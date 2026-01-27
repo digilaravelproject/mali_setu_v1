@@ -47,6 +47,9 @@ dependencies:
   percent_indicator: ^4.2.5
   share_plus: ^7.0.0
   app_links: ^6.4.1
+  flutter_secure_storage: ^10.0.0
+  file_picker: ^8.0.0
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -71,7 +74,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/anim/
     - assets/fonts/
     - assets/images/
     - assets/icons/

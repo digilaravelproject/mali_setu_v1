@@ -9,7 +9,7 @@ import '../core/styles/app_colors.dart';
 import '../core/utils/app_assets.dart';
 
 class CustomImageView extends StatelessWidget {
-  ///[url] is required parameter for fetching network image
+  ///[url] is required parameter for fetching network2 image
   final String? url;
 
   ///[imagePath] is required parameter for showing png,jpg,etc image
@@ -72,7 +72,7 @@ class CustomImageView extends StatelessWidget {
   final bool enableFv;
 
   ///a [CustomImageView] it can be used for showing any type of images
-  /// it will shows the placeholder image if image is not found on network image
+  /// it will shows the placeholder image if image is not found on network2 image
   const CustomImageView({
     super.key,
     this.url,

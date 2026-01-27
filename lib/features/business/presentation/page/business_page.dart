@@ -1100,7 +1100,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
+              child: Image.network2(
                 'https://via.placeholder.com/80',
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {

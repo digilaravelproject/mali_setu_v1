@@ -10,7 +10,6 @@ import 'package:edu_cluezer/features/business/presentation/page/job_details_scre
 import 'package:edu_cluezer/features/business/presentation/page/my_business_screen.dart';
 import 'package:edu_cluezer/features/matrimony/binding/match_binding.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/page/reg_matrimony_page.dart';
-import 'package:edu_cluezer/features/register/presentation/page/register_page.dart';
 import 'package:edu_cluezer/features/settings/page/change_password_page.dart';
 import 'package:edu_cluezer/features/settings/page/my_profile.dart';
 import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
@@ -19,6 +18,11 @@ import 'package:edu_cluezer/features/volunteer/pages/volunteer_update_profile_sc
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../features/Auth/login/binding/login_binding.dart';
+import '../../features/Auth/login/presentation/page/login_page.dart';
+import '../../features/Auth/login/presentation/page/reset_password_screen.dart';
+import '../../features/Auth/register/binding/register_binding.dart';
+import '../../features/Auth/register/presentation/page/register_page.dart';
 import '../../features/_init/binding/init_binding.dart';
 import '../../features/_init/presentation/page/intro_page.dart';
 import '../../features/_init/presentation/page/splash_page.dart';
@@ -29,14 +33,10 @@ import '../../features/dashboard/binding/dashboard_binding.dart';
 import '../../features/dashboard/presentation/page/dashboard_page.dart';
 import '../../features/date/binding/date_binding.dart';
 import '../../features/date/presentation/page/date_profile_page.dart';
-import '../../features/login/binding/login_binding.dart';
-import '../../features/login/presentation/page/login_page.dart';
-import '../../features/login/presentation/page/reset_password_screen.dart';
 import '../../features/notification/binding/notification_binding.dart';
 import '../../features/notification/presentation/page/notification_page.dart';
 import '../../features/profile/binding/profile_binding.dart';
 import '../../features/profile/presentation/page/edit_profile_page.dart';
-import '../../features/register/binding/register_binding.dart';
 import '../../features/search/binding/search_binding.dart';
 import '../../features/search/presentation/page/search_page.dart';
 import '../../features/settings/page/update_profile_page.dart';
@@ -85,13 +85,13 @@ class AppPages {
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
-    GetPage(
-      binding: InitBinding(),
-      name: AppRoutes.intro,
-      page: () => const IntroPage(),
-      transition: Transition.cupertino,
-      transitionDuration: const Duration(milliseconds: 500),
-    ),
+    // GetPage(
+    //   binding: InitBinding(),
+    //   name: AppRoutes.intro,
+    //   page: () => const IntroPage(),
+    //   transition: Transition.cupertino,
+    //   transitionDuration: const Duration(milliseconds: 500),
+    // ),
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginPage(),

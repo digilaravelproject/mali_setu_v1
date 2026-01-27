@@ -1,14 +1,17 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../common/api/apiClient.dart';
-import '../../../db/shared_pref_manager.dart';
+import '../../Auth/change_password/data/model/req_change_password_model.dart';
+import '../../Auth/change_password/domain/usecase/change_password_usecase.dart';
+
 
 class ChangePasswordController extends GetxController {
+  final ChangePasswordUseCase changePasswordUseCase;
+
+  ChangePasswordController({required this.changePasswordUseCase});
+
   // Text Controllers
   final currentPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -63,9 +66,6 @@ class ChangePasswordController extends GetxController {
     return null;
   }
 
-  final apiClient = ApiClient(
-    baseUrl: 'https://greenyellow-grouse-707123.hostingersite.com/public/api',
-  );
   // Check form validity
   void checkFormValidity() {
     final currentPasswordValid = validateCurrentPassword(currentPasswordController.text) == null;
@@ -76,50 +76,29 @@ class ChangePasswordController extends GetxController {
   }
 
   // Change Password Function
-
-
   Future<void> changePassword() async {
-    
-    print("chnage password : call function");
+    print("change password : call function");
     // Form valid check
     if (!isFormValid.value) return;
 
     isLoading.value = true;
 
     try {
-      // Prepare request body
-      final body = {
-        "current_password": currentPasswordController.text,
-        "password": newPasswordController.text,
-        "password_confirmation": confirmPasswordController.text,
-      };
-
-      print("chnage p[assword :"+body.toString());
-      // Make POST call using your existing method
-      final response = await apiClient.post(
-        '/auth/change-password',
-        body: body,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${SharedPrefManager().userToken}',
-          //SharedPrefManager().userToken, // token from shared prefs
-        },
+      final reqModel = ReqChangePasswordModel(
+        currentPassword: currentPasswordController.text,
+        password: newPasswordController.text,
+        passwordConfirmation: confirmPasswordController.text,
       );
 
-      print("chnagepasswordresponse : "+response.body);
+      final response = await changePasswordUseCase(reqModel);
 
-      print("token : "+SharedPrefManager().userToken,);
-      print("response  : "+response.body);
-
-      final decoded = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && decoded['success'] == true) {
+      if (response.success == true) {
         // Success
         resetForm();
         Get.back(); // close screen
         Get.snackbar(
           'Success',
-          decoded['message'] ?? 'Password changed successfully',
+          response.message ?? 'Password changed successfully',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -128,7 +107,7 @@ class ChangePasswordController extends GetxController {
         // Error
         Get.snackbar(
           'Error',
-          decoded['message'] ?? 'Failed to change password',
+          response.message ?? 'Failed to change password',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -147,43 +126,6 @@ class ChangePasswordController extends GetxController {
       isLoading.value = false;
     }
   }
-
- /* Future<void> changePassword() async {
-    if (!isFormValid.value) return;
-
-    isLoading.value = true;
-
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Reset form on success
-      resetForm();
-
-      Get.back();
-      Get.snackbar(
-        'Success',
-        'Password changed successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to change password: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } finally {
-      isLoading.value = false;
-    }
-  }*/
-
-
-
-  /// REGISTER ACTION - API Call
 
   // Reset form
   void resetForm() {
