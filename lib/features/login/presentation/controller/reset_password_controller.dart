@@ -16,12 +16,13 @@ import '../page/otp_verification_bts.dart';
 
 class ResetPasswordController extends GetxController
     implements GetTickerProviderStateMixin {
-  LoginDataSource dataSource;
+ // LoginDataSource dataSource;
 
-  ResetPasswordController({required this.dataSource});
+ // ResetPasswordController({required this.dataSource});
 
-  var mobileController = TextEditingController();
+  var emailController = TextEditingController();
   var passwordController = TextEditingController();
+  var confPasswordController = TextEditingController();
 
  // var isRemember = true.obs;
   var isPasswordVisible = true.obs;

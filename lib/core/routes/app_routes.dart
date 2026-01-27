@@ -71,6 +71,7 @@ class AppRoutes {
   static const String volunteerCreateProfile = "/volunteerCreateProfile";
   static const String appliedJobList = "/appliedJobList";
   static const String emailPasswordReset = "/emailPasswordReset";
+  static const String resetPasswordScreen = "/resetPasswordScreen";
 
 
 }
@@ -102,7 +103,15 @@ class AppPages {
     GetPage(
       name: AppRoutes.emailPasswordReset,
       page: () => const EmailResetPasswordScreen(),
-     // binding: LoginBinding(),
+      binding: LoginBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+
+    GetPage(
+      name: AppRoutes.resetPasswordScreen,
+      page: () => const ResetPasswordScreen(),
+       binding: LoginBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

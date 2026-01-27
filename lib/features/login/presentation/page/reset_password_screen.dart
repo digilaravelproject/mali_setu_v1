@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/features/login/presentation/controller/reset_password_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +9,7 @@ import '../../../../core/helper/form_validator.dart';
 import '../../../../widgets/basic_text_field.dart';
 import '../../../../widgets/custom_buttons.dart';
 
-class EmailResetPasswordScreen GetWidget<> {
+class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
   const EmailResetPasswordScreen({super.key});
 
   @override
@@ -70,7 +72,7 @@ class EmailResetPasswordScreen GetWidget<> {
                     label: "Email ",
                     iconData: CupertinoIcons.mail_solid,
                     textInputType: TextInputType.emailAddress,
-                   // controller: controller.mobileController,
+                    controller: controller.emailController,
                     hint: const [AutofillHints.email],
                     validator: FormValidator.email,
                   ),
@@ -83,7 +85,7 @@ class EmailResetPasswordScreen GetWidget<> {
                     title: "Send Otp",
                    // isLoading: controller.isLoading.value,
                     onPressed: (){
-
+                      Get.toNamed(AppRoutes.resetPasswordScreen);
                     }
                    // controller.performLogin,
                   ),
@@ -151,19 +153,14 @@ class EmailResetPasswordScreen GetWidget<> {
 
 
 
-class ResetPasswordScreen extends StatelessWidget {
+class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
   const ResetPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    final List<TextEditingController> otpControllers = List.generate(
-      6,
-          (_) => TextEditingController(),
-    );
 
-    final List<FocusNode> otpFocusNodes = List.generate(6, (_) => FocusNode());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -208,159 +205,162 @@ class ResetPasswordScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 38.0),
+                  const SizedBox(height: 30.0),
 
-                  // OTP Input Field
-                  // AppInputTextField(
-                  //   label: "OTP",
-                  //   iconData: CupertinoIcons.number_square,
-                  //   textInputType: TextInputType.number,
-                  //   // controller: controller.otpController,
-                  //   hint: const ["Enter 6-digit OTP"],
-                  //   validator: FormValidator.otp,
-                  //   maxLength: 6,
+                 // OTP Input Field
+                  AppInputTextField(
+                    label: "OTP",
+                    iconData: CupertinoIcons.number_square,
+                    textInputType: TextInputType.number,
+                    // controller: controller.otpController,
+                    hint: const ["Enter 6-digit OTP"],
+                   // validator: FormValidator.otp,
+                    //maxLength: 6,
+                  ),
+
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: List.generate(6, (index) {
+                  //     return TextFormField(
+                  //      // controller: otpControllers[index],
+                  //      // focusNode: otpFocusNodes[index],
+                  //       textAlign: TextAlign.center,
+                  //       keyboardType: TextInputType.number,
+                  //       maxLength: 1,
+                  //       style: const TextStyle(
+                  //         fontSize: 20,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  //       cursorHeight: 20,
+                  //       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  //       decoration: InputDecoration(
+                  //         contentPadding: EdgeInsets.zero,
+                  //         counterText: '',
+                  //         constraints: const BoxConstraints.tightFor(
+                  //           height: 50,
+                  //           width: 50,
+                  //         ),
+                  //         border: OutlineInputBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //         ),
+                  //       ),
+                  //       onChanged: (value) {
+                  //         if (value.isNotEmpty && index < 5) {
+                  //           otpFocusNodes[index + 1].requestFocus();
+                  //         } else if (value.isEmpty && index > 0) {
+                  //           otpFocusNodes[index - 1].requestFocus();
+                  //         }
+                  //       },
+                  //     );
+                  //   }),
                   // ),
 
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(6, (index) {
-                      return TextFormField(
-                       // controller: otpControllers[index],
-                       // focusNode: otpFocusNodes[index],
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        maxLength: 1,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        cursorHeight: 20,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.zero,
-                          counterText: '',
-                          constraints: const BoxConstraints.tightFor(
-                            height: 50,
-                            width: 50,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onChanged: (value) {
-                          if (value.isNotEmpty && index < 5) {
-                            otpFocusNodes[index + 1].requestFocus();
-                          } else if (value.isEmpty && index > 0) {
-                            otpFocusNodes[index - 1].requestFocus();
-                          }
-                        },
-                      );
-                    }),
-                  ),
-
-                  const SizedBox(height: 24.0),
+                  const SizedBox(height: 16.0),
 
                   // New Password Field
-                  AppInputTextField(
-                    label: "Password",
-                    iconData: CupertinoIcons.lock_fill,
-                    textInputType: TextInputType.visiblePassword,
-                    controller: controller.passwordController,
-                    hint: const [AutofillHints.password],
-                    isObscure: !controller.isPasswordVisible.value,
-                    endIcon: controller.isPasswordVisible.value
-                        ? Icons.remove_red_eye_rounded
-                        : Icons.visibility_off,
-                    onEndIconTap: () => controller.isPasswordVisible.toggle(),
-                    validator: FormValidator.password,
+                  Obx(
+                      ()=>AppInputTextField(
+                        label: "Password",
+                        iconData: CupertinoIcons.lock_fill,
+                        textInputType: TextInputType.visiblePassword,
+                        controller: controller.passwordController,
+                        hint: const [AutofillHints.password],
+                        isObscure: !controller.isPasswordVisible.value,
+                        endIcon: controller.isPasswordVisible.value
+                            ? Icons.remove_red_eye_rounded
+                            : Icons.visibility_off,
+                        onEndIconTap: () => controller.isPasswordVisible.toggle(),
+                        validator: FormValidator.password,
+                      ),
                   ),
 
-                  const SizedBox(height: 24.0),
+                  const SizedBox(height: 16.0),
 
                   // Confirm Password Field
-                  AppInputTextField(
-                    label: "Confirm Password",
-                    iconData: CupertinoIcons.lock_fill,
-                    textInputType: TextInputType.visiblePassword,
-                    // controller: controller.confirmPasswordController,
-                    hint: const ["Re-enter new password"],
-                    validator: (value) {
-                      // You can add custom validation to match both passwords
-                      // if (value != controller.newPasswordController.text) {
-                      //   return 'Passwords do not match';
-                      // }
-                      return FormValidator.password(value);
-                    },
-                    isPassword: true,
+                  Obx(
+                      ()=>AppInputTextField(
+                        label: "Confirm Password",
+                        iconData: CupertinoIcons.lock_fill,
+                        textInputType: TextInputType.visiblePassword,
+                        controller: controller.confPasswordController,
+                        hint: const [AutofillHints.password],
+                        isObscure: !controller.isPasswordVisible.value,
+                        endIcon: controller.isPasswordVisible.value
+                            ? Icons.remove_red_eye_rounded
+                            : Icons.visibility_off,
+                        onEndIconTap: () => controller.isPasswordVisible.toggle(),
+                        validator: FormValidator.password,
+                      ),
                   ),
 
+
                   // Password requirements
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0, left: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Password must contain:',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        const SizedBox(height: 4.0),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 14,
-                              color: Colors.green.shade600,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'At least 8 characters',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2.0),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 14,
-                              color: Colors.green.shade600,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'One uppercase & lowercase letter',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2.0),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 14,
-                              color: Colors.green.shade600,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'One number and special character',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(top: 12.0, left: 8.0),
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Text(
+                  //         'Password must contain:',
+                  //         style: theme.textTheme.bodySmall?.copyWith(
+                  //           color: Colors.grey.shade600,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(height: 4.0),
+                  //       Row(
+                  //         children: [
+                  //           Icon(
+                  //             Icons.check_circle_outline,
+                  //             size: 14,
+                  //             color: Colors.green.shade600,
+                  //           ),
+                  //           const SizedBox(width: 6),
+                  //           Text(
+                  //             'At least 8 characters',
+                  //             style: theme.textTheme.bodySmall?.copyWith(
+                  //               color: Colors.grey.shade600,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //       const SizedBox(height: 2.0),
+                  //       Row(
+                  //         children: [
+                  //           Icon(
+                  //             Icons.check_circle_outline,
+                  //             size: 14,
+                  //             color: Colors.green.shade600,
+                  //           ),
+                  //           const SizedBox(width: 6),
+                  //           Text(
+                  //             'One uppercase & lowercase letter',
+                  //             style: theme.textTheme.bodySmall?.copyWith(
+                  //               color: Colors.grey.shade600,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //       const SizedBox(height: 2.0),
+                  //       Row(
+                  //         children: [
+                  //           Icon(
+                  //             Icons.check_circle_outline,
+                  //             size: 14,
+                  //             color: Colors.green.shade600,
+                  //           ),
+                  //           const SizedBox(width: 6),
+                  //           Text(
+                  //             'One number and special character',
+                  //             style: theme.textTheme.bodySmall?.copyWith(
+                  //               color: Colors.grey.shade600,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
 
                   const SizedBox(height: 32.0),
 
@@ -373,46 +373,41 @@ class ResetPasswordScreen extends StatelessWidget {
                         // controller.verifyOtpAndResetPassword();
                       }
                   ),
+                  const SizedBox(height: 32.0),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Didn't receive OTP? ",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Get.back();
+                        },
+                        child: Text(
+                          "Resend OTP",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
 
                   const Spacer(),
 
                   // Resend OTP Section
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 40.0, top: 20.0),
+                    padding: const EdgeInsets.only(bottom: 40.0, top: 30.0),
                     child: Center(
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Didn't receive OTP? ",
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  // controller.resendOtp();
-                                },
-                                child: Text(
-                                  "Resend OTP",
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10.0),
-                          Text(
-                            "OTP expires in 05:00",
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.red.shade600,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+
                           const SizedBox(height: 20.0),
                           Container(
                             width: 60.0,
