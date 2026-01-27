@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/features/filter/presentation/page/filter_page.dart';
 import 'package:edu_cluezer/packages/card_swiper/flutter_card_swiper.dart';
@@ -96,9 +97,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         body: TabBarView(
           children: [
             _buildCardList(context, seriousPeoples),
-            _buildCardList(
-              context,
-              seriousPeoples.where((e) => e.isNew).toList(),
+            _buildCardList(context, seriousPeoples.where((e) => e.isNew).toList(),
             ),
           ],
         ),
@@ -161,11 +160,16 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         child: Stack(
           children: [
             // BACKGROUND IMAGE
-            CustomImageView(
-              url: user.imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
+            InkWell(
+              onTap: (){
+                Get.toNamed(AppRoutes.matrimonyProfileScreen);
+              },
+              child: CustomImageView(
+                url: user.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
 
             // GRADIENT OVERLAY

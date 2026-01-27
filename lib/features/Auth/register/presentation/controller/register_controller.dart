@@ -517,10 +517,14 @@ class RegisterController extends GetxController {
     cityError.value = '';
     casteCertificateError.value = '';
 
+    print("call registration function ");
+
     // Validate form
     if (!formKey.currentState!.validate()) {
       return;
     }
+
+
 
     // Validate address hierarchy
     final stateValidation = validateState(stateCtrl.text.trim());
@@ -582,6 +586,8 @@ class RegisterController extends GetxController {
       );
 
       final response = await registerUseCase(reqModel);
+
+      print("registerresponse : "+response.toString());
 
       if (response.success == true || response.message == "User registered successfully") {
         Get.snackbar(

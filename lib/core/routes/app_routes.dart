@@ -33,6 +33,7 @@ import '../../features/dashboard/binding/dashboard_binding.dart';
 import '../../features/dashboard/presentation/page/dashboard_page.dart';
 import '../../features/date/binding/date_binding.dart';
 import '../../features/date/presentation/page/date_profile_page.dart';
+import '../../features/matrimony/presentation/page/matrimony_profile_screen.dart';
 import '../../features/notification/binding/notification_binding.dart';
 import '../../features/notification/presentation/page/notification_page.dart';
 import '../../features/profile/binding/profile_binding.dart';
@@ -45,7 +46,6 @@ import '../helper/logger_helper.dart';
 class AppRoutes {
   AppRoutes._();
 
-  /// Auth
   static const String splash = '/';
   static const String intro = '/intro';
   static const String login = '/login';
@@ -72,6 +72,7 @@ class AppRoutes {
   static const String appliedJobList = "/appliedJobList";
   static const String emailPasswordReset = "/emailPasswordReset";
   static const String resetPasswordScreen = "/resetPasswordScreen";
+  static const String matrimonyProfileScreen = "/matrimonyProfileScreen";
 
 
 }
@@ -146,7 +147,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.notification,
-      page: () => const NotificationPage(),
+      page: () =>  NotificationPage(),
       binding: NotificationBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
@@ -260,6 +261,13 @@ class AppPages {
       name: AppRoutes.appliedJobList,
       page: () => AppliedJobsScreen(),
      // binding: VolunteerBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.matrimonyProfileScreen,
+      page: () => MatrimonyProfileScreen(profileId: '123',),
+      // binding: VolunteerBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

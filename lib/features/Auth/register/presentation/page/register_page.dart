@@ -306,7 +306,7 @@ class RegisterPage extends GetWidget<RegisterController> {
               Obx(
                 () => AppInputTextField(
                   label: "Password",
-                  isObscure: true,
+                  isObscure: !controller.isPasswordValue.value,
                   validator: FormValidator.password,
                   controller: controller.passwordCtrl,
                   endIcon: controller.isPasswordValue.value
@@ -316,10 +316,26 @@ class RegisterPage extends GetWidget<RegisterController> {
                 ),
               ),
 
+              // Obx(
+              //       () => AppInputTextField(
+              //     label: "Password",
+              //     iconData: CupertinoIcons.lock_fill,
+              //     textInputType: TextInputType.visiblePassword,
+              //     controller: controller.passwordController,
+              //     hint: const [AutofillHints.password],
+              //     isObscure: !controller.isPasswordVisible.value,
+              //     endIcon: controller.isPasswordVisible.value
+              //         ? Icons.remove_red_eye_rounded
+              //         : Icons.visibility_off,
+              //     onEndIconTap: () => controller.isPasswordVisible.toggle(),
+              //     validator: FormValidator.password,
+              //   ),
+              // ),
+
               Obx(
                 () => AppInputTextField(
                   label: "Confirm Password",
-                  isObscure: controller.isCnfPasswordValue.value,
+                  isObscure: !controller.isCnfPasswordValue.value,
                   validator: (value) => FormValidator.confirmPassword(
                     value,
                     controller.passwordCtrl.text,
