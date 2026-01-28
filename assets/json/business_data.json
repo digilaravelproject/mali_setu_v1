@@ -1,0 +1,13 @@
+{
+    "business_types": [
+        {
+            "id": "product",
+            "name": "Product"
+        },
+        {
+            "id": "service",
+            "name": "Service"
+        }
+    ],
+    "categories": []
+}

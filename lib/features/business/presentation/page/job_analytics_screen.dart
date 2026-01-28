@@ -2,232 +2,209 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-class JobAnalysisPage extends StatelessWidget {
-  JobAnalysisPage({super.key});
+import '../../data/model/res_all_business_model.dart';
+import '../controller/business_controller.dart';
 
-  final List<Map<String, dynamic>> recentApplications = [
-    {
-      'name': 'Rahul Sharma',
-      'job': 'Senior Flutter Developer',
-      'status': 'Pending',
-      'time': '2 hours ago',
-      'avatar': 'RS',
-      'statusColor': Colors.orange,
-    },
-    {
-      'name': 'Priya Patel',
-      'job': 'UI/UX Designer',
-      'status': 'Accepted',
-      'time': '1 day ago',
-      'avatar': 'PP',
-      'statusColor': Colors.green,
-    },
-    {
-      'name': 'Amit Verma',
-      'job': 'Backend Developer',
-      'status': 'Rejected',
-      'time': '2 days ago',
-      'avatar': 'AV',
-      'statusColor': Colors.red,
-    },
-    {
-      'name': 'Neha Singh',
-      'job': 'Product Manager',
-      'status': 'Pending',
-      'time': '3 days ago',
-      'avatar': 'NS',
-      'statusColor': Colors.orange,
-    },
-    {
-      'name': 'Suresh Kumar',
-      'job': 'DevOps Engineer',
-      'status': 'Accepted',
-      'time': '4 days ago',
-      'avatar': 'SK',
-      'statusColor': Colors.green,
-    },
-    {
-      'name': 'Anjali Gupta',
-      'job': 'Mobile Developer',
-      'status': 'Under Review',
-      'time': '5 days ago',
-      'avatar': 'AG',
-      'statusColor': Colors.blue,
-    },
-  ];
+class JobAnalysisPage extends StatefulWidget {
+  const JobAnalysisPage({super.key});
+
+  @override
+  State<JobAnalysisPage> createState() => _JobAnalysisPageState();
+}
+
+class _JobAnalysisPageState extends State<JobAnalysisPage> {
+  final BusinessController controller = Get.find<BusinessController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchJobAnalytics();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          /// App Bar
-          SliverAppBar(
-            elevation: 2,
-            pinned: true,
-            centerTitle: false,
-            title: Text(
-              'Job Analysis Dashboard',
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 22,
+      body: Obx(() {
+        final analytics = controller.jobAnalytics.value;
+        
+        if (controller.isLoading.value && analytics == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            /// App Bar
+            SliverAppBar(
+              elevation: 2,
+              pinned: true,
+              centerTitle: false,
+              title: Text(
+                'Job Analysis Dashboard',
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                ),
+              ),
+              leading: InkWell(
+                onTap: () => Get.back(),
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  color: context.iconColor,
+                  size: 18,
+                ),
               ),
             ),
 
-            leading: InkWell(
-              onTap: () => Navigator.of(context).pop(),
-              child: Icon(
-                Icons.arrow_back_ios,
-                color: context.iconColor,
-                size: 18,
+            /// Stats Grid
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Job Statistics',
+                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
+                ),
               ),
             ),
-          ),
-
-          /// Stats Grid
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Job Statistics',
-                  style:context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: statCard(
-                          context: context,
-                          title: 'Total Jobs',
-                          count: 124,
-                          color: Colors.blue,
-                          icon: Icons.work_outline
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: statCard(
+                            context: context,
+                            title: 'Total Jobs',
+                            count: analytics?.totalJobs ?? 0,
+                            color: Colors.blue,
+                            icon: Icons.work_outline
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 12,),
-
-                      // Active Jobs
-                      Expanded(
-                        child: statCard(
-                          context: context,
-                          title: 'Active Jobs',
-                          count: 89,
-                          color: Colors.green,
-                          icon: Icons.work,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: statCard(
+                            context: context,
+                            title: 'Active Jobs',
+                            count: analytics?.activeJobs ?? 0,
+                            color: Colors.green,
+                            icon: Icons.work,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: statCard(
-                          context: context,
-                          title: 'Pending Jobs',
-                          count: 15,
-                          color: Colors.orange,
-                          icon: Icons.pending_actions,
-                        ),
-                      ),
-                      SizedBox(width: 12,),
-                      // Total Applications
-                      Expanded(
-                        child: statCard(
-                          context: context,
-                          title: 'Total Applications',
-                          count: 456,
-                          color: Colors.purple,
-                          icon: Icons.people_outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: statCard(
-                          context: context,
-                          title: 'Pending Applications',
-                          count: 78,
-                          color: Colors.red,
-                          icon: Icons.hourglass_empty,
-                        ),
-                      ),
-                      SizedBox(width: 12,),
-                      // Accepted Applications
-                      Expanded(
-                        child: statCard(
-                          context: context,
-                          title: 'Accepted Applications',
-                          count: 245,
-                          color: Colors.teal,
-                          icon: Icons.check_circle_outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Application Progress',
-                  style:context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(child: _buildProgressSection(context :context)),
-
-          // Recent Applications
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Recent Applications',
-                    style:context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'View All',
-                      style: context.textTheme.titleMedium?.copyWith(color: Colors.blue)
+                      ],
                     ),
-                  ),
-                ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: statCard(
+                            context: context,
+                            title: 'Pending Jobs',
+                            count: analytics?.pendingJobs ?? 0,
+                            color: Colors.orange,
+                            icon: Icons.pending_actions,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: statCard(
+                            context: context,
+                            title: 'Total Applications',
+                            count: analytics?.totalApplications ?? 0,
+                            color: Colors.purple,
+                            icon: Icons.people_outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: statCard(
+                            context: context,
+                            title: 'Pending Applications',
+                            count: analytics?.pendingApplications ?? 0,
+                            color: Colors.red,
+                            icon: Icons.hourglass_empty,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: statCard(
+                            context: context,
+                            title: 'Accepted Applications',
+                            count: analytics?.acceptedApplications ?? 0,
+                            color: Colors.teal,
+                            icon: Icons.check_circle_outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Applications List
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) =>
-                  _buildApplicationCard(recentApplications[index]),
-              childCount: recentApplications.length,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Application Progress',
+                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
+                ),
+              ),
             ),
-          ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
-        ],
-      ),
+            SliverToBoxAdapter(child: _buildProgressSection(context: context, analytics: analytics)),
 
+            // Recent Applications
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Recent Applications',
+                      style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'View All',
+                        style: context.textTheme.titleMedium?.copyWith(color: Colors.blue)
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Applications List
+            if (analytics?.recentApplications == null || analytics!.recentApplications!.isEmpty)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Center(child: Text("No recent applications found")),
+                ),
+              )
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _buildApplicationCard(analytics.recentApplications![index]),
+                  childCount: analytics.recentApplications!.length,
+                ),
+              ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          ],
+        );
+      }),
     );
   }
 
@@ -246,7 +223,7 @@ class JobAnalysisPage extends StatelessWidget {
         side: BorderSide(color: context.theme.dividerColor),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -263,22 +240,23 @@ class JobAnalysisPage extends StatelessWidget {
                   child: Icon(
                     icon,
                     color: color,
+                    size: 18,
                   ),
                 ),
-                SizedBox(width: 10),
-
+                const SizedBox(width: 10),
                 Text(
                   "$count",
                   style: context.textTheme.titleLarge?.copyWith(
-                    color: context.theme.primaryColor,
+                    color: color, // Use individual color for count
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 5,),
+            const SizedBox(height: 5),
             Text(
               title,
-              style: context.textTheme.bodyMedium,
+              style: context.textTheme.bodyMedium?.copyWith(fontSize: 12),
             ),
           ],
         ),
@@ -286,7 +264,11 @@ class JobAnalysisPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressSection({required BuildContext context}) {
+  Widget _buildProgressSection({required BuildContext context, JobAnalyticsData? analytics}) {
+    final double successRate = (analytics?.totalApplications ?? 0) > 0 
+        ? (analytics!.acceptedApplications! / analytics.totalApplications!) 
+        : 0;
+        
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -313,13 +295,8 @@ class JobAnalysisPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'This Month',
-                  style: context.textTheme.bodyMedium?.copyWith( color: Colors.blue.shade700, )
-                  // TextStyle(
-                  //   color: Colors.blue.shade700,
-                  //   fontWeight: FontWeight.w600,
-                  //   fontSize: 12,
-                  // ),
+                  'Lifetime',
+                  style: context.textTheme.bodyMedium?.copyWith(color: Colors.blue.shade700, fontSize: 10)
                 ),
               ),
             ],
@@ -331,12 +308,12 @@ class JobAnalysisPage extends StatelessWidget {
               CircularPercentIndicator(
                 radius: 60,
                 lineWidth: 12,
-                percent: 0.75,
+                percent: successRate,
                 center: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '75%',
+                      '${(successRate * 100).toInt()}%',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
@@ -345,7 +322,7 @@ class JobAnalysisPage extends StatelessWidget {
                     ),
                     Text(
                       'Success',
-                      style: context.textTheme.bodyMedium,
+                      style: context.textTheme.bodyMedium?.copyWith(fontSize: 10),
                     ),
                   ],
                 ),
@@ -359,10 +336,9 @@ class JobAnalysisPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLegendItem('Accepted', 245, Colors.green,context : context),
-                    _buildLegendItem('Pending', 78, Colors.orange,context : context),
-                    _buildLegendItem('Rejected', 42, Colors.red,context : context),
-                    _buildLegendItem('Under Review', 91, Colors.blue,context : context),
+                    _buildLegendItem('Accepted', analytics?.acceptedApplications ?? 0, Colors.teal, context: context),
+                    _buildLegendItem('Pending', analytics?.pendingApplications ?? 0, Colors.orange, context: context),
+                    _buildLegendItem('Total', analytics?.totalApplications ?? 0, Colors.blue, context: context),
                   ],
                 ),
               ),
@@ -387,25 +363,40 @@ class JobAnalysisPage extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style:context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)
+              style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500, fontSize: 12)
             ),
           ),
           Text(
             '$count',
-            style: context.textTheme.titleSmall
+            style: context.textTheme.titleSmall?.copyWith(fontSize: 12)
           ),
         ],
       ),
     );
   }
 
-  Widget _buildApplicationCard(Map<String, dynamic> application) {
+  Widget _buildApplicationCard(dynamic application) {
+    // Assuming application structure from API or placeholder
+    final String name = application['name'] ?? 'Unknown Applicant';
+    final String jobTitle = application['job'] ?? 'Job Application';
+    final String status = application['status'] ?? 'Pending';
+    final String time = application['time'] ?? 'Recently';
+    final String avatarText = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'A';
+    
+    Color statusColor = Colors.orange;
+    if (status.toLowerCase().contains('accept')) {
+      statusColor = Colors.green;
+    } else if (status.toLowerCase().contains('reject')) {
+      statusColor = Colors.red;
+    }
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 8,right: 16,left: 16),
+      margin: const EdgeInsets.only(bottom: 8, right: 16, left: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: context.theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey)
+        border: Border.all(color: context.theme.dividerColor)
       ),
       child: Row(
         children: [
@@ -419,7 +410,7 @@ class JobAnalysisPage extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                application['avatar'],
+                avatarText,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -435,7 +426,7 @@ class JobAnalysisPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  application['name'],
+                  name,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -443,12 +434,12 @@ class JobAnalysisPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  application['job'],
+                  jobTitle,
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  application['time'],
+                  time,
                   style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                 ),
               ],
@@ -458,13 +449,13 @@ class JobAnalysisPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: application['statusColor'].withOpacity(0.1),
+              color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              application['status'],
+              status,
               style: TextStyle(
-                color: application['statusColor'],
+                color: statusColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),

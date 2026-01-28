@@ -275,24 +275,53 @@ class UpProfileController extends GetxController {
         barrierDismissible: false,
       );
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      // Prepare data
+      final Map<String, dynamic> updateData = {
+        'name': fullNameCtrl.text,
+        'email': emailCtrl.text,
+        'phone': phoneNumberCtrl.text,
+        'age': int.tryParse(ageCtrl.text),
+        'occupation': occupationCtrl.text,
+        'reffral_code': Get.find<AuthService>().currentUser.value?.reffralCode,
+        'address': streetAddressCtrl.text,
+        'nearby_location': nearbyLocationCtrl.text,
+        'road_number': roadNumberCtrl.text,
+        'city': cityCtrl.text,
+        'state': stateCtrl.text,
+        'district': districtCtrl.text,
+        'pincode': pincodeCtrl.text,
+        'sector': sectorCtrl.text,
+        'destination': destinationCtrl.text,
+      };
+
+      // Call API via AuthService
+      final response = await Get.find<AuthService>().updateProfile(updateData);
 
       Get.back(); // Close loading
 
-      Get.back(); // Close update screen
-      Get.snackbar(
-        'Success',
-        'Profile updated successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      if (response.success) {
+        Get.back(); // Close update screen
+        Get.snackbar(
+          'Success',
+          'Profile updated successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message ?? 'Failed to update profile',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } catch (e) {
       Get.back(); // Close loading if open
       Get.snackbar(
         'Error',
-        'Failed to update profile: ${e.toString()}',
+        'An unexpected error occurred: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../../core/widgets/custom_confirm_dialog.dart';
 
 import '../../data/model/profile_model.dart';
-
-
-import 'package:flutter/material.dart';
-
 import '../controller/matrimony_profile_controller.dart';
 
 
@@ -595,30 +593,20 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
   }
 
   void _blockProfile(ProfileModel profile) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Block Profile'),
-        content: Text('Are you sure you want to block ${profile.name}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+    CustomConfirmDialog.show(
+      title: 'Block Profile',
+      message: 'Are you sure you want to block ${profile.name}?',
+      confirmText: 'Block',
+      confirmColor: Colors.red,
+      icon: Icons.block,
+      onConfirm: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${profile.name} has been blocked'),
+            backgroundColor: Colors.red,
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${profile.name} has been blocked'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-            child: const Text('Block', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

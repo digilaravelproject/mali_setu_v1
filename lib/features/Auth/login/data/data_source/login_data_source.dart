@@ -5,6 +5,7 @@ import '../model/res_login_model.dart';
 
 abstract class LoginDataSource {
   Future<ResLoginModel> login(ReqLoginModel reqModel);
+  Future<ResLoginModel> googleLogin(Map<String, String> data);
   Future<ResLoginModel> logout();
 }
 
@@ -21,6 +22,19 @@ class LoginDataSourceImpl implements LoginDataSource {
         data: reqModel.toJson(),
       );
       
+      return ResLoginModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ResLoginModel> googleLogin(Map<String, String> data) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.authGoogleLogin,
+        data: data,
+      );
       return ResLoginModel.fromJson(response.data);
     } catch (e) {
       rethrow;

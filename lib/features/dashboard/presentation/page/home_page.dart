@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
+import '../../../notification/presentation/controller/notification_controller.dart';
 import '../controller/home_controller.dart';
 
 class HomePage extends GetWidget<HomeController> {
@@ -68,8 +69,24 @@ class HomePage extends GetWidget<HomeController> {
               actions: [
                 IconButton(
                   style: IconButton.styleFrom(side: BorderSide.none),
-                  onPressed: () {},
-                  icon: Badge(child: Icon(CupertinoIcons.bell_fill)),
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.notification);
+                  },
+                  icon: Obx(() {
+                    int count = 0;
+                    try {
+                      final notificationController = Get.find<NotificationController>();
+                      count = notificationController.unreadCount.value;
+                    } catch (e) {
+                      count = 0;
+                    }
+
+                    return Badge(
+                      label: Text(count.toString()),
+                      isLabelVisible: count > 0,
+                      child: const Icon(CupertinoIcons.bell_fill),
+                    );
+                  }),
                 ).marginOnly(right: 8),
               ],
             ),
@@ -119,52 +136,153 @@ class HomePage extends GetWidget<HomeController> {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      Text(
-                        "View All",
-                        style: context.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: context.theme.primaryColor,
+                      InkWell(
+                        onTap: () {
+                           if (controller.categories.isNotEmpty) {
+                             Get.bottomSheet(
+                               Container(
+                                 height: Get.height * 0.6,
+                                 decoration: BoxDecoration(
+                                   color: context.theme.scaffoldBackgroundColor,
+                                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                 ),
+                                 padding: EdgeInsets.all(16),
+                                 child: Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     Text(
+                                       "All Categories",
+                                       style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                                     ).marginOnly(bottom: 16),
+                                     Expanded(
+                                       child: GridView.builder(
+                                          itemCount: controller.categories.length,
+                                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 4,
+                                            crossAxisSpacing: 12,
+                                            mainAxisSpacing: 12,
+                                            childAspectRatio: 0.8,
+                                          ),
+                                          itemBuilder: (_, index) {
+                                            final category = controller.categories[index];
+                                            return GestureDetector(
+                                              onTap: () {
+                                                print("Category tap fail");
+                                                if (category.id != null) {
+                                                  // Close bottom sheet then fetch details
+                                                  Get.back();
+                                                  controller.onCategoryTap(category.id!);
+                                                }else{
+                                                  print("Category tap fail");
+                                                }
+                                              },
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  CustomImageView(
+                                                    height: 36,
+                                                    width: 36,
+                                                    url: category.photo != null && category.photo!.isNotEmpty
+                                                        ? category.photo
+                                                        : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
+                                                    fit: BoxFit.cover,
+                                                    radius: BorderRadius.circular(18),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    category.name ?? "",
+                                                    textAlign: TextAlign.center,
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: context.textTheme.bodySmall?.copyWith(
+                                                      fontWeight: FontWeight.bold,
+                                                      height: 1.1,
+                                                      fontSize: 10,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                       ),
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                               isScrollControlled: true,
+                             );
+                           }
+                        },
+                        child: Text(
+                          "View All",
+                          style: context.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: context.theme.primaryColor,
+                          ),
                         ),
                       ),
                     ],
                   ).marginAll(16),
-                  GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    shrinkWrap: true,
-                    itemCount: 8,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemBuilder: (_, index) {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CustomImageView(
-                            height: 36,
-                            width: 36,
-                            url:
-                                "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
+                  Obx(() {
+                    if (controller.isLoadingCategories.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (controller.categories.isEmpty) {
+                      return SizedBox.shrink(); // Or "No Categories" text
+                    }
+                    
+                    // Show max 8 on home screen
+                    final displayList = controller.categories.take(8).toList();
+                    
+                    return GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      shrinkWrap: true,
+                      itemCount: displayList.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.8,
+                      ),
+                      itemBuilder: (_, index) {
+                        final category = displayList[index];
+                        return GestureDetector(
+                          onTap: () {
+                             if (category.id != null) {
+                               controller.onCategoryTap(category.id!);
+                             }
+                          },
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomImageView(
+                                height: 36,
+                                width: 36,
+                                url: category.photo != null && category.photo!.isNotEmpty
+                                    ? category.photo
+                                    : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
+                                fit: BoxFit.cover,
+                                radius: BorderRadius.circular(18),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                category.name ?? "Unknown",
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.1,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Category Name",
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              height: 1.1,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    );
+                  }),
                   BgGradientBorder(
                     child: Row(
                       children: [
@@ -197,12 +315,17 @@ class HomePage extends GetWidget<HomeController> {
                                   horizontal: 12,
                                   vertical: 4,
                                 ),
-                                child: Text(
-                                  "Start Now",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.theme.colorScheme.onPrimary,
+                                child: InkWell(
+                                  onTap: () {
+                                    Get.toNamed(AppRoutes.regBusiness);
+                                  },
+                                  child: Text(
+                                    "Start Now",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.theme.colorScheme.onPrimary,
+                                    ),
                                   ),
                                 ),
                               ),

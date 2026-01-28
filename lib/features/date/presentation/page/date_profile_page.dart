@@ -5,6 +5,7 @@ import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/widgets/custom_confirm_dialog.dart';
 
 class DateProfilePage extends GetWidget<DateProfileController> {
   const DateProfilePage({super.key});
@@ -481,14 +482,15 @@ class DateProfilePage extends GetWidget<DateProfileController> {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         // Block functionality
-                        Get.defaultDialog(
+                        CustomConfirmDialog.show(
                           title: "Block User",
-                          middleText:
-                              "Are you sure you want to block this user?",
-                          textConfirm: "Block",
-                          textCancel: "Cancel",
-                          confirmTextColor: Colors.white,
-                          onConfirm: () => Get.back(),
+                          message: "Are you sure you want to block this user?",
+                          confirmText: "Block",
+                          confirmColor: Colors.red,
+                          icon: Icons.block_flipped,
+                          onConfirm: () {
+                            // Logic to block
+                          },
                         );
                       },
                       icon: Icon(Icons.block, size: 18),
@@ -505,13 +507,15 @@ class DateProfilePage extends GetWidget<DateProfileController> {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         // Report functionality
-                        Get.defaultDialog(
+                        CustomConfirmDialog.show(
                           title: "Report User",
-                          middleText: "Please select a reason for reporting",
-                          textConfirm: "Report",
-                          textCancel: "Cancel",
-                          confirmTextColor: Colors.white,
-                          onConfirm: () => Get.back(),
+                          message: "Are you sure you want to report this user for inappropriate behavior?",
+                          confirmText: "Report",
+                          confirmColor: Colors.orange,
+                          icon: Icons.flag_outlined,
+                          onConfirm: () {
+                            // Logic to report
+                          },
                         );
                       },
                       icon: Icon(Icons.flag, size: 18),

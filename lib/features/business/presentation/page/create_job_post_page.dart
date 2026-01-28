@@ -21,16 +21,18 @@ class CreateJobPage extends GetWidget<CreateJobController> {
           onPressed: Get.back,
           icon: Icon(AppAssets.backArrow),
         ),
-        title: const Text("Create Job Posting"),
+        title: Obx(() => Text(controller.isEditMode.value ? "Update Job Posting" : "Create Job Posting")),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Job Details", style: context.textTheme.displaySmall),
+            Text(controller.isEditMode.value ? "Edit Job Details" : "Job Details", style: context.textTheme.displaySmall),
             Text(
-              "Fill in the details to create your job posting",
+              controller.isEditMode.value 
+                  ? "Update the information for your job posting" 
+                  : "Fill in the details to create your job posting",
               style: context.textTheme.labelMedium,
             ),
 
@@ -39,9 +41,9 @@ class CreateJobPage extends GetWidget<CreateJobController> {
 
             AppInputTextField(
               label: "Job Title ",
-              hintText: "Senior Flutter Developer",
+              hintText: "Job title",
               textInputType: TextInputType.text,
-              //controller: controller.mobileController,
+              controller: controller.titleCtrl,
               validator: FormValidator.jobTitle,
             ),
 
@@ -49,7 +51,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               label: "Job Description",
               hintText: "Describe the role, responsibility",
               textInputType: TextInputType.text,
-              //controller: controller.mobileController,
+              controller: controller.descriptionCtrl,
               maxLines: 4,
               // validator: FormValidator.jobDescription(),
               validator: (value) =>
@@ -60,7 +62,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               label: "Requirements",
               hintText: "List the required skills, qualifications",
               textInputType: TextInputType.text,
-              //controller: controller.mobileController,
+              controller: controller.requirementsCtrl,
               maxLines: 4,
               validator: (value) =>
                   FormValidator.jobDescription(value, "Requirements"),
@@ -71,37 +73,71 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             const SectionTitle("Job Details"),
             AppInputTextField(
               label: "Salary Range",
-              hintText: "₹5,000-₹5,000 per month",
+              hintText: "₹5,000 - ₹50,000 per month",
               textInputType: TextInputType.text,
-              //controller: controller.mobileController,
-              //validator: FormValidator.name,
+              controller: controller.salaryRangeCtrl,
+              validator: (v) => v!.isEmpty ? "Salary range is required" : null,
             ),
             SingleDropdown(
               controller: controller.jobTypeCtrl,
               label: "Job Type",
-              items: controller.jobTypes,
+              items: CreateJobController.JOB_TYPES,
             ),
             AppInputTextField(
               label: "Location",
-              hintText: "Lucknow",
+              hintText: "City name (e.g., Lucknow)",
               textInputType: TextInputType.text,
-              //controller: controller.mobileController,
-              //validator: FormValidator.name,
+              controller: controller.locationCtrl,
+              validator: (v) => v!.isEmpty ? "Location is required" : null,
             ),
             SingleDropdown(
               controller: controller.experienceCtrl,
               label: "Experience Level",
-              items: controller.expLevel,
+              items: CreateJobController.EXP_LEVELS,
             ),
             SingleDropdown(
               controller: controller.employmentCtrl,
               label: "Employment Type",
-              items: controller.employmentTypes,
+              items: CreateJobController.EMPLOYMENT_TYPES,
             ),
             SingleDropdown(
-              controller: controller.smokingCtrl,
-              label: "Category",
-              items: controller.categories,
+              controller: controller.categoryCtrl,
+              label: "Job Category",
+              items: CreateJobController.CATEGORIES,
+            ),
+
+            const SizedBox(height: 16),
+            
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => controller.selectDate(context, controller.deadlineCtrl),
+                    child: AbsorbPointer(
+                      child: AppInputTextField(
+                        label: "Application Deadline",
+                        hintText: "YYYY-MM-DD",
+                        controller: controller.deadlineCtrl,
+                        validator: (v) => v!.isEmpty ? "Deadline is required" : null,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => controller.selectDate(context, controller.expiryCtrl),
+                    child: AbsorbPointer(
+                      child: AppInputTextField(
+                        label: "Job Expiry Date",
+                        hintText: "YYYY-MM-DD",
+                        controller: controller.expiryCtrl,
+                        validator: (v) => v!.isEmpty ? "Expiry date is required" : null,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 16),
@@ -110,19 +146,62 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             const SectionTitle("Benefits & Perks"),
 
             // Add Custom Benefit
-            AppInputTextField(
-              controller: controller.benefitsCtrl,
-              label: "Add Benefits *",
-              hintText: "Enter a benefit (e.g., Health insurance)",
-              textInputType: TextInputType.text,
+            Row(
+              children: [
+                Expanded(
+                  child: AppInputTextField(
+                    controller: controller.benefitsCtrl,
+                    label: "Add Benefit",
+                    hintText: "e.g., Health insurance",
+                    textInputType: TextInputType.text,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 25.0),
+                  child: CustomButton(
+                    title: "+",
+                    width: 50,
+                    height: 50,
+                    onPressed: controller.addCustomBenefit,
+                  ),
+                ),
+              ],
             ),
 
-            const SizedBox(height: 16),
-            CustomButton(
-              title: "+ Add",
-              height: 40,
-              onPressed: controller.addCustomBenefit,
+            const SizedBox(height: 12),
+            
+            // Popular Benefits
+            Text(
+              "Quick Add Benefits:",
+              style: context.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: context.theme.hintColor,
+              ),
             ),
+            const SizedBox(height: 8),
+            Obx(() => Wrap(
+              spacing: 8,
+              runSpacing: 0,
+              children: CreateJobController.POPULAR_BENEFITS
+                  .map(
+                    (benefit) => FilterChip(
+                      label: Text(benefit, style: TextStyle(fontSize: 12)),
+                      selected: controller.selectedBenefits.contains(benefit),
+                      selectedColor: context.theme.primaryColor.withOpacity(0.2),
+                      checkmarkColor: context.theme.primaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      onSelected: (selected) {
+                        if (selected) {
+                          controller.addPopularBenefit(benefit);
+                        } else {
+                          controller.removeBenefit(benefit);
+                        }
+                      },
+                    ),
+                  )
+                  .toList(),
+            )),
 
             // Selected Benefits List
             Obx(
@@ -134,9 +213,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                         const SizedBox(height: 12),
                         Text(
                           "Selected Benefits:",
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
                         Wrap(
@@ -146,9 +223,9 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                               .map(
                                 (benefit) => Chip(
                                   label: Text(benefit),
-                                  deleteIcon: const Icon(Icons.close, size: 16),
-                                  onDeleted: () =>
-                                      controller.removeBenefit(benefit),
+                                  backgroundColor: context.theme.primaryColor.withOpacity(0.1),
+                                  deleteIcon: const Icon(Icons.cancel, size: 18),
+                                  onDeleted: () => controller.removeBenefit(benefit),
                                 ),
                               )
                               .toList(),
@@ -157,106 +234,58 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                     ),
             ),
 
-            // Popular Benefits
-            const SizedBox(height: 16),
-            Text(
-              "Popular Benefits:",
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.popularBenefits
-                  .map(
-                    (benefit) => FilterChip(
-                      label: Text(benefit),
-                      selected: controller.selectedBenefits.contains(benefit),
-                      onSelected: (selected) {
-                        if (selected) {
-                          controller.addPopularBenefit(benefit);
-                        } else {
-                          controller.removeBenefit(benefit);
-                        }
-                      },
-                    ),
-                  )
-                  .toList(),
-            ),
-
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // ================ Skills Required Section ================
 
             const SectionTitle("Skills Required"),
 
             // Add Custom Skill
-            AppInputTextField(
-              controller: controller.skillsCtrl,
-              label: "Add Skills ",
-              hintText: "Enter a skill (e.g., PHP, Laravel)",
-              textInputType: TextInputType.text,
-            ),
-
-            const SizedBox(height: 16),
-            CustomButton(
-              title: "+ Add",
-              height: 40,
-              onPressed: controller.addCustomSkill,
-            ),
-
-            // Selected Benefits List
-            Obx(
-                  () => controller.selectedSkills.isEmpty
-                  ? const SizedBox()
-                  : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
-                  Text(
-                    "Selected Skills:",
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInputTextField(
+                    controller: controller.skillsCtrl,
+                    label: "Add Skill",
+                    hintText: "e.g., Flutter, Laravel",
+                    textInputType: TextInputType.text,
                   ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: controller.selectedSkills
-                        .map(
-                          (skill) => Chip(
-                        label: Text(skill),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () =>
-                            controller.removeSkill(skill),
-                      ),
-                    )
-                        .toList(),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 25.0),
+                  child: CustomButton(
+                    title: "+",
+                    width: 50,
+                    height: 50,
+                    onPressed: controller.addCustomSkill,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
 
+            const SizedBox(height: 12),
+            
             // Popular Skills
-            const SizedBox(height: 16),
             Text(
               "Quick Add Skills:",
-              style: context.textTheme.titleMedium?.copyWith(
+              style: context.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: context.theme.hintColor,
               ),
             ),
             const SizedBox(height: 8),
-            Wrap(
+            Obx(() => Wrap(
               spacing: 8,
-              runSpacing: 8,
-              children: controller.popularSkills
+              runSpacing: 0,
+              children: CreateJobController.POPULAR_SKILLS
                   .map(
                     (skill) => FilterChip(
-                  label: Text(skill),
+                  label: Text(skill, style: TextStyle(fontSize: 12)),
                   selected: controller.selectedSkills.contains(skill),
+                  selectedColor: context.theme.primaryColor.withOpacity(0.2),
+                  checkmarkColor: context.theme.primaryColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   onSelected: (selected) {
                     if (selected) {
                       controller.addPopularSkill(skill);
@@ -267,27 +296,50 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                 ),
               )
                   .toList(),
-            ),
+            )),
 
-            const SizedBox(height: 16),
-
-            const SectionTitle("Do you have any dosh ?"),
+            // Selected Skills List
             Obx(
-              () => OptionSelector(
-                options: const ['YES', 'NO', 'Unknown'],
-                selectedValue: controller.dosh.value,
-                onSelected: controller.dosh.call,
+                  () => controller.selectedSkills.isEmpty
+                  ? const SizedBox()
+                  : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 12),
+                  Text(
+                    "Selected Skills:",
+                    style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: controller.selectedSkills
+                        .map(
+                          (skill) => Chip(
+                        label: Text(skill),
+                        backgroundColor: context.theme.primaryColor.withOpacity(0.1),
+                        deleteIcon: const Icon(Icons.cancel, size: 18),
+                        onDeleted: () => controller.removeSkill(skill),
+                      ),
+                    )
+                        .toList(),
+                  ),
+                ],
               ),
             ),
+
+            const SizedBox(height: 100),
           ],
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: CustomButton(
-          title: "Post Job Now",
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Obx(() => CustomButton(
+          title: controller.isEditMode.value ? "Update Job" : "Post Job Now",
+          isLoading: controller.isLoading.value,
           onPressed: controller.onRegister,
-        ),
+        )),
       ),
     );
   }
@@ -300,12 +352,24 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: context.textTheme.titleLarge?.copyWith(
-        color: context.theme.primaryColor,
-      ),
-    ).marginOnly(bottom: 4);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: context.textTheme.titleLarge?.copyWith(
+            color: context.theme.primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Container(
+          height: 2,
+          width: 40,
+          color: context.theme.primaryColor,
+          margin: const EdgeInsets.only(top: 4, bottom: 16),
+        ),
+      ],
+    );
   }
 }
 
@@ -330,6 +394,7 @@ class SingleDropdown extends StatelessWidget {
       label: label ?? "No Label",
       isDropdown: true,
       dropdownItems: items,
+      validator: (v) => (v == null || v.isEmpty) ? "${label ?? 'Field'} is required" : null,
     );
   }
 }

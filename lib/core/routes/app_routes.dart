@@ -37,6 +37,7 @@ import '../../features/notification/binding/notification_binding.dart';
 import '../../features/notification/presentation/page/notification_page.dart';
 import '../../features/profile/binding/profile_binding.dart';
 import '../../features/profile/presentation/page/edit_profile_page.dart';
+import '../../features/dashboard/presentation/page/category_details_screen.dart';
 import '../../features/search/binding/search_binding.dart';
 import '../../features/search/presentation/page/search_page.dart';
 import '../../features/settings/binding/profile_binding.dart';
@@ -73,8 +74,7 @@ class AppRoutes {
   static const String emailPasswordReset = "/emailPasswordReset";
   static const String resetPasswordScreen = "/resetPasswordScreen";
   static const String matrimonyProfileScreen = "/matrimonyProfileScreen";
-
-
+  static const String categoryDetails = "/categoryDetails";
 }
 
 class AppPages {
@@ -127,7 +127,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const DashboardPage(),
-      bindings: [DashboardBinding(), ProfileBinding(), MatrimonyBinding(),SettingsBinding()],
+      bindings: [DashboardBinding(), ProfileBinding(), MatrimonyBinding(), SettingsBinding(), BusinessBinding()],
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -190,14 +190,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.jobAnalytics,
       page: () => JobAnalysisPage(),
-     // binding: BusinessBinding(),
+       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
       name: AppRoutes.myBusiness,
       page: () => MyBusinessScreen(),
-      // binding: BusinessBinding(),
+       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -211,21 +211,21 @@ class AppPages {
     GetPage(
       name: AppRoutes.businessDetails,
       page: () => BusinessDetailScreen(),
-     // binding: BusinessBinding(),
+       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
       name: AppRoutes.jobDetails,
       page: () => JobDetailsScreen(),
-      // binding: BusinessBinding(),
+       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
       name: AppRoutes.profileScreen,
       page: () => ProfileScreen(),
-      // binding: BusinessBinding(),
+       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -268,6 +268,12 @@ class AppPages {
       name: AppRoutes.matrimonyProfileScreen,
       page: () => MatrimonyProfileScreen(profileId: '123',),
       // binding: VolunteerBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.categoryDetails,
+      page: () => const CategoryDetailsScreen(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

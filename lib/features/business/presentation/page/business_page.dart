@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/features/business/presentation/page/single_business_details.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
+import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,98 +10,21 @@ import '../../../../common/widgets/bg_gradient_border.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../widgets/custom_buttons.dart';
 import '../controller/business_controller.dart';
+import '../../data/model/res_all_business_model.dart' as model;
 import 'add_product_screen.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
 
 class BusinessPage extends GetWidget<BusinessController> {
   const BusinessPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(body: Column(children: []));
+    return const BusinessScreen();
   }
 }
 
-// Business Model
-class Business {
-  final String id;
-  final String name;
-  final String category;
-  final String established;
-  final String address;
-  final bool isActive;
-  final String revenue;
-
-  Business({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.established,
-    required this.address,
-    required this.isActive,
-    required this.revenue,
-  });
-}
-
-// Sample Data
-final List<Business> businesses = [
-  Business(
-    id: '1',
-    name: 'Raj Electronics',
-    category: 'Electronics',
-    established: '2020',
-    address: 'Hazratganj, Lucknow',
-    isActive: true,
-    revenue: '₹45L/month',
-  ),
-  Business(
-    id: '2',
-    name: 'Sharma Sweets',
-    category: 'Food & Beverages',
-    established: '2018',
-    address: 'Aminabad, Lucknow',
-    isActive: true,
-    revenue: '₹32L/month',
-  ),
-  Business(
-    id: '3',
-    name: 'Fashion Hub',
-    category: 'Clothing',
-    established: '2022',
-    address: 'Gomti Nagar, Lucknow',
-    isActive: true,
-    revenue: '₹28L/month',
-  ),
-  Business(
-    id: '4',
-    name: 'Tech Solutions',
-    category: 'IT Services',
-    established: '2019',
-    address: 'Indira Nagar, Lucknow',
-    isActive: false,
-    revenue: '₹55L/month',
-  ),
-  Business(
-    id: '5',
-    name: 'Green Garden',
-    category: 'Agriculture',
-    established: '2021',
-    address: 'Alambagh, Lucknow',
-    isActive: true,
-    revenue: '₹20L/month',
-  ),
-  Business(
-    id: '6',
-    name: 'Book Palace',
-    category: 'Books & Stationery',
-    established: '2017',
-    address: 'Chowk, Lucknow',
-    isActive: true,
-    revenue: '₹15L/month',
-  ),
-];
-
 // Dashboard Screen
-class BusinessScreen extends StatelessWidget {
+class BusinessScreen extends GetView<BusinessController> {
   const BusinessScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -121,354 +45,299 @@ class BusinessScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: context.theme.colorScheme.onPrimary,
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return _buildShimmerLoading(context);
+        }
 
-                GestureDetector(
-                  onTap: () {
-                   Get.toNamed(AppRoutes.myBusiness);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          context.theme.colorScheme.primary,
-                          context.theme.colorScheme.primary,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.theme.colorScheme.primary.withOpacity(
-                            0.3,
+        return Container(
+          decoration: BoxDecoration(
+            color: context.theme.colorScheme.onPrimary,
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (controller.myBusiness.value != null)
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.myBusiness);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              context.theme.colorScheme.primary,
+                              context.theme.colorScheme.primary,
+                            ],
                           ),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.theme.colorScheme.primary.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Row(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
                           children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.business_center,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'My Business',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'View your business details',
+                                        style: TextStyle(
+                                          color: Color(0xFFFCE4EC),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
-                                Icons.business_center,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  Text(
-                                    'My Business',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'View your business details',
-                                    style: TextStyle(
-                                      color: Color(0xFFFCE4EC),
-                                      fontSize: 14,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          controller.myBusiness.value?.businessName ?? '',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          controller.myBusiness.value?.category?.name ?? '',
+                                          style: const TextStyle(
+                                            color: Color(0xFFFCE4EC),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(
-                              Icons.chevron_right,
-                              color: Colors.white,
-                              size: 28,
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.regBusiness);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              context.theme.colorScheme.primary,
+                              context.theme.colorScheme.primary,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.theme.colorScheme.primary.withOpacity(0.3),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      businesses[0].name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      businesses[0].category,
-                                      style: const TextStyle(
-                                        color: Color(0xFFFCE4EC),
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add_business_rounded,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Header with View All
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Featured Businesses',
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                      // style: TextStyle(
-                      //   fontSize: 24,
-                      //   fontWeight: FontWeight.bold,
-                      //   color: Color(0xFF424242),
-                      // ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AllBusinessesScreen(),
-                          ),
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          Text(
-                            'View All',
-                            style: TextStyle(
-                              color: context.theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Register Your Business',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Start growing your business today',
+                                        style: TextStyle(
+                                          color: Color(0xFFFCE4EC),
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.chevron_right,
-                            color: context.theme.colorScheme.primary,
-                            size: 20,
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Register Now',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Build your digital profile',
+                                          style: TextStyle(
+                                            color: Color(0xFFFCE4EC),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                  
+                  const SizedBox(height: 32),
 
-                // Business List
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: businesses.length > 6 ? 6 : businesses.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: BusinessListCard(business: businesses[index]),
-                    );
-                  },
-                ),
-              ],
+                  // Header with View All
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Featured Businesses',
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Get.to(() => const AllBusinessesScreen());
+                        },
+                        child: Row(
+                          children: [
+                            Text(
+                              'View All',
+                              style: TextStyle(
+                                color: context.theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right,
+                              color: context.theme.colorScheme.primary,
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Business List
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.businesses.length > 6 ? 6 : controller.businesses.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: BusinessListCard(business: controller.businesses[index]),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Business Card Widget
-class BusinessCard extends StatelessWidget {
-  final Business business;
-
-  const BusinessCard({Key? key, required this.business}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BusinessDetailScreen(),
-            //(business: business),
           ),
         );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFCE4EC),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.business,
-                    color: Color(0xFFE91E63),
-                    size: 24,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: business.isActive
-                        ? const Color(0xFFE8F5E9)
-                        : const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    business.isActive ? 'Active' : 'Inactive',
-                    style: TextStyle(
-                      color: business.isActive
-                          ? const Color(0xFF4CAF50)
-                          : const Color(0xFF9E9E9E),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              business.name,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF424242),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              business.category,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFFE91E63),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_on,
-                  size: 14,
-                  color: Color(0xFFE91E63),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    business.address,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF757575),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today,
-                  size: 14,
-                  color: Color(0xFFE91E63),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Est. ${business.established}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF757575),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(
-                  Icons.trending_up,
-                  size: 14,
-                  color: Color(0xFFE91E63),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  business.revenue,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF424242),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      }),
     );
   }
 }
+
 
 // All Businesses Screen
 class AllBusinessesScreen extends GetWidget<BusinessController> {
@@ -478,27 +347,26 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true, // Show back button
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Get.back(),
+        ),
         elevation: 0,
         backgroundColor: context.theme.primaryColorLight,
         centerTitle: false,
-        titleSpacing: 20,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "All Businesses",
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-              ),
-            ),
-          ],
+        titleSpacing: 0, // Adjusted for custom leading
+        title: Text(
+          "All Businesses",
+          style: context.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            fontSize: 24,
+          ),
         ),
       ),
-      body: Obx((){
+      body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return _buildShimmerLoading(context);
         }
 
         if (controller.businesses.isEmpty) {
@@ -507,14 +375,8 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
         return Container(
           decoration: BoxDecoration(
             color: context.theme.cardColor,
-            // gradient: LinearGradient(
-            //   begin: Alignment.topLeft,
-            //   end: Alignment.bottomRight,
-            //   colors: [Color(0xFFFCE4EC), Color(0xFFF3E5F5)],
-            // ),
           ),
           child: SafeArea(
-            // top: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -524,13 +386,10 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${businesses.length} Businesses Available',
+                        '${controller.businesses.length} Businesses Available',
                         style: context.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: context.theme.primaryColor,
-                          // style: const TextStyle(
-                          //   fontSize: 16,
-                          //   color: Color(0xFF757575),
                         ),
                       ),
                     ],
@@ -539,11 +398,11 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: businesses.length,
+                    itemCount: controller.businesses.length,
                     itemBuilder: (context, index) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
-                        child: BusinessListCard(business: businesses[index]),
+                        child: BusinessListCard(business: controller.businesses[index]),
                       );
                     },
                   ),
@@ -552,51 +411,37 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
             ),
           ),
         );
-      })
-
+      }),
     );
   }
 }
 
 // Business List Card
 class BusinessListCard extends StatelessWidget {
-  final Business business;
+  final model.Business business;
 
   const BusinessListCard({Key? key, required this.business}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    String address = [
+      business.user?.city,
+      business.user?.district,
+    ].where((e) => e != null && e.isNotEmpty).join(", ");
+
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BusinessDetailScreen(),
-            //(business: business),
-          ),
-        );
+        Get.to(() => const BusinessDetailScreen(), arguments: business);
       },
       child: BgGradientBorder(
-        // decoration: BoxDecoration(
-        //   color: Colors.white,
-        //   borderRadius: BorderRadius.circular(16),
-        //   boxShadow: [
-        //     BoxShadow(
-        //       color: Colors.grey.withOpacity(0.1),
-        //       blurRadius: 10,
-        //       offset: const Offset(0, 4),
-        //     ),
-        //   ],
-        // ),
-        // padding: const EdgeInsets.all(16),
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFCE4EC),
+                  color: context.theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -614,8 +459,10 @@ class BusinessListCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            business.name,
-                            style: context.textTheme.titleMedium,
+                            business.businessName ?? '',
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         Container(
@@ -624,15 +471,15 @@ class BusinessListCard extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: business.isActive
+                            color: business.status == 'active'
                                 ? const Color(0xFFE8F5E9)
                                 : const Color(0xFFF5F5F5),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            business.isActive ? 'Active' : 'Inactive',
+                            (business.status ?? 'unknown').toTitleCase(),
                             style: TextStyle(
-                              color: business.isActive
+                              color: business.status == 'active'
                                   ? const Color(0xFF4CAF50)
                                   : const Color(0xFF9E9E9E),
                               fontSize: 12,
@@ -644,48 +491,67 @@ class BusinessListCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      business.category,
+                      business.category?.name ?? 'General',
                       style: TextStyle(
                         fontSize: 14,
                         color: context.theme.colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Color(0xFF757575),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            business.address,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF757575),
+                    if (address.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: Color(0xFF757575),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              address,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF757575),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 4),
                     Row(
                       children: [
                         const Icon(
-                          Icons.trending_up,
-                          size: 14,
+                          Icons.shopping_bag_outlined,
+                          size: 16,
                           color: Color(0xFF757575),
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          business.revenue,
+                          '${business.products?.length ?? 0} Products',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: Color(0xFF424242),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Icons.settings_outlined,
+                          size: 16,
+                          color: Color(0xFF757575),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${business.services?.length ?? 0} Services',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF424242),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -702,68 +568,6 @@ class BusinessListCard extends StatelessWidget {
 }
 
 
-// Detail Card Widget
-class DetailCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-  final Color color;
-
-  const DetailCard({
-    Key? key,
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.color,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF757575),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF424242),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 
 
@@ -1278,6 +1082,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
               Expanded(
                 child: InkWell(
                     onTap: () {
+                      if (Get.isRegistered<CreateJobController>()) {
+                        Get.find<CreateJobController>().clearFields();
+                      }
                       Get.toNamed(AppRoutes.createJob);
                     },
                     child: _buildActionButton('Create Job', Icons.work_outline)),
@@ -1802,3 +1609,40 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
     return false;
   }
 }*/
+
+Widget _buildShimmerLoading(BuildContext context) {
+  return SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // My Business Shimmer
+        ShimmerLoading.rounded(height: 160),
+        const SizedBox(height: 32),
+        
+        // Featured Header Shimmer
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ShimmerLoading.rounded(height: 24, width: 200),
+            ShimmerLoading.rounded(height: 20, width: 80),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        // Business List Shimmer
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 4,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ShimmerLoading.rounded(height: 100),
+            );
+          },
+        ),
+      ],
+    ),
+  );
+}

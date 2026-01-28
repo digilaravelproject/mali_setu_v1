@@ -5,7 +5,7 @@ import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/widgets/option_selector.dart';
+import '../../../../common/widgets/selection_tile.dart';
 import '../../../../core/utils/app_assets.dart';
 
 class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
@@ -29,14 +29,14 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (controller.currentStep.value == 0) _buildPersonalStep(context),
-                    if (controller.currentStep.value == 1) _buildBackgroundStep(context),
-                    if (controller.currentStep.value == 2) _buildHabitsStep(context),
-                    if (controller.currentStep.value == 3) _buildReligiousStep(context),
+                    if (controller.currentStep.value == 1) _buildReligiousStep(context),
+                    if (controller.currentStep.value == 2) _buildEducationCareerStep(context),
+                    if (controller.currentStep.value == 3) _buildFamilyLocationStep(context),
                   ],
                 ),
               ),
@@ -133,306 +133,470 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     );
   }
 
+  /// Step 1: Personal Details
   Widget _buildPersonalStep(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Personal Identity",
-          style: context.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "Let's start with your basic details",
-          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        ),
-        const SizedBox(height: 24),
+        _buildStepHeader("Personal Details", "Start with your basic info"),
+        
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                AppInputTextField(
+                  controller: controller.nameCtrl,
+                  label: "Full Name *",
+                ),
+                const SizedBox(height: 12),
+                
+                Obx(() => SelectionTile(
+                  label: "Profile Created By *",
+                  value: controller.profileCreatedBy.value,
+                  icon: Icons.person_add_alt,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Created By", controller.profileCreatedByList, controller.profileCreatedBy.call),
+                )),
+                const SizedBox(height: 12),
 
-        /// Gender
-        const SectionTitle("Gender"),
-        Obx(
-          () => OptionSelector(
-            options: const ['Male', 'Female'],
-            onSelected: controller.gender.call,
-            selectedValue: controller.gender.value,
-          ),
-        ),
-        const SizedBox(height: 16),
+                Obx(() => SelectionTile(
+                  label: "Gender *",
+                  value: controller.gender.value,
+                  icon: Icons.person_outline,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Gender", controller.genderList, controller.gender.call),
+                )),
+                const SizedBox(height: 12),
 
-        /// DOB
-        const SectionTitle("Date of birth"),
-        const BirthdayDateField(),
-        const SizedBox(height: 16),
+                Obx(() => SelectionTile(
+                  label: "Date of Birth *",
+                  value: controller.rxDob.value,
+                  icon: Icons.calendar_today,
+                  onTap: () => controller.selectDate(context),
+                )),
+                const SizedBox(height: 12),
 
-        /// Place of Birth
-        const SectionTitle("Place of birth"),
-        TwoColumnDropdownRow(
-          left: AppInputTextField(
-            controller: controller.countryCtrl,
-            label: "Country",
-            isDropdown: true,
-            dropdownItems: controller.countries,
-          ),
-          right: AppInputTextField(
-            controller: controller.stateCtrl,
-            label: "State",
-            isDropdown: true,
-            dropdownItems: controller.states,
-          ),
-        ),
-        const SizedBox(height: 12),
-        TwoColumnDropdownRow(
-          left: AppInputTextField(
-            controller: controller.cityCtrl,
-            label: "City",
-            isDropdown: true,
-            dropdownItems: controller.cities,
-          ),
-          right: AppInputTextField(
-            controller: controller.birthTimeCtrl,
-            label: "Time",
-            enable: false,
-            endIcon: Icons.watch_later_outlined,
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppInputTextField(
+                        controller: controller.heightCtrl,
+                        label: "Height (ft) *",
+                        hintText: "5.6",
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppInputTextField(
+                        controller: controller.weightCtrl,
+                        label: "Weight (kg) *",
+                        hintText: "65",
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Complexion *",
+                  value: controller.complexion.value,
+                  icon: Icons.face,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Select Complexion", controller.complexionList, controller.complexion.call),
+                )),
+                const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Marital Status *",
+                  value: controller.maritalStatus.value,
+                  icon: Icons.favorite_border,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Marital Status", controller.maritalStatusList, controller.maritalStatus.call),
+                )),
+                const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Physical Status *",
+                  value: controller.physicalStatus.value,
+                  icon: Icons.accessibility_new,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Physical Status", controller.physicalStatusList, controller.physicalStatus.call),
+                )),
+                 const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Language *",
+                  value: controller.language.value,
+                  icon: Icons.language,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Language", controller.languageList, controller.language.call),
+                )),
+                 const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Citizenship *",
+                  value: controller.citizenship.value,
+                  icon: Icons.flag_outlined,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Citizenship", controller.citizenshipList, controller.citizenship.call),
+                )),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBackgroundStep(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Background & Lifestyle",
-          style: context.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "Tell us about your education and lifestyle",
-          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        ),
-        const SizedBox(height: 24),
-
-        /// Physical Status
-        const SectionTitle("Your physical status"),
-        Obx(
-          () => OptionSelector(
-            options: const ['Normal', 'Challenged'],
-            selectedValue: controller.physicalStatus.value,
-            onSelected: controller.physicalStatus.call,
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        /// Education & Employment
-        TwoColumnDropdownRow(
-          left: AppInputTextField(
-            controller: controller.citizenshipCtrl,
-            label: "Citizenship",
-            isDropdown: true,
-            dropdownItems: controller.countries,
-          ),
-          right: AppInputTextField(
-            controller: controller.educationCtrl,
-            label: "Education",
-            isDropdown: true,
-            dropdownItems: controller.educations,
-          ),
-        ),
-        const SizedBox(height: 12),
-        TwoColumnDropdownRow(
-          left: AppInputTextField(
-            controller: controller.employmentCtrl,
-            label: "Employment Type",
-            isDropdown: true,
-            dropdownItems: controller.employmentTypes,
-          ),
-          right: AppInputTextField(
-            controller: controller.motherTongueCtrl,
-            label: "Mother Tongue",
-            isDropdown: true,
-            dropdownItems: controller.languages,
-          ),
-        ),
-        const SizedBox(height: 12),
-        SingleDropdown(
-          controller: controller.familyTypeCtrl,
-          label: "Family Type",
-          items: controller.familyTypes,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHabitsStep(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Habits & Social",
-          style: context.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "More about your personality and habits",
-          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        ),
-        const SizedBox(height: 24),
-
-        /// Marital Status
-        const SectionTitle("Your Marital status"),
-        Obx(
-          () => OptionSelector(
-            options: controller.maritalStatuses,
-            selectedValue: controller.maritalStatus.value,
-            onSelected: controller.maritalStatus.call,
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        /// Eating Habits
-        const SectionTitle("Special Eating Habits"),
-        Obx(
-          () => OptionSelector(
-            options: controller.eatingHabits,
-            selectedValue: controller.eatingHabit.value,
-            onSelected: controller.eatingHabit.call,
-          ),
-        ),
-        const SizedBox(height: 16),
-        SingleDropdown(
-          controller: controller.drinkingCtrl,
-          label: "Drinking Habits",
-          items: const ["Yes", "No"],
-        ),
-        const SizedBox(height: 12),
-        SingleDropdown(
-          controller: controller.smokingCtrl,
-          label: "Smoking Habits",
-          items: const ["Yes", "No"],
-        ),
-      ],
-    );
-  }
-
+  /// Step 2: Religious & Horoscope
   Widget _buildReligiousStep(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Religious & Horoscope",
-          style: context.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          "Final step for your religious details",
-          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-        ),
-        const SizedBox(height: 24),
+        _buildStepHeader("Religious & Horoscope", "Your astrological details"),
 
-        /// Religious Details
-        const SectionTitle("Religious Details"),
-        SingleDropdown(
-          controller: controller.religionCtrl,
-          label: "Religion",
-          items: controller.religions,
-        ),
-        const SizedBox(height: 12),
-        SingleDropdown(
-          controller: controller.casteCtrl,
-          label: "Caste",
-          items: controller.castes,
-        ),
-        const SizedBox(height: 24),
+        Card(
+          elevation: 0,
+           shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Obx(() => SelectionTile(
+                  label: "Religion *",
+                  value: controller.religion.value,
+                  icon: Icons.temple_hindu,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Religion", controller.religionList, controller.religion.call),
+                )),
+                const SizedBox(height: 12),
 
-        /// Star Details
-        const SectionTitle("Add Star Details"),
-        SingleDropdown(
-          controller: controller.starCtrl,
-          label: "Star",
-          items: controller.stars,
-        ),
-        const SizedBox(height: 12),
-        SingleDropdown(
-          controller: controller.rashiCtrl,
-          label: "Rashi",
-          items: controller.rashis,
-        ),
-        const SizedBox(height: 12),
-        SingleDropdown(
-          controller: controller.manglikCtrl,
-          label: "Manglik",
-          items: const ["Yes", "No"],
-        ),
-        const SizedBox(height: 24),
+                AppInputTextField(
+                  controller: controller.casteCtrl,
+                  label: "Caste *",
+                ),
+                const SizedBox(height: 12),
 
-        const SectionTitle("Do you have any dosh?"),
-        Obx(
-          () => OptionSelector(
-            options: const ['YES', 'NO', 'Unknown'],
-            selectedValue: controller.dosh.value,
-            onSelected: controller.dosh.call,
+                Obx(() => SelectionTile(
+                  label: "Star *",
+                  value: controller.star.value,
+                  icon: Icons.star_border,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Star", controller.starList, controller.star.call),
+                )),
+                const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Raasi *",
+                  value: controller.raasi.value,
+                  icon: Icons.nightlight_round,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Raasi", controller.raasiList, controller.raasi.call),
+                )),
+                const SizedBox(height: 12),
+
+                 Obx(() => SelectionTile(
+                  label: "Manglik *",
+                  value: controller.manglik.value,
+                  icon: Icons.warning_amber_rounded,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Manglik", controller.manglikList, controller.manglik.call),
+                )),
+                const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Dosh *",
+                  value: controller.dosh.value,
+                  icon: Icons.error_outline,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Dosh", controller.doshList, controller.dosh.call),
+                )),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
-}
 
-class SectionTitle extends StatelessWidget {
-  final String title;
-
-  const SectionTitle(this.title, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: context.textTheme.titleLarge,
-    ).marginOnly(bottom: 4);
-  }
-}
-
-class TwoColumnDropdownRow extends StatelessWidget {
-  final Widget left;
-  final Widget right;
-
-  const TwoColumnDropdownRow({
-    super.key,
-    required this.left,
-    required this.right,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+  /// Step 3: Education & Career
+  Widget _buildEducationCareerStep(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: left),
-        const SizedBox(width: 12),
-        Expanded(child: right),
+        _buildStepHeader("Education & Career", "Qualifications & Occupation"),
+
+        Card(
+          elevation: 0,
+           shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                 Obx(() => SelectionTile(
+                  label: "Highest Qualification *",
+                  value: controller.education.value,
+                  icon: Icons.school_outlined,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Highest Qualification", controller.educationList, controller.education.call),
+                )),
+                const SizedBox(height: 12),
+
+                AppInputTextField(
+                  controller: controller.collegeCtrl,
+                  label: "College / University *",
+                ),
+                const SizedBox(height: 12),
+
+                Obx(() => SelectionTile(
+                  label: "Employment Type *",
+                  value: controller.employmentType.value,
+                  icon: Icons.work_outline,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Employment Type", controller.employmentTypeList, controller.employmentType.call),
+                )),
+                const SizedBox(height: 12),
+
+                AppInputTextField(
+                  controller: controller.jobTitleCtrl,
+                  label: "Job Title *",
+                ),
+                const SizedBox(height: 12),
+
+                AppInputTextField(
+                  controller: controller.companyCtrl,
+                  label: "Company Name *",
+                ),
+                const SizedBox(height: 12),
+
+                 AppInputTextField(
+                  controller: controller.annualIncomeCtrl,
+                  label: "Annual Income *",
+                  hintText: "e.g. 10 Lakhs",
+                  textInputType: TextInputType.number,
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
-}
 
-class SingleDropdown extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final String? hint;
-  final List<String> items;
+   /// Step 4: Family, Lifestyle & Location
+  Widget _buildFamilyLocationStep(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildStepHeader("Family & Lifestyle", "Family background & habits"),
 
-  const SingleDropdown({
-    super.key,
-    required this.controller,
-    required this.items,
-    this.label,
-    this.hint,
-  });
+        Card(
+          elevation: 0,
+           shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                 // Family
+                 Obx(() => SelectionTile(
+                  label: "Family Type *",
+                  value: controller.familyType.value,
+                  icon: Icons.family_restroom,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Family Type", controller.familyTypeList, controller.familyType.call),
+                )),
+                const SizedBox(height: 12),
 
-  @override
-  Widget build(BuildContext context) {
-    return AppInputTextField(
-      controller: controller,
-      label: label ?? "No Label",
-      isDropdown: true,
-      dropdownItems: items,
+                 Obx(() => SelectionTile(
+                  label: "Family Class *",
+                  value: controller.familyClass.value,
+                  icon: Icons.monetization_on_outlined,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Family Class", controller.familyClassList, controller.familyClass.call),
+                )),
+                const SizedBox(height: 12),
+
+                 Obx(() => SelectionTile(
+                  label: "Family Value *",
+                  value: controller.familyValue.value,
+                  icon: Icons.volunteer_activism,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Family Value", controller.familyValueList, controller.familyValue.call),
+                )),
+                const SizedBox(height: 12),
+
+                AppInputTextField(
+                  controller: controller.fatherOccupationCtrl,
+                  label: "Father's Occupation *",
+                ),
+                const SizedBox(height: 12),
+                 AppInputTextField(
+                  controller: controller.motherOccupationCtrl,
+                  label: "Mother's Occupation *",
+                ),
+                const SizedBox(height: 20),
+                
+                // Lifestyle
+                _buildSectionHeader("Lifestyle"),
+                 Obx(() => SelectionTile(
+                  label: "Diet *",
+                  value: controller.diet.value,
+                  icon: Icons.restaurant,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Diet", controller.dietList, controller.diet.call),
+                )),
+                const SizedBox(height: 12),
+                 Obx(() => SelectionTile(
+                  label: "Smoking *",
+                  value: controller.smoking.value,
+                  icon: Icons.smoking_rooms,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Smoking", controller.smokingList, controller.smoking.call),
+                )),
+                const SizedBox(height: 12),
+                  Obx(() => SelectionTile(
+                  label: "Drinking *",
+                  value: controller.drinking.value,
+                  icon: Icons.local_bar,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Drinking", controller.drinkingList, controller.drinking.call),
+                )),
+                const SizedBox(height: 20),
+
+                // Location
+                _buildSectionHeader("Location"),
+                 Obx(() => SelectionTile(
+                  label: "Country *",
+                  value: controller.country.value,
+                  icon: Icons.public,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "Country", controller.countryList, controller.country.call),
+                )),
+                const SizedBox(height: 12),
+                 Obx(() => SelectionTile(
+                  label: "State *",
+                  value: controller.state.value,
+                  icon: Icons.map,
+                  onTap: () => _showSingleSelectBottomSheet(
+                      context, "State", controller.stateList, controller.state.call),
+                )),
+                const SizedBox(height: 12),
+                 AppInputTextField(
+                  controller: controller.cityCtrl,
+                  label: "City *",
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 🔽 Helper Widgets & Methods
+  Widget _buildStepHeader(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Get.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          subtitle,
+          style: Get.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: Get.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+          color: Get.theme.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  void _showSingleSelectBottomSheet(
+      BuildContext context,
+      String title,
+      List<String> options,
+      ValueChanged<String> onSelected
+      ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: Get.height * 0.6,
+        decoration: BoxDecoration(
+          color: context.theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.theme.dividerColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: options.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final option = options[index];
+                  return ListTile(
+                    title: Text(
+                      option,
+                      style: context.textTheme.bodyLarge,
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    onTap: () {
+                      onSelected(option);
+                      Get.back();
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1)),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

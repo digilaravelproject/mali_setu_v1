@@ -1,90 +1,137 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../domain/repository/notification_repository.dart';
+import '../../data/model/notification_model.dart';
 
 class NotificationController extends GetxController {
-  // List of notifications
-  var notifications = <NotificationItem>[].obs;
+  final NotificationRepository repository;
 
-  // Selected notifications
+  NotificationController({required this.repository});
+
+  // List of notifications
+  var notifications = <NotificationModel>[].obs;
+  
+  // Pagination
+  var currentPage = 1.obs;
+  var lastPage = 1.obs;
+  var isLoading = false.obs;
+  var isMoreLoading = false.obs;
+
+  // Unread Count
+  var unreadCount = 0.obs;
+
+  // Selected notifications for bulk delete
   var selectedNotifications = <String>[].obs;
 
   // Is select mode active
   var isSelectMode = false.obs;
 
+  ScrollController scrollController = ScrollController();
+
   @override
   void onInit() {
     super.onInit();
     loadNotifications();
+    loadUnreadCount();
+    
+    scrollController.addListener(() {
+      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+        if (currentPage.value < lastPage.value && !isMoreLoading.value) {
+          loadMoreNotifications();
+        }
+      }
+    });
   }
 
-  void loadNotifications() {
-    // Load dummy data - replace with API call
-    notifications.value = [
-      NotificationItem(
-        id: '1',
-        title: 'Order Confirmed',
-        message: 'Your order #ORD-2024-001 has been confirmed',
-        time: '10 min ago',
-        isRead: false,
-        icon: Icons.shopping_bag_outlined,
-        iconColor: Colors.green,
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'Payment Successful',
-        message: 'Payment of ₹2,499 has been received',
-        time: '1 hour ago',
-        isRead: true,
-        icon: Icons.payment_outlined,
-        iconColor: Colors.blue,
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'Delivery Update',
-        message: 'Your package will be delivered by 5 PM today',
-        time: '3 hours ago',
-        isRead: false,
-        icon: Icons.local_shipping_outlined,
-        iconColor: Colors.orange,
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'New Message',
-        message: 'You have a new message from seller',
-        time: '5 hours ago',
-        isRead: true,
-        icon: Icons.message_outlined,
-        iconColor: Colors.purple,
-      ),
-      NotificationItem(
-        id: '5',
-        title: 'Discount Alert',
-        message: 'Get 20% off on your next purchase',
-        time: '1 day ago',
-        isRead: false,
-        icon: Icons.discount_outlined,
-        iconColor: Colors.red,
-      ),
-      NotificationItem(
-        id: '6',
-        title: 'Account Security',
-        message: 'New login detected from Mumbai',
-        time: '2 days ago',
-        isRead: true,
-        icon: Icons.security_outlined,
-        iconColor: Colors.teal,
-      ),
-      NotificationItem(
-        id: '7',
-        title: 'Review Request',
-        message: 'Rate your recent purchase',
-        time: '3 days ago',
-        isRead: true,
-        icon: Icons.star_outline,
-        iconColor: Colors.amber,
-      ),
-    ];
+  @override
+  void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  Future<void> loadNotifications() async {
+    try {
+      isLoading.value = true;
+      final response = await repository.getNotifications(page: 1);
+      if (response.success == true && response.data != null) {
+        notifications.value = response.data!.notifications ?? [];
+        unreadCount.value = response.data!.unreadCount ?? 0;
+        
+        if (response.data!.pagination != null) {
+          currentPage.value = response.data!.pagination!.currentPage ?? 1;
+          lastPage.value = response.data!.pagination!.lastPage ?? 1;
+        }
+      }
+    } catch (e) {
+      print('Error loading notifications: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadMoreNotifications() async {
+    try {
+      isMoreLoading.value = true;
+      int nextPage = currentPage.value + 1;
+      final response = await repository.getNotifications(page: nextPage);
+      if (response.success == true && response.data != null) {
+        notifications.addAll(response.data!.notifications ?? []);
+        
+        if (response.data!.pagination != null) {
+          currentPage.value = response.data!.pagination!.currentPage ?? nextPage;
+          lastPage.value = response.data!.pagination!.lastPage ?? currentPage.value;
+        }
+      }
+    } catch (e) {
+      print('Error loading more notifications: $e');
+    } finally {
+      isMoreLoading.value = false;
+    }
+  }
+
+  Future<void> loadUnreadCount() async {
+    try {
+      final response = await repository.getUnreadCount();
+      if (response.success == true && response.data != null) {
+        unreadCount.value = response.data!.unreadCount ?? 0;
+      }
+    } catch (e) {
+      print('Error loading unread count: $e');
+    }
+  }
+
+  Future<void> deleteNotification(String id) async {
+    try {
+      await repository.deleteNotification(id);
+      notifications.removeWhere((n) => n.id == id);
+      // Determine if we should decrement unread count? 
+      // API doesn't return updated count, so maybe reload count or just leave it.
+      // Usually deleting implies it's gone, so count might change if it was unread.
+      // For now, let's reload count to be safe.
+      loadUnreadCount();
+      Get.snackbar('Success', 'Notification deleted successfully');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to delete notification');
+    }
+  }
+
+  Future<void> deleteSelected() async {
+    if (selectedNotifications.isEmpty) return;
+
+    try {
+      // Create a copy of IDs because selectedNotifications will be cleared
+      List<String> idsToDelete = List.from(selectedNotifications);
+      
+      await repository.deleteMultipleNotifications(idsToDelete);
+      
+      notifications.removeWhere((n) => idsToDelete.contains(n.id));
+      selectedNotifications.clear();
+      isSelectMode.value = false;
+      loadUnreadCount();
+      Get.snackbar('Success', 'Selected notifications deleted');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to delete notifications');
+    }
   }
 
   void toggleSelection(String id) {
@@ -96,33 +143,12 @@ class NotificationController extends GetxController {
   }
 
   void selectAll() {
-    selectedNotifications.value = notifications.map((n) => n.id).toList();
+    // Only select currently loaded notifications
+    selectedNotifications.value = notifications.map((n) => n.id!).toList();
   }
 
   void clearSelection() {
     selectedNotifications.clear();
-  }
-
-  void deleteSelected() {
-    notifications.removeWhere(
-          (notification) => selectedNotifications.contains(notification.id),
-    );
-    selectedNotifications.clear();
-  }
-
-  void markAsRead(String id) {
-    final index = notifications.indexWhere((n) => n.id == id);
-    if (index != -1) {
-      notifications[index] = notifications[index].copyWith(isRead: true);
-      notifications.refresh();
-    }
-  }
-
-  void markAllAsRead() {
-    for (var i = 0; i < notifications.length; i++) {
-      notifications[i] = notifications[i].copyWith(isRead: true);
-    }
-    notifications.refresh();
   }
 
   void toggleSelectMode() {
@@ -130,45 +156,5 @@ class NotificationController extends GetxController {
     if (!isSelectMode.value) {
       selectedNotifications.clear();
     }
-  }
-}
-
-class NotificationItem {
-  final String id;
-  final String title;
-  final String message;
-  final String time;
-  final bool isRead;
-  final IconData icon;
-  final Color iconColor;
-
-  NotificationItem({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.time,
-    required this.isRead,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  NotificationItem copyWith({
-    String? id,
-    String? title,
-    String? message,
-    String? time,
-    bool? isRead,
-    IconData? icon,
-    Color? iconColor,
-  }) {
-    return NotificationItem(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      message: message ?? this.message,
-      time: time ?? this.time,
-      isRead: isRead ?? this.isRead,
-      icon: icon ?? this.icon,
-      iconColor: iconColor ?? this.iconColor,
-    );
   }
 }

@@ -83,22 +83,44 @@ class LoginController extends GetxController {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return; // User canceled the sign-in
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      // We have the googleUser, now call our backend API
+      final Map<String, String> data = {
+        "google_id": googleUser.id,
+        "email": googleUser.email,
+      };
 
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final User? user = userCredential.user;
+      isLoading.value = true;
+      final response = await loginUseCase.google(data);
 
-      if (user != null) {
-        Get.snackbar("Success", "Google Login Successful");
-       // Get.to(() => EmailDisplayPage(email: user.email));
+      if (response.success == true) {
+         // Save Token
+        if (response.data?.token != null) {
+          await TokenManager.saveToken(response.data!.token!);
+        }
+        
+        // Save User Data
+        if (response.data?.user != null) {
+          final user = response.data!.user!;
+          Get.find<AuthService>().currentUser.value = user;
+          await SharedPrefs.setString(
+            AppConstants.userDataPref,
+            jsonEncode(user.toJson()),
+          );
+        }
+
+        // Set Logged In
+        await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
+
+        Get.snackbar("Success", response.message ?? "Google Login successful");
+        Get.offAllNamed(AppRoutes.dashboard);
+      } else {
+        Get.snackbar("Error", response.message ?? "Google Login failed");
       }
 
     } catch (e) {
       Get.snackbar("Error", "Google Sign-In failed: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 

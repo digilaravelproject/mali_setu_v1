@@ -8,4 +8,5 @@ class AssetsRes {
 
   static const String PROJECT_NAME = 'edu_cluezer';
   static const String PROJECT_VERSION = '1.0.0+1';
+  static const String BUSINESS_DATA = 'assets/json/business_data.json';
 }

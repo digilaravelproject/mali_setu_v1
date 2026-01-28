@@ -14,6 +14,11 @@ class LoginRepositoryImpl implements LoginRepository {
   }
 
   @override
+  Future<ResLoginModel> googleLogin(Map<String, String> data) async {
+    return await dataSource.googleLogin(data);
+  }
+
+  @override
   Future<ResLoginModel> logout() async {
     return await dataSource.logout();
   }

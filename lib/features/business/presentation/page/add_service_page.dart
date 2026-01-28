@@ -15,6 +15,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/helper/form_validator.dart';
 import '../../../../widgets/basic_text_field.dart';
 import '../../../../widgets/custom_buttons.dart';
+import '../controller/business_controller.dart';
 
 /*class AddServiceController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -193,7 +194,7 @@ class AddServiceScreen extends StatelessWidget {
           onPressed: Get.back,
           icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
         ),
-        title: Text("Add Product", style: context.textTheme.titleMedium),
+        title: Text("Add Service", style: context.textTheme.titleMedium),
       ),
       body: Form(
         key: controller.formKey,
@@ -352,6 +353,19 @@ class AddServiceController extends GetxController {
   final RxBool isLoading = false.obs;
   final int maxImages = 5;
 
+  late int businessId;
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.arguments != null) {
+      businessId = Get.arguments as int;
+    } else {
+      Get.back();
+      // Get.snackbar("Error", "Business ID missing");
+    }
+  }
+
   @override
   void onClose() {
     nameController.dispose();
@@ -398,12 +412,12 @@ class AddServiceController extends GetxController {
     selectedImages.removeAt(index);
   }
 
-  Future<void> createProduct() async {
+  Future<void> createProduct() async { // Kept name createProduct as per original file, but logic is addService
     if (!formKey.currentState!.validate()) {
       return;
     }
 
-    if (selectedImages.isEmpty) {
+    /*if (selectedImages.isEmpty) {
       Get.snackbar(
         'Error',
         'Please select at least one product image',
@@ -412,29 +426,32 @@ class AddServiceController extends GetxController {
         colorText: Colors.white,
       );
       return;
-    }
+    }*/
 
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    final data = {
+      'business_id': businessId,
+      'name': nameController.text.trim(),
+      'description': descriptionController.text.trim(),
+      'cost': priceController.text.trim(),
+    };
+
+    final businessController = Get.find<BusinessController>();
+    final success = await businessController.addService(data, selectedImages);
 
     isLoading.value = false;
 
-    // Show success message
-    Get.snackbar(
-      'Success',
-      'Product created successfully with ${selectedImages.length} image(s)!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-
-    // Clear form
-    nameController.clear();
-    descriptionController.clear();
-    priceController.clear();
-    selectedImages.clear();
+    if (success) {
+      Get.back();
+      Get.snackbar(
+        'Success',
+        'Service created successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    }
   }
 }
 

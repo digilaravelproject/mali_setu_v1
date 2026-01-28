@@ -202,27 +202,58 @@ class AppInputTextField extends StatelessWidget {
   void _showDropdown(BuildContext context) {
     FocusScope.of(context).unfocus();
 
+    if (dropdownItems == null || dropdownItems!.isEmpty) {
+      Get.snackbar("Notice", "No options available", snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // Allow it to take required height up to max
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) {
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: dropdownItems!.length,
-          separatorBuilder: (_, __) => const Divider(),
-          itemBuilder: (context, index) {
-            final item = dropdownItems![index];
-            return ListTile(
-              title: Text(item),
-              onTap: () {
-                controller?.text = item;
-                onDropdownChanged?.call(item);
-                Navigator.pop(context);
-              },
-            );
-          },
+        return DraggableScrollableSheet(
+            initialChildSize: 0.5,
+            minChildSize: 0.3,
+            maxChildSize: 0.9,
+            expand: false,
+            builder: (context, scrollController) {
+              return Column(
+                children: [
+                   // Handle bar
+                   Container(
+                     margin: const EdgeInsets.symmetric(vertical: 10),
+                     width: 40,
+                     height: 4,
+                     decoration: BoxDecoration(
+                       color: Colors.grey[300],
+                       borderRadius: BorderRadius.circular(2),
+                     ),
+                   ),
+                   Expanded(
+                     child: ListView.separated(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: dropdownItems!.length,
+                      separatorBuilder: (_, __) => const Divider(),
+                      itemBuilder: (context, index) {
+                        final item = dropdownItems![index];
+                        return ListTile(
+                          title: Text(item, style: context.textTheme.bodyLarge),
+                          onTap: () {
+                            controller?.text = item;
+                            onDropdownChanged?.call(item);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                  ),
+                   ),
+                ],
+              );
+            }
         );
       },
     );

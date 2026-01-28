@@ -213,9 +213,10 @@ class UpdateProfilePage extends GetView<UpProfileController> {
 
               // Update Button
              // _buildUpdateButton(),
-              CustomButton(title: "Update Profile", onPressed: (){
-
-              }),
+              CustomButton(
+                title: "Update Profile",
+                onPressed: () => controller.updateProfile(),
+              ),
               const SizedBox(height: 40),
             ],
           ),
@@ -319,6 +320,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               child: AppInputTextField(
                 label: "Phone Number",
                 controller: controller.phoneNumberCtrl,
+                enable: false,
                 textInputType: TextInputType.phone,
                 iconData: Icons.phone_outlined,
               //  validator: FormValidator.phone,
@@ -329,6 +331,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
         AppInputTextField(
           label: "Email Address",
           controller: controller.emailCtrl,
+          enable: false,
           textInputType: TextInputType.emailAddress,
           iconData: Icons.email_outlined,
           validator: FormValidator.email,

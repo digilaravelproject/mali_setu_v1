@@ -223,4 +223,58 @@ class AuthService extends GetxService {
       Get.offAllNamed(AppRoutes.login);
     }
   }
+
+  /// Fetch latest profile data
+  Future<ApiResponse<User>> refreshProfile() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.authProfile);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        // User object is usually directly in data or in data['user']
+        final userData = data['user'] ?? data['data']?['user'] ?? data['data'] ?? data;
+        final user = User.fromJson(userData);
+        
+        currentUser.value = user;
+        await SharedPrefs.setString(
+          AppConstants.userDataPref,
+          jsonEncode(user.toJson()),
+        );
+        
+        return ApiResponse.success(user);
+      } else {
+        return ApiResponse.error(response.data['message'] ?? 'Failed to fetch profile');
+      }
+    } catch (e) {
+      return ApiResponse.error(e.toString());
+    }
+  }
+
+  /// Update profile data
+  Future<ApiResponse<User>> updateProfile(Map<String, dynamic> updateData) async {
+    try {
+      final response = await _apiClient.put(
+        ApiConstants.authProfileUpdate,
+        data: updateData,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        final userData = data['user'] ?? data['data']?['user'] ?? data['data'] ?? data;
+        final user = User.fromJson(userData);
+        
+        currentUser.value = user;
+        await SharedPrefs.setString(
+          AppConstants.userDataPref,
+          jsonEncode(user.toJson()),
+        );
+        
+        return ApiResponse.success(user);
+      } else {
+        return ApiResponse.error(response.data['message'] ?? 'Failed to update profile');
+      }
+    } catch (e) {
+      return ApiResponse.error(e.toString());
+    }
+  }
 }

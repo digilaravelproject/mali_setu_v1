@@ -1,8 +1,15 @@
 import 'package:get/get.dart';
 
+import 'package:flutter/material.dart';
+import '../../../../core/routes/app_routes.dart';
+
 import '../../../../packages/card_swiper/src/controller/card_swiper_controller.dart';
 import '../../../../packages/card_swiper/src/direction/card_swiper_direction.dart';
+import '../../../../packages/card_swiper/src/direction/card_swiper_direction.dart';
 import '../../data/model/user_profile_data.dart';
+import '../../../business/data/model/res_all_business_model.dart';
+import '../../../business/domain/usecase/get_business_categories_usecase.dart';
+import '../../../business/domain/repository/all_business_repository.dart';
 
 class HomeController extends GetxController {
   final RxInt currentIndex = 0.obs;
@@ -12,6 +19,54 @@ class HomeController extends GetxController {
   final RxBool isStarSelected = false.obs;
   final RxBool isHeartSelected = false.obs;
   final RxBool isShareSelected = false.obs;
+  
+  // Categories
+  final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
+  final RxList<Category> categories = <Category>[].obs;
+  final RxBool isLoadingCategories = false.obs;
+
+  HomeController({required this.getBusinessCategoriesUseCase});
+  
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCategories();
+  }
+  
+  Future<void> fetchCategories() async {
+    try {
+      isLoadingCategories.value = true;
+      final list = await getBusinessCategoriesUseCase();
+      categories.assignAll(list);
+    } catch (e) {
+      print("Error fetching home categories: $e");
+    } finally {
+      isLoadingCategories.value = false;
+    }
+  }
+
+  Future<void> onCategoryTap(int categoryId) async {
+    try {
+      Get.dialog(Center(child: CircularProgressIndicator()), barrierDismissible: false);
+      
+      final repository = Get.find<BusinessRepository>();
+      final categoryDetails = await repository.getCategoryDetails(categoryId);
+      
+      Get.back(); // Close loading dialog
+
+      if (categoryDetails != null) {
+        print("Category Fetched: ${categoryDetails.name}");
+        Get.toNamed(AppRoutes.categoryDetails, arguments: categoryDetails);
+      } else {
+        print("Category Details is null for ID: $categoryId");
+        Get.snackbar("Error", "Category details not found.");
+      }
+    } catch (e) {
+      if (Get.isDialogOpen == true) Get.back();
+      print("Error fetching category details: $e");
+      Get.snackbar("Error", "Failed to fetch category details: $e");
+    }
+  }
 
   final List<UserProfile> users = [
     UserProfile(

@@ -11,6 +11,7 @@ import '../../../../widgets/basic_text_field.dart';
 import '../../../../widgets/custom_buttons.dart';
 
 
+import '../controller/business_controller.dart';
 /*
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);
@@ -495,9 +496,23 @@ class AddProductController extends GetxController {
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
 
-  final Rx<File?> selectedImage = Rx<File?>(null);
+  final RxList<File> selectedImages = <File>[].obs;
   final ImagePicker _picker = ImagePicker();
   final RxBool isLoading = false.obs;
+  final int maxImages = 5;
+  
+  late int businessId;
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.arguments != null) {
+      businessId = Get.arguments as int;
+    } else {
+      Get.back();
+      // Get.snackbar("Error", "Business ID missing");
+    }
+  }
 
   @override
   void onClose() {
@@ -508,6 +523,17 @@ class AddProductController extends GetxController {
   }
 
   Future<void> pickImage(ImageSource source) async {
+    if (selectedImages.length >= maxImages) {
+      Get.snackbar(
+        'Limit Reached',
+        'You can only upload maximum $maxImages images',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
@@ -517,7 +543,7 @@ class AddProductController extends GetxController {
       );
 
       if (image != null) {
-        selectedImage.value = File(image.path);
+        selectedImages.add(File(image.path));
       }
     } catch (e) {
       Get.snackbar(
@@ -530,8 +556,8 @@ class AddProductController extends GetxController {
     }
   }
 
-  void removeImage() {
-    selectedImage.value = null;
+  void removeImage(int index) {
+    selectedImages.removeAt(index);
   }
 
   Future<void> createProduct() async {
@@ -539,38 +565,30 @@ class AddProductController extends GetxController {
       return;
     }
 
-    if (selectedImage.value == null) {
-      Get.snackbar(
-        'Error',
-        'Please select a product image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    final data = {
+      'business_id': businessId,
+      'name': nameController.text.trim(),
+      'description': descriptionController.text.trim(),
+      'cost': priceController.text.trim(),
+    };
+
+    final businessController = Get.find<BusinessController>();
+    final success = await businessController.addProduct(data, selectedImages);
 
     isLoading.value = false;
 
-    // Show success message
-    Get.snackbar(
-      'Success',
-      'Product created successfully!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-
-    // Clear form
-    nameController.clear();
-    descriptionController.clear();
-    priceController.clear();
-    selectedImage.value = null;
+    if (success) {
+      Get.back();
+      Get.snackbar(
+        'Success',
+        'Product created successfully!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    }
   }
 }
 
@@ -676,81 +694,114 @@ class AddProductScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Image Section
-              Text(
-                'Product Image',
-                style: context.textTheme.titleMedium,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Product Images',
+                    style: context.textTheme.titleMedium,
+                  ),
+                  Obx(() => Text(
+                    '${controller.selectedImages.length}/${controller.maxImages}',
+                    style: context.textTheme.bodySmall,
+                  )),
+                ],
               ),
               const SizedBox(height: 12),
               Obx(() => GestureDetector(
-                onTap: () => _showImageSourceDialog(context, controller),
+                onTap: controller.selectedImages.length < controller.maxImages
+                    ? () => _showImageSourceDialog(context, controller)
+                    : null,
                 child: Container(
-                  height: 150,
                   width: double.infinity,
+                  constraints: const BoxConstraints(minHeight: 150),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                 //   color: context.theme.hoverColor,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: context.theme.dividerColor, width: 1),
                   ),
-                  child: controller.selectedImage.value != null
-                      ? Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          controller.selectedImage.value!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: controller.removeImage,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                      : Column(
+                  child: controller.selectedImages.isEmpty
+                      ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.add_photo_alternate_outlined,
                         size: 60,
-                        color:context.theme.focusColor,
+                        color: context.theme.focusColor,
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Tap to add product image',
-                        style:context.textTheme.bodyLarge
-                        // TextStyle(
-                        //   fontSize: 14,
-                        //   color: Colors.grey[600],
-                        //   fontWeight: FontWeight.w500,
-                        // ),
+                        'Tap to add product images',
+                        style: context.textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Camera or Gallery',
-                        style:context.textTheme.bodySmall
-                        // TextStyle(
-                        //   fontSize: 12,
-                        //   color: Colors.grey[500],
-                        // ),
+                        style: context.textTheme.bodySmall,
                       ),
+                    ],
+                  )
+                      : Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...List.generate(
+                        controller.selectedImages.length,
+                            (index) => Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                controller.selectedImages[index],
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: -8,
+                              right: -8,
+                              child: GestureDetector(
+                                onTap: () => controller.removeImage(index),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (controller.selectedImages.length < controller.maxImages)
+                        GestureDetector(
+                          onTap: () => _showImageSourceDialog(context, controller),
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: context.theme.hoverColor,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: context.theme.dividerColor,
+                                width: 1,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.add,
+                              size: 40,
+                              color: context.theme.focusColor,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -758,10 +809,9 @@ class AddProductScreen extends StatelessWidget {
               const SizedBox(height: 10),
 
               AppInputTextField(
-                label: "Product Name ",
-               // iconData: CupertinoIcons.mail_solid,
+                label: "Product Name",
                 textInputType: TextInputType.text,
-                //controller: controller.mobileController,
+                controller: controller.nameController,
                 hint: const [AutofillHints.name],
                 validator: FormValidator.name,
               ),
@@ -769,9 +819,8 @@ class AddProductScreen extends StatelessWidget {
 
               AppInputTextField(
                 label: "Product Description",
-                // iconData: CupertinoIcons.mail_solid,
                 textInputType: TextInputType.text,
-                //controller: controller.mobileController,
+                controller: controller.descriptionController,
                 hint: const [AutofillHints.name],
                 maxLines: 4,
                 validator: FormValidator.name,
@@ -779,10 +828,8 @@ class AddProductScreen extends StatelessWidget {
               const SizedBox(height: 8),
               AppInputTextField(
                 label: "Product Price",
-                // iconData: CupertinoIcons.mail_solid,
                 textInputType: TextInputType.number,
-                //controller: controller.mobileController,
-                //hint: const [AutofillHints.n],
+                controller: controller.priceController,
                 validator:(value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please enter product price';
@@ -968,7 +1015,10 @@ class AddProductScreen extends StatelessWidget {
               SizedBox(height: 30,),
 
 
-              CustomButton(onPressed: controller.createProduct, title: "Create Product"),
+              Obx(() => CustomButton(
+                onPressed: controller.isLoading.value ? null : controller.createProduct,
+                title: controller.isLoading.value ? "Creating..." : "Create Product",
+              )),
 
               // Obx(() => SizedBox(
               //   width: double.infinity,

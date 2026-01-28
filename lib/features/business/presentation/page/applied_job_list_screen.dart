@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_utils/src/extensions/context_extensions.dart';
-
-
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import '../controller/business_controller.dart';
+import '../../data/model/res_all_business_model.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
 
 class AppliedJobsScreen extends StatefulWidget {
   @override
@@ -11,363 +11,128 @@ class AppliedJobsScreen extends StatefulWidget {
 }
 
 class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
-  List<JobApplication> applications = [
-    // JobApplication(
-    //   id: '1',
-    //   jobTitle: 'Senior Flutter Developer',
-    //   companyName: 'Tech Innovations Inc.',
-    //   jobType: 'Full-time',
-    //   location: 'San Francisco, CA',
-    //   salary: '\$120,000 - \$150,000',
-    //   workMode: 'Hybrid',
-    //   appliedDate: DateTime.now().subtract(Duration(days: 3)),
-    //   skillsRequired: ['Flutter', 'Dart', 'Firebase', 'REST API', 'BLoC'],
-    //   description: 'We are looking for an experienced Flutter developer...',
-    //   status: 'Under Review',
-    // ),
-    // JobApplication(
-    //   id: '2',
-    //   jobTitle: 'Mobile App Developer',
-    //   companyName: 'StartUp Ventures',
-    //   jobType: 'Contract',
-    //   location: 'Remote',
-    //   salary: '\$80 - \$100/hour',
-    //   workMode: 'Remote',
-    //   appliedDate: DateTime.now().subtract(Duration(days: 7)),
-    //   skillsRequired: ['Flutter', 'iOS', 'Android', 'Git', 'Agile'],
-    //   description: 'Join our fast-growing startup as a mobile developer...',
-    //   status: 'Interview Scheduled',
-    // ),
-    // JobApplication(
-    //   id: '3',
-    //   jobTitle: 'Frontend Developer',
-    //   companyName: 'Digital Solutions Ltd.',
-    //   jobType: 'Full-time',
-    //   location: 'New York, NY',
-    //   salary: '\$95,000 - \$115,000',
-    //   workMode: 'On-site',
-    //   appliedDate: DateTime.now().subtract(Duration(days: 1)),
-    //   skillsRequired: ['React', 'JavaScript', 'HTML/CSS', 'TypeScript'],
-    //   description: 'Frontend developer needed for web applications...',
-    //   status: 'Applied',
-    // ),
-  JobApplication(
-  id: '1',
-  jobTitle: 'Senior Flutter Developer',
-  companyName: 'Tech Innovations Inc.',
-  jobType: 'Full-time',
-  location: 'San Francisco, CA (Hybrid)',
-  salary: '\$120,000 - \$150,000 per year',
-  workMode: 'Hybrid (3 days office)',
-  appliedDate: DateTime.now().subtract(Duration(days: 3)),
-  skillsRequired: ['Flutter', 'Dart', 'Firebase', 'REST API', 'BLoC', 'Git', 'Agile'],
-  description: 'We are seeking an experienced Flutter Developer to join our mobile team. You will be responsible for building and maintaining our flagship mobile applications used by millions of users worldwide. The ideal candidate has 3+ years of experience in mobile development and a strong portfolio of published apps.',
-  status: 'Under Review',
-  experienceLevel: '3-5 years',
-  applicationDeadline: 'December 15, 2024',
-  requirements: [
-  'Bachelor\'s degree in Computer Science or related field',
-  '3+ years of professional mobile development experience',
-  'Strong understanding of Flutter framework and Dart language',
-  'Experience with state management (BLoC, Provider, Riverpod)',
-  'Knowledge of RESTful APIs and third-party libraries',
-  'Familiarity with version control (Git)',
-  'Experience with automated testing',
-  ],
-  benefits: [
-  'Health Insurance',
-  'Stock Options',
-  'Flexible Hours',
-  'Remote Work Options',
-  'Learning Budget',
-  'Quarterly Bonuses',
-  'Gym Membership',
-  ],
-  coverLetter: 'cover_letter_john_doe.pdf',
-  additionalDocuments: ['portfolio.pdf', 'certifications.pdf'],
-  applicationNotes: 'Referred by John Smith from LinkedIn. Scheduled follow-up call for next week.',
-  companyEmail: 'careers@techinnovations.com',
-  companyPhone: '+1 (555) 123-4567',
-  companyWebsite: 'www.techinnovations.com',
-  companyAddress: '123 Tech Street, San Francisco, CA 94107',
-  companyDescription: 'Tech Innovations Inc. is a leading technology company specializing in mobile solutions for enterprise clients. Founded in 2015, we have grown to serve over 500 clients worldwide with our innovative software solutions. Our team of 200+ professionals is dedicated to creating cutting-edge mobile experiences.',
-  ),
-    JobApplication(
-      id: '1',
-      jobTitle: 'Senior Flutter Developer',
-      companyName: 'Tech Innovations Inc.',
-      jobType: 'Full-time',
-      location: 'San Francisco, CA (Hybrid)',
-      salary: '\$120,000 - \$150,000 per year',
-      workMode: 'Hybrid (3 days office)',
-      appliedDate: DateTime.now().subtract(Duration(days: 3)),
-      skillsRequired: ['Flutter', 'Dart', 'Firebase', 'REST API', 'BLoC', 'Git', 'Agile'],
-      description: 'We are seeking an experienced Flutter Developer to join our mobile team. You will be responsible for building and maintaining our flagship mobile applications used by millions of users worldwide. The ideal candidate has 3+ years of experience in mobile development and a strong portfolio of published apps.',
-      status: 'Under Review',
-      experienceLevel: '3-5 years',
-      applicationDeadline: 'December 15, 2024',
-      requirements: [
-        'Bachelor\'s degree in Computer Science or related field',
-        '3+ years of professional mobile development experience',
-        'Strong understanding of Flutter framework and Dart language',
-        'Experience with state management (BLoC, Provider, Riverpod)',
-        'Knowledge of RESTful APIs and third-party libraries',
-        'Familiarity with version control (Git)',
-        'Experience with automated testing',
-      ],
-      benefits: [
-        'Health Insurance',
-        'Stock Options',
-        'Flexible Hours',
-        'Remote Work Options',
-        'Learning Budget',
-        'Quarterly Bonuses',
-        'Gym Membership',
-      ],
-      coverLetter: 'cover_letter_john_doe.pdf',
-      additionalDocuments: ['portfolio.pdf', 'certifications.pdf'],
-      applicationNotes: 'Referred by John Smith from LinkedIn. Scheduled follow-up call for next week.',
-      companyEmail: 'careers@techinnovations.com',
-      companyPhone: '+1 (555) 123-4567',
-      companyWebsite: 'www.techinnovations.com',
-      companyAddress: '123 Tech Street, San Francisco, CA 94107',
-      companyDescription: 'Tech Innovations Inc. is a leading technology company specializing in mobile solutions for enterprise clients. Founded in 2015, we have grown to serve over 500 clients worldwide with our innovative software solutions. Our team of 200+ professionals is dedicated to creating cutting-edge mobile experiences.',
-    ),
-    JobApplication(
-      id: '1',
-      jobTitle: 'Senior Flutter Developer',
-      companyName: 'Tech Innovations Inc.',
-      jobType: 'Full-time',
-      location: 'San Francisco, CA (Hybrid)',
-      salary: '\$120,000 - \$150,000 per year',
-      workMode: 'Hybrid (3 days office)',
-      appliedDate: DateTime.now().subtract(Duration(days: 3)),
-      skillsRequired: ['Flutter', 'Dart', 'Firebase', 'REST API', 'BLoC', 'Git', 'Agile'],
-      description: 'We are seeking an experienced Flutter Developer to join our mobile team. You will be responsible for building and maintaining our flagship mobile applications used by millions of users worldwide. The ideal candidate has 3+ years of experience in mobile development and a strong portfolio of published apps.',
-      status: 'Under Review',
-      experienceLevel: '3-5 years',
-      applicationDeadline: 'December 15, 2024',
-      requirements: [
-        'Bachelor\'s degree in Computer Science or related field',
-        '3+ years of professional mobile development experience',
-        'Strong understanding of Flutter framework and Dart language',
-        'Experience with state management (BLoC, Provider, Riverpod)',
-        'Knowledge of RESTful APIs and third-party libraries',
-        'Familiarity with version control (Git)',
-        'Experience with automated testing',
-      ],
-      benefits: [
-        'Health Insurance',
-        'Stock Options',
-        'Flexible Hours',
-        'Remote Work Options',
-        'Learning Budget',
-        'Quarterly Bonuses',
-        'Gym Membership',
-      ],
-      coverLetter: 'cover_letter_john_doe.pdf',
-      additionalDocuments: ['portfolio.pdf', 'certifications.pdf'],
-      applicationNotes: 'Referred by John Smith from LinkedIn. Scheduled follow-up call for next week.',
-      companyEmail: 'careers@techinnovations.com',
-      companyPhone: '+1 (555) 123-4567',
-      companyWebsite: 'www.techinnovations.com',
-      companyAddress: '123 Tech Street, San Francisco, CA 94107',
-      companyDescription: 'Tech Innovations Inc. is a leading technology company specializing in mobile solutions for enterprise clients. Founded in 2015, we have grown to serve over 500 clients worldwide with our innovative software solutions. Our team of 200+ professionals is dedicated to creating cutting-edge mobile experiences.',
-    ),
-    JobApplication(
-      id: '1',
-      jobTitle: 'Senior Flutter Developer',
-      companyName: 'Tech Innovations Inc.',
-      jobType: 'Full-time',
-      location: 'San Francisco, CA (Hybrid)',
-      salary: '\$120,000 - \$150,000 per year',
-      workMode: 'Hybrid (3 days office)',
-      appliedDate: DateTime.now().subtract(Duration(days: 3)),
-      skillsRequired: ['Flutter', 'Dart', 'Firebase', 'REST API', 'BLoC', 'Git', 'Agile'],
-      description: 'We are seeking an experienced Flutter Developer to join our mobile team. You will be responsible for building and maintaining our flagship mobile applications used by millions of users worldwide. The ideal candidate has 3+ years of experience in mobile development and a strong portfolio of published apps.',
-      status: 'Under Review',
-      experienceLevel: '3-5 years',
-      applicationDeadline: 'December 15, 2024',
-      requirements: [
-        'Bachelor\'s degree in Computer Science or related field',
-        '3+ years of professional mobile development experience',
-        'Strong understanding of Flutter framework and Dart language',
-        'Experience with state management (BLoC, Provider, Riverpod)',
-        'Knowledge of RESTful APIs and third-party libraries',
-        'Familiarity with version control (Git)',
-        'Experience with automated testing',
-      ],
-      benefits: [
-        'Health Insurance',
-        'Stock Options',
-        'Flexible Hours',
-        'Remote Work Options',
-        'Learning Budget',
-        'Quarterly Bonuses',
-        'Gym Membership',
-      ],
-      coverLetter: 'cover_letter_john_doe.pdf',
-      additionalDocuments: ['portfolio.pdf', 'certifications.pdf'],
-      applicationNotes: 'Referred by John Smith from LinkedIn. Scheduled follow-up call for next week.',
-      companyEmail: 'careers@techinnovations.com',
-      companyPhone: '+1 (555) 123-4567',
-      companyWebsite: 'www.techinnovations.com',
-      companyAddress: '123 Tech Street, San Francisco, CA 94107',
-      companyDescription: 'Tech Innovations Inc. is a leading technology company specializing in mobile solutions for enterprise clients. Founded in 2015, we have grown to serve over 500 clients worldwide with our innovative software solutions. Our team of 200+ professionals is dedicated to creating cutting-edge mobile experiences.',
-    )
-  ];
+  final BusinessController controller = Get.find<BusinessController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchMyApplications();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
-          onTap: Get.back,
-          child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: Icon(Icons.arrow_back_ios_new, color: context.textTheme.bodyLarge?.color),
         ),
         title: Text(
-          "Applied Jobs",
-          style: context.textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          "My Applications",
+          style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
       ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.myApplications.isEmpty) {
+          return _buildShimmerLoading();
+        }
 
-      body: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: applications.length,
-        itemBuilder: (context, index) {
-          return JobCard(
-            application: applications[index],
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfessionalJobDetailsScreen(job: applications[index],
-                   // application: applications[index],
-                  ),
-                ),
-              );
+        if (controller.myApplications.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return RefreshIndicator(
+          onRefresh: controller.fetchMyApplications,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            itemCount: controller.myApplications.length,
+            itemBuilder: (context, index) {
+              final application = controller.myApplications[index];
+              return _buildApplicationCard(application);
             },
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
-}
 
-class JobCard extends StatelessWidget {
-  final JobApplication application;
-  final VoidCallback onTap;
+  Widget _buildApplicationCard(JobApplication application) {
+    final job = application.jobPosting;
+    final business = job?.business;
 
-  const JobCard({
-    Key? key,
-    required this.application,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.only(bottom: 16),
-      elevation: 4,
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: context.theme.dividerColor.withOpacity(0.5)),
       ),
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        onTap: () => _showApplicationDetail(application),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Job Title and Company
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Business Logo Placeholder
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: context.theme.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.business, color: context.theme.primaryColor),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          application.jobTitle,
-                          style: context.textTheme.titleLarge?.copyWith(color: context.theme.primaryColor),
+                          job?.title ?? "Unknown Position",
+                          style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          application.companyName,
-                          style: context.textTheme.bodyMedium
+                          business?.businessName ?? "Unknown Business",
+                          style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(application.status),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      application.status,
-                      style: context.textTheme.bodyMedium?.copyWith(color: context.theme.cardColor)
-                    ),
-                  ),
+                  _buildStatusBadge(application.status ?? "pending"),
                 ],
               ),
-
-              SizedBox(height: 16),
-
-              // Job Details Row
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 12),
               Row(
-                //  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildDetailIcon(Icons.schedule, application.jobType),
-                  _buildDetailIcon(Icons.location_on, application.location),
+                  _buildInfoItem(Icons.location_on_outlined, job?.location ?? "N/A"),
+                  const SizedBox(width: 16),
+                  _buildInfoItem(Icons.calendar_today_outlined, _formatDate(application.appliedAt)),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildDetailIcon(Icons.work, application.workMode),
-                  _buildDetailIcon(Icons.attach_money, application.salary),
-                ],
-              ),
-
-
-
-              SizedBox(height: 16),
-
-              // Skills Chips
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: application.skillsRequired
-                    .take(3)
-                    .map((skill) => Chip(
-                  label: Text(skill),
-                  backgroundColor: context.theme.primaryColorLight,
-                  labelStyle: context.textTheme.bodyMedium,
-                ))
-                    .toList(),
-              ),
-
-              SizedBox(height: 8),
-
-              // Applied Date
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Applied: Nov 5, 2025',
-                    style: context.textTheme.bodyMedium,
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color:context.theme.primaryColor,
-                  ),
+                   _buildInfoItem(Icons.work_outline, job?.jobType ?? "N/A"),
+                   const SizedBox(width: 16),
+                   _buildInfoItem(Icons.payments_outlined, job?.salaryRange ?? "N/A"),
                 ],
               ),
             ],
@@ -377,17 +142,44 @@ class JobCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailIcon(IconData icon, String text) {
+  Widget _buildStatusBadge(String status) {
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'accepted':
+      case 'approved':
+        color = Colors.green;
+        break;
+      case 'rejected':
+      case 'declined':
+        color = Colors.red;
+        break;
+      default:
+        color = Colors.orange;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status.capitalizeFirst!,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(IconData icon, String text) {
     return Expanded(
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Get.theme.primaryColor),
-          SizedBox(width: 4),
+          Icon(icon, size: 16, color: Colors.grey),
+          const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: Get.theme.textTheme.bodyMedium,
-             // TextStyle(fontSize: 12),
+              style: context.textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -397,794 +189,122 @@ class JobCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'interview scheduled':
-        return Colors.orange;
-      case 'under review':
-        return Colors.blue;
-      case 'applied':
-        return Colors.grey;
-      case 'accepted':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return Colors.grey;
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return "N/A";
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('MMM dd, yyyy').format(date);
+    } catch (_) {
+      return dateStr;
     }
   }
-}
 
-
-
-
-
-class ProfessionalJobDetailsScreen extends StatelessWidget {
-  final JobApplication job;
-
-  ProfessionalJobDetailsScreen({required this.job});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: false,
-            pinned: true,
-            leading:GestureDetector(
-              onTap: Get.back,
-              child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              title:  Text(
-                job.companyName,
-                style: context.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.assignment_outlined, size: 80, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          Text(
+            "No Applications Yet",
+            style: context.textTheme.titleLarge?.copyWith(color: Colors.grey),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Job Title and Basic Info
-                  _buildJobHeader(),
-                  SizedBox(height: 24),
-
-                  // Application Timeline
-                  _buildTimelineSection(),
-                  SizedBox(height: 24),
-
-                  // Job Details Sections
-                  _buildDetailCard(
-                    title: 'Job Details',
-                    icon: Icons.work,
-                    child: _buildJobDetails(),
-                  ),
-                  SizedBox(height: 16),
-
-                  _buildDetailCard(
-                    title: 'Requirements & Qualifications',
-                    icon: Icons.checklist,
-                    child: _buildRequirements(),
-                  ),
-                  SizedBox(height: 16),
-
-                  _buildDetailCard(
-                    title: 'Benefits & Perks',
-                    icon: Icons.card_giftcard,
-                    child: _buildBenefits(),
-                  ),
-                  SizedBox(height: 16),
-
-                  _buildDetailCard(
-                    title: 'Your Application',
-                    icon: Icons.description,
-                    child: _buildYourApplication(),
-                  ),
-                  SizedBox(height: 16),
-
-                  _buildDetailCard(
-                    title: 'Company & Contact',
-                    icon: Icons.business,
-                    child: _buildCompanyContact(),
-                  ),
-                  SizedBox(height: 30),
-
-                  // Action Buttons
-                  //_buildActionButtons(context),
-                 // SizedBox(height: 40),
-                ],
-              ),
-            ),
+          const SizedBox(height: 8),
+          const Text("Explore jobs and start applying!"),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => Get.back(),
+            child: const Text("Go Back"),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildJobHeader() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+  Widget _buildShimmerLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return const Padding(
+          padding: EdgeInsets.only(bottom: 16),
+          child: ShimmerLoading.rounded(height: 140),
+        );
+      },
+    );
+  }
+
+  void _showApplicationDetail(JobApplication application) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: context.theme.scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        job.jobTitle,
-                        style: Get.theme.textTheme.headlineMedium?.copyWith(color: Get.theme.primaryColor)
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        job.companyName,
-                        style: Get.theme.textTheme.bodyLarge
-                        // TextStyle(
-                        //   fontSize: 18,
-                        //   color: Colors.grey[700],
-                        // ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Get.theme.primaryColor.withOpacity(0.7), Get.theme.primaryColor.withOpacity(0.5)],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    job.status,
-                    style: Get.textTheme.bodyMedium?.copyWith(color: Get.theme.cardColor)
-                    // TextStyle(
-                    //   color: Colors.white,
-                    //   fontWeight: FontWeight.bold,
-                    // ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Divider(),
-            SizedBox(height: 16),
-            Wrap(
-              spacing: 16,
-              runSpacing: 12,
-              children: [
-                _buildInfoChip(Icons.schedule, job.jobType),
-                _buildInfoChip(Icons.location_on, job.location),
-                _buildInfoChip(Icons.attach_money, job.salary),
-                _buildInfoChip(Icons.work_outline, job.workMode),
-                _buildInfoChip(Icons.timeline, 'Experience: ${job.experienceLevel}'),
-                _buildInfoChip(Icons.event_busy, 'Deadline: ${job.applicationDeadline}'),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(IconData icon, String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: Colors.blue),
-          SizedBox(width: 6),
-          Text(
-            text,
-            style:Get.textTheme.bodyMedium
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTimelineSection() {
-    List<TimelineEvent> timelineEvents = [
-      TimelineEvent(
-        title: 'Applied',
-        date: job.appliedDate,
-        status: 'completed',
-        icon: Icons.send,
-      ),
-      TimelineEvent(
-        title: 'Under Review',
-        date: job.appliedDate.add(Duration(days: 1)),
-        status: 'completed',
-        icon: Icons.visibility,
-      ),
-      TimelineEvent(
-        title: 'Decision',
-        date: job.appliedDate.add(Duration(days: 7)),
-        status: 'upcoming',
-        icon: Icons.gavel,
-      ),
-    ];
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.timeline, color:  Get.theme.primaryColor),
-                SizedBox(width: 10),
                 Text(
-                  'Application Timeline',
-                  style:Get.textTheme.headlineMedium?.copyWith(color: Get.theme.primaryColor)
-                  // TextStyle(
-                  //   fontSize: 18,
-                  //   fontWeight: FontWeight.bold,
-                  // ),
+                  "Application Details",
+                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
+                _buildStatusBadge(application.status ?? "pending"),
               ],
             ),
-          //  SizedBox(height: 16),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: timelineEvents.length,
-              separatorBuilder: (_, __) => SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final event = timelineEvents[index];
-                return _buildTimelineItem(event, index == timelineEvents.length - 1);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimelineItem(TimelineEvent event, bool isLast) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Get.theme.primaryColorLight,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            event.icon,
-            size: 20,
-            color: Get.theme.primaryColor,
-          ),
-        ),
-        // Column(
-        //   children: [
-        //     Container(
-        //       width: 40,
-        //       height: 40,
-        //       decoration: BoxDecoration(
-        //         shape: BoxShape.circle,
-        //         color: _getTimelineColor(event.status),
-        //         border: Border.all(color: Colors.white, width: 2),
-        //       ),
-        //       child: Icon(
-        //         event.icon,
-        //         size: 20,
-        //         color: Colors.white,
-        //       ),
-        //     ),
-        //     if (!isLast)
-        //       Container(
-        //         width: 2,
-        //         height: 40,
-        //         color: Colors.grey[300],
-        //       ),
-        //   ],
-        // ),
-        SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                event.title,
-                style: Get.textTheme.titleMedium,
-              ),
-              SizedBox(height: 4),
-              Text(
-                "5 Nov, 2025",
-                //DateFormat('MMM dd, yyyy').format(event.date),
-                style: TextStyle(
-                  color: Colors.grey[600],
-                ),
-              ),
-              SizedBox(height: 4),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getTimelineStatusColor(event.status),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  event.status.toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            const Divider(height: 32),
+            _buildDetailItem("Cover Letter", application.coverLetter ?? "No cover letter provided"),
+            const SizedBox(height: 16),
+            if (application.additionalInfo != null && application.additionalInfo!.isNotEmpty) ...[
+              _buildDetailItem("Additional Info", application.additionalInfo!),
+              const SizedBox(height: 16),
             ],
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Color _getTimelineStatusColor(String status) {
-    switch (status) {
-      case 'completed':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      case 'upcoming':
-        return Colors.blue[300]!;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Widget _buildDetailCard({
-    required String title,
-    required IconData icon,
-    required Widget child,
-  }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Get.theme.primaryColorLight,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: Get.theme.primaryColor),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  title,
-                  style: Get.textTheme.titleLarge
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildJobDetails() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildDetailRow('Job Type', job.jobType),
-        _buildDetailRow('Work Mode', job.workMode),
-        _buildDetailRow('Location', job.location),
-        _buildDetailRow('Salary Range', job.salary),
-        _buildDetailRow('Experience Level', job.experienceLevel),
-        _buildDetailRow('Application Deadline', job.applicationDeadline),
-        SizedBox(height: 12),
-        Text(
-          'Job Description:',
-          style: Get.textTheme.titleMedium
-        //  TextStyle(fontWeight: FontWeight.w600),
-        ),
-        SizedBox(height: 8),
-        Text(
-          job.description,
-          style: Get.textTheme.bodyMedium
-          //TextStyle(height: 1.6),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRequirements() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: job.skillsRequired
-              .map((skill) => Chip(
-            label: Text(skill),
-            backgroundColor: Colors.blue[50],
-            labelStyle: TextStyle(color: Colors.blue[800]),
-          ))
-              .toList(),
-        ),
-        SizedBox(height: 16),
-        ...job.requirements.map((req) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.check_circle, size: 16, color: Colors.green),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  req,
-                  style: Get.textTheme.bodyMedium
-                //  TextStyle(height: 1.5),
-                ),
+            if (application.resumeUrl != null) ...[
+              _buildDetailItem("Resume", "Available online"),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: () {
+                   // Logic to view resume
+                },
+                icon: const Icon(Icons.remove_red_eye_outlined),
+                label: const Text("View Resume"),
               ),
+              const SizedBox(height: 16),
             ],
-          ),
-        )),
-      ],
-    );
-  }
-
-  Widget _buildBenefits() {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: job.benefits
-          .map((benefit) => Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.green[50],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Get.theme.dividerColor),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.star, size: 16, color: Colors.green),
-            SizedBox(width: 8),
-            Text(
-              benefit,
-              style: TextStyle(color: Colors.green[800]),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => Get.back(),
+                child: const Text("Close"),
+              ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
-      ))
-          .toList(),
+      ),
+      isScrollControlled: true,
     );
   }
 
-  Widget _buildYourApplication() {
+  Widget _buildDetailItem(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDocumentItem(
-          'Resume',
-          'resume_john_doe.pdf',
-          true,
-          onTap: () {
-            // Open PDF
-          },
-        ),
-        // _buildDocumentItem(
-        //   'Cover Letter',
-        //   job.coverLetter ?? 'Not Attached',
-        //   job.coverLetter != null,
-        // ),
-        // _buildDocumentItem(
-        //   'Additional Documents',
-        //   job.additionalDocuments?.join(', ') ?? 'No additional documents',
-        //   job.additionalDocuments != null && job.additionalDocuments!.isNotEmpty,
-        // ),
-        SizedBox(height: 16),
         Text(
-          'Application Notes:',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          label,
+          style: context.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: context.theme.primaryColor),
         ),
-        SizedBox(height: 8),
-        Container(
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Get.theme.hoverColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Get.theme.dividerColor),
-          ),
-          child: Text(
-            job.applicationNotes ?? 'No additional notes provided',
-            style: TextStyle(height: 1.5),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDocumentItem(String title, String subtitle, bool available, {VoidCallback? onTap}) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color:Get.theme.hoverColor ,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Get.theme.dividerColor),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            available ? Icons.description : Icons.description_outlined,
-            color: available ? Colors.blue : Colors.grey,
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style:Get.textTheme.titleMedium
-                  // TextStyle(
-                  //   fontWeight: FontWeight.w500,
-                  // ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: Get.textTheme.bodyMedium
-                  // TextStyle(
-                  //   fontSize: 12,
-                  //   color: Colors.grey[600],
-                  // ),
-                ),
-              ],
-            ),
-          ),
-          if (available && onTap != null)
-            IconButton(
-              icon: Icon(Icons.open_in_new, size: 20),
-              onPressed: onTap,
-              color: Colors.blue,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompanyContact() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildDetailRow('Email', job.companyEmail),
-        _buildDetailRow('Phone', job.companyPhone),
-        _buildDetailRow('Website', job.companyWebsite),
-        _buildDetailRow('Address', job.companyAddress),
-        SizedBox(height: 12),
+        const SizedBox(height: 4),
         Text(
-          'About Company:',
-          style:Get.textTheme.titleMedium
-          //TextStyle(fontWeight: FontWeight.w600),
-        ),
-        SizedBox(height: 8),
-        Text(
-          job.companyDescription,
-          style:Get.textTheme.bodyMedium
-          //TextStyle(height: 1.6),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 150,
-            child: Text(
-              '$label:',
-              style:Get.textTheme.bodyMedium
-              // TextStyle(
-              //   fontWeight: FontWeight.w500,
-              //   color: Colors.grey[700],
-              // ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Get.textTheme.bodyMedium
-             // TextStyle(height: 1.5),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {
-              // Update application
-            },
-            icon: Icon(Icons.edit),
-            label: Text('Edit Application'),
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Colors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 12),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              // View company profile
-            },
-            icon: Icon(Icons.business),
-            label: Text('View Company'),
-            style: OutlinedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
+          value,
+          style: context.textTheme.bodyMedium,
         ),
       ],
     );
   }
 }
-
-// Updated Data Model with all new fields
-class JobApplication {
-  final String id;
-  final String jobTitle;
-  final String companyName;
-  final String jobType;
-  final String location;
-  final String salary;
-  final String workMode;
-  final DateTime appliedDate;
-  final List<String> skillsRequired;
-  final String description;
-  final String status;
-  final String experienceLevel;
-  final String applicationDeadline;
-  final List<String> requirements;
-  final List<String> benefits;
-  final String? coverLetter;
-  final List<String>? additionalDocuments;
-  final String? applicationNotes;
-  final String companyEmail;
-  final String companyPhone;
-  final String companyWebsite;
-  final String companyAddress;
-  final String companyDescription;
-
-  JobApplication({
-    required this.id,
-    required this.jobTitle,
-    required this.companyName,
-    required this.jobType,
-    required this.location,
-    required this.salary,
-    required this.workMode,
-    required this.appliedDate,
-    required this.skillsRequired,
-    required this.description,
-    required this.status,
-    required this.experienceLevel,
-    required this.applicationDeadline,
-    required this.requirements,
-    required this.benefits,
-    this.coverLetter,
-    this.additionalDocuments,
-    this.applicationNotes,
-    required this.companyEmail,
-    required this.companyPhone,
-    required this.companyWebsite,
-    required this.companyAddress,
-    required this.companyDescription,
-  });
-}
-
-class TimelineEvent {
-  final String title;
-  final DateTime date;
-  final String status; // completed, pending, upcoming
-  final IconData icon;
-
-  TimelineEvent({
-    required this.title,
-    required this.date,
-    required this.status,
-    required this.icon,
-  });
-}
-
-// Sample Static Data
-final sampleJob = JobApplication(
-  id: '1',
-  jobTitle: 'Senior Flutter Developer',
-  companyName: 'Tech Innovations Inc.',
-  jobType: 'Full-time',
-  location: 'San Francisco, CA (Hybrid)',
-  salary: '\$120,000 - \$150,000 per year',
-  workMode: 'Hybrid (3 days office)',
-  appliedDate: DateTime.now().subtract(Duration(days: 3)),
-  skillsRequired: ['Flutter', 'Dart', 'Firebase', 'REST API', 'BLoC', 'Git', 'Agile'],
-  description: 'We are seeking an experienced Flutter Developer to join our mobile team. You will be responsible for building and maintaining our flagship mobile applications used by millions of users worldwide. The ideal candidate has 3+ years of experience in mobile development and a strong portfolio of published apps.',
-  status: 'Under Review',
-  experienceLevel: '3-5 years',
-  applicationDeadline: 'December 15, 2024',
-  requirements: [
-    'Bachelor\'s degree in Computer Science or related field',
-    '3+ years of professional mobile development experience',
-    'Strong understanding of Flutter framework and Dart language',
-    'Experience with state management (BLoC, Provider, Riverpod)',
-    'Knowledge of RESTful APIs and third-party libraries',
-    'Familiarity with version control (Git)',
-    'Experience with automated testing',
-  ],
-  benefits: [
-    'Health Insurance',
-    'Stock Options',
-    'Flexible Hours',
-    'Remote Work Options',
-    'Learning Budget',
-    'Quarterly Bonuses',
-    'Gym Membership',
-  ],
-  coverLetter: 'cover_letter_john_doe.pdf',
-  additionalDocuments: ['portfolio.pdf', 'certifications.pdf'],
-  applicationNotes: 'Referred by John Smith from LinkedIn. Scheduled follow-up call for next week.',
-  companyEmail: 'careers@techinnovations.com',
-  companyPhone: '+1 (555) 123-4567',
-  companyWebsite: 'www.techinnovations.com',
-  companyAddress: '123 Tech Street, San Francisco, CA 94107',
-  companyDescription: 'Tech Innovations Inc. is a leading technology company specializing in mobile solutions for enterprise clients. Founded in 2015, we have grown to serve over 500 clients worldwide with our innovative software solutions. Our team of 200+ professionals is dedicated to creating cutting-edge mobile experiences.',
-);
-
-

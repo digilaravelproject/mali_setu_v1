@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import '../core/styles/app_colors.dart';
 import '../core/utils/app_assets.dart';
+import '../core/constent/api_constants.dart';
 
 class CustomImageView extends StatelessWidget {
   ///[url] is required parameter for fetching network2 image
@@ -106,14 +107,28 @@ class CustomImageView extends StatelessWidget {
   }
 
   Widget _buildWidget(BuildContext context) {
+    if (onTap == null && !enableFv) {
+      return Padding(
+        padding: margin ?? EdgeInsets.zero,
+        child: _buildCircleImage(context),
+      );
+    }
+
     return Padding(
       padding: margin ?? EdgeInsets.zero,
       child: GestureDetector(
-        onTap:
-            onTap ??
+        onTap: onTap ??
             () {
               if (url != null && url!.isNotEmpty && enableFv) {
-                Get.to(() => ImageFvScreen(imageUrl: url!));
+                String fullUrl = url!;
+                if (!fullUrl.startsWith("http")) {
+                   if (fullUrl.startsWith("/")) {
+                     fullUrl = "${ApiConstants.baseUrl}$fullUrl";
+                   } else {
+                     fullUrl = "${ApiConstants.baseUrl}/$fullUrl";
+                   }
+                }
+                Get.to(() => ImageFvScreen(imageUrl: fullUrl));
               } else if (file != null && file!.path.isNotEmpty && enableFv) {
                 Get.to(() => ImageFvScreen(imageFile: file));
               }
@@ -199,11 +214,21 @@ class CustomImageView extends StatelessWidget {
       );
     } */
     else if (url != null && url!.isNotEmpty) {
+      String fullUrl = url!;
+      if (!fullUrl.startsWith("http")) {
+        // Handle potential leading slash in url or trailing slash in baseUrl
+        if (fullUrl.startsWith("/")) {
+          fullUrl = "${ApiConstants.baseUrl}$fullUrl"; 
+        } else {
+          fullUrl = "${ApiConstants.baseUrl}/$fullUrl";
+        }
+      }
+
       return CachedNetworkImage(
         height: height,
         width: width,
         fit: fit,
-        imageUrl: url!,
+        imageUrl: fullUrl,
         imageBuilder:
             imageBuilder ??
             (context, imageProvider) => Container(

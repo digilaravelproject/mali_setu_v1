@@ -48,6 +48,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    // Refresh profile data when entering the screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      authService.refreshProfile();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
       appBar: AppBar(

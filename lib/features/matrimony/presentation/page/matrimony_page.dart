@@ -99,13 +99,25 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             ),
           ),
         ),
-        body: TabBarView(
-          children: [
-            _buildCardList(context, seriousPeoples),
-            _buildCardList(context, seriousPeoples.where((e) => e.isNew).toList(),
-            ),
-          ],
-        ),
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (controller.profiles.isEmpty) {
+            return const Center(child: Text("No matches found"));
+          }
+
+          return TabBarView(
+            children: [
+              _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+              _buildCardList(context, controller.profiles
+                  .map((e) => _mapToUserProfile(e))
+                  .where((e) => e.isNew)
+                  .toList()),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -285,6 +297,26 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           color: Colors.white,
         ),
       ),
+    );
+  }
+
+  UserProfile _mapToUserProfile(dynamic data) {
+    // If it's already a UserProfile (e.g. from local tests), return it
+    if (data is UserProfile) return data;
+    
+    // Mapping logic for API response (Best guess based on registration payload)
+    final personal = data['personal_details'] ?? {};
+    final location = data['location_details'] ?? {};
+    
+    return UserProfile(
+      name: personal['name'] ?? data['name'] ?? 'No Name',
+      age: int.tryParse(personal['age']?.toString() ?? data['age']?.toString() ?? "0") ?? 0,
+      location: "${location['city'] ?? ''}, ${location['state'] ?? ''}",
+      imageUrl: data['image'] ?? data['imageUrl'] ?? "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+      distance: double.tryParse(data['distance']?.toString() ?? "0") ?? 0.0,
+      isNew: data['is_new'] == true,
+      isOnline: data['is_online'] == true,
+      interests: List<String>.from(personal['hobbies'] ?? []),
     );
   }
 }

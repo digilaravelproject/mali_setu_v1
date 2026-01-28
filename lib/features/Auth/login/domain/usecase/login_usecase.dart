@@ -10,4 +10,8 @@ class LoginUseCase {
   Future<ResLoginModel> call(ReqLoginModel reqModel) async {
     return await repository.login(reqModel);
   }
+
+  Future<ResLoginModel> google(Map<String, String> data) async {
+    return await repository.googleLogin(data);
+  }
 }

@@ -1,55 +1,41 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_utils/src/extensions/context_extensions.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/routes/app_routes.dart';
 import '../../../../widgets/custom_buttons.dart';
+import '../../../../core/helper/string_extensions.dart';
+import '../../../Auth/service/auth_service.dart';
+import '../controller/business_controller.dart';
+import '../../data/model/res_all_business_model.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
+import '../../../../core/widgets/custom_confirm_dialog.dart';
+import '../controller/create_job_controller.dart';
 
-class BusinessDetailScreen extends StatefulWidget {
+class BusinessDetailScreen extends GetView<BusinessController> {
   const BusinessDetailScreen({Key? key}) : super(key: key);
 
   @override
-  State<BusinessDetailScreen> createState() => _BusinessDetailScreenState();
-}
-
-class _BusinessDetailScreenState extends State<BusinessDetailScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final ScrollController _scrollController = ScrollController();
-  bool _isPinned = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (_scrollController.offset > 10 && !_isPinned) {
-      setState(() => _isPinned = true);
-    } else if (_scrollController.offset <= 10 && _isPinned) {
-      setState(() => _isPinned = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initial fetch
+    final argBusiness = Get.arguments as Business;
+    // We can use the passed business object for initial display,
+    // but we should also fetch fresh details.
+    // Let's trigger the fetch.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (argBusiness.id != null) {
+        controller.fetchBusinessDetails(argBusiness.id!);
+      }
+    });
+
     return Scaffold(
       body: Stack(
         children: [
-          NestedScrollView(
-            controller: _scrollController,
+          DefaultTabController(
+            length: 4,
+            child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
@@ -58,19 +44,16 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                   centerTitle: false,
                   backgroundColor: context.theme.cardColor,
                   elevation: 0,
-                  title: _isPinned
-                      ? Text(
-                    'Tech Solutions Pvt Ltd',
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 22
-                      // style: TextStyle(
-                      //   color: Colors.black87,
-                      //   fontSize: 16,
-                      //   fontWeight: FontWeight.w600,
-                    ),
-                  )
-                      : null,
+                  title: Obx(() {
+                    final business = controller.selectedBusiness.value ?? argBusiness;
+                    return Text(
+                      business.businessName ?? 'Business Details',
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22
+                      ),
+                    );
+                  }),
                   leading: InkWell(
                     onTap: () => Navigator.of(context).pop(),
                     child: Icon(
@@ -81,26 +64,28 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                   ),
                 ),
                 SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      _buildBusinessHeader(),
-                      const SizedBox(height: 16),
-                      _buildQuickActions(),
-                      const SizedBox(height: 20),
-                      _buildStatsRow(),
-                      const SizedBox(height: 20),
-                      _buildManageSection(),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
+                  child: Obx(() {
+                    final business = controller.selectedBusiness.value ?? argBusiness;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                         _buildBusinessHeader(business, context),
+                        const SizedBox(height: 16),
+                        _buildQuickActions(context),
+                        const SizedBox(height: 20),
+                        _buildStatsRow(business, context),
+                        const SizedBox(height: 20),
+                        _buildManageSection(context),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }),
                 ),
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: _StickyTabBarDelegate(
                     TabBar(
-                      controller: _tabController,
                       labelColor: context.theme.primaryColor,
                       unselectedLabelColor: Colors.grey[600],
                       indicatorColor: context.theme.primaryColor,
@@ -123,23 +108,26 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
             body: Padding(
               padding: const EdgeInsets.only(bottom: 70),
               child: TabBarView(
-                controller: _tabController,
                 children: [
-                  _buildProductsTab(),
-                  _buildServicesTab(),
-                  _buildJobsTab(),
-                  _buildBusinessInfoTab(),
+                  _buildProductsTab(context),
+                  _buildServicesTab(context),
+                  _buildJobsTab(context),
+                  Obx(() {
+                     final business = controller.selectedBusiness.value ?? argBusiness;
+                     return _buildBusinessInfoTab(business, context);
+                  }),
                 ],
               ),
             ),
           ),
-          _buildBottomActionBar(),
+          ),
+          _buildBottomActionBar(context),
         ],
       ),
     );
   }
 
-  Widget _buildBusinessHeader() {
+  Widget _buildBusinessHeader(Business business, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -155,14 +143,10 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Tech Solutions Pvt Ltd',
+                        business.businessName ?? 'Unnamed Business',
                         style: context.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                           fontSize: 22,
-                          // style: TextStyle(
-                          //   color: Colors.black87,
-                          //   fontSize: 20,
-                          //   fontWeight: FontWeight.bold,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -201,25 +185,21 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     const SizedBox(width: 10),
                     Text(
                       '118 Ratings',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        // fontWeight: FontWeight.w700,
-                        // fontSize: 22,
-                        // style: TextStyle(
-                        //   color: Colors.grey[700],
-                        //   fontSize: 13,
-                      ),
+                      style: context.textTheme.bodyMedium,
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.verified, color: Colors.blue, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Verified',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                    if (business.verificationStatus == 'approved') ...[
+                      const Icon(Icons.verified, color: Colors.blue, size: 16),
+                      const SizedBox(width: 4),
+                      const Text(
+                        'Verified',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -229,9 +209,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        'Munshi Pulia, Lucknow',
+                        business.category?.name ?? 'Category',
                         style: context.textTheme.bodyMedium,
-                        //TextStyle(color: Colors.grey[700], fontSize: 13),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -308,6 +287,28 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Status
+                     Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: business.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              (business.status ?? 'active').toTitleCase(),
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: business.status == 'active' ? Colors.green.shade700 : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -321,20 +322,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                'https://via.placeholder.com/80',
+              child: business.photo != null ? Image.network(
+                business.photo!,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: const Icon(
-                      Icons.business,
-                      size: 40,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
+                errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
+              ) : _buildDetailPlaceholderIcon(),
             ),
           ),
         ],
@@ -342,7 +334,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SingleChildScrollView(
@@ -351,22 +343,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildQuickActionButton(Icons.call, 'Call', Colors.blue),
+            _buildQuickActionButton(Icons.call, 'Call', Colors.blue, context),
             const SizedBox(width: 20),
-            _buildQuickActionButton(FontAwesomeIcons.whatsapp, 'WhatsApp', Colors.green),
+            _buildQuickActionButton(FontAwesomeIcons.whatsapp, 'WhatsApp', Colors.green, context),
             const SizedBox(width: 20),
-            _buildQuickActionButton(FontAwesomeIcons.message, 'Enquiry', Colors.grey,),
+            _buildQuickActionButton(FontAwesomeIcons.message, 'Enquiry', Colors.grey, context),
             const SizedBox(width: 20),
-            _buildQuickActionButton(Icons.directions, 'Direction', Colors.grey),
+            _buildQuickActionButton(Icons.directions, 'Direction', Colors.grey, context),
             const SizedBox(width: 20),
-            _buildQuickActionButton(Icons.star_border, 'Review', Colors.grey),
+            _buildQuickActionButton(Icons.star_border, 'Review', Colors.grey, context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuickActionButton(IconData icon, String label, Color color) {
+  Widget _buildQuickActionButton(IconData icon, String label, Color color, BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -395,19 +387,13 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
         Text(
           label,
           style: context.textTheme.titleSmall?.copyWith(
-            //  fontWeight: FontWeight.w700,
-            //fontSize: 22,
-            // style: TextStyle(
-            //   fontSize: 12,
-            //   color: Colors.grey[800],
-            //   fontWeight: FontWeight.w500,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(Business business, BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 18),
       padding: const EdgeInsets.all(15),
@@ -419,19 +405,19 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('Products', '24', Icons.inventory_2_outlined),
+          _buildStatItem('Products', '${business.products?.length ?? 0}', Icons.inventory_2_outlined, context),
           _buildDivider(),
-          _buildStatItem('Services', '12', Icons.room_service_outlined),
+          _buildStatItem('Services', '${business.services?.length ?? 0}', Icons.room_service_outlined, context),
           _buildDivider(),
-          _buildStatItem('Jobs', '8', Icons.work_outline),
+          _buildStatItem('Jobs', '0', Icons.work_outline, context),
           _buildDivider(),
-          _buildStatItem('Value', '₹2.5L', Icons.currency_rupee),
+          _buildStatItem('Value', '0', Icons.currency_rupee, context),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
+  Widget _buildStatItem(String label, String value, IconData icon, BuildContext context) {
     return Column(
       children: [
         Icon(icon, color: context.iconColor, size: 22),
@@ -439,11 +425,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
         Text(
             value,
             style: context.textTheme.titleMedium
-          // const TextStyle(
-          //   color: Colors.black87,
-          //   fontSize: 18,
-          //   fontWeight: FontWeight.bold,
-          // ),
         ),
         const SizedBox(height: 4),
         Text(label, style: context.textTheme.bodyMedium),
@@ -455,7 +436,17 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     return Container(height: 50, width: 1, color: Colors.grey[400]);
   }
 
-  Widget _buildManageSection() {
+  Widget _buildManageSection(BuildContext context) {
+    // Determine if the current user is the owner
+    final authService = Get.find<AuthService>();
+    final currentUser = authService.currentUser.value;
+    final business = controller.selectedBusiness.value ?? Get.arguments as Business;
+    
+    // If user is not logged in or doesn't match owner ID, hide section
+    if (currentUser?.id != business.userId) {
+       return const SizedBox.shrink();
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -500,9 +491,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
-                    Get.toNamed(AppRoutes.addProduct);
+                    Get.toNamed(AppRoutes.addProduct, arguments: business.id);
                   },
-                  child: _buildActionButton('Add Product', Icons.add_box_outlined,),
+                  child: _buildActionButton('Add Product', Icons.add_box_outlined, context),
                 ),
               ),
               const SizedBox(width: 10),
@@ -510,18 +501,21 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
-                    Get.toNamed(AppRoutes.addService);
+                    Get.toNamed(AppRoutes.addService, arguments: business.id);
                   },
-                  child: _buildActionButton('Add Service', Icons.add_circle_outline,),
+                  child: _buildActionButton('Add Service', Icons.add_circle_outline, context),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: InkWell(
                     onTap: () {
+                      if (Get.isRegistered<CreateJobController>()) {
+                        Get.find<CreateJobController>().clearFields();
+                      }
                       Get.toNamed(AppRoutes.createJob);
                     },
-                    child: _buildActionButton('Create Job', Icons.work_outline)),
+                    child: _buildActionButton('Create Job', Icons.work_outline, context)),
               ),
             ],
           ),
@@ -530,7 +524,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     );
   }
 
-  Widget _buildActionButton(String label, IconData icon) {
+  Widget _buildActionButton(String label, IconData icon, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
@@ -550,6 +544,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
         ],
       ),
     );
+  }
     // return ElevatedButton(
     //   onPressed: () {},
     //   style: ElevatedButton.styleFrom(
@@ -570,9 +565,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     //     ],
     //   ),
     // );
-  }
-
-  Widget _buildBottomActionBar() {
+  
+  Widget _buildBottomActionBar(BuildContext context) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -651,332 +645,414 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
     );
   }
 
-  Widget _buildProductsTab() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 8,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: context.theme.dividerColor),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+  Widget _buildProductsTab(BuildContext context) {
+    return Obx(() {
+        if (controller.isDetailsLoading.isTrue) {
+             return _buildShimmerList(context);
+        }
+        if (controller.businessProducts.isEmpty) {
+            return const Center(child: Text("No Products Found"));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.businessProducts.length,
+          itemBuilder: (context, index) {
+            final product = controller.businessProducts[index];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: context.theme.dividerColor),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        color: context.theme.primaryColorLight,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.shopping_bag_outlined,
-                        color: context.theme.primaryColor,
-                      ),
-                    ),
-                    SizedBox(width: 10,),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          'Paracetamol Tablet',
-                          style: context.textTheme.titleLarge,
+                         Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: context.theme.primaryColorLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: product.imagePath != null 
+                             ? ClipRRect(
+                                 borderRadius: BorderRadius.circular(10),
+                                 child: Image.network(product.imagePath!, fit: BoxFit.cover, errorBuilder: (c,e,s) => Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor))
+                               )
+                             : Icon(
+                            Icons.shopping_bag_outlined,
+                            color: context.theme.primaryColor,
+                          ),
                         ),
-                        Text(
-                          '₹${(index + 1) * 1000}',
-                          style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                        ),
-                      ],)
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10,top: 10),
-                  child: Text("Release the pain",style: context.textTheme.bodyMedium,),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text("4 nov 2025",style: context.textTheme.titleSmall,)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildServicesTab() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: context.theme.dividerColor),
-          ),
-          child:Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        color: context.theme.primaryColorLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.medical_services,
-                        color: context.theme.primaryColor,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Ondemand medicine',
-                          style: context.textTheme.titleLarge,
-                        ),
-                        Text(
-                          '₹${(index + 1) * 1000}',
-                          style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                        ),
-                      ],)
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10,top: 10),
-                  child: Text("We get the order from customers and provide the medicine",style: context.textTheme.bodyMedium,),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text("4 nov 2025",style: context.textTheme.titleSmall,)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildJobsTab() {
-    return Column(
-      children: [
-
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: CustomButton(title: "Job Analytics", height: 40, onPressed: (){
-            Get.toNamed(AppRoutes.jobAnalytics);
-          }),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: CustomButton(title: "Applied Jobs", height: 40, onPressed: (){
-            Get.toNamed(AppRoutes.appliedJobList);
-          }),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: context.theme.dividerColor),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                        SizedBox(width: 10,),
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: context.theme.primaryColorLight,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.work_outline,
-                                color: context.theme.primaryColor,
-                              ),
+                            Text(
+                              product.name ?? 'Unknown Product',
+                              style: context.textTheme.titleLarge,
+                              maxLines: 1, overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Shop Cleaner',
-                                  style: context.textTheme.titleLarge,
-                                ),
-                                Text(
-                                  '₹1000 - ₹2000',
-                                  style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                                ),
-                              ],)
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10,top: 10),
-                          child: Text("We need the shop cleaner which clean all the shop and stock",style: context.textTheme.bodyMedium,),
-                        ),
-                        SizedBox(height: 16,),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, size: 16, color: context.theme.primaryColor),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'Lucknow',
-                                style: context.textTheme.titleSmall,
-                                //TextStyle(color: Colors.grey[700], fontSize: 13),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                            Text(
+                              '₹${product.cost ?? '0.00'}',
+                              style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
                             ),
-                          ],
-                        ),
-
-                        SizedBox(height: 8,),
-                        Row(
-                          children: [
-                            Icon(Icons.business_rounded, size: 16, color: context.theme.primaryColor),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'On - Site',
-                                style: context.textTheme.titleSmall,
-                                //TextStyle(color: Colors.grey[700], fontSize: 13),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: 8,),
-                        Row(
-                          children: [
-                            Icon(Icons.alarm, size: 16, color: context.theme.primaryColor),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'Full Time',
-                                style: context.textTheme.titleSmall,
-                                //TextStyle(color: Colors.grey[700], fontSize: 13),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: 8,),
-                        Row(
-                          children: [
-                            Icon(Icons.business_center, size: 16, color: context.theme.primaryColor),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'Application Closed',
-                                style: context.textTheme.titleSmall?.copyWith(color: context.theme.primaryColor),
-                                //TextStyle(color: Colors.grey[700], fontSize: 13),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10,),
-
-                        CustomButton(
-                          title: "Application Closed",
-                          backgroundColor: Colors.orange,
-                          borderRadius: 12,
-                          height: 40,
-                          onPressed: (){
-
-                          },
-                        ),
-                        SizedBox(height: 10,),
-                        CustomButton(
-                          backgroundColor: context.theme.primaryColor,
-                          title: "View Details",
-                          borderRadius: 12,
-                          height: 40,
-                          onPressed: (){
-                            Get.toNamed(AppRoutes.jobDetails);
-                          },
-                        ),
-
+                          ],)
+                        )
                       ],
                     ),
-                  )
-              );
-            },
-          ),
-        ),
-      ],
-    );
+                    if (product.description != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10,top: 10),
+                      child: Text(product.description!, style: context.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis,),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 15),
+                    //   child: Align(
+                    //       alignment: Alignment.centerRight,
+                    //       child: Text("4 nov 2025",style: context.textTheme.titleSmall,)),
+                    // ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+    });
   }
 
-  Widget _buildBusinessInfoTab() {
+  Widget _buildServicesTab(BuildContext context) {
+    return Obx(() {
+        if (controller.isDetailsLoading.isTrue) {
+             return _buildShimmerList(context);
+        }
+        if (controller.businessServices.isEmpty) {
+            return const Center(child: Text("No Services Found"));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.businessServices.length,
+          itemBuilder: (context, index) {
+            final service = controller.businessServices[index];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: context.theme.dividerColor),
+              ),
+              child:Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            color: context.theme.primaryColorLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                           child: service.imagePath != null 
+                             ? ClipRRect(
+                                 borderRadius: BorderRadius.circular(10),
+                                 child: Image.network(service.imagePath!, fit: BoxFit.cover, errorBuilder: (c,e,s) => Icon(Icons.medical_services, color: context.theme.primaryColor))
+                               )
+                          : Icon(
+                            Icons.medical_services,
+                            color: context.theme.primaryColor,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              service.name ?? 'Unknown Service',
+                              style: context.textTheme.titleLarge,
+                               maxLines: 1, overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              '₹${service.cost ?? '0.00'}',
+                              style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
+                            ),
+                          ],))
+                      ],
+                    ),
+                    if (service.description != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10,top: 10),
+                      child: Text(service.description!,style: context.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis,),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 15),
+                    //   child: Align(
+                    //       alignment: Alignment.centerRight,
+                    //       child: Text("4 nov 2025",style: context.textTheme.titleSmall,)),
+                    // ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+    });
+  }
+
+  Widget _buildJobsTab(BuildContext context) {
+    return Obx(() {
+      if (controller.isDetailsLoading.isTrue) {
+        return _buildShimmerList(context);
+      }
+      if (controller.businessJobs.isEmpty) {
+         return Center(
+           child: SingleChildScrollView(
+             padding: const EdgeInsets.all(32.0),
+             child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               mainAxisSize: MainAxisSize.min,
+               children: [
+                 Icon(Icons.work_off_outlined, size: 64, color: context.theme.disabledColor),
+                 const SizedBox(height: 16),
+                 Text("No jobs posted yet", style: context.textTheme.titleMedium),
+               ],
+             ),
+           ),
+         );
+      }
+
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          CustomButton(
+              title: "Job Analytics",
+              height: 40,
+              onPressed: () {
+                Get.toNamed(AppRoutes.jobAnalytics);
+              }),
+          const SizedBox(height: 16),
+          CustomButton(
+              title: "Applied Jobs",
+              height: 40,
+              onPressed: () {
+                Get.toNamed(AppRoutes.appliedJobList);
+              }),
+          const SizedBox(height: 16),
+          ...controller.businessJobs.map((job) {
+            return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: context.theme.dividerColor),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 45,
+                            height: 45,
+                            decoration: BoxDecoration(
+                              color: context.theme.primaryColorLight,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.work_outline,
+                              color: context.theme.primaryColor,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        job.title ?? 'No Title',
+                                        style: context.textTheme.titleLarge,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildJobStatusBadge(job, context),
+                                  ],
+                                ),
+                                Text(
+                                  job.salaryRange ?? 'Salary not specified',
+                                  style: context.textTheme.titleMedium
+                                      ?.copyWith(color: context.theme.primaryColor),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10, top: 10),
+                        child: Text(
+                          job.description ?? '',
+                          style: context.textTheme.bodyMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 16, color: context.theme.primaryColor),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              job.location ?? 'Unknown',
+                              style: context.textTheme.titleSmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.business_rounded,
+                              size: 16, color: context.theme.primaryColor),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              job.jobType ?? 'Not specified',
+                              style: context.textTheme.titleSmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.alarm,
+                              size: 16, color: context.theme.primaryColor),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              job.employmentType ?? 'Full Time',
+                              style: context.textTheme.titleSmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.business_center,
+                              size: 16, color: context.theme.primaryColor),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              job.status?.toUpperCase() ?? 'PENDING',
+                              style: context.textTheme.titleSmall
+                                  ?.copyWith(color: context.theme.primaryColor),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (job.status == 'pending')
+                         CustomButton(
+                           title: "Waiting for Approval",
+                           backgroundColor: Colors.orange,
+                           borderRadius: 12,
+                           height: 40,
+                           onPressed: () {},
+                         ),
+                      const SizedBox(height: 10),
+                      CustomButton(
+                        backgroundColor: context.theme.primaryColor,
+                        title: "View Details",
+                        borderRadius: 12,
+                        height: 40,
+                        onPressed: () {
+                          Get.toNamed(AppRoutes.jobDetails, arguments: job);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+          }),
+        ],
+      );
+    });
+  }
+
+  Widget _buildBusinessInfoTab(Business business, BuildContext context) {
+    if (controller.isDetailsLoading.isTrue) {
+       return _buildShimmerInfo(context);
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildInfoCard('Business Details', [
-            _buildInfoRow(Icons.business, 'Name', 'Tech Solutions Pvt Ltd'),
-            _buildInfoRow(Icons.category, 'Category', 'Technology'),
-            _buildInfoRow(Icons.verified, 'Verification Status', 'Approved', isGreen: true),
-            _buildInfoRow(Icons.stacked_bar_chart_sharp, 'Business Status', 'Active'),
-          ]),
+            _buildInfoRow(Icons.business, 'Name', business.businessName ?? 'N/A', context),
+            _buildInfoRow(Icons.category, 'Category', business.category?.name ?? 'N/A', context),
+            _buildInfoRow(Icons.verified, 'Verification Status', (business.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: business.verificationStatus == 'approved'),
+            _buildInfoRow(Icons.stacked_bar_chart_sharp, 'Business Status', (business.status ?? 'active').toTitleCase(), context),
+            _buildInfoRow(Icons.description, 'Description', business.description ?? 'No description available', context, maxLines: 5),
+          ], context),
           const SizedBox(height: 16),
           _buildInfoCard('Contact Information', [
-            _buildInfoRow(Icons.phone, 'Phone', '+91 98765 43210'),
-            _buildInfoRow(Icons.email, 'Email', 'contact@techsolutions.com'),
-            _buildInfoRow(Icons.location_on, 'Address', 'Mumbai, Maharashtra'),
-          ]),
+            _buildInfoRow(Icons.phone, 'Phone', business.contactPhone ?? 'N/A', context),
+            _buildInfoRow(Icons.email, 'Email', business.contactEmail ?? 'N/A', context),
+            _buildInfoRow(Icons.language, 'Website', business.website ?? 'N/A', context),
+          ], context),
           const SizedBox(height: 16),
           _buildInfoCard('Additional Information', [
-            _buildInfoRow(Icons.inventory, 'Total Products', '24'),
-            _buildInfoRow(Icons.room_service, 'Total Services', '12'),
-            _buildInfoRow(Icons.work, 'Active Jobs', '8'),
-            _buildInfoRow(Icons.currency_rupee, 'Total Value', '₹2,50,000'),
-          ]),
+            _buildInfoRow(Icons.calendar_today, 'Created At', business.createdAt != null ? business.createdAt!.split('T')[0] : 'N/A', context),
+             _buildInfoRow(Icons.update, 'Last Updated', business.updatedAt != null ? business.updatedAt!.split('T')[0] : 'N/A', context),
+          ], context),
+          const SizedBox(height: 30),
+          SizedBox(height: 16),
+          _buildInfoCard('Additional Information', [
+            _buildInfoRow(Icons.inventory, 'Total Products', '${business.products?.length ?? 0}', context),
+            _buildInfoRow(Icons.room_service, 'Total Services', '${business.services?.length ?? 0}', context),
+            _buildInfoRow(Icons.work, 'Active Jobs', '0', context),
+          ], context),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(String title, List<Widget> children) {
+  Widget _buildDetailPlaceholderIcon() {
+    return Container(
+      color: Colors.grey[200],
+      child: const Icon(
+        Icons.business,
+        size: 40,
+        color: Colors.grey,
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, List<Widget> children, BuildContext context) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -1008,32 +1084,148 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
   Widget _buildInfoRow(
       IconData icon,
       String label,
-      String value, {
+      String value,
+      BuildContext context, {
         bool isGreen = false,
+        int? maxLines,
       }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: context.iconColor),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              style: context.textTheme.bodyMedium,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: context.textTheme.bodyMedium,
+                ),
+                 const SizedBox(height: 2),
+                 Text(
+                    value,
+                    style: context.textTheme.titleSmall?.copyWith(color: isGreen ? Colors.green : context.iconColor),
+                    maxLines: maxLines,
+                    overflow: maxLines != null ? TextOverflow.ellipsis : null,
+                  ),
+              ],
             ),
           ),
-          Text(
-              value,
-              style: context.textTheme.titleSmall?.copyWith(color: isGreen ? Colors.green : context.iconColor)
-            // TextStyle(
-            //   fontWeight: FontWeight.w600,
-            //   fontSize: 14,
-            //   color: isGreen ? Colors.green : Colors.black87,
-            // ),
-          ),
+          // Expanded(
+          //   child: Text(
+          //     label,
+          //     style: context.textTheme.bodyMedium,
+          //   ),
+          // ),
+          // Text(
+          //     value,
+          //     style: context.textTheme.titleSmall?.copyWith(color: isGreen ? Colors.green : context.iconColor)
+          //   // TextStyle(
+          //   //   fontWeight: FontWeight.w600,
+          //   //   fontSize: 14,
+          //   //   color: isGreen ? Colors.green : Colors.black87,
+          //   // ),
+          // ),
         ],
       ),
+    );
+  }
+  Widget _buildShimmerList(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                   Container(
+                     width: 60, height: 60,
+                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                   ),
+                   const SizedBox(width: 10),
+                   Expanded(child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       Container(height: 14, width: 150, color: Colors.white),
+                       const SizedBox(height: 8),
+                       Container(height: 12, width: 100, color: Colors.white),
+                       const SizedBox(height: 8),
+                        Container(height: 10, width: double.infinity, color: Colors.white),
+                     ],
+                   ))
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildShimmerInfo(BuildContext context) {
+     return SingleChildScrollView(
+       padding: const EdgeInsets.all(16),
+       child: Shimmer.fromColors(
+          baseColor: Colors.purple.shade900.withOpacity(0.1),
+          highlightColor: Colors.purple.shade900.withOpacity(0.05),
+          child: Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+               const SizedBox(height: 16),
+               Container(height: 150, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+             ],
+          ),
+       ),
+     );
+  }
+
+  Widget _buildJobStatusBadge(Job job, BuildContext context) {
+    final bool isActive = job.isActive ?? false;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: isActive ? Colors.green : Colors.red, width: 0.5),
+      ),
+      child: Text(
+        isActive ? "Active" : "Inactive",
+        style: context.textTheme.bodySmall?.copyWith(
+          color: isActive ? Colors.green : Colors.red,
+          fontWeight: FontWeight.bold,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+
+  void _handleToggleJobStatus(Job job) {
+    if (job.id == null) return;
+    final bool currentlyActive = job.isActive ?? false;
+    CustomConfirmDialog.show(
+      title: currentlyActive ? "Deactivate Job" : "Activate Job",
+      message: currentlyActive 
+          ? "Are you sure you want to deactivate this job posting? It will no longer be visible to applicants."
+          : "Are you sure you want to activate this job posting? It will become visible to applicants.",
+      confirmText: currentlyActive ? "Deactivate" : "Activate",
+      confirmColor: currentlyActive ? Colors.orange : Colors.green,
+      icon: currentlyActive ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+      onConfirm: () {
+        controller.toggleJobStatus(job.id!);
+      },
     );
   }
 }

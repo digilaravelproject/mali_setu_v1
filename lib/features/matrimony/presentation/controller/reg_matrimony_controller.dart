@@ -1,32 +1,137 @@
-import 'package:flutter/cupertino.dart';
+import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class RegMatrimonyController extends GetxController {
-  /// Text Controllers
-  final countryCtrl = TextEditingController();
-  final stateCtrl = TextEditingController();
-  final cityCtrl = TextEditingController();
-  final birthTimeCtrl = TextEditingController();
-  final citizenshipCtrl = TextEditingController();
-  final educationCtrl = TextEditingController();
-  final employmentCtrl = TextEditingController();
-  final motherTongueCtrl = TextEditingController();
-  final familyTypeCtrl = TextEditingController();
-  final drinkingCtrl = TextEditingController();
-  final smokingCtrl = TextEditingController();
-  final religionCtrl = TextEditingController();
-  final casteCtrl = TextEditingController();
-  final starCtrl = TextEditingController();
-  final rashiCtrl = TextEditingController();
-  final manglikCtrl = TextEditingController();
+  final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
 
-  /// Rx Option Selectors
+  /// --- Text Controllers ---
+  final nameCtrl = TextEditingController();
+  final dobCtrl = TextEditingController(); // Used for display
+  final heightCtrl = TextEditingController();
+  final weightCtrl = TextEditingController();
+  final collegeCtrl = TextEditingController();
+  final jobTitleCtrl = TextEditingController();
+  final companyCtrl = TextEditingController();
+  final annualIncomeCtrl = TextEditingController();
+  final fatherOccupationCtrl = TextEditingController();
+  final motherOccupationCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
+  
+  // Keep some old ones if needed or reuse
+  final casteCtrl = TextEditingController(); 
+  final subCasteCtrl = TextEditingController();
+
+  /// --- Rx Selection Variables ---
+  // Personal
+  final profileCreatedBy = ''.obs;
   final gender = ''.obs;
+  final complexion = ''.obs;
   final physicalStatus = ''.obs;
   final maritalStatus = ''.obs;
-  final eatingHabit = ''.obs;
+  final language = ''.obs;
+  final citizenship = ''.obs;
+  
+  // Religious
+  final religion = ''.obs;
+  final star = ''.obs;
+  final raasi = ''.obs;
+  final manglik = ''.obs;
   final dosh = ''.obs;
+
+  // Education & Career
+  final education = ''.obs;
+  final employmentType = ''.obs;
+
+  // Family & Lifestyle
+  final familyType = ''.obs;
+  final familyClass = ''.obs;
+  final familyValue = ''.obs;
+  final diet = ''.obs;
+  final smoking = ''.obs;
+  final drinking = ''.obs;
+
+  // Location
+  final country = 'India'.obs;
+  final state = ''.obs;
+
+  // Formatting variables
+  DateTime? selectedDate;
+  final rxDob = ''.obs;
+  
+  // Steps
   final currentStep = 0.obs;
+
+  /// --- Static Data Lists ---
+  final List<String> profileCreatedByList = ['Self', 'Parent', 'Sibling', 'Relative', 'Friend'];
+  final List<String> genderList = ['Male', 'Female'];
+  final List<String> complexionList = ['Fair', 'Wheatish', 'Dark'];
+  final List<String> physicalStatusList = ['Normal', 'Physically Challenged'];
+  final List<String> maritalStatusList = ['Never Married', 'Divorced', 'Widowed', 'Awaiting Divorce'];
+  final List<String> languageList = ['Hindi', 'English', 'Marathi', 'Gujarati', 'Punjabi', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Urdu', 'Other'];
+  final List<String> citizenshipList = ['Indian', 'NRI', 'Other'];
+  
+  final List<String> religionList = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jain', 'Buddhist', 'Parsi', 'Jewish', 'Other'];
+  final List<String> starList = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashirsha', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'];
+  final List<String> raasiList = ['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)'];
+  final List<String> manglikList = ['Yes', 'No', 'Anshik (Partial)', 'Don\'t Know'];
+  final List<String> doshList = ['No', 'Yes', 'Don\'t Know'];
+
+  final List<String> educationList = ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other'];
+  final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Business', 'Self Employed', 'Not Working'];
+  
+  final List<String> familyTypeList = ['Joint', 'Nuclear'];
+  final List<String> familyClassList = ['Rich', 'Upper Middle Class', 'Middle Class', 'Lower Middle Class', 'Lower Class'];
+  final List<String> familyValueList = ['Orthodox', 'Traditional', 'Moderate', 'Liberal'];
+  
+  final List<String> dietList = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian', 'Vegan'];
+  final List<String> smokingList = ['No', 'Yes', 'Occasionally'];
+  final List<String> drinkingList = ['No', 'Yes', 'Occasionally'];
+
+  final List<String> countryList = ['India', 'USA', 'UK', 'Canada', 'Australia', 'UAE', 'Other'];
+  final List<String> stateList = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Other'];
+
+  /// --- Methods ---
+
+  void selectDate(BuildContext context) async {
+    final now = DateTime.now();
+    final lastAllowedDate = DateTime(now.year - 18, now.month, now.day);
+    
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: lastAllowedDate,
+      firstDate: DateTime(1960),
+      lastDate: lastAllowedDate,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+             colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      selectedDate = picked;
+      String formatted = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      dobCtrl.text = formatted;
+      rxDob.value = formatted;
+    }
+  }
+
+  int calculateAge() {
+    if (selectedDate == null) return 0;
+    final now = DateTime.now();
+    int age = now.year - selectedDate!.year;
+    if (now.month < selectedDate!.month || (now.month == selectedDate!.month && now.day < selectedDate!.day)) {
+      age--;
+    }
+    return age;
+  }
 
   void nextStep() {
     if (currentStep.value < 3) {
@@ -40,54 +145,112 @@ class RegMatrimonyController extends GetxController {
     }
   }
 
-  /// Dropdown Data
-  final countries = ["India", "UK", "USA"];
-  final states = ["UP", "Delhi", "Bihar"];
-  final cities = ["Lucknow", "Kanpur"];
-  final educations = ["Graduate", "Post Graduate"];
-  final employmentTypes = ["Private", "Government", "Business"];
-  final languages = ["Hindi", "English"];
-  final familyTypes = ["Joint", "Nuclear"];
-  final religions = ["Hindu", "Muslim", "Christian"];
-  final castes = ["General", "OBC", "SC", "ST"];
-  final stars = ["Ashwini", "Bharani"];
-  final rashis = ["Mesh", "Vrishabh"];
+  Future<void> onRegister() async {
+    // Basic Validation
+    if (nameCtrl.text.isEmpty || gender.value.isEmpty || dobCtrl.text.isEmpty) {
+        Get.snackbar("Error", "Please fill required fields", backgroundColor: Colors.red, colorText: Colors.white);
+        return;
+    }
 
-  final maritalStatuses = [
-    'Never Married',
-    'Awaiting Divorce',
-    'Divorced',
-    'Widowed',
-  ];
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
-  final eatingHabits = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian'];
+      // Construct Nested JSON
+      final Map<String, dynamic> body = {
+        "age": calculateAge(), // 28
+        "height": heightCtrl.text, // "5.6"
+        "weight": weightCtrl.text, // "65"
+        "complexion": complexion.value,
+        "physical_status": physicalStatus.value,
+        "personal_details": {
+            "name": nameCtrl.text,
+            "dob": dobCtrl.text, // "1997-05-12"
+            "annual_income": annualIncomeCtrl.text,
+            "occupation": jobTitleCtrl.text,
+            "profile_created_by": profileCreatedBy.value,
+            "hobbies": ["reading"], // Hardcoded for now 
+            "language": language.value,
+            "citizenship": citizenship.value,
+            "employment_type": employmentType.value,
+            "family_type": familyType.value,
+            "marital_status": maritalStatus.value,
+            "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
+            "star_details": [star.value, raasi.value, "manglik-${manglik.value}"], 
+            "dosh": dosh.value
+        },
+        "family_details": {
+            "father": fatherOccupationCtrl.text,
+            "mother": motherOccupationCtrl.text,
+            "family_class": familyClass.value,
+            "family_value": familyValue.value
+        },
+        "education_details": {
+            "highest_qualification": education.value,
+            "college": collegeCtrl.text
+        },
+        "professional_details": {
+            "job_title": jobTitleCtrl.text,
+            "company": companyCtrl.text
+        },
+        "lifestyle_details": {
+            "diet": diet.value,
+            "smoking": smoking.value,
+            "drinking": drinking.value
+        },
+        "location_details": {
+            "city": cityCtrl.text,
+            "state": state.value,
+            "country": country.value
+        },
+        "partner_preferences": {
+            "age_range": "20-30",
+            "education": "Any",
+            "location": "Any"
+        },
+        "privacy_settings": {
+            "show_photos": "all",
+            "show_contact": "premium_only"
+        }
+      };
+      
+      print("Calling API with Body: $body");
+      
+      final response = await _repository.createProfile(body);
+      
+      Get.back(); // Close Loading
 
-  void onRegister() {
-    // Validate & Submit
+      if (response.success == true) {
+         Get.back(); // Close Registration Screen
+         Get.snackbar("Success", response.message ?? "Profile Created Successfully", 
+            backgroundColor: Colors.green, colorText: Colors.white);
+      } else {
+         Get.snackbar("Error", response.message ?? "Failed to create profile", 
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      print("API Error: $e");
+      Get.snackbar("Error", "Something went wrong. Please try again.", 
+          backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
   @override
   void onClose() {
-    for (final c in [
-      countryCtrl,
-      stateCtrl,
-      cityCtrl,
-      birthTimeCtrl,
-      citizenshipCtrl,
-      educationCtrl,
-      employmentCtrl,
-      motherTongueCtrl,
-      familyTypeCtrl,
-      drinkingCtrl,
-      smokingCtrl,
-      religionCtrl,
-      casteCtrl,
-      starCtrl,
-      rashiCtrl,
-      manglikCtrl,
-    ]) {
-      c.dispose();
-    }
+    nameCtrl.dispose();
+    dobCtrl.dispose();
+    heightCtrl.dispose();
+    weightCtrl.dispose();
+    collegeCtrl.dispose();
+    jobTitleCtrl.dispose();
+    companyCtrl.dispose();
+    annualIncomeCtrl.dispose();
+    fatherOccupationCtrl.dispose();
+    motherOccupationCtrl.dispose();
+    cityCtrl.dispose();
+    casteCtrl.dispose();
+    subCasteCtrl.dispose();
     super.onClose();
   }
 }

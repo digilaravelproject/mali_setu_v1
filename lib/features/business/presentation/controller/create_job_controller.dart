@@ -1,52 +1,68 @@
-import 'package:flutter/cupertino.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/create_job_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_job_usecase.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/core/helper/string_extensions.dart';
+import '../controller/business_controller.dart';
 
 class CreateJobController extends GetxController {
+  final CreateJobUseCase createJobUseCase;
+  final UpdateJobUseCase updateJobUseCase;
+
+  CreateJobController({
+    required this.createJobUseCase,
+    required this.updateJobUseCase,
+  });
+
+  /// Edit Mode variables
+  final isEditMode = false.obs;
+  final editingJobId = Rxn<int>();
+
   /// Text Controllers
+  final titleCtrl = TextEditingController();
+  final descriptionCtrl = TextEditingController();
+  final requirementsCtrl = TextEditingController();
+  final salaryRangeCtrl = TextEditingController();
+  final locationCtrl = TextEditingController();
+  
   final countryCtrl = TextEditingController();
   final stateCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
-  final birthTimeCtrl = TextEditingController();
-  final citizenshipCtrl = TextEditingController();
-  final educationCtrl = TextEditingController();
-  final employmentCtrl = TextEditingController();
-  final motherTongueCtrl = TextEditingController();
-  final familyTypeCtrl = TextEditingController();
-  final drinkingCtrl = TextEditingController();
-  final smokingCtrl = TextEditingController();
-  final religionCtrl = TextEditingController();
-  final casteCtrl = TextEditingController();
-  final starCtrl = TextEditingController();
-  final rashiCtrl = TextEditingController();
-  final manglikCtrl = TextEditingController();
+  
   final jobTypeCtrl = TextEditingController();
   final experienceCtrl = TextEditingController();
+  final employmentCtrl = TextEditingController();
+  final categoryCtrl = TextEditingController();
+
+  final deadlineCtrl = TextEditingController();
+  final expiryCtrl = TextEditingController();
 
 
   final benefitsCtrl = TextEditingController();
   final RxList<String> selectedBenefits = <String>[].obs;
   final RxList<String> popularBenefits = <String>[
+    'Health insurance',
     'Flexible working hours',
     'Paid time off',
     'Remote work options',
     'Professional development',
     'Stock options',
-    'Dental insurance',
-    'Vision insurance',
-    'Life insurance',
   ].obs;
 
   final skillsCtrl = TextEditingController();
   final RxList<String> selectedSkills = <String>[].obs;
-  final RxList<String> popularSkills = <String>[
-    'PHP',
-    'Laravel',
-    'MySQL',
-    'REST API',
-    'Flutter',
-    'Dart',
-    'Android',
-  ].obs;
+  
+  static const List<String> POPULAR_SKILLS = [
+    'PHP', 'Laravel', 'MySQL', 'REST API', 'Flutter', 'Dart', 'Android', 
+    'React Native', 'Java', 'Python', 'Node.js', 'UI/UX Design'
+  ];
+
+  static const List<String> POPULAR_BENEFITS = [
+    'Health insurance', 'Flexible working hours', 'Paid time off', 
+    'Remote work options', 'Professional development', 'Stock options',
+    'Performance Bonus', 'Gym Membership', 'Free Meals'
+  ];
 
   /// Add new benefit
   void addCustomBenefit() {
@@ -90,67 +106,121 @@ class CreateJobController extends GetxController {
     selectedSkills.remove(skill);
   }
 
-  /// Rx Option Selectors
-  final gender = ''.obs;
-  final physicalStatus = ''.obs;
-  final maritalStatus = ''.obs;
-  final eatingHabit = ''.obs;
-  final dosh = ''.obs;
-
-  /// Dropdown Data
-  final countries = ["India", "UK", "USA"];
-  final states = ["UP", "Delhi", "Bihar"];
-  final cities = ["Lucknow", "Kanpur"];
-  final educations = ["Graduate", "Post Graduate"];
- // final employmentTypes = ["Private", "Government", "Business"];
-  final languages = ["Hindi", "English"];
-  final familyTypes = ["Joint", "Nuclear"];
-  final religions = ["Hindu", "Muslim", "Christian"];
-  final castes = ["General", "OBC", "SC", "ST"];
-  final stars = ["Ashwini", "Bharani"];
-  final rashis = ["Mesh", "Vrishabh"];
-
-  final jobTypes = ["On Site", "Remote", "Hybrid"];
-  final expLevel = ["Entry Level (0 Years - 2 Years)","Mid Level (3 Years - 5 Years)", "High Level (6 Years - 9 Years)"];
-  final employmentTypes = ["Full Time", "Part Time", "InternShip", "FreeLancer"];
-  final categories = ["Flutter Developer", "Android Developer", "Laravel Developer"];
-
-  final maritalStatuses = [
-    'Never Married',
-    'Awaiting Divorce',
-    'Divorced',
-    'Widowed',
-  ];
-
-  final eatingHabits = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian'];
-
-  void onRegister() {
-    // Validate & Submit
+  Future<void> selectDate(BuildContext context, TextEditingController controller) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      controller.text = picked.toString().split(' ').first;
+    }
   }
 
-  // @override
-  // void onClose() {
-  //   for (final c in [
-  //     countryCtrl,
-  //     stateCtrl,
-  //     cityCtrl,
-  //     birthTimeCtrl,
-  //     citizenshipCtrl,
-  //     educationCtrl,
-  //     employmentCtrl,
-  //     motherTongueCtrl,
-  //     familyTypeCtrl,
-  //     drinkingCtrl,
-  //     smokingCtrl,
-  //     religionCtrl,
-  //     casteCtrl,
-  //     starCtrl,
-  //     rashiCtrl,
-  //     manglikCtrl,
-  //   ]) {
-  //     c.dispose();
-  //   }
-  //   super.onClose();
-  // }
+  /// Dropdown Data
+  static const List<String> JOB_TYPES = ["On-site", "Remote", "Hybrid"];
+  static const List<String> EXP_LEVELS = ["Entry", "Mid", "Senior", "Expert"];
+  static const List<String> EMPLOYMENT_TYPES = ["Full-time", "Part-time", "Internship", "Freelance", "Contract"];
+  static const List<String> CATEGORIES = ["Software Development", "Marketing", "Sales", "Design", "Finance", "Human Resources"];
+
+  final isLoading = false.obs;
+
+  void populateFields(Job job) {
+    isEditMode.value = true;
+    editingJobId.value = job.id;
+
+    titleCtrl.text = job.title ?? '';
+    descriptionCtrl.text = job.description ?? '';
+    requirementsCtrl.text = job.requirements ?? '';
+    salaryRangeCtrl.text = job.salaryRange ?? '';
+    locationCtrl.text = job.location ?? '';
+    
+    jobTypeCtrl.text = job.jobType ?? '';
+    experienceCtrl.text = (job.experienceLevel ?? '').toTitleCase();
+    employmentCtrl.text = (job.employmentType ?? '').replaceAll('-', ' ').toTitleCase();
+    categoryCtrl.text = job.category ?? '';
+    
+    deadlineCtrl.text = job.applicationDeadline != null ? job.applicationDeadline!.split('T').first : '';
+    expiryCtrl.text = job.expiresAt != null ? job.expiresAt!.split('T').first : '';
+
+    selectedBenefits.assignAll(job.benefits ?? []);
+    selectedSkills.assignAll(job.skillsRequired ?? []);
+  }
+
+  void clearFields() {
+    isEditMode.value = false;
+    editingJobId.value = null;
+    titleCtrl.clear();
+    descriptionCtrl.clear();
+    requirementsCtrl.clear();
+    salaryRangeCtrl.clear();
+    locationCtrl.clear();
+    jobTypeCtrl.clear();
+    experienceCtrl.clear();
+    employmentCtrl.clear();
+    categoryCtrl.clear();
+    deadlineCtrl.clear();
+    expiryCtrl.clear();
+    selectedBenefits.clear();
+    selectedSkills.clear();
+  }
+
+  Future<void> onRegister() async {
+    final businessId = Get.find<BusinessController>().myBusiness.value?.id;
+    
+    if (businessId == null) {
+      Get.snackbar("Error", "Please Register/Select a Business first");
+      return;
+    }
+
+    final data = {
+      "business_id": businessId,
+      "title": titleCtrl.text.trim(),
+      "description": descriptionCtrl.text.trim(),
+      "requirements": requirementsCtrl.text.trim(),
+      "salary_range": salaryRangeCtrl.text.trim(),
+      "job_type": jobTypeCtrl.text.trim(),
+      "location": locationCtrl.text.trim(),
+      "experience_level": experienceCtrl.text.trim().toLowerCase(),
+      "employment_type": employmentCtrl.text.trim().toLowerCase().replaceAll(' ', '-'),
+      "category": categoryCtrl.text.trim(),
+      "skills_required": selectedSkills,
+      "benefits": selectedBenefits,
+      "application_deadline": deadlineCtrl.text.trim(),
+      "expires_at": expiryCtrl.text.trim()
+    };
+
+    try {
+      isLoading.value = true;
+      final BusinessResponse response;
+      if (isEditMode.value && editingJobId.value != null) {
+        response = await updateJobUseCase(editingJobId.value!, data);
+      } else {
+        response = await createJobUseCase(data);
+      }
+      
+      if (response.success == true) {
+        Get.back();
+        Get.snackbar("Success", response.message ?? (isEditMode.value ? "Job posting updated successfully" : "Job posting created successfully"));
+        
+        // Refresh business jobs list
+        final bController = Get.find<BusinessController>();
+        final bId = int.tryParse(data['business_id'].toString()) ?? 0;
+        bController.fetchBusinessJobs(bId);
+
+        // If we were editing, refresh the job details as well
+        if (isEditMode.value && editingJobId.value != null) {
+          bController.fetchJobDetails(editingJobId.value!);
+        }
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to save job posting");
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
 
