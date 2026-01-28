@@ -1,6 +1,7 @@
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,207 +11,167 @@ import '../../../widgets/custom_buttons.dart';
 import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends GetWidget<SettingsController> {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  final authService = Get.find<AuthService>();
-
-  @override
   Widget build(BuildContext context) {
+    final authService = Get.find<AuthService>();
+
     return Scaffold(
-      body: Container(
-        child: SafeArea(
-          child: Column(
-            children: [
-              // User Profile Header
-              _buildUserHeader(),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // User Profile Header
+            _buildUserHeader(context, authService),
 
-              // Settings List
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // User Information Section
-                        _buildSectionHeader('USER INFORMATION'),
-                        buildInfoCard(
-                          infoItems: [
-                            {'title': 'My Profile', 'icon': Icons.person_outline, 'onTap': () {
-                             Get.toNamed(AppRoutes.profileScreen);
-                            },},
-                            {'title': 'App Language', 'icon': Icons.language},
-                            {'title': 'User Approval', 'icon': Icons.verified},
-                            {'title': 'Active User', 'icon': CupertinoIcons.person_2_fill,},
-                          ],
-                        ),
+            // Settings List
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User Information Section
+                      _buildSectionHeader(context, 'USER INFORMATION'),
+                      _buildInfoCard(
+                        context: context,
+                        infoItems: [
+                          {
+                            'title': 'My Profile',
+                            'icon': Icons.person_outline,
+                            'onTap': () {
+                              Get.toNamed(AppRoutes.profileScreen);
+                            },
+                          },
+                          {'title': 'App Language', 'icon': Icons.language},
+                          {'title': 'User Approval', 'icon': Icons.verified},
+                          {'title': 'Active User', 'icon': CupertinoIcons.person_2_fill},
+                        ],
+                      ),
 
-                        // Business Section
-                        _buildSectionHeader('BUSINESS'),
-                        buildInfoCard(
-                          infoItems: [
-                            {
-                              'title': 'Active Business',
-                              'icon': Icons.business,
-                            },
-                            {
-                              'title': 'Business Approval',
-                              'icon': Icons.verified,
-                            },
-                            {'title': 'Business Type', 'icon': Icons.list},
-                            {'title': 'Saved Business', 'icon': Icons.bookmark},
-                          ],
-                        ),
+                      // Business Section
+                      _buildSectionHeader(context, 'BUSINESS'),
+                      _buildInfoCard(
+                        context: context,
+                        infoItems: [
+                          {'title': 'Active Business', 'icon': Icons.business},
+                          {'title': 'Business Approval', 'icon': Icons.verified},
+                          {'title': 'Business Type', 'icon': Icons.list},
+                          {'title': 'Saved Business', 'icon': Icons.bookmark},
+                        ],
+                      ),
 
-                        // Volunteer Section
-                        _buildSectionHeader('VOLUNTEER'),
-                        //_buildVolunteerSection(),
-                        buildInfoCard(
-                          infoItems: [
-                            {
-                              'title': 'Active Volunteer',
-                              'icon': Icons.favorite,
-                            },
-                            {
-                              'title': 'Volunteer Approval',
-                              'icon': Icons.verified,
-                            },
-                            {
-                              'title': 'Volunteer Excel Download',
-                              'icon': Icons.download_for_offline_sharp,
-                            },
-                          ],
-                        ),
+                      // Volunteer Section
+                      _buildSectionHeader(context, 'VOLUNTEER'),
+                      _buildInfoCard(
+                        context: context,
+                        infoItems: [
+                          {'title': 'Active Volunteer', 'icon': Icons.favorite},
+                          {'title': 'Volunteer Approval', 'icon': Icons.verified},
+                          {
+                            'title': 'Volunteer Excel Download',
+                            'icon': Icons.download_for_offline_sharp,
+                          },
+                        ],
+                      ),
 
-                        // Legal Section
-                        _buildSectionHeader('LEGAL'),
-                        //  _buildLegalSection(),
-                        buildInfoCard(
-                          infoItems: [
-                            {'title': 'Privacy Policy', 'icon': Icons.policy},
-                            {
-                              'title': 'Terms & Conditions',
-                              'icon': Icons.file_open,
+                      // Legal Section
+                      _buildSectionHeader(context, 'LEGAL'),
+                      _buildInfoCard(
+                        context: context,
+                        infoItems: [
+                          {'title': 'Privacy Policy', 'icon': Icons.policy},
+                          {'title': 'Terms & Conditions', 'icon': Icons.file_open},
+                          {'title': 'Contact Supports', 'icon': Icons.contact_support},
+                        ],
+                      ),
+
+                      // App Settings Section
+                      _buildSectionHeader(context, 'APP SETTINGS'),
+                      _buildInfoCard(
+                        context: context,
+                        infoItems: [
+                          {
+                            'title': 'Share App',
+                            'icon': CupertinoIcons.arrowshape_turn_up_right_fill,
+                            'onTap': () async {
+                              try {
+                                await Share.share(
+                                  'Check out this amazing app!\n\nDownload link: https://yourapp.com',
+                                  subject: 'Awesome App Recommendation',
+                                );
+                              } catch (e) {
+                                debugPrint('Share failed: $e');
+                              }
                             },
-                            {
-                              'title': 'Contact Supports',
-                              'icon': Icons.contact_support,
-                            },
-                          ],
-                        ),
-                        // App Settings Section
-                        _buildSectionHeader('APP SETTINGS'),
-                        //  _buildAppSettingsSection(),
-                        buildInfoCard(
-                          infoItems: [
-                            {
-                              'title': 'Share App',
-                              'icon': CupertinoIcons.arrowshape_turn_up_right_fill,
-                              'onTap': () async {
-                                try {
-                                  await Share.share(
-                                    'Check out this amazing app!\n\nDownload link: https://yourapp.com',
-                                    subject: 'Awesome App Recommendation',
-                                  );
-                                } catch (e) {
-                                  debugPrint('Share failed: $e');
-                                }
-                              },
-                            },
-                            {'title': 'Logout', 'icon': Icons.logout,"onTap":(){
-                              LogoutDialog.show(
+                          },
+                          {
+                            'title': 'Logout',
+                            'icon': Icons.logout,
+                            'onTap': () async {
+                              final confirm = await LogoutDialog.show(
                                 context: context,
                                 title: 'Confirm Logout',
                                 message: 'You will be redirected to login screen',
                               );
-                            }
+                              if (confirm == true) {
+                                authService.logout();
+                              }
                             },
+                          },
+                        ],
+                      ),
+
+                      // Add Business Button
+                      const SizedBox(height: 20),
+                      _buildSectionHeader(context, 'Do you want to register your own business ?'),
+                      const SizedBox(height: 8),
+                      CustomButton(
+                        height: 40,
+                        borderRadius: 14,
+                        title: "Register Your Own Business",
+                        onPressed: () {},
+                      ),
+
+                      const SizedBox(height: 40),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Initiative By",
+                              style: context.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              " Anushka Foundation",
+                              style: context.textTheme.titleLarge?.copyWith(
+                                color: context.theme.primaryColor,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ],
                         ),
-
-                        // Add Business Button
-                        const SizedBox(height: 20),
-                        _buildSectionHeader('Do you want to register your own business ?'),
-                        SizedBox(height: 8,),
-                        CustomButton(
-                          height: 40,
-                          borderRadius: 14,
-                          title: "Register Your Own Business",
-                          onPressed: () {},
-                        ),
-                        // _buildAddBusinessButton(),
-                        // Card(
-                        //   elevation: 0,
-                        //   shape: RoundedRectangleBorder(
-                        //     borderRadius: BorderRadius.circular(12),
-                        //     side: BorderSide(
-                        //       color: context.theme.dividerColor,
-                        //       width: 1,
-                        //     ),
-                        //   ),
-                        //   child: Padding(
-                        //     padding: const EdgeInsets.all(16),
-                        //     child: Column(children: [
-                        //       Text("Do you want to register your own business ?",style: context.textTheme.titleMedium,),
-                        //       SizedBox(height: 8,),
-                        //       CustomButton(
-                        //         height: 40,
-                        //         borderRadius: 14,
-                        //         title: "Register Your Own Business",
-                        //         onPressed: () {},
-                        //       ),
-                        //     ]),
-                        //   ),
-                        // ),
-
-
-                        const SizedBox(height: 40),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Initiative By",
-                                style: context.textTheme.bodyLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                " Anushka Foundation",
-                                style: context.textTheme.titleLarge?.copyWith(
-                                  color: context.theme.primaryColor,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
                 ),
               ),
-
-              // Footer
-              // _buildFooter(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildUserHeader() {
+  Widget _buildUserHeader(BuildContext context, AuthService authService) {
     return Obx(() {
       final user = authService.currentUser.value;
       final name = user?.name ?? 'Guest User';
@@ -237,7 +198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 height: 55,
                 width: 55,
                 radius: BorderRadius.circular(25),
-                imagePath: AppAssets.imgAppLogo, // Fallback asset
+                imagePath: AppAssets.imgAppLogo,
                 fit: BoxFit.cover,
               ),
             ),
@@ -263,7 +224,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 16, bottom: 8),
       child: Text(
@@ -275,7 +236,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget buildInfoCard({required List<Map<String, dynamic>> infoItems}) {
+  Widget _buildInfoCard({
+    required BuildContext context,
+    required List<Map<String, dynamic>> infoItems,
+  }) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -287,10 +251,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           children: infoItems
               .map((item) => _buildInfoRow(
-            onTap: item['onTap'],
-            title: item['title'],
-            icon: item['icon'],
-          ))
+                    context: context,
+                    onTap: item['onTap'],
+                    title: item['title'],
+                    icon: item['icon'],
+                  ))
               .toList(),
         ),
       ),
@@ -298,9 +263,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildInfoRow({
+    required BuildContext context,
     required String title,
     required IconData icon,
-    VoidCallback? onTap,} ) {
+    VoidCallback? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -320,10 +287,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 title,
                 style: context.textTheme.bodyMedium,
-
               ),
             ),
-
             const SizedBox(width: 8),
             Icon(Icons.chevron_right, size: 20, color: context.iconColor),
           ],
@@ -331,288 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
-  /*
-  Widget _buildBusinessSection() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildStatRow('Active Business', '12', Colors.blue),
-            _buildStatRow('Business Approval', '10/12', Colors.green),
-            _buildStatRow('Business Type', '3 Types', Colors.orange),
-            _buildStatRow('Saved Business', '5', Colors.purple),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVolunteerSection() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildStatRow('Active Volunteer', '25', Colors.red),
-            _buildStatRow('Volunteer Approval', '20/25', Colors.teal),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatRow(String title, String value, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Icon(Icons.chevron_right, size: 20, color: Colors.grey.shade400),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppSettingsSection() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildSettingsRow('Excel Download', Icons.download_for_offline),
-            _buildSettingsRow('Share App', Icons.share),
-            _buildSettingsRow(
-              'Notification Settings',
-              Icons.notifications_none,
-            ),
-            _buildSettingsRow(
-              'Dark Mode',
-              Icons.dark_mode_outlined,
-              isSwitch: true,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingsRow(
-    String title,
-    IconData icon, {
-    bool isSwitch = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: Colors.blue.shade600),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-          if (isSwitch)
-            Switch(
-              value: false,
-              onChanged: (value) {},
-              activeColor: Colors.blue,
-            )
-          else
-            Icon(Icons.chevron_right, size: 20, color: Colors.grey.shade400),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegalSection() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildLegalRow('Privacy Policy', Icons.privacy_tip_outlined),
-            _buildLegalRow('Terms & Conditions', Icons.description_outlined),
-            _buildLegalRow('About Us', Icons.info_outline),
-            _buildLegalRow('Contact Support', Icons.support_agent_outlined),
-            _buildLegalRow('Rate App', Icons.star_border),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLegalRow(String title, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: Colors.grey.shade600),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ),
-          Icon(Icons.chevron_right, size: 20, color: Colors.grey.shade400),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddBusinessButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          // Add business
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 2,
-          shadowColor: Colors.blue.shade200,
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_circle_outline, size: 24),
-            SizedBox(width: 10),
-            Text(
-              'ADD YOUR BUSINESS',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFooter() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1)),
-      ),
-      child: Column(
-        children: [
-          // Logout Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: OutlinedButton.icon(
-              onPressed: () {
-                // Logout
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: BorderSide(color: Colors.red.shade300),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.logout, size: 20),
-              label: const Text(
-                'LOGOUT',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Initiative Text
-          Text(
-            'Initiative by',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Your Organization Name',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.blue,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Version 2.1.4 • © 2024 All Rights Reserved',
-            style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
-          ),
-        ],
-      ),
-    );
-  }*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class LogoutDialog {
   static Future<bool?> show({
@@ -641,7 +325,6 @@ class LogoutDialog {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Icon
                 if (showIcon)
                   Container(
                     width: 60,
@@ -650,16 +333,13 @@ class LogoutDialog {
                       shape: BoxShape.circle,
                       color: Colors.red.withOpacity(0.1),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.logout,
                       size: 30,
                       color: Colors.red,
                     ),
                   ),
-
-                if (showIcon) SizedBox(height: 20),
-
-                // Title
+                if (showIcon) const SizedBox(height: 20),
                 Text(
                   title,
                   style: TextStyle(
@@ -669,10 +349,7 @@ class LogoutDialog {
                   ),
                   textAlign: TextAlign.center,
                 ),
-
-                SizedBox(height: 12),
-
-                // Message
+                const SizedBox(height: 12),
                 Text(
                   message,
                   style: TextStyle(
@@ -682,20 +359,16 @@ class LogoutDialog {
                   ),
                   textAlign: TextAlign.center,
                 ),
-
-                SizedBox(height: 24),
-
-                // Buttons
+                const SizedBox(height: 24),
                 Row(
                   children: [
-                    // Cancel Button
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          Navigator.of(context).pop(false);
+                          Navigator.pop(context, false);
                         },
                         style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -711,18 +384,14 @@ class LogoutDialog {
                         ),
                       ),
                     ),
-
-                    SizedBox(width: 12),
-
-                    // Logout Button
+                    const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pop(true);
-                          Get.find<AuthService>().logout();
+                          Navigator.pop(context, true);
                         },
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           backgroundColor: confirmColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -749,5 +418,3 @@ class LogoutDialog {
     );
   }
 }
-
-

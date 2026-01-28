@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "58378864066",
+    "project_id": "malisetu-be0df",
+    "storage_bucket": "malisetu-be0df.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:58378864066:android:27504936714e7cc873c25b",
+        "android_client_info": {
+          "package_name": "com.mali.setu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5OtmhldQJOc6yAFLR5JMpT4yy6kDdvQc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -106,7 +106,9 @@ class LoginPage extends GetWidget<LoginController> {
                     () => CustomButton(
                       title: "Login",
                       isLoading: controller.isLoading.value,
-                      onPressed: controller.performLogin,
+                      onPressed:
+                        //  (){Get.toNamed(AppRoutes.dashboard);}
+                      controller.performLogin,
                     ),
                   ),
                 ],
@@ -147,25 +149,28 @@ class LoginPage extends GetWidget<LoginController> {
             ),
 
             // Social Login Buttons
-            Container(
-              decoration: AppDecorations.cardDecoration(context),
-              padding: EdgeInsets.symmetric(vertical: 14),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 12,
-                children: [
-                  CustomImageView(
-                    svgPath: AppAssets.icGoogle,
-                    width: 24,
-                    height: 24,
-                  ),
-                  Text(
-                    "Sign in with Google",
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+            GestureDetector(
+              onTap: controller.googleSignIn,
+              child: Container(
+                decoration: AppDecorations.cardDecoration(context),
+                padding: EdgeInsets.symmetric(vertical: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 12,
+                  children: [
+                    CustomImageView(
+                      svgPath: AppAssets.icGoogle,
+                      width: 24,
+                      height: 24,
                     ),
-                  ),
-                ],
+                    Text(
+                      "Sign in with Google",
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 

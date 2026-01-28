@@ -67,28 +67,35 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
 
                   const SizedBox(height: 38.0),
 
+                  Form(
+                    key: controller.formKey,
+                    child: Column(
+                      children: [
+                        AppInputTextField(
+                          label: "Email ",
+                          iconData: CupertinoIcons.mail_solid,
+                          textInputType: TextInputType.emailAddress,
+                          controller: controller.emailController,
+                          hint: const [AutofillHints.email],
+                          validator: FormValidator.email,
+                        ),
+
+                        const SizedBox(height: 32.0),
+
+                        // Submit button
+                        CustomButton(
+                          borderRadius: 12,
+                          title: "Send Otp",
+                          // isLoading: controller.isLoading.value,
+                          onPressed: controller.sendOtp,
+                          // controller.performLogin,
+                        ),
+                      ],
+                    ),
+                  ),
+
                   // Email input field
-                  AppInputTextField(
-                    label: "Email ",
-                    iconData: CupertinoIcons.mail_solid,
-                    textInputType: TextInputType.emailAddress,
-                    controller: controller.emailController,
-                    hint: const [AutofillHints.email],
-                    validator: FormValidator.email,
-                  ),
 
-                  const SizedBox(height: 32.0),
-
-                  // Submit button
-                  CustomButton(
-                    borderRadius: 12,
-                    title: "Send Otp",
-                   // isLoading: controller.isLoading.value,
-                    onPressed: (){
-                      Get.toNamed(AppRoutes.resetPasswordScreen);
-                    }
-                   // controller.performLogin,
-                  ),
 
                   const SizedBox(height: 24.0),
 
@@ -156,6 +163,7 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
 class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
   const ResetPasswordScreen({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -179,7 +187,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0, bottom: 20.0),
                     child: IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Get.back(),
                       icon: Container(
                         child: Icon(
                           Icons.arrow_back_ios_new_rounded,
@@ -207,172 +215,75 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
 
                   const SizedBox(height: 30.0),
 
-                 // OTP Input Field
-                  AppInputTextField(
-                    label: "OTP",
-                    iconData: CupertinoIcons.number_square,
-                    textInputType: TextInputType.number,
-                    // controller: controller.otpController,
-                    hint: const ["Enter 6-digit OTP"],
-                   // validator: FormValidator.otp,
-                    //maxLength: 6,
-                  ),
+                 Form(
+                   key: controller.formKey,
+                   child: Column(
+                     children: [
+                       // OTP Input Field
+                       AppInputTextField(
+                         label: "OTP",
+                         iconData: CupertinoIcons.number_square,
+                         textInputType: TextInputType.number,
+                          controller: controller.otpController,
+                         hint: const ["Enter 6-digit OTP"],
+                         // validator: FormValidator.otp,
+                         //maxLength: 6,
+                       ),
+
+                       const SizedBox(height: 16.0),
+
+                       // New Password Field
+                       Obx(
+                             ()=>AppInputTextField(
+                           label: "Password",
+                           iconData: CupertinoIcons.lock_fill,
+                           textInputType: TextInputType.visiblePassword,
+                           controller: controller.passwordController,
+                           hint: const [AutofillHints.password],
+                           isObscure: !controller.isPasswordVisible.value,
+                           endIcon: controller.isPasswordVisible.value
+                               ? Icons.remove_red_eye_rounded
+                               : Icons.visibility_off,
+                           onEndIconTap: () => controller.isPasswordVisible.toggle(),
+                           validator: FormValidator.password,
+                         ),
+                       ),
+
+                       const SizedBox(height: 16.0),
+
+                       // Confirm Password Field
+                       Obx(
+                             ()=>AppInputTextField(
+                           label: "Confirm Password",
+                           iconData: CupertinoIcons.lock_fill,
+                           textInputType: TextInputType.visiblePassword,
+                           controller: controller.confPasswordController,
+                           hint: const [AutofillHints.password],
+                           isObscure: !controller.isPasswordVisible.value,
+                           endIcon: controller.isPasswordVisible.value
+                               ? Icons.remove_red_eye_rounded
+                               : Icons.visibility_off,
+                           onEndIconTap: () => controller.isPasswordVisible.toggle(),
+                           validator: FormValidator.password,
+                         ),
+                       ),
+
+                       const SizedBox(height: 32.0),
+
+                       // Submit button
+                       CustomButton(
+                           borderRadius: 12,
+                           title: "Reset Password",
+                           // isLoading: controller.isLoading.value,
+                           onPressed: () {
+                             controller.resetPassword();
+                           }
+                       ),
+                     ],
+                   ),
+                 ),
 
 
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //   children: List.generate(6, (index) {
-                  //     return TextFormField(
-                  //      // controller: otpControllers[index],
-                  //      // focusNode: otpFocusNodes[index],
-                  //       textAlign: TextAlign.center,
-                  //       keyboardType: TextInputType.number,
-                  //       maxLength: 1,
-                  //       style: const TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.bold,
-                  //       ),
-                  //       cursorHeight: 20,
-                  //       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  //       decoration: InputDecoration(
-                  //         contentPadding: EdgeInsets.zero,
-                  //         counterText: '',
-                  //         constraints: const BoxConstraints.tightFor(
-                  //           height: 50,
-                  //           width: 50,
-                  //         ),
-                  //         border: OutlineInputBorder(
-                  //           borderRadius: BorderRadius.circular(12),
-                  //         ),
-                  //       ),
-                  //       onChanged: (value) {
-                  //         if (value.isNotEmpty && index < 5) {
-                  //           otpFocusNodes[index + 1].requestFocus();
-                  //         } else if (value.isEmpty && index > 0) {
-                  //           otpFocusNodes[index - 1].requestFocus();
-                  //         }
-                  //       },
-                  //     );
-                  //   }),
-                  // ),
-
-                  const SizedBox(height: 16.0),
-
-                  // New Password Field
-                  Obx(
-                      ()=>AppInputTextField(
-                        label: "Password",
-                        iconData: CupertinoIcons.lock_fill,
-                        textInputType: TextInputType.visiblePassword,
-                        controller: controller.passwordController,
-                        hint: const [AutofillHints.password],
-                        isObscure: !controller.isPasswordVisible.value,
-                        endIcon: controller.isPasswordVisible.value
-                            ? Icons.remove_red_eye_rounded
-                            : Icons.visibility_off,
-                        onEndIconTap: () => controller.isPasswordVisible.toggle(),
-                        validator: FormValidator.password,
-                      ),
-                  ),
-
-                  const SizedBox(height: 16.0),
-
-                  // Confirm Password Field
-                  Obx(
-                      ()=>AppInputTextField(
-                        label: "Confirm Password",
-                        iconData: CupertinoIcons.lock_fill,
-                        textInputType: TextInputType.visiblePassword,
-                        controller: controller.confPasswordController,
-                        hint: const [AutofillHints.password],
-                        isObscure: !controller.isPasswordVisible.value,
-                        endIcon: controller.isPasswordVisible.value
-                            ? Icons.remove_red_eye_rounded
-                            : Icons.visibility_off,
-                        onEndIconTap: () => controller.isPasswordVisible.toggle(),
-                        validator: FormValidator.password,
-                      ),
-                  ),
-
-
-                  // Password requirements
-                  // Padding(
-                  //   padding: const EdgeInsets.only(top: 12.0, left: 8.0),
-                  //   child: Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: [
-                  //       Text(
-                  //         'Password must contain:',
-                  //         style: theme.textTheme.bodySmall?.copyWith(
-                  //           color: Colors.grey.shade600,
-                  //         ),
-                  //       ),
-                  //       const SizedBox(height: 4.0),
-                  //       Row(
-                  //         children: [
-                  //           Icon(
-                  //             Icons.check_circle_outline,
-                  //             size: 14,
-                  //             color: Colors.green.shade600,
-                  //           ),
-                  //           const SizedBox(width: 6),
-                  //           Text(
-                  //             'At least 8 characters',
-                  //             style: theme.textTheme.bodySmall?.copyWith(
-                  //               color: Colors.grey.shade600,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //       const SizedBox(height: 2.0),
-                  //       Row(
-                  //         children: [
-                  //           Icon(
-                  //             Icons.check_circle_outline,
-                  //             size: 14,
-                  //             color: Colors.green.shade600,
-                  //           ),
-                  //           const SizedBox(width: 6),
-                  //           Text(
-                  //             'One uppercase & lowercase letter',
-                  //             style: theme.textTheme.bodySmall?.copyWith(
-                  //               color: Colors.grey.shade600,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //       const SizedBox(height: 2.0),
-                  //       Row(
-                  //         children: [
-                  //           Icon(
-                  //             Icons.check_circle_outline,
-                  //             size: 14,
-                  //             color: Colors.green.shade600,
-                  //           ),
-                  //           const SizedBox(width: 6),
-                  //           Text(
-                  //             'One number and special character',
-                  //             style: theme.textTheme.bodySmall?.copyWith(
-                  //               color: Colors.grey.shade600,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-
-                  const SizedBox(height: 32.0),
-
-                  // Submit button
-                  CustomButton(
-                      borderRadius: 12,
-                      title: "Reset Password",
-                      // isLoading: controller.isLoading.value,
-                      onPressed: () {
-                        // controller.verifyOtpAndResetPassword();
-                      }
-                  ),
                   const SizedBox(height: 32.0),
 
                   Row(

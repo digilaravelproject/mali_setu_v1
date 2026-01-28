@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../../core/constent/app_constants.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/storage/shared_prefs.dart';
 import '../../../../../core/storage/token_manger.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
-import '../../data/model/res_login_model.dart';
+import '../../data/model/res_login_model.dart' hide User;
 import '../../data/model/req_login_model.dart';
 import '../../domain/usecase/login_usecase.dart';
 
@@ -74,5 +76,35 @@ class LoginController extends GetxController {
       isLoading.value = false;
     }
   }
+
+
+  Future<void> googleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // User canceled the sign-in
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        Get.snackbar("Success", "Google Login Successful");
+       // Get.to(() => EmailDisplayPage(email: user.email));
+      }
+
+    } catch (e) {
+      Get.snackbar("Error", "Google Sign-In failed: $e");
+    }
+  }
+
+
+
+
+
 }
 

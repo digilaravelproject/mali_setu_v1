@@ -8,9 +8,9 @@ import 'core/storage/shared_prefs.dart';
 import 'init_app.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await initApp();
 
-  
   runApp(MyApp());
 }
 

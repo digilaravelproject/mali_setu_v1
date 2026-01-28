@@ -471,7 +471,7 @@ class BusinessCard extends StatelessWidget {
 }
 
 // All Businesses Screen
-class AllBusinessesScreen extends StatelessWidget {
+class AllBusinessesScreen extends GetWidget<BusinessController> {
   const AllBusinessesScreen({Key? key}) : super(key: key);
 
   @override
@@ -496,84 +496,64 @@ class AllBusinessesScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: context.theme.cardColor,
-          // gradient: LinearGradient(
-          //   begin: Alignment.topLeft,
-          //   end: Alignment.bottomRight,
-          //   colors: [Color(0xFFFCE4EC), Color(0xFFF3E5F5)],
-          // ),
-        ),
-        child: SafeArea(
-          // top: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // GestureDetector(
-                    //   onTap: () => Navigator.pop(context),
-                    //   child: Row(
-                    //     children: const [
-                    //       Icon(
-                    //         Icons.chevron_left,
-                    //         color: Color(0xFFE91E63),
-                    //         size: 28,
-                    //       ),
-                    //       Text(
-                    //         'Back',
-                    //         style: TextStyle(
-                    //           color: Color(0xFFE91E63),
-                    //           fontWeight: FontWeight.w600,
-                    //           fontSize: 16,
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    // const SizedBox(height: 24),
-                    // const Text(
-                    //   'All Businesses',
-                    //   style: TextStyle(
-                    //     fontSize: 32,
-                    //     fontWeight: FontWeight.bold,
-                    //     color: Color(0xFF424242),
-                    //   ),
-                    // ),
-                    // const SizedBox(height: 8),
-                    Text(
-                      '${businesses.length} Businesses Available',
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: context.theme.primaryColor,
-                        // style: const TextStyle(
-                        //   fontSize: 16,
-                        //   color: Color(0xFF757575),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: businesses.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: BusinessListCard(business: businesses[index]),
-                    );
-                  },
-                ),
-              ),
-            ],
+      body: Obx((){
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.businesses.isEmpty) {
+          return const Center(child: Text("No Businesses Found"));
+        }
+        return Container(
+          decoration: BoxDecoration(
+            color: context.theme.cardColor,
+            // gradient: LinearGradient(
+            //   begin: Alignment.topLeft,
+            //   end: Alignment.bottomRight,
+            //   colors: [Color(0xFFFCE4EC), Color(0xFFF3E5F5)],
+            // ),
           ),
-        ),
-      ),
+          child: SafeArea(
+            // top: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${businesses.length} Businesses Available',
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: context.theme.primaryColor,
+                          // style: const TextStyle(
+                          //   fontSize: 16,
+                          //   color: Color(0xFF757575),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: businesses.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: BusinessListCard(business: businesses[index]),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      })
+
     );
   }
 }
