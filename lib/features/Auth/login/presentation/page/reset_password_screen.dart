@@ -163,6 +163,7 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
 class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
   const ResetPasswordScreen({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -186,7 +187,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                   Padding(
                     padding: const EdgeInsets.only(top: 16.0, bottom: 20.0),
                     child: IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Get.back(),
                       icon: Container(
                         child: Icon(
                           Icons.arrow_back_ios_new_rounded,
@@ -223,7 +224,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                          label: "OTP",
                          iconData: CupertinoIcons.number_square,
                          textInputType: TextInputType.number,
-                         // controller: controller.otpController,
+                          controller: controller.otpController,
                          hint: const ["Enter 6-digit OTP"],
                          // validator: FormValidator.otp,
                          //maxLength: 6,
@@ -275,7 +276,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                            title: "Reset Password",
                            // isLoading: controller.isLoading.value,
                            onPressed: () {
-                             // controller.verifyOtpAndResetPassword();
+                             controller.resetPassword();
                            }
                        ),
                      ],

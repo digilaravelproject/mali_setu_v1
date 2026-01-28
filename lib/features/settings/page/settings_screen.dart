@@ -1,23 +1,18 @@
 import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../widgets/custom_buttons.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends GetWidget<SettingsController> {
   const SettingsScreen({super.key});
 
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
+  // @override
+  // State<SettingsScreen> createState() => _SettingsScreenState();
 
-class _SettingsScreenState extends State<SettingsScreen> {
-  final userData = {
-    'name': 'Aarav Sharma',
-    'email': 'aarav.sharma@example.com',
-    'role': 'Premium User',
-  };
+
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: [
               // User Profile Header
-              _buildUserHeader(),
+              _buildUserHeader(context: context),
 
               // Settings List
               Expanded(
@@ -39,8 +34,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // User Information Section
-                        _buildSectionHeader('USER INFORMATION'),
+                        _buildSectionHeader(context: context,'USER INFORMATION'),
                         buildInfoCard(
+                          context: context,
                           infoItems: [
                             {'title': 'My Profile', 'icon': Icons.person_outline, 'onTap': () {
                              Get.toNamed(AppRoutes.profileScreen);
@@ -52,8 +48,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
 
                         // Business Section
-                        _buildSectionHeader('BUSINESS'),
+                        _buildSectionHeader(context: context,'BUSINESS'),
                         buildInfoCard(
+                          context: context,
                           infoItems: [
                             {
                               'title': 'Active Business',
@@ -69,9 +66,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
 
                         // Volunteer Section
-                        _buildSectionHeader('VOLUNTEER'),
+                        _buildSectionHeader(context: context,'VOLUNTEER'),
                         //_buildVolunteerSection(),
                         buildInfoCard(
+                          context: context,
                           infoItems: [
                             {
                               'title': 'Active Volunteer',
@@ -89,9 +87,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
 
                         // Legal Section
-                        _buildSectionHeader('LEGAL'),
+                        _buildSectionHeader(context: context,'LEGAL'),
                         //  _buildLegalSection(),
                         buildInfoCard(
+                          context: context,
                           infoItems: [
                             {'title': 'Privacy Policy', 'icon': Icons.policy},
                             {
@@ -105,9 +104,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                         // App Settings Section
-                        _buildSectionHeader('APP SETTINGS'),
+                        _buildSectionHeader(context: context,'APP SETTINGS'),
                         //  _buildAppSettingsSection(),
                         buildInfoCard(
+                          context: context,
                           infoItems: [
                             {
                               'title': 'Share App',
@@ -123,12 +123,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 }
                               },
                             },
-                            {'title': 'Logout', 'icon': Icons.logout,"onTap":(){
-                              LogoutDialog.show(
+                            {'title': 'Logout', 'icon': Icons.logout,"onTap":()async{
+                              final confirm = await LogoutDialog.show(
                                 context: context,
                                 title: 'Confirm Logout',
                                 message: 'You will be redirected to login screen',
                               );
+                              if (confirm == true) {
+                                controller.performLogout(); // ✅ Sirf confirm pe API call
+                              } else {
+                                print("Logout cancelled"); // Cancel pe API call nahi
+                              }
                             }
                             },
                           ],
@@ -136,7 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                         // Add Business Button
                         const SizedBox(height: 20),
-                        _buildSectionHeader('Do you want to register your own business ?'),
+                        _buildSectionHeader(context: context,'Do you want to register your own business ?'),
                         SizedBox(height: 8,),
                         CustomButton(
                           height: 40,
@@ -209,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildUserHeader() {
+  Widget _buildUserHeader({required BuildContext context}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -248,11 +253,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userData['name']!,
+                  "Aarav Sharma",
                   style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
                 ),
                 Text(
-                  userData['email']!,
+                  "aarav.sharma@example.com",
                   style: context.textTheme.bodyLarge,
                 ),
               ],
@@ -263,7 +268,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title,{required BuildContext context}) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 16, bottom: 8),
       child: Text(
@@ -275,7 +280,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget buildInfoCard({required List<Map<String, dynamic>> infoItems}) {
+  Widget buildInfoCard({required List<Map<String, dynamic>> infoItems, required BuildContext context,}) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -287,6 +292,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           children: infoItems
               .map((item) => _buildInfoRow(
+            context: context,
             onTap: item['onTap'],
             title: item['title'],
             icon: item['icon'],
@@ -298,6 +304,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildInfoRow({
+    required BuildContext context,
     required String title,
     required IconData icon,
     VoidCallback? onTap,} ) {
@@ -614,6 +621,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
 
+
 class LogoutDialog {
   static Future<bool?> show({
     required BuildContext context,
@@ -692,7 +700,8 @@ class LogoutDialog {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
-                          Navigator.of(context).pop(false);
+                          //Navigator.of(context).pop(false);
+                          Navigator.pop(context, false);
                         },
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 14),
@@ -718,7 +727,8 @@ class LogoutDialog {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pop(true);
+                         // Navigator.of(context).pop(true);
+                          Navigator.pop(context, true);
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 14),

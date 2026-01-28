@@ -7,4 +7,9 @@ import '../../data/model/res_login_model.dart';
 
 abstract class ResetPasswordRepository {
   Future<ResResetPasswordModel> sendOtp(ReqResetPasswordModel reqModel);
+  Future<bool> resetPassword(RequestResetPasswordModel reqModel);
+
 }
+
+
+

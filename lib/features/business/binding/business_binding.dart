@@ -5,6 +5,12 @@ import 'package:edu_cluezer/features/filter/presentation/controller/filter_contr
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:get/get.dart';
 
+import '../data/data_source/all_business_data_source.dart';
+import '../data/repository/all_business_repository_impl.dart';
+import '../domain/repository/all_business_repository.dart';
+import '../domain/usecase/all_business_usecase.dart';
+import '../presentation/controller/business_controller.dart';
+
 
 
 class BusinessBinding extends Bindings {
@@ -14,5 +20,10 @@ class BusinessBinding extends Bindings {
     // Get.lazyPut(() => FilterController(), fenix: true);
     Get.lazyPut(() => CreateJobController());
     Get.lazyPut(() => RegBusinessController());
+
+    Get.lazyPut<BusinessDataSource>(() => BusinessDataSourceImpl(apiClient: Get.find()));
+    Get.lazyPut<BusinessRepository>(() => BusinessRepositoryImpl(dataSource: Get.find()));
+    Get.lazyPut(() => GetAllBusinessesUseCase(repository: Get.find()));
+    Get.lazyPut(() => BusinessController(getAllBusinessesUseCase: Get.find()));
   }
 }

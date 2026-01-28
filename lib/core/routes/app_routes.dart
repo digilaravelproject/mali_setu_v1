@@ -40,6 +40,7 @@ import '../../features/profile/binding/profile_binding.dart';
 import '../../features/profile/presentation/page/edit_profile_page.dart';
 import '../../features/search/binding/search_binding.dart';
 import '../../features/search/presentation/page/search_page.dart';
+import '../../features/settings/binding/profile_binding.dart';
 import '../../features/settings/page/update_profile_page.dart';
 import '../helper/logger_helper.dart';
 
@@ -127,7 +128,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.dashboard,
       page: () => const DashboardPage(),
-      bindings: [DashboardBinding(), ProfileBinding(), MatrimonyBinding()],
+      bindings: [DashboardBinding(), ProfileBinding(), MatrimonyBinding(),SettingsBinding()],
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

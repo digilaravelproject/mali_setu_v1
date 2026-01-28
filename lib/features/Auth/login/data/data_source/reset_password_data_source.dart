@@ -8,6 +8,8 @@ import '../model/res_login_model.dart';
 
 abstract class ResetPasswordDataSource {
   Future<ResResetPasswordModel> sendOtp(ReqResetPasswordModel reqModel);
+  Future<bool> resetPassword(RequestResetPasswordModel reqModel);
+
 }
 
 class ResetPasswordDataSourceImpl implements ResetPasswordDataSource {
@@ -28,4 +30,29 @@ class ResetPasswordDataSourceImpl implements ResetPasswordDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<bool> resetPassword(RequestResetPasswordModel reqModel) async {
+    final response = await apiClient.post(
+      ApiConstants.resetPassword,  // ya ApiConstants.authResetPassword
+      data: reqModel.toJson(),
+      handleError: true,
+      showToaster: true,
+    );
+
+    return response.statusCode == 200;
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

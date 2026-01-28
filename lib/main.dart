@@ -10,7 +10,6 @@ import 'init_app.dart';
 Future<void> main() async {
   await initApp();
 
-  
   runApp(MyApp());
 }
 

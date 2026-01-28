@@ -7,7 +7,14 @@ class ResetPasswordUseCase {
 
   ResetPasswordUseCase({required this.repository});
 
-  Future<ResResetPasswordModel> call(ReqResetPasswordModel reqModel) async {
+  Future<ResResetPasswordModel> sendOtp(ReqResetPasswordModel reqModel) async {
     return await repository.sendOtp(reqModel);
   }
+
+  Future<bool> callReset(RequestResetPasswordModel reqModel) async {
+    return await repository.resetPassword(reqModel);
+  }
 }
+
+
+

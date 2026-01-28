@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:edu_cluezer/features/Auth/login/data/model/req_reset_password_model.dart';
@@ -20,40 +19,50 @@ import '../../../../../widgets/custom_snack_bar.dart';
 import '../../data/data_source/login_data_source.dart';
 import '../page/otp_verification_bts.dart';
 
-class ResetPasswordController extends GetxController
-     {
+class ResetPasswordController extends GetxController {
+  final ResetPasswordUseCase resetPasswordUseCase;
+  var resetEmail = ''.obs;
 
-       final ResetPasswordUseCase resetPasswordUseCase;
+  ResetPasswordController({required this.resetPasswordUseCase});
+  // LoginDataSource dataSource;
 
-       ResetPasswordController({required this.resetPasswordUseCase});
- // LoginDataSource dataSource;
-
- // ResetPasswordController({required this.dataSource});
+  // ResetPasswordController({required this.dataSource});
 
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
   var confPasswordController = TextEditingController();
+  var otpController = TextEditingController();
 
- // var isRemember = true.obs;
+  // var isRemember = true.obs;
   var isPasswordVisible = true.obs;
   //var selectedPhone = countries.where((p) => p.dialCode == "91").first.obs;
 
   var countryController = TextEditingController();
   var isLoading = false.obs;
   final formKey = GlobalKey<FormState>();
+  //
+  // @override
+  // void onInit() {
+  //   _initCountry();
+  //   super.onInit();
+  // }
 
   @override
   void onInit() {
-    _initCountry();
     super.onInit();
+
+    // Agar email argument me aaya ho
+    final args = Get.arguments;
+    if (args != null && args['email'] != null) {
+      emailController.text = args['email'];
+    }
   }
 
   @override
   void didChangeDependencies(BuildContext context) {}
 
-
   Future<void> sendOtp() async {
-   if (!formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
 
     try {
       isLoading.value = true;
@@ -62,9 +71,10 @@ class ResetPasswordController extends GetxController
         email: emailController.text.trim(),
       );
 
-      final response = await resetPasswordUseCase(reqModel);
+      final response = await resetPasswordUseCase.sendOtp(reqModel);
 
       if (response.success == true) {
+        resetEmail.value = emailController.text.trim();
 
         // if (response?.user != null) {
         //   await SharedPrefs.setString(
@@ -77,7 +87,12 @@ class ResetPasswordController extends GetxController
         //await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
         Get.snackbar("Success", response.message ?? "OTP send successful");
-        Get.offAllNamed(AppRoutes.resetPasswordScreen);
+        Get.offAllNamed(
+          AppRoutes.resetPasswordScreen,
+          arguments: {
+            'email': resetEmail.value, // pass email to next screen
+          },
+        );
       } else {
         Get.snackbar("Error", response.message ?? "OTP send failed");
       }
@@ -88,6 +103,30 @@ class ResetPasswordController extends GetxController
     }
   }
 
+  Future<void> resetPassword() async {
+    if (!formKey.currentState!.validate()) return;
+    try {
+      isLoading.value = true;
+
+      final reqModel = RequestResetPasswordModel(
+        email: emailController.text,
+        otp: otpController.text,
+        password: passwordController.text,
+        passwordConfirmation: confPasswordController.text,
+      );
+
+      final success = await resetPasswordUseCase.callReset(reqModel);
+
+      if (success) {
+        Get.snackbar("Success", "Password reset successful");
+        Get.offNamed(AppRoutes.login); // ya aapka login route
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void _initCountry() {}
 }

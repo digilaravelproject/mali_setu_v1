@@ -17,4 +17,15 @@ class ResetPasswordRepositoryImpl implements ResetPasswordRepository {
   Future<ResResetPasswordModel> sendOtp(ReqResetPasswordModel reqModel) async {
     return await dataSource.sendOtp(reqModel);
   }
+
+  @override
+  Future<bool> resetPassword(RequestResetPasswordModel reqModel) async {
+    return await dataSource.resetPassword(reqModel);
+  }
+
+
+
 }
+
+
+
