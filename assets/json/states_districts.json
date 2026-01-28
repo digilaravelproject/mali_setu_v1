@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Andhra Pradesh",
+    "districts": [
+      { "name": "Anantapur", "cities": ["Anantapur", "Guntakal", "Hindupur", "Dharmavaram", "Kadiri"] },
+      { "name": "Chittoor", "cities": ["Chittoor", "Tirupati", "Madanapalle", "Palamaner", "Punganur"] },
+      { "name": "East Godavari", "cities": ["Kakinada", "Rajahmundry", "Amalapuram", "Peddapuram", "Tuni"] },
+      { "name": "Guntur", "cities": ["Guntur", "Tenali", "Narasaraopet", "Chilakaluripet", "Mangalagiri"] },
+      { "name": "Krishna", "cities": ["Vijayawada", "Machilipatnam", "Gudivada", "Nuzvid", "Jaggayyapeta"] },
+      { "name": "Kurnool", "cities": ["Kurnool", "Nandyal", "Adoni", "Yemmiganur", "Dhone"] },
+      { "name": "Prakasam", "cities": ["Ongole", "Markapur", "Kandukur", "Chirala", "Giddalur"] },
+      { "name": "Sri Potti Sriramulu Nellore", "cities": ["Nellore", "Kavali", "Gudur", "Kovur", "Atmakur"] },
+      { "name": "Srikakulam", "cities": ["Srikakulam", "Amadalavalasa", "Ichchapuram", "Palasa", "Tekkali"] },
+      { "name": "Visakhapatnam", "cities": ["Visakhapatnam", "Anakapalle", "Bheemunipatnam", "Paderu", "Narsipatnam"] },
+      { "name": "Vizianagaram", "cities": ["Vizianagaram", "Parvathipuram", "Bobbili", "Salur", "Gajapathinagaram"] },
+      { "name": "West Godavari", "cities": ["Eluru", "Bhimavaram", "Tadepalligudem", "Tanuku", "Nidadavole"] },
+      { "name": "YSR Kadapa", "cities": ["Kadapa", "Proddatur", "Rayachoti", "Pulivendula", "Jammalamadugu"] }
+    ]
+  },
+  {
+    "name": "Maharashtra",
+    "districts": [
+      { "name": "Mumbai City", "cities": ["Colaba", "Fort", "Dadar", "Bandra", "Andheri"] },
+      { "name": "Mumbai Suburban", "cities": ["Borivali", "Chembur", "Kurla", "Malad"] },
+      { "name": "Pune", "cities": ["Pune", "Pimpri-Chinchwad", "Bhor", "Baramati"] },
+      { "name": "Nagpur", "cities": ["Nagpur", "Hingna", "Katol"] },
+      { "name": "Thane", "cities": ["Thane", "Kalyan", "Navi Mumbai", "Bhiwandi"] },
+      { "name": "Nashik", "cities": ["Nashik", "Malegaon", "Niphad"] },
+      { "name": "Aurangabad", "cities": ["Aurangabad", "Paithan", "Kannad"] },
+      { "name": "Solapur", "cities": ["Solapur", "Pandharpur", "Barshi"] },
+      { "name": "Amravati", "cities": ["Amravati", "Achalpur", "Daryapur"] },
+      { "name": "Akola", "cities": ["Akola", "Murtizapur", "Telhara"] },
+      { "name": "Washim", "cities": ["Washim", "Mangrulpir"] },
+      { "name": "Buldhana", "cities": ["Buldhana", "Malkapur", "Khamgaon"] },
+      { "name": "Yavatmal", "cities": ["Yavatmal", "Darwha", "Pusad"] },
+      { "name": "Wardha", "cities": ["Wardha", "Deoli", "Seloo"] },
+      { "name": "Gondia", "cities": ["Gondia", "Arjuni Morgaon"] },
+      { "name": "Chandrapur", "cities": ["Chandrapur", "Ballarpur", "Warora"] },
+      { "name": "Bhandara", "cities": ["Bhandara", "Tumsar", "Pauni"] },
+      { "name": "Raigad", "cities": ["Alibag", "Panvel", "Mahad"] },
+      { "name": "Ratnagiri", "cities": ["Ratnagiri", "Chiplun", "Lanja"] },
+      { "name": "Sindhudurg", "cities": ["Kudal", "Malvan", "Sawantwadi"] },
+      { "name": "Kolhapur", "cities": ["Kolhapur", "Ichalkaranji", "Radhanagari"] },
+      { "name": "Sangli", "cities": ["Sangli", "Miraj", "Palus"] },
+      { "name": "Satara", "cities": ["Satara", "Wai", "Koregaon"] },
+      { "name": "Jalgaon", "cities": ["Jalgaon", "Bhusawal", "Amalner"] },
+      { "name": "Dhule", "cities": ["Dhule", "Shindkheda", "Sakri"] },
+      { "name": "Nandurbar", "cities": ["Nandurbar", "Shahada", "Taloda"] },
+      { "name": "Ahmednagar", "cities": ["Ahmednagar", "Shrirampur", "Sangamner"] },
+      { "name": "Beed", "cities": ["Beed", "Kaij", "Georai"] },
+      { "name": "Latur", "cities": ["Latur", "Ausa", "Nilanga"] },
+      { "name": "Osmanabad", "cities": ["Osmanabad", "Tuljapur", "Umarga"] },
+      { "name": "Parbhani", "cities": ["Parbhani", "Selu", "Jintur"] },
+      { "name": "Hingoli", "cities": ["Hingoli", "Aundha"] },
+      { "name": "Gadchiroli", "cities": ["Gadchiroli", "Chamorshi"] }
+    ]
+  },
+  {
+    "name": "Delhi (NCT)",
+    "districts": [
+      { "name": "New Delhi", "cities": ["Connaught Place", "Chanakyapuri"] },
+      { "name": "North Delhi", "cities": ["Civil Lines", "Model Town"] },
+      { "name": "South Delhi", "cities": ["Hauz Khas", "Saket"] },
+      { "name": "East Delhi", "cities": ["Preet Vihar", "Mayur Vihar"] },
+      { "name": "West Delhi", "cities": ["Rajouri Garden", "Janakpuri"] },
+      { "name": "Central Delhi", "cities": ["Daryaganj", "Karol Bagh"] },
+      { "name": "North East Delhi", "cities": ["Seelampur", "Shahdara"] },
+      { "name": "South West Delhi", "cities": ["Dwarka", "Najafgarh"] },
+      { "name": "North West Delhi", "cities": ["Rohini", "Pitampura"] }
+    ]
+  },
+  {
+    "name": "Karnataka",
+    "districts": [
+      { "name": "Bangalore Urban", "cities": ["Bangalore", "Yelahanka", "Kengeri"] },
+      { "name": "Bangalore Rural", "cities": ["Devanahalli", "Doddaballapur"] },
+      { "name": "Mysore", "cities": ["Mysore", "Nanjangud"] },
+      { "name": "Belgaum", "cities": ["Belgaum", "Bailhongal", "Athani"] },
+      { "name": "Mangalore", "cities": ["Mangalore", "Ullal", "Moodabidri"] },
+      { "name": "Hubli-Dharwad", "cities": ["Hubli", "Dharwad", "Navalgund"] }
+    ]
+  },
+  {
+    "name": "Tamil Nadu",
+    "districts": [
+      { "name": "Chennai", "cities": ["Chennai", "Tambaram"] },
+      { "name": "Coimbatore", "cities": ["Coimbatore", "Pollachi"] },
+      { "name": "Madurai", "cities": ["Madurai", "Melur", "Thirumangalam"] },
+      { "name": "Trichy", "cities": ["Trichy", "Srirangam", "Thuraiyur"] }
+    ]
+  },
+  {
+    "name": "Kerala",
+    "districts": [
+      { "name": "Thiruvananthapuram", "cities": ["Thiruvananthapuram", "Neyyattinkara", "Attingal"] },
+      { "name": "Kochi", "cities": ["Kochi", "Aluva", "Kalamassery"] },
+      { "name": "Kozhikode", "cities": ["Kozhikode", "Vadakara", "Ramanattukara"] }
+    ]
+  },
+  {
+    "name": "Gujarat",
+    "districts": [
+      { "name": "Ahmedabad", "cities": ["Ahmedabad", "Gandhinagar", "Sanand"] },
+      { "name": "Surat", "cities": ["Surat", "Udhna", "Kadodara"] },
+      { "name": "Vadodara", "cities": ["Vadodara", "Ankleshwar", "Bharuch"] }
+    ]
+  },
+  {
+    "name": "Rajasthan",
+    "districts": [
+      { "name": "Jaipur", "cities": ["Jaipur", "Sikar", "Tonk"] },
+      { "name": "Jodhpur", "cities": ["Jodhpur", "Pali", "Bilara"] },
+      { "name": "Udaipur", "cities": ["Udaipur", "Rajsamand", "Nathdwara"] }
+    ]
+  },
+  {
+    "name": "Uttar Pradesh",
+    "districts": [
+      { "name": "Lucknow", "cities": ["Lucknow", "Barabanki", "Malihabad"] },
+      { "name": "Kanpur", "cities": ["Kanpur", "Unnao", "Bithoor"] },
+      { "name": "Varanasi", "cities": ["Varanasi", "Mirzapur", "Chandauli"] }
+    ]
+  },
+  {
+    "name": "West Bengal",
+    "districts": [
+      { "name": "Kolkata", "cities": ["Kolkata", "Howrah", "Barrackpore"] },
+      { "name": "Darjeeling", "cities": ["Darjeeling", "Siliguri", "Kurseong"] },
+      { "name": "Durgapur", "cities": ["Durgapur", "Asansol", "Raniganj"] }
+    ]
+  }
+]

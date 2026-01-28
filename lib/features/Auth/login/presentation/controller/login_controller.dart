@@ -6,6 +6,8 @@ import '../../../../../core/constent/app_constants.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/storage/shared_prefs.dart';
 import '../../../../../core/storage/token_manger.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import '../../data/model/res_login_model.dart';
 import '../../data/model/req_login_model.dart';
 import '../../domain/usecase/login_usecase.dart';
 
@@ -50,9 +52,11 @@ class LoginController extends GetxController {
         
         // Save User Data
         if (response.data?.user != null) {
-           await SharedPrefs.setString(
+          final user = response.data!.user!;
+          Get.find<AuthService>().currentUser.value = user;
+          await SharedPrefs.setString(
             AppConstants.userDataPref,
-            jsonEncode(response.data!.user!.toJson()),
+            jsonEncode(user.toJson()),
           );
         }
 

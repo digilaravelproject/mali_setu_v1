@@ -2,14 +2,18 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/core/helper/string_extensions.dart';
 
 class VolunteerProfileController extends GetxController {
+  final authService = Get.find<AuthService>();
+
   // Volunteer Data
-  final volunteerData = {
-    'name': 'Rahul Sharma',
-    'role': 'Senior Volunteer',
-    'profileImage': 'https://randomuser.me/api/portraits/men/35.jpg',
-    'joinDate': '15 March 2022',
+  Map<String, String> get volunteerData => {
+    'name': authService.currentUser.value?.name.toTitleCase() ?? 'Rahul Sharma',
+    'role': authService.currentUser.value?.occupation.toTitleCase() ?? 'Community Volunteer',
+    'profileImage': 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
+    'joinDate': authService.currentUser.value?.createdAt ?? 'Jan 2024',
     'totalHours': '245',
     'completedProjects': '18',
     'rating': '4.8',

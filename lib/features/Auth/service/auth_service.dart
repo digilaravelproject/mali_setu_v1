@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart'; // Added
 import 'package:get/get.dart';
 
 import '../../../core/constent/api_constants.dart';
@@ -7,6 +8,11 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/storage/shared_prefs.dart';
 import '../../../core/storage/token_manger.dart';
+import '../login/data/model/res_login_model.dart';
+import '../login/data/data_source/login_data_source.dart'; // Added
+import '../login/data/repository/login_repository_impl.dart'; // Added
+import '../login/domain/usecase/logout_usecase.dart'; // Added
+import '../../../../core/routes/app_routes.dart'; // Added
 
 class AuthService extends GetxService {
   final ApiClient _apiClient = Get.find<ApiClient>();
@@ -14,16 +20,36 @@ class AuthService extends GetxService {
   // Observable for login state
   final isLoggedIn = false.obs;
   final isCompanyLogin = false.obs;
+  final currentUser = Rxn<User>();
+
+  // Added for logout functionality
+  late final LogoutUseCase _logoutUseCase;
 
   @override
   void onInit() {
     super.onInit();
     _checkLoginStatus();
+    
+    // Initialize LogoutUseCase (following project structure)
+    final dataSource = LoginDataSourceImpl(apiClient: _apiClient);
+    final repository = LoginRepositoryImpl(dataSource: dataSource);
+    _logoutUseCase = LogoutUseCase(repository: repository);
   }
 
   void _checkLoginStatus() {
     isLoggedIn.value = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
     isCompanyLogin.value = SharedPrefs.getBool(AppConstants.isCompanyLoginPref) ?? false;
+    
+    if (isLoggedIn.value) {
+      final userJson = SharedPrefs.getString(AppConstants.userDataPref);
+      if (userJson != null) {
+        try {
+          currentUser.value = User.fromJson(jsonDecode(userJson));
+        } catch (e) {
+          currentUser.value = null;
+        }
+      }
+    }
   }
 
   // ==================== USER AUTH ====================
@@ -55,14 +81,18 @@ class AuthService extends GetxService {
 
           // Save user data
           if (data['data'] != null && data['data']['user'] != null) {
-             await SharedPrefs.setString(
+            final user = User.fromJson(data['data']['user']);
+            currentUser.value = user;
+            await SharedPrefs.setString(
               AppConstants.userDataPref,
-              jsonEncode(data['data']['user']),
+              jsonEncode(user.toJson()),
             );
           } else if (data['user'] != null) {
-             await SharedPrefs.setString(
+            final user = User.fromJson(data['user']);
+            currentUser.value = user;
+            await SharedPrefs.setString(
               AppConstants.userDataPref,
-              jsonEncode(data['user']),
+              jsonEncode(user.toJson()),
             );
           }
 
@@ -171,6 +201,26 @@ class AuthService extends GetxService {
     }
   }
 
-
-
+  /// Process user logout
+  Future<void> logout() async {
+    try {
+      // Call Logout API
+      await _logoutUseCase();
+    } catch (e) {
+      debugPrint("Logout API error: $e");
+      // Even if API fails, we should clear local data
+    } finally {
+      // Clear local data
+      currentUser.value = null;
+      isLoggedIn.value = false;
+      isCompanyLogin.value = false;
+      await TokenManager.clearToken();
+      await SharedPrefs.remove(AppConstants.userDataPref);
+      await SharedPrefs.setBool(AppConstants.isLoggedInPref, false);
+      await SharedPrefs.setBool(AppConstants.isCompanyLoginPref, false);
+      
+      // Navigate to Login
+      Get.offAllNamed(AppRoutes.login);
+    }
+  }
 }

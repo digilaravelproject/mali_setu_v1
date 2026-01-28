@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -115,24 +116,26 @@ class UpProfileController extends GetxController {
   final states = ["Uttar Pradesh", "Delhi", "Bihar", "Maharashtra", "Karnataka"];
   final districts = ["Lucknow", "Kanpur Nagar", "New Delhi", "Mumbai Suburban"];
 
-  // Load initial data (You can load from API)
+  // Load initial data from AuthService
   void loadUserData() {
-    // Example data - replace with API call
-    fullNameCtrl.text = "Rajesh Kumar";
-    ageCtrl.text = "32";
-    phoneNumberCtrl.text = "+91 9876543210";
-    occupationCtrl.text = "Software Engineer";
-    emailCtrl.text = "rajesh.kumar@example.com";
+    final user = Get.find<AuthService>().currentUser.value;
+    if (user != null) {
+      fullNameCtrl.text = user.name ?? "";
+      ageCtrl.text = user.age?.toString() ?? "";
+      phoneNumberCtrl.text = user.phone ?? "";
+      occupationCtrl.text = user.occupation ?? "";
+      emailCtrl.text = user.email ?? "";
 
-    streetAddressCtrl.text = "Skyline Apartments, 404";
-    nearbyLocationCtrl.text = "Opposite Central Mall";
-    roadNumberCtrl.text = "MG Road, Lane 7";
-    cityCtrl.text = "Mumbai";
-    stateCtrl.text = "Maharashtra";
-    districtCtrl.text = "Mumbai Suburban";
-    pincodeCtrl.text = "400001";
-    sectorCtrl.text = "Bandra West";
-    destinationCtrl.text = "Commercial Complex";
+      streetAddressCtrl.text = user.address ?? "";
+      nearbyLocationCtrl.text = user.nearbyLocation ?? "";
+      roadNumberCtrl.text = user.roadNumber ?? "";
+      cityCtrl.text = user.city ?? "";
+      stateCtrl.text = user.state ?? "";
+      districtCtrl.text = user.district ?? "";
+      pincodeCtrl.text = user.pincode ?? "";
+      sectorCtrl.text = user.sector ?? "";
+      destinationCtrl.text = user.destination ?? "";
+    }
   }
 
   // Profile Image Methods

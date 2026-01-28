@@ -73,6 +73,7 @@ class User {
   String? emailVerifiedAt;
   String? createdAt;
   String? updatedAt;
+  String? profileImage;
 
   User(
       {this.id,
@@ -100,7 +101,8 @@ class User {
       this.adminNotes,
       this.emailVerifiedAt,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.profileImage});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -129,6 +131,7 @@ class User {
     emailVerifiedAt = json['email_verified_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    profileImage = json['profile_image'];
   }
 
   Map<String, dynamic> toJson() {
@@ -159,6 +162,7 @@ class User {
     data['email_verified_at'] = emailVerifiedAt;
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
+    data['profile_image'] = profileImage;
     return data;
   }
 }

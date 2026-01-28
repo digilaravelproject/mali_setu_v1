@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'core/network/api_client.dart';
 import 'core/storage/shared_prefs.dart';
+import 'features/Auth/service/auth_service.dart';
 
 
 Future<void> initApp() async {
@@ -21,5 +22,6 @@ Future<void> initApp() async {
   // Initialize ApiClient as a singleton in GetX
   Get.put(ApiClient(), permanent: true);
 
-
+  // Initialize AuthService as a permanent singleton
+  Get.put(AuthService(), permanent: true);
 }

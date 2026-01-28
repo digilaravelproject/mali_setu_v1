@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/cupertino.dart';
@@ -5,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 
+import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import '../../../core/utils/app_assets.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,32 +20,36 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final userData = {
-    'profileImage': 'https://randomuser.me/api/portraits/men/32.jpg',
-    'fullName': 'Aarav Sharma',
-    'email': 'aarav.sharma@example.com',
-    'mobile': '+91 9876543210',
-    'age': '28 Years',
-    'phoneNumber': '+91 9876543210',
-    'occupation': 'Software Engineer',
-    'referralCode': 'REF2024ABC123',
-    'streetAddress': '123 Tech Park',
-    'nearbyLocation': 'Near Infosys Campus',
-    'roadNumber': 'Road No. 5',
-    'city': 'Bangalore',
-    'state': 'Karnataka',
-    'district': 'Bangalore Urban',
-    'pincode': '560001',
-    'sector': 'Electronic City',
-    'destination': 'Phase 2',
-    'accountStatus': 'Active',
-    'joinedDate': '15 Jan 2022',
+  final authService = Get.find<AuthService>();
+
+  User? get user => authService.currentUser.value;
+
+  Map<String, String> get userData => {
+    'profileImage': '',
+    'fullName': user?.name.toTitleCase() ?? 'Name Not Available',
+    'email': user?.email ?? 'Email Not Available',
+    'mobile': user?.phone ?? 'N/A',
+    'age': user?.age != null ? '${user!.age} Years' : 'N/A',
+    'phoneNumber': user?.phone ?? 'N/A',
+    'occupation': user?.occupation.toTitleCase() ?? 'N/A',
+    'referralCode': user?.reffralCode ?? 'N/A',
+    'streetAddress': user?.address ?? 'N/A',
+    'nearbyLocation': user?.nearbyLocation ?? 'N/A',
+    'roadNumber': user?.roadNumber ?? 'N/A',
+    'city': user?.city ?? 'N/A',
+    'state': user?.state ?? 'N/A',
+    'district': user?.district ?? 'N/A',
+    'pincode': user?.pincode ?? 'N/A',
+    'sector': user?.sector ?? 'N/A',
+    'destination': user?.destination ?? 'N/A',
+    'accountStatus': user?.status ?? 'Active',
+    'joinedDate': user?.createdAt ?? 'N/A',
     'membershipType': 'Premium',
   };
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
@@ -77,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: _buildAddressInfo(),
             ),
 
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: CustomButton(
@@ -89,18 +97,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }),
             ),
 
-            // Account Information
-            // _buildSectionCard(
-            //   title: 'ACCOUNT INFORMATION',
-            //   icon: Icons.account_circle,
-            //   child: _buildAccountInfo(),
-            // ),
-
             const SizedBox(height: 30),
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildProfileHeader() {
@@ -135,18 +136,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 3,
                   ),
                 ),
-                child: ClipOval(
-                  child: Image.network(
-                    '',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      // fallback to local asset image
-                      return Image.asset(
-                        AppAssets.imgAppLogo, // your asset image path
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
+                child: CustomImageView(
+                  url: user?.profileImage,
+                  imagePath: AppAssets.imgAppLogo,
+                  fit: BoxFit.cover,
                 ),
               ),
              /* Container(

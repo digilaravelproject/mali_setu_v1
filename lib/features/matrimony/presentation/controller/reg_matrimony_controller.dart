@@ -26,6 +26,19 @@ class RegMatrimonyController extends GetxController {
   final maritalStatus = ''.obs;
   final eatingHabit = ''.obs;
   final dosh = ''.obs;
+  final currentStep = 0.obs;
+
+  void nextStep() {
+    if (currentStep.value < 3) {
+      currentStep.value++;
+    }
+  }
+
+  void previousStep() {
+    if (currentStep.value > 0) {
+      currentStep.value--;
+    }
+  }
 
   /// Dropdown Data
   final countries = ["India", "UK", "USA"];

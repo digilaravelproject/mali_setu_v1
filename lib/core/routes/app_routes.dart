@@ -24,7 +24,6 @@ import '../../features/Auth/login/presentation/page/reset_password_screen.dart';
 import '../../features/Auth/register/binding/register_binding.dart';
 import '../../features/Auth/register/presentation/page/register_page.dart';
 import '../../features/_init/binding/init_binding.dart';
-import '../../features/_init/presentation/page/intro_page.dart';
 import '../../features/_init/presentation/page/splash_page.dart';
 import '../../features/business/presentation/page/applied_job_list_screen.dart';
 import '../../features/business/presentation/page/register_your_business_screen.dart';

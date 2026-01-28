@@ -12,5 +12,6 @@ class ApiConstants {
     static const String authRegister = "auth/register";
     static const String authLogin = "auth/login";
     static const String authChangePassword = "auth/change-password";
+    static const String authLogout = "auth/logout";
 
 }

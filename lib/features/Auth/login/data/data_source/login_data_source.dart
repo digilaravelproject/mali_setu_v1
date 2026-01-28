@@ -5,6 +5,7 @@ import '../model/res_login_model.dart';
 
 abstract class LoginDataSource {
   Future<ResLoginModel> login(ReqLoginModel reqModel);
+  Future<ResLoginModel> logout();
 }
 
 class LoginDataSourceImpl implements LoginDataSource {
@@ -20,6 +21,18 @@ class LoginDataSourceImpl implements LoginDataSource {
         data: reqModel.toJson(),
       );
       
+      return ResLoginModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ResLoginModel> logout() async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.authLogout,
+      );
       return ResLoginModel.fromJson(response.data);
     } catch (e) {
       rethrow;

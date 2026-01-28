@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 
 import '../../../explore/presentation/page/explore_page.dart';
 import '../controller/matrimony_controller.dart';
+import 'package:edu_cluezer/core/utils/app_assets.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
 class MatrimonyPage extends GetWidget<MatrimonyController> {
   const MatrimonyPage({super.key});
@@ -25,20 +27,23 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             ),
           ),
           centerTitle: true,
-          leading: Padding(
-            padding: const EdgeInsets.all(6),
-            child: ClipOval(
-              child: SizedBox(
-                width: 45,
-                height: 45,
-                child: CustomImageView(
-                  url:
-                      "https://img.freepik.com/free-photo/front-view-business-woman-suit_23-2148603018.jpg?semt=ais_hybrid&w=740&q=80",
-                  fit: BoxFit.cover,
+          leading: Obx(() {
+            final user = Get.find<AuthService>().currentUser.value;
+            return Padding(
+              padding: const EdgeInsets.all(6),
+              child: ClipOval(
+                child: SizedBox(
+                  width: 45,
+                  height: 45,
+                  child: CustomImageView(
+                    url:  user?.profileImage,
+                    imagePath: AppAssets.imgAppLogo,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          }),
           actions: [
             IconButton(
               onPressed: (){

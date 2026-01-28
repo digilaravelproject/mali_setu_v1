@@ -4,4 +4,5 @@ import '../../data/model/res_login_model.dart';
 
 abstract class LoginRepository {
   Future<ResLoginModel> login(ReqLoginModel reqModel);
+  Future<ResLoginModel> logout();
 }

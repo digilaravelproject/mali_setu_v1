@@ -12,4 +12,9 @@ class LoginRepositoryImpl implements LoginRepository {
   Future<ResLoginModel> login(ReqLoginModel reqModel) async {
     return await dataSource.login(reqModel);
   }
+
+  @override
+  Future<ResLoginModel> logout() async {
+    return await dataSource.logout();
+  }
 }

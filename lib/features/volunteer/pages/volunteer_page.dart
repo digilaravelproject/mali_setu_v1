@@ -246,20 +246,33 @@ class VolunteerCard extends StatelessWidget {
                         SizedBox(height: 8),
 
                         // Rating and Experience
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          runSpacing: 4,
                           children: [
-                            Icon(Icons.star, size: 16, color: Colors.amber),
-                            SizedBox(width: 4),
-                            Text(
-                              '${volunteer.rating} (${volunteer.totalReviews})',
-                              style: TextStyle(fontSize: 13),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.star, size: 16, color: Colors.amber),
+                                SizedBox(width: 4),
+                                Text(
+                                  '${volunteer.rating} (${volunteer.totalReviews})',
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ],
                             ),
-                            SizedBox(width: 16),
-                            Icon(Icons.work_history, size: 16, color: Colors.blue),
-                            SizedBox(width: 4),
-                            Text(
-                              '${volunteer.experience} experience',
-                              style: TextStyle(fontSize: 13),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.work_history,
+                                    size: 16, color: Colors.blue),
+                                SizedBox(width: 4),
+                                Text(
+                                  '${volunteer.experience} experience',
+                                  style: TextStyle(fontSize: 13),
+                                ),
+                              ],
                             ),
                           ],
                         ),

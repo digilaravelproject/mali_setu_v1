@@ -1,9 +1,14 @@
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../widgets/custom_buttons.dart';
+import '../../../widgets/custom_image_view.dart';
+import '../../../core/utils/app_assets.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,11 +18,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final userData = {
-    'name': 'Aarav Sharma',
-    'email': 'aarav.sharma@example.com',
-    'role': 'Premium User',
-  };
+  final authService = Get.find<AuthService>();
 
   @override
   Widget build(BuildContext context) {
@@ -210,57 +211,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildUserHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: context.theme.primaryColorLight,
-        borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(40),
-          bottomLeft: Radius.circular(40),
+    return Obx(() {
+      final user = authService.currentUser.value;
+      final name = user?.name ?? 'Guest User';
+      final email = user?.email ?? 'Sign in to access more features';
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: context.theme.primaryColorLight,
+          borderRadius: const BorderRadius.only(
+            bottomRight: Radius.circular(40),
+            bottomLeft: Radius.circular(40),
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          InkWell(
-            onTap: (){
-              Get.toNamed(AppRoutes.profileScreen);
-            },
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: context.theme.primaryColor,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.person,
-                  color: context.theme.cardColor,
-                  size: 30,
-                ),
+        child: Row(
+          children: [
+            InkWell(
+              onTap: () {
+                Get.toNamed(AppRoutes.profileScreen);
+              },
+              child: CustomImageView(
+                url: user?.profileImage,
+                height: 55,
+                width: 55,
+                radius: BorderRadius.circular(25),
+                imagePath: AppAssets.imgAppLogo, // Fallback asset
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  userData['name']!,
-                  style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
-                ),
-                Text(
-                  userData['email']!,
-                  style: context.textTheme.bodyLarge,
-                ),
-              ],
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name.toTitleCase(),
+                    style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
+                  ),
+                  Text(
+                    email,
+                    style: context.textTheme.bodyLarge,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildSectionHeader(String title) {
@@ -719,6 +719,7 @@ class LogoutDialog {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop(true);
+                          Get.find<AuthService>().logout();
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 14),
