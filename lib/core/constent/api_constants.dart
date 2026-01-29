@@ -44,7 +44,9 @@ class ApiConstants {
     static const String searchMatrimony = "search/matrimony";
     static const String connectionRequest = "matrimony/connection-request";
     static const String connectionRequests = "matrimony/connection-requests";
-    static const String respondConnectionRequest = "matrimony/connection-request/respond";
+    static const String matrimonyConversations = "matrimony/conversations";
+    static const String matrimonySendMessage = "matrimony/send-message";
+    static const String matrimonyMessages = "matrimony/messages"; // matrimony/messages/{conversation_id}
 
     // Job Api
     static const String createJobs = "jobs";

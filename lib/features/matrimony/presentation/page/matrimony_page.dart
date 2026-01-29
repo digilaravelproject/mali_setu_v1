@@ -208,7 +208,10 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               
               if (isAccepted) {
                 return IconButton(
-                  onPressed: () => Get.snackbar("Chat", "Chat feature is coming soon!"),
+                  onPressed: () => Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                    'conversation_id': null,
+                    'other_user_id': currentProfile.user?.id,
+                  }),
                   icon: const Icon(Icons.chat_bubble_outline, size: 30, color: Colors.purple),
                 );
               }

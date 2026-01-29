@@ -1,4 +1,5 @@
 import '../../data/data_source/matrimony_data_source.dart';
+import '../../data/model/matrimony_chat_response.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../domain/repository/matrimony_repository.dart';
 
@@ -41,7 +42,22 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   }
 
   @override
-  Future<dynamic> respondToConnectionRequest(Map<String, dynamic> data) async {
-    return await dataSource.respondToConnectionRequest(data);
+  Future<dynamic> respondToConnectionRequest(int requestId, Map<String, dynamic> data) async {
+    return await dataSource.respondToConnectionRequest(requestId, data);
+  }
+
+  @override
+  Future<MatrimonyConversationResponse> getConversations() async {
+    return await dataSource.getConversations();
+  }
+
+  @override
+  Future<MatrimonyMessagesResponse> getMessages(int conversationId) async {
+    return await dataSource.getMessages(conversationId);
+  }
+
+  @override
+  Future<dynamic> sendMessage(Map<String, dynamic> data) async {
+    return await dataSource.sendMessage(data);
   }
 }

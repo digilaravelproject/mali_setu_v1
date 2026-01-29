@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/matrimony/data/model/search_matrimony_response.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_details_controller.dart';
@@ -359,7 +360,10 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 isActionable = true;
                 buttonColor = Colors.green;
                 onPressed = () {
-                   Get.snackbar("Chat", "Chat feature is coming soon!");
+                   Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                     'conversation_id': null,
+                     'other_user_id': profile.user?.id,
+                   });
                 };
               }
 

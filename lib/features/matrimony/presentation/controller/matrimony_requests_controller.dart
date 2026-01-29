@@ -1,5 +1,7 @@
 import 'package:edu_cluezer/features/matrimony/data/model/connection_requests_response.dart';
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_controller.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_members_controller.dart';
 import 'package:get/get.dart';
 
 class MatrimonyRequestsController extends GetxController {
@@ -33,14 +35,24 @@ class MatrimonyRequestsController extends GetxController {
   Future<void> respondToRequest(int requestId, String status) async {
     try {
       final data = {
-        "request_id": requestId.toString(),
         "status": status.toLowerCase(),
+        "response_message": "NA"
       };
       
-      final response = await _repository.respondToConnectionRequest(data);
+      final response = await _repository.respondToConnectionRequest(requestId, data);
       if (response['success'] == true) {
         Get.snackbar("Success", response['message'] ?? "Request $status successfully");
-        fetchRequests(); // Refresh the list
+        
+        // Refresh the local requests list
+        fetchRequests(); 
+        
+        // Proactively refresh other relevant controllers if they are active
+        if (Get.isRegistered<MatrimonyMembersController>()) {
+          Get.find<MatrimonyMembersController>().fetchMembers();
+        }
+        if (Get.isRegistered<MatrimonyController>()) {
+          Get.find<MatrimonyController>().fetchProfiles();
+        }
       } else {
         Get.snackbar("Error", response['message'] ?? "Failed to update request");
       }

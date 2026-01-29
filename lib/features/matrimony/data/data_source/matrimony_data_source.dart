@@ -1,6 +1,7 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import '../model/matrimony_response.dart';
+import '../model/matrimony_chat_response.dart';
 import '../model/search_matrimony_response.dart';
 import '../model/connection_requests_response.dart';
 
@@ -11,7 +12,10 @@ abstract class MatrimonyDataSource {
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);
   Future<dynamic> sendConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectionRequests();
-  Future<dynamic> respondToConnectionRequest(Map<String, dynamic> data);
+  Future<dynamic> respondToConnectionRequest(int requestId, Map<String, dynamic> data);
+  Future<MatrimonyConversationResponse> getConversations();
+  Future<MatrimonyMessagesResponse> getMessages(int conversationId);
+  Future<dynamic> sendMessage(Map<String, dynamic> data);
 }
 
 class MatrimonyDataSourceImpl implements MatrimonyDataSource {
@@ -56,8 +60,26 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   }
 
   @override
-  Future<dynamic> respondToConnectionRequest(Map<String, dynamic> data) async {
-    final response = await apiClient.post(ApiConstants.respondConnectionRequest, data: data);
+  Future<dynamic> respondToConnectionRequest(int requestId, Map<String, dynamic> data) async {
+    final response = await apiClient.put("${ApiConstants.connectionRequest}/$requestId", data: data);
+    return response.data;
+  }
+
+  @override
+  Future<MatrimonyConversationResponse> getConversations() async {
+    final response = await apiClient.get(ApiConstants.matrimonyConversations);
+    return MatrimonyConversationResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<MatrimonyMessagesResponse> getMessages(int conversationId) async {
+    final response = await apiClient.get("${ApiConstants.matrimonyMessages}/$conversationId");
+    return MatrimonyMessagesResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<dynamic> sendMessage(Map<String, dynamic> data) async {
+    final response = await apiClient.post(ApiConstants.matrimonySendMessage, data: data);
     return response.data;
   }
 }

@@ -22,8 +22,10 @@ import 'package:get/get.dart';
 import '../../features/matrimony/binding/matrimony_details_binding.dart';
 import '../../features/matrimony/binding/matrimony_requests_binding.dart';
 import '../../features/matrimony/binding/matrimony_members_binding.dart';
+import '../../features/matrimony/binding/matrimony_chat_binding.dart';
 import '../../features/matrimony/presentation/page/matrimony_requests_screen.dart';
 import '../../features/matrimony/presentation/page/matrimony_members_screen.dart';
+import '../../features/matrimony/presentation/page/matrimony_chat_screen.dart';
 
 import '../../features/Auth/login/binding/login_binding.dart';
 import '../../features/Auth/login/presentation/page/login_page.dart';
@@ -83,6 +85,7 @@ class AppRoutes {
   static const String matrimonyProfileScreen = "/matrimonyProfileScreen";
   static const String matrimonyRequests = '/matrimonyRequests';
   static const String matrimonyMembers = '/matrimonyMembers';
+  static const String matrimonyChat = '/matrimonyChat';
   static const String categoryDetails = "/categoryDetails";
   static const String jobAppliers = "/jobAppliers";
 }
@@ -292,6 +295,13 @@ class AppPages {
       name: AppRoutes.matrimonyMembers,
       page: () => const MatrimonyMembersScreen(),
       binding: MatrimonyMembersBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.matrimonyChat,
+      page: () => const MatrimonyChatScreen(),
+      binding: MatrimonyChatBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

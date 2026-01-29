@@ -140,7 +140,10 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
             onPressed: () {
-              Get.snackbar("Chat", "Chat feature coming soon!");
+               Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                 'conversation_id': null, // Can be improved if we have conv ID in member model
+                 'other_user_id': user?.id,
+               });
             },
           ),
         ],
