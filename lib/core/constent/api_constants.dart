@@ -42,6 +42,9 @@ class ApiConstants {
     // Matrimony Api
     static const String matrimonyProfile = "matrimony/profile";
 
+    // Volunteer Api
+    static const String volunteerProfile = "volunteer/profile";
+
     // Job Api
     static const String createJobs = "jobs";
     static const String jobsById = "jobs";
