@@ -10,6 +10,8 @@ import '../../data/model/user_profile_data.dart';
 import '../../../business/data/model/res_all_business_model.dart';
 import '../../../business/domain/usecase/get_business_categories_usecase.dart';
 import '../../../business/domain/repository/all_business_repository.dart';
+import '../../domain/usecase/get_banners_usecase.dart';
+import '../../data/model/banner_model.dart';
 
 class HomeController extends GetxController {
   final RxInt currentIndex = 0.obs;
@@ -20,17 +22,38 @@ class HomeController extends GetxController {
   final RxBool isHeartSelected = false.obs;
   final RxBool isShareSelected = false.obs;
   
+  // Banners
+  final GetBannersUseCase getBannersUseCase;
+  final RxList<BannerData> banners = <BannerData>[].obs;
+  final RxBool isLoadingBanners = false.obs;
+  
   // Categories
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
   final RxList<Category> categories = <Category>[].obs;
   final RxBool isLoadingCategories = false.obs;
 
-  HomeController({required this.getBusinessCategoriesUseCase});
+  HomeController({
+    required this.getBusinessCategoriesUseCase,
+    required this.getBannersUseCase,
+  });
   
   @override
   void onInit() {
     super.onInit();
     fetchCategories();
+    fetchBanners();
+  }
+
+  Future<void> fetchBanners() async {
+    try {
+      isLoadingBanners.value = true;
+      final response = await getBannersUseCase();
+      banners.assignAll(response.data);
+    } catch (e) {
+      print("Error fetching home banners: $e");
+    } finally {
+      isLoadingBanners.value = false;
+    }
   }
   
   Future<void> fetchCategories() async {

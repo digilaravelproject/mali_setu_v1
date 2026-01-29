@@ -149,8 +149,8 @@ class NotificationPage extends GetView<NotificationController> {
   }) {
     // Determine data from map
     final data = notification.data ?? {};
-    final title = data['title'] ?? 'Notification';
-    final message = data['message'] ?? 'You have a new notification';
+    final title = notification.type ?? 'Notification';
+    final message = notification.message ?? 'You have a new notification';
     final isRead = notification.readAt != null;
     
     // Determine visuals based on type or content
@@ -219,7 +219,7 @@ class NotificationPage extends GetView<NotificationController> {
             onTap: isMode
                 ? () {
                     if (notification.id != null) {
-                      controller.toggleSelection(notification.id!);
+                      controller.toggleSelection(notification.id.toString());
                     }
                   }
                 : () {
@@ -228,7 +228,7 @@ class NotificationPage extends GetView<NotificationController> {
             onLongPress: () {
               if (!isMode && notification.id != null) {
                 controller.isSelectMode.value = true;
-                controller.selectedNotifications.add(notification.id!);
+                controller.selectedNotifications.add(notification.id.toString());
               }
             },
             child: Padding(

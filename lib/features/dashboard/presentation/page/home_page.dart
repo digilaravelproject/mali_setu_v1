@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../controller/home_controller.dart';
 
@@ -116,17 +117,26 @@ class HomePage extends GetWidget<HomeController> {
                       ],
                     ),
                   ).marginSymmetric(horizontal: 16, vertical: 12),
-                  SizedBox(
-                    height: Get.height * 0.2,
-                    child: ImageSlider(
-                      indicatorType: IndicatorType.rectangle,
-                      images: [
-                        "https://img.freepik.com/premium-psd/super-sale-tag-label-template-with-glossy-3d-style-editable-text-effect_628935-983.jpg",
-                        "https://img.freepik.com/premium-vector/black-friday-sale-banner-waving-design-template_2239-1556.jpg",
-                        "https://img.freepik.com/premium-vector/gradient-zero-commission-sale-banner_52683-98500.jpg",
-                      ],
-                    ),
-                  ),
+                  Obx(() {
+                    if (controller.isLoadingBanners.value) {
+                      return SizedBox(
+                        height: Get.height * 0.2,
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (controller.banners.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return SizedBox(
+                      height: Get.height * 0.2,
+                      child: ImageSlider(
+                        indicatorType: IndicatorType.rectangle,
+                        images: controller.banners
+                            .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
+                            .toList(),
+                      ),
+                    );
+                  }),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

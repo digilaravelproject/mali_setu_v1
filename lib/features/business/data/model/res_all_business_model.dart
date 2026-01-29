@@ -104,16 +104,16 @@ class BusinessData {
     }
 
     return BusinessData(
-      currentPage: json['current_page'],
+      currentPage: _asInt(json['current_page']),
       data: businesses.isNotEmpty ? businesses : [],
-      total: json['total'],
+      total: _asInt(json['total']),
       firstPageUrl: json['first_page_url'],
       lastPageUrl: json['last_page_url'],
       nextPageUrl: json['next_page_url'],
       prevPageUrl: json['prev_page_url'],
-      from: json['from'],
-      to: json['to'],
-      lastPage: json['last_page'],
+      from: _asInt(json['from']),
+      to: _asInt(json['to']),
+      lastPage: _asInt(json['last_page']),
       products: json['products'] != null
           ? List<Product>.from(json['products'].map((x) => Product.fromJson(x)))
           : null,
@@ -180,11 +180,11 @@ class Business {
 
   factory Business.fromJson(Map<String, dynamic> json) {
     return Business(
-      id: json['id'],
-      userId: json['user_id'],
+      id: _asInt(json['id']),
+      userId: _asInt(json['user_id']),
       businessName: json['business_name'],
       businessType: json['business_type'],
-      categoryId: json['category_id'],
+      categoryId: _asInt(json['category_id']),
       description: json['description'],
       contactPhone: json['contact_phone'],
       contactEmail: json['contact_email'],
@@ -194,7 +194,7 @@ class Business {
       photo: json['photo'],
       subscriptionStatus: json['subscription_status'],
       subscriptionExpiresAt: json['subscription_expires_at'],
-      jobPostingLimit: json['job_posting_limit'],
+      jobPostingLimit: _asInt(json['job_posting_limit']),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       status: json['status'],
@@ -241,11 +241,11 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: _asInt(json['id']),
       name: json['name'],
       email: json['email'],
       phone: json['phone'],
-      age: json['age'],
+      age: _asInt(json['age']),
       address: json['address'],
       nearbyLocation: json['nearby_location'],
       pincode: json['pincode'],
@@ -268,11 +268,11 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['id'],
+      id: _asInt(json['id']),
       name: json['name'],
       description: json['description'],
       photo: json['photo'],
-      isActive: json['is_active'],
+      isActive: _asBool(json['is_active']),
     );
   }
 }
@@ -298,8 +298,8 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
-      businessId: json['business_id'],
+      id: _asInt(json['id']),
+      businessId: _asInt(json['business_id']),
       name: json['name'],
       description: json['description'],
       cost: json['cost'],
@@ -330,8 +330,8 @@ class Service {
 
   factory Service.fromJson(Map<String, dynamic> json) {
     return Service(
-      id: json['id'],
-      businessId: json['business_id'],
+      id: _asInt(json['id']),
+      businessId: _asInt(json['business_id']),
       name: json['name'],
       description: json['description'],
       cost: json['cost'],
@@ -443,8 +443,8 @@ class Job {
 
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
-      id: json['id'],
-      businessId: json['business_id'],
+      id: _asInt(json['id']),
+      businessId: _asInt(json['business_id']),
       title: json['title'],
       description: json['description'],
       requirements: json['requirements'],
@@ -544,12 +544,12 @@ class JobAnalyticsData {
 
   factory JobAnalyticsData.fromJson(Map<String, dynamic> json) {
     return JobAnalyticsData(
-      totalJobs: json['total_jobs'],
-      activeJobs: json['active_jobs'],
-      pendingJobs: json['pending_jobs'],
-      totalApplications: json['total_applications'],
-      pendingApplications: json['pending_applications'],
-      acceptedApplications: json['accepted_applications'],
+      totalJobs: _asInt(json['total_jobs']),
+      activeJobs: _asInt(json['active_jobs']),
+      pendingJobs: _asInt(json['pending_jobs']),
+      totalApplications: _asInt(json['total_applications']),
+      pendingApplications: _asInt(json['pending_applications']),
+      acceptedApplications: _asInt(json['accepted_applications']),
       recentApplications: json['recent_applications'],
     );
   }
@@ -639,9 +639,9 @@ class JobApplication {
 
   factory JobApplication.fromJson(Map<String, dynamic> json) {
     return JobApplication(
-      id: json['id'],
-      userId: json['user_id'],
-      jobPostingId: json['job_posting_id'],
+      id: _asInt(json['id']),
+      userId: _asInt(json['user_id']),
+      jobPostingId: _asInt(json['job_posting_id']),
       coverLetter: json['cover_letter'],
       resumeUrl: json['resume_url'],
       additionalInfo: json['additional_info'],
@@ -650,4 +650,25 @@ class JobApplication {
       jobPosting: json['job_posting'] != null ? Job.fromJson(json['job_posting']) : null,
     );
   }
+}
+
+int? _asInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  if (value is List && value.isNotEmpty) return _asInt(value.first);
+  return null;
+}
+
+bool? _asBool(dynamic value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  if (value is int) return value == 1;
+  if (value is String) {
+    String v = value.toLowerCase();
+    if (v == 'true' || v == '1') return true;
+    if (v == 'false' || v == '0') return false;
+  }
+  return null;
 }

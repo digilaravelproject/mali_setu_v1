@@ -1,7 +1,8 @@
 class ApiConstants {
     ApiConstants._();
 
-    static const String baseUrl = "https://greenyellow-grouse-707123.hostingersite.com/public";
+    static const String baseUrl = "https://greenyellow-grouse-707123.hostingersite.com";
+    static const String imageBaseUrl = "https://greenyellow-grouse-707123.hostingersite.com/storage/app/public/";
     static const String apiBaseUrl = "$baseUrl/api/";
 
     static const String xApiKey = "X-API-KEY";
@@ -57,4 +58,7 @@ class ApiConstants {
     static const String getUnreadCount = "notifications/unread-count";
     static const String deleteNotification = "notifications";
     static const String deleteMultipleNotifications = "notifications";
+
+    // Banner Api
+    static const String getBanner = "banner";
 }

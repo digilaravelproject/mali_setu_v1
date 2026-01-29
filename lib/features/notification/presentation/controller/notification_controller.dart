@@ -103,12 +103,8 @@ class NotificationController extends GetxController {
   Future<void> deleteNotification(String id) async {
     try {
       await repository.deleteNotification(id);
-      notifications.removeWhere((n) => n.id == id);
-      // Determine if we should decrement unread count? 
-      // API doesn't return updated count, so maybe reload count or just leave it.
-      // Usually deleting implies it's gone, so count might change if it was unread.
-      // For now, let's reload count to be safe.
-      loadUnreadCount();
+      // Refresh list from server to ensure sync
+      await loadNotifications();
       Get.snackbar('Success', 'Notification deleted successfully');
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete notification');
@@ -119,15 +115,15 @@ class NotificationController extends GetxController {
     if (selectedNotifications.isEmpty) return;
 
     try {
-      // Create a copy of IDs because selectedNotifications will be cleared
       List<String> idsToDelete = List.from(selectedNotifications);
-      
       await repository.deleteMultipleNotifications(idsToDelete);
       
-      notifications.removeWhere((n) => idsToDelete.contains(n.id));
       selectedNotifications.clear();
       isSelectMode.value = false;
-      loadUnreadCount();
+      
+      // Refresh list from server
+      await loadNotifications();
+      
       Get.snackbar('Success', 'Selected notifications deleted');
     } catch (e) {
       Get.snackbar('Error', 'Failed to delete notifications');
@@ -144,7 +140,7 @@ class NotificationController extends GetxController {
 
   void selectAll() {
     // Only select currently loaded notifications
-    selectedNotifications.value = notifications.map((n) => n.id!).toList();
+    selectedNotifications.value = notifications.map((n) => n.id!).cast<String>().toList();
   }
 
   void clearSelection() {

@@ -123,9 +123,9 @@ class CustomImageView extends StatelessWidget {
                 String fullUrl = url!;
                 if (!fullUrl.startsWith("http")) {
                    if (fullUrl.startsWith("/")) {
-                     fullUrl = "${ApiConstants.baseUrl}$fullUrl";
+                     fullUrl = "${ApiConstants.imageBaseUrl}$fullUrl";
                    } else {
-                     fullUrl = "${ApiConstants.baseUrl}/$fullUrl";
+                     fullUrl = "${ApiConstants.imageBaseUrl}/$fullUrl";
                    }
                 }
                 Get.to(() => ImageFvScreen(imageUrl: fullUrl));
@@ -218,9 +218,9 @@ class CustomImageView extends StatelessWidget {
       if (!fullUrl.startsWith("http")) {
         // Handle potential leading slash in url or trailing slash in baseUrl
         if (fullUrl.startsWith("/")) {
-          fullUrl = "${ApiConstants.baseUrl}$fullUrl"; 
+          fullUrl = "${ApiConstants.imageBaseUrl}$fullUrl";
         } else {
-          fullUrl = "${ApiConstants.baseUrl}/$fullUrl";
+          fullUrl = "${ApiConstants.imageBaseUrl}/$fullUrl";
         }
       }
 

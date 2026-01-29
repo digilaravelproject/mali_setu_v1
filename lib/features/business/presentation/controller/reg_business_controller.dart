@@ -205,6 +205,7 @@ class RegBusinessController extends GetxController {
 
       if (isEditMode && businessId != null) {
           final success = await Get.find<BusinessController>().updateBusiness(businessId!, body);
+          print("updatebusiness : "+success.toString());
           if (success) {
             Get.back(); // Close Screen
             Get.snackbar("Success", "Business updated successfully", backgroundColor: Colors.green, colorText: Colors.white);

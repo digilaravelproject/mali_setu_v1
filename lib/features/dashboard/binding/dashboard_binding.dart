@@ -13,6 +13,10 @@ import '../../notification/presentation/controller/notification_controller.dart'
 
 import '../presentation/controller/dashboard_controller.dart';
 import '../presentation/controller/home_controller.dart';
+import '../data/data_source/dashboard_data_source.dart';
+import '../data/repository/dashboard_repository_impl.dart';
+import '../domain/repository/dashboard_repository.dart';
+import '../domain/usecase/get_banners_usecase.dart';
 
 class DashboardBinding extends Bindings {
   @override
@@ -27,8 +31,15 @@ class DashboardBinding extends Bindings {
     Get.lazyPut<NotificationRepository>(() => NotificationRepositoryImpl(dataSource: Get.find()));
     Get.lazyPut(() => NotificationController(repository: Get.find()));
 
+    Get.lazyPut<DashboardDataSource>(() => DashboardDataSourceImpl(apiClient: Get.find()));
+    Get.lazyPut<DashboardRepository>(() => DashboardRepositoryImpl(dataSource: Get.find()));
+    Get.lazyPut(() => GetBannersUseCase(repository: Get.find()));
+
     Get.lazyPut(() => DashboardController());
-    Get.lazyPut(() => HomeController(getBusinessCategoriesUseCase: Get.find()));
+    Get.lazyPut(() => HomeController(
+      getBusinessCategoriesUseCase: Get.find(),
+      getBannersUseCase: Get.find(),
+    ));
     Get.lazyPut(() => SettingsController(logoutUseCase: Get.find()));
   }
 }
