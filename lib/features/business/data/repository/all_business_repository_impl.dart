@@ -116,4 +116,14 @@ class BusinessRepositoryImpl implements BusinessRepository {
   Future<MyApplicationsResponse> getMyApplications() {
     return dataSource.getMyApplications();
   }
+
+  @override
+  Future<JobApplicationsResponse> getJobApplications(int jobId) {
+    return dataSource.getJobApplications(jobId);
+  }
+
+  @override
+  Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes}) {
+    return dataSource.updateApplicationStatus(applicationId, status, notes: notes);
+  }
 }

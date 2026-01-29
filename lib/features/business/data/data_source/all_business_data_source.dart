@@ -31,6 +31,8 @@ abstract class BusinessDataSource {
   Future<JobAnalyticsResponse> getJobAnalytics();
   Future<BusinessResponse> applyJob(Map<String, dynamic> data);
   Future<MyApplicationsResponse> getMyApplications();
+  Future<JobApplicationsResponse> getJobApplications(int jobId);
+  Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
 }
 
 class BusinessDataSourceImpl implements BusinessDataSource {
@@ -191,6 +193,24 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   Future<MyApplicationsResponse> getMyApplications() async {
     final response = await apiClient.post(ApiConstants.myApplications);
     return MyApplicationsResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<JobApplicationsResponse> getJobApplications(int jobId) async {
+    final response = await apiClient.get('${ApiConstants.getJobApplications}/$jobId/applications');
+    return JobApplicationsResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes}) async {
+    final response = await apiClient.put(
+      '${ApiConstants.updateApplicationStatus}/$applicationId/status',
+      data: {
+        'status': status,
+        if (notes != null) 'employer_notes': notes,
+      },
+    );
+    return BusinessResponse.fromJson(response.data);
   }
 }
 

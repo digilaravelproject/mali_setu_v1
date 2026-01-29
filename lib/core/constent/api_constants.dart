@@ -56,6 +56,8 @@ class ApiConstants {
     static const String jobAnalytics = "jobs/analytics";
     static const String applyJob = "jobs/apply";
     static const String myApplications = "jobs/my-applications";
+    static const String getJobApplications = "jobs"; // jobs/{id}/applications
+    static const String updateApplicationStatus = "jobs/applications"; // jobs/applications/{id}/status
 
     // Notification Api
     static const String getNotifications = "notifications";

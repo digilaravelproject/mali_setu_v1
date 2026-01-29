@@ -27,6 +27,8 @@ import '../domain/usecase/toggle_job_status_usecase.dart';
 import '../domain/usecase/get_job_analytics_usecase.dart';
 import '../domain/usecase/apply_job_usecase.dart';
 import '../domain/usecase/get_my_applications_usecase.dart';
+import '../domain/usecase/get_job_applications_usecase.dart';
+import '../domain/usecase/update_application_status_usecase.dart';
 import '../presentation/controller/business_controller.dart';
 
 
@@ -63,6 +65,8 @@ class BusinessBinding extends Bindings {
     Get.lazyPut(() => GetJobAnalyticsUseCase(Get.find()));
     Get.lazyPut(() => ApplyJobUseCase(repository: Get.find()));
     Get.lazyPut(() => GetMyApplicationsUseCase(repository: Get.find()));
+    Get.lazyPut(() => GetJobApplicationsUseCase(repository: Get.find()));
+    Get.lazyPut(() => UpdateApplicationStatusUseCase(repository: Get.find()));
     
     // Controllers at the end
     Get.lazyPut(() => CreateJobController(
@@ -88,6 +92,8 @@ class BusinessBinding extends Bindings {
           getJobAnalyticsUseCase: Get.find(),
           applyJobUseCase: Get.find(),
           getMyApplicationsUseCase: Get.find(),
+          getJobApplicationsUseCase: Get.find(),
+          updateApplicationStatusUseCase: Get.find(),
         ), fenix: true);
   }
 }

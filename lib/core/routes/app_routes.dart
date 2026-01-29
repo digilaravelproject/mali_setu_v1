@@ -7,6 +7,7 @@ import 'package:edu_cluezer/features/business/presentation/page/add_service_page
 import 'package:edu_cluezer/features/business/presentation/page/create_job_post_page.dart';
 import 'package:edu_cluezer/features/business/presentation/page/job_analytics_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/job_details_screen.dart';
+import 'package:edu_cluezer/features/business/presentation/page/job_applications_page.dart';
 import 'package:edu_cluezer/features/business/presentation/page/my_business_screen.dart';
 import 'package:edu_cluezer/features/matrimony/binding/match_binding.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/page/reg_matrimony_page.dart';
@@ -83,6 +84,7 @@ class AppRoutes {
   static const String matrimonyRequests = '/matrimonyRequests';
   static const String matrimonyMembers = '/matrimonyMembers';
   static const String categoryDetails = "/categoryDetails";
+  static const String jobAppliers = "/jobAppliers";
 }
 
 class AppPages {
@@ -296,6 +298,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.categoryDetails,
       page: () => const CategoryDetailsScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.jobAppliers,
+      page: () => const JobApplicationsPage(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
