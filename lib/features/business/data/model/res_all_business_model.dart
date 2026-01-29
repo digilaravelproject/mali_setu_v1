@@ -222,6 +222,7 @@ class User {
   String? state;
   String? city;
   String? district;
+  String? destination;
   String? userType;
 
   User({
@@ -236,6 +237,7 @@ class User {
     this.state,
     this.city,
     this.district,
+    this.destination,
     this.userType,
   });
 
@@ -252,6 +254,7 @@ class User {
       state: json['state'],
       city: json['city'],
       district: json['district'],
+      destination: json['destination'],
       userType: json['user_type'],
     );
   }
@@ -499,7 +502,7 @@ class JobDetailData {
   factory JobDetailData.fromJson(Map<String, dynamic> json) {
     return JobDetailData(
       job: json['job'] != null ? Job.fromJson(json['job']) : null,
-      hasApplied: json['has_applied'],
+      hasApplied: _asBool(json['has_applied']),
       similarJobs: json['similar_jobs'] != null
           ? List<Job>.from(json['similar_jobs'].map((x) => Job.fromJson(x)))
           : [],
@@ -622,8 +625,11 @@ class JobApplication {
   String? resumeUrl;
   String? additionalInfo;
   String? status;
+  String? employerNotes;
   String? appliedAt;
+  String? reviewedAt;
   Job? jobPosting;
+  User? user;
 
   JobApplication({
     this.id,
@@ -633,8 +639,11 @@ class JobApplication {
     this.resumeUrl,
     this.additionalInfo,
     this.status,
+    this.employerNotes,
     this.appliedAt,
+    this.reviewedAt,
     this.jobPosting,
+    this.user,
   });
 
   factory JobApplication.fromJson(Map<String, dynamic> json) {
@@ -646,8 +655,61 @@ class JobApplication {
       resumeUrl: json['resume_url'],
       additionalInfo: json['additional_info'],
       status: json['status'],
+      employerNotes: json['employer_notes'],
       appliedAt: json['applied_at'],
+      reviewedAt: json['reviewed_at'],
       jobPosting: json['job_posting'] != null ? Job.fromJson(json['job_posting']) : null,
+      user: json['user'] != null ? User.fromJson(json['user']) : null,
+    );
+  }
+}
+
+class JobApplicationsResponse {
+  bool? success;
+  JobApplicationsData? data;
+  String? message;
+
+  JobApplicationsResponse({this.success, this.data, this.message});
+
+  factory JobApplicationsResponse.fromJson(Map<String, dynamic> json) {
+    return JobApplicationsResponse(
+      success: json['success'],
+      data: json['data'] != null ? JobApplicationsData.fromJson(json['data']) : null,
+      message: json['message'],
+    );
+  }
+}
+
+class JobApplicationsData {
+  Job? job;
+  JobApplicationsPagination? applications;
+
+  JobApplicationsData({this.job, this.applications});
+
+  factory JobApplicationsData.fromJson(Map<String, dynamic> json) {
+    return JobApplicationsData(
+      job: json['job'] != null ? Job.fromJson(json['job']) : null,
+      applications: json['applications'] != null ? JobApplicationsPagination.fromJson(json['applications']) : null,
+    );
+  }
+}
+
+class JobApplicationsPagination {
+  int? currentPage;
+  List<JobApplication>? data;
+  int? lastPage;
+  int? total;
+
+  JobApplicationsPagination({this.currentPage, this.data, this.lastPage, this.total});
+
+  factory JobApplicationsPagination.fromJson(Map<String, dynamic> json) {
+    return JobApplicationsPagination(
+      currentPage: _asInt(json['current_page']),
+      data: json['data'] != null
+          ? List<JobApplication>.from(json['data'].map((x) => JobApplication.fromJson(x)))
+          : null,
+      lastPage: _asInt(json['last_page']),
+      total: _asInt(json['total']),
     );
   }
 }

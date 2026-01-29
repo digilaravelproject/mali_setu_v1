@@ -832,19 +832,34 @@ class BusinessDetailScreen extends GetView<BusinessController> {
       return ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          CustomButton(
-              title: "Job Analytics",
-              height: 40,
-              onPressed: () {
-                Get.toNamed(AppRoutes.jobAnalytics);
-              }),
-          const SizedBox(height: 16),
-          CustomButton(
-              title: "Applied Jobs",
-              height: 40,
-              onPressed: () {
-                Get.toNamed(AppRoutes.appliedJobList);
-              }),
+
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  title: "Job Analytics",
+                  height: 40,
+                  borderRadius: 12,
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.jobAnalytics);
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: CustomButton(
+                  title: "Applied Jobs",
+                  height: 40,
+                  borderRadius: 12,
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.appliedJobList);
+                  },
+                ),
+              ),
+            ],
+          ),
+
+
           const SizedBox(height: 16),
           ...controller.businessJobs.map((job) {
             return Card(

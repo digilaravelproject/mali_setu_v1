@@ -21,6 +21,8 @@ import '../../domain/usecase/toggle_job_status_usecase.dart';
 import '../../domain/usecase/get_job_analytics_usecase.dart';
 import '../../domain/usecase/apply_job_usecase.dart';
 import '../../domain/usecase/get_my_applications_usecase.dart';
+import '../../domain/usecase/get_job_applications_usecase.dart';
+import '../../domain/usecase/update_application_status_usecase.dart';
 
 
 class BusinessController extends GetxController {
@@ -41,6 +43,8 @@ class BusinessController extends GetxController {
   final GetJobAnalyticsUseCase getJobAnalyticsUseCase;
   final ApplyJobUseCase applyJobUseCase;
   final GetMyApplicationsUseCase getMyApplicationsUseCase;
+  final GetJobApplicationsUseCase getJobApplicationsUseCase;
+  final UpdateApplicationStatusUseCase updateApplicationStatusUseCase;
   final AuthService _authService = Get.find<AuthService>();
 
   BusinessController({
@@ -61,6 +65,8 @@ class BusinessController extends GetxController {
     required this.getJobAnalyticsUseCase,
     required this.applyJobUseCase,
     required this.getMyApplicationsUseCase,
+    required this.getJobApplicationsUseCase,
+    required this.updateApplicationStatusUseCase,
   });
 
   var businesses = <Business>[].obs;
@@ -75,6 +81,7 @@ class BusinessController extends GetxController {
   var selectedJobDetail = Rxn<JobDetailData>();
   var jobAnalytics = Rxn<JobAnalyticsData>();
   var myApplications = <JobApplication>[].obs;
+  var selectedJobApplications = <JobApplication>[].obs;
   
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
@@ -322,6 +329,10 @@ class BusinessController extends GetxController {
       final response = await applyJobUseCase(data);
       if (response.success == true) {
         Get.snackbar("Success", response.message ?? "Applied successfully");
+        // Refresh job details to update hasApplied status
+        if (data['job_posting_id'] != null) {
+          fetchJobDetails(int.parse(data['job_posting_id'].toString()));
+        }
         return true;
       } else {
         Get.snackbar("Error", response.message ?? "Failed to apply");
@@ -346,6 +357,40 @@ class BusinessController extends GetxController {
       }
     } catch (e) {
       print('Error fetching applications: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchJobApplications(int jobId) async {
+    try {
+      isLoading.value = true;
+      selectedJobApplications.clear();
+      final response = await getJobApplicationsUseCase(jobId);
+      if (response.success == true && response.data != null && response.data!.applications != null) {
+        selectedJobApplications.value = response.data!.applications!.data ?? [];
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to fetch applications");
+      }
+    } catch (e) {
+      print('Error fetching job applications: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateApplicationStatus(int applicationId, String status, int jobId, {String? notes}) async {
+    try {
+      isLoading.value = true;
+      final response = await updateApplicationStatusUseCase(applicationId, status, notes: notes);
+      if (response.success == true) {
+        Get.snackbar("Success", response.message ?? "Status updated to $status");
+        fetchJobApplications(jobId); // Refresh list
+      } else {
+        Get.snackbar("Error", response.message ?? "Failed to update status");
+      }
+    } catch (e) {
+       Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
     }

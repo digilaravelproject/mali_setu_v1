@@ -76,7 +76,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       final Job job = controller.selectedJobDetail.value?.job ?? initialJob;
       final bool hasApplied = controller.selectedJobDetail.value?.hasApplied ?? false;
       final List<Job> similarJobs = controller.selectedJobDetail.value?.similarJobs ?? [];
-      final bool isMyJob = job.business?.id != null && job.business?.id == controller.myBusiness.value?.id;
+      final bool isMyJob = controller.myBusinesses.any((b) => b.id != null && b.id == (job.businessId ?? job.business?.id));
+
+      debugPrint("isMyJob value: $isMyJob, JobBusinessID: ${job.businessId ?? job.business?.id}");
 
       if (controller.isLoading.value && controller.selectedJobDetail.value == null) {
         return Scaffold(
@@ -96,7 +98,8 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
               backgroundColor: context.theme.primaryColor,
               leading: IconButton(
                 onPressed: () => Get.back(),
-                icon: Container(
+                icon:
+                Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.3),
@@ -106,45 +109,57 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                 ),
               ),
               actions: [
-                if (isMyJob) ...[
-                  IconButton(
-                    onPressed: () => _handleEdit(job),
+                if (isMyJob)
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') _handleEdit(job);
+                      if (value == 'delete') _handleDelete(job.id);
+                      if (value == 'toggle') _handleToggleStatus(job);
+                    },
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.3),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.edit, size: 18, color: Colors.white),
+                      child: const Icon(Icons.more_vert, size: 18, color: Colors.white),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => _handleDelete(job.id),
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        shape: BoxShape.circle,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 20, color: Colors.blue),
+                            SizedBox(width: 12),
+                            Text("Edit Job"),
+                          ],
+                        ),
                       ),
-                      child: const Icon(Icons.delete_outline, size: 18, color: Colors.white),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => _handleToggleStatus(job),
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: (job.isActive ?? false) ? Colors.green.withOpacity(0.5) : Colors.red.withOpacity(0.5),
-                        shape: BoxShape.circle,
+                      const PopupMenuItem(
+                        value: 'toggle',
+                        child: Row(
+                          children: [
+                            Icon(Icons.visibility_off, size: 20, color: Colors.orange),
+                            SizedBox(width: 12),
+                            Text("Toggle Visibility"),
+                          ],
+                        ),
                       ),
-                      child: Icon(
-                        (job.isActive ?? false) ? Icons.visibility : Icons.visibility_off,
-                        size: 18,
-                        color: Colors.white,
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                            SizedBox(width: 12),
+                            Text("Delete Job"),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                
+                // Share Action
                 IconButton(
                   onPressed: () {},
                   icon: Container(
@@ -348,7 +363,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             ),
           ],
         ),
-        bottomSheet: isMyJob ? null : _buildBottomAction(context, hasApplied, job),
+        bottomSheet: _buildBottomAction(context, hasApplied, job, isMyJob),
       );
     });
   }
@@ -513,7 +528,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     );
   }
 
-  Widget _buildBottomAction(BuildContext context, bool hasApplied, Job job) {
+  Widget _buildBottomAction(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -527,37 +542,41 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           children: [
             Expanded(
               child: ElevatedButton(
-                onPressed: hasApplied ? null : () {
-                  if (job.id != null) {
-                    Get.bottomSheet(
-                      JobApplyForm(jobId: job.id!),
-                      isScrollControlled: true,
-                    );
-                  }
-                },
+                onPressed: isMyJob 
+                  ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
+                  : (hasApplied ? null : () {
+                      if (job.id != null) {
+                        Get.bottomSheet(
+                          JobApplyForm(jobId: job.id!),
+                          isScrollControlled: true,
+                        );
+                      }
+                    }),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: context.theme.primaryColor,
+                  backgroundColor: isMyJob ? Colors.orange : context.theme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
                 child: Text(
-                  hasApplied ? "Already Applied" : "Apply Now",
+                  isMyJob ? "View Appliers" : (hasApplied ? "Applied" : "Apply Now"),
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: context.theme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+            if (!isMyJob) ...[
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: context.theme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
+                ),
               ),
-              child: IconButton(
-                onPressed: () {},
-                icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
-              ),
-            ),
+            ],
           ],
         ),
       ),
