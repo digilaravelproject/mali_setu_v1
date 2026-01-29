@@ -480,6 +480,7 @@ class _ExplorePageState extends State<ExplorePage> {
 
 // Dummy Data Models
 class UserProfile {
+  final int? id;
   final String name;
   final int age;
   final String location;
@@ -490,6 +491,7 @@ class UserProfile {
   final List<String> interests;
 
   UserProfile({
+    this.id,
     required this.name,
     required this.age,
     required this.location,

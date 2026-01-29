@@ -13,10 +13,16 @@ import 'package:edu_cluezer/features/matrimony/presentation/page/reg_matrimony_p
 import 'package:edu_cluezer/features/settings/page/change_password_page.dart';
 import 'package:edu_cluezer/features/settings/page/my_profile.dart';
 import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
+import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_page.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_update_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../features/matrimony/binding/matrimony_details_binding.dart';
+import '../../features/matrimony/binding/matrimony_requests_binding.dart';
+import '../../features/matrimony/binding/matrimony_members_binding.dart';
+import '../../features/matrimony/presentation/page/matrimony_requests_screen.dart';
+import '../../features/matrimony/presentation/page/matrimony_members_screen.dart';
 
 import '../../features/Auth/login/binding/login_binding.dart';
 import '../../features/Auth/login/presentation/page/login_page.dart';
@@ -74,6 +80,8 @@ class AppRoutes {
   static const String emailPasswordReset = "/emailPasswordReset";
   static const String resetPasswordScreen = "/resetPasswordScreen";
   static const String matrimonyProfileScreen = "/matrimonyProfileScreen";
+  static const String matrimonyRequests = '/matrimonyRequests';
+  static const String matrimonyMembers = '/matrimonyMembers';
   static const String categoryDetails = "/categoryDetails";
 }
 
@@ -266,8 +274,22 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.matrimonyProfileScreen,
-      page: () => MatrimonyProfileScreen(profileId: '123',),
-      // binding: VolunteerBinding(),
+      page: () => const MatrimonyProfileScreen(),
+      binding: MatrimonyDetailsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.matrimonyRequests,
+      page: () => const MatrimonyRequestsScreen(),
+      binding: MatrimonyRequestsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.matrimonyMembers,
+      page: () => const MatrimonyMembersScreen(),
+      binding: MatrimonyMembersBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

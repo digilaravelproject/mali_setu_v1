@@ -1,215 +1,89 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/features/matrimony/data/model/search_matrimony_response.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_details_controller.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/widgets/custom_confirm_dialog.dart';
 
-import '../../data/model/profile_model.dart';
-import '../controller/matrimony_profile_controller.dart';
-
-
-class MatrimonyProfileScreen extends StatefulWidget {
-  final String profileId;
-
-  const MatrimonyProfileScreen({
-    super.key,
-    required this.profileId,
-  });
-
-  @override
-  State<MatrimonyProfileScreen> createState() => _MatrimonyProfileScreenState();
-}
-
-class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
-  late Future<ProfileModel> _profileFuture;
-  bool _isLoadingConnection = false;
-  bool _isShortlisted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _profileFuture = ProfileService.fetchProfileData(widget.profileId);
-  }
+class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
+  const MatrimonyProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: FutureBuilder<ProfileModel>(
-        future: _profileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoadingScreen();
-          }
+      backgroundColor: Colors.grey[100],
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          if (snapshot.hasError) {
-            return _buildErrorScreen(snapshot.error.toString());
-          }
+        if (controller.profile.value == null) {
+          return const Center(child: Text("Profile not found"));
+        }
 
-          if (!snapshot.hasData) {
-            return _buildNoDataScreen();
-          }
-
-          final profile = snapshot.data!;
-          return _buildProfileScreen(profile);
-        },
-      ),
-    );
-  }
-
-  Widget _buildProfileScreen(ProfileModel profile) {
-    return CustomScrollView(
-      slivers: [
-        _buildProfileHeader(profile),
-        _buildProfileDetails(profile),
-        _buildActionButtons(profile),
-      ],
-    );
-  }
-
-  Widget _buildLoadingScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 20),
-          Text(
-            'Loading Profile...',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorScreen(String error) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        final profile = controller.profile.value!;
+        return Stack(
           children: [
-            const Icon(Icons.error_outline, size: 60, color: Colors.red),
-            const SizedBox(height: 20),
-            const Text(
-              'Failed to load profile',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            CustomScrollView(
+              slivers: [
+                _buildProfileHeader(context, profile),
+                _buildProfileContent(context, profile),
+                const SliverToBoxAdapter(child: SizedBox(height: 100)), // Space for bottom bar
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              error,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _profileFuture = ProfileService.fetchProfileData(widget.profileId);
-                });
-              },
-              child: const Text('Try Again'),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildBottomBar(context, profile),
             ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  Widget _buildNoDataScreen() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.person_off, size: 60, color: Colors.grey),
-          SizedBox(height: 20),
-          Text(
-            'Profile not found',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  SliverAppBar _buildProfileHeader(ProfileModel profile) {
+  SliverAppBar _buildProfileHeader(BuildContext context, MatrimonyProfile profile) {
+    final images = profile.personalDetails?.photos ?? [];
     return SliverAppBar(
-      expandedHeight: 350,
-      floating: false,
+      expandedHeight: 450,
       pinned: true,
-      actions: [
-        IconButton(
-          icon: Icon(_isShortlisted ? Icons.favorite : Icons.favorite_border),
-          color: _isShortlisted ? Colors.red : Colors.white,
-          onPressed: _toggleShortlist,
-        ),
-        IconButton(
-          icon: const Icon(Icons.share),
-          onPressed: () => _shareProfile(profile),
-        ),
-        PopupMenuButton<String>(
-          onSelected: (value) => _handleMenuSelection(value, profile),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'block',
-              child: Row(
-                children: [
-                  Icon(Icons.block, color: Colors.red),
-                  SizedBox(width: 10),
-                  Text('Block Profile'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'report',
-              child: Row(
-                children: [
-                  Icon(Icons.flag, color: Colors.orange),
-                  SizedBox(width: 10),
-                  Text('Report Profile'),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
+      backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
+          fit: StackFit.expand,
           children: [
-            // Profile Images Carousel
-            PageView.builder(
-              itemCount: profile.images.length,
-              itemBuilder: (context, index) {
-                return Image.network(
-                  profile.images[index],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.person, size: 100, color: Colors.grey),
-                    );
-                  },
-                );
-              },
-            ),
-
+            if (images.isNotEmpty)
+              PageView.builder(
+                itemCount: images.length,
+                itemBuilder: (context, index) {
+                  return CustomImageView(
+                    url: "${ApiConstants.imageBaseUrl}${images[index]}",
+                    fit: BoxFit.cover,
+                  );
+                },
+              )
+            else
+              Container(
+                color: Colors.grey[300],
+                child: const Icon(Icons.person, size: 100, color: Colors.grey),
+              ),
             // Gradient Overlay
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.transparent,
-                    Colors.transparent,
                     Colors.black.withOpacity(0.3),
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.8),
                   ],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
-
-            // Profile Info Overlay
+            // Header Info
             Positioned(
               bottom: 20,
               left: 20,
@@ -221,57 +95,39 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          '${profile.name}, ${profile.age}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(
-                                blurRadius: 10,
-                                color: Colors.black,
+                          '${profile.personalDetails?.name ?? 'Unknown'}, ${profile.age ?? ''}',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
-                            ],
-                          ),
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      if (profile.isVerified)
-                        const Icon(Icons.verified, color: Colors.blue, size: 24),
-                      if (profile.isPremium)
+                      if (profile.status == 'active')
                         Container(
-                          margin: const EdgeInsets.only(left: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.amber, Colors.orange],
-                            ),
-                            borderRadius: BorderRadius.circular(4),
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text(
-                            'PREMIUM',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Colors.white, size: 14),
+                              SizedBox(width: 4),
+                              Text(
+                                "Verified",
+                                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
                         ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    profile.profession,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
-                      fontSize: 16,
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 5,
-                          color: Colors.black,
+                    profile.professionalDetails?.jobTitle ?? 'Designation Not Added',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.white.withOpacity(0.9),
                         ),
-                      ],
-                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -279,9 +135,9 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
                       const Icon(Icons.location_on, size: 16, color: Colors.white70),
                       const SizedBox(width: 4),
                       Text(
-                        profile.location,
+                        "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withOpacity(0.9),
                           fontSize: 14,
                         ),
                       ),
@@ -296,96 +152,83 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
     );
   }
 
-  SliverList _buildProfileDetails(ProfileModel profile) {
+  SliverList _buildProfileContent(BuildContext context, MatrimonyProfile profile) {
     return SliverList(
       delegate: SliverChildListDelegate([
-        Container(
-          color: Colors.white,
-          padding: const EdgeInsets.all(20),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Basic Info Section
-              _buildSectionTitle('Basic Information'),
-              const SizedBox(height: 15),
-              _buildInfoRow('Religion', profile.religion),
-              _buildInfoRow('Caste', profile.caste),
-              _buildInfoRow('Education', profile.education),
-              _buildInfoRow('Height', profile.height),
-              if (profile.annualIncome != null)
-                _buildInfoRow('Annual Income', profile.annualIncome!),
-
-              const SizedBox(height: 30),
-
-              // About Section
-              _buildSectionTitle('About Me'),
-              const SizedBox(height: 10),
-              Text(
-                profile.bio,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
+              _buildSectionCard(
+                context,
+                title: 'Basic Information',
+                icon: Icons.person_outline,
+                children: [
+                  _buildInfoRow('Marital Status', profile.personalDetails?.maritalStatus ?? '-'),
+                  _buildInfoRow('Religion', (profile.personalDetails?.religion ?? []).join(", ")),
+                  _buildInfoRow('Caste', "General"), // Example: Add caste field if available
+                  _buildInfoRow('Height', profile.height ?? '-'),
+                  _buildInfoRow('Weight', profile.weight ?? '-'),
+                  _buildInfoRow('Complexion', profile.complexion ?? '-'),
+                ],
               ),
-
-              const SizedBox(height: 30),
-
-              // Partner Expectations (if available)
-              if (profile.partnerExpectations != null) ...[
-                _buildSectionTitle('Partner Expectations'),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: Colors.purple[50],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    profile.partnerExpectations!,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.black87,
-                      height: 1.5,
-                    ),
-                  ),
+              const SizedBox(height: 16),
+              _buildSectionCard(
+                context,
+                title: 'Professional Details',
+                icon: Icons.work_outline,
+                children: [
+                  _buildInfoRow('Occupation', profile.personalDetails?.occupation ?? '-'),
+                  _buildInfoRow('Employer', profile.professionalDetails?.company ?? '-'), // Added Company
+                  _buildInfoRow('Annual Income', "₹ ${profile.personalDetails?.annualIncome ?? '-'}"),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSectionCard(
+                context,
+                title: 'Education',
+                icon: Icons.school_outlined,
+                children: [
+                  _buildInfoRow('Highest Degree', profile.educationDetails?.highestQualification ?? '-'),
+                  _buildInfoRow('College/University', profile.educationDetails?.college ?? '-'), // Added College
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSectionCard(
+                context,
+                title: 'Family Details',
+                icon: Icons.family_restroom,
+                children: [
+                  _buildInfoRow('Father', profile.familyDetails?.father ?? '-'),
+                  _buildInfoRow('Mother', profile.familyDetails?.mother ?? '-'),
+                  _buildInfoRow('Family Type', profile.personalDetails?.familyType ?? '-'),
+                  _buildInfoRow('Family Value', profile.familyDetails?.familyValue ?? '-'),
+                  _buildInfoRow('Family Status', profile.familyDetails?.familyClass ?? '-'), // Added Family Class
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildSectionCard(
+                context,
+                title: 'Lifestyle',
+                icon: Icons.local_dining,
+                children: [
+                  _buildInfoRow('Diet', profile.lifestyleDetails?.diet ?? '-'),
+                  _buildInfoRow('Smoking', profile.lifestyleDetails?.smoking ?? '-'),
+                  _buildInfoRow('Drinking', profile.lifestyleDetails?.drinking ?? '-'), // Added Drinking
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (profile.partnerPreferences != null)
+                _buildSectionCard(
+                  context,
+                  title: 'Partner Preferences',
+                  icon: Icons.favorite_border,
+                  children: [
+                    _buildInfoRow('Age Range', profile.partnerPreferences?.ageRange ?? '-'),
+                    _buildInfoRow('Education', profile.partnerPreferences?.education ?? '-'),
+                    _buildInfoRow('Location', profile.partnerPreferences?.location ?? '-'),
+                  ],
                 ),
-                const SizedBox(height: 30),
-              ],
-
-              // Family Details (if available)
-              if (profile.familyDetails != null) ...[
-                _buildSectionTitle('Family Details'),
-                const SizedBox(height: 10),
-                Text(
-                  profile.familyDetails!,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.black87,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
-
-              // Interests Section
-              if (profile.interests.isNotEmpty) ...[
-                _buildSectionTitle('Interests & Hobbies'),
-                const SizedBox(height: 15),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: profile.interests
-                      .map((interest) => Chip(
-                    label: Text(interest),
-                    backgroundColor: Colors.purple[50],
-                    avatar: const Icon(Icons.check, size: 16),
-                  ))
-                      .toList(),
-                ),
-              ],
-
-              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -393,39 +236,63 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Row(
-      children: [
-        Container(
-          width: 4,
-          height: 20,
-          color: Colors.purple,
-          margin: const EdgeInsets.only(right: 10),
-        ),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.purple,
+  Widget _buildSectionCard(BuildContext context, {required String title, required IconData icon, required List<Widget> children}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        ),
-      ],
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.purple.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: Colors.purple, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ...children,
+        ],
+      ),
     );
   }
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 140,
             child: Text(
               label,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
@@ -435,7 +302,7 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 color: Colors.black87,
                 fontWeight: FontWeight.w500,
               ),
@@ -446,251 +313,76 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
     );
   }
 
-  SliverPadding _buildActionButtons(ProfileModel profile) {
-    return SliverPadding(
-      padding: const EdgeInsets.all(20),
-      sliver: SliverToBoxAdapter(
-        child: Column(
-          children: [
-            Row(
-              children: [
-                // Chat Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _startChat(profile),
-                    icon: const Icon(Icons.chat_outlined),
-                    label: const Text('Chat'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      side: BorderSide(color: Colors.grey[300]!),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-
-                // Call Button (Premium feature)
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: profile.isPremium ? () => _makeCall(profile) : null,
-                    icon: const Icon(Icons.call_outlined),
-                    label: Text(profile.isPremium ? 'Call' : 'Premium'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      side: BorderSide(
-                        color: profile.isPremium ? Colors.green : Colors.grey[300]!,
-                      ),
-                      foregroundColor: profile.isPremium ? Colors.green : Colors.grey,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-
-                // Connect Button
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoadingConnection ? null : () => _sendConnection(profile),
-                    icon: _isLoadingConnection
-                        ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(Colors.white),
-                      ),
-                    )
-                        : const Icon(Icons.send),
-                    label: _isLoadingConnection
-                        ? const Text('Sending...')
-                        : const Text(
-                      'Send Connection',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 17),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 15),
-
-            // Report Button
-            OutlinedButton.icon(
-              onPressed: () => _reportProfile(profile),
-              icon: const Icon(Icons.flag_outlined, size: 18),
-              label: const Text('Report Profile'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                side: BorderSide(color: Colors.grey[300]!),
-                foregroundColor: Colors.grey[700],
-              ),
-            ),
-          ],
-        ),
+  Widget _buildBottomBar(BuildContext context, MatrimonyProfile profile) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
-    );
-  }
+      child: Row(
+        children: [
+          // Expanded(
+          //   child: OutlinedButton(
+          //     onPressed: () {},
+          //     style: OutlinedButton.styleFrom(
+          //       padding: const EdgeInsets.symmetric(vertical: 16),
+          //       side: const BorderSide(color: Colors.purple),
+          //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          //     ),
+          //     child: const Text("Shortlist", style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold)),
+          //   ),
+          // ),
+          // const SizedBox(width: 16),
+          Expanded(
+            flex: 2,
+            child: Obx(() {
+              final status = profile.connectionStatus?.toLowerCase();
+              String buttonText = "Send Connection Request";
+              bool isActionable = true;
+              Color buttonColor = Colors.purple;
+              VoidCallback? onPressed = controller.sendRequest;
 
-  // Actions Handlers
-  void _toggleShortlist() async {
-    final profile = await _profileFuture;
-    final success = await ProfileService.shortlistProfile(profile.id);
+              if (status == "pending") {
+                buttonText = "Request Sent";
+                isActionable = false;
+                buttonColor = Colors.grey;
+                onPressed = null;
+              } else if (status == "accepted") {
+                buttonText = "Start Chat";
+                isActionable = true;
+                buttonColor = Colors.green;
+                onPressed = () {
+                   Get.snackbar("Chat", "Chat feature is coming soon!");
+                };
+              }
 
-    if (success && mounted) {
-      setState(() {
-        _isShortlisted = !_isShortlisted;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _isShortlisted
-                ? '${profile.name} added to shortlist'
-                : '${profile.name} removed from shortlist',
-          ),
-          backgroundColor: _isShortlisted ? Colors.green : Colors.grey,
-        ),
-      );
-    }
-  }
-
-  void _shareProfile(ProfileModel profile) {
-    // Implement share functionality
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Share Profile'),
-        content: const Text('Share this profile via:'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Share'),
+              return ElevatedButton(
+                onPressed: controller.isLoading.value ? null : onPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: buttonColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : Text(buttonText, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              );
+            }),
           ),
         ],
       ),
     );
-  }
-
-  void _handleMenuSelection(String value, ProfileModel profile) {
-    switch (value) {
-      case 'block':
-        _blockProfile(profile);
-        break;
-      case 'report':
-        _reportProfile(profile);
-        break;
-    }
-  }
-
-  void _blockProfile(ProfileModel profile) {
-    CustomConfirmDialog.show(
-      title: 'Block Profile',
-      message: 'Are you sure you want to block ${profile.name}?',
-      confirmText: 'Block',
-      confirmColor: Colors.red,
-      icon: Icons.block,
-      onConfirm: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${profile.name} has been blocked'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      },
-    );
-  }
-
-  void _reportProfile(ProfileModel profile) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Report Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Select reason for reporting:'),
-            const SizedBox(height: 10),
-            ...['Fake Profile', 'Inappropriate Content', 'Harassment', 'Other']
-                .map((reason) => ListTile(
-              leading: const Icon(Icons.report_problem, size: 20),
-              title: Text(reason),
-              onTap: () {
-                Navigator.pop(context);
-                _submitReport(profile, reason);
-              },
-            ))
-                .toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _submitReport(ProfileModel profile, String reason) async {
-    final success = await ProfileService.reportProfile(profile.id, reason);
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Report submitted for ${profile.name}'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    }
-  }
-
-  void _startChat(ProfileModel profile) {
-    // Navigate to chat screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening chat with ${profile.name}'),
-      ),
-    );
-  }
-
-  void _makeCall(ProfileModel profile) {
-    // Implement calling functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Calling ${profile.name}...'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
-
-  void _sendConnection(ProfileModel profile) async {
-    setState(() {
-      _isLoadingConnection = true;
-    });
-
-    final success = await ProfileService.sendConnectionRequest(
-      profile.id,
-      'Hi, I would like to connect with you!',
-    );
-
-    setState(() {
-      _isLoadingConnection = false;
-    });
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Connection request sent to ${profile.name}!'),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
   }
 }

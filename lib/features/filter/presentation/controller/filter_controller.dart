@@ -21,27 +21,28 @@ class FilterController extends GetxController {
 
   // For radio-style selection
   RxString selectedDontShowOption = "".obs; // "ignored", "shortlisted", etc.
+  final RxString recentlyCreated = 'all'.obs;
 
   // Initialize if needed
   void init() {
     selectedDontShowOption.value = "ignored";
   }
 
-    // Basic Details
-  RangeValues ageRange = RangeValues(25, 35);
-  RangeValues salaryRange = RangeValues(25000, 80000);
-  RangeValues heightRange = RangeValues(150, 180);
-  List<String> maritalStatus = ['Never Married'];
-  List<String> motherTongue = ['Hindi'];
+  // Basic Details
+  RangeValues ageRange = RangeValues(18, 60);
+  RangeValues salaryRange = RangeValues(0, 5000000); // Default wider range
+  RangeValues heightRange = RangeValues(140, 200); // Default full range
+  List<String> maritalStatus = [];
+  List<String> motherTongue = [];
 
   // Professional Details
-  List<String> education = ['Bachelor\'s Degree'];
+  List<String> education = [];
   List<String> profession = [];
   String annualIncome = 'Any';
   List<String> workingWith = [];
 
   // Religion Details
-  List<String> religion = ['Hindu'];
+  List<String> religion = [];
   List<String> caste = [];
   String gothra = '';
   String manglik = "Doesn't Matter";
@@ -49,21 +50,21 @@ class FilterController extends GetxController {
   RxBool isPrivate = false.obs;
   RxBool isNearbyChecked = false.obs;
   // Family Details
-  String familyStatus = 'Middle Class';
-  List<String> familyType = ['Nuclear'];
-  List<String> familyValues = ['Moderate'];
+  String familyStatus = 'Any';
+  List<String> familyType = [];
+  List<String> familyValues = [];
   String fatherOccupation = '';
 
   // Location Details
-  String country = 'India';
+  String country = '';
   String state = '';
   String city = '';
-  List<String> citizenship = ['Indian'];
+  List<String> citizenship = [];
 
   // Lifestyle
-  List<String> diet = ['Vegetarian'];
-  String smoking = 'No';
-  String drinking = 'No';
+  List<String> diet = [];
+  String smoking = 'Any';
+  String drinking = 'Any';
   List<String> hobbies = [];
   //RxBool isNearbyChecked = false.obs;
 
@@ -77,7 +78,7 @@ class FilterController extends GetxController {
     }
   }
   // Profile Type
-  List<String> profileCreatedBy = ['Self'];
+  List<String> profileCreatedBy = [];
   String profileFor = 'Self';
   String withPhoto = "Doesn't Matter";
   String verifiedProfiles = "Doesn't Matter";
@@ -202,50 +203,121 @@ class FilterController extends GetxController {
     minPhotos.value = 1;
 
 
-
-    ageRange = RangeValues(25, 35);
-    heightRange = RangeValues(150, 180);
-    salaryRange = RangeValues(25000, 80000);
-    maritalStatus = ['Never Married'];
-    motherTongue = ['Hindi'];
-    education = ['Bachelor\'s Degree'];
+    ageRange = RangeValues(18, 60);
+    heightRange = RangeValues(140, 200);
+    salaryRange = RangeValues(0, 5000000);
+    maritalStatus = [];
+    motherTongue = [];
+    education = [];
     profession = [];
     annualIncome = 'Any';
     workingWith = [];
-    religion = ['Hindu'];
+    religion = [];
     caste = [];
     gothra = '';
     manglik = "Doesn't Matter";
-    familyStatus = 'Middle Class';
-    familyType = ['Nuclear'];
-    familyValues = ['Moderate'];
+    familyStatus = 'Any';
+    familyType = [];
+    familyValues = [];
     fatherOccupation = '';
-    country = 'India';
+    country = '';
     state = '';
     city = '';
-    citizenship = ['Indian'];
-    diet = ['Vegetarian'];
-    smoking = 'No';
-    drinking = 'No';
+    citizenship = [];
+    diet = [];
+    smoking = 'Any';
+    drinking = 'Any';
     hobbies = [];
-    profileCreatedBy = ['Self'];
+    profileCreatedBy = [];
     profileFor = 'Self';
     withPhoto = "Doesn't Matter";
     verifiedProfiles = "Doesn't Matter";
     createdInLast = ['Any'];
     lastActive = ['Any'];
     updatedProfiles = 'Any';
+    recentlyCreated.value = 'all';
+    
+    // Clear text controllers
+    educationCtrl.clear();
+    familyStatusCtrl.clear();
+    countryCtrl.clear();
+    smokingCtrl.clear();
+    profileCreatedByCtrl.clear();
+    mothertangueCtrl.clear();
+    
     update();
   }
 
+  Map<String, dynamic> getFilters() {
+    final Map<String, dynamic> filters = {};
+
+    // Basic Details
+    // Only send age if range is customized (not 18-60 default)
+    if (ageRange.start > 18 || ageRange.end < 60) {
+      filters['age_min'] = ageRange.start.round();
+      filters['age_max'] = ageRange.end.round();
+    }
+    
+    if (maritalStatus.isNotEmpty && maritalStatus.first != 'Any') filters['marital_status'] = maritalStatus.first;
+    if (profileCreatedBy.isNotEmpty && profileCreatedBy.first != 'Any') filters['profile_created_by'] = profileCreatedBy.first;
+    if (mothertangueCtrl.text.isNotEmpty) filters['language'] = mothertangueCtrl.text;
+    
+    if (heightRange.start > 140 || heightRange.end < 200) {
+       filters['height'] = heightRange.start.toStringAsFixed(1); 
+    }
+
+    // Professional
+    if (salaryRange.start > 0 || salaryRange.end < 5000000) {
+      filters['annual_income'] = "${salaryRange.start.round()}-${salaryRange.end.round()}";
+    }
+    if (educationCtrl.text.isNotEmpty) filters['education'] = educationCtrl.text;
+    
+    // Family
+    if (familyStatusCtrl.text.isNotEmpty) filters['family_status'] = familyStatusCtrl.text;
+    if (familyType.isNotEmpty && familyType.first != 'Any') filters['family_type'] = familyType.first;
+    if (familyValues.isNotEmpty && familyValues.first != 'Any') filters['family_value'] = familyValues.first;
+
+    // Location
+    if (countryCtrl.text.isNotEmpty) filters['country'] = countryCtrl.text;
+    if (citizenship.isNotEmpty && citizenship.first != 'Any') filters['citizenship'] = citizenship.first;
+
+    // Lifestyle
+    if (diet.isNotEmpty && diet.first != 'Any') filters['diet'] = diet.first;
+    if (smokingCtrl.text.isNotEmpty && smokingCtrl.text != 'Any') filters['smoking'] = smokingCtrl.text;
+
+    if (isProfileWithPhoto.value) filters['photo'] = true;
+    
+    if (recentlyCreated.value != 'all') {
+      filters['created_at'] = recentlyCreated.value;
+    }
+    
+    return filters;
+  }
+
   void applyFilters() {
-    Get.back();
-    Get.snackbar(
-      'Filters Applied',
-      'Your preferences have been updated',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 2),
-    );
+    update(); // Notify listeners (MatrimonyPage badge)
+    Get.back(result: getFilters());
+  }
+
+  int get activeFilterCount {
+    int count = 0;
+    if (ageRange.start > 18 || ageRange.end < 60) count++;
+    if (maritalStatus.isNotEmpty && maritalStatus.first != 'Any') count++;
+    if (profileCreatedBy.isNotEmpty && profileCreatedBy.first != 'Any') count++;
+    if (mothertangueCtrl.text.isNotEmpty) count++;
+    if (heightRange.start > 140 || heightRange.end < 200) count++;
+    if (salaryRange.start > 0 || salaryRange.end < 5000000) count++;
+    if (educationCtrl.text.isNotEmpty) count++;
+    if (familyStatusCtrl.text.isNotEmpty) count++;
+    if (familyType.isNotEmpty && familyType.first != 'Any') count++;
+    if (familyValues.isNotEmpty && familyValues.first != 'Any') count++;
+    if (countryCtrl.text.isNotEmpty) count++;
+    if (citizenship.isNotEmpty && citizenship.first != 'Any') count++;
+    if (diet.isNotEmpty && diet.first != 'Any') count++;
+    if (smokingCtrl.text.isNotEmpty && smokingCtrl.text != 'Any') count++;
+    if (isProfileWithPhoto.value) count++;
+    if (recentlyCreated.value != 'all') count++;
+    return count;
   }
 }
 

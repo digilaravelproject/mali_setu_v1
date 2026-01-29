@@ -14,222 +14,67 @@ class FilterBottomSheet extends GetWidget<FilterController> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Container(
-        // decoration: AppDecorations.bottomSheetDecoration(context),
-        //height: Get.height * 0.9,
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle bar
-            Center(
-              child: Container(
-                height: 4,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: context.theme.dividerColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ).marginOnly(bottom: 16),
-            ),
+    return Container(
+      decoration: AppDecorations.bottomSheetDecoration(context),
+      height: Get.height * 0.9,
+      padding: EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              height: 4,
+              width: 60,
+              decoration: BoxDecoration(
+                color: context.theme.dividerColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ).marginOnly(bottom: 16),
+          ),
 
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Filters", style: context.textTheme.headlineSmall),
-                TextButton(
-                  onPressed: controller.resetFilters,
-                  child: Text(
-                    "Reset",
-                    style: TextStyle(color: context.theme.primaryColor),
-                  ),
-                ),
-              ],
-            ).marginSymmetric(horizontal: 8),
-
-            PreferredSize(
-              preferredSize: const Size.fromHeight(40),
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  color: context.theme.colorScheme.surface.withValues(
-                    alpha: 0.12,
-                  ),
-                ),
-                child: TabBar(
-                  dividerHeight: 0,
-                  padding: EdgeInsets.zero,
-                  physics: const NeverScrollableScrollPhysics(),
-                  tabAlignment: TabAlignment.fill,
-                  indicator: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: context.theme.primaryColor,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  indicatorSize: TabBarIndicatorSize.label,
-                  labelColor: context.theme.colorScheme.primary,
-                  unselectedLabelColor: context.theme.colorScheme.onSurface,
-                  tabs: const [
-                    Tab(text: "By Criteria"),
-                    Tab(text: "By Profile Id"),
-                    Tab(text: "Saved Search"),
-                  ],
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GetBuilder<FilterController>(
+                builder: (ctrl) {
+                  return Text(
+                    "Filters${ctrl.activeFilterCount > 0 ? " (${ctrl.activeFilterCount})" : ""}", 
+                    style: context.textTheme.headlineSmall
+                  );
+                }
+              ),
+              TextButton(
+                onPressed: controller.resetFilters,
+                child: Text(
+                  "Reset",
+                  style: TextStyle(color: context.theme.primaryColor),
                 ),
               ),
-            ),
+            ],
+          ).marginSymmetric(horizontal: 8),
 
-            // Scrollable content
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildCriteriaSection(context),
-                  _buildByProfileIdSection(),
-                  _buildSaveSearchSection(context),
-                ],
-              ),
+          SizedBox(height: 10),
+
+          // Filter Content
+          // Filter Content
+          Expanded(
+            child: GetBuilder<FilterController>(
+              builder: (ctrl) => FilterCriteriaSection(controller: ctrl),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  static show() {
-    Get.bottomSheet(
+  static Future<dynamic> show() {
+    return Get.bottomSheet(
       const FilterBottomSheet(),
       isScrollControlled: true,
       persistent: false,
       backgroundColor: Colors.transparent,
-    );
-  }
-
-  Widget _buildCriteriaSection(BuildContext context) {
-    return Column(
-      children: [
-        Flexible(child: Column(children: [])),
-        SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: controller.applyFilters,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: context.theme.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                "Apply Filters",
-                style: context.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildByProfileIdSection() {
-    return Column(
-      spacing: 16,
-      children: [
-        AppInputTextField(
-          hintText: "Eg. MMS939290",
-          label: "Matrimony Id",
-          iconData: CupertinoIcons.search,
-        ),
-
-        CustomButton(title: "View Profile", onPressed: () {}),
-      ],
-    ).marginAll(12);
-  }
-
-  Widget _buildSaveSearchSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Your Saved Search...",
-                style: context.textTheme.titleMedium,
-              ),
-              Text(
-                "Total (75)",
-                style: context.textTheme.titleMedium?.copyWith(
-                  color: context.theme.primaryColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Flexible(
-          child: ListView.separated(
-            itemCount: 8,
-            separatorBuilder: (context, index) {
-              return SizedBox(height: 14);
-            },
-            itemBuilder: (context, index) {
-              return Container(
-                decoration: AppDecorations.cardDecoration(context),
-                padding: EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Search Title",
-                          style: context.textTheme.labelMedium,
-                        ),
-                        Icon(
-                          Icons.delete,
-                          size: 20,
-                          color: context.theme.primaryColor,
-                        ),
-                      ],
-                    ),
-                    Text(
-                      "${index * 7} Matches",
-                      style: context.textTheme.titleLarge,
-                    ),
-                    Center(
-                      child: BgGradientBorder(
-                        child:
-                            Text(
-                              "Show Matches",
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: context.theme.primaryColor,
-                              ),
-                            ).marginSymmetric(
-                              horizontal: Get.width * 0.1,
-                              vertical: 8,
-                            ),
-                      ),
-                    ).marginOnly(top: 12),
-                  ],
-                ),
-              ).marginSymmetric(horizontal: 4);
-            },
-          ),
-        ),
-      ],
     );
   }
 }
@@ -344,10 +189,7 @@ class FilterScreen extends GetWidget<FilterController> {
   //   );
   // }
   Widget _buildCriteriaSection() {
-    return SingleChildScrollView(
-      //  padding: EdgeInsets.all(8),
-      child: FilterCriteriaSection(controller: controller),
-    );
+    return FilterCriteriaSection(controller: controller);
   }
 
   Widget _buildByProfileIdSection() {
@@ -588,110 +430,195 @@ class FilterCriteriaSection extends StatefulWidget {
 }
 
 class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
-  final List<bool> _sectionExpansionStates = List.generate(8, (index) => false);
+  int _selectedIndex = 0;
+
+  final List<String> _categories = [
+    "Brand",
+    "RAM",
+    "Deliver At",
+    "Network Type",
+    "Internal Storage",
+    "Type",
+    "Processor Brand",
+    "Clock Speed",
+    "Operating System",
+    "Battery Capacity",
+    "Resolution Type",
+  ];
+
+  // Mapping old categories to new names based on image or keeping old names?
+  // The user image shows "Brand", "RAM" etc which are for PHONES.
+  // BUT the app is Matrimony. The user likely wants the LAYOUT, not the content.
+  // I should keep the EXISTING categories ("Basic Details", "Professional Details" etc) but use the NEW layout.
+  
+  final List<Map<String, dynamic>> _sections = [
+    {"title": "Basic Details", "icon": Icons.person_outline},
+    {"title": "Professional Details", "icon": Icons.work_outline},
+    {"title": "Religion Details", "icon": Icons.temple_hindu_outlined},
+    {"title": "Family Details", "icon": Icons.family_restroom},
+    {"title": "Location Details", "icon": Icons.location_on_outlined},
+    {"title": "Lifestyle", "icon": Icons.fitness_center_outlined},
+    {"title": "Profile Type", "icon": Icons.category_outlined},
+    {"title": "Recently Created", "icon": Icons.access_time_outlined},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Basic Details Section
-        ExpandableFilterSection(
-          title: "Basic Details",
-          icon: Icons.person_outline,
-          initiallyExpanded: _sectionExpansionStates[0],
-          content: _buildBasicDetailsSection(),
-        ),
-        Divider(),
-
-        // Professional Details
-        ExpandableFilterSection(
-          title: "Professional Details",
-          icon: Icons.work_outline,
-          initiallyExpanded: _sectionExpansionStates[1],
-          content:
-              // ProfessionalDetailsSection()
-              _buildProfessionalDetailsSection(),
-        ),
-        Divider(),
-        // Religion Details
-        ExpandableFilterSection(
-          title: "Religion Details",
-          icon: Icons.temple_hindu_outlined,
-          initiallyExpanded: _sectionExpansionStates[2],
-          content: _buildReligionDetailsSection(),
-        ),
-        Divider(),
-
-        // Family Details
-        ExpandableFilterSection(
-          title: "Family Details",
-          icon: Icons.family_restroom,
-          initiallyExpanded: _sectionExpansionStates[3],
-          content: _buildFamilyDetailsSection(),
-        ),
-        Divider(),
-
-        // Location Details
-        ExpandableFilterSection(
-          title: "Location Details",
-          icon: Icons.location_on_outlined,
-          initiallyExpanded: _sectionExpansionStates[4],
-          content: _buildLocationDetailsSection(),
-        ),
-        Divider(),
-
-        // Lifestyle
-        ExpandableFilterSection(
-          title: "Lifestyle",
-          icon: Icons.fitness_center_outlined,
-          initiallyExpanded: _sectionExpansionStates[5],
-          content: _buildLifestyleSection(),
-        ),
-        Divider(),
-
-        // Profile Type
-        ExpandableFilterSection(
-          title: "Profile Type",
-          icon: Icons.category_outlined,
-          initiallyExpanded: _sectionExpansionStates[6],
-          content: _buildProfileTypeSection(),
-        ),
-        Divider(),
-
-        // Recently Created Profiles
-        ExpandableFilterSection(
-          title: "Recently Created Profiles",
-          icon: Icons.access_time_outlined,
-          initiallyExpanded: _sectionExpansionStates[7],
-          content: _buildRecentlyCreatedSection(),
-        ),
-
-        SizedBox(height: 20),
-
-        // Apply Button
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: widget.controller.applyFilters,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.theme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // LEFT SIDE - Categories
+              Container(
+                width: 120, // Reduced width for left menu
+                decoration: BoxDecoration(
+                  color: Colors.grey[50], // Lighter grey
+                  border: Border(right: BorderSide(color: Colors.grey[200]!)),
+                ),
+                child: ListView.builder(
+                  itemCount: _sections.length,
+                  itemBuilder: (context, index) {
+                    final isSelected = _selectedIndex == index;
+                    return InkWell(
+                      onTap: () => setState(() => _selectedIndex = index),
+                      child: Container(
+                        color: isSelected ? Colors.white : Colors.transparent,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 8), // Reduced padding
+                        child: Row(
+                          children: [
+                            if (isSelected)
+                              Container(
+                                width: 4,
+                                height: 20, // Smaller indicator
+                                decoration: BoxDecoration(
+                                  color: context.theme.primaryColor,
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(4),
+                                    bottomRight: Radius.circular(4),
+                                  ),
+                                ),
+                              ).marginOnly(right: 6),
+                             Expanded(
+                              child: Text(
+                                _sections[index]['title'],
+                                style: TextStyle(
+                                  fontSize: 12, // Reduced font size
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
+                                  color: isSelected
+                                      ? context.theme.primaryColor
+                                      : Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            child: Text(
-              "Apply Filters",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+
+              // RIGHT SIDE - Content
+              Expanded(
+                child: Container(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      // Header for the selected section
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+                        ),
+                        child: Text(
+                          _sections[_selectedIndex]['title'],
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      
+                      // Scrollable Content
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: _buildCurrentSection(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        // Footer Actions (Apply Button)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: widget.controller.applyFilters,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.theme.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                "Apply Filters",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildCurrentSection() {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildBasicDetailsSection();
+      case 1:
+        return _buildProfessionalDetailsSection();
+      case 2:
+        return _buildReligionDetailsSection();
+      case 3:
+        return _buildFamilyDetailsSection();
+      case 4:
+        return _buildLocationDetailsSection();
+      case 5:
+        return _buildLifestyleSection();
+      case 6:
+        return _buildProfileTypeSection();
+      case 7:
+        return _buildRecentlyCreatedSection();
+      default:
+        return SizedBox();
+    }
   }
 
   Widget _buildBasicDetailsSection() {
@@ -767,13 +694,13 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         // Education
         _buildRangeFilter(
           title: "Annual Income",
-          range: widget.controller.ageRange,
-          min: 20,
-          max: 60,
+          range: widget.controller.salaryRange,
+          min: 0,
+          max: 5000000,
           unit: "₹",
           onChanged: (range) {
             setState(() {
-              widget.controller.ageRange = range;
+              widget.controller.salaryRange = range;
             });
           },
         ),
@@ -873,9 +800,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Profiles with horoscope",
-                      style: context.textTheme.titleMedium,
+                    Expanded(
+                      child: Text(
+                        "Profiles with horoscope",
+                        style: context.textTheme.titleMedium,
+                      ),
                     ),
                     Icon(Icons.lock),
                   ],
@@ -889,9 +818,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Profiles with horoscope",
-                      style: context.textTheme.titleMedium,
+                    Expanded(
+                      child: Text(
+                        "Profiles with horoscope",
+                        style: context.textTheme.titleMedium,
+                      ),
                     ),
                     Icon(Icons.lock),
                   ],
@@ -930,8 +861,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             const SizedBox(height: 16),
 
             Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              () => Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.start,
                 // () => GridView.count(
                 //   crossAxisCount: 4,
                 //   shrinkWrap: true,
@@ -1070,16 +1003,18 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Nearby Profiles", style: Get.textTheme.titleMedium),
-                SizedBox(height: 5),
-                Text(
-                  "Matches Near your location",
-                  style: Get.textTheme.bodyMedium,
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Nearby Profiles", style: Get.textTheme.titleMedium),
+                  SizedBox(height: 5),
+                  Text(
+                    "Matches Near your location",
+                    style: Get.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             ),
             Obx(
               () => Checkbox(
@@ -1387,16 +1322,42 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
   }
 
   Widget _buildRecentlyCreatedSection() {
+    final options = {
+      'all': 'All Time',
+      'today': 'Today',
+      'last_7_days': 'Last 7 Days',
+      'last_30_days': 'Last 30 Days',
+      'one_week': 'One Week',
+      'one_month': 'One Month',
+    };
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Created In Last
-        SelectableChipGroup(
-          title: "Profile Created",
-          items: ["All", "Today", "Last 3 days", "One Week", "One month"],
-          onSelectionChanged: (selected) {
-            print(selected);
-          },
+        Text(
+          "Profile Created",
+          style: context.textTheme.titleMedium,
         ),
+        const SizedBox(height: 12),
+        ...options.entries.map((entry) {
+          return Obx(() {
+            final isSelected = widget.controller.recentlyCreated.value == entry.key;
+            return RadioListTile<String>(
+              title: Text(entry.value),
+              value: entry.key,
+              groupValue: widget.controller.recentlyCreated.value,
+              onChanged: (val) {
+                if (val != null) {
+                  widget.controller.recentlyCreated.value = val;
+                }
+              },
+              activeColor: context.theme.primaryColor,
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              controlAffinity: ListTileControlAffinity.trailing,
+            );
+          });
+        }).toList(),
       ],
     );
   }
@@ -2182,6 +2143,16 @@ class _MultiCheckboxListState extends State<MultiCheckboxList> {
   void initState() {
     super.initState();
     _initCheckedItems();
+  }
+
+  @override
+  void didUpdateWidget(MultiCheckboxList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items.length != oldWidget.items.length || 
+        widget.items != oldWidget.items ||
+        widget.initiallySelected != oldWidget.initiallySelected) {
+      _initCheckedItems();
+    }
   }
 
   void _initCheckedItems() {
