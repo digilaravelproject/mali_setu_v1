@@ -1,12 +1,41 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
+import '../domain/repository/volunteer_repository.dart';
+import '../data/model/volunteer_profile_model.dart';
 
 class VolunteerProfileController extends GetxController {
+  final VolunteerRepository repository;
   final authService = Get.find<AuthService>();
+
+  VolunteerProfileController({required this.repository});
+
+  final Rxn<VolunteerProfileData> profileData = Rxn<VolunteerProfileData>();
+  final RxBool isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchVolunteerProfile();
+  }
+
+  Future<void> fetchVolunteerProfile() async {
+    isLoading.value = true;
+    update();
+    try {
+      final response = await repository.getVolunteerProfile();
+      if (response.success == true) {
+        profileData.value = response.data;
+      }
+    } catch (e) {
+      debugPrint("Error fetching volunteer profile: $e");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
 
   // Volunteer Data
   Map<String, String> get volunteerData => {
@@ -20,12 +49,12 @@ class VolunteerProfileController extends GetxController {
   };
 
   // About Me
-  final aboutMe = '''
+  String get aboutMe => profileData.value?.bio ?? '''
 Experienced social worker with 5+ years in community service. Passionate about education and environmental conservation. Strong communication skills and team leadership experience. Fluent in Hindi, English, and Punjabi.
 ''';
 
   // Skills
-  final skills = [
+  List<String> get skillList => profileData.value?.skills?.split(',').map((e) => e.trim()).toList() ?? [
     'Community Outreach',
     'Event Management',
     'Teaching/Tutoring',
@@ -67,7 +96,7 @@ Experienced social worker with 5+ years in community service. Passionate about e
   };
 
   // Interests
-  final interests = [
+  List<String> get interestList => profileData.value?.interests ?? [
     'Education',
     'Environment',
     'Healthcare',
@@ -108,7 +137,8 @@ Experienced social worker with 5+ years in community service. Passionate about e
 
   // Get status color
   Color getStatusColor() {
-    return profileStatus['status'] == 'Active'
+    String status = profileData.value?.status ?? profileStatus['status'] as String;
+    return status.toLowerCase() == 'active'
         ? Get.theme.colorScheme.primary
         : Colors.grey;
   }

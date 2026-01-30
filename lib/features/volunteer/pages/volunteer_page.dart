@@ -3,6 +3,7 @@ import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:get/get_utils/src/extensions/context_extensions.dart';
 import '../controller/volunteerController.dart';
@@ -86,11 +87,19 @@ class VolunteerPage extends StatelessWidget {
                 child: CustomButton(
                   height: 45,
                   borderRadius: 14,
-                  title: "My Volunteer Profile",
+                  title: "Create Volunteer Profile",
                   onPressed: () {
-                    Get.toNamed(AppRoutes.volunteerProfile);
+                    Get.toNamed(AppRoutes.volunteerCreateProfile);
                   },
                 ),
+                // CustomButton(
+                //   height: 45,
+                //   borderRadius: 14,
+                //   title: "My Volunteer Profile",
+                //   onPressed: () {
+                //     Get.toNamed(AppRoutes.volunteerProfile);
+                //   },
+                // ),
               ),
             ),
 
@@ -545,116 +554,116 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
           onTap: Get.back,
           child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
         ),
+        actions: [
+          InkWell(
+            onTap: (){
+              Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': true});
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.edit, size: 20, color: colorScheme.primary),
+            ),
+          ),
+        ],
         title: Text("Volunteer Profile", style: context.textTheme.headlineLarge),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            // Profile Header
-            _buildProfileHeader(theme, colorScheme),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-            // Stats Cards
-            //_buildStatsCards(colorScheme),
+        final profile = controller.profileData.value;
 
-            // All Sections
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // About Me
-                  _buildSection(
-                    title: 'About Me',
-                    icon: Icons.person_outline,
-                    colorScheme: colorScheme,
-                    child: _buildAboutMeSection(textTheme),
-                  ),
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              // Profile Header
+              //_buildProfileHeader(theme, colorScheme),
 
-                  const SizedBox(height: 16),
+              // Stats Cards
+              //_buildStatsCards(colorScheme),
 
-                  // Skills
-                  _buildSection(
-                    title: 'Skills',
-                    icon: Icons.star_outline,
-                    colorScheme: colorScheme,
-                    child: _buildSkillsSection(),
-                  ),
-                  
-
-                  // Experience
-                  // _buildSection(
-                  //   title: 'Experience',
-                  //   icon: Icons.work_outline,
-                  //   colorScheme: colorScheme,
-                  //   child: _buildExperienceSection(textTheme),
-                  // ),
-
-                  const SizedBox(height: 16),
-
-                Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildAvailabilityRow(
-                          label: 'Experience',
-                          value: "5 years in marketing and sales",
-                          icon: Icons.work_outline,
-                        ),
-                        SizedBox(height: 8,),
-                        _buildAvailabilityRow(
-                          label: 'Availability',
-                          value: "Full-time",
-                          icon: Icons.calendar_today_rounded,
-                        ),
-                        SizedBox(height: 8,),
-                        _buildAvailabilityRow(
-                          label: 'Location',
-                          value: "Lucknow",
-                          icon: Icons.location_on_outlined,
-                        ),
-
-                      ],
+              // All Sections
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // About Me
+                    _buildSection(
+                      title: 'Bio',
+                      icon: Icons.person_outline,
+                      colorScheme: colorScheme,
+                      child: _buildAboutMeSection(textTheme),
                     ),
-                  ),
+
+                    const SizedBox(height: 16),
+
+                    // Skills
+                    _buildSection(
+                      title: 'Skills',
+                      icon: Icons.star_outline,
+                      colorScheme: colorScheme,
+                      child: _buildSkillsSection(),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildAvailabilityRow(
+                              label: 'Experience',
+                              value: profile?.experience ?? "Not specified",
+                              icon: Icons.work_outline,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildAvailabilityRow(
+                              label: 'Availability',
+                              value: profile?.availability ?? "Not specified",
+                              icon: Icons.calendar_today_rounded,
+                            ),
+                            const SizedBox(height: 8),
+                            _buildAvailabilityRow(
+                              label: 'Location',
+                              value: profile?.location ?? "Not specified",
+                              icon: Icons.location_on_outlined,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Interests
+                    _buildSection(
+                      title: 'Interests',
+                      icon: Icons.favorite_outline,
+                      colorScheme: colorScheme,
+                      child: _buildInterestsSection(),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Profile Status
+                    _buildProfileStatusSection(colorScheme, textTheme),
+
+                    const SizedBox(height: 40),
+                  ],
                 ),
-
-                  const SizedBox(height: 16),
-
-                  // Availability
-                  // _buildSection(
-                  //   title: 'Availability',
-                  //   icon: Icons.calendar_today_outlined,
-                  //   colorScheme: colorScheme,
-                  //   child: _buildAvailabilitySection(),
-                  // ),
-
-
-                  // Interests
-                  _buildSection(
-                    title: 'Interests',
-                    icon: Icons.favorite_outline,
-                    colorScheme: colorScheme,
-                    child: _buildInterestsSection(),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Profile Status
-                  _buildProfileStatusSection(colorScheme, textTheme),
-
-                  const SizedBox(height: 40),
-                ],
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -726,7 +735,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
 
           InkWell(
             onTap: (){
-              Get.toNamed(AppRoutes.volunteerCreateProfile);
+              Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': true});
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -920,7 +929,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
     return Wrap(
       spacing: 10,
       runSpacing: 10,
-      children: controller.skills.map((skill) {
+      children: controller.skillList.map((skill) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
@@ -1087,7 +1096,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
     return Wrap(
       spacing: 10,
       runSpacing: 10,
-      children: controller.interests.map((interest) {
+      children: controller.interestList.map((interest) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(

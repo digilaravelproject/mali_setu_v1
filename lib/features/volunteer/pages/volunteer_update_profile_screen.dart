@@ -1,13 +1,11 @@
-import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/widgets/option_selector.dart';
 import '../../../../core/helper/form_validator.dart';
-import '../../../../core/utils/app_assets.dart';
 import '../controller/volunteerUpdateProfileController.dart';
 
 class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
@@ -21,222 +19,226 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
           onTap: Get.back,
           child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
         ),
-        title: Text("Update Your Profile", style: context.textTheme.headlineLarge),
+        title: Text(controller.isEdit.value ? "Update Your Profile" : "Create Your Profile", style: context.textTheme.headlineLarge),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Update your volunteer information",
-              style: context.textTheme.titleMedium,
-            ),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                controller.isEdit.value ? "Update your volunteer information" : "Fill in your volunteer information",
+                style: context.textTheme.titleMedium,
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Add Custom Skill
-            AppInputTextField(
-              controller: controller.skillsCtrl,
-              label: "Add Skills ",
-              hintText: "Enter a skill (e.g., PHP, Laravel)",
-              textInputType: TextInputType.text,
-            ),
+              // Bio Section
+              AppInputTextField(
+                controller: controller.bioCtrl,
+                label: "Bio",
+                hintText: "Enter your bio...",
+                maxLines: 4,
+                textInputType: TextInputType.multiline,
+              ),
 
-            const SizedBox(height: 16),
-            CustomButton(
-              title: "+ Add",
-              height: 40,
-              onPressed: controller.addCustomSkill,
-            ),
+              const SizedBox(height: 16),
 
-            // Selected Benefits List
-            Obx(
-                  () => controller.selectedSkills.isEmpty
+              // Add Custom Skill
+              AppInputTextField(
+                controller: controller.skillsCtrl,
+                label: "Add Skills",
+                hintText: "Enter a skill (e.g., PHP, Laravel)",
+                textInputType: TextInputType.text,
+              ),
+
+              const SizedBox(height: 12),
+              CustomButton(
+                title: "+ Add Skill",
+                height: 40,
+                onPressed: controller.addCustomSkill,
+              ),
+
+              // Selected Skills List
+              Obx(() => controller.selectedSkills.isEmpty
                   ? const SizedBox()
                   : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
-                  Text(
-                    "Selected Skills:",
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        Text(
+                          "Selected Skills:",
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: controller.selectedSkills
+                              .map(
+                                (skill) => Chip(
+                                  label: Text(skill),
+                                  deleteIcon: const Icon(Icons.close, size: 16),
+                                  onDeleted: () => controller.removeSkill(skill),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    )),
+
+              // Popular Skills
+              const SizedBox(height: 16),
+              Text(
+                "Quick Add Skills:",
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Obx(() => Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: controller.selectedSkills
+                    children: controller.popularSkills
                         .map(
-                          (skill) => Chip(
-                        label: Text(skill),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () =>
-                            controller.removeSkill(skill),
-                      ),
-                    )
+                          (skill) => FilterChip(
+                            label: Text(skill),
+                            selected: controller.selectedSkills.contains(skill),
+                            onSelected: (selected) {
+                              if (selected) {
+                                controller.addPopularSkill(skill);
+                              } else {
+                                controller.removeSkill(skill);
+                              }
+                            },
+                          ),
+                        )
                         .toList(),
-                  ),
-                ],
+                  )),
+
+              const SizedBox(height: 16),
+
+              SingleDropdown(
+                controller: controller.experienceCtrl,
+                label: "Experience Level",
+                items: controller.expLevels,
               ),
-            ),
 
-            // Popular Skills
-            const SizedBox(height: 16),
-            Text(
-              "Quick Add Skills:",
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: 16),
+
+              SingleDropdown(
+                controller: controller.availabilityCtrl,
+                label: "Availability",
+                items: controller.availabilities,
               ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.popularSkills
-                  .map(
-                    (skill) => FilterChip(
-                  label: Text(skill),
-                  selected: controller.selectedSkills.contains(skill),
-                  onSelected: (selected) {
-                    if (selected) {
-                      controller.addPopularSkill(skill);
-                    } else {
-                      controller.removeSkill(skill);
-                    }
-                  },
-                ),
-              )
-                  .toList(),
-            ),
 
-            SingleDropdown(
-              controller: controller.experienceCtrl,
-              label: "Experience Level",
-              items: controller.expLevel,
-            ),
+              const SizedBox(height: 16),
 
-            SingleDropdown(
-              controller: controller.experienceCtrl,
-              label: "Availability",
-              items: controller.availabilities,
-            ),
+              AppInputTextField(
+                controller: controller.locationCtrl,
+                label: "Location",
+                hintText: "e.g., Pune, Maharashtra",
+                textInputType: TextInputType.text,
+                //validator: FormValidator.required,
+              ),
 
-            AppInputTextField(
-              label: "Location ",
-              hintText: "Lucknow",
-              textInputType: TextInputType.text,
-              //controller: controller.mobileController,
-              validator: FormValidator.jobTitle,
-            ),
+              const SizedBox(height: 24),
 
-            // ================ Benefits & Perks Section ================
-            const SectionTitle("Interests"),
+              // Interests Section
+              const SectionTitle("Interests"),
 
-            // Add Custom Benefit
-            AppInputTextField(
-              controller: controller.benefitsCtrl,
-              label: "Add Interests ",
-              hintText: "Enter a Interests (e.g., Gaming, Coding)",
-              textInputType: TextInputType.text,
-            ),
+              // Add Custom Interest
+              AppInputTextField(
+                controller: controller.interestsCtrl,
+                label: "Add Interests",
+                hintText: "Enter an interest (e.g., Gaming, Coding)",
+                textInputType: TextInputType.text,
+              ),
 
-            const SizedBox(height: 16),
-            CustomButton(
-              title: "+ Add",
-              height: 40,
-              onPressed: controller.addCustomBenefit,
-            ),
+              const SizedBox(height: 12),
+              CustomButton(
+                title: "+ Add Interest",
+                height: 40,
+                onPressed: controller.addCustomInterest,
+              ),
 
-            // Selected Benefits List
-            Obx(
-                  () => controller.selectedBenefits.isEmpty
+              // Selected Interests List
+              Obx(() => controller.selectedInterests.isEmpty
                   ? const SizedBox()
                   : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 12),
-                  Text(
-                    "Selected Interests:",
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        Text(
+                          "Selected Interests:",
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: controller.selectedInterests
+                              .map(
+                                (interest) => Chip(
+                                  label: Text(interest),
+                                  deleteIcon: const Icon(Icons.close, size: 16),
+                                  onDeleted: () => controller.removeInterest(interest),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    )),
+
+              // Popular Interests
+              const SizedBox(height: 16),
+              Text(
+                "Popular Interests:",
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Obx(() => Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: controller.selectedBenefits
+                    children: controller.popularInterests
                         .map(
-                          (benefit) => Chip(
-                        label: Text(benefit),
-                        deleteIcon: const Icon(Icons.close, size: 16),
-                        onDeleted: () =>
-                            controller.removeBenefit(benefit),
-                      ),
-                    )
+                          (interest) => FilterChip(
+                            label: Text(interest),
+                            selected: controller.selectedInterests.contains(interest),
+                            onSelected: (selected) {
+                              if (selected) {
+                                controller.addPopularInterest(interest);
+                              } else {
+                                controller.removeInterest(interest);
+                              }
+                            },
+                          ),
+                        )
                         .toList(),
-                  ),
-                ],
-              ),
-            ),
+                  )),
 
-            // Popular Benefits
-            const SizedBox(height: 16),
-            Text(
-              "Popular Interests:",
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: controller.popularBenefits
-                  .map(
-                    (benefit) => FilterChip(
-                  label: Text(benefit),
-                  selected: controller.selectedBenefits.contains(benefit),
-                  onSelected: (selected) {
-                    if (selected) {
-                      controller.addPopularBenefit(benefit);
-                    } else {
-                      controller.removeBenefit(benefit);
-                    }
-                  },
-                ),
-              )
-                  .toList(),
-            ),
-
-
-
-
-            const SizedBox(height: 16),
-
-
-
-
-            const SectionTitle("Do you have any dosh ?"),
-            Obx(
-                  () => OptionSelector(
-                options: const ['YES', 'NO', 'Unknown'],
-                selectedValue: controller.dosh.value,
-                onSelected: controller.dosh.call,
-              ),
-            ),
-          ],
-        ),
-      ),
+              const SizedBox(height: 80),
+            ],
+          ),
+        );
+      }),
       bottomNavigationBar: BottomAppBar(
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: CustomButton(
-          title: "Post Job Now",
-          onPressed: controller.onRegister,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Obx(() => CustomButton(
+              isLoading: controller.isLoading.value,
+              title: controller.isEdit.value ? "Update Profile" : "Create Profile",
+              onPressed: controller.onSaveProfile,
+            )),
       ),
     );
   }
