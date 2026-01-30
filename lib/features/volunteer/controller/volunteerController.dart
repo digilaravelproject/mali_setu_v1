@@ -10,10 +10,11 @@ class VolunteerProfileController extends GetxController {
   final VolunteerRepository repository;
   final authService = Get.find<AuthService>();
 
-  VolunteerProfileController({required this.repository});
+  VolunteerProfileController({required this.repository,});
 
   final Rxn<VolunteerProfileData> profileData = Rxn<VolunteerProfileData>();
   final RxBool isLoading = false.obs;
+
 
   @override
   void onInit() {
@@ -39,8 +40,8 @@ class VolunteerProfileController extends GetxController {
 
   // Volunteer Data
   Map<String, String> get volunteerData => {
-    'name': authService.currentUser.value?.name.toTitleCase() ?? 'Rahul Sharma',
-    'role': authService.currentUser.value?.occupation.toTitleCase() ?? 'Community Volunteer',
+    'name': authService.currentUser.value?.name.toTitleCase() ?? 'Volunteer',
+    'role': profileData.value?.skills?.split(',').first ?? authService.currentUser.value?.occupation.toTitleCase() ?? 'Community Volunteer',
     'profileImage': 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
     'joinDate': authService.currentUser.value?.createdAt ?? 'Jan 2024',
     'totalHours': '245',
@@ -66,33 +67,23 @@ Experienced social worker with 5+ years in community service. Passionate about e
   ];
 
   // Experience
-  final experiences = [
+  List<Map<String, String>> get experiences => [
     {
-      'title': 'Education Volunteer',
+      'title': profileData.value?.skills?.split(',').first ?? 'Education Volunteer',
       'organization': 'Teach India Foundation',
-      'duration': 'Jan 2021 - Present',
-      'description': 'Teaching underprivileged children in rural areas',
-    },
-    {
-      'title': 'Environmental Activist',
-      'organization': 'Green Earth Society',
-      'duration': 'Jun 2020 - Dec 2022',
-      'description': 'Organized tree plantation drives and awareness campaigns',
-    },
-    {
-      'title': 'Disaster Relief Volunteer',
-      'organization': 'National Relief Organization',
-      'duration': 'Mar 2020 - May 2020',
-      'description': 'Provided aid during flood relief operations',
+      'duration': profileData.value?.experience ?? 'Jan 2021 - Present',
+      'description': profileData.value?.bio ?? 'Teaching underprivileged children in rural areas',
     },
   ];
 
   // Availability
-  final availability = {
+  Map<String, String> get availability => {
     'weekdays': 'Evenings (6 PM - 9 PM)',
     'weekends': 'Full Day',
     'remote': 'Available',
     'onSite': 'Available',
+    'availability': profileData.value?.availability ?? 'Not specified',
+    'location': profileData.value?.location ?? 'Not specified',
   };
 
   // Interests

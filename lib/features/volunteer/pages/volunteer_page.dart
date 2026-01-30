@@ -1,12 +1,10 @@
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:get/get_state_manager/src/simple/get_view.dart';
-import 'package:get/get_utils/src/extensions/context_extensions.dart';
+import 'package:get/get.dart';
+import '../controller/all_volunteer_controller.dart';
 import '../controller/volunteerController.dart';
+import '../data/model/res_all_volunteer_model.dart';
 
 class VolunteerPage1 extends StatelessWidget {
   const VolunteerPage1({super.key});
@@ -51,11 +49,7 @@ class VolunteerPage1 extends StatelessWidget {
   }
 }
 
-
-
-
-
-class VolunteerPage extends StatelessWidget {
+class VolunteerPage extends GetWidget<AllVolunteerController> {
   const VolunteerPage({super.key});
 
   @override
@@ -87,73 +81,96 @@ class VolunteerPage extends StatelessWidget {
                 child: CustomButton(
                   height: 45,
                   borderRadius: 14,
-                  title: "Create Volunteer Profile",
+                  title: "My Volunteer Profile",
                   onPressed: () {
-                    Get.toNamed(AppRoutes.volunteerCreateProfile);
+                    Get.toNamed(AppRoutes.volunteerProfile);
                   },
                 ),
-                // CustomButton(
-                //   height: 45,
-                //   borderRadius: 14,
-                //   title: "My Volunteer Profile",
-                //   onPressed: () {
-                //     Get.toNamed(AppRoutes.volunteerProfile);
-                //   },
-                // ),
               ),
             ),
 
             // Volunteer List Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Available Volunteers",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      "12 Volunteers",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue[800],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+
 
             // Volunteer List
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: volunteers.length,
-                itemBuilder: (context, index) {
-                  return VolunteerCard(
-                    volunteer: volunteers[index],
-                    onTap: () {
-                      // Navigate to volunteer details
-                   //   Get.toNamed(AppRoutes.volunteerDetails, arguments: volunteers[index]);
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            //   child: ListView.builder(
+            //     shrinkWrap: true,
+            //     physics: NeverScrollableScrollPhysics(),
+            //     itemCount: controller.allVolunteerList.length,
+            //     itemBuilder: (context, index) {
+            //       return VolunteerCard(
+            //         volunteer: controller.allVolunteerList[index],
+            //         onTap: () {
+            //           // Navigate to volunteer details
+            //         },
+            //       );
+            //     },
+            //   ),
+            // ),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (controller.allVolunteerList.isEmpty) {
+                return Center(child: Text("No Volunteers Available"));
+              }
+
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Available Volunteers",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            controller.allVolunteerList.length.toString(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue[800],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: controller.allVolunteerList.length,
+                    itemBuilder: (context, index) {
+                      return VolunteerCard(
+                        volunteer: controller.allVolunteerList[index], // ✅ DATA SET
+                        onTap: () {
+                          Get.toNamed(
+                            AppRoutes.volunteerOpportunityDetails,
+                            arguments: controller.allVolunteerList[index].id,
+                          );
+                        },
+                      );
                     },
-                  );
-                },
-              ),
-            ),
+                  ),
+                ],
+              );
+            })
+
           ],
         ),
       ),
@@ -192,21 +209,21 @@ class VolunteerCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Profile Image
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage(volunteer.profileImage),
-                        fit: BoxFit.cover,
-                      ),
-                      border: Border.all(
-                        color: Colors.blue[100]!,
-                        width: 2,
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   width: 60,
+                  //   height: 60,
+                  //   decoration: BoxDecoration(
+                  //     shape: BoxShape.circle,
+                  //     image: DecorationImage(
+                  //       image: NetworkImage(volunteer.profileImage),
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //     border: Border.all(
+                  //       color: Colors.blue[100]!,
+                  //       width: 2,
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(width: 16),
 
                   // Volunteer Info
@@ -218,7 +235,7 @@ class VolunteerCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              volunteer.name,
+                              volunteer.contactPerson.toString(),
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -230,11 +247,11 @@ class VolunteerCard extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: _getAvailabilityColor(volunteer.availability),
+                                color: _getAvailabilityColor(volunteer.status.toString()),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                volunteer.availability,
+                                volunteer.status.toString(),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
@@ -246,7 +263,14 @@ class VolunteerCard extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          volunteer.role,
+                          volunteer.contactEmail.toString(),
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          volunteer.organization.toString(),
                           style: TextStyle(
                             color: Colors.grey[700],
                             fontSize: 14,
@@ -255,36 +279,36 @@ class VolunteerCard extends StatelessWidget {
                         SizedBox(height: 8),
 
                         // Rating and Experience
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.star, size: 16, color: Colors.amber),
-                                SizedBox(width: 4),
-                                Text(
-                                  '${volunteer.rating} (${volunteer.totalReviews})',
-                                  style: TextStyle(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.work_history,
-                                    size: 16, color: Colors.blue),
-                                SizedBox(width: 4),
-                                Text(
-                                  '${volunteer.experience} experience',
-                                  style: TextStyle(fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                        // Wrap(
+                        //   crossAxisAlignment: WrapCrossAlignment.center,
+                        //   spacing: 8,
+                        //   runSpacing: 4,
+                        //   children: [
+                        //     Row(
+                        //       mainAxisSize: MainAxisSize.min,
+                        //       children: [
+                        //         Icon(Icons.star, size: 16, color: Colors.amber),
+                        //         SizedBox(width: 4),
+                        //         // Text(
+                        //         //   '${volunteer.rating} (${volunteer.totalReviews})',
+                        //         //   style: TextStyle(fontSize: 13),
+                        //         // ),
+                        //       ],
+                        //     ),
+                        //     Row(
+                        //       mainAxisSize: MainAxisSize.min,
+                        //       children: [
+                        //         Icon(Icons.work_history,
+                        //             size: 16, color: Colors.blue),
+                        //         SizedBox(width: 4),
+                        //         Text(
+                        //           '${volunteer.experience} experience',
+                        //           style: TextStyle(fontSize: 13),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),
@@ -294,32 +318,32 @@ class VolunteerCard extends StatelessWidget {
               SizedBox(height: 16),
 
               // Skills
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: volunteer.skills
-                    .take(4)
-                    .map((skill) => Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    skill,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ))
-                    .toList(),
-              ),
+              // Wrap(
+              //   spacing: 8,
+              //   runSpacing: 8,
+              //   children: volunteer.skills
+              //       .take(4)
+              //       .map((skill) => Container(
+              //     padding: EdgeInsets.symmetric(
+              //       horizontal: 10,
+              //       vertical: 5,
+              //     ),
+              //     decoration: BoxDecoration(
+              //       color: Colors.grey[100],
+              //       borderRadius: BorderRadius.circular(20),
+              //     ),
+              //     child: Text(
+              //       skill,
+              //       style: TextStyle(
+              //         fontSize: 12,
+              //         color: Colors.grey[800],
+              //       ),
+              //     ),
+              //   ))
+              //       .toList(),
+              // ),
 
-              SizedBox(height: 16),
+             // SizedBox(height: 16),
 
               // Footer with Location and Hours
               Row(
@@ -330,7 +354,7 @@ class VolunteerCard extends StatelessWidget {
                       Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
                       SizedBox(width: 4),
                       Text(
-                        volunteer.location,
+                        volunteer.location.toString(),
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[600],
@@ -338,19 +362,19 @@ class VolunteerCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                      SizedBox(width: 4),
-                      Text(
-                        '${volunteer.volunteerHours} hours',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                  //     SizedBox(width: 4),
+                  //     // Text(
+                  //     //   '${volunteer.volunteerHours} hours',
+                  //     //   style: TextStyle(
+                  //     //     fontSize: 13,
+                  //     //     color: Colors.grey[600],
+                  //     //   ),
+                  //     // ),
+                  //   ],
+                  // ),
                 ],
               ),
             ],
@@ -362,7 +386,7 @@ class VolunteerCard extends StatelessWidget {
 
   Color _getAvailabilityColor(String availability) {
     switch (availability.toLowerCase()) {
-      case 'available':
+      case 'active':
         return Colors.green;
       case 'busy':
         return Colors.orange;
@@ -377,167 +401,130 @@ class VolunteerCard extends StatelessWidget {
 }
 
 // Volunteer Data Model
-class Volunteer {
-  final String id;
-  final String name;
-  final String role;
-  final String profileImage;
-  final String location;
-  final double rating;
-  final int totalReviews;
-  final String experience;
-  final List<String> skills;
-  final String availability;
-  final int volunteerHours;
-  final List<String> causes;
-  final String bio;
-  final List<String> languages;
-  final DateTime joinDate;
-
-  Volunteer({
-    required this.id,
-    required this.name,
-    required this.role,
-    required this.profileImage,
-    required this.location,
-    required this.rating,
-    required this.totalReviews,
-    required this.experience,
-    required this.skills,
-    required this.availability,
-    required this.volunteerHours,
-    required this.causes,
-    required this.bio,
-    required this.languages,
-    required this.joinDate,
-  });
-}
-
-// Sample Static Data
-List<Volunteer> volunteers = [
-  Volunteer(
-    id: '1',
-    name: 'Sarah Johnson',
-    role: 'Community Organizer',
-    profileImage: 'https://randomuser.me/api/portraits/women/44.jpg',
-    location: 'New York, NY',
-    rating: 4.8,
-    totalReviews: 127,
-    experience: '3 years',
-    skills: ['Event Planning', 'Fundraising', 'Teaching', 'First Aid', 'Leadership'],
-    availability: 'Available',
-    volunteerHours: 240,
-    causes: ['Education', 'Environment', 'Healthcare'],
-    bio: 'Passionate about community service and environmental conservation.',
-    languages: ['English', 'Spanish'],
-    joinDate: DateTime(2022, 5, 15),
-  ),
-  Volunteer(
-    id: '2',
-    name: 'Michael Chen',
-    role: 'Tech Mentor',
-    profileImage: 'https://randomuser.me/api/portraits/men/32.jpg',
-    location: 'San Francisco, CA',
-    rating: 4.9,
-    totalReviews: 89,
-    experience: '5 years',
-    skills: ['Coding', 'Mentoring', 'Public Speaking', 'Python', 'Web Development'],
-    availability: 'Busy',
-    volunteerHours: 180,
-    causes: ['Education', 'Technology', 'Youth'],
-    bio: 'Helping underprivileged youth learn coding skills.',
-    languages: ['English', 'Mandarin'],
-    joinDate: DateTime(2021, 8, 22),
-  ),
-  Volunteer(
-    id: '3',
-    name: 'Priya Sharma',
-    role: 'Medical Volunteer',
-    profileImage: 'https://randomuser.me/api/portraits/women/67.jpg',
-    location: 'Chicago, IL',
-    rating: 4.7,
-    totalReviews: 56,
-    experience: '2 years',
-    skills: ['First Aid', 'Nursing', 'Counseling', 'Emergency Response'],
-    availability: 'Available',
-    volunteerHours: 320,
-    causes: ['Healthcare', 'Elderly Care', 'Disaster Relief'],
-    bio: 'Registered nurse volunteering in free health camps.',
-    languages: ['English', 'Hindi', 'Gujarati'],
-    joinDate: DateTime(2023, 1, 10),
-  ),
-  Volunteer(
-    id: '4',
-    name: 'David Wilson',
-    role: 'Animal Rescue',
-    profileImage: 'https://randomuser.me/api/portraits/men/55.jpg',
-    location: 'Austin, TX',
-    rating: 4.6,
-    totalReviews: 42,
-    experience: '4 years',
-    skills: ['Animal Care', 'Veterinary Assistance', 'Rescue Operations'],
-    availability: 'Limited',
-    volunteerHours: 150,
-    causes: ['Animal Welfare', 'Environment'],
-    bio: 'Dedicated to rescuing and rehabilitating animals.',
-    languages: ['English'],
-    joinDate: DateTime(2022, 3, 5),
-  ),
-  Volunteer(
-    id: '5',
-    name: 'Maria Garcia',
-    role: 'Food Bank Coordinator',
-    profileImage: 'https://randomuser.me/api/portraits/women/33.jpg',
-    location: 'Miami, FL',
-    rating: 4.5,
-    totalReviews: 78,
-    experience: '1 year',
-    skills: ['Logistics', 'Team Management', 'Food Safety', 'Spanish'],
-    availability: 'Available',
-    volunteerHours: 200,
-    causes: ['Hunger Relief', 'Community Development'],
-    bio: 'Organizing food distribution to families in need.',
-    languages: ['English', 'Spanish'],
-    joinDate: DateTime(2023, 6, 18),
-  ),
-];
-
-// Filter Options Chip Bar (Optional)
-class FilterChips extends StatelessWidget {
-  final List<String> filters;
-  final Function(String) onFilterSelected;
-
-  const FilterChips({
-    Key? key,
-    required this.filters,
-    required this.onFilterSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: filters.map((filter) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(filter),
-              onSelected: (selected) {
-                onFilterSelected(filter);
-              },
-              backgroundColor: Colors.grey[200],
-              selectedColor: Colors.blue[100],
-              labelStyle: TextStyle(color: Colors.grey[800]),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-
+// class Volunteer {
+//   final String id;
+//   final String name;
+//   final String role;
+//   final String profileImage;
+//   final String location;
+//   final double rating;
+//   final int totalReviews;
+//   final String experience;
+//   final List<String> skills;
+//   final String availability;
+//   final int volunteerHours;
+//   final List<String> causes;
+//   final String bio;
+//   final List<String> languages;
+//   final DateTime joinDate;
+//
+//   Volunteer({
+//     required this.id,
+//     required this.name,
+//     required this.role,
+//     required this.profileImage,
+//     required this.location,
+//     required this.rating,
+//     required this.totalReviews,
+//     required this.experience,
+//     required this.skills,
+//     required this.availability,
+//     required this.volunteerHours,
+//     required this.causes,
+//     required this.bio,
+//     required this.languages,
+//     required this.joinDate,
+//   });
+// }
+//
+// // Sample Static Data
+// List<Volunteer> volunteers = [
+//   Volunteer(
+//     id: '1',
+//     name: 'Sarah Johnson',
+//     role: 'Community Organizer',
+//     profileImage: 'https://randomuser.me/api/portraits/women/44.jpg',
+//     location: 'New York, NY',
+//     rating: 4.8,
+//     totalReviews: 127,
+//     experience: '3 years',
+//     skills: ['Event Planning', 'Fundraising', 'Teaching', 'First Aid', 'Leadership'],
+//     availability: 'Available',
+//     volunteerHours: 240,
+//     causes: ['Education', 'Environment', 'Healthcare'],
+//     bio: 'Passionate about community service and environmental conservation.',
+//     languages: ['English', 'Spanish'],
+//     joinDate: DateTime(2022, 5, 15),
+//   ),
+//   Volunteer(
+//     id: '2',
+//     name: 'Michael Chen',
+//     role: 'Tech Mentor',
+//     profileImage: 'https://randomuser.me/api/portraits/men/32.jpg',
+//     location: 'San Francisco, CA',
+//     rating: 4.9,
+//     totalReviews: 89,
+//     experience: '5 years',
+//     skills: ['Coding', 'Mentoring', 'Public Speaking', 'Python', 'Web Development'],
+//     availability: 'Busy',
+//     volunteerHours: 180,
+//     causes: ['Education', 'Technology', 'Youth'],
+//     bio: 'Helping underprivileged youth learn coding skills.',
+//     languages: ['English', 'Mandarin'],
+//     joinDate: DateTime(2021, 8, 22),
+//   ),
+//   Volunteer(
+//     id: '3',
+//     name: 'Priya Sharma',
+//     role: 'Medical Volunteer',
+//     profileImage: 'https://randomuser.me/api/portraits/women/67.jpg',
+//     location: 'Chicago, IL',
+//     rating: 4.7,
+//     totalReviews: 56,
+//     experience: '2 years',
+//     skills: ['First Aid', 'Nursing', 'Counseling', 'Emergency Response'],
+//     availability: 'Available',
+//     volunteerHours: 320,
+//     causes: ['Healthcare', 'Elderly Care', 'Disaster Relief'],
+//     bio: 'Registered nurse volunteering in free health camps.',
+//     languages: ['English', 'Hindi', 'Gujarati'],
+//     joinDate: DateTime(2023, 1, 10),
+//   ),
+//   Volunteer(
+//     id: '4',
+//     name: 'David Wilson',
+//     role: 'Animal Rescue',
+//     profileImage: 'https://randomuser.me/api/portraits/men/55.jpg',
+//     location: 'Austin, TX',
+//     rating: 4.6,
+//     totalReviews: 42,
+//     experience: '4 years',
+//     skills: ['Animal Care', 'Veterinary Assistance', 'Rescue Operations'],
+//     availability: 'Limited',
+//     volunteerHours: 150,
+//     causes: ['Animal Welfare', 'Environment'],
+//     bio: 'Dedicated to rescuing and rehabilitating animals.',
+//     languages: ['English'],
+//     joinDate: DateTime(2022, 3, 5),
+//   ),
+//   Volunteer(
+//     id: '5',
+//     name: 'Maria Garcia',
+//     role: 'Food Bank Coordinator',
+//     profileImage: 'https://randomuser.me/api/portraits/women/33.jpg',
+//     location: 'Miami, FL',
+//     rating: 4.5,
+//     totalReviews: 78,
+//     experience: '1 year',
+//     skills: ['Logistics', 'Team Management', 'Food Safety', 'Spanish'],
+//     availability: 'Available',
+//     volunteerHours: 200,
+//     causes: ['Hunger Relief', 'Community Development'],
+//     bio: 'Organizing food distribution to families in need.',
+//     languages: ['English', 'Spanish'],
+//     joinDate: DateTime(2023, 6, 18),
+//   ),
+// ];
 
 class VolunteerProfilePage extends GetView<VolunteerProfileController> {
   const VolunteerProfilePage({super.key});
@@ -579,10 +566,10 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
           child: Column(
             children: [
               // Profile Header
-              //_buildProfileHeader(theme, colorScheme),
-
-              // Stats Cards
-              //_buildStatsCards(colorScheme),
+              // _buildProfileHeader(theme, colorScheme),
+              //
+              // // Stats Cards
+              // _buildStatsCards(colorScheme),
 
               // All Sections
               Padding(
@@ -1271,5 +1258,3 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
     );
   }
 }
-
-

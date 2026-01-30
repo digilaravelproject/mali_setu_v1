@@ -51,6 +51,7 @@ import '../../features/search/binding/search_binding.dart';
 import '../../features/search/presentation/page/search_page.dart';
 import '../../features/settings/binding/profile_binding.dart';
 import '../../features/settings/page/update_profile_page.dart';
+import '../../features/volunteer/pages/opportunity_details_page.dart';
 import '../helper/logger_helper.dart';
 
 class AppRoutes {
@@ -88,6 +89,7 @@ class AppRoutes {
   static const String matrimonyChat = '/matrimonyChat';
   static const String categoryDetails = "/categoryDetails";
   static const String jobAppliers = "/jobAppliers";
+  static const String volunteerOpportunityDetails = "/volunteerOpportunityDetails";
 }
 
 class AppPages {
@@ -309,12 +311,20 @@ class AppPages {
       name: AppRoutes.categoryDetails,
       page: () => const CategoryDetailsScreen(),
       transition: Transition.cupertino,
+      binding: DashboardBinding(),
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
       name: AppRoutes.jobAppliers,
       page: () => const JobApplicationsPage(),
       binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.volunteerOpportunityDetails,
+      page: () => const OpportunityDetailsPage(),
+      binding: VolunteerBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

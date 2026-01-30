@@ -15,4 +15,6 @@ abstract class MatrimonyRepository {
   Future<MatrimonyConversationResponse> getConversations();
   Future<MatrimonyMessagesResponse> getMessages(int conversationId);
   Future<dynamic> sendMessage(Map<String, dynamic> data);
+  Future<dynamic> removeConnectionRequest(Map<String, dynamic> data);
+  Future<ConnectionRequestsResponse> getConnectedUsers();
 }

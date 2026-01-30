@@ -54,4 +54,26 @@ class MatrimonyController extends GetxController {
       Get.snackbar("Error", "Something went wrong: $e");
     }
   }
+
+  Future<void> rejectRequest(int? receiverId) async {
+    if (receiverId == null) return;
+    try {
+      isLoading.value = true;
+      final data = {
+        "receiver_id": receiverId.toString(),
+        "message": "Reject"
+      };
+      final response = await _repository.removeConnectionRequest(data);
+      if (response['success'] == true) {
+        Get.snackbar("Success", response['message'] ?? "User removed successfully");
+        fetchProfiles(); // Refresh list
+      } else {
+        Get.snackbar("Error", response['message'] ?? "Failed to remove request");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Something went wrong: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

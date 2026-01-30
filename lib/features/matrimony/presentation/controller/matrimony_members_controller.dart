@@ -21,19 +21,9 @@ class MatrimonyMembersController extends GetxController {
   Future<void> fetchMembers() async {
     try {
       isLoading.value = true;
-      final response = await _repository.getConnectionRequests();
+      final response = await _repository.getConnectedUsers();
       if (response.success == true && response.data != null) {
-        List<ConnectionRequest> allMembers = [];
-        
-        if (response.data!.sentRequests != null) {
-          allMembers.addAll(response.data!.sentRequests!.where((r) => r.status == "accepted"));
-        }
-        
-        if (response.data!.receivedRequests != null) {
-          allMembers.addAll(response.data!.receivedRequests!.where((r) => r.status == "accepted"));
-        }
-
-        members.value = allMembers;
+        members.value = response.data!.connectedUsers ?? [];
         filterMembers(searchQuery.value);
       }
     } catch (e) {
@@ -50,7 +40,7 @@ class MatrimonyMembersController extends GetxController {
     } else {
       final currentUserId = _authService.currentUser.value?.id;
       filteredMembers.value = members.where((m) {
-        final user = m.senderId == currentUserId ? m.receiver : m.sender;
+        final user = m.connectedProfile ?? (m.senderId == currentUserId ? m.receiver : m.sender);
         final name = (user?.name ?? "").toLowerCase();
         return name.contains(query.toLowerCase());
       }).toList();

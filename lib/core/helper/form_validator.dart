@@ -34,9 +34,9 @@ class FormValidator {
     if (value.trim().length < 10) {
       return "$title must be at least 10 characters";
     }
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
-      return "$title can only contain alphabets";
-    }
+    // if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+    //   return "$title can only contain alphabets";
+    // }
     return null;
   }
 

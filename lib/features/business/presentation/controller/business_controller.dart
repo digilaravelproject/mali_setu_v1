@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../Auth/service/auth_service.dart';
 import '../../data/model/res_all_business_model.dart';
@@ -393,6 +394,24 @@ class BusinessController extends GetxController {
        Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> launchPhone(String phone) async {
+    final Uri uri = Uri(scheme: 'tel', path: phone);
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch phone';
+    }
+  }
+
+  Future<void> launchEmail(String email) async {
+    final Uri uri = Uri(
+      scheme: 'mailto',
+      path: email,
+    );
+
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch email';
     }
   }
 }

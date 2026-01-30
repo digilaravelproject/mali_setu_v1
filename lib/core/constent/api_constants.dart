@@ -39,6 +39,9 @@ class ApiConstants {
     static const String getCategory = "category";
     static const String getCategoryDetails = "category";
 
+    static const String getCategoryBusiness = "business/category";
+
+
     // Matrimony Api
     static const String matrimonyProfile = "matrimony/profile";
     static const String searchMatrimony = "search/matrimony";
@@ -47,9 +50,13 @@ class ApiConstants {
     static const String matrimonyConversations = "matrimony/conversations";
     static const String matrimonySendMessage = "matrimony/send-message";
     static const String matrimonyMessages = "matrimony/messages"; // matrimony/messages/{conversation_id}
+    static const String matrimonyRemoveRequest = "matrimony/remove-request";
+    static const String matrimonyConnectedUsers = "matrimony/connected-users";
 
     // Volunteer Api
     static const String volunteerProfile = "volunteer/profile";
+    static const String allVolunteer = "volunteer/opportunities";
+    static const String volunteerOpportunity = "volunteer/opportunity";
 
     // Job Api
     static const String createJobs = "jobs";

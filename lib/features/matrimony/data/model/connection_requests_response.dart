@@ -15,8 +15,9 @@ class ConnectionRequestsResponse {
 class ConnectionRequestsData {
   List<ConnectionRequest>? sentRequests;
   List<ConnectionRequest>? receivedRequests;
+  List<ConnectionRequest>? connectedUsers;
 
-  ConnectionRequestsData({this.sentRequests, this.receivedRequests});
+  ConnectionRequestsData({this.sentRequests, this.receivedRequests, this.connectedUsers});
 
   ConnectionRequestsData.fromJson(Map<String, dynamic> json) {
     if (json['sent_requests'] != null) {
@@ -29,6 +30,12 @@ class ConnectionRequestsData {
       receivedRequests = <ConnectionRequest>[];
       json['received_requests'].forEach((v) {
         receivedRequests!.add(ConnectionRequest.fromJson(v));
+      });
+    }
+    if (json['connected_users'] != null) {
+      connectedUsers = <ConnectionRequest>[];
+      json['connected_users'].forEach((v) {
+        connectedUsers!.add(ConnectionRequest.fromJson(v));
       });
     }
   }
@@ -46,6 +53,7 @@ class ConnectionRequest {
   String? updatedAt;
   User? sender;
   User? receiver;
+  User? connectedProfile;
 
   ConnectionRequest({
     this.id,
@@ -59,6 +67,7 @@ class ConnectionRequest {
     this.updatedAt,
     this.sender,
     this.receiver,
+    this.connectedProfile,
   });
 
   ConnectionRequest.fromJson(Map<String, dynamic> json) {
@@ -73,5 +82,6 @@ class ConnectionRequest {
     updatedAt = json['updated_at'];
     sender = json['sender'] != null ? User.fromJson(json['sender']) : null;
     receiver = json['receiver'] != null ? User.fromJson(json['receiver']) : null;
+    connectedProfile = json['connected_profile'] != null ? User.fromJson(json['connected_profile']) : null;
   }
 }

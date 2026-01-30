@@ -16,6 +16,8 @@ abstract class MatrimonyDataSource {
   Future<MatrimonyConversationResponse> getConversations();
   Future<MatrimonyMessagesResponse> getMessages(int conversationId);
   Future<dynamic> sendMessage(Map<String, dynamic> data);
+  Future<dynamic> removeConnectionRequest(Map<String, dynamic> data);
+  Future<ConnectionRequestsResponse> getConnectedUsers();
 }
 
 class MatrimonyDataSourceImpl implements MatrimonyDataSource {
@@ -81,5 +83,17 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   Future<dynamic> sendMessage(Map<String, dynamic> data) async {
     final response = await apiClient.post(ApiConstants.matrimonySendMessage, data: data);
     return response.data;
+  }
+
+  @override
+  Future<dynamic> removeConnectionRequest(Map<String, dynamic> data) async {
+    final response = await apiClient.post(ApiConstants.matrimonyRemoveRequest, data: data);
+    return response.data;
+  }
+
+  @override
+  Future<ConnectionRequestsResponse> getConnectedUsers() async {
+    final response = await apiClient.get(ApiConstants.matrimonyConnectedUsers);
+    return ConnectionRequestsResponse.fromJson(response.data);
   }
 }

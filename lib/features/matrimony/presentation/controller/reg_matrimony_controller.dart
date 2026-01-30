@@ -5,6 +5,9 @@ import 'package:get/get.dart';
 class RegMatrimonyController extends GetxController {
   final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
 
+  final ScrollController scrollController = ScrollController();
+
+
   /// --- Text Controllers ---
   final nameCtrl = TextEditingController();
   final dobCtrl = TextEditingController(); // Used for display
@@ -136,12 +139,22 @@ class RegMatrimonyController extends GetxController {
   void nextStep() {
     if (currentStep.value < 3) {
       currentStep.value++;
+      scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
   void previousStep() {
     if (currentStep.value > 0) {
       currentStep.value--;
+      scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 

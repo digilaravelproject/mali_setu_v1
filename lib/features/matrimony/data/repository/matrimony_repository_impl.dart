@@ -60,4 +60,14 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   Future<dynamic> sendMessage(Map<String, dynamic> data) async {
     return await dataSource.sendMessage(data);
   }
+
+  @override
+  Future<dynamic> removeConnectionRequest(Map<String, dynamic> data) async {
+    return await dataSource.removeConnectionRequest(data);
+  }
+
+  @override
+  Future<ConnectionRequestsResponse> getConnectedUsers() async {
+    return await dataSource.getConnectedUsers();
+  }
 }

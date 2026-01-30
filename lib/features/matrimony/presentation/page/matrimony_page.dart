@@ -188,17 +188,19 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 12,
           children: [
-            IconButton(
-              onPressed: () {},
-              icon: CustomImageView(
-                svgPath: AppAssets.icWhatsapp,
-                height: 30,
-                width: 30,
-              ),
-            ),
+            // IconButton(
+            //   onPressed: () {},
+            //   icon: CustomImageView(
+            //     svgPath: AppAssets.icWhatsapp,
+            //     height: 30,
+            //     width: 30,
+            //   ),
+            // ),
             IconButton(onPressed: () {
+                final currentProfileId = controller.profiles[controller.currentIndex.value].id;
+                controller.rejectRequest(currentProfileId);
                 controller.swiperController.swipe(CardSwiperDirection.left);
-            }, icon: const Icon(Icons.close, size: 40)),
+            }, icon: const Icon(Icons.cancel_rounded, size: 30,color: Colors.red,)),
             Obx(() {
               if (controller.profiles.isEmpty) return const SizedBox();
               final currentProfile = controller.profiles[controller.currentIndex.value];

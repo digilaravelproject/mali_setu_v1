@@ -29,6 +29,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
             Expanded(
               child: SingleChildScrollView(
+                controller: controller.scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,9 +72,11 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     );
   }
 
+
+
   Widget _buildProgressIndicator(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
         color: context.theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
@@ -85,14 +88,16 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           ),
         ],
       ),
-      child: Row(
-        children: List.generate(4, (index) {
-          final isCompleted = index < controller.currentStep.value;
-          final isActive = index == controller.currentStep.value;
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // take only as much space as needed
+          children: List.generate(4, (index) {
+            final isCompleted = index < controller.currentStep.value;
+            final isActive = index == controller.currentStep.value;
 
-          return Expanded(
-            child: Row(
+            return Row(
               children: [
+                // Circle Step
                 Container(
                   width: 30,
                   height: 30,
@@ -106,29 +111,31 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     child: isCompleted
                         ? const Icon(Icons.check, size: 16, color: Colors.white)
                         : Text(
-                            "${index + 1}",
-                            style: TextStyle(
-                              color: isCompleted || isActive
-                                  ? Colors.white
-                                  : context.theme.iconTheme.color,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
-                if (index < 3)
-                  Expanded(
-                    child: Container(
-                      height: 2,
-                      color: index < controller.currentStep.value
-                          ? context.theme.primaryColor
-                          : context.theme.dividerColor.withValues(alpha: 0.5),
+                      "${index + 1}",
+                      style: TextStyle(
+                        color: isCompleted || isActive
+                            ? Colors.white
+                            : context.theme.iconTheme.color,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                ),
+
+                // Connector line
+                if (index < 3)
+                  Container(
+                    width: 40, // control spacing
+                    height: 2,
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    color: index < controller.currentStep.value
+                        ? context.theme.primaryColor
+                        : context.theme.dividerColor.withValues(alpha: 0.5),
+                  ),
               ],
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -600,3 +607,72 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     );
   }
 }
+
+
+
+/*Widget _buildProgressIndicator(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      decoration: BoxDecoration(
+        color: context.theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(4, (index) {
+            final isCompleted = index < controller.currentStep.value;
+            final isActive = index == controller.currentStep.value;
+
+            return
+              Expanded(
+              child:
+              Row(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isCompleted || isActive
+                          ? context.theme.primaryColor
+                          : context.theme.dividerColor.withValues(alpha: 0.5),
+                    ),
+                    child: Center(
+                      child: isCompleted
+                          ? const Icon(Icons.check, size: 16, color: Colors.white)
+                          : Text(
+                              "${index + 1}",
+                              style: TextStyle(
+                                color: isCompleted || isActive
+                                    ? Colors.white
+                                    : context.theme.iconTheme.color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                  if (index < 3)
+                    Expanded(
+                      child: Container(
+                        height: 2,
+                        color: index < controller.currentStep.value
+                            ? context.theme.primaryColor
+                            : context.theme.dividerColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }*/

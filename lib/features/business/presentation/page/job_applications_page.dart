@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../data/model/res_all_business_model.dart';
@@ -229,7 +230,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                         children: [
                           const Text("You can view the resume at:"),
                           const SizedBox(height: 8),
-                          SelectableText(application.resumeUrl!, style: const TextStyle(color: Colors.blue)),
+                          SelectableText(ApiConstants.imageBaseUrl+application.resumeUrl!, style: const TextStyle(color: Colors.blue)),
                         ],
                       ),
                       confirm: ElevatedButton(

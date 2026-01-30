@@ -81,11 +81,12 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
 
   Widget _buildMemberCard(ConnectionRequest member) {
     final currentUserId = Get.find<AuthService>().currentUser.value?.id;
-    final user = member.senderId == currentUserId ? member.receiver : member.sender;
-    final name = user?.name ?? "Anonymous";
-    final profession = user?.occupation ?? "Professional";
-    final location = user?.city ?? user?.state ?? "Unknown";
+    final user = member.connectedProfile ?? (member.senderId == currentUserId ? member.receiver : member.sender);
+    final name = member.message?? "Anonymous";
+    final profession = member.responseMessage ?? "Professional";
+    final location = member.status ??  "Unknown";
     final imageUrl = user?.profileImage != null ? ApiConstants.imageBaseUrl + user!.profileImage! : null;
+       // != null ? ApiConstants.imageBaseUrl + user!.profileImage! : null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),

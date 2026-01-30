@@ -160,17 +160,17 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                   ),
                 
                 // Share Action
-                IconButton(
-                  onPressed: () {},
-                  icon: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.share, size: 18, color: Colors.white),
-                  ),
-                ),
+                // IconButton(
+                //   onPressed: () {},
+                //   icon: Container(
+                //     padding: const EdgeInsets.all(8),
+                //     decoration: BoxDecoration(
+                //       color: Colors.white.withOpacity(0.3),
+                //       shape: BoxShape.circle,
+                //     ),
+                //     child: const Icon(Icons.share, size: 18, color: Colors.white),
+                //   ),
+                // ),
                 const SizedBox(width: 8),
               ],
               flexibleSpace: FlexibleSpaceBar(
@@ -564,19 +564,19 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                 ),
               ),
             ),
-            if (!isMyJob) ...[
-              const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: context.theme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
-                ),
-              ),
-            ],
+            // if (!isMyJob) ...[
+            //   const SizedBox(width: 12),
+            //   Container(
+            //     decoration: BoxDecoration(
+            //       color: context.theme.primaryColor.withOpacity(0.1),
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //     child: IconButton(
+            //       onPressed: () {},
+            //       icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
+            //     ),
+            //   ),
+            // ],
           ],
         ),
       ),

@@ -11,6 +11,16 @@ import '../../notification/data/repository/notification_repository_impl.dart';
 import '../../notification/domain/repository/notification_repository.dart';
 import '../../notification/presentation/controller/notification_controller.dart';
 
+import '../../volunteer/controller/all_volunteer_controller.dart';
+import '../../volunteer/data/data_source/volunteer_data_source.dart';
+import '../../volunteer/data/repository/volunteer_repository_impl.dart';
+import '../../volunteer/domain/repository/volunteer_repository.dart';
+import '../../volunteer/domain/usecase/all_volunteer_use_case.dart';
+import '../data/data_source/category_business_data_source.dart';
+import '../data/repository/category_business_repository_impl.dart';
+import '../domain/repository/category_business_repository.dart';
+import '../domain/usecase/category_business_usecase.dart';
+import '../presentation/controller/cat_business_controller.dart';
 import '../presentation/controller/dashboard_controller.dart';
 import '../presentation/controller/home_controller.dart';
 import '../data/data_source/dashboard_data_source.dart';
@@ -41,5 +51,28 @@ class DashboardBinding extends Bindings {
       getBannersUseCase: Get.find(),
     ));
     Get.lazyPut(() => SettingsController(logoutUseCase: Get.find()));
+
+    Get.lazyPut<CatBusinessDataSource>(() => CatBusinessDataSourceImpl(apiClient: Get.find()),);
+    // Repository
+    Get.lazyPut<CatBusinessRepository>(() => CatBusinessRepositoryImpl(dataSource: Get.find()),);
+    // UseCase
+    Get.lazyPut<GetBusinessByCategoryUseCase>(() => GetBusinessByCategoryUseCase(repository: Get.find()),);
+    // Controller
+    Get.lazyPut(() => CatBusinessController(useCase: Get.find()));
+
+
+    // Data Source
+    Get.lazyPut<VolunteerDataSource>(() => VolunteerDataSourceImpl(apiClient: Get.find()));
+
+    // Repository
+    Get.lazyPut<VolunteerRepository>(() => VolunteerRepositoryImpl(dataSource: Get.find()));
+
+    // Use Case
+    Get.lazyPut(() => VolunteerUseCase(repository: Get.find()));
+
+    // Controller
+    Get.lazyPut(() => AllVolunteerController(useCase: Get.find()));
   }
-}
+  }
+
+
