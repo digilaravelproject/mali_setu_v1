@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
 import '../../domain/repository/matrimony_repository.dart';
 import '../../data/model/search_matrimony_response.dart';
@@ -24,10 +25,10 @@ class MatrimonyDetailsController extends GetxController {
       if (response.success == true && response.data?.profile != null) {
         profile.value = response.data!.profile;
       } else {
-        Get.snackbar("Error", "Failed to fetch profile details");
+        CustomSnackBar.showError(message: "Failed to fetch profile details");
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong: $e");
+      CustomSnackBar.showError(message: "Something went wrong: $e");
     } finally {
       isLoading.value = false;
     }
@@ -46,12 +47,12 @@ class MatrimonyDetailsController extends GetxController {
       if (response['success'] == true) {
         profile.value!.connectionStatus = "pending";
         profile.refresh();
-        Get.snackbar("Success", response['message'] ?? "Connection request sent successfully");
+        CustomSnackBar.showSuccess(message: response['message'] ?? "Connection request sent successfully");
       } else {
-        Get.snackbar("Error", response['message'] ?? "Failed to send connection request");
+        CustomSnackBar.showError(message: response['message'] ?? "Failed to send connection request");
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong: $e");
+      CustomSnackBar.showError(message: "Something went wrong: $e");
     } finally {
       isLoading.value = false;
     }

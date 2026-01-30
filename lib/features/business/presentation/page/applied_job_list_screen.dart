@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../controller/business_controller.dart';
-import '../../data/model/res_all_business_model.dart';
-import '../../../../core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 
 class AppliedJobsScreen extends StatefulWidget {
   @override

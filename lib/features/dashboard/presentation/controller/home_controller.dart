@@ -1,5 +1,5 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
-
 import 'package:flutter/material.dart';
 import '../../../../core/routes/app_routes.dart';
 
@@ -82,12 +82,12 @@ class HomeController extends GetxController {
         Get.toNamed(AppRoutes.categoryDetails, arguments: categoryDetails);
       } else {
         print("Category Details is null for ID: $categoryId");
-        Get.snackbar("Error", "Category details not found.");
+        CustomSnackBar.showError(message: "Category details not found.");
       }
     } catch (e) {
       if (Get.isDialogOpen == true) Get.back();
       print("Error fetching category details: $e");
-      Get.snackbar("Error", "Failed to fetch category details: $e");
+      CustomSnackBar.showError(message: "Failed to fetch category details: $e");
     }
   }
 

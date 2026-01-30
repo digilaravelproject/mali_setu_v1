@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
 class JobApplyForm extends StatefulWidget {
   final int jobId;
@@ -44,18 +45,18 @@ class _JobApplyFormState extends State<JobApplyForm> {
         });
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to pick file: $e");
+      CustomSnackBar.showError(message: "Failed to pick file: $e");
     }
   }
 
   void _submit() async {
     if (_coverLetterController.text.isEmpty) {
-      Get.snackbar("Error", "Please enter a cover letter");
+      CustomSnackBar.showError(message: "Please enter a cover letter");
       return;
     }
 
     if (_resumeFile == null) {
-      Get.snackbar("Error", "Please upload a resume");
+      CustomSnackBar.showError(message: "Please upload a resume");
       return;
     }
 
@@ -66,10 +67,8 @@ class _JobApplyFormState extends State<JobApplyForm> {
       'resume': _resumeFile,
     };
 
-    final success = await _controller.applyJob(data);
-    if (success) {
-      Get.back(); // Close bottom sheet
-    }
+    Get.back(); // Close bottom sheet immediately as per user request
+    await _controller.applyJob(data);
   }
 
   void _nextStep() {

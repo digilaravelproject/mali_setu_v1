@@ -1,10 +1,10 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../data/model/res_all_business_model.dart';
-import '../controller/business_controller.dart';
-import '../../../../core/widgets/shimmer_loading.dart';
-import '../../../../core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 
 class JobApplicationsPage extends StatefulWidget {
   const JobApplicationsPage({super.key});
@@ -220,30 +220,57 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                   ),
                 ],
               ),
-              if (application.resumeUrl != null && application.resumeUrl!.isNotEmpty)
-                TextButton.icon(
-                  onPressed: () {
-                    // Since url_launcher is not available, we show the URL
-                    Get.defaultDialog(
-                      title: "Resume Link",
-                      content: Column(
-                        children: [
-                          const Text("You can view the resume at:"),
-                          const SizedBox(height: 8),
-                          SelectableText(ApiConstants.imageBaseUrl+application.resumeUrl!, style: const TextStyle(color: Colors.blue)),
-                        ],
-                      ),
-                      confirm: ElevatedButton(
-                        onPressed: () => Get.back(),
-                        child: const Text("OK"),
-                      ),
+              if (application.resumeUrl != null && application.resumeUrl!.isNotEmpty) ...[
+                // Logic to determine file type and show appropriate icon
+                Builder(
+                  builder: (context) {
+                    final resumeUrl = application.resumeUrl!;
+                    final isUrlAbsolute = resumeUrl.startsWith('http');
+                    final fullUrl = isUrlAbsolute ? resumeUrl : ApiConstants.imageBaseUrl + resumeUrl;
+                    
+                    final extension = resumeUrl.split('.').last.toLowerCase();
+                    IconData fileIcon;
+                    Color iconColor;
+                    
+                    if (['jpg', 'jpeg', 'png'].contains(extension)) {
+                      fileIcon = Icons.image;
+                      iconColor = Colors.purple;
+                    } else if (extension == 'pdf') {
+                      fileIcon = Icons.picture_as_pdf;
+                      iconColor = Colors.red;
+                    } else if (['doc', 'docx'].contains(extension)) {
+                      fileIcon = Icons.description;
+                      iconColor = Colors.blue;
+                    } else {
+                      fileIcon = Icons.insert_drive_file;
+                      iconColor = Colors.grey;
+                    }
+
+                    return Row(
+                      children: [
+                        TextButton.icon(
+                          onPressed: () => controller.launchResume(fullUrl),
+                          icon: Icon(fileIcon, size: 16, color: iconColor),
+                          label: Text("View", style: TextStyle(fontSize: 12, color: iconColor)),
+                          style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          onPressed: () {
+                            // Extract filename or use default
+                            final fileName = "Resume_${application.user?.name ?? 'Candidate'}_${application.id}.$extension";
+                            controller.downloadResume(fullUrl, fileName);
+                          },
+                          icon: const Icon(Icons.download_rounded, size: 20, color: Colors.grey),
+                          tooltip: "Download Resume",
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     );
-                  },
-                  icon: const Icon(Icons.description_outlined, size: 16),
-                  label: const Text("View Resume", style: TextStyle(fontSize: 12)),
-                  style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
-                )
-              else
+                  }
+                ),
+              ] else
                 const Text(
                   "Resume not uploaded",
                   style: TextStyle(color: Colors.redAccent, fontSize: 11, fontStyle: FontStyle.italic),
@@ -252,58 +279,69 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
           ),
           const SizedBox(height: 16),
           // Action Buttons: Review, Accept, Reject
-          Row(
-            children: [
-              // Review Button
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: status == 'reviewed' 
-                    ? null 
-                    : () => _handleStatusUpdate(application, 'reviewed'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.blue,
-                    side: const BorderSide(color: Colors.blue),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          Obx(() {
+            final loadingStatus = controller.applicationLoadingStates[application.id];
+            final isAppLoading = loadingStatus != null;
+            
+            return Row(
+              children: [
+                // Review Button
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: (status == 'reviewed' || isAppLoading) 
+                      ? null 
+                      : () => _handleStatusUpdate(application, 'reviewed'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: (loadingStatus == 'reviewed') 
+                      ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue))
+                      : const Text("Review", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
-                  child: const Text("Review", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(width: 8),
-              // Reject Button
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: status == 'rejected' 
-                    ? null 
-                    : () => _handleStatusUpdate(application, 'rejected'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.redAccent,
-                    side: const BorderSide(color: Colors.redAccent),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(width: 8),
+                // Reject Button
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: (status == 'rejected' || isAppLoading) 
+                      ? null 
+                      : () => _handleStatusUpdate(application, 'rejected'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.redAccent,
+                      side: const BorderSide(color: Colors.redAccent),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: (loadingStatus == 'rejected')
+                      ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.redAccent))
+                      : const Text("Reject", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
-                  child: const Text("Reject", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(width: 8),
-              // Accept Button
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: status == 'accepted' 
-                    ? null 
-                    : () => _handleStatusUpdate(application, 'accepted'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
+                const SizedBox(width: 8),
+                // Accept Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: (status == 'accepted' || isAppLoading) 
+                      ? null 
+                      : () => _handleStatusUpdate(application, 'accepted'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                    child: (loadingStatus == 'accepted')
+                      ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text("Accept", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
-                  child: const Text("Accept", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          }),
         ],
       ),
     );

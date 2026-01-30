@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
 import '../data/model/res_all_volunteer_model.dart';
 import '../domain/usecase/single_volunteer_use_case.dart';
@@ -25,7 +26,7 @@ class OpportunityDetailsController extends GetxController {
       final result = await useCase(id);
       opportunity.value = result;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load opportunity details: $e');
+      CustomSnackBar.showError(message: 'Failed to load opportunity details: $e');
     } finally {
       isLoading.value = false;
     }

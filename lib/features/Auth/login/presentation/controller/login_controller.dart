@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -65,13 +66,13 @@ class LoginController extends GetxController {
         // Set Logged In
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
-        Get.snackbar("Success", response.message ?? "Login successful");
+        CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
-        Get.snackbar("Error", response.message ?? "Login failed");
+        CustomSnackBar.showError(message: response.message ?? "Login failed");
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -111,22 +112,16 @@ class LoginController extends GetxController {
         // Set Logged In
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
-        Get.snackbar("Success", response.message ?? "Google Login successful");
+        CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
-        Get.snackbar("Error", response.message ?? "Google Login failed");
+        CustomSnackBar.showError(message: response.message ?? "Login failed");
       }
-
     } catch (e) {
-      Get.snackbar("Error", "Google Sign-In failed: $e");
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }
   }
-
-
-
-
-
 }
 

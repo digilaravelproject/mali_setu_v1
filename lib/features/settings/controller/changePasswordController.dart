@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -96,31 +97,19 @@ class ChangePasswordController extends GetxController {
         // Success
         resetForm();
         Get.back(); // close screen
-        Get.snackbar(
-          'Success',
-          response.message ?? 'Password changed successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+        CustomSnackBar.showSuccess(
+          message: response.message ?? 'Password changed successfully',
         );
       } else {
         // Error
-        Get.snackbar(
-          'Error',
-          response.message ?? 'Failed to change password',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        CustomSnackBar.showError(
+          message: response.message ?? 'Failed to change password',
         );
       }
     } catch (e) {
       // Exception
-      Get.snackbar(
-        'Error',
-        'Something went wrong: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.showError(
+        message: 'Something went wrong: $e',
       );
     } finally {
       isLoading.value = false;

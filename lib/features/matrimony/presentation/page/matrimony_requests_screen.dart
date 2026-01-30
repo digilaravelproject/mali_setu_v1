@@ -110,20 +110,40 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 70,
-                    height: 70,
-                    child: CustomImageView(
-                      url: user?.profileImage != null ? ApiConstants.imageBaseUrl + user!.profileImage! : null,
-                      imagePath: user?.profileImage == null ? null : ApiConstants.imageBaseUrl + user!.profileImage!,
-                      fit: BoxFit.cover,
-                      placeHolder: (context, url) => Container(
-                        color: Colors.grey[200],
-                        child: Icon(Icons.person, color: Colors.grey[400], size: 40),
-                      ),
-                    ),
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(35),
+                    child: user?.profileImage != null && user!.profileImage!.isNotEmpty
+                        ? CustomImageView(
+                            url: ApiConstants.imageBaseUrl + user.profileImage!,
+                            fit: BoxFit.cover,
+                            placeHolder: (context, url) => Container(
+                              decoration: BoxDecoration(
+                                color: Colors.purple.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.person, color: Colors.purple, size: 35),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              decoration: BoxDecoration(
+                                color: Colors.purple.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.person, color: Colors.purple, size: 35),
+                            ),
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.person, color: Colors.purple, size: 35),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),

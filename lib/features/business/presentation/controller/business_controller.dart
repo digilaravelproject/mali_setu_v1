@@ -1,29 +1,33 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:dio/dio.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
-import '../../../Auth/service/auth_service.dart';
-import '../../data/model/res_all_business_model.dart';
-import '../../domain/usecase/add_business_service_usecase.dart';
-import '../../domain/usecase/all_business_usecase.dart';
-import '../../domain/usecase/get_business_details_usecase.dart';
-import '../../domain/usecase/get_business_products_usecase.dart';
-import '../../domain/usecase/get_business_services_usecase.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/add_business_service_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/all_business_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_details_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_products_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_services_usecase.dart';
 import 'dart:io';
-import '../../domain/usecase/get_my_businesses_usecase.dart';
-import '../../domain/usecase/add_business_product_usecase.dart';
-import '../../domain/usecase/update_business_usecase.dart';
-import '../../domain/usecase/delete_business_usecase.dart';
-import '../../domain/usecase/get_job_details_usecase.dart';
-import '../../domain/usecase/update_job_usecase.dart';
-import '../../domain/usecase/delete_job_usecase.dart';
-import '../../domain/usecase/get_my_jobs_usecase.dart';
-import '../../domain/usecase/toggle_job_status_usecase.dart';
-import '../../domain/usecase/get_job_analytics_usecase.dart';
-import '../../domain/usecase/apply_job_usecase.dart';
-import '../../domain/usecase/get_my_applications_usecase.dart';
-import '../../domain/usecase/get_job_applications_usecase.dart';
-import '../../domain/usecase/update_application_status_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_my_businesses_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/add_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_job_details_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_job_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_job_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_my_jobs_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/toggle_job_status_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_job_analytics_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/apply_job_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_my_applications_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_job_applications_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_application_status_usecase.dart';
 
 
 class BusinessController extends GetxController {
@@ -86,6 +90,7 @@ class BusinessController extends GetxController {
   
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
+  var applicationLoadingStates = <int, String?>{}.obs;
 
   @override
   void onInit() {
@@ -101,7 +106,7 @@ class BusinessController extends GetxController {
         fetchMyBusinesses(),
       ]);
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -198,7 +203,7 @@ class BusinessController extends GetxController {
       }
       return true;
     } catch (e) {
-      Get.snackbar("Error", e.toString(), backgroundColor: Get.theme.colorScheme.error, colorText: Get.theme.colorScheme.onError);
+      CustomSnackBar.showError(message: e.toString());
       return false;
     } finally {
       isLoading.value = false;
@@ -216,7 +221,7 @@ class BusinessController extends GetxController {
       }
       return true;
     } catch (e) {
-      Get.snackbar("Error", e.toString(), backgroundColor: Get.theme.colorScheme.error, colorText: Get.theme.colorScheme.onError);
+      CustomSnackBar.showError(message: e.toString());
       return false;
     } finally {
       isLoading.value = false;
@@ -230,7 +235,7 @@ class BusinessController extends GetxController {
       await fetchMyBusinesses(); // Refresh list
       return true;
     } catch (e) {
-      Get.snackbar("Error", e.toString(), backgroundColor: Get.theme.colorScheme.error, colorText: Get.theme.colorScheme.onError);
+      CustomSnackBar.showError(message: e.toString());
       return false;
     } finally {
       isLoading.value = false;
@@ -243,10 +248,10 @@ class BusinessController extends GetxController {
       await deleteBusinessUseCase(id);
       await fetchMyBusinesses(); // Refresh list
       Get.back(); // Close dialog
-      Get.snackbar("Success", "Business deleted successfully", backgroundColor: Get.theme.colorScheme.primary, colorText: Get.theme.colorScheme.onPrimary);
+      CustomSnackBar.showSuccess(message: "Business deleted successfully");
     } catch (e) {
       Get.back(); // Close dialog
-      Get.snackbar("Error", e.toString(), backgroundColor: Get.theme.colorScheme.error, colorText: Get.theme.colorScheme.onError);
+      CustomSnackBar.showError(message: e.toString());
     }
   }
 
@@ -270,18 +275,18 @@ class BusinessController extends GetxController {
       
       if (response.success == true) {
         Get.back(); // Back from details screen
-        Get.snackbar("Success", response.message ?? "Job deleted successfully");
+        CustomSnackBar.showSuccess(message: response.message ?? "Job deleted successfully");
         
         // Refresh business jobs if we have a selected business
         if (selectedBusiness.value != null) {
           fetchBusinessJobs(selectedBusiness.value!.id!);
         }
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to delete job");
+        CustomSnackBar.showError(message: response.message ?? "Failed to delete job");
       }
     } catch (e) {
       Get.back(); // Close dialog
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
     }
   }
 
@@ -292,7 +297,7 @@ class BusinessController extends GetxController {
       Get.back(); // Close dialog
       
       if (response.success == true) {
-        Get.snackbar("Success", response.message ?? "Job status updated successfully");
+        CustomSnackBar.showSuccess(message: response.message ?? "Job status updated successfully");
         // Refresh job details
         fetchJobDetails(jobId);
         // Refresh business jobs if we have a selected business
@@ -300,11 +305,11 @@ class BusinessController extends GetxController {
           fetchBusinessJobs(selectedBusiness.value!.id!);
         }
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to update job status");
+        CustomSnackBar.showError(message: response.message ?? "Failed to update job status");
       }
     } catch (e) {
       Get.back(); // Close dialog
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
     }
   }
 
@@ -315,10 +320,10 @@ class BusinessController extends GetxController {
       if (response.success == true) {
         jobAnalytics.value = response.data;
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to fetch analytics");
+        CustomSnackBar.showError(message: response.message ?? "Failed to fetch analytics");
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -329,18 +334,27 @@ class BusinessController extends GetxController {
       isLoading.value = true;
       final response = await applyJobUseCase(data);
       if (response.success == true) {
-        Get.snackbar("Success", response.message ?? "Applied successfully");
+        CustomSnackBar.showSuccess(message: response.message ?? "Applied successfully");
         // Refresh job details to update hasApplied status
         if (data['job_posting_id'] != null) {
           fetchJobDetails(int.parse(data['job_posting_id'].toString()));
         }
         return true;
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to apply");
+        // Handle "already applied" case specifically
+        if (response.message != null && response.message!.toLowerCase().contains("already applied")) {
+           CustomSnackBar.showInfo(message: "You have already applied for this job");
+           if (data['job_posting_id'] != null) {
+             fetchJobDetails(int.parse(data['job_posting_id'].toString()));
+           }
+           return true; // Return true to close the form
+        }
+        
+        CustomSnackBar.showError(message: response.message ?? "Failed to apply");
         return false;
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
       return false;
     } finally {
       isLoading.value = false;
@@ -371,7 +385,7 @@ class BusinessController extends GetxController {
       if (response.success == true && response.data != null && response.data!.applications != null) {
         selectedJobApplications.value = response.data!.applications!.data ?? [];
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to fetch applications");
+        CustomSnackBar.showError(message: response.message ?? "Failed to fetch applications");
       }
     } catch (e) {
       print('Error fetching job applications: $e');
@@ -382,18 +396,18 @@ class BusinessController extends GetxController {
 
   Future<void> updateApplicationStatus(int applicationId, String status, int jobId, {String? notes}) async {
     try {
-      isLoading.value = true;
+      applicationLoadingStates[applicationId] = status;
       final response = await updateApplicationStatusUseCase(applicationId, status, notes: notes);
       if (response.success == true) {
-        Get.snackbar("Success", response.message ?? "Status updated to $status");
+        CustomSnackBar.showSuccess(message: response.message ?? "Status updated to $status");
         fetchJobApplications(jobId); // Refresh list
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to update status");
+        CustomSnackBar.showError(message: response.message ?? "Failed to update status");
       }
     } catch (e) {
-       Get.snackbar("Error", e.toString());
+       CustomSnackBar.showError(message: e.toString());
     } finally {
-      isLoading.value = false;
+      applicationLoadingStates[applicationId] = null;
     }
   }
 
@@ -414,4 +428,69 @@ class BusinessController extends GetxController {
       throw 'Could not launch email';
     }
   }
+
+  Future<void> launchResume(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+       CustomSnackBar.showError(message: "Could not launch resume");
+    }
+  }
+
+  Future<void> downloadResume(String url, String fileName) async {
+    try {
+      // Basic permission check - for Android 10+ scoped storage/mediastore is different, 
+      // but for simple downloads folder standard dio write is often used with permission.
+      // Or use path_provider to get app docs dir.
+      // Since user wants "download", they likely expect it in Downloads folder.
+      
+      // Checking permission
+      var status = await Permission.storage.status;
+      if (!status.isGranted) {
+        status = await Permission.storage.request();
+      }
+
+      // If denied, we might still be able to write to app specific dirs, but for public download:
+      if (status.isDenied) {
+        // Try anyway or show error? On newer Android, explicit storage perm might not be needed for some paths.
+        // Proceeding with attempt or showing error.
+        // CustomSnackBar.showError(message: "Storage permission denied");
+        // return;
+      }
+
+      Directory? downloadsDir;
+      if (Platform.isAndroid) {
+        downloadsDir = Directory('/storage/emulated/0/Download');
+      } else if (Platform.isIOS) {
+        downloadsDir = await getApplicationDocumentsDirectory(); // iOS doesn't have public downloads easily accessible
+      } else {
+        downloadsDir = await getDownloadsDirectory();
+      }
+
+      if (downloadsDir == null) {
+         CustomSnackBar.showError(message: "Could not find downloads directory");
+         return;
+      }
+
+      String savePath = "${downloadsDir.path}/$fileName";
+      
+      // Ensure unique name
+      int count = 1;
+      while (File(savePath).existsSync()) {
+        final nameWithoutExt = fileName.split('.').first;
+        final ext = fileName.split('.').last;
+        savePath = "${downloadsDir.path}/${nameWithoutExt}_$count.$ext";
+        count++;
+      }
+
+      CustomSnackBar.showInfo(message: "Downloading...");
+      
+      await Dio().download(url, savePath);
+      
+      CustomSnackBar.showSuccess(message: "Downloaded to $savePath");
+      
+    } catch (e) {
+      CustomSnackBar.showError(message: "Download failed: $e");
+    }
+  }
 }
+

@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -6,12 +7,12 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/helper/form_validator.dart';
-import '../../../../widgets/basic_text_field.dart';
-import '../../../../widgets/custom_buttons.dart';
+import 'package:edu_cluezer/core/helper/form_validator.dart';
+import 'package:edu_cluezer/widgets/basic_text_field.dart';
+import 'package:edu_cluezer/widgets/custom_buttons.dart';
 
 
-import '../controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 /*
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);
@@ -53,9 +54,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
-      );
+      CustomSnackBar.showError(message: 'Error picking image: $e');
     }
   }
 
@@ -143,12 +142,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
 
     if (_selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a product image'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      CustomSnackBar.showError(message: 'Please select a product image');
       return;
     }
 
@@ -160,12 +154,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     setState(() => _isLoading = false);
 
     // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Product created successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    CustomSnackBar.showSuccess(message: 'Product created successfully!');
 
     // Clear form
     _nameController.clear();
@@ -524,12 +513,8 @@ class AddProductController extends GetxController {
 
   Future<void> pickImage(ImageSource source) async {
     if (selectedImages.length >= maxImages) {
-      Get.snackbar(
-        'Limit Reached',
-        'You can only upload maximum $maxImages images',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
+      CustomSnackBar.showWarning(
+        message: 'You can only upload maximum $maxImages images',
       );
       return;
     }
@@ -546,12 +531,8 @@ class AddProductController extends GetxController {
         selectedImages.add(File(image.path));
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error picking image: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.showError(
+        message: 'Error picking image: $e',
       );
     }
   }
@@ -581,12 +562,8 @@ class AddProductController extends GetxController {
 
     if (success) {
       Get.back();
-      Get.snackbar(
-        'Success',
-        'Product created successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      CustomSnackBar.showSuccess(
+        message: 'Product created successfully!',
       );
     }
   }

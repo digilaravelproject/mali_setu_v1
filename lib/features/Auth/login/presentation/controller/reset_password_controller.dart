@@ -86,7 +86,7 @@ class ResetPasswordController extends GetxController {
         // Set Logged In
         //await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
-        Get.snackbar("Success", response.message ?? "OTP send successful");
+        CustomSnackBar.showSuccess(message: response.message ?? "OTP send successful");
         Get.offAllNamed(
           AppRoutes.resetPasswordScreen,
           arguments: {
@@ -94,10 +94,10 @@ class ResetPasswordController extends GetxController {
           },
         );
       } else {
-        Get.snackbar("Error", response.message ?? "OTP send failed");
+        CustomSnackBar.showError(message: response.message ?? "OTP send failed");
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -118,11 +118,11 @@ class ResetPasswordController extends GetxController {
       final success = await resetPasswordUseCase.callReset(reqModel);
 
       if (success) {
-        Get.snackbar("Success", "Password reset successful");
+        CustomSnackBar.showSuccess(message: "Password reset successful");
         Get.offNamed(AppRoutes.login); // ya aapka login route
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }

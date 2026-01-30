@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
-import '../../data/model/res_all_business_model.dart';
-import '../controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
 
 class MyBusinessScreen extends GetWidget<BusinessController> {

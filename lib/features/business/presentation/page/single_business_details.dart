@@ -4,15 +4,15 @@ import 'package:shimmer/shimmer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/routes/app_routes.dart';
-import '../../../../widgets/custom_buttons.dart';
-import '../../../../core/helper/string_extensions.dart';
-import '../../../Auth/service/auth_service.dart';
-import '../controller/business_controller.dart';
-import '../../data/model/res_all_business_model.dart';
-import '../../../../core/widgets/shimmer_loading.dart';
-import '../../../../core/widgets/custom_confirm_dialog.dart';
-import '../controller/create_job_controller.dart';
+import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/widgets/custom_buttons.dart';
+import 'package:edu_cluezer/core/helper/string_extensions.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 
 class BusinessDetailScreen extends GetView<BusinessController> {
   const BusinessDetailScreen({Key? key}) : super(key: key);
@@ -51,56 +51,81 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       floating: false,
                       pinned: true,
                       centerTitle: false,
-                      backgroundColor: context.theme.cardColor,
+                      backgroundColor: context.theme.scaffoldBackgroundColor,
                       elevation: 0,
+                      shadowColor: Colors.black.withOpacity(0.05),
                       expandedHeight: isOwner ? 600 : 480,
+                      title: Text(
+                        business.businessName ?? '',
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          color: Colors.black87,
+                        ),
+                      ),
                       leading: InkWell(
                         onTap: () => Navigator.of(context).pop(),
-                        child: Icon(
-                          Icons.arrow_back_ios,
-                          color: context.iconColor,
-                          size: 18,
+                        child: Container(
+                           margin: const EdgeInsets.all(8),
+                           decoration: BoxDecoration(
+                             color: Colors.white,
+                             shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 5,
+                                )
+                              ]
+                           ),
+                           child: const Icon(
+                             Icons.arrow_back_ios_new,
+                             color: Colors.black87,
+                             size: 18,
+                           ),
                         ),
                       ),
                       flexibleSpace: FlexibleSpaceBar(
-                        background: Padding(
-                          padding: const EdgeInsets.only(top: kToolbarHeight + 8),
-                          child: SingleChildScrollView(
-                            physics: const NeverScrollableScrollPhysics(),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildBusinessHeader(business, context),
-                                const SizedBox(height: 16),
-                                _buildQuickActions(business, context),
-                                const SizedBox(height: 20),
-                                _buildStatsRow(business, context),
-                                const SizedBox(height: 20),
-                                _buildManageSection(context),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
-                          ),
+                        background: Column(
+                          children: [
+                            SizedBox(height: MediaQuery.of(context).padding.top + 48),
+                            _buildBusinessHeader(business, context),
+                            const SizedBox(height: 16),
+                            _buildQuickActions(business, context),
+                            const SizedBox(height: 20),
+                            _buildStatsRow(business, context),
+                            const SizedBox(height: 20),
+                            _buildManageSection(context),
+                          ],
                         ),
                       ),
                       bottom: PreferredSize(
                         preferredSize: const Size.fromHeight(48),
                         child: Container(
-                          color: context.theme.primaryColorLight,
+                          decoration: BoxDecoration(
+                            color: context.theme.cardColor,
+                            border: Border(
+                              bottom: BorderSide(color: context.theme.dividerColor, width: 0.5),
+                            ),
+                          ),
                           child: TabBar(
                             labelColor: context.theme.primaryColor,
                             unselectedLabelColor: Colors.grey[600],
                             indicatorColor: context.theme.primaryColor,
-                            indicatorWeight: 3,
+                            indicatorWeight: 2,
+                            dividerColor: Colors.transparent,
                             labelStyle: const TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 15,
+                              fontSize: 14,
+                            ),
+                            unselectedLabelStyle: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
                             ),
                             tabs: const [
                               Tab(text: 'Products'),
                               Tab(text: 'Services'),
                               Tab(text: 'Jobs'),
-                              Tab(text: 'Business Info'),
+                              Tab(text: 'Info'),
                             ],
                           ),
                         ),
@@ -139,301 +164,284 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   Widget _buildBusinessHeader(Business business, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.business, size: 20, color: Colors.black87),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        business.businessName ?? 'Unnamed Business',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            '4.4',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(width: 3),
-                          Icon(Icons.star, color: Colors.white, size: 12),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '118 Ratings',
-                      style: context.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(width: 8),
-                    if (business.verificationStatus == 'approved') ...[
-                      const Icon(Icons.verified, color: Colors.blue, size: 16),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'Verified',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 16, color: context.iconColor),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        business.category?.name ?? 'Category',
-                        style: context.textTheme.bodyMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.directions_walk,
-                      size: 16,
-                      color: context.iconColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '6 min',
-                      style:context.textTheme.bodyMedium,
-                      //TextStyle(color: Colors.grey[700], fontSize: 13),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '500 mts',
-                      style: context.textTheme.bodyMedium,
-                      //TextStyle(color: Colors.grey[700], fontSize: 13),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'AC Repair & Services',
-                      style:context.textTheme.bodyMedium?.copyWith(fontSize: 13),
-                      maxLines: 1,
+                      business.businessName ?? 'Unnamed Business',
+                      style: context.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 24,
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      //TextStyle(color: Colors.grey[700], fontSize: 13),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[600],
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '5 Years in Business',
-                      style:context.textTheme.bodyMedium?.copyWith(fontSize: 13),
-                      //TextStyle(color: Colors.grey[700], fontSize: 13),
-                    ),
-                  ],
-                ),
-                // const SizedBox(height: 8),
-                // Text(
-                //   'Response time: 5 mins',
-                //   style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                // ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      'Open Now: until 9:00 pm',
-                      style: context.textTheme.bodyMedium?.copyWith(fontSize: 15),
-                      // TextStyle(
-                      //   color: Colors.grey[800],
-                      //   fontSize: 13,
-                      //   fontWeight: FontWeight.w500,
-                      // ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 16,
-                      color: context.iconColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    // Status
-                     Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: business.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              (business.status ?? 'active').toTitleCase(),
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                color: business.status == 'active' ? Colors.green.shade700 : Colors.grey.shade700,
-                              ),
-                            ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(6),
                           ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Text(
+                                '4.4',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.star, color: Colors.white, size: 12),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '118 Ratings',
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (business.verificationStatus == 'approved')
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.verified, color: Colors.blue, size: 18),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Verified',
+                                style: TextStyle(
+                                  color: Colors.blue[700],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: business.photo != null
+                      ? Image.network(
+                          business.photo!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
+                        )
+                      : _buildDetailPlaceholderIcon(),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.grey[300]!),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: business.photo != null ? Image.network(
-                business.photo!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
-              ) : _buildDetailPlaceholderIcon(),
-            ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 16,
+            runSpacing: 10,
+            children: [
+              _buildHeaderIconLabel(Icons.category_outlined, business.category?.name ?? 'Category', context),
+              _buildHeaderIconLabel(Icons.directions_walk, '6 min • 500 mts', context),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buildHeaderIconLabel(Icons.info_outline, 'AC Repair & Services • 5 Years in Business', context),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                'Open Now:',
+                style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.green[700],
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'until 9:00 pm',
+                style: context.textTheme.bodyMedium,
+              ),
+              Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey[600]),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: business.status == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  (business.status ?? 'active').toTitleCase(),
+                  style: TextStyle(
+                    color: business.status == 'active' ? Colors.green[800] : Colors.grey[800],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActions(Business business,BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-                onTap: () {
-                  controller.launchPhone(business.user!.phone.toString());
-                },
-                child: _buildQuickActionButton(Icons.call, 'Call', Colors.blue, context)),
-            const SizedBox(width: 20),
-            InkWell(
-                onTap: () {
-                  controller.launchEmail(business.user!.email.toString());
-                },
-                child: _buildQuickActionButton(Icons.email, 'Email', Colors.green, context)),
-            const SizedBox(width: 20),
-            // _buildQuickActionButton(FontAwesomeIcons.message, 'Enquiry', Colors.grey, context),
-            // const SizedBox(width: 20),
-            // _buildQuickActionButton(Icons.directions, 'Direction', Colors.grey, context),
-            // const SizedBox(width: 20),
-            // _buildQuickActionButton(Icons.star_border, 'Review', Colors.grey, context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionButton(IconData icon, String label, Color color, BuildContext context) {
-    return Column(
+  Widget _buildHeaderIconLabel(IconData icon, String label, BuildContext context) {
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color == Colors.blue
-                ? Colors.blue
-                : color == Colors.green
-                ? Colors.green
-                : Colors.grey[200],
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-              bottomRight: Radius.circular(10),
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            label,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: Colors.grey[700],
+              fontSize: 14,
             ),
-          ),
-          child: Icon(
-            icon,
-            color: color == Colors.grey ? Colors.grey[700] : Colors.white,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: context.textTheme.titleSmall?.copyWith(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
     );
   }
 
+  Widget _buildQuickActions(Business business, BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          _buildQuickActionButton(
+            Icons.call_rounded,
+            'Call',
+            Colors.blue,
+            context,
+            onTap: () => controller.launchPhone(business.user!.phone.toString()),
+          ),
+          const SizedBox(width: 24),
+          _buildQuickActionButton(
+            Icons.mail_outline_rounded,
+            'Email',
+            Colors.green,
+            context,
+            onTap: () => controller.launchEmail(business.user!.email.toString()),
+          ),
+        ],
+      ),
+    );
+  }
+ 
+  Widget _buildQuickActionButton(
+    IconData icon,
+    String label,
+    Color color,
+    BuildContext context, {
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: context.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+ 
   Widget _buildStatsRow(Business business, BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 18),
-      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-          color: context.theme.hoverColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: context.theme.dividerColor)
+        color: context.theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.theme.dividerColor.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildStatItem('Products', '${business.products?.length ?? 0}', Icons.inventory_2_outlined, context),
-          _buildDivider(),
+          _buildVerticalDivider(context),
           _buildStatItem('Services', '${business.services?.length ?? 0}', Icons.room_service_outlined, context),
-          _buildDivider(),
+          _buildVerticalDivider(context),
           _buildStatItem('Jobs', '0', Icons.work_outline, context),
-          _buildDivider(),
+          _buildVerticalDivider(context),
           _buildStatItem('Value', '0', Icons.currency_rupee, context),
         ],
       ),
     );
   }
 
+  Widget _buildVerticalDivider(BuildContext context) {
+    return Container(
+      height: 32,
+      width: 1,
+      color: context.theme.dividerColor.withOpacity(0.5),
+    );
+  }
+ 
   Widget _buildStatItem(String label, String value, IconData icon, BuildContext context) {
     return Column(
       children: [
@@ -583,87 +591,53 @@ class BusinessDetailScreen extends GetView<BusinessController> {
     //   ),
     // );
   
-  Widget _buildBottomActionBar(Business business,BuildContext context) {
+  Widget _buildBottomActionBar(Business business, BuildContext context) {
     return Positioned(
       bottom: 0,
       left: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.theme.cardColor,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, -2),
+              blurRadius: 15,
+              offset: const Offset(0, -4),
             ),
           ],
         ),
         child: SafeArea(
           top: false,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    controller.launchPhone(business.user!.phone.toString());
-                  },
-                  icon: const Icon(Icons.call, size: 18),
-                  label: Text('Call Now', style: context.textTheme.titleSmall?.copyWith(color: context.theme.cardColor)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.theme.primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              controller.launchPhone(business.user!.phone.toString());
+            },
+            icon: const Icon(Icons.call, size: 20),
+            label: Text(
+              'Call Now',
+              style: context.textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
-              // SizedBox(width: 10,),
-              // Expanded(
-              //   child: ElevatedButton.icon(
-              //     onPressed: () {},
-              //     //  icon: const Icon(Icons.call, size: 18),
-              //     label: Text('Enquire Now', style: context.textTheme.titleSmall?.copyWith(color: context.theme.cardColor)),
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: context.theme.primaryColor,
-              //       foregroundColor: Colors.white,
-              //       padding: const EdgeInsets.symmetric(vertical: 2),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(8),
-              //       ),
-              //       elevation: 0,
-              //     ),
-              //   ),
-              // ),
-              // SizedBox(width: 10,),
-              // Expanded(
-              //   child: ElevatedButton.icon(
-              //     onPressed: () {},
-              //     icon: const Icon(FontAwesomeIcons.whatsapp, size: 18),
-              //     label: Text('WhatsApp', style: context.textTheme.titleSmall?.copyWith(color: context.theme.cardColor)),
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: context.theme.primaryColor,
-              //       foregroundColor: Colors.white,
-              //       padding: const EdgeInsets.symmetric(vertical: 2),
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(8),
-              //       ),
-              //       elevation: 0,
-              //     ),
-              //   ),
-              // ),
-            ],
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.theme.primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              elevation: 4,
+              shadowColor: context.theme.primaryColor.withOpacity(0.4),
+            ),
           ),
         ),
       ),
     );
   }
-
+ 
   Widget _buildProductsTab(BuildContext context) {
     return Obx(() {
         if (controller.isDetailsLoading.isTrue) {

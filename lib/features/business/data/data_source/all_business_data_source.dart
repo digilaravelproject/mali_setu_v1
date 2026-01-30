@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import '../../../../../../core/network/api_client.dart';
-import '../../../../../../core/constent/api_constants.dart';
-import '../model/res_all_business_model.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 
 
 

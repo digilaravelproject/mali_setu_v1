@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Auth/service/auth_service.dart';
@@ -43,7 +44,7 @@ class MatrimonyChatController extends GetxController {
         _scrollToBottom();
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to fetch messages: $e");
+      CustomSnackBar.showError(message: "Failed to fetch messages: $e");
     } finally {
       isLoading.value = false;
     }
@@ -66,7 +67,7 @@ class MatrimonyChatController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to find conversation: $e");
+      CustomSnackBar.showError(message: "Failed to find conversation: $e");
     } finally {
       isLoading.value = false;
     }
@@ -109,7 +110,7 @@ class MatrimonyChatController extends GetxController {
         fetchMessages(); // Refresh to get the latest state from server
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to send message: $e");
+      CustomSnackBar.showError(message: "Failed to send message: $e");
     }
   }
 

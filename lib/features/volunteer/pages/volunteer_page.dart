@@ -54,125 +54,200 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Get.theme;
+    
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: context.theme.primaryColorLight,
-        centerTitle: false,
-        titleSpacing: 20,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Volunteer",
-              style: context.textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Profile Button
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: CustomButton(
-                  height: 45,
-                  borderRadius: 14,
-                  title: "My Volunteer Profile",
-                  onPressed: () {
-                    Get.toNamed(AppRoutes.volunteerProfile);
-                  },
-                ),
+      backgroundColor: Colors.grey[50], // Light background
+      body: Column(
+        children: [
+          // 1. Custom Header Area
+          Container(
+            padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
+            decoration: BoxDecoration(
+              color: theme.primaryColor,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.primaryColor.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-
-            // Volunteer List Header
-
-
-            // Volunteer List
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            //   child: ListView.builder(
-            //     shrinkWrap: true,
-            //     physics: NeverScrollableScrollPhysics(),
-            //     itemCount: controller.allVolunteerList.length,
-            //     itemBuilder: (context, index) {
-            //       return VolunteerCard(
-            //         volunteer: controller.allVolunteerList[index],
-            //         onTap: () {
-            //           // Navigate to volunteer details
-            //         },
-            //       );
-            //     },
-            //   ),
-            // ),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return Center(child: CircularProgressIndicator());
-              }
-
-              if (controller.allVolunteerList.isEmpty) {
-                return Center(child: Text("No Volunteers Available"));
-              }
-
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Available Volunteers",
+                          "Community",
                           style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            controller.allVolunteerList.length.toString(),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue[800],
-                              fontWeight: FontWeight.w500,
-                            ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          "Volunteers",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: controller.allVolunteerList.length,
-                    itemBuilder: (context, index) {
-                      return VolunteerCard(
-                        volunteer: controller.allVolunteerList[index], // ✅ DATA SET
-                        onTap: () {
-                          Get.toNamed(
-                            AppRoutes.volunteerOpportunityDetails,
-                            arguments: controller.allVolunteerList[index].id,
-                          );
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.search, color: Colors.white),
+                        onPressed: () {
+                          // Search functionality
                         },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                
+                // My Profile Banner (Embedded in Header for style)
+                Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  elevation: 4,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                  child: InkWell(
+                    onTap: () => Get.toNamed(AppRoutes.volunteerProfile),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.person, color: theme.primaryColor),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "My Volunteer Profile",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                                Text(
+                                  "Manage your contributions",
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 2. List Content
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (controller.allVolunteerList.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.group_off_outlined, size: 60, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text("No volunteers found", style: TextStyle(color: Colors.grey[500])),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                itemCount: controller.allVolunteerList.length + 1, // +1 for header title
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Available Volunteers",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "${controller.allVolunteerList.length} Found",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: theme.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
+                  final volunteer = controller.allVolunteerList[index - 1];
+                  return VolunteerCard(
+                    volunteer: volunteer,
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.volunteerOpportunityDetails,
+                        arguments: volunteer.id,
                       );
                     },
-                  ),
-                ],
+                  );
+                },
               );
-            })
-
-          ],
-        ),
+            }),
+          ),
+        ],
       ),
     );
   }
@@ -191,213 +266,164 @@ class VolunteerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    final theme = Theme.of(context);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // Volunteer Header
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Profile Image
-                  // Container(
-                  //   width: 60,
-                  //   height: 60,
-                  //   decoration: BoxDecoration(
-                  //     shape: BoxShape.circle,
-                  //     image: DecorationImage(
-                  //       image: NetworkImage(volunteer.profileImage),
-                  //       fit: BoxFit.cover,
-                  //     ),
-                  //     border: Border.all(
-                  //       color: Colors.blue[100]!,
-                  //       width: 2,
-                  //     ),
-                  //   ),
-                  // ),
-                  SizedBox(width: 16),
-
-                  // Volunteer Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              volunteer.contactPerson.toString(),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getAvailabilityColor(volunteer.status.toString()),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                volunteer.status.toString(),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: theme.primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                       child: Center(
+                         child: Text(
+                           volunteer.contactPerson?.substring(0, 1).toUpperCase() ?? "V",
+                           style: TextStyle(
+                             fontSize: 20,
+                             fontWeight: FontWeight.bold,
+                             color: theme.primaryColor,
+                           ),
+                         ),
+                       ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  volunteer.contactPerson ?? "Volunteer",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              _buildStatusChip(volunteer.status ?? "Offline"),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            volunteer.organization ?? "Individual Volunteer",
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          volunteer.contactEmail.toString(),
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 14,
                           ),
-                        ),
-                        Text(
-                          volunteer.organization.toString(),
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 14,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-
-                        // Rating and Experience
-                        // Wrap(
-                        //   crossAxisAlignment: WrapCrossAlignment.center,
-                        //   spacing: 8,
-                        //   runSpacing: 4,
-                        //   children: [
-                        //     Row(
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         Icon(Icons.star, size: 16, color: Colors.amber),
-                        //         SizedBox(width: 4),
-                        //         // Text(
-                        //         //   '${volunteer.rating} (${volunteer.totalReviews})',
-                        //         //   style: TextStyle(fontSize: 13),
-                        //         // ),
-                        //       ],
-                        //     ),
-                        //     Row(
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         Icon(Icons.work_history,
-                        //             size: 16, color: Colors.blue),
-                        //         SizedBox(width: 4),
-                        //         Text(
-                        //           '${volunteer.experience} experience',
-                        //           style: TextStyle(fontSize: 13),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ],
-                        // ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 16),
-
-              // Skills
-              // Wrap(
-              //   spacing: 8,
-              //   runSpacing: 8,
-              //   children: volunteer.skills
-              //       .take(4)
-              //       .map((skill) => Container(
-              //     padding: EdgeInsets.symmetric(
-              //       horizontal: 10,
-              //       vertical: 5,
-              //     ),
-              //     decoration: BoxDecoration(
-              //       color: Colors.grey[100],
-              //       borderRadius: BorderRadius.circular(20),
-              //     ),
-              //     child: Text(
-              //       skill,
-              //       style: TextStyle(
-              //         fontSize: 12,
-              //         color: Colors.grey[800],
-              //       ),
-              //     ),
-              //   ))
-              //       .toList(),
-              // ),
-
-             // SizedBox(height: 16),
-
-              // Footer with Location and Hours
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
-                      SizedBox(width: 4),
-                      Text(
-                        volunteer.location.toString(),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                  // Row(
-                  //   children: [
-                  //     Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                  //     SizedBox(width: 4),
-                  //     // Text(
-                  //     //   '${volunteer.volunteerHours} hours',
-                  //     //   style: TextStyle(
-                  //     //     fontSize: 13,
-                  //     //     color: Colors.grey[600],
-                  //     //   ),
-                  //     // ),
-                  //   ],
-                  // ),
-                ],
-              ),
-            ],
+                    ),
+                  ],
+                ),
+                
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1),
+                ),
+
+                // Details Row
+                 Row(
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        volunteer.location ?? "Unknown Location",
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(Icons.email_outlined, size: 16, color: Colors.grey[500]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        volunteer.contactEmail ?? "No Email",
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Color _getAvailabilityColor(String availability) {
-    switch (availability.toLowerCase()) {
+  Widget _buildStatusChip(String status) {
+    Color color;
+    switch (status.toLowerCase()) {
       case 'active':
-        return Colors.green;
+        color = Colors.green;
+        break;
       case 'busy':
-        return Colors.orange;
+        color = Colors.orange;
+        break;
       case 'offline':
-        return Colors.grey;
-      case 'limited':
-        return Colors.blue;
+        color = Colors.grey;
+        break;
       default:
-        return Colors.grey;
+        color = Colors.blue;
     }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
+
 }
 
 // Volunteer Data Model
@@ -536,23 +562,29 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
     final textTheme = theme.textTheme;
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
-          child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
+          child: Icon(Icons.arrow_back_ios_rounded, color: Colors.black, size: 20),
         ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Text("Volunteer Profile", style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20)),
         actions: [
-          InkWell(
-            onTap: (){
+          IconButton(
+            onPressed: () {
               Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': true});
             },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(Icons.edit, size: 20, color: colorScheme.primary),
+            icon: CircleAvatar(
+              radius: 16,
+              backgroundColor: colorScheme.primary.withOpacity(0.1),
+              child: Icon(Icons.edit, size: 16, color: colorScheme.primary),
             ),
           ),
+          const SizedBox(width: 8),
         ],
-        title: Text("Volunteer Profile", style: context.textTheme.headlineLarge),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -560,93 +592,153 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
         }
 
         final profile = controller.profileData.value;
+        // Access user data from Auth Service via controller getter
+        final userData = controller.volunteerData;
+
+        if (profile == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.person_off_outlined, size: 64, color: Colors.grey[300]),
+                const SizedBox(height: 16),
+                const Text("Profile not found", style: TextStyle(color: Colors.grey)),
+                const SizedBox(height: 16),
+                 ElevatedButton(
+                  onPressed: () => Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': false}),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text("Create Profile"),
+                ),
+              ],
+            ),
+          );
+        }
 
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Profile Header
-              // _buildProfileHeader(theme, colorScheme),
-              //
-              // // Stats Cards
-              // _buildStatsCards(colorScheme),
-
-              // All Sections
-              Padding(
-                padding: const EdgeInsets.all(16),
+              // 1. Profile Summary Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
                 child: Column(
                   children: [
-                    // About Me
-                    _buildSection(
-                      title: 'Bio',
-                      icon: Icons.person_outline,
-                      colorScheme: colorScheme,
-                      child: _buildAboutMeSection(textTheme),
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: colorScheme.primary.withOpacity(0.1),
+                      child: Text(
+                        userData['name']?.substring(0, 1).toUpperCase() ?? "V",
+                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                      ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Skills
-                    _buildSection(
-                      title: 'Skills',
-                      icon: Icons.star_outline,
-                      colorScheme: colorScheme,
-                      child: _buildSkillsSection(),
+                    const SizedBox(height: 12),
+                    Text(
+                      userData['name'] ?? "Volunteer",
+                      style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
-
-                    const SizedBox(height: 16),
-
+                    const SizedBox(height: 4),
                     Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildAvailabilityRow(
-                              label: 'Experience',
-                              value: profile?.experience ?? "Not specified",
-                              icon: Icons.work_outline,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildAvailabilityRow(
-                              label: 'Availability',
-                              value: profile?.availability ?? "Not specified",
-                              icon: Icons.calendar_today_rounded,
-                            ),
-                            const SizedBox(height: 8),
-                            _buildAvailabilityRow(
-                              label: 'Location',
-                              value: profile?.location ?? "Not specified",
-                              icon: Icons.location_on_outlined,
-                            ),
-                          ],
-                        ),
+                      child: Text(
+                        "Active Volunteer",
+                        style: textTheme.bodySmall?.copyWith(color: Colors.green, fontWeight: FontWeight.bold),
                       ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Interests
-                    _buildSection(
-                      title: 'Interests',
-                      icon: Icons.favorite_outline,
-                      colorScheme: colorScheme,
-                      child: _buildInterestsSection(),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Profile Status
-                    _buildProfileStatusSection(colorScheme, textTheme),
-
-                    const SizedBox(height: 40),
                   ],
                 ),
               ),
+              
+              const SizedBox(height: 16),
+
+              // 2. Info Grid (Experience, Availability, etc.)
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoCard(
+                      label: "Experience",
+                      value: profile.experience ?? "N/A",
+                      icon: Icons.work_outline,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildInfoCard(
+                      label: "Availability",
+                      value: profile.availability ?? "N/A",
+                      icon: Icons.access_time,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildLocationCard(profile.location ?? "N/A", Colors.redAccent),
+
+              const SizedBox(height: 20),
+
+              // 3. Bio Section
+              _buildContentSection(
+                title: "About Me",
+                icon: Icons.person_outline,
+                child: Text(
+                  profile.bio ?? "No bio added yet.",
+                  style: TextStyle(color: Colors.grey[700], height: 1.5, fontSize: 14),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 4. Skills Section
+              _buildContentSection(
+                title: "Skills",
+                icon: Icons.star_outline,
+                child: (profile.skills != null && profile.skills!.isNotEmpty) 
+                  ? Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: profile.skills!.split(',').map((skill) => _buildChip(skill.trim(), colorScheme.primary)).toList(),
+                    )
+                  : const Text("No skills listed", style: TextStyle(color: Colors.grey)),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 5. Interests Section
+              _buildContentSection(
+                title: "Interests",
+                icon: Icons.favorite_outline,
+                child: (profile.interests != null && profile.interests!.isNotEmpty)
+                  ? Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: profile.interests!.map((interest) => _buildChip(interest, Colors.pink)).toList(),
+                    )
+                  : const Text("No interests listed", style: TextStyle(color: Colors.grey)),
+              ),
+
+              const SizedBox(height: 30),
             ],
           ),
         );
@@ -654,607 +746,110 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
     );
   }
 
-  Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildInfoCard({required String label, required String value, required IconData icon, required Color color}) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-      ),
-      child: Column(
-        children: [
-          // Profile Image and Status
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: colorScheme.primary,
-                    width: 3,
-                  ),
-                  image: DecorationImage(
-                    image: NetworkImage(controller.volunteerData['profileImage']!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: controller.getStatusColor(),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: const Icon(
-                  Icons.check,
-                  size: 14,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Name and Role
-          Text(
-            controller.volunteerData['name']!,
-            style: Get.theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            controller.volunteerData['role']!,
-            style: Get.textTheme.titleMedium?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          InkWell(
-            onTap: (){
-              Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': true});
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.edit_outlined, size: 16, color: colorScheme.primary),
-                  const SizedBox(width: 6),
-                  GestureDetector(
-                    onTap: () {
-                      // Navigate to Edit Profile Screen
-
-                    },
-                    child: Text(
-                      'Edit Profile',
-                      style: Get.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.calendar_month_outlined,
-                  size: 16, color: colorScheme.onSurface.withOpacity(0.6)),
-              const SizedBox(width: 6),
-              Text(
-                'Member since ${controller.volunteerData['joinDate']!}',
-                style: Get.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatsCards(ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: Colors.grey.shade200),
-          bottom: BorderSide(color: Colors.grey.shade200),
-        ),
-      ),
-      child: Row(
-        children: [
-          _buildStatCard(
-            title: 'Total Hours',
-            value: controller.volunteerData['totalHours']!,
-            icon: Icons.access_time,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(width: 12),
-          _buildStatCard(
-            title: 'Projects',
-            value: controller.volunteerData['completedProjects']!,
-            icon: Icons.assignment_turned_in,
-            color: Colors.green,
-          ),
-          const SizedBox(width: 12),
-          _buildStatCard(
-            title: 'Rating',
-            value: controller.volunteerData['rating']!,
-            icon: Icons.star,
-            color: Colors.amber,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.1)),
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 18, color: color),
-                const SizedBox(width: 6),
-                Text(
-                  value,
-                  style: Get.theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: Get.theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required ColorScheme colorScheme,
-    required Widget child,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(icon, size: 20, color: colorScheme.primary),
-                const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: Get.theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Divider
-          Container(
-            height: 1,
-            color: Colors.grey.shade200,
-          ),
-
-          // Section Content
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAboutMeSection(TextTheme textTheme) {
-    return Text(
-      controller.aboutMe,
-      style: textTheme.bodyLarge?.copyWith(
-        color: Get.theme.colorScheme.onSurface.withOpacity(0.8),
-        height: 1.6,
-      ),
-    );
-  }
-
-  Widget _buildSkillsSection() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: controller.skillList.map((skill) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: Get.theme.colorScheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Get.theme.colorScheme.primary.withOpacity(0.2),
-            ),
-          ),
-          child: Text(
-            skill,
-            style: Get.theme.textTheme.bodyMedium?.copyWith(
-              color: Get.theme.colorScheme.primary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildExperienceSection(TextTheme textTheme) {
-    return Column(
-      children: controller.experiences.map((exp) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      exp['title']!,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Get.theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    exp['duration']!,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                exp['organization']!,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Get.theme.colorScheme.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                exp['description']!,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Get.theme.colorScheme.onSurface.withOpacity(0.7),
-                  height: 1.5,
-                ),
-              ),
-              if (exp != controller.experiences.last)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Divider(color: Colors.grey.shade200, height: 1),
-                ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildAvailabilitySection() {
-    return Column(
-      children: [
-        _buildAvailabilityRow(
-          label: 'Weekdays',
-          value: controller.availability['weekdays']!,
-          icon: Icons.work_outline,
-        ),
-        const SizedBox(height: 12),
-        _buildAvailabilityRow(
-          label: 'Weekends',
-          value: controller.availability['weekends']!,
-          icon: Icons.weekend_outlined,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildAvailabilityRow(
-                label: 'Remote Work',
-                value: controller.availability['remote']!,
-                icon: Icons.computer_outlined,
-                compact: true,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildAvailabilityRow(
-                label: 'On-site',
-                value: controller.availability['onSite']!,
-                icon: Icons.location_on_outlined,
-                compact: true,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAvailabilityRow({
-    required String label,
-    required String value,
-    required IconData icon,
-    bool compact = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Get.theme.colorScheme.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: Get.theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: Get.theme.textTheme.bodyMedium?.copyWith(
-                    color: Get.theme.colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                    fontSize: compact ? 12 : 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInterestsSection() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: controller.interestList.map((interest) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.green.shade100),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.favorite_border, size: 16, color: Colors.green),
-              const SizedBox(width: 6),
-              Text(
-                interest,
-                style: Get.theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.green.shade800,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildProfileStatusSection(ColorScheme colorScheme, TextTheme textTheme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with toggle
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.verified_outlined, size: 20, color: colorScheme.primary),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Profile Status',
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: controller.toggleStatus,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: controller.getStatusColor().withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: controller.getStatusColor().withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: controller.getStatusColor(),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'status',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: controller.getStatusColor(),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Divider
-          Container(height: 1, color: Colors.grey.shade200),
-
-          // Status Details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Last Active
-                _buildStatusDetailRow(
-                  icon: Icons.timelapse_outlined,
-                  label: 'Last Active',
-                  value: "lastActive",
-                ),
-                const SizedBox(height: 12),
-
-                // Verification Status
-                _buildStatusDetailRow(
-                  icon: Icons.verified_user_outlined,
-                  label: 'Verification',
-                  value: controller.profileStatus['verified'] != null ? 'Verified' : 'Not Verified',
-                  valueColor: controller.profileStatus['verified']!=null ? Colors.green : Colors.orange,
-                ),
-                const SizedBox(height: 16),
-
-                // Badges
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Badges & Achievements',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-
-                  ],
-                ),
-              ],
-            ),
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 12),
+          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          const SizedBox(height: 4),
+          Text(
+            value, 
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusDetailRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    Color? valueColor,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey.shade600),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: Get.theme.textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
+  Widget _buildLocationCard(String location, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+           Container(
+             padding: const EdgeInsets.all(10),
+             decoration: BoxDecoration(
+               color: color.withOpacity(0.1),
+               shape: BoxShape.circle,
+             ),
+             child: Icon(Icons.location_on, color: color, size: 20),
+           ),
+           const SizedBox(width: 16),
+           Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               const Text("Location", style: TextStyle(color: Colors.grey, fontSize: 12)),
+               const SizedBox(height: 2),
+               Text(location, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+             ],
+           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentSection({required String title, required IconData icon, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: Colors.grey[700]),
+              const SizedBox(width: 8),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
           ),
-        ),
-        Text(
-          value,
-          style: Get.theme.textTheme.bodyMedium?.copyWith(
-            color: valueColor ?? Get.theme.colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+          const Divider(height: 24),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }
+

@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -161,7 +162,7 @@ class RegMatrimonyController extends GetxController {
   Future<void> onRegister() async {
     // Basic Validation
     if (nameCtrl.text.isEmpty || gender.value.isEmpty || dobCtrl.text.isEmpty) {
-        Get.snackbar("Error", "Please fill required fields", backgroundColor: Colors.red, colorText: Colors.white);
+        CustomSnackBar.showError(message: "Please fill required fields");
         return;
     }
 
@@ -234,18 +235,15 @@ class RegMatrimonyController extends GetxController {
 
       if (response.success == true) {
          Get.back(); // Close Registration Screen
-         Get.snackbar("Success", response.message ?? "Profile Created Successfully", 
-            backgroundColor: Colors.green, colorText: Colors.white);
+         CustomSnackBar.showSuccess(message: response.message ?? "Profile Created Successfully");
       } else {
-         Get.snackbar("Error", response.message ?? "Failed to create profile", 
-            backgroundColor: Colors.red, colorText: Colors.white);
+         CustomSnackBar.showError(message: response.message ?? "Failed to create profile");
       }
 
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
       print("API Error: $e");
-      Get.snackbar("Error", "Something went wrong. Please try again.", 
-          backgroundColor: Colors.red, colorText: Colors.white);
+      CustomSnackBar.showError(message: "Something went wrong. Please try again.");
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../data/model/volunteer_profile_model.dart';
@@ -151,15 +152,16 @@ class VoluntProfileUpdateController extends GetxController {
       }
 
       if (response.success == true) {
-        Get.snackbar("Success", response.message ?? (isEdit.value ? "Profile updated successfully" : "Profile created successfully"));
+        CustomSnackBar.showSuccess(message: response.message ?? (isEdit.value ? "Profile updated successfully" : "Profile created successfully"));
         // Refresh profile data
         Get.find<VolunteerProfileController>().fetchVolunteerProfile();
+        await Future.delayed(const Duration(milliseconds: 500));
         Get.back();
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to save profile");
+        CustomSnackBar.showError(message: response.message ?? "Failed to save profile");
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong: $e");
+      CustomSnackBar.showError(message: "Something went wrong: $e");
     } finally {
       isLoading.value = false;
       update();

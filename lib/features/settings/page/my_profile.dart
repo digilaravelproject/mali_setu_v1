@@ -59,54 +59,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
-          child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
+          child: Container(
+             margin: const EdgeInsets.all(8),
+             decoration: BoxDecoration(
+               color: Colors.white,
+               shape: BoxShape.circle,
+               border: Border.all(color: Colors.grey[200]!)
+             ),
+             child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.black87),
+          ),
         ),
-        title: Text("My Profile", style: context.textTheme.headlineLarge),
+        title: Text(
+          "My Profile",
+          style: context.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: Colors.black87,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.grey[50],
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
+            const SizedBox(height: 20),
             // Profile Header
             _buildProfileHeader(),
+            const SizedBox(height: 30),
 
             // Basic Information
             _buildSectionCard(
               title: 'BASIC INFORMATION',
-              icon: Icons.person_outline,
+              icon: Icons.person_outline_rounded,
               child: _buildBasicInfo(),
             ),
 
             // Contact Information
             _buildSectionCard(
               title: 'CONTACT INFORMATION',
-              icon: Icons.contact_phone,
+              icon: Icons.contact_phone_outlined,
               child: _buildContactInfo(),
             ),
 
             // Address Information
             _buildSectionCard(
               title: 'ADDRESS INFORMATION',
-              icon: Icons.location_on,
+              icon: Icons.location_on_outlined,
               child: _buildAddressInfo(),
             ),
 
-            const SizedBox(height: 10,),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: CustomButton(
-                  height: 40,
-                  borderRadius: 12,
-                  title: "Change Password",
-                  onPressed: (){
-                    Get.toNamed(AppRoutes.changePassword);
-                  }),
+            const SizedBox(height: 20),
+            CustomButton(
+              height: 48,
+              borderRadius: 14,
+              title: "Change Password",
+              onPressed: () {
+                Get.toNamed(AppRoutes.changePassword);
+              },
+              backgroundColor: Colors.white,
+              textColor: context.theme.primaryColor,
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -114,118 +135,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader() {
-    return Container(
-      padding: const EdgeInsets.all(25),
-      decoration: BoxDecoration(
-        // color:  context.theme.primaryColorLight,
-        // gradient: LinearGradient(
-        //   begin: Alignment.topLeft,
-        //   end: Alignment.bottomRight,
-        //   colors: [
-        //     context.theme.primaryColorLight,
-        //     context.theme.cardColor,
-        //   ],
-        // ),
-        border: Border(
-          bottom: BorderSide(color: context.theme.dividerColor, width: 1),
-        ),
-      ),
-      child: Column(
-        children: [
-          Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: context.theme.primaryColor,
-                    width: 3,
-                  ),
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: context.theme.primaryColor.withOpacity(0.2),
+              width: 2,
+            ),
+          ),
+          child: Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: context.theme.primaryColor.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
-                child: CustomImageView(
+              ],
+            ),
+            child: ClipOval(
+               child: CustomImageView(
                   url: user?.profileImage,
                   imagePath: AppAssets.imgAppLogo,
                   fit: BoxFit.cover,
                 ),
-              ),
-             /* Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: context.theme.primaryColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.theme.cardColor, width: 2),
-                ),
-                child: Icon(
-                  Icons.camera_alt,
-                  size: 18,
-                  color: context.theme.cardColor,
-                ),
-              ),*/
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            userData['fullName']!,
-            style: context.textTheme.headlineMedium
-            // const TextStyle(
-            //   fontSize: 22,
-            //   fontWeight: FontWeight.w700,
-            //   color: Colors.black87,
-            // ),
-          ),
-        //  const SizedBox(height: 6),
-          Text(
-            userData['email']!,
-            style: context.textTheme.bodyLarge
-           // TextStyle(fontSize: 14, color: Colors.grey.shade600),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.phone, size: 16, color: context.iconColor),
-              const SizedBox(width: 6),
-              Text(
-                userData['mobile']!,
-                style:context.textTheme.bodyMedium
-               // TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: (){
-              Get.toNamed(AppRoutes.updateProfile);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                color: context.theme.primaryColorLight,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color:  context.theme.primaryColor.withOpacity(0.2)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.mode_edit_outline_sharp, size: 16, color:  context.theme.primaryColor),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Edit Profile',
-                    style: context.textTheme.bodyMedium?.copyWith(color: context.theme.primaryColor)
-                    // TextStyle(
-                    //   fontSize: 13,
-                    //   fontWeight: FontWeight.w500,
-                    //   color: Colors.blue.shade700,
-                    // ),
-                  ),
-                ],
-              ),
             ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          userData['fullName']!,
+          style: context.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          userData['email']!,
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () {
+             Get.toNamed(AppRoutes.updateProfile);
+          },
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            side: BorderSide(color: context.theme.primaryColor),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          icon: Icon(Icons.edit_outlined, size: 16, color: context.theme.primaryColor),
+          label: Text(
+            'Edit Profile',
+            style: TextStyle(
+              color: context.theme.primaryColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -235,38 +215,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required Widget child,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: context.theme.dividerColor, width: 1),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                 // Icon(icon, size: 20, color: Colors.blue),
-                  const SizedBox(width: 10),
-                  Text(
-                    title,
-                    style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor)
-                    // TextStyle(
-                    //   fontSize: 14,
-                    //   fontWeight: FontWeight.w600,
-                    //   color: Colors.grey.shade700,
-                    //   letterSpacing: 0.5,
-                    // ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              child,
-            ],
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: context.theme.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, size: 18, color: context.theme.primaryColor),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: context.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            child,
+          ],
         ),
       ),
     );
@@ -278,21 +267,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildInfoRow(
           label: 'Full Name',
           value: userData['fullName']!,
-          icon: Icons.person,
+          icon: Icons.person_outline,
         ),
-        const Divider(height: 20),
-        _buildInfoRow(label: 'Age', value: userData['age']!, icon: Icons.cake),
-        const Divider(height: 20),
+        const SizedBox(height: 16),
+        _buildInfoRow(label: 'Age', value: userData['age']!, icon: Icons.cake_outlined),
+        const SizedBox(height: 16),
         _buildInfoRow(
           label: 'Occupation',
           value: userData['occupation']!,
-          icon: Icons.work,
+          icon: Icons.work_outline,
         ),
-        const Divider(height: 20),
+        const SizedBox(height: 16),
         _buildInfoRow(
           label: 'Referral Code',
           value: userData['referralCode']!,
-          icon: Icons.confirmation_number,
+          icon: Icons.confirmation_number_outlined,
         ),
       ],
     );
@@ -304,19 +293,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildInfoRow(
           label: 'Email Address',
           value: userData['email']!,
-          icon: Icons.email,
+          icon: Icons.email_outlined,
         ),
-        const Divider(height: 20),
+        const SizedBox(height: 16),
         _buildInfoRow(
           label: 'Mobile Number',
           value: userData['mobile']!,
-          icon: Icons.phone_android,
-        ),
-        const Divider(height: 20),
-        _buildInfoRow(
-          label: 'Phone Number',
-          value: userData['phoneNumber']!,
-          icon: Icons.phone,
+          icon: Icons.phone_android_outlined,
         ),
       ],
     );
@@ -328,77 +311,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildInfoRow(
           label: 'Street Address',
           value: userData['streetAddress']!,
-          icon: Icons.home,
+          icon: Icons.home_outlined,
+          isFullWidth: true,
         ),
-        const Divider(height: 20),
-        _buildInfoRow(
-          label: 'Nearby Location',
-          value: userData['nearbyLocation']!,
-          icon: Icons.location_searching,
-        ),
-        const Divider(height: 20),
-        _buildInfoRow(
-          label: 'Road Number',
-          value: userData['roadNumber']!,
-          icon: Icons.add_road,
-        ),
-        const Divider(height: 20),
+        const SizedBox(height: 16),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: _buildInfoRow(
                 label: 'City',
                 value: userData['city']!,
-                icon: Icons.location_city,
-
+                icon: Icons.location_city_outlined,
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildInfoRow(
                 label: 'State',
                 value: userData['state']!,
-                icon: Icons.map,
+                icon: Icons.map_outlined,
               ),
             ),
           ],
         ),
-        const Divider(height: 20),
+        const SizedBox(height: 16),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+             Expanded(
               child: _buildInfoRow(
                 label: 'District',
                 value: userData['district']!,
-                icon: Icons.terrain,
+                icon: Icons.terrain_outlined,
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildInfoRow(
                 label: 'Pincode',
                 value: userData['pincode']!,
-                icon: Icons.numbers,
-              ),
-            ),
-          ],
-        ),
-        const Divider(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: _buildInfoRow(
-                label: 'Sector',
-                value: userData['sector']!,
-                icon: Icons.domain,
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: _buildInfoRow(
-                label: 'Destination',
-                value: userData['destination']!,
-                icon: Icons.place,
+                icon: Icons.pin_drop_outlined,
               ),
             ),
           ],
@@ -407,106 +360,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
- /* Widget _buildAccountInfo() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            _buildStatusBadge(
-              'Account Status',
-              userData['accountStatus']!,
-              Colors.green,
-            ),
-            const SizedBox(width: 15),
-            _buildStatusBadge(
-              'Membership',
-              userData['membershipType']!,
-              Colors.purple,
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        _buildInfoRow(
-          label: 'Joined Date',
-          value: userData['joinedDate']!,
-          icon: Icons.calendar_today,
-        ),
-      ],
-    );
-  }*/
-
   Widget _buildInfoRow({
     required String label,
     required String value,
     required IconData icon,
+    bool isFullWidth = false,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: context.iconColor),
-        const SizedBox(width: 12),
+        // Icon(icon, size: 18, color: Colors.grey[400]),
+        // const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: context.textTheme.bodyMedium
-                // TextStyle(
-                //   fontSize: 13,
-                //   color: Colors.grey.shade600,
-                //   fontWeight: FontWeight.w500,
-                // ),
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[500],
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style:context.textTheme.titleMedium
-                // TextStyle(
-                //   fontSize: 15,
-                //   fontWeight: FontWeight.w600,
-                //   color: Colors.black87,
-                // ),
+                style: context.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+                maxLines: isFullWidth ? 3 : 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatusBadge(String label, String value, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 14,
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

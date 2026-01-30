@@ -6,10 +6,10 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:get/get_utils/src/extensions/context_extensions.dart';
 
-import '../../../../core/helper/form_validator.dart';
-import '../../../../widgets/basic_text_field.dart';
-import '../../../../widgets/custom_buttons.dart';
-import '../controller/reg_business_controller.dart';
+import 'package:edu_cluezer/core/helper/form_validator.dart';
+import 'package:edu_cluezer/widgets/basic_text_field.dart';
+import 'package:edu_cluezer/widgets/custom_buttons.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 
 class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
   const RegYourBusinessScreen({Key? key}) : super(key: key);

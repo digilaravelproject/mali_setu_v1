@@ -5,10 +5,10 @@ import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/widgets/option_selector.dart';
-import '../../../../core/helper/form_validator.dart';
-import '../../../../core/utils/app_assets.dart';
-import '../controller/create_job_controller.dart';
+import 'package:edu_cluezer/common/widgets/option_selector.dart';
+import 'package:edu_cluezer/core/helper/form_validator.dart';
+import 'package:edu_cluezer/core/utils/app_assets.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 
 class CreateJobPage extends GetWidget<CreateJobController> {
   const CreateJobPage({super.key});

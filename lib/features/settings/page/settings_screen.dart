@@ -19,153 +19,241 @@ class SettingsScreen extends GetWidget<SettingsController> {
     final authService = Get.find<AuthService>();
 
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Light background for contrast
+      appBar: AppBar(
+        title: Text(
+          "Profile & Settings",
+          style: context.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+          ),
+        ),
+        centerTitle: false,
+        backgroundColor: Colors.grey[50],
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // User Profile Header
-            _buildUserHeader(context, authService),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              // User Profile Header
+              _buildUserHeader(context, authService),
+              const SizedBox(height: 30),
 
-            // Settings List
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // User Information Section
-                      _buildSectionHeader(context, 'USER INFORMATION'),
-                      _buildInfoCard(
-                        context: context,
-                        infoItems: [
-                          {
-                            'title': 'My Profile',
-                            'icon': Icons.person_outline,
-                            'onTap': () {
-                              Get.toNamed(AppRoutes.profileScreen);
-                            },
-                          },
-                          {'title': 'App Language', 'icon': Icons.language},
-                          {'title': 'User Approval', 'icon': Icons.verified},
-                          {'title': 'Active User', 'icon': CupertinoIcons.person_2_fill},
-                        ],
-                      ),
-
-                      // Business Section
-                      _buildSectionHeader(context, 'BUSINESS'),
-                      _buildInfoCard(
-                        context: context,
-                        infoItems: [
-                          {'title': 'Active Business', 'icon': Icons.business},
-                          {'title': 'Business Approval', 'icon': Icons.verified},
-                          {'title': 'Business Type', 'icon': Icons.list},
-                          {'title': 'Saved Business', 'icon': Icons.bookmark},
-                        ],
-                      ),
-
-                      // Volunteer Section
-                      _buildSectionHeader(context, 'VOLUNTEER'),
-                      _buildInfoCard(
-                        context: context,
-                        infoItems: [
-                          {'title': 'Active Volunteer', 'icon': Icons.favorite},
-                          {'title': 'Volunteer Approval', 'icon': Icons.verified},
-                          {
-                            'title': 'Volunteer Excel Download',
-                            'icon': Icons.download_for_offline_sharp,
-                          },
-                        ],
-                      ),
-
-                      // Legal Section
-                      _buildSectionHeader(context, 'LEGAL'),
-                      _buildInfoCard(
-                        context: context,
-                        infoItems: [
-                          {'title': 'Privacy Policy', 'icon': Icons.policy},
-                          {'title': 'Terms & Conditions', 'icon': Icons.file_open},
-                          {'title': 'Contact Supports', 'icon': Icons.contact_support},
-                        ],
-                      ),
-
-                      // App Settings Section
-                      _buildSectionHeader(context, 'APP SETTINGS'),
-                      _buildInfoCard(
-                        context: context,
-                        infoItems: [
-                          {
-                            'title': 'Share App',
-                            'icon': CupertinoIcons.arrowshape_turn_up_right_fill,
-                            'onTap': () async {
-                              try {
-                                await Share.share(
-                                  'Check out this amazing app!\n\nDownload link: https://yourapp.com',
-                                  subject: 'Awesome App Recommendation',
-                                );
-                              } catch (e) {
-                                debugPrint('Share failed: $e');
-                              }
-                            },
-                          },
-                          {
-                            'title': 'Logout',
-                            'icon': Icons.logout,
-                            'onTap': () async {
-                              final confirm = await LogoutDialog.show(
-                                context: context,
-                                title: 'Confirm Logout',
-                                message: 'You will be redirected to login screen',
-                              );
-                              if (confirm == true) {
-                                authService.logout();
-                              }
-                            },
-                          },
-                        ],
-                      ),
-
-                      // Add Business Button
-                      const SizedBox(height: 20),
-                      _buildSectionHeader(context, 'Do you want to register your own business ?'),
-                      const SizedBox(height: 8),
-                      CustomButton(
-                        height: 40,
-                        borderRadius: 14,
-                        title: "Register Your Own Business",
-                        onPressed: () {},
-                      ),
-
-                      const SizedBox(height: 40),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Initiative By",
-                              style: context.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Text(
-                              " Anushka Foundation",
-                              style: context.textTheme.titleLarge?.copyWith(
-                                color: context.theme.primaryColor,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                    ],
+              // Settings List
+              // User Information Section
+              _buildSectionHeader(context, 'USER INFORMATION'),
+              _buildSettingsGroup(
+                context,
+                [
+                  _SettingsItem(
+                    title: 'My Profile',
+                    icon: Icons.person_outline_rounded,
+                    onTap: () => Get.toNamed(AppRoutes.profileScreen),
                   ),
+                  _SettingsItem(
+                    title: 'App Language',
+                    icon: Icons.language_rounded,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'User Approval',
+                    icon: Icons.verified_user_outlined,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Active User',
+                    icon: CupertinoIcons.person_2,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                ],
+              ),
+
+              // Business Section
+              _buildSectionHeader(context, 'BUSINESS'),
+              _buildSettingsGroup(
+                context,
+                [
+                  _SettingsItem(
+                    title: 'Active Business',
+                    icon: Icons.business_rounded,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Business Approval',
+                    icon: Icons.verified_outlined,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Business Type',
+                    icon: Icons.list_alt_rounded,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Saved Business',
+                    icon: Icons.bookmark_border_rounded,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                ],
+              ),
+
+              // Volunteer Section
+              _buildSectionHeader(context, 'VOLUNTEER'),
+              _buildSettingsGroup(
+                context,
+                [
+                  _SettingsItem(
+                    title: 'Active Volunteer',
+                    icon: Icons.favorite_border_rounded,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Volunteer Approval',
+                    icon: Icons.verified_outlined,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Volunteer Excel Download',
+                    icon: Icons.download_for_offline_outlined,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                ],
+              ),
+
+              // Legal Section
+              _buildSectionHeader(context, 'LEGAL'),
+              _buildSettingsGroup(
+                context,
+                [
+                  _SettingsItem(
+                    title: 'Privacy Policy',
+                    icon: Icons.privacy_tip_outlined,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Terms & Conditions',
+                    icon: Icons.description_outlined,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'Contact Support',
+                    icon: Icons.support_agent_rounded,
+                    onTap: () => _showComingSoonDialog(context),
+                  ),
+                ],
+              ),
+
+              // App Settings Section
+              _buildSectionHeader(context, 'APP SETTINGS'),
+              _buildSettingsGroup(
+                context,
+                [
+                  _SettingsItem(
+                    title: 'Share App',
+                    icon: CupertinoIcons.share,
+                    onTap: () async {
+                      try {
+                        await Share.share(
+                          'Check out this amazing app!\n\nDownload link: https://yourapp.com',
+                          subject: 'Awesome App Recommendation',
+                        );
+                      } catch (e) {
+                        debugPrint('Share failed: $e');
+                      }
+                    },
+                  ),
+                  _SettingsItem(
+                    title: 'Logout',
+                    icon: Icons.logout_rounded,
+                    isDestructive: true,
+                    onTap: () async {
+                      final confirm = await LogoutDialog.show(
+                        context: context,
+                        title: 'Confirm Logout',
+                        message: 'You will be redirected to the login screen.',
+                      );
+                      if (confirm == true) {
+                        authService.logout();
+                      }
+                    },
+                  ),
+                ],
+              ),
+
+              // Add Business Button
+              const SizedBox(height: 32),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: context.theme.primaryColor.withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "Want to grow your business?",
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    CustomButton(
+                      height: 48,
+                      borderRadius: 14,
+                      title: "Register Your Business",
+                      onPressed: () {}, // Add route if available
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 40),
+              Align(
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    Text(
+                      "Initiative By",
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Anushka Foundation",
+                      style: context.textTheme.titleLarge?.copyWith(
+                        color: context.theme.primaryColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Version 1.0.0", // Dynamic version if possible
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
@@ -178,44 +266,71 @@ class SettingsScreen extends GetWidget<SettingsController> {
       final email = user?.email ?? 'Sign in to access more features';
 
       return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: context.theme.primaryColorLight,
-          borderRadius: const BorderRadius.only(
-            bottomRight: Radius.circular(40),
-            bottomLeft: Radius.circular(40),
-          ),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Row(
           children: [
             InkWell(
-              onTap: () {
-                Get.toNamed(AppRoutes.profileScreen);
-              },
-              child: CustomImageView(
-                url: user?.profileImage,
-                height: 55,
-                width: 55,
-                radius: BorderRadius.circular(25),
-                imagePath: AppAssets.imgAppLogo,
-                fit: BoxFit.cover,
+              onTap: () => Get.toNamed(AppRoutes.profileScreen),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: context.theme.primaryColor.withOpacity(0.2), width: 2),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: CustomImageView(
+                  url: user?.profileImage,
+                  height: 60,
+                  width: 60,
+                  radius: BorderRadius.circular(30),
+                  imagePath: AppAssets.imgAppLogo,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     name.toTitleCase(),
-                    style: context.textTheme.titleLarge?.copyWith(fontSize: 20),
+                    style: context.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     email,
-                    style: context.textTheme.bodyLarge,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
+              ),
+            ),
+            InkWell(
+              onTap: () => Get.toNamed(AppRoutes.updateProfile),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: context.theme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.edit_outlined, color: context.theme.primaryColor, size: 20),
               ),
             ),
           ],
@@ -226,76 +341,179 @@ class SettingsScreen extends GetWidget<SettingsController> {
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8, top: 16, bottom: 8),
+      padding: const EdgeInsets.only(left: 4, bottom: 12, top: 20),
       child: Text(
-        title,
-        style: context.textTheme.titleMedium?.copyWith(
-          color: context.theme.primaryColor,
+        title.toUpperCase(),
+        style: context.textTheme.labelLarge?.copyWith(
+          color: Colors.grey[600],
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+          fontSize: 12,
         ),
       ),
     );
   }
 
-  Widget _buildInfoCard({
-    required BuildContext context,
-    required List<Map<String, dynamic>> infoItems,
-  }) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: context.theme.dividerColor, width: 1),
+  Widget _buildSettingsGroup(BuildContext context, List<_SettingsItem> items) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: infoItems
-              .map((item) => _buildInfoRow(
-                    context: context,
-                    onTap: item['onTap'],
-                    title: item['title'],
-                    icon: item['icon'],
-                  ))
-              .toList(),
-        ),
+      child: Column(
+        children: List.generate(items.length, (index) {
+          final item = items[index];
+          final isLast = index == items.length - 1;
+          
+          return Column(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: item.onTap,
+                  borderRadius: isLast 
+                      ? const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20))
+                      : index == 0 
+                          ? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
+                          : BorderRadius.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: item.isDestructive 
+                                ? Colors.red.withOpacity(0.1) 
+                                : context.theme.primaryColor.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            item.icon,
+                            size: 20,
+                            color: item.isDestructive ? Colors.red : context.theme.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            item.title,
+                            style: context.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: item.isDestructive ? Colors.red : Colors.grey[800],
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 22,
+                          color: Colors.grey[400],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  indent: 60,
+                  color: Colors.grey[200],
+                ),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildInfoRow({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: context.theme.primaryColorLight,
-                borderRadius: BorderRadius.circular(20),
+  void _showComingSoonDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.theme.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.rocket_launch_rounded,
+                  size: 32,
+                  color: context.theme.primaryColor,
+                ),
               ),
-              child: Icon(icon, size: 18, color: context.theme.primaryColor),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: context.textTheme.bodyMedium,
+              const SizedBox(height: 20),
+              Text(
+                "Coming Soon!",
+                style: context.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Icon(Icons.chevron_right, size: 20, color: context.iconColor),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                "We are currently working on this feature.\nIt will be available in future updates!",
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.theme.primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    "Got it!",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _SettingsItem {
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  _SettingsItem({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    this.isDestructive = false,
+  });
 }
 
 class LogoutDialog {
@@ -316,9 +534,9 @@ class LogoutDialog {
       builder: (context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
-          elevation: 8,
+          elevation: 0,
           backgroundColor: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -334,18 +552,18 @@ class LogoutDialog {
                       color: Colors.red.withOpacity(0.1),
                     ),
                     child: const Icon(
-                      Icons.logout,
-                      size: 30,
+                      Icons.logout_rounded,
+                      size: 28,
                       color: Colors.red,
                     ),
                   ),
                 if (showIcon) const SizedBox(height: 20),
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
+                    color: Colors.black87,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -363,22 +581,21 @@ class LogoutDialog {
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
+                      child: TextButton(
                         onPressed: () {
                           Navigator.pop(context, false);
                         },
-                        style: OutlinedButton.styleFrom(
+                        style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          side: BorderSide(color: cancelColor),
                         ),
                         child: Text(
                           cancelText,
                           style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                             color: cancelColor,
                           ),
                         ),
@@ -400,9 +617,9 @@ class LogoutDialog {
                         ),
                         child: Text(
                           confirmText,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),

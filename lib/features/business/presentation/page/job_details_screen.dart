@@ -1,13 +1,14 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../data/model/res_all_business_model.dart';
-import '../controller/business_controller.dart';
-import '../controller/create_job_controller.dart';
-import '../../../../core/routes/app_routes.dart';
-import '../../../../core/widgets/shimmer_loading.dart';
-import '../../../../core/widgets/custom_confirm_dialog.dart';
-import '../widget/job_apply_form.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
+import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/features/business/presentation/widget/job_apply_form.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   const JobDetailsScreen({super.key});
@@ -36,7 +37,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       createJobCtrl.populateFields(job);
       Get.toNamed(AppRoutes.createJob);
     } else {
-      Get.snackbar("Error", "Could not initialize job editor. Please try again.");
+      CustomSnackBar.showError(message: "Could not initialize job editor. Please try again.");
     }
   }
 

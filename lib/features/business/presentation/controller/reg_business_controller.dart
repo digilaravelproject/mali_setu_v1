@@ -3,15 +3,16 @@ import 'dart:io';
 
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../data/model/res_all_business_model.dart';
-import '../../../../core/constent/api_constants.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../core/network/multipart.dart';
-import '../../../../core/helper/img_picker_helper.dart';
-import '../../domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/network/multipart.dart';
+import 'package:edu_cluezer/core/helper/img_picker_helper.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
 
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
@@ -183,7 +184,7 @@ class RegBusinessController extends GetxController {
   Future<void> onRegister() async {
     // Basic Validation
     if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
-      Get.snackbar("Error", "Please fill required fields", backgroundColor: Colors.red, colorText: Colors.white);
+      CustomSnackBar.showError(message: "Please fill required fields");
       return;
     }
 
@@ -208,7 +209,7 @@ class RegBusinessController extends GetxController {
           print("updatebusiness : "+success.toString());
           if (success) {
             Get.back(); // Close Screen
-            Get.snackbar("Success", "Business updated successfully", backgroundColor: Colors.green, colorText: Colors.white);
+            CustomSnackBar.showSuccess(message: "Business updated successfully");
           }
           return;
       }
@@ -237,7 +238,7 @@ class RegBusinessController extends GetxController {
         final data = response.data;
         if (data['success'] == true) {
           Get.back(); // Close screen
-          Get.snackbar("Success", data['message'] ?? "Business registered successfully", backgroundColor: Colors.green, colorText: Colors.white);
+          CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
           
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
@@ -245,15 +246,15 @@ class RegBusinessController extends GetxController {
           }
         } else {
           // Handle server-side validation/business logic errors
-          Get.snackbar("Error", data['message'] ?? "Registration failed", backgroundColor: Colors.red, colorText: Colors.white);
+          CustomSnackBar.showError(message: data['message'] ?? "Registration failed");
         }
       } else {
          final data = response.data;
-         Get.snackbar("Error", data['message'] ?? "Something went wrong", backgroundColor: Colors.red, colorText: Colors.white);
+         CustomSnackBar.showError(message: data['message'] ?? "Something went wrong");
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(); // Close Loading if open
-      Get.snackbar("Error", "An unexpected error occurred: ${e.toString()}", backgroundColor: Colors.red, colorText: Colors.white);
+      CustomSnackBar.showError(message: "An unexpected error occurred: ${e.toString()}");
     }
   }
 

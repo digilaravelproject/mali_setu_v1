@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response;
 import '../constent/app_constants.dart';
 import '../storage/shared_prefs.dart';
 import '../storage/token_manger.dart';
-import '../utils/custom_snackbar.dart';
 import '../utils/logger.dart';
 import 'error_handler.dart';
 
@@ -105,20 +105,20 @@ class ApiChecker {
     if (error is DioException) {
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
-          CustomSnackbar.showError(
+          CustomSnackBar.showError(
             message: 'Connection timeout. Please check your internet and try again.',
           );
           break;
         case DioExceptionType.sendTimeout:
-          CustomSnackbar.showError(message: 'Request timeout. Please try again.');
+          CustomSnackBar.showError(message: 'Request timeout. Please try again.');
           break;
         case DioExceptionType.receiveTimeout:
-          CustomSnackbar.showError(
+          CustomSnackBar.showError(
             message: 'Server is taking too long to respond. Please try again.',
           );
           break;
         case DioExceptionType.badCertificate:
-          CustomSnackbar.showError(
+          CustomSnackBar.showError(
             message: 'Security certificate error. Please contact support.',
           );
           break;
@@ -138,41 +138,41 @@ class ApiChecker {
             try {
               ErrorResponse errorResponse = ErrorResponse.fromJson(error.response!.data);
               if (errorResponse.errors != null && errorResponse.errors!.isNotEmpty) {
-                CustomSnackbar.showError(
+                CustomSnackBar.showError(
                   message: errorResponse.errors!.first.message ?? 'Unknown error',
                 );
               } else if (error.response?.data['msg'] != null) {
-                CustomSnackbar.showError(
+                CustomSnackBar.showError(
                   message: error.response!.data['msg'].toString(),
                 );
               } else if (error.response?.data['message'] != null) {
-                CustomSnackbar.showError(
+                CustomSnackBar.showError(
                   message: error.response!.data['message'].toString(),
                 );
               } else {
-                CustomSnackbar.showError(message: 'Something went wrong');
+                CustomSnackBar.showError(message: 'Something went wrong');
               }
             } catch (e) {
               if (error.response?.data is Map) {
                 final data = error.response!.data as Map;
-                CustomSnackbar.showError(
+                CustomSnackBar.showError(
                   message: data['msg']?.toString() ??
                       data['message']?.toString() ??
                       'Something went wrong',
                 );
               } else {
-                CustomSnackbar.showError(message: 'Something went wrong');
+                CustomSnackBar.showError(message: 'Something went wrong');
               }
             }
           } else {
-            CustomSnackbar.showError(message: 'Server error. Please try again.');
+            CustomSnackBar.showError(message: 'Server error. Please try again.');
           }
           break;
         case DioExceptionType.cancel:
-          CustomSnackbar.showError(message: 'Request cancelled');
+          CustomSnackBar.showError(message: 'Request cancelled');
           break;
         case DioExceptionType.connectionError:
-          CustomSnackbar.showError(
+          CustomSnackBar.showError(
             message: 'No internet connection. Please check your network and try again.',
           );
           break;
@@ -181,16 +181,16 @@ class ApiChecker {
             final errorString = error.error.toString();
             if (errorString.contains('SocketException') ||
                 errorString.contains('Failed host lookup')) {
-              CustomSnackbar.showError(
+              CustomSnackBar.showError(
                 message: 'Network error. Please check your internet connection.',
               );
             } else if (errorString.contains('HttpException')) {
-              CustomSnackbar.showError(message: 'Connection failed. Please try again.');
+              CustomSnackBar.showError(message: 'Connection failed. Please try again.');
             } else {
-              CustomSnackbar.showError(message: 'Something went wrong. Please try again.');
+              CustomSnackBar.showError(message: 'Something went wrong. Please try again.');
             }
           } else {
-            CustomSnackbar.showError(message: 'Something went wrong. Please try again.');
+            CustomSnackBar.showError(message: 'Something went wrong. Please try again.');
           }
           break;
       }
@@ -209,7 +209,7 @@ class ApiChecker {
       );
     } else {
       Logger.e('Error: $error');
-      CustomSnackbar.showError(message: 'Unexpected error occurred. Please try again.');
+      CustomSnackBar.showError(message: 'Unexpected error occurred. Please try again.');
 
       return Response(
         requestOptions: RequestOptions(path: ''),
@@ -253,7 +253,7 @@ class ApiChecker {
           message;
     }
 
-    CustomSnackbar.showError(message: message);
+    CustomSnackBar.showError(message: message);
   }
 
   static void _showValidationErrors(Response response) {
@@ -265,11 +265,11 @@ class ApiChecker {
               .map((e) => e.message ?? '')
               .where((msg) => msg.isNotEmpty)
               .join('\n');
-          CustomSnackbar.showError(
+          CustomSnackBar.showError(
             message: errorMsg.isNotEmpty ? errorMsg : 'Validation errors occurred',
           );
         } else {
-          CustomSnackbar.showError(message: 'Validation Error');
+          CustomSnackBar.showError(message: 'Validation Error');
         }
       } catch (e) {
         if (response.data is Map) {
@@ -277,13 +277,13 @@ class ApiChecker {
           String message = data['msg']?.toString() ??
               data['message']?.toString() ??
               'Validation Error';
-          CustomSnackbar.showError(message: message);
+          CustomSnackBar.showError(message: message);
         } else {
-          CustomSnackbar.showError(message: 'Validation Error');
+          CustomSnackBar.showError(message: 'Validation Error');
         }
       }
     } else {
-      CustomSnackbar.showError(message: 'Validation Error');
+      CustomSnackBar.showError(message: 'Validation Error');
     }
   }
 
@@ -309,7 +309,7 @@ class ApiChecker {
       try {
         ErrorResponse errorResponse = ErrorResponse.fromJson(response.data);
         if (errorResponse.errors != null && errorResponse.errors!.isNotEmpty) {
-          CustomSnackbar.showError(
+          CustomSnackBar.showError(
             message: errorResponse.errors!.first.message ?? 'An error occurred',
           );
           return;
@@ -320,17 +320,17 @@ class ApiChecker {
 
       if (response.data is Map) {
         final data = response.data as Map;
-        CustomSnackbar.showError(
+        CustomSnackBar.showError(
           message: data['msg']?.toString() ??
               data['message']?.toString() ??
               data['error']?.toString() ??
               'Something went wrong',
         );
       } else {
-        CustomSnackbar.showError(message: 'Something went wrong');
+        CustomSnackBar.showError(message: 'Something went wrong');
       }
     } else {
-      CustomSnackbar.showError(message: 'Something went wrong');
+      CustomSnackBar.showError(message: 'Something went wrong');
     }
   }
 

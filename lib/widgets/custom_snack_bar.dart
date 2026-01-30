@@ -1,30 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:ui';
 
 enum SnackBarType { success, warning, error, info }
-
-enum SnackBarPosition { top, bottom }
 
 class CustomSnackBar {
   static void show({
     required String message,
     SnackBarType type = SnackBarType.success,
-    SnackBarPosition position = SnackBarPosition.bottom,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(seconds: 3),
     VoidCallback? onTap,
     BuildContext? context,
   }) {
-    if (position == SnackBarPosition.bottom) {
-      _showBottom(
-        message: message,
-        type: type,
-        duration: duration,
-        onTap: onTap,
-        context: context,
-      );
-    } else {
-      _showTop(message: message, type: type, duration: duration, onTap: onTap);
-    }
+    _showBottom(
+      message: message,
+      type: type,
+      duration: duration,
+      onTap: onTap,
+      context: context,
+    );
   }
 
   static void _showBottom({
@@ -34,117 +28,29 @@ class CustomSnackBar {
     VoidCallback? onTap,
     BuildContext? context,
   }) {
-    final ctx = context ?? Get.context ?? Get.overlayContext;
-    if (ctx == null) return;
-
-    final snackBar = SnackBar(
-      content: _SnackBarContent(message: message, type: type, onTap: onTap),
-      duration: duration,
+    // Using Get.showSnackbar ensures it appears above BottomSheets and Dialogs
+    Get.showSnackbar(GetSnackBar(
+      messageText: _SnackBarContent(message: message, type: type, onTap: onTap),
       backgroundColor: Colors.transparent,
-      elevation: 0,
-      behavior: SnackBarBehavior.floating,
-      margin: const EdgeInsets.all(16),
-    );
-
-    final messenger = ScaffoldMessenger.maybeOf(ctx);
-    messenger
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(snackBar);
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
+      borderRadius: 16,
+      padding: EdgeInsets.zero,
+      duration: duration,
+      isDismissible: true,
+      animationDuration: const Duration(milliseconds: 300),
+    ));
   }
-
-  /*static void _showTop({
-    required String message,
-    required SnackBarType type,
-    required Duration duration,
-    VoidCallback? onTap,
-  }) {
-    final ctx = Get.overlayContext ?? Get.context;
-    if (ctx == null) return;
-
-    final overlay = Overlay.of(ctx);
-
-    final entry = OverlayEntry(
-      builder: (_) => Positioned(
-        top: MediaQuery.of(ctx).padding.top + 60,
-        left: 16,
-        right: 16,
-        child: Material(
-          color: Colors.transparent,
-          child: _SnackBarContent(message: message, type: type, onTap: onTap),
-        ),
-      ),
-    );
-
-    overlay.insert(entry);
-
-    Future.delayed(duration, () {
-      entry.remove();
-    });
-  }*/
-
-
-  static void _showTop({
-    required String message,
-    required SnackBarType type,
-    required Duration duration,
-    VoidCallback? onTap,
-  }) {
-    final ctx = Get.overlayContext;
-
-    // If overlay not ready → fallback to bottom snackbar
-    if (ctx == null || Overlay.of(ctx) == null) {
-      _showBottom(
-        message: message,
-        type: type,
-        duration: duration,
-        onTap: onTap,
-        context: Get.context,
-      );
-      return;
-    }
-
-    final overlay = Overlay.of(ctx);
-
-    late OverlayEntry entry;
-    entry = OverlayEntry(
-      builder: (_) => Positioned(
-        top: MediaQuery.of(ctx).padding.top + 60,
-        left: 16,
-        right: 16,
-        child: Material(
-          color: Colors.transparent,
-          child: _SnackBarContent(
-            message: message,
-            type: type,
-            onTap: () {
-              entry.remove();
-              onTap?.call();
-            },
-          ),
-        ),
-      ),
-    );
-
-    overlay.insert(entry);
-
-    Future.delayed(duration, () {
-      if (entry.mounted) entry.remove();
-    });
-  }
-
-
 
   static void showSuccess({
     required String message,
-    SnackBarPosition position = SnackBarPosition.bottom,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(seconds: 3),
     VoidCallback? onTap,
     BuildContext? context,
   }) {
     show(
       message: message,
       type: SnackBarType.success,
-      position: position,
       duration: duration,
       onTap: onTap,
       context: context,
@@ -153,15 +59,13 @@ class CustomSnackBar {
 
   static void showWarning({
     required String message,
-    SnackBarPosition position = SnackBarPosition.bottom,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(seconds: 3),
     VoidCallback? onTap,
     BuildContext? context,
   }) {
     show(
       message: message,
       type: SnackBarType.warning,
-      position: position,
       duration: duration,
       onTap: onTap,
       context: context,
@@ -170,7 +74,6 @@ class CustomSnackBar {
 
   static void showError({
     required String message,
-    SnackBarPosition position = SnackBarPosition.top,
     Duration duration = const Duration(seconds: 4),
     VoidCallback? onTap,
     BuildContext? context,
@@ -178,7 +81,6 @@ class CustomSnackBar {
     show(
       message: message,
       type: SnackBarType.error,
-      position: position,
       duration: duration,
       onTap: onTap,
       context: context,
@@ -187,15 +89,13 @@ class CustomSnackBar {
 
   static void showInfo({
     required String message,
-    SnackBarPosition position = SnackBarPosition.bottom,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(seconds: 3),
     VoidCallback? onTap,
     BuildContext? context,
   }) {
     show(
       message: message,
       type: SnackBarType.info,
-      position: position,
       duration: duration,
       onTap: onTap,
       context: context,
@@ -216,155 +116,138 @@ class _SnackBarContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: _getBackgroundColor(),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getBorderColor(), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: _getShadowColor(),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(2),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: InkWell(
+          onTap: () {
+             ScaffoldMessenger.of(context).hideCurrentSnackBar();
+             onTap?.call();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: _getIconBackgroundColor(),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(_getIcon(), color: _getIconColor(), size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: _getTextColor(),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                height: 1.4,
+              color: _getBackgroundColor(context).withOpacity(0.9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _getBorderColor().withOpacity(0.5),
+                width: 1,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: _getShadowColor(),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _getIconColor().withOpacity(0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _getIcon(),
+                    color: _getIconColor(),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _getTitle(),
+                        style: TextStyle(
+                          color: _getIconColor(),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        message,
+                        style: TextStyle(
+                          color: _getTextColor(context),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: _getTextColor(context).withOpacity(0.6),
+                    size: 18,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              onTap?.call();
-            },
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: _getCloseButtonColor(),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(Icons.close, color: _getTextColor(), size: 16),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Color _getBackgroundColor() {
+  String _getTitle() {
     switch (type) {
-      case SnackBarType.success:
-        return const Color(0xFFF0FDF4);
-      case SnackBarType.warning:
-        return const Color(0xFFFFFBEB);
-      case SnackBarType.error:
-        return const Color(0xFFFEF2F2);
-      case SnackBarType.info:
-        return const Color(0xFFEFF6FF);
+      case SnackBarType.success: return 'Success';
+      case SnackBarType.warning: return 'Warning';
+      case SnackBarType.error: return 'Error';
+      case SnackBarType.info: return 'Info';
     }
+  }
+
+  Color _getBackgroundColor(BuildContext context) {
+    return context.theme.cardColor;
   }
 
   Color _getBorderColor() {
     switch (type) {
-      case SnackBarType.success:
-        return const Color(0xFFBBF7D0);
-      case SnackBarType.warning:
-        return const Color(0xFFFDE68A);
-      case SnackBarType.error:
-        return const Color(0xFFFECACA);
-      case SnackBarType.info:
-        return const Color(0xFFBFDBFE);
+      case SnackBarType.success: return Colors.green.withOpacity(0.3);
+      case SnackBarType.warning: return Colors.orange.withOpacity(0.3);
+      case SnackBarType.error: return Colors.red.withOpacity(0.3);
+      case SnackBarType.info: return Colors.blue.withOpacity(0.3);
     }
   }
 
   Color _getShadowColor() {
-    switch (type) {
-      case SnackBarType.success:
-        return const Color(0xFF22C55E).withValues(alpha: 0.15);
-      case SnackBarType.warning:
-        return const Color(0xFFF59E0B).withValues(alpha: 0.15);
-      case SnackBarType.error:
-        return const Color(0xFFEF4444).withValues(alpha: 0.15);
-      case SnackBarType.info:
-        return const Color(0xFF3B82F6).withValues(alpha: 0.15);
-    }
+    return Colors.black.withOpacity(0.08);
   }
 
-  Color _getTextColor() {
-    switch (type) {
-      case SnackBarType.success:
-        return const Color(0xFF166534);
-      case SnackBarType.warning:
-        return const Color(0xFF92400E);
-      case SnackBarType.error:
-        return const Color(0xFF991B1B);
-      case SnackBarType.info:
-        return const Color(0xFF1E40AF);
-    }
+  Color _getTextColor(BuildContext context) {
+    return context.theme.textTheme.bodyMedium?.color ?? Colors.black87;
   }
 
   Color _getIconColor() {
     switch (type) {
-      case SnackBarType.success:
-        return const Color(0xFF22C55E);
-      case SnackBarType.warning:
-        return const Color(0xFFF59E0B);
-      case SnackBarType.error:
-        return const Color(0xFFEF4444);
-      case SnackBarType.info:
-        return const Color(0xFF3B82F6);
+      case SnackBarType.success: return Colors.green[600]!;
+      case SnackBarType.warning: return Colors.orange[600]!;
+      case SnackBarType.error: return Colors.red[600]!;
+      case SnackBarType.info: return Colors.blue[600]!;
     }
-  }
-
-  Color _getIconBackgroundColor() {
-    switch (type) {
-      case SnackBarType.success:
-        return const Color(0xFFDCFCE7);
-      case SnackBarType.warning:
-        return const Color(0xFFFEF3C7);
-      case SnackBarType.error:
-        return const Color(0xFFFEE2E2);
-      case SnackBarType.info:
-        return const Color(0xFFDBEAFE);
-    }
-  }
-
-  Color _getCloseButtonColor() {
-    return _getTextColor().withValues(alpha: 0.1);
   }
 
   IconData _getIcon() {
     switch (type) {
-      case SnackBarType.success:
-        return Icons.check_circle;
-      case SnackBarType.warning:
-        return Icons.warning;
-      case SnackBarType.error:
-        return Icons.error;
-      case SnackBarType.info:
-        return Icons.info;
+      case SnackBarType.success: return Icons.check_circle_rounded;
+      case SnackBarType.warning: return Icons.warning_rounded;
+      case SnackBarType.error: return Icons.error_rounded;
+      case SnackBarType.info: return Icons.info_rounded;
     }
   }
 }

@@ -1,13 +1,14 @@
-import 'package:edu_cluezer/features/dashboard/data/model/res_category_business_model.dart' hide Category;
+import 'package:edu_cluezer/features/dashboard/data/model/res_category_business_model.dart' hide Category, User;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:flutter/cupertino.dart';
 
-import '../../../../common/widgets/bg_gradient_border.dart';
 import '../../../../core/helper/string_extensions.dart';
 import '../../../business/presentation/page/business_page.dart';
 import '../../../business/presentation/page/single_business_details.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../controller/cat_business_controller.dart';
 
 class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
@@ -16,88 +17,172 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
   @override
   Widget build(BuildContext context) {
     final Category category = Get.arguments;
+    final theme = context.theme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(category.name ?? "Category Details"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomImageView(
-              url: category.photo != null && category.photo!.isNotEmpty
-                  ? category.photo
-                  : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
-              height: 250,
-              width: double.infinity,
-              fit: BoxFit.cover,
+      backgroundColor: Colors.grey[50], // Light background for contrast
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 220,
+            pinned: true,
+            backgroundColor: theme.primaryColor,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+              onPressed: () => Get.back(),
             ),
-            Padding(
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                category.name?.toTitleCase() ?? "Category Details",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              centerTitle: false,
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CustomImageView(
+                    url: category.photo != null && category.photo!.isNotEmpty
+                        ? category.photo
+                        : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
+                    fit: BoxFit.cover,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    category.name ?? "Unknown Category",
-                    style: context.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (category.description != null && category.description!.isNotEmpty)
-                    Text(
-                      category.description!,
-                      style: context.textTheme.bodyMedium,
-                    ),
-                 // const SizedBox(height: 24),
+                   if (category.description != null && category.description!.isNotEmpty)
+                     Container(
+                       padding: const EdgeInsets.all(12),
+                       decoration: BoxDecoration(
+                         color: Colors.white,
+                         borderRadius: BorderRadius.circular(12),
+                         boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))
+                         ]
+                       ),
+                       child: Text(
+                        category.description!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700], 
+                          height: 1.5
+                        ),
+                      ),
+                     ),
+                  
                   if (category.isActive == false)
                     Container(
-                      padding: const EdgeInsets.all(8),
-                      color: Colors.red.withOpacity(0.1),
-                      child: const Text(
-                        "This category is currently inactive.",
-                        style: TextStyle(color: Colors.red),
+                      margin: const EdgeInsets.only(top: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                         color: Colors.red.withOpacity(0.1),
+                         borderRadius: BorderRadius.circular(12),
+                         border: Border.all(color: Colors.red.withOpacity(0.3))
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline, color: Colors.red, size: 20),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              "This category is currently inactive.",
+                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  Row(
+                    children: [
+                      Container(
+                        height: 20, 
+                        width: 4, 
+                        decoration: BoxDecoration(
+                          color: theme.primaryColor,
+                          borderRadius: BorderRadius.circular(2)
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Related Businesses",
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
+          ),
+          
+          Obx(() {
+            if (controller.allBusinesses.isEmpty) {
+              return SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      Icon(Icons.store_mall_directory_outlined, size: 60, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        "No businesses found in this category.",
+                        style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-            Padding(
-              padding: const EdgeInsets.only(left: 16,right: 16,bottom: 16),
-              child: Text("Related Business",style: context.textTheme.headlineMedium,),
-            ),
-
-            // Reactive ListView
-            Obx(() {
-              if (controller.allBusinesses.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: Text("No businesses found.")),
-                );
-              }
-
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: controller.allBusinesses.length,
-                itemBuilder: (context, index) {
+            return SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     child: BusinessListCard(business: controller.allBusinesses[index]),
                   );
                 },
-              );
-            }),
-          ],
-        ),
+                childCount: controller.allBusinesses.length,
+              ),
+            );
+          }),
+          
+          const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
+        ],
       ),
     );
   }
 }
-
 
 class BusinessListCard extends StatelessWidget {
   final CatBusiness business;
@@ -106,96 +191,140 @@ class BusinessListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     String address = [
-      business.user?.address,
       business.user?.city,
+      business.user?.address,
     ].where((e) => e != null && e.isNotEmpty).join(", ");
 
-    return GestureDetector(
-      onTap: () {
-       // Get.to(() => const BusinessDetailScreen(), arguments: business.id);
-      },
-      child: BgGradientBorder(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.business,
-                  color: context.theme.colorScheme.primary,
-                  size: 28,
-                ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 4),
+            blurRadius: 10,
+          )
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+            Get.toNamed(
+              AppRoutes.businessDetails,
+              arguments: Business(
+                id: business.id,
+                userId: business.userId,
+                businessName: business.businessName,
+                businessType: business.businessType,
+                categoryId: business.categoryId,
+                description: business.description,
+                contactPhone: business.contactPhone,
+                contactEmail: business.contactEmail,
+                website: business.website,
+                verificationStatus: business.verificationStatus,
+                status: business.status,
+                user: business.user != null
+                    ? User(
+                        id: business.user!.id,
+                        name: business.user!.name,
+                        email: business.user!.email,
+                        phone: business.user!.phone,
+                      )
+                    : null,
+                category: business.category != null
+                    ? Category(
+                        id: business.category!.id,
+                        name: business.category!.name,
+                      )
+                    : null,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            business.businessName ?? '',
-                            style: context.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: business.status == 'active'
-                                ? const Color(0xFFE8F5E9)
-                                : const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            (business.status ?? 'unknown').toTitleCase(),
-                            style: TextStyle(
-                              color: business.status == 'active'
-                                  ? const Color(0xFF4CAF50)
-                                  : const Color(0xFF9E9E9E),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Business Icon / Initial
+                Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.store_rounded,
+                      size: 30,
+                      color: theme.primaryColor,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      business.category?.name ?? 'General',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.theme.colorScheme.primary,
-                        fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              business.businessName ?? "Business Name",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                height: 1.2
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                             margin: const EdgeInsets.only(left: 8),
+                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                             decoration: BoxDecoration(
+                               color: business.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                               borderRadius: BorderRadius.circular(8)
+                             ),
+                             child: Text(
+                               (business.status ?? "Unknown").toUpperCase(),
+                               style: TextStyle(
+                                 fontSize: 10,
+                                 fontWeight: FontWeight.bold,
+                                 color: business.status == 'active' ? Colors.green : Colors.grey,
+                               ),
+                             ),
+                          ),
+                        ],
                       ),
-                    ),
-                    if (address.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      
+                      const SizedBox(height: 6),
+                      
                       Row(
                         children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 16,
-                            color: Color(0xFF757575),
-                          ),
+                          Icon(CupertinoIcons.location_solid, size: 14, color: Colors.grey[400]),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              address,
-                              style: const TextStyle(
+                              address.isNotEmpty ? address : "Location not available",
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF757575),
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -203,48 +332,51 @@ class BusinessListCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      
+                      const SizedBox(height: 12),
+                      Container(height: 1, color: Colors.grey[100]),
+                      const SizedBox(height: 10),
+                      
+                      Row(
+                        children: [
+                           _buildStatItem(
+                             icon: CupertinoIcons.cube_box,
+                             label: "${business.products?.length ?? 0} Products",
+                             color: Colors.blueAccent
+                           ),
+                           const SizedBox(width: 16),
+                           _buildStatItem(
+                             icon: CupertinoIcons.wrench,
+                             label: "${business.services?.length ?? 0} Services",
+                             color: Colors.orangeAccent
+                           ),
+                        ],
+                      ),
                     ],
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 16,
-                          color: Color(0xFF757575),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${business.products?.length ?? 0} Products',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF424242),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Icon(
-                          Icons.settings_outlined,
-                          size: 16,
-                          color: Color(0xFF757575),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${business.services?.length ?? 0} Services',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF424242),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem({required IconData icon, required String label, required Color color}) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700]
+          ),
+        )
+      ],
     );
   }
 }

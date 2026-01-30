@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
@@ -110,17 +110,13 @@ Experienced social worker with 5+ years in community service. Passionate about e
   void toggleStatus() {
     if (profileStatus['status'] == 'Active') {
       profileStatus['status'] = 'Inactive';
-      Get.snackbar(
-        'Status Updated',
-        'Profile marked as Inactive',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomSnackBar.showInfo(
+        message: 'Profile marked as Inactive',
       );
     } else {
       profileStatus['status'] = 'Active';
-      Get.snackbar(
-        'Status Updated',
-        'Profile marked as Active',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomSnackBar.showInfo(
+        message: 'Profile marked as Active',
       );
     }
     update();

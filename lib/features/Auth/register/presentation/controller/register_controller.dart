@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -459,11 +460,8 @@ class RegisterController extends GetxController {
         casteCertificateFileName.value = image.name;
         casteCertificateError.value = ''; // Clear any previous error
 
-        Get.snackbar(
-          "Success",
-          "Caste certificate uploaded successfully",
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
+        CustomSnackBar.showSuccess(
+          message: "Caste certificate uploaded successfully",
         );
       }
     } catch (e) {
@@ -532,7 +530,7 @@ class RegisterController extends GetxController {
     final cityValidation = validateCity(cityCtrl.text.trim());
 
     if (stateValidation != null || districtValidation != null || cityValidation != null) {
-      Get.snackbar("Error", "Please fill all address fields properly");
+      CustomSnackBar.showError(message: "Please fill all address fields properly");
       return;
     }
 
@@ -543,7 +541,7 @@ class RegisterController extends GetxController {
 
     // Validate password confirmation
     if (passwordCtrl.text != confirmPasswordCtrl.text) {
-      Get.snackbar("Error", "Passwords do not match");
+      CustomSnackBar.showError(message: "Passwords do not match");
       return;
     }
 
@@ -590,21 +588,18 @@ class RegisterController extends GetxController {
       print("registerresponse : "+response.toString());
 
       if (response.success == true || response.message == "User registered successfully") {
-        Get.snackbar(
-          "Success",
-          response.message ?? "Registration completed successfully",
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
+        CustomSnackBar.showSuccess(
+          message: response.message ?? "Registration completed successfully",
         );
 
         await Future.delayed(const Duration(seconds: 2));
         Get.offAllNamed(AppRoutes.login);
       } else {
-        Get.snackbar("Error", response.message ?? "Registration failed");
+        CustomSnackBar.showError(message: response.message ?? "Registration failed");
       }
     } catch (e) {
       debugPrint("Registration error: $e");
-      Get.snackbar("Error", "Registration failed: ${e.toString()}");
+      CustomSnackBar.showError(message: "Registration failed: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }

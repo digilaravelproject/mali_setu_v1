@@ -1,11 +1,8 @@
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
-import 'package:edu_cluezer/widgets/custom_scaffold.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../core/helper/form_validator.dart';
 import '../controller/volunteerUpdateProfileController.dart';
 
 class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
@@ -13,227 +10,283 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
+    final theme = Get.theme;
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50], // Match profile view background
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
-          child: Icon(Icons.arrow_back_ios_rounded, color: context.iconColor),
+          child: const Icon(Icons.arrow_back_ios_rounded, color: Colors.black, size: 20),
         ),
-        title: Text(controller.isEdit.value ? "Update Your Profile" : "Create Your Profile", style: context.textTheme.headlineLarge),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          controller.isEdit.value ? "Update Profile" : "Create Profile",
+          style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
         return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header Text
               Text(
-                controller.isEdit.value ? "Update your volunteer information" : "Fill in your volunteer information",
-                style: context.textTheme.titleMedium,
+                controller.isEdit.value 
+                    ? "Update your volunteer information to get better matches." 
+                    : "Fill in your information to join as a volunteer.",
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+
+              // 1. Basic Information Card
+              _buildSectionCard(
+                title: "Basic Information",
+                icon: Icons.person_outline,
+                colorScheme: colorScheme,
+                children: [
+                   AppInputTextField(
+                    controller: controller.bioCtrl,
+                    label: "Bio",
+                    hintText: "Tell us about yourself...",
+                    maxLines: 4,
+                    textInputType: TextInputType.multiline,
+                  ),
+                  const SizedBox(height: 16),
+                  AppInputTextField(
+                    controller: controller.locationCtrl,
+                    label: "Location",
+                    hintText: "e.g., Pune, Maharashtra",
+                    textInputType: TextInputType.text,
+                  ),
+                  const SizedBox(height: 16),
+                  SingleDropdown(
+                    controller: controller.experienceCtrl,
+                    label: "Experience Level",
+                    items: controller.expLevels,
+                  ),
+                  const SizedBox(height: 16),
+                  SingleDropdown(
+                    controller: controller.availabilityCtrl,
+                    label: "Availability",
+                    items: controller.availabilities,
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
 
-              // Bio Section
-              AppInputTextField(
-                controller: controller.bioCtrl,
-                label: "Bio",
-                hintText: "Enter your bio...",
-                maxLines: 4,
-                textInputType: TextInputType.multiline,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Add Custom Skill
-              AppInputTextField(
-                controller: controller.skillsCtrl,
-                label: "Add Skills",
-                hintText: "Enter a skill (e.g., PHP, Laravel)",
-                textInputType: TextInputType.text,
-              ),
-
-              const SizedBox(height: 12),
-              CustomButton(
-                title: "+ Add Skill",
-                height: 40,
-                onPressed: controller.addCustomSkill,
-              ),
-
-              // Selected Skills List
-              Obx(() => controller.selectedSkills.isEmpty
-                  ? const SizedBox()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        Text(
-                          "Selected Skills:",
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+              // 2. Skills Section
+              _buildSectionCard(
+                title: "Skills",
+                icon: Icons.star_outline,
+                colorScheme: colorScheme,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppInputTextField(
+                          controller: controller.skillsCtrl,
+                          label: "Add Skill",
+                          hintText: "e.g. Teaching",
+                          textInputType: TextInputType.text,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24.0), // Align with input field
+                        child: InkWell(
+                          onTap: controller.addCustomSkill,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.add, color: Colors.white),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: controller.selectedSkills
-                              .map(
-                                (skill) => Chip(
-                                  label: Text(skill),
-                                  deleteIcon: const Icon(Icons.close, size: 16),
-                                  onDeleted: () => controller.removeSkill(skill),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ],
-                    )),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Selected Skills
+                  Obx(() => controller.selectedSkills.isNotEmpty ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Selected Skills", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: controller.selectedSkills.map((skill) => 
+                          Chip(
+                            label: Text(skill, style: TextStyle(color: colorScheme.primary, fontSize: 12)),
+                            backgroundColor: colorScheme.primary.withOpacity(0.1),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide(color: colorScheme.primary.withOpacity(0.2))
+                              ),
+                            deleteIcon: Icon(Icons.close, size: 16, color: colorScheme.primary),
+                            onDeleted: () => controller.removeSkill(skill),
+                          )
+                        ).toList(),
+                      ),
+                      const Divider(height: 24),
+                    ],
+                  ) : const SizedBox.shrink()),
 
-              // Popular Skills
-              const SizedBox(height: 16),
-              Text(
-                "Quick Add Skills:",
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Obx(() => Wrap(
+                   // Popular Skills
+                  const Text("Popular Skills", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  Obx(() => Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: controller.popularSkills
-                        .map(
-                          (skill) => FilterChip(
-                            label: Text(skill),
-                            selected: controller.selectedSkills.contains(skill),
-                            onSelected: (selected) {
-                              if (selected) {
-                                controller.addPopularSkill(skill);
-                              } else {
-                                controller.removeSkill(skill);
-                              }
-                            },
-                          ),
-                        )
-                        .toList(),
+                    children: controller.popularSkills.map((skill) => 
+                      FilterChip(
+                        label: Text(skill),
+                        labelStyle: TextStyle(
+                          color: controller.selectedSkills.contains(skill) ? Colors.white : Colors.black87,
+                          fontSize: 12,
+                        ),
+                        selected: controller.selectedSkills.contains(skill),
+                        selectedColor: colorScheme.primary,
+                        checkmarkColor: Colors.white,
+                        backgroundColor: Colors.grey[100],
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        side: BorderSide.none,
+                        onSelected: (selected) {
+                           if (selected) {
+                            controller.addPopularSkill(skill);
+                          } else {
+                            controller.removeSkill(skill);
+                          }
+                        },
+                      )
+                    ).toList(),
                   )),
-
-              const SizedBox(height: 16),
-
-              SingleDropdown(
-                controller: controller.experienceCtrl,
-                label: "Experience Level",
-                items: controller.expLevels,
+                ],
               ),
 
               const SizedBox(height: 16),
 
-              SingleDropdown(
-                controller: controller.availabilityCtrl,
-                label: "Availability",
-                items: controller.availabilities,
-              ),
-
-              const SizedBox(height: 16),
-
-              AppInputTextField(
-                controller: controller.locationCtrl,
-                label: "Location",
-                hintText: "e.g., Pune, Maharashtra",
-                textInputType: TextInputType.text,
-                //validator: FormValidator.required,
-              ),
-
-              const SizedBox(height: 24),
-
-              // Interests Section
-              const SectionTitle("Interests"),
-
-              // Add Custom Interest
-              AppInputTextField(
-                controller: controller.interestsCtrl,
-                label: "Add Interests",
-                hintText: "Enter an interest (e.g., Gaming, Coding)",
-                textInputType: TextInputType.text,
-              ),
-
-              const SizedBox(height: 12),
-              CustomButton(
-                title: "+ Add Interest",
-                height: 40,
-                onPressed: controller.addCustomInterest,
-              ),
-
-              // Selected Interests List
-              Obx(() => controller.selectedInterests.isEmpty
-                  ? const SizedBox()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        Text(
-                          "Selected Interests:",
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+              // 3. Interests Section
+              _buildSectionCard(
+                title: "Interests",
+                icon: Icons.favorite_outline,
+                colorScheme: colorScheme,
+                children: [
+                   Row(
+                    children: [
+                      Expanded(
+                        child: AppInputTextField(
+                          controller: controller.interestsCtrl,
+                          label: "Add Interest",
+                          hintText: "e.g. Environment",
+                          textInputType: TextInputType.text,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24.0),
+                        child: InkWell(
+                          onTap: controller.addCustomInterest,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.add, color: Colors.white),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: controller.selectedInterests
-                              .map(
-                                (interest) => Chip(
-                                  label: Text(interest),
-                                  deleteIcon: const Icon(Icons.close, size: 16),
-                                  onDeleted: () => controller.removeInterest(interest),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ],
-                    )),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Selected Interests
+                  Obx(() => controller.selectedInterests.isNotEmpty ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Selected Interests", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: controller.selectedInterests.map((interest) => 
+                          Chip(
+                            label: Text(interest, style: const TextStyle(color: Colors.green, fontSize: 12)),
+                            backgroundColor: Colors.green.withOpacity(0.1),
+                             shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide(color: Colors.green.withOpacity(0.2))
+                              ),
+                            deleteIcon: const Icon(Icons.close, size: 16, color: Colors.green),
+                            onDeleted: () => controller.removeInterest(interest),
+                          )
+                        ).toList(),
+                      ),
+                      const Divider(height: 24),
+                    ],
+                  ) : const SizedBox.shrink()),
 
-              // Popular Interests
-              const SizedBox(height: 16),
-              Text(
-                "Popular Interests:",
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Obx(() => Wrap(
+                   // Popular Interests
+                  const Text("Popular Interests", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  Obx(() => Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: controller.popularInterests
-                        .map(
-                          (interest) => FilterChip(
-                            label: Text(interest),
-                            selected: controller.selectedInterests.contains(interest),
-                            onSelected: (selected) {
-                              if (selected) {
-                                controller.addPopularInterest(interest);
-                              } else {
-                                controller.removeInterest(interest);
-                              }
-                            },
-                          ),
-                        )
-                        .toList(),
+                    children: controller.popularInterests.map((interest) => 
+                      FilterChip(
+                        label: Text(interest),
+                           labelStyle: TextStyle(
+                          color: controller.selectedInterests.contains(interest) ? Colors.white : Colors.black87,
+                          fontSize: 12,
+                        ),
+                        selected: controller.selectedInterests.contains(interest),
+                        selectedColor: Colors.green,
+                        checkmarkColor: Colors.white,
+                        backgroundColor: Colors.grey[100],
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        side: BorderSide.none,
+                        onSelected: (selected) {
+                           if (selected) {
+                            controller.addPopularInterest(interest);
+                          } else {
+                            controller.removeInterest(interest);
+                          }
+                        },
+                      )
+                    ).toList(),
                   )),
-
-              const SizedBox(height: 80),
+                ],
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         );
       }),
-      bottomNavigationBar: BottomAppBar(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+          ],
+        ),
         child: Obx(() => CustomButton(
               isLoading: controller.isLoading.value,
               title: controller.isEdit.value ? "Update Profile" : "Create Profile",
@@ -242,23 +295,41 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
       ),
     );
   }
-}
 
-class SectionTitle extends StatelessWidget {
-  final String title;
-
-  const SectionTitle(this.title, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: context.textTheme.titleLarge?.copyWith(
-        color: context.theme.primaryColor,
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required ColorScheme colorScheme,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
       ),
-    ).marginOnly(bottom: 4);
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: Colors.grey[700]),
+              const SizedBox(width: 8),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ],
+          ),
+          const Divider(height: 24),
+          ...children,
+        ],
+      ),
+    );
   }
 }
+
 
 class SingleDropdown extends StatelessWidget {
   final TextEditingController controller;

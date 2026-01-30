@@ -1,10 +1,12 @@
 import 'package:edu_cluezer/features/business/domain/usecase/create_job_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_job_usecase.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
-import '../controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
 class CreateJobController extends GetxController {
   final CreateJobUseCase createJobUseCase;
@@ -170,7 +172,7 @@ class CreateJobController extends GetxController {
     final businessId = Get.find<BusinessController>().myBusiness.value?.id;
     
     if (businessId == null) {
-      Get.snackbar("Error", "Please Register/Select a Business first");
+      CustomSnackBar.showError(message: "Please Register/Select a Business first");
       return;
     }
 
@@ -202,7 +204,7 @@ class CreateJobController extends GetxController {
       
       if (response.success == true) {
         Get.back();
-        Get.snackbar("Success", response.message ?? (isEditMode.value ? "Job posting updated successfully" : "Job posting created successfully"));
+        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? "Job posting updated successfully" : "Job posting created successfully"));
         
         // Refresh business jobs list
         final bController = Get.find<BusinessController>();
@@ -214,13 +216,12 @@ class CreateJobController extends GetxController {
           bController.fetchJobDetails(editingJobId.value!);
         }
       } else {
-        Get.snackbar("Error", response.message ?? "Failed to save job posting");
+        CustomSnackBar.showError(message: response.message ?? "Failed to save job posting");
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }
   }
 }
-

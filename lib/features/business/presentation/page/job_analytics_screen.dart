@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-import '../../data/model/res_all_business_model.dart';
-import '../controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
 class JobAnalysisPage extends StatefulWidget {
   const JobAnalysisPage({super.key});

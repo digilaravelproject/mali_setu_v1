@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -562,12 +563,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       Navigator.pop(context); // Remove loading
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Language changed successfully'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
+      CustomSnackBar.showSuccess(
+        message: 'Language changed successfully',
       );
 
       // Restart app or reload screen
@@ -576,11 +573,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     } catch (e) {
       Navigator.pop(context); // Remove loading
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to change language: $e'),
-          backgroundColor: Colors.red,
-        ),
+      CustomSnackBar.showError(
+        message: 'Failed to change language: $e',
       );
     }
   }

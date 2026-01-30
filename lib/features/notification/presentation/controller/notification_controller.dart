@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/repository/notification_repository.dart';
@@ -105,9 +106,9 @@ class NotificationController extends GetxController {
       await repository.deleteNotification(id);
       // Refresh list from server to ensure sync
       await loadNotifications();
-      Get.snackbar('Success', 'Notification deleted successfully');
+      CustomSnackBar.showSuccess(message: 'Notification deleted successfully');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete notification');
+      CustomSnackBar.showError(message: 'Failed to delete notification');
     }
   }
 
@@ -124,9 +125,9 @@ class NotificationController extends GetxController {
       // Refresh list from server
       await loadNotifications();
       
-      Get.snackbar('Success', 'Selected notifications deleted');
+      CustomSnackBar.showSuccess(message: 'Selected notifications deleted');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete notifications');
+      CustomSnackBar.showError(message: 'Failed to delete notifications');
     }
   }
 

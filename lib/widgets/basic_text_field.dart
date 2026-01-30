@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -203,7 +204,7 @@ class AppInputTextField extends StatelessWidget {
     FocusScope.of(context).unfocus();
 
     if (dropdownItems == null || dropdownItems!.isEmpty) {
-      Get.snackbar("Notice", "No options available", snackPosition: SnackPosition.BOTTOM);
+      CustomSnackBar.showInfo(message: "No options available");
       return;
     }
 

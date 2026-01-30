@@ -2,6 +2,7 @@ import 'package:edu_cluezer/features/matrimony/data/model/connection_requests_re
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_controller.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_members_controller.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
 
 class MatrimonyRequestsController extends GetxController {
@@ -26,7 +27,7 @@ class MatrimonyRequestsController extends GetxController {
         receivedRequests.value = response.data!.receivedRequests ?? [];
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to fetch requests: $e");
+      CustomSnackBar.showError(message: "Failed to fetch requests: $e");
     } finally {
       isLoading.value = false;
     }
@@ -41,7 +42,7 @@ class MatrimonyRequestsController extends GetxController {
       
       final response = await _repository.respondToConnectionRequest(requestId, data);
       if (response['success'] == true) {
-        Get.snackbar("Success", response['message'] ?? "Request $status successfully");
+        CustomSnackBar.showSuccess(message: response['message'] ?? "Request $status successfully");
         
         // Refresh the local requests list
         fetchRequests(); 
@@ -54,10 +55,10 @@ class MatrimonyRequestsController extends GetxController {
           Get.find<MatrimonyController>().fetchProfiles();
         }
       } else {
-        Get.snackbar("Error", response['message'] ?? "Failed to update request");
+        CustomSnackBar.showError(message: response['message'] ?? "Failed to update request");
       }
     } catch (e) {
-      Get.snackbar("Error", "Something went wrong: $e");
+      CustomSnackBar.showError(message: "Something went wrong: $e");
     }
   }
 }

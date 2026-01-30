@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/widgets/bg_gradient_border.dart';
-import '../../../../core/routes/app_routes.dart';
-import '../../../../widgets/custom_buttons.dart';
-import '../controller/business_controller.dart';
-import '../../data/model/res_all_business_model.dart' as model;
-import 'add_product_screen.dart';
-import '../../../../core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/common/widgets/bg_gradient_border.dart';
+import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/widgets/custom_buttons.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart' as model;
+import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
+import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 
 class BusinessPage extends GetWidget<BusinessController> {
   const BusinessPage({super.key});
@@ -24,320 +24,334 @@ class BusinessPage extends GetWidget<BusinessController> {
 }
 
 // Dashboard Screen
+// Dashboard Screen
 class BusinessScreen extends GetView<BusinessController> {
   const BusinessScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        elevation: 0,
-        backgroundColor: context.theme.primaryColorLight,
-        centerTitle: false,
-        titleSpacing: 20,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Business Dashboard",
-              style: context.textTheme.headlineMedium
-            ),
-          ],
-        ),
-      ),
+      backgroundColor: Colors.grey[50],
       body: Obx(() {
         if (controller.isLoading.value) {
           return _buildShimmerLoading(context);
         }
 
-        return Container(
-          decoration: BoxDecoration(
-            color: context.theme.colorScheme.onPrimary,
-          ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (controller.myBusiness.value != null)
-                    GestureDetector(
-                      onTap: () {
-                        Get.toNamed(AppRoutes.myBusiness);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              context.theme.colorScheme.primary,
-                              context.theme.colorScheme.primary,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.theme.colorScheme.primary.withOpacity(0.3),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.business_center,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'My Business',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        'View your business details',
-                                        style: TextStyle(
-                                          color: Color(0xFFFCE4EC),
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          controller.myBusiness.value?.businessName ?? '',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          controller.myBusiness.value?.category?.name ?? '',
-                                          style: const TextStyle(
-                                            color: Color(0xFFFCE4EC),
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    GestureDetector(
-                      onTap: () {
-                        Get.toNamed(AppRoutes.regBusiness);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              context.theme.colorScheme.primary,
-                              context.theme.colorScheme.primary,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.theme.colorScheme.primary.withOpacity(0.3),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: const Icon(
-                                    Icons.add_business_rounded,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Register Your Business',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Start growing your business today',
-                                        style: TextStyle(
-                                          color: Color(0xFFFCE4EC),
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Register Now',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Build your digital profile',
-                                          style: TextStyle(
-                                            color: Color(0xFFFCE4EC),
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  
-                  const SizedBox(height: 32),
-
-                  // Header with View All
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Featured Businesses',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
+        return CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 70,
+              toolbarHeight: 70,
+              pinned: true,
+              backgroundColor: theme.scaffoldBackgroundColor,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              title: Text(
+                "Business Dashboard",
+                style: context.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
+                ),
+              ),
+              centerTitle: false,
+            ),
+            
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (controller.myBusiness.value != null)
                       GestureDetector(
                         onTap: () {
-                          Get.to(() => const AllBusinessesScreen());
+                          Get.toNamed(AppRoutes.myBusiness);
                         },
-                        child: Row(
-                          children: [
-                            Text(
-                              'View All',
-                              style: TextStyle(
-                                color: context.theme.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.primaryColor,
+                                theme.primaryColor.withOpacity(0.8),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.primaryColor.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
                               ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.business_center_rounded,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'My Business',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Manage your business details',
+                                          style: TextStyle(
+                                            color: Colors.white.withOpacity(0.8),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                       color: Colors.white.withOpacity(0.1),
+                                       shape: BoxShape.circle
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.white.withOpacity(0.1))
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            controller.myBusiness.value?.businessName ?? '',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            controller.myBusiness.value?.category?.name ?? 'Category',
+                                            style: TextStyle(
+                                              color: Colors.white.withOpacity(0.7),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      GestureDetector(
+                        onTap: () {
+                          Get.toNamed(AppRoutes.regBusiness);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.primaryColor,
+                                theme.primaryColor.withOpacity(0.8),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.chevron_right,
-                              color: context.theme.colorScheme.primary,
-                              size: 20,
-                            ),
-                          ],
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.primaryColor.withOpacity(0.3),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Icon(
+                                      Icons.add_business_rounded,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Register Business',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Start your digital journey',
+                                          style: TextStyle(
+                                            color: Colors.white.withOpacity(0.8),
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                       color: Colors.white.withOpacity(0.1),
+                                       shape: BoxShape.circle
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Register Now',
+                                    style: TextStyle(
+                                      color: theme.primaryColor,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                    
+                    const SizedBox(height: 32),
 
-                  // Business List
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: controller.businesses.length > 6 ? 6 : controller.businesses.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: BusinessListCard(business: controller.businesses[index]),
-                      );
-                    },
-                  ),
-                ],
+                    // Header with View All
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Featured Businesses',
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Get.to(() => const AllBusinessesScreen());
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: theme.primaryColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20)
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'View All',
+                                  style: TextStyle(
+                                    color: theme.primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: theme.primaryColor,
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             ),
-          ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                 (context, index) {
+                   return Padding(
+                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                     child: BusinessListCard(business: controller.businesses[index]),
+                   );
+                 },
+                 childCount: controller.businesses.length > 10 ? 10 : controller.businesses.length,
+               ),
+             ),
+             const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
+          ],
         );
       }),
     );
   }
 }
-
 
 // All Businesses Screen
 class AllBusinessesScreen extends GetWidget<BusinessController> {
@@ -346,6 +360,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(
@@ -353,14 +368,16 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
           onPressed: () => Get.back(),
         ),
         elevation: 0,
-        backgroundColor: context.theme.primaryColorLight,
+        backgroundColor: context.theme.primaryColor,
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: false,
-        titleSpacing: 0, // Adjusted for custom leading
+        titleSpacing: 0, 
         title: Text(
           "All Businesses",
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
-            fontSize: 24,
+            fontSize: 20,
+            color: Colors.white
           ),
         ),
       ),
@@ -372,51 +389,22 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
         if (controller.businesses.isEmpty) {
           return const Center(child: Text("No Businesses Found"));
         }
-        return Container(
-          decoration: BoxDecoration(
-            color: context.theme.cardColor,
-          ),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${controller.businesses.length} Businesses Available',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: context.theme.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: controller.businesses.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: BusinessListCard(business: controller.businesses[index]),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.businesses.length,
+          physics: const BouncingScrollPhysics(),
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: BusinessListCard(business: controller.businesses[index]),
+            );
+          },
         );
       }),
     );
   }
 }
 
-// Business List Card
 class BusinessListCard extends StatelessWidget {
   final model.Business business;
 
@@ -424,96 +412,111 @@ class BusinessListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     String address = [
-      business.user?.city,
-      business.user?.district,
+       business.user?.city,
+       business.user?.district,
     ].where((e) => e != null && e.isNotEmpty).join(", ");
 
-    return GestureDetector(
-      onTap: () {
-        Get.to(() => const BusinessDetailScreen(), arguments: business);
-      },
-      child: BgGradientBorder(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.business,
-                  color: context.theme.colorScheme.primary,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            business.businessName ?? '',
-                            style: context.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: business.status == 'active'
-                                ? const Color(0xFFE8F5E9)
-                                : const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            (business.status ?? 'unknown').toTitleCase(),
-                            style: TextStyle(
-                              color: business.status == 'active'
-                                  ? const Color(0xFF4CAF50)
-                                  : const Color(0xFF9E9E9E),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 4),
+            blurRadius: 10,
+          )
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+             Get.to(() => const BusinessDetailScreen(), arguments: business);
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Business Icon / Initial
+                Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.store_rounded,
+                      size: 30,
+                      color: theme.primaryColor,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      business.category?.name ?? 'General',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: context.theme.colorScheme.primary,
-                        fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              business.businessName ?? "Business Name",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                height: 1.2
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                             margin: const EdgeInsets.only(left: 8),
+                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                             decoration: BoxDecoration(
+                               color: business.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                               borderRadius: BorderRadius.circular(8)
+                             ),
+                             child: Text(
+                               (business.status ?? "Unknown").toUpperCase(),
+                               style: TextStyle(
+                                 fontSize: 10,
+                                 fontWeight: FontWeight.bold,
+                                 color: business.status == 'active' ? Colors.green : Colors.grey,
+                               ),
+                             ),
+                          ),
+                        ],
                       ),
-                    ),
-                    if (address.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      
+                      const SizedBox(height: 6),
+                      
                       Row(
                         children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 16,
-                            color: Color(0xFF757575),
-                          ),
+                          Icon(CupertinoIcons.location_solid, size: 14, color: Colors.grey[400]),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              address,
-                              style: const TextStyle(
+                              address.isNotEmpty ? address : "Location not available",
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF757575),
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w400
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -521,48 +524,51 @@ class BusinessListCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      
+                      const SizedBox(height: 12),
+                      Container(height: 1, color: Colors.grey[100]),
+                      const SizedBox(height: 10),
+                      
+                      Row(
+                        children: [
+                           _buildStatItem(
+                             icon: CupertinoIcons.cube_box,
+                             label: "${business.products?.length ?? 0} Products",
+                             color: Colors.blueAccent
+                           ),
+                           const SizedBox(width: 16),
+                           _buildStatItem(
+                             icon: CupertinoIcons.wrench,
+                             label: "${business.services?.length ?? 0} Services",
+                             color: Colors.orangeAccent
+                           ),
+                        ],
+                      ),
                     ],
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 16,
-                          color: Color(0xFF757575),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${business.products?.length ?? 0} Products',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF424242),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Icon(
-                          Icons.settings_outlined,
-                          size: 16,
-                          color: Color(0xFF757575),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${business.services?.length ?? 0} Services',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF424242),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem({required IconData icon, required String label, required Color color}) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700]
+          ),
+        )
+      ],
     );
   }
 }

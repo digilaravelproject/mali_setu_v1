@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -155,13 +156,9 @@ class UpProfileController extends GetxController {
         // await uploadProfileImage(File(image.path));
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to capture image: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+        CustomSnackBar.showError(
+          message: 'Failed to capture image: ${e.toString()}',
+        );
     }
   }
 
@@ -181,13 +178,9 @@ class UpProfileController extends GetxController {
         // await uploadProfileImage(File(image.path));
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to pick image: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+        CustomSnackBar.showError(
+          message: 'Failed to pick image: ${e.toString()}',
+        );
     }
   }
 
@@ -254,15 +247,15 @@ class UpProfileController extends GetxController {
   Future<void> updateProfile() async {
     // Validate fields
     if (fullNameCtrl.text.isEmpty) {
-      Get.snackbar('Error', 'Please enter full name');
+      CustomSnackBar.showError(message: 'Please enter full name');
       return;
     }
     if (emailCtrl.text.isEmpty || !GetUtils.isEmail(emailCtrl.text)) {
-      Get.snackbar('Error', 'Please enter valid email');
+      CustomSnackBar.showError(message: 'Please enter valid email');
       return;
     }
     if (phoneNumberCtrl.text.isEmpty) {
-      Get.snackbar('Error', 'Please enter phone number');
+      CustomSnackBar.showError(message: 'Please enter phone number');
       return;
     }
 
@@ -301,30 +294,18 @@ class UpProfileController extends GetxController {
 
       if (response.success) {
         Get.back(); // Close update screen
-        Get.snackbar(
-          'Success',
-          'Profile updated successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
+        CustomSnackBar.showSuccess(
+          message: 'Profile updated successfully',
         );
       } else {
-        Get.snackbar(
-          'Error',
-          response.message ?? 'Failed to update profile',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        CustomSnackBar.showError(
+          message: response.message ?? 'Failed to update profile',
         );
       }
     } catch (e) {
       Get.back(); // Close loading if open
-      Get.snackbar(
-        'Error',
-        'An unexpected error occurred: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.showError(
+        message: 'An unexpected error occurred: ${e.toString()}',
       );
     }
   }

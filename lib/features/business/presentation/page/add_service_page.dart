@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -12,10 +13,10 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:get/get_utils/src/extensions/context_extensions.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/helper/form_validator.dart';
-import '../../../../widgets/basic_text_field.dart';
-import '../../../../widgets/custom_buttons.dart';
-import '../controller/business_controller.dart';
+import 'package:edu_cluezer/core/helper/form_validator.dart';
+import 'package:edu_cluezer/widgets/basic_text_field.dart';
+import 'package:edu_cluezer/widgets/custom_buttons.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
 /*class AddServiceController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -48,12 +49,8 @@ import '../controller/business_controller.dart';
         selectedImage.value = File(image.path);
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error picking image: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.showError(
+        message: 'Error picking image: $e',
       );
     }
   }
@@ -68,12 +65,8 @@ import '../controller/business_controller.dart';
     }
 
     if (selectedImage.value == null) {
-      Get.snackbar(
-        'Error',
-        'Please select a product image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.showError(
+        message: 'Please select a product image',
       );
       return;
     }
@@ -86,12 +79,8 @@ import '../controller/business_controller.dart';
     isLoading.value = false;
 
     // Show success message
-    Get.snackbar(
-      'Success',
-      'Product created successfully!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
+    CustomSnackBar.showSuccess(
+      message: 'Product created successfully!',
     );
 
     // Clear form
@@ -376,12 +365,8 @@ class AddServiceController extends GetxController {
 
   Future<void> pickImage(ImageSource source) async {
     if (selectedImages.length >= maxImages) {
-      Get.snackbar(
-        'Limit Reached',
-        'You can only upload maximum $maxImages images',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
+      CustomSnackBar.showWarning(
+        message: 'You can only upload maximum $maxImages images',
       );
       return;
     }
@@ -398,12 +383,8 @@ class AddServiceController extends GetxController {
         selectedImages.add(File(image.path));
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Error picking image: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.showWarning(
+        message: 'Error picking image: $e',
       );
     }
   }
@@ -444,12 +425,8 @@ class AddServiceController extends GetxController {
 
     if (success) {
       Get.back();
-      Get.snackbar(
-        'Success',
-        'Service created successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      CustomSnackBar.showSuccess(
+        message: 'Service created successfully!',
       );
     }
   }

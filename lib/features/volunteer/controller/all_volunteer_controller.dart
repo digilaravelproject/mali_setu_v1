@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
 import '../data/model/res_all_volunteer_model.dart';
 import '../domain/usecase/all_volunteer_use_case.dart';
@@ -22,7 +23,7 @@ class AllVolunteerController extends GetxController {
       final list = await useCase();
       allVolunteerList.assignAll(list); // ✅ set list data
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;
     }

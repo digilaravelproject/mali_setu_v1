@@ -1,6 +1,7 @@
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/matrimony/data/model/connection_requests_response.dart';
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
 
 class MatrimonyMembersController extends GetxController {
@@ -27,7 +28,7 @@ class MatrimonyMembersController extends GetxController {
         filterMembers(searchQuery.value);
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to fetch members: $e");
+      CustomSnackBar.showError(message: "Failed to fetch members: $e");
     } finally {
       isLoading.value = false;
     }

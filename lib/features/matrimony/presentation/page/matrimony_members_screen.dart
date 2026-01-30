@@ -81,12 +81,30 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
 
   Widget _buildMemberCard(ConnectionRequest member) {
     final currentUserId = Get.find<AuthService>().currentUser.value?.id;
+    // Fallback logic to find the "other" user.
     final user = member.connectedProfile ?? (member.senderId == currentUserId ? member.receiver : member.sender);
-    final name = member.message?? "Anonymous";
-    final profession = member.responseMessage ?? "Professional";
-    final location = member.status ??  "Unknown";
-    final imageUrl = user?.profileImage != null ? ApiConstants.imageBaseUrl + user!.profileImage! : null;
-       // != null ? ApiConstants.imageBaseUrl + user!.profileImage! : null;
+    
+    // Correct mapping
+    final name = user?.name ?? "Matrimony Member"; 
+    final profession = user?.occupation ?? "Member";
+    final location = user?.city ?? "Unknown Location";
+    
+    // Correct image logic
+    String? imageUrl;
+    if (user?.profileImage != null && user!.profileImage!.isNotEmpty) {
+       imageUrl = ApiConstants.imageBaseUrl + user.profileImage!;
+    }
+    
+    // Fallback widget
+    Widget buildPlaceholder() {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.purple.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.person, color: Colors.purple, size: 30),
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -104,19 +122,22 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 60,
-              height: 60,
-              child: CustomImageView(
-                url: imageUrl,
-                fit: BoxFit.cover,
-                placeHolder: (context, url) => Container(
-                  color: Colors.grey[200],
-                  child: Icon(Icons.person, color: Colors.grey[400], size: 30),
-                ),
-              ),
+          Container(
+            width: 60,
+            height: 60,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: imageUrl != null
+                  ? CustomImageView(
+                      url: imageUrl,
+                      fit: BoxFit.cover,
+                      placeHolder: (context, url) => buildPlaceholder(),
+                      errorWidget: (context, url, error) => buildPlaceholder(),
+                    )
+                  : buildPlaceholder(),
             ),
           ),
           const SizedBox(width: 16),
