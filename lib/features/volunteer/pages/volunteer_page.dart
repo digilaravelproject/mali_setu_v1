@@ -13,35 +13,34 @@ class VolunteerPage1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false,
-          elevation: 0,
-          backgroundColor: context.theme.primaryColorLight,
-          centerTitle: false,
-          titleSpacing: 20,
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                  "Volunteer",
-                  style: context.textTheme.headlineMedium
-              ),
-            ],
-          ),
+        automaticallyImplyLeading: false,
+        elevation: 0,
+        backgroundColor: context.theme.primaryColorLight,
+        centerTitle: false,
+        titleSpacing: 20,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Volunteer", style: context.textTheme.headlineMedium),
+          ],
         ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-           Center(
-             child: Padding(
-               padding: const EdgeInsets.all(16.0),
-               child: CustomButton(
-                 height: 45,
-                   borderRadius: 14,
-                   title: "My Volunteer Profile", onPressed: (){
-                 Get.toNamed(AppRoutes.volunteerProfile);
-               }),
-             ),
-           )
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: CustomButton(
+                  height: 45,
+                  borderRadius: 14,
+                  title: "My Volunteer Profile",
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.volunteerProfile);
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -55,14 +54,19 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
   @override
   Widget build(BuildContext context) {
     final theme = Get.theme;
-    
+
     return Scaffold(
       backgroundColor: Colors.grey[50], // Light background
       body: Column(
         children: [
           // 1. Custom Header Area
           Container(
-            padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
+            padding: const EdgeInsets.only(
+              top: 50,
+              left: 20,
+              right: 20,
+              bottom: 20,
+            ),
             decoration: BoxDecoration(
               color: theme.primaryColor,
               borderRadius: const BorderRadius.only(
@@ -119,7 +123,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                
+
                 // My Profile Banner (Embedded in Header for style)
                 Material(
                   color: Colors.white,
@@ -130,7 +134,10 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                     onTap: () => Get.toNamed(AppRoutes.volunteerProfile),
                     borderRadius: BorderRadius.circular(16),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Row(
                         children: [
                           Container(
@@ -139,7 +146,10 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                               color: theme.primaryColor.withOpacity(0.1),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(Icons.person, color: theme.primaryColor),
+                            child: Icon(
+                              Icons.person,
+                              color: theme.primaryColor,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -164,7 +174,11 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                               ],
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.grey[400],
+                          ),
                         ],
                       ),
                     ),
@@ -186,9 +200,16 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.group_off_outlined, size: 60, color: Colors.grey[300]),
+                      Icon(
+                        Icons.group_off_outlined,
+                        size: 60,
+                        color: Colors.grey[300],
+                      ),
                       const SizedBox(height: 16),
-                      Text("No volunteers found", style: TextStyle(color: Colors.grey[500])),
+                      Text(
+                        "No volunteers found",
+                        style: TextStyle(color: Colors.grey[500]),
+                      ),
                     ],
                   ),
                 );
@@ -197,7 +218,9 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
               return ListView.builder(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(20),
-                itemCount: controller.allVolunteerList.length + 1, // +1 for header title
+                itemCount:
+                    controller.allVolunteerList.length +
+                    1, // +1 for header title
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return Padding(
@@ -214,7 +237,10 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: theme.primaryColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
@@ -232,7 +258,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                       ),
                     );
                   }
-                  
+
                   final volunteer = controller.allVolunteerList[index - 1];
                   return VolunteerCard(
                     volunteer: volunteer,
@@ -258,16 +284,13 @@ class VolunteerCard extends StatelessWidget {
   final Volunteer volunteer;
   final VoidCallback onTap;
 
-  const VolunteerCard({
-    Key? key,
-    required this.volunteer,
-    required this.onTap,
-  }) : super(key: key);
+  const VolunteerCard({Key? key, required this.volunteer, required this.onTap})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -303,16 +326,19 @@ class VolunteerCard extends StatelessWidget {
                         color: theme.primaryColor.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                       child: Center(
-                         child: Text(
-                           volunteer.contactPerson?.substring(0, 1).toUpperCase() ?? "V",
-                           style: TextStyle(
-                             fontSize: 20,
-                             fontWeight: FontWeight.bold,
-                             color: theme.primaryColor,
-                           ),
-                         ),
-                       ),
+                      child: Center(
+                        child: Text(
+                          volunteer.contactPerson
+                                  ?.substring(0, 1)
+                                  .toUpperCase() ??
+                              "V",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryColor,
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     // Info
@@ -351,16 +377,20 @@ class VolunteerCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Divider(height: 1),
                 ),
 
                 // Details Row
-                 Row(
+                Row(
                   children: [
-                    Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[500]),
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 16,
+                      color: Colors.grey[500],
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -371,7 +401,11 @@ class VolunteerCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Icon(Icons.email_outlined, size: 16, color: Colors.grey[500]),
+                    Icon(
+                      Icons.email_outlined,
+                      size: 16,
+                      color: Colors.grey[500],
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -423,7 +457,6 @@ class VolunteerCard extends StatelessWidget {
       ),
     );
   }
-
 }
 
 // Volunteer Data Model
@@ -566,24 +599,40 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
-          child: Icon(Icons.arrow_back_ios_rounded, color: Colors.black, size: 20),
+          child: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: Colors.black,
+            size: 20,
+          ),
         ),
         elevation: 0,
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text("Volunteer Profile", style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20)),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': true});
-            },
-            icon: CircleAvatar(
-              radius: 16,
-              backgroundColor: colorScheme.primary.withOpacity(0.1),
-              child: Icon(Icons.edit, size: 16, color: colorScheme.primary),
-            ),
+        title: Text(
+          "Volunteer Profile",
+          style: textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
-          const SizedBox(width: 8),
+        ),
+
+        actions: [
+          if (controller.volunteerData != null) ...[
+            IconButton(
+              onPressed: () {
+                Get.toNamed(
+                  AppRoutes.volunteerCreateProfile,
+                  arguments: {'isEdit': true},
+                );
+              },
+              icon: CircleAvatar(
+                radius: 16,
+                backgroundColor: colorScheme.primary.withOpacity(0.1),
+                child: Icon(Icons.edit, size: 16, color: colorScheme.primary),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
         ],
       ),
       body: Obx(() {
@@ -600,16 +649,28 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.person_off_outlined, size: 64, color: Colors.grey[300]),
+                Icon(
+                  Icons.person_off_outlined,
+                  size: 64,
+                  color: Colors.grey[300],
+                ),
                 const SizedBox(height: 16),
-                const Text("Profile not found", style: TextStyle(color: Colors.grey)),
+                const Text(
+                  "Profile not found",
+                  style: TextStyle(color: Colors.grey),
+                ),
                 const SizedBox(height: 16),
-                 ElevatedButton(
-                  onPressed: () => Get.toNamed(AppRoutes.volunteerCreateProfile, arguments: {'isEdit': false}),
+                ElevatedButton(
+                  onPressed: () => Get.toNamed(
+                    AppRoutes.volunteerCreateProfile,
+                    arguments: {'isEdit': false},
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: const Text("Create Profile"),
                 ),
@@ -645,30 +706,42 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                       backgroundColor: colorScheme.primary.withOpacity(0.1),
                       child: Text(
                         userData['name']?.substring(0, 1).toUpperCase() ?? "V",
-                        style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       userData['name'] ?? "Volunteer",
-                      style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         "Active Volunteer",
-                        style: textTheme.bodySmall?.copyWith(color: Colors.green, fontWeight: FontWeight.bold),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 16),
 
               // 2. Info Grid (Experience, Availability, etc.)
@@ -704,7 +777,11 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                 icon: Icons.person_outline,
                 child: Text(
                   profile.bio ?? "No bio added yet.",
-                  style: TextStyle(color: Colors.grey[700], height: 1.5, fontSize: 14),
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    height: 1.5,
+                    fontSize: 14,
+                  ),
                 ),
               ),
 
@@ -714,13 +791,22 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
               _buildContentSection(
                 title: "Skills",
                 icon: Icons.star_outline,
-                child: (profile.skills != null && profile.skills!.isNotEmpty) 
-                  ? Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: profile.skills!.split(',').map((skill) => _buildChip(skill.trim(), colorScheme.primary)).toList(),
-                    )
-                  : const Text("No skills listed", style: TextStyle(color: Colors.grey)),
+                child: (profile.skills != null && profile.skills!.isNotEmpty)
+                    ? Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: profile.skills!
+                            .split(',')
+                            .map(
+                              (skill) =>
+                                  _buildChip(skill.trim(), colorScheme.primary),
+                            )
+                            .toList(),
+                      )
+                    : const Text(
+                        "No skills listed",
+                        style: TextStyle(color: Colors.grey),
+                      ),
               ),
 
               const SizedBox(height: 16),
@@ -729,13 +815,21 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
               _buildContentSection(
                 title: "Interests",
                 icon: Icons.favorite_outline,
-                child: (profile.interests != null && profile.interests!.isNotEmpty)
-                  ? Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: profile.interests!.map((interest) => _buildChip(interest, Colors.pink)).toList(),
-                    )
-                  : const Text("No interests listed", style: TextStyle(color: Colors.grey)),
+                child:
+                    (profile.interests != null && profile.interests!.isNotEmpty)
+                    ? Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: profile.interests!
+                            .map(
+                              (interest) => _buildChip(interest, Colors.pink),
+                            )
+                            .toList(),
+                      )
+                    : const Text(
+                        "No interests listed",
+                        style: TextStyle(color: Colors.grey),
+                      ),
               ),
 
               const SizedBox(height: 30),
@@ -746,14 +840,23 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
     );
   }
 
-  Widget _buildInfoCard({required String label, required String value, required IconData icon, required Color color}) {
+  Widget _buildInfoCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -764,7 +867,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
           Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
           const SizedBox(height: 4),
           Text(
-            value, 
+            value,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -782,34 +885,51 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
         children: [
-           Container(
-             padding: const EdgeInsets.all(10),
-             decoration: BoxDecoration(
-               color: color.withOpacity(0.1),
-               shape: BoxShape.circle,
-             ),
-             child: Icon(Icons.location_on, color: color, size: 20),
-           ),
-           const SizedBox(width: 16),
-           Column(
-             crossAxisAlignment: CrossAxisAlignment.start,
-             children: [
-               const Text("Location", style: TextStyle(color: Colors.grey, fontSize: 12)),
-               const SizedBox(height: 2),
-               Text(location, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-             ],
-           ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.location_on, color: color, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Location",
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                location,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildContentSection({required String title, required IconData icon, required Widget child}) {
+  Widget _buildContentSection({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -817,7 +937,11 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -827,7 +951,13 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
             children: [
               Icon(icon, size: 20, color: Colors.grey[700]),
               const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
             ],
           ),
           const Divider(height: 24),
@@ -847,9 +977,12 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
 }
-

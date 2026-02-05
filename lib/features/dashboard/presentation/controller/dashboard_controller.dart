@@ -41,7 +41,7 @@ class DashboardController extends GetxController {
       ),
       BtmNavModel(
         title: "Business",
-        icon: Icons.shop_outlined,
+        icon: Icons.business,
         selectedIcon: Icons.shop,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,

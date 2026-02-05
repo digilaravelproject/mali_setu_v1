@@ -54,8 +54,10 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
         final conv = controller.conversation.value;
         final currentUserId = Get.find<AuthService>().currentUser.value?.id;
         final otherUser = conv?.user1Id == currentUserId ? conv?.user2 : conv?.user1;
-        final name = nameByOtherUserId() ?? otherUser?.name ?? "Chat";
-        final imageUrl = otherUser?.profileImage != null ? ApiConstants.imageBaseUrl + otherUser!.profileImage! : null;
+       // final name = nameByOtherUserId() ?? otherUser?.status ?? "Chat";
+        final name = controller.userName;
+            //otherUser?.personalDetails?.name ?? "Chat";
+      //  final imageUrl = otherUser?. != null ? ApiConstants.imageBaseUrl + otherUser!.profileImage! : null;
 
         return Row(
           children: [
@@ -64,15 +66,15 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
               child: SizedBox(
                 width: 36,
                 height: 36,
-                child: CustomImageView(
-                  url: imageUrl,
-                  fit: BoxFit.cover,
-                  placeHolder: (context, url) => Container(
-                    color: Colors.purple.withOpacity(0.1),
-                    child: const Icon(Icons.person, color: Colors.purple, size: 20),
-                  ),
-                ),
-              ),
+              //   child: CustomImageView(
+              //     url: imageUrl,
+              //     fit: BoxFit.cover,
+              //     placeHolder: (context, url) => Container(
+              //       color: Colors.purple.withOpacity(0.1),
+              //       child: const Icon(Icons.person, color: Colors.purple, size: 20),
+              //     ),
+              //   ),
+               ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -80,25 +82,25 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                   name.toString(),
                     style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const Text(
-                    "Online",
-                    style: TextStyle(color: Colors.green, fontSize: 12),
-                  ),
+                  // const Text(
+                  //   "Online",
+                  //   style: TextStyle(color: Colors.green, fontSize: 12),
+                  // ),
                 ],
               ),
             ),
           ],
         );
       }),
-      actions: [
-        IconButton(icon: const Icon(Icons.videocam_outlined, color: Colors.purple), onPressed: () {}),
-        IconButton(icon: const Icon(Icons.call_outlined, color: Colors.purple), onPressed: () {}),
-        const SizedBox(width: 4),
-      ],
+      // actions: [
+      //   IconButton(icon: const Icon(Icons.videocam_outlined, color: Colors.purple), onPressed: () {}),
+      //   IconButton(icon: const Icon(Icons.call_outlined, color: Colors.purple), onPressed: () {}),
+      //   const SizedBox(width: 4),
+      // ],
     );
   }
 

@@ -1,5 +1,5 @@
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
-import 'package:edu_cluezer/features/matrimony/data/model/connection_requests_response.dart';
+import 'package:edu_cluezer/features/matrimony/data/model/matrimony_chat_response.dart';
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
@@ -9,8 +9,8 @@ class MatrimonyMembersController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
 
   final RxBool isLoading = false.obs;
-  final RxList<ConnectionRequest> members = <ConnectionRequest>[].obs;
-  final RxList<ConnectionRequest> filteredMembers = <ConnectionRequest>[].obs;
+  final RxList<MatrimonyConversation> members = <MatrimonyConversation>[].obs;
+  final RxList<MatrimonyConversation> filteredMembers = <MatrimonyConversation>[].obs;
   final RxString searchQuery = "".obs;
 
   @override
@@ -22,9 +22,9 @@ class MatrimonyMembersController extends GetxController {
   Future<void> fetchMembers() async {
     try {
       isLoading.value = true;
-      final response = await _repository.getConnectedUsers();
-      if (response.success == true && response.data != null) {
-        members.value = response.data!.connectedUsers ?? [];
+      final response = await _repository.getConversations();
+      if (response.success == true && response.data?.conversations != null) {
+        members.value = response.data!.conversations ?? [];
         filterMembers(searchQuery.value);
       }
     } catch (e) {
@@ -41,8 +41,8 @@ class MatrimonyMembersController extends GetxController {
     } else {
       final currentUserId = _authService.currentUser.value?.id;
       filteredMembers.value = members.where((m) {
-        final user = m.connectedProfile ?? (m.senderId == currentUserId ? m.receiver : m.sender);
-        final name = (user?.name ?? "").toLowerCase();
+        final user = m.user1Id == currentUserId ? m.user2 : m.user1;
+        final name = (user?.personalDetails?.name ?? "").toLowerCase();
         return name.contains(query.toLowerCase());
       }).toList();
     }

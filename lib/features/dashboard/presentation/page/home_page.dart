@@ -77,18 +77,21 @@ class HomePage extends GetWidget<HomeController> {
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
                       ),
-                      child: CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.white,
-                        backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
-                            ? NetworkImage(user.profileImage!)
-                            : null,
-                        child: (user?.profileImage == null || user!.profileImage!.isEmpty)
-                            ? Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Image.asset(AppAssets.imgAppLogo),
-                              )
-                            : null,
+                      child: InkWell(
+                          onTap: () => Get.toNamed(AppRoutes.profileScreen),
+                        child: CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white,
+                          backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                              ? NetworkImage(user.profileImage!)
+                              : null,
+                          child: (user?.profileImage == null || user!.profileImage!.isEmpty)
+                              ? Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Image.asset(AppAssets.imgAppLogo),
+                                )
+                              : null,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

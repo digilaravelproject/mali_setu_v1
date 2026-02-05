@@ -1,3 +1,28 @@
+// class ResLoginModel {
+//   bool? success;
+//   String? message;
+//   LoginData? data;
+//
+//   ResLoginModel({this.success, this.message, this.data});
+//
+//   ResLoginModel.fromJson(Map<String, dynamic> json) {
+//     success = json['success'];
+//     message = json['message'];
+//     data = json['data'] != null ? LoginData.fromJson(json['data']) : null;
+//   }
+//
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = <String, dynamic>{};
+//     data['success'] = success;
+//     data['message'] = message;
+//     if (this.data != null) {
+//       data['data'] = this.data!.toJson();
+//     }
+//     return data;
+//   }
+// }
+
+
 class ResLoginModel {
   bool? success;
   String? message;
@@ -6,9 +31,25 @@ class ResLoginModel {
   ResLoginModel({this.success, this.message, this.data});
 
   ResLoginModel.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
+    // Handle both: success OR status
+    if (json.containsKey('success')) {
+      success = _parseBool(json['success']);
+    } else if (json.containsKey('status')) {
+      success = _parseBool(json['status']);
+    }
+
     message = json['message'];
     data = json['data'] != null ? LoginData.fromJson(json['data']) : null;
+  }
+
+  bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) {
+      return value.toLowerCase() == 'true' ||
+          value.toLowerCase() == 'success';
+    }
+    return false;
   }
 
   Map<String, dynamic> toJson() {
@@ -21,6 +62,7 @@ class ResLoginModel {
     return data;
   }
 }
+
 
 class LoginData {
   User? user;

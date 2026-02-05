@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,10 +23,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   Widget build(BuildContext context) {
     // Initial fetch
     final argBusiness = Get.arguments as Business;
-   // final businessId = Get.arguments as int;
-    // We can use the passed business object for initial display,
-    // but we should also fetch fresh details.
-    // Let's trigger the fetch.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (argBusiness.id != null) {
         controller.fetchBusinessDetails(argBusiness.id!);
@@ -52,15 +51,20 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       pinned: true,
                       centerTitle: false,
                       backgroundColor: context.theme.scaffoldBackgroundColor,
-                      elevation: 0,
+                      elevation: innerBoxIsScrolled ? 4 : 0,
                       shadowColor: Colors.black.withOpacity(0.05),
                       expandedHeight: isOwner ? 600 : 480,
-                      title: Text(
-                        business.businessName ?? '',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          color: Colors.black87,
+                      forceElevated: innerBoxIsScrolled,
+                      title: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: innerBoxIsScrolled ? 1.0 : 0.0,
+                        child: Text(
+                          business.businessName ?? '',
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
                       leading: InkWell(
@@ -190,35 +194,35 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       runSpacing: 8,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Text(
-                                '4.4',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Icon(Icons.star, color: Colors.white, size: 12),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          '118 Ratings',
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.green,
+                        //     borderRadius: BorderRadius.circular(6),
+                        //   ),
+                        //   child: Row(
+                        //     mainAxisSize: MainAxisSize.min,
+                        //     children: const [
+                        //       Text(
+                        //         '4.4',
+                        //         style: TextStyle(
+                        //           color: Colors.white,
+                        //           fontSize: 12,
+                        //           fontWeight: FontWeight.bold,
+                        //         ),
+                        //       ),
+                        //       SizedBox(width: 4),
+                        //       Icon(Icons.star, color: Colors.white, size: 12),
+                        //     ],
+                        //   ),
+                        // ),
+                        // Text(
+                        //   '118 Ratings',
+                        //   style: context.textTheme.bodyMedium?.copyWith(
+                        //     color: Colors.grey[600],
+                        //     fontWeight: FontWeight.w500,
+                        //   ),
+                        // ),
                         if (business.verificationStatus == 'approved')
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -259,7 +263,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   borderRadius: BorderRadius.circular(16),
                   child: business.photo != null
                       ? Image.network(
-                          business.photo!,
+                    ApiConstants.imageBaseUrl+ business.photo!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
                         )
@@ -274,11 +278,11 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             runSpacing: 10,
             children: [
               _buildHeaderIconLabel(Icons.category_outlined, business.category?.name ?? 'Category', context),
-              _buildHeaderIconLabel(Icons.directions_walk, '6 min • 500 mts', context),
+             // _buildHeaderIconLabel(Icons.directions_walk, '6 min • 500 mts', context),
             ],
           ),
           const SizedBox(height: 10),
-          _buildHeaderIconLabel(Icons.info_outline, 'AC Repair & Services • 5 Years in Business', context),
+          _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -294,7 +298,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                 'until 9:00 pm',
                 style: context.textTheme.bodyMedium,
               ),
-              Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey[600]),
+              //Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey[600]),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

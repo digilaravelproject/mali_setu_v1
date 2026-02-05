@@ -103,8 +103,8 @@ class FormValidator {
       return "Age must be a valid number";
     }
 
-    if (age < 1) {
-      return "Age must be greater than 0";
+    if (age < 18) {
+      return "Age must be greater than 18";
     }
 
     if (age > 120) {

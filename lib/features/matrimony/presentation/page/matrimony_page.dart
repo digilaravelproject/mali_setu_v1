@@ -198,6 +198,30 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   }
 
   Widget _buildCardList(BuildContext context, List<UserProfile> list) {
+    if (list.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.people_outline, size: 80, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              "No more profiles",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "You have seen all available matches",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
     return Column(
       children: [
         Expanded(
@@ -215,10 +239,11 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               return _buildUserCard(context, list[index]);
             },
             cardsCount: list.length,
+            numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
           ),
         ),
         const SizedBox(height: 20),
-        
+
         // ACTION BUTTONS
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
@@ -228,7 +253,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               // Reject Button
               _buildActionButton(
                 onTap: () {
-                    final currentProfileId = controller.profiles[controller.currentIndex.value].id;
+                    final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
                     controller.rejectRequest(currentProfileId);
                     controller.swiperController.swipe(CardSwiperDirection.left);
                 },
@@ -262,24 +287,49 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                  );
               }),
 
-              // Connect/Like Button
-               Obx(() {
-                  if (controller.profiles.isEmpty) return const SizedBox();
-                  final currentProfile = controller.profiles[controller.currentIndex.value];
-                  final status = currentProfile.connectionStatus?.toLowerCase();
-                  final isConnected = status != "not_connected";
-                  
-                  return _buildActionButton(
-                    onTap: isConnected ? null : () {
-                      controller.sendConnectionRequest(currentProfile.id);
-                      controller.swiperController.swipe(CardSwiperDirection.right);
-                    },
-                    icon: isConnected ? Icons.check : Icons.favorite_rounded,
-                    color: isConnected ? Colors.green : Colors.purpleAccent,
-                    size: 32,
-                    elevation: 5,
-                  );
-               }),
+              // // Connect/Like Button
+              //  Obx(() {
+              //     if (controller.profiles.isEmpty) return const SizedBox();
+              //     final currentProfile = controller.profiles[controller.currentIndex.value];
+              //     final status = currentProfile.connectionStatus?.toLowerCase();
+              //     final isConnected = status != "not_connected";
+              //
+              //     return _buildActionButton(
+              //       onTap: isConnected ? null : () {
+              //         controller.sendConnectionRequest(currentProfile.id);
+              //         controller.swiperController.swipe(CardSwiperDirection.right);
+              //       },
+              //       icon: isConnected ? Icons.check : Icons.favorite_rounded,
+              //       color: isConnected ? Colors.green : Colors.purpleAccent,
+              //       size: 32,
+              //       elevation: 5,
+              //     );
+              //  }),
+
+              Obx(() {
+                if (controller.profiles.isEmpty) return const SizedBox();
+
+                final currentProfile = controller.profiles[controller.currentIndex.value];
+                final status = currentProfile.connectionStatus?.toLowerCase();
+                final isConnected = status != "not_connected";
+
+                // Agar already connected, button hide
+                if (isConnected) return const SizedBox();
+
+                // NOT connected → show check icon
+                return _buildActionButton(
+                  onTap: () {
+                    controller.sendConnectionRequest(currentProfile.id);
+                    controller.swiperController.swipe(CardSwiperDirection.right);
+                  },
+                  icon: Icons.check, // ✅ icon
+                  color: Colors.green,
+                  size: 32,
+                  elevation: 5,
+                );
+              }),
+
+
             ],
           ),
         ),

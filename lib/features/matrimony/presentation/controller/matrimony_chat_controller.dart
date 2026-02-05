@@ -18,13 +18,15 @@ class MatrimonyChatController extends GetxController {
 
   int? conversationId;
   int? otherUserId;
+  String? userName;
 
   @override
   void onInit() {
     super.onInit();
     conversationId = Get.arguments['conversation_id'];
     otherUserId = Get.arguments['other_user_id'];
-    
+    userName = Get.arguments['user_name'];
+
     if (conversationId != null) {
       fetchMessages();
     } else if (otherUserId != null) {
