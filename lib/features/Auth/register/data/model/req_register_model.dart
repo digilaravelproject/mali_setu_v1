@@ -1,7 +1,7 @@
 class ReqRegisterModel {
   String? name;
   String? email;
-  int? age;
+  String? dob;
   String? phone;
   String? occupation;
   String? reffralCode;
@@ -19,11 +19,14 @@ class ReqRegisterModel {
   String? userType;
   String? castCertificate;
   bool? termCondition;
+  String? company_name;
+  String? dept_name;
+  String? designation;
 
   ReqRegisterModel(
       {this.name,
       this.email,
-      this.age,
+      this.dob,
       this.phone,
       this.occupation,
       this.reffralCode,
@@ -40,12 +43,16 @@ class ReqRegisterModel {
       this.passwordConfirmation,
       this.userType,
       this.castCertificate,
-      this.termCondition});
+      this.termCondition,
+      this.company_name,
+      this.dept_name,
+      this.designation,
+      });
 
   ReqRegisterModel.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     email = json['email'];
-    age = json['age'];
+    dob = json['dob'];
     phone = json['phone'];
     occupation = json['occupation'];
     reffralCode = json['reffral_code'];
@@ -63,13 +70,16 @@ class ReqRegisterModel {
     userType = json['user_type'];
     castCertificate = json['cast_certificate'];
     termCondition = json['term_condition'];
+    company_name = json['company_name'];
+    dept_name = json['dept_name'];
+    designation = json['designation'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['name'] = name;
     data['email'] = email;
-    data['age'] = age;
+    data['dob'] = dob;
     data['phone'] = phone;
     data['occupation'] = occupation;
     data['reffral_code'] = reffralCode;
@@ -87,6 +97,9 @@ class ReqRegisterModel {
     data['user_type'] = userType;
     data['cast_certificate'] = castCertificate;
     data['term_condition'] = termCondition;
+    data['company_name'] = company_name;
+    data['dept_name'] = dept_name;
+    data['designation'] = designation;
     return data;
   }
 }

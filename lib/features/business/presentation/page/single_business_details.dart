@@ -660,7 +660,95 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final product = controller.businessProducts[index];
-                    return Card(
+                    return  Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: context.theme.dividerColor),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Product Image
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: context.theme.primaryColorLight,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: product.imagePath != null
+                                  ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  product.imagePath!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (c, e, s) =>
+                                      Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
+                                ),
+                              )
+                                  : Icon(
+                                Icons.shopping_bag_outlined,
+                                color: context.theme.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Product Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Product Name
+                                  Text(
+                                    product.name ?? 'Unknown Product',
+                                    style: context.textTheme.titleLarge,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                  const SizedBox(height: 4),
+
+                                  // Amount (conditionally)
+                                  if (product.cost != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: context.theme.primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '₹${product.cost}',
+                                        style: context.textTheme.bodyMedium?.copyWith(
+                                          color: context.theme.primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                  // Description (conditionally)
+                                  if (product.description != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: Text(
+                                        product.description!,
+                                        style: context.textTheme.bodyMedium,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+
+                    /*  Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -717,7 +805,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           ],
                         ),
                       ),
-                    );
+                    );*/
                   },
                   childCount: controller.businessProducts.length,
                 ),

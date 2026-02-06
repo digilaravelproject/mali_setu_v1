@@ -10,8 +10,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   BusinessRepositoryImpl({required this.dataSource});
 
   @override
-  Future<BusinessResponse> getAllBusinesses() {
-    return dataSource.getAllBusinesses();
+  Future<BusinessResponse> getAllBusinesses({int page = 1}) {
+    return dataSource.getAllBusinesses(page: page);
   }
 
   @override

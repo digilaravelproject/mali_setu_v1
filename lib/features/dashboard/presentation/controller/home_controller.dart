@@ -56,6 +56,7 @@ class HomeController extends GetxController {
     }
   }
   
+
   Future<void> fetchCategories() async {
     try {
       isLoadingCategories.value = true;
@@ -234,6 +235,7 @@ class HomeController extends GetxController {
     }
     return null;
   }
+
 
   void onSwipeComplete(
     int oldIndex,

@@ -81,13 +81,20 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
 
   Widget _buildMemberCard(MatrimonyConversation conversation) {
     final currentUserId = Get.find<AuthService>().currentUser.value?.id;
-    final user = conversation.user1Id == currentUserId ? conversation.user2 : conversation.user1;
+    final user = conversation.user1Id == currentUserId ? conversation.user1 : conversation.user2;
     
     // Correct mapping from MatrimonyProfile
-    final name = user?.personalDetails?.name ?? "Matrimony Member"; 
+    final name = user?.personalDetails?.name ?? "Matrimony Member";
     final profession = user?.professionalDetails?.jobTitle ?? user?.personalDetails?.occupation ?? "Member";
     final location = user?.locationDetails?.city ?? "Unknown Location";
-    
+    print("name : "+name+" profession :"+profession+"  location :"+location);
+
+    print("conversation.user1 : ${conversation.user1}");
+    print("conversation.user2 : ${conversation.user2}");
+    print("currentUserId : $currentUserId");
+    print("conversation.user1Id : ${conversation.user1Id}, conversation.user2Id: ${conversation.user2Id}");
+
+
     // Correct image logic
     String? imageUrl;
     if (user?.personalDetails?.photos != null && user!.personalDetails!.photos!.isNotEmpty) {
@@ -144,7 +151,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                 const SizedBox(height: 4),
                 Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                 const SizedBox(height: 2),

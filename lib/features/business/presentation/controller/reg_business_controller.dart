@@ -29,15 +29,35 @@ class RegBusinessController extends GetxController {
   final emailCtrl = TextEditingController();
   final websiteCtrl = TextEditingController();
 
+  TextEditingController openingTimeCtrl = TextEditingController();
+  TextEditingController closingTimeCtrl = TextEditingController();
+  TimeOfDay? openingTime;
+  TimeOfDay? closingTime;
+
   /// Dropdown DataContainer
   var businessTypes = <String>["Product", "Service"].obs;
   var businessCategories = <String>[].obs;
   
   // Maps to store ID mapping - Initialize with defaults
   Map<String, String> typeIdMap = {
-    "Product": "product", 
+    "Product": "product",
     "Service": "service"
   };
+
+  // Dropdown DataContainer
+//   var businessTypes = <String>[
+//     "Proprietary / Partnership",
+//     "Private Ltd",
+//     "Public Ltd"
+//   ].obs;
+//
+// // Map to store type IDs
+//   Map<String, String> typeIdMap = {
+//     "Proprietary / Partnership": "proprietary",
+//     "Private Ltd": "private_ltd",
+//     "Public Ltd": "public_ltd"
+//   };
+
   Map<String, int> categoryIdMap = {};
 
   /// Image Selection
@@ -71,6 +91,19 @@ class RegBusinessController extends GetxController {
       } else {
          bTypeCtrl.text = (business.businessType ?? "").toTitleCase();
       }
+
+      // Handle Business Type
+      // String type = (business.businessType ?? "").toLowerCase();
+      // if (type.contains("proprietary")) {
+      //   bTypeCtrl.text = "Proprietary / Partnership";
+      // } else if (type.contains("private")) {
+      //   bTypeCtrl.text = "Private Ltd";
+      // } else if (type.contains("public")) {
+      //   bTypeCtrl.text = "Public Ltd";
+      // } else {
+      //   bTypeCtrl.text = (business.businessType ?? "").toTitleCase();
+      // }
+
 
       bDescCtrl.text = business.description ?? "";
       phoneCtrl.text = business.contactPhone ?? "";
@@ -138,27 +171,43 @@ class RegBusinessController extends GetxController {
     }
   }
 
+  // Future<void> loadBusinessTypes() async {
+  //   try {
+  //     // Just load types from JSON or hardcode
+  //     final String response = await rootBundle.loadString('assets/json/business_data.json');
+  //     final data = await json.decode(response);
+  //
+  //     if (data['business_types'] != null) {
+  //       businessTypes.clear();
+  //       typeIdMap.clear();
+  //       for (var item in data['business_types']) {
+  //         businessTypes.add(item['name']);
+  //         typeIdMap[item['name']] = item['id'].toString();
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print("Error loading types: $e");
+  //     // Fallback
+  //     businessTypes.assignAll(["Product", "Service"]);
+  //     typeIdMap.assignAll({"Product": "product", "Service": "service"});
+  //   }
+  // }
+
+
   Future<void> loadBusinessTypes() async {
-    try {
-      // Just load types from JSON or hardcode
-      final String response = await rootBundle.loadString('assets/json/business_data.json');
-      final data = await json.decode(response);
-      
-      if (data['business_types'] != null) {
-        businessTypes.clear();
-        typeIdMap.clear();
-        for (var item in data['business_types']) {
-          businessTypes.add(item['name']);
-          typeIdMap[item['name']] = item['id'].toString();
-        }
-      }
-    } catch (e) {
-      print("Error loading types: $e");
-      // Fallback
-      businessTypes.assignAll(["Product", "Service"]);
-      typeIdMap.assignAll({"Product": "product", "Service": "service"});
-    }
+    businessTypes.assignAll([
+      "Proprietary / Partnership",
+      "Private Ltd",
+      "Public Ltd"
+    ]);
+
+    typeIdMap = {
+      "Proprietary / Partnership": "proprietary",
+      "Private Ltd": "private_ltd",
+      "Public Ltd": "public_ltd"
+    };
   }
+
 
   String _toTitleCase(String text) {
       if (text.isEmpty) return text;

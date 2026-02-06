@@ -21,7 +21,6 @@ class ApiConstants {
     static const String resetPassword = "auth/password/reset";
 
 
-
     // Bussiness Api
     static const String allBusiness = "business";
     static const String getSingleBusiness = "business";

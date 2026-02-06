@@ -63,6 +63,8 @@ class LoginController extends GetxController {
           );
         }
 
+        print("usertype : "+AppConstants.userTypeUser);
+
         // Set Logged In
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
@@ -100,8 +102,11 @@ class LoginController extends GetxController {
          // Save Token
         if (response.data?.token != null) {
           await TokenManager.saveToken(response.data!.token!);
+          print(" token : "+response.data!.token.toString());
         }
-        
+
+        print("DEBUG_TOKEN: Retrieved token = '${await TokenManager.getToken() ?? 'NULL/EMPTY'}'");
+
         // Save User Data
         if (response.data?.user != null) {
           final user = response.data!.user!;
@@ -118,7 +123,7 @@ class LoginController extends GetxController {
         print("googlelogin : "+response.message.toString());
 
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
-        Get.offAllNamed(AppRoutes.dashboard);
+      //  Get.offAllNamed(AppRoutes.dashboard);
       } else {
         CustomSnackBar.showError(message: response.message ?? "Login failed");
       }

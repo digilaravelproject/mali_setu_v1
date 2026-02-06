@@ -3,7 +3,7 @@ import '../../data/model/res_all_business_model.dart';
 
 
 abstract class BusinessRepository {
-  Future<BusinessResponse> getAllBusinesses();
+  Future<BusinessResponse> getAllBusinesses({int page = 1});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);

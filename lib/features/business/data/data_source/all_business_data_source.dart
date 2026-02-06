@@ -9,7 +9,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 
 
 abstract class BusinessDataSource {
-  Future<BusinessResponse> getAllBusinesses();
+  Future<BusinessResponse> getAllBusinesses({int page = 1});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);
@@ -41,8 +41,11 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   BusinessDataSourceImpl({required this.apiClient});
 
   @override
-  Future<BusinessResponse> getAllBusinesses() async {
-    final response = await apiClient.get(ApiConstants.allBusiness);
+  Future<BusinessResponse> getAllBusinesses({int page = 1}) async {
+    final response = await apiClient.get(
+      ApiConstants.allBusiness,
+      queryParameters: {'page': page},
+    );
     return BusinessResponse.fromJson(response.data);
   }
 

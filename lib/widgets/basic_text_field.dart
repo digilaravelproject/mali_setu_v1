@@ -3,92 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-/*class AppInputTextField extends StatelessWidget {
-  final String label;
-  final TextInputType textInputType;
-  final IconData? iconData;
-  final IconData? endIcon;
-  final bool showLabel;
-  final bool isObscure;
-  final GestureTapCallback? onEndIconTap;
-  final TextEditingController? controller;
-  final List<String>? hint;
-  final String? hintText;
-  final bool enable;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
 
-  const AppInputTextField({
-    super.key,
-    this.label = "Input Label",
-    this.iconData,
-    this.controller,
-    this.endIcon,
-    this.hint,
-    this.onEndIconTap,
-    this.validator,
-    this.onChanged,
-    this.hintText,
-    this.inputFormatters,
-    this.showLabel = true,
-    this.isObscure = false,
-    this.enable = true,
-    this.textInputType = TextInputType.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      spacing: 6,
-      children: [
-        if (showLabel) ...[
-          SizedBox(height: 8),
-          Text(
-            label.toUpperCase(),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ],
-
-        TextFormField(
-          enabled: enable,
-          canRequestFocus: enable,
-          autofillHints: hint,
-          controller: controller,
-          obscureText: isObscure,
-          keyboardType: textInputType,
-          onTapOutside: (event) => FocusScope.of(context).unfocus(),
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          validator: validator,
-          inputFormatters: inputFormatters,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: hintText ?? "Your ${label.toLowerCase()}",
-            hintStyle: context.textTheme.bodyMedium,
-            suffixIcon: endIcon == null
-                ? null
-                : IconButton(
-                    onPressed: onEndIconTap,
-                    icon: Icon(endIcon, color: context.theme.primaryColor),
-                    style: Theme.of(context).iconButtonTheme.style?.copyWith(
-                      side: const WidgetStatePropertyAll(BorderSide.none),
-                      backgroundColor: const WidgetStatePropertyAll(
-                        Colors.transparent,
-                      ),
-                    ),
-                  ).marginOnly(right: 8),
-            prefixIcon: iconData == null ? null : Icon(iconData, size: 20),
-          ),
-        ),
-      ],
-    );
-  }
-}*/
 
 class AppInputTextField extends StatelessWidget {
   final String label;
@@ -97,6 +12,7 @@ class AppInputTextField extends StatelessWidget {
   final IconData? endIcon;
   final bool showLabel;
   final bool isObscure;
+  final Widget? suffixWidget;
   final GestureTapCallback? onEndIconTap;
   final TextEditingController? controller;
   final List<String>? hint;
@@ -105,6 +21,8 @@ class AppInputTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final GestureTapCallback? onTap;
+
 
 
   /// 🔽 Dropdown related
@@ -130,7 +48,8 @@ class AppInputTextField extends StatelessWidget {
     this.enable = true,
     this.textInputType = TextInputType.text,
     this.maxLines,
-
+    this.onTap,
+    this.suffixWidget,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
@@ -160,7 +79,7 @@ class AppInputTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           enabled: enable,
-          readOnly: isDropdown,
+          readOnly: isDropdown || onTap != null, // dropdown ya custom onTap
           canRequestFocus: !isDropdown && enable,
           obscureText: isObscure,
           keyboardType: textInputType,
@@ -173,7 +92,9 @@ class AppInputTextField extends StatelessWidget {
           onChanged: isDropdown ? null : onChanged,
 
           /// 🔽 Handle tap for dropdown
-          onTap: isDropdown ? () => _showDropdown(context) : null,
+          //onTap: isDropdown ? () => _showDropdown(context) : null,
+          onTap: onTap ?? (isDropdown ? () => _showDropdown(context) : null),
+
 
           decoration: InputDecoration(
             hintText: hintText ?? "Your ${label.toLowerCase()}",
@@ -181,18 +102,32 @@ class AppInputTextField extends StatelessWidget {
 
             prefixIcon: iconData == null ? null : Icon(iconData, size: 20),
 
-            suffixIcon: isDropdown
-                ? Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: theme.primaryColor,
-                  )
-                : endIcon == null
-                ? null
-                : IconButton(
-                    onPressed: onEndIconTap,
-                    style: IconButton.styleFrom(side: BorderSide.none),
-                    icon: Icon(endIcon, color: theme.primaryColor),
-                  ),
+            suffixIcon: suffixWidget ??
+                (isDropdown
+                    ? Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: theme.primaryColor,
+                )
+                    : endIcon == null
+                    ? null
+                    : IconButton(
+                  onPressed: onEndIconTap,
+                  style: IconButton.styleFrom(side: BorderSide.none),
+                  icon: Icon(endIcon, color: theme.primaryColor),
+                )),
+
+            // suffixIcon: isDropdown
+            //     ? Icon(
+            //         Icons.keyboard_arrow_down_rounded,
+            //         color: theme.primaryColor,
+            //       )
+            //     : endIcon == null
+            //     ? null
+            //     : IconButton(
+            //         onPressed: onEndIconTap,
+            //         style: IconButton.styleFrom(side: BorderSide.none),
+            //         icon: Icon(endIcon, color: theme.primaryColor),
+            //       ),
           ),
         ),
       ],

@@ -21,6 +21,7 @@ class BannerResponse {
 class BannerData {
   final int id;
   final String title;
+  final String url; // URL to navigate (e.g., "/api/business/41")
   final String imageUrl;
   final String createdAt;
   final String updatedAt;
@@ -28,6 +29,7 @@ class BannerData {
   BannerData({
     required this.id,
     required this.title,
+    required this.url,
     required this.imageUrl,
     required this.createdAt,
     required this.updatedAt,
@@ -37,10 +39,24 @@ class BannerData {
     return BannerData(
       id: json['id'],
       title: json['title'],
+      url: json['url'] ?? '',
       imageUrl: json['image_url'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
     );
+  }
+  
+  /// Extract business ID from URL like "/api/business/41"
+  int? get businessId {
+    try {
+      final parts = url.split('/');
+      if (parts.length >= 3 && parts[parts.length - 2] == 'business') {
+        return int.tryParse(parts.last);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }
 

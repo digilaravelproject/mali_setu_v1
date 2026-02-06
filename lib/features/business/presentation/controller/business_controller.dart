@@ -78,6 +78,12 @@ class BusinessController extends GetxController {
   var myBusinesses = <Business>[].obs;
   var myBusiness = Rxn<Business>();
   
+  // Pagination variables
+  var currentPage = 1.obs;
+  var totalPages = 1.obs;
+  var hasNextPage = false.obs;
+  var isLoadingMore = false.obs;
+  
   // For Business Detail Screen
   var selectedBusiness = Rxn<Business>();
   var businessProducts = <Product>[].obs;
@@ -102,7 +108,7 @@ class BusinessController extends GetxController {
     try {
       isLoading.value = true;
       await Future.wait([
-        fetchAllBusinesses(),
+        fetchAllBusinesses(isRefresh: true),
         fetchMyBusinesses(),
       ]);
     } catch (e) {
@@ -112,12 +118,57 @@ class BusinessController extends GetxController {
     }
   }
 
-  Future<void> fetchAllBusinesses() async {
+  Future<void> fetchAllBusinesses({bool isRefresh = false}) async {
     try {
-      final list = await getAllBusinessesUseCase();
-      businesses.value = list;
+      if (isRefresh) {
+        currentPage.value = 1;
+        businesses.clear();
+      }
+      
+      final response = await getAllBusinessesUseCase(page: currentPage.value);
+      
+      if (isRefresh) {
+        businesses.value = response.businesses;
+      } else {
+        businesses.addAll(response.businesses);
+      }
+      
+      // Update pagination info
+      currentPage.value = response.currentPage;
+      totalPages.value = response.lastPage;
+      hasNextPage.value = response.hasNextPage;
+      
+      print("DEBUG_PAGINATION: Current page: ${currentPage.value}, Total pages: ${totalPages.value}, Has next: ${hasNextPage.value}");
+      print("DEBUG_PAGINATION: Loaded ${response.businesses.length} businesses, Total in list: ${businesses.length}");
+      
     } catch (e) {
       print('Error fetching all businesses: $e');
+    }
+  }
+
+  Future<void> loadMoreBusinesses() async {
+    if (isLoadingMore.value || !hasNextPage.value) return;
+    
+    try {
+      isLoadingMore.value = true;
+      currentPage.value++;
+      
+      print("DEBUG_PAGINATION: Loading page ${currentPage.value}");
+      
+      final response = await getAllBusinessesUseCase(page: currentPage.value);
+      businesses.addAll(response.businesses);
+      
+      // Update pagination info
+      totalPages.value = response.lastPage;
+      hasNextPage.value = response.hasNextPage;
+      
+      print("DEBUG_PAGINATION: Loaded ${response.businesses.length} more businesses, Total: ${businesses.length}");
+      
+    } catch (e) {
+      print('Error loading more businesses: $e');
+      currentPage.value--; // Revert page number on error
+    } finally {
+      isLoadingMore.value = false;
     }
   }
 

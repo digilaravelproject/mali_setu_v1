@@ -66,7 +66,9 @@ class BusinessScreen extends GetView<BusinessController> {
                     if (controller.myBusiness.value != null)
                       GestureDetector(
                         onTap: () {
-                          Get.toNamed(AppRoutes.myBusiness);
+                          print("DEBUG_DASHBOARD: My business: ${controller.myBusiness.value?.businessName}");
+                          print("DEBUG_DASHBOARD: My businesses count: ${controller.myBusinesses.length}");
+                        //  Get.toNamed(AppRoutes.myBusiness);
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -345,6 +347,39 @@ class BusinessScreen extends GetView<BusinessController> {
                  childCount: controller.businesses.length > 10 ? 10 : controller.businesses.length,
                ),
              ),
+             // Show pagination info if there are more businesses
+             SliverToBoxAdapter(
+               child: Obx(() => controller.businesses.length > 10 || controller.hasNextPage.value
+                 ? Container(
+                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                     padding: const EdgeInsets.all(12),
+                     decoration: BoxDecoration(
+                       color: Colors.blue.withOpacity(0.1),
+                       borderRadius: BorderRadius.circular(12),
+                       border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                     ),
+                     child: Row(
+                       children: [
+                         Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                         const SizedBox(width: 8),
+                         Expanded(
+                           child: Text(
+                             controller.businesses.length > 10 
+                               ? "Showing first 10 businesses. Tap 'View All' to see all ${controller.businesses.length} businesses."
+                               : "Total ${controller.businesses.length} businesses available.",
+                             style: TextStyle(
+                               color: Colors.blue[700],
+                               fontSize: 13,
+                               fontWeight: FontWeight.w500,
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                   )
+                 : const SizedBox.shrink()
+               ),
+             ),
              const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
           ],
         );
@@ -372,33 +407,97 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: false,
         titleSpacing: 0, 
-        title: Text(
-          "All Businesses",
+        title: Obx(() => Text(
+          "All Businesses (${controller.businesses.length})",
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
             color: Colors.white
           ),
-        ),
+        )),
+        actions: [
+          Obx(() => controller.hasNextPage.value 
+            ? IconButton(
+                icon: const Icon(Icons.info_outline, color: Colors.white),
+                onPressed: () {
+                  Get.snackbar(
+                    "Pagination Info",
+                    "Page ${controller.currentPage.value} of ${controller.totalPages.value}",
+                    backgroundColor: Colors.white,
+                    colorText: Colors.black87,
+                  );
+                },
+              )
+            : const SizedBox.shrink()
+          ),
+        ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value && controller.businesses.isEmpty) {
           return _buildShimmerLoading(context);
         }
 
         if (controller.businesses.isEmpty) {
           return const Center(child: Text("No Businesses Found"));
         }
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.businesses.length,
-          physics: const BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: BusinessListCard(business: controller.businesses[index]),
-            );
-          },
+        
+        return RefreshIndicator(
+          onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              // Load more when user scrolls to 80% of the list
+              if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent * 0.8) {
+                controller.loadMoreBusinesses();
+              }
+              return false;
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: controller.businesses.length + (controller.hasNextPage.value ? 1 : 0),
+              physics: const BouncingScrollPhysics(),
+              itemBuilder: (context, index) {
+                // Show business card
+                if (index < controller.businesses.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: BusinessListCard(business: controller.businesses[index]),
+                  );
+                }
+                
+                // Show loading indicator at bottom
+                return Obx(() => controller.isLoadingMore.value
+                  ? Container(
+                      padding: const EdgeInsets.all(16),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : controller.hasNextPage.value
+                    ? Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: ElevatedButton(
+                            onPressed: controller.loadMoreBusinesses,
+                            child: Text("Load More (Page ${controller.currentPage.value + 1})"),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: Text(
+                            "All ${controller.businesses.length} businesses loaded",
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                );
+              },
+            ),
+          ),
         );
       }),
     );

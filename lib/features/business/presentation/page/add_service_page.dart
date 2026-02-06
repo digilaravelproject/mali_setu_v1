@@ -686,16 +686,6 @@ class AddServiceScreen extends StatelessWidget {
                 label: "Service Price",
                 textInputType: TextInputType.number,
                 controller: controller.priceController,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter product price';
-                  }
-                  final price = int.tryParse(value);
-                  if (price == null || price <= 0) {
-                    return 'Please enter a valid price';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 30),

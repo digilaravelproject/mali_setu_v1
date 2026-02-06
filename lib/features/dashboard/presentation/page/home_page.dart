@@ -239,6 +239,10 @@ class HomePage extends GetWidget<HomeController> {
                                 images: controller.banners
                                     .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
                                     .toList(),
+                                onImageTap: (index) {
+                                  // Handle banner tap
+                                  //controller.onBannerTap(index);
+                                },
                               ),
                             ),
                           );

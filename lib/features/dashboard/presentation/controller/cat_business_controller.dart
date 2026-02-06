@@ -34,13 +34,11 @@ class CatBusinessController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-
       final res = await useCase(categoryId);
 
       if (res.success == true && res.businesses != null) {
         // Clear previous data
         allBusinesses.clear();
-
         // Add new data
         allBusinesses.addAll(res.businesses!);
       } else {
