@@ -98,6 +98,19 @@ class BusinessController extends GetxController {
   var isDetailsLoading = false.obs;
   var applicationLoadingStates = <int, String?>{}.obs;
 
+  // Search logic
+  var searchText = "".obs;
+  List<Business> get filteredBusinesses {
+    if (searchText.isEmpty) {
+      return businesses;
+    }
+    return businesses
+        .where((b) => (b.businessName ?? "")
+            .toLowerCase()
+            .contains(searchText.value.toLowerCase()))
+        .toList();
+  }
+
   @override
   void onInit() {
     super.onInit();

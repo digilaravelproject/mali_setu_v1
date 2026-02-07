@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../widgets/custom_buttons.dart';
 import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
+import 'change_language_page.dart';
 
 class SettingsScreen extends GetWidget<SettingsController> {
   const SettingsScreen({super.key});
@@ -59,7 +60,8 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   _SettingsItem(
                     title: 'App Language',
                     icon: Icons.language_rounded,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () => Get.to(LanguageSelectionScreen())
+                       // _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
                     title: 'User Approval',

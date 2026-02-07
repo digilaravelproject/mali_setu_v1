@@ -30,6 +30,7 @@ class AppInputTextField extends StatelessWidget {
   final List<String>? dropdownItems;
   final ValueChanged<String>? onDropdownChanged;
   final int? maxLines;
+  final bool? readOnly;
 
   const AppInputTextField({
     super.key,
@@ -50,6 +51,7 @@ class AppInputTextField extends StatelessWidget {
     this.maxLines,
     this.onTap,
     this.suffixWidget,
+    this.readOnly,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
@@ -79,7 +81,8 @@ class AppInputTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           enabled: enable,
-          readOnly: isDropdown || onTap != null, // dropdown ya custom onTap
+          readOnly: readOnly ?? isDropdown || onTap != null,
+         // readOnly: isDropdown || onTap != null, // dropdown ya custom onTap
           canRequestFocus: !isDropdown && enable,
           obscureText: isObscure,
           keyboardType: textInputType,

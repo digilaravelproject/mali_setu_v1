@@ -74,7 +74,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                       controller: controller.openingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.sunny,
-                      // readOnly: true,
+                      readOnly: true,
                       onTap: () => _selectTime(context, controller.openingTimeCtrl, true),
                       suffixWidget: Icon(Icons.access_time),
                       validator: (value) {
@@ -92,7 +92,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                       controller: controller.closingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.nightlight_outlined,
-                      //  readOnly: true,
+                      readOnly: true,
                       onTap: () => _selectTime(context, controller.closingTimeCtrl, false),
                       suffixWidget: Icon(Icons.access_time),
                       validator: (value) {
@@ -273,28 +273,34 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
   }
 
   Future<void> _selectTime(
-      BuildContext context, TextEditingController timeCtrl, bool isOpening) async {
+      BuildContext context,
+      TextEditingController timeCtrl,
+      bool isOpening,
+      ) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).primaryColor,
-              onPrimary: Colors.white,
-            ),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: true, // ⛔ hides keyboard input
+            textScaleFactor: 1.0,
           ),
-          child: child!,
+          child: Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: ColorScheme.light(
+                primary: Theme.of(context).primaryColor,
+                onPrimary: Colors.white,
+              ),
+            ),
+            child: child!,
+          ),
         );
       },
     );
 
     if (picked != null) {
-      final time = picked.format(context);
-      timeCtrl.text = time;
-
-      // You can also save the TimeOfDay object in your controller if needed
+      timeCtrl.text = picked.format(context);
       if (isOpening) {
         controller.openingTime = picked;
       } else {
@@ -302,6 +308,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
       }
     }
   }
+
 }
 
 

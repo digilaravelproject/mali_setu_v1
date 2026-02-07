@@ -66,9 +66,9 @@ class BusinessScreen extends GetView<BusinessController> {
                     if (controller.myBusiness.value != null)
                       GestureDetector(
                         onTap: () {
-                          print("DEBUG_DASHBOARD: My business: ${controller.myBusiness.value?.businessName}");
-                          print("DEBUG_DASHBOARD: My businesses count: ${controller.myBusinesses.length}");
-                        //  Get.toNamed(AppRoutes.myBusiness);
+                         // print("DEBUG_DASHBOARD: My business: ${controller.myBusiness.value?.businessName}");
+                         // print("DEBUG_DASHBOARD: My businesses count: ${controller.myBusinesses.length}");
+                          Get.toNamed(AppRoutes.myBusiness);
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -399,11 +399,11 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon:  Icon(Icons.arrow_back_ios_new_rounded,color: Get.iconColor,),
           onPressed: () => Get.back(),
         ),
         elevation: 0,
-        backgroundColor: context.theme.primaryColor,
+        //backgroundColor: context.theme.primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: false,
         titleSpacing: 0, 
@@ -412,7 +412,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.white
+           // color: Colors.white
           ),
         )),
         actions: [
@@ -432,74 +432,132 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
           ),
         ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.businesses.isEmpty) {
-          return _buildShimmerLoading(context);
-        }
-
-        if (controller.businesses.isEmpty) {
-          return const Center(child: Text("No Businesses Found"));
-        }
-        
-        return RefreshIndicator(
-          onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              // Load more when user scrolls to 80% of the list
-              if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent * 0.8) {
-                controller.loadMoreBusinesses();
-              }
-              return false;
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.businesses.length + (controller.hasNextPage.value ? 1 : 0),
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                // Show business card
-                if (index < controller.businesses.length) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: BusinessListCard(business: controller.businesses[index]),
-                  );
-                }
-                
-                // Show loading indicator at bottom
-                return Obx(() => controller.isLoadingMore.value
-                  ? Container(
-                      padding: const EdgeInsets.all(16),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : controller.hasNextPage.value
-                    ? Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Center(
-                          child: ElevatedButton(
-                            onPressed: controller.loadMoreBusinesses,
-                            child: Text("Load More (Page ${controller.currentPage.value + 1})"),
-                          ),
-                        ),
-                      )
-                    : Container(
-                        padding: const EdgeInsets.all(16),
-                        child: Center(
-                          child: Text(
-                            "All ${controller.businesses.length} businesses loaded",
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      )
-                );
-              },
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                onChanged: (value) {
+                  controller.searchText.value = value;
+                },
+                decoration: InputDecoration(
+                  hintText: "Search business by name...",
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            controller.searchText.value = "";
+                          },
+                        )
+                      : const SizedBox.shrink()),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+              ),
             ),
           ),
-        );
-      }),
+          
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.businesses.isEmpty) {
+                return _buildShimmerLoading(context);
+              }
+
+              final filteredList = controller.filteredBusinesses;
+
+              if (filteredList.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off_rounded, size: 64, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        "No Businesses Found",
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
+              return RefreshIndicator(
+                onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    // Load more when user scrolls to 80% of the list, only if not searching
+                    if (controller.searchText.isEmpty && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent * 0.8) {
+                      controller.loadMoreBusinesses();
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredList.length + (controller.hasNextPage.value && controller.searchText.isEmpty ? 1 : 0),
+                    physics: const BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      // Show business card
+                      if (index < filteredList.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: BusinessListCard(business: filteredList[index]),
+                        );
+                      }
+                      
+                      // Show loading indicator at bottom (only if not searching)
+                      return Obx(() => controller.isLoadingMore.value
+                        ? Container(
+                            padding: const EdgeInsets.all(16),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : controller.hasNextPage.value
+                          ? Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: ElevatedButton(
+                                  onPressed: controller.loadMoreBusinesses,
+                                  child: Text("Load More (Page ${controller.currentPage.value + 1})"),
+                                ),
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: Text(
+                                  "All businesses loaded",
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            )
+                      );
+                    },
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

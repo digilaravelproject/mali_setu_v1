@@ -11,6 +11,7 @@ import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../controller/home_controller.dart';
 
@@ -178,31 +179,87 @@ class HomePage extends GetWidget<HomeController> {
                         ),
                       ),
                       // Search Bar
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(20, 10, 20, 20), // Adjusted margins
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20), // Rounded pill shape
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
-                            )
-                          ],
-                        ),
-                        child: TextField(
-                          readOnly: true, 
-                          decoration: InputDecoration(
-                            hintText: "Search here...",
-                            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                            prefixIcon: Icon(CupertinoIcons.search, color: theme.primaryColor),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                          ),
-                        ),
-                      ),
+
+
+              InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  Get.to(() => const AllBusinessesScreen());
+                },
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      )
                     ],
+                  ),
+                  child: AbsorbPointer( // 🔥 MAIN FIX
+                    child: TextField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        hintText: "Search here...",
+                        hintStyle: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(
+                          CupertinoIcons.search,
+                          color: theme.primaryColor,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+
+              /* InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () {
+                  Get.to(() => const AllBusinessesScreen());
+                },
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
+                  ),
+                  child: AbsorbPointer( // 👈 VERY IMPORTANT
+                    child: TextField(
+                      enabled: false, // extra safety
+                      decoration: InputDecoration(
+                        hintText: "Search here...",
+                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                        prefixIcon: Icon(
+                          CupertinoIcons.search,
+                          color: theme.primaryColor,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      ),
+                    ),
+                  ),
+                ),
+              ),*/
+
+              ],
                   ),
 
                   Padding(
@@ -213,7 +270,7 @@ class HomePage extends GetWidget<HomeController> {
                         Obx(() {
                           if (controller.isLoadingBanners.value) {
                             return Container(
-                              height: 180,
+                              height: 150,
                               decoration: BoxDecoration(
                                  color: Colors.grey[200],
                                  borderRadius: BorderRadius.circular(16)
@@ -225,9 +282,9 @@ class HomePage extends GetWidget<HomeController> {
                             return const SizedBox.shrink();
                           }
                           return Container(
-                            height: 180,
+                            height: 150,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
                               ]
@@ -241,7 +298,7 @@ class HomePage extends GetWidget<HomeController> {
                                     .toList(),
                                 onImageTap: (index) {
                                   // Handle banner tap
-                                  //controller.onBannerTap(index);
+                                  controller.onBannerTap(index);
                                 },
                               ),
                             ),
@@ -283,7 +340,7 @@ class HomePage extends GetWidget<HomeController> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                      //  const SizedBox(height: 8),
 
                         // 4. Categories Grid (Home)
                         Obx(() {
@@ -302,9 +359,9 @@ class HomePage extends GetWidget<HomeController> {
                             itemCount: displayList.length,
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 4,
-                              crossAxisSpacing: 8,
+                              crossAxisSpacing: 16,
                               mainAxisSpacing: 12,
-                              childAspectRatio: 0.85,
+                              childAspectRatio: 0.95,
                             ),
                             itemBuilder: (_, index) {
                               return _buildCategoryItem(context, displayList[index]);
@@ -364,22 +421,20 @@ class HomePage extends GetWidget<HomeController> {
         children: [
           Container(
             padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1), width: 1),
-               boxShadow: [
-                BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
-              ]
-            ),
-            child: ClipOval(
+            // decoration: BoxDecoration(
+            //   shape: BoxShape.circle,
+            //   border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1), width: 1),
+            //    boxShadow: [
+            //     BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
+            //   ]
+            // ),
                child: CustomImageView(
-                height: 50,
-                width: 50,
+                height: 28,
+                width: 28,
                  url: category.photo != null && category.photo!.isNotEmpty
                     ? category.photo
                     : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
                 fit: BoxFit.cover,
-              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -389,10 +444,9 @@ class HomePage extends GetWidget<HomeController> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
               color: Colors.grey[800],
-              height: 1.2,
             ),
           ),
         ],
