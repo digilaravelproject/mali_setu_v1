@@ -23,7 +23,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
           icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
         ),
         title: Text(
-          controller.isEditMode ? "Update Business" : "Register Business", 
+          controller.isEditMode ? 'update_business'.tr : 'register_business'.tr, 
           style: context.textTheme.titleMedium
         ),
       ),
@@ -33,9 +33,9 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionTitle("Business Information"),
+              SectionTitle('business_information'.tr),
               AppInputTextField(
-                label: "Business Name",
+                label: 'business_name'.tr,
                 controller: controller.bNameCtrl,
                 textInputType: TextInputType.text,
                 iconData: Icons.business_outlined,
@@ -44,24 +44,24 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               Obx(() => SingleDropdown(
                 controller: controller.bTypeCtrl,
-                label: "Business Type",
+                label: 'business_type'.tr,
                 prefixIcon: Icons.category_rounded,
                 items: controller.businessTypes.toList(), // Using observable list
               )),
 
               Obx(() => SingleDropdown(
                 controller: controller.bCategoryCtrl,
-                label: "Business Category",
+                label: 'business_category'.tr,
                 prefixIcon: Icons.category_rounded,
-                items: controller.businessCategories.toList(), // Using observable list
+                items: controller.businessCategories.toList(),
               )),
 
               AppInputTextField(
-                label: "Business Description",
+                label: 'business_description'.tr,
                 textInputType: TextInputType.text,
                 controller: controller.bDescCtrl,
                 maxLines: 4,
-                hintText: "Describe your business, products",
+                hintText: 'business_description_hint'.tr,
                 validator: FormValidator.name,
               ),
              // const SizedBox(height: 16),
@@ -70,7 +70,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 children: [
                   Expanded(
                     child: AppInputTextField(
-                      label: "Opening Time",
+                      label: 'opening_time'.tr,
                       controller: controller.openingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.sunny,
@@ -79,7 +79,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                       suffixWidget: Icon(Icons.access_time),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "Please select opening time";
+                          return 'select_opening_time'.tr;
                         }
                         return null;
                       },
@@ -88,7 +88,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                   const SizedBox(width: 12),
                   Expanded(
                     child: AppInputTextField(
-                      label: "Closing Time",
+                      label: 'closing_time'.tr,
                       controller: controller.closingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.nightlight_outlined,
@@ -97,7 +97,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                       suffixWidget: Icon(Icons.access_time),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "Please select closing time";
+                          return 'select_closing_time'.tr;
                         }
                         return null;
                       },
@@ -108,21 +108,21 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               const SizedBox(height: 20),
 
-              const SectionTitle("Business Photos"),
+              SectionTitle('business_photos'.tr),
               const SizedBox(height: 8),
               Obx(() => _buildPhotoGrid(context)),
               const SizedBox(height: 24),
 
-              const SectionTitle("Contact Information"),
+              SectionTitle('contact_information'.tr),
               AppInputTextField(
-                label: "Contact Number ",
+                label: 'contact_number'.tr,
                 iconData: CupertinoIcons.phone,
                 textInputType: TextInputType.phone,
                 controller: controller.phoneCtrl,
                 hint: const [AutofillHints.telephoneNumber],
               ),
               AppInputTextField(
-                label: "Email ",
+                label: 'email'.tr,
                 iconData: CupertinoIcons.mail_solid,
                 textInputType: TextInputType.emailAddress,
                 controller: controller.emailCtrl,
@@ -130,7 +130,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 validator: FormValidator.email,
               ),
               AppInputTextField(
-                label: "Website ",
+                label: 'website'.tr,
                 iconData: Icons.language_rounded,
                 textInputType: TextInputType.webSearch,
                 controller: controller.websiteCtrl,
@@ -139,7 +139,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
               const SizedBox(height: 30),
 
               CustomButton(
-                title: controller.isEditMode ? "Update Business" : "Register Business", 
+                title: controller.isEditMode ? 'update_business'.tr : 'register_business'.tr, 
                 onPressed: controller.onRegister,
               ),
 
@@ -257,8 +257,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 const SizedBox(height: 8),
                 Text(
                   controller.selectedImages.isEmpty 
-                    ? "Add Business Photos" 
-                    : "Add More Photos",
+                    ? 'add_business_photos'.tr
+                    : 'add_more_photos'.tr,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: context.theme.primaryColor,
                     fontWeight: FontWeight.w600,

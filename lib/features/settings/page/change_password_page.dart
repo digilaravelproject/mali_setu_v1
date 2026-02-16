@@ -27,7 +27,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
           ),
         ),
         title: Text(
-          "Change Password",
+          "change_password".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: Colors.black87,
@@ -54,7 +54,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
                 const SizedBox(height: 40),
 
                 Obx(() => CustomButton(
-                  title: "Change Password",
+                  title: "change_password".tr,
                   height: 50,
                   borderRadius: 16,
                   isLoading: controller.isLoading.value,
@@ -104,7 +104,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
         ),
         const SizedBox(height: 24),
         Text(
-          'Create a New Password',
+          'create_new_password'.tr,
           style: context.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.black87,
@@ -112,7 +112,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Your new password must be different from previous passwords',
+          'password_subtitle'.tr,
           textAlign: TextAlign.center,
           style: context.textTheme.bodyMedium?.copyWith(
              color: Colors.grey[600],
@@ -145,7 +145,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
           children: [
             // Current Password
             AppInputTextField(
-              label: "Current Password",
+              label: "current_password".tr,
               iconData: Icons.lock_outline_rounded,
               textInputType: TextInputType.visiblePassword,
               controller: controller.currentPasswordController,
@@ -162,7 +162,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
   
             // New Password
             AppInputTextField(
-              label: "New Password",
+              label: "new_password".tr,
               iconData: Icons.lock_reset_outlined,
               textInputType: TextInputType.visiblePassword,
               controller: controller.newPasswordController,
@@ -179,7 +179,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
   
             // Confirm Password
             AppInputTextField(
-              label: "Confirm Password",
+              label: "confirm_password".tr,
               iconData: Icons.check_circle_outline_rounded,
               textInputType: TextInputType.visiblePassword,
               controller: controller.confirmPasswordController,
@@ -214,7 +214,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
               Icon(Icons.security_rounded, size: 20, color: Get.theme.primaryColor),
               const SizedBox(width: 10),
                Text(
-                'Password Guidelines',
+                'password_guidelines'.tr,
                 style: context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: Get.theme.primaryColor,
@@ -224,13 +224,13 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildGuidelineItem(context, 'At least 6 characters long'),
+          _buildGuidelineItem(context, 'password_rule_length'.tr),
           const SizedBox(height: 8),
-          _buildGuidelineItem(context, 'Must contain letters and numbers'),
+          _buildGuidelineItem(context, 'password_rule_letters_numbers'.tr),
           const SizedBox(height: 8),
-          _buildGuidelineItem(context, 'Different from current password'),
+          _buildGuidelineItem(context, 'password_rule_different'.tr),
           const SizedBox(height: 8),
-          _buildGuidelineItem(context, 'Avoid using personal information'),
+          _buildGuidelineItem(context, 'password_rule_personal'.tr),
         ],
       ),
     );

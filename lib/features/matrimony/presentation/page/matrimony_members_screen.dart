@@ -15,7 +15,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text("Members", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Text("members".tr, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -27,7 +27,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
           IconButton(
             icon: const Icon(Icons.swap_horizontal_circle_outlined, color: Colors.purple, size: 28),
             onPressed: () => Get.toNamed(AppRoutes.matrimonyRequests),
-            tooltip: "Requests",
+            tooltip: "requests".tr,
           ),
           const SizedBox(width: 8),
         ],
@@ -69,7 +69,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
         child: TextField(
           onChanged: (value) => controller.filterMembers(value),
           decoration: InputDecoration(
-            hintText: "Search members...",
+            hintText: "search_members".tr,
             prefixIcon: const Icon(Icons.search, color: Colors.grey),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(vertical: 12),

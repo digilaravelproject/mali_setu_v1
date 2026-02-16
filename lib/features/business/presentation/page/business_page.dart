@@ -48,7 +48,7 @@ class BusinessScreen extends GetView<BusinessController> {
               elevation: 0,
               automaticallyImplyLeading: false,
               title: Text(
-                "Business Dashboard",
+                'business_dashboard'.tr,
                 style: context.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: Colors.black87,
@@ -66,8 +66,6 @@ class BusinessScreen extends GetView<BusinessController> {
                     if (controller.myBusiness.value != null)
                       GestureDetector(
                         onTap: () {
-                         // print("DEBUG_DASHBOARD: My business: ${controller.myBusiness.value?.businessName}");
-                         // print("DEBUG_DASHBOARD: My businesses count: ${controller.myBusinesses.length}");
                           Get.toNamed(AppRoutes.myBusiness);
                         },
                         child: Container(
@@ -112,16 +110,16 @@ class BusinessScreen extends GetView<BusinessController> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          'My Business',
-                                          style: TextStyle(
+                                        Text(
+                                          'my_business'.tr,
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          'Manage your business details',
+                                          'manage_business'.tr,
                                           style: TextStyle(
                                             color: Colors.white.withOpacity(0.8),
                                             fontSize: 14,
@@ -168,7 +166,7 @@ class BusinessScreen extends GetView<BusinessController> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            controller.myBusiness.value?.category?.name ?? 'Category',
+                                            controller.myBusiness.value?.category?.name ?? 'business_category'.tr,
                                             style: TextStyle(
                                               color: Colors.white.withOpacity(0.7),
                                               fontSize: 14,
@@ -230,16 +228,16 @@ class BusinessScreen extends GetView<BusinessController> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          'Register Business',
-                                          style: TextStyle(
+                                        Text(
+                                          'register_business'.tr,
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          'Start your digital journey',
+                                          'start_digital_journey'.tr,
                                           style: TextStyle(
                                             color: Colors.white.withOpacity(0.8),
                                             fontSize: 14,
@@ -272,7 +270,7 @@ class BusinessScreen extends GetView<BusinessController> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    'Register Now',
+                                    'register_now'.tr,
                                     style: TextStyle(
                                       color: theme.primaryColor,
                                       fontSize: 16,
@@ -293,7 +291,7 @@ class BusinessScreen extends GetView<BusinessController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Featured Businesses',
+                          'featured_businesses'.tr,
                           style: context.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: Colors.black87,
@@ -312,7 +310,7 @@ class BusinessScreen extends GetView<BusinessController> {
                             child: Row(
                               children: [
                                 Text(
-                                  'View All',
+                                  'view_all'.tr,
                                   style: TextStyle(
                                     color: theme.primaryColor,
                                     fontWeight: FontWeight.w600,
@@ -407,13 +405,15 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: false,
         titleSpacing: 0, 
-        title: Obx(() => Text(
-          "All Businesses (${controller.businesses.length})",
+        title:
+        //Obx(() =>
+            Text(
+          "all_businesses".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
            // color: Colors.white
-          ),
+         // ),
         )),
         actions: [
           Obx(() => controller.hasNextPage.value 
@@ -454,7 +454,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                   controller.searchText.value = value;
                 },
                 decoration: InputDecoration(
-                  hintText: "Search business by name...",
+                  hintText: "search_business_by_name".tr,
                   hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
@@ -488,7 +488,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                       Icon(Icons.search_off_rounded, size: 64, color: Colors.grey[300]),
                       const SizedBox(height: 16),
                       Text(
-                        "No Businesses Found",
+                        "no_businesses_found".tr,
                         style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],

@@ -126,6 +126,76 @@ class CreateJobController extends GetxController {
   static const List<String> EMPLOYMENT_TYPES = ["Full-time", "Part-time", "Internship", "Freelance", "Contract"];
   static const List<String> CATEGORIES = ["Software Development", "Marketing", "Sales", "Design", "Finance", "Human Resources"];
 
+  // Methods to get translated lists
+  List<String> getJobTypes() {
+    return [
+      'on_site'.tr,
+      'remote'.tr,
+      'hybrid'.tr,
+    ];
+  }
+
+  List<String> getExperienceLevels() {
+    return [
+      'entry'.tr,
+      'mid'.tr,
+      'senior'.tr,
+      'expert'.tr,
+    ];
+  }
+
+  List<String> getEmploymentTypes() {
+    return [
+      'full_time'.tr,
+      'part_time'.tr,
+      'internship'.tr,
+      'freelance'.tr,
+      'contract'.tr,
+    ];
+  }
+
+  List<String> getCategories() {
+    return [
+      'software_development'.tr,
+      'marketing'.tr,
+      'sales'.tr,
+      'design'.tr,
+      'finance'.tr,
+      'human_resources'.tr,
+    ];
+  }
+
+  List<String> getPopularBenefits() {
+    return [
+      'health_insurance'.tr,
+      'flexible_working_hours'.tr,
+      'paid_time_off'.tr,
+      'remote_work_options'.tr,
+      'professional_development'.tr,
+      'stock_options'.tr,
+      'performance_bonus'.tr,
+      'gym_membership'.tr,
+      'free_meals'.tr,
+    ];
+  }
+
+  List<String> getPopularSkills() {
+    return [
+      'php'.tr,
+      'laravel'.tr,
+      'mysql'.tr,
+      'rest_api'.tr,
+      'flutter'.tr,
+      'dart'.tr,
+      'android'.tr,
+      'react_native'.tr,
+      'java'.tr,
+      'python'.tr,
+      'nodejs'.tr,
+      'ui_ux_design'.tr,
+    ];
+  }
+
   final isLoading = false.obs;
 
   void populateFields(Job job) {
@@ -172,7 +242,7 @@ class CreateJobController extends GetxController {
     final businessId = Get.find<BusinessController>().myBusiness.value?.id;
     
     if (businessId == null) {
-      CustomSnackBar.showError(message: "Please Register/Select a Business first");
+      CustomSnackBar.showError(message: 'register_business_first'.tr);
       return;
     }
 
@@ -204,7 +274,7 @@ class CreateJobController extends GetxController {
       
       if (response.success == true) {
         Get.back();
-        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? "Job posting updated successfully" : "Job posting created successfully"));
+        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? 'job_updated_success'.tr : 'job_created_success'.tr));
         
         // Refresh business jobs list
         final bController = Get.find<BusinessController>();
@@ -216,7 +286,7 @@ class CreateJobController extends GetxController {
           bController.fetchJobDetails(editingJobId.value!);
         }
       } else {
-        CustomSnackBar.showError(message: response.message ?? "Failed to save job posting");
+        CustomSnackBar.showError(message: response.message ?? 'job_save_failed'.tr);
       }
     } catch (e) {
       CustomSnackBar.showError(message: e.toString());

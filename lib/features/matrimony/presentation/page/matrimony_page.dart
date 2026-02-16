@@ -29,7 +29,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           backgroundColor: Colors.white,
           centerTitle: true,
           title: Text(
-            "DISCOVER",
+            'discover'.tr,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
@@ -72,7 +72,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               child: IconButton(
                 onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
                 icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800]),
-                tooltip: "Members",
+                tooltip: 'members'.tr,
               ),
             ),
             GetBuilder<FilterController>(
@@ -152,9 +152,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 labelColor: theme.primaryColor,
                 unselectedLabelColor: Colors.grey[600],
                 labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                tabs: const [
-                  Tab(text: "ALL MATCHES"),
-                  Tab(text: "NEWLY JOINED"),
+                tabs: [
+                  Tab(text: 'all_matches'.tr),
+                  Tab(text: 'newly_joined'.tr),
                 ],
               ),
             ),
@@ -173,7 +173,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
                   const SizedBox(height: 16),
                   Text(
-                    "No matches found",
+                    'no_matches_found'.tr,
                     style: TextStyle(
                       color: Colors.grey[500],
                       fontSize: 16,
@@ -202,11 +202,11 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children:  [
             Icon(Icons.people_outline, size: 80, color: Colors.grey),
             SizedBox(height: 16),
             Text(
-              "No more profiles",
+              'no_more_profiles'.tr,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -215,7 +215,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             ),
             SizedBox(height: 8),
             Text(
-              "You have seen all available matches",
+              'seen_all_matches'.tr,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -422,8 +422,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                         if (user.isNew)
                           _buildGlassChip(
                             context,
-                            child: const Text(
-                              "NEW",
+                            child: Text(
+                              'new'.tr,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 10,
@@ -561,10 +561,10 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     if (data is MatrimonyProfile) {
        return UserProfile(
           id: data.id,
-          name: data.personalDetails?.name ?? 'No Name',
+          name: data.personalDetails?.name ?? 'no_name'.tr,
           age: data.age ?? 0,
-          location: "${data.locationDetails?.city ?? 'Unknown'}, ${data.locationDetails?.state ?? ''}",
-          occupation: data.professionalDetails?.jobTitle ?? data.personalDetails?.occupation ?? "Professional",
+          location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
+          occupation: data.professionalDetails?.jobTitle ?? data.personalDetails?.occupation ?? 'professional'.tr,
           imageUrl: (data.personalDetails?.photos != null && data.personalDetails!.photos!.isNotEmpty) 
               ? "${ApiConstants.imageBaseUrl}${data.personalDetails!.photos![0]}" 
               : "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
@@ -582,10 +582,10 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     
     return UserProfile(
       id: data['id'],
-      name: personal['name'] ?? data['name'] ?? 'No Name',
+      name: personal['name'] ?? data['name'] ?? 'no_name'.tr,
       age: int.tryParse(personal['age']?.toString() ?? data['age']?.toString() ?? "0") ?? 0,
       location: "${location['city'] ?? ''}, ${location['state'] ?? ''}",
-      occupation: personal['occupation'] ?? "Professional",
+      occupation: personal['occupation'] ?? 'professional'.tr,
       imageUrl: data['image'] ?? data['imageUrl'] ?? "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
       distance: double.tryParse(data['distance']?.toString() ?? "0") ?? 0.0,
       isNew: data['is_new'] == true,

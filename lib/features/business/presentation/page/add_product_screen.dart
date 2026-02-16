@@ -584,8 +584,8 @@ class AddProductScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Select Image Source',
+            Text(
+              'select_image_source'.tr,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -597,7 +597,7 @@ class AddProductScreen extends StatelessWidget {
               children: [
                 _buildImageSourceOption(
                   icon: Icons.camera_alt,
-                  label: 'Camera',
+                  label: 'camera'.tr,
                   onTap: () {
                     Navigator.pop(context);
                     controller.pickImage(ImageSource.camera);
@@ -605,7 +605,7 @@ class AddProductScreen extends StatelessWidget {
                 ),
                 _buildImageSourceOption(
                   icon: Icons.photo_library,
-                  label: 'Gallery',
+                  label: 'gallery'.tr,
                   onTap: () {
                     Navigator.pop(context);
                     controller.pickImage(ImageSource.gallery);
@@ -661,7 +661,7 @@ class AddProductScreen extends StatelessWidget {
           onPressed: Get.back,
           icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
         ),
-        title: Text("Add Product", style: context.textTheme.titleMedium),
+        title: Text("add_product".tr, style: context.textTheme.titleMedium),
       ),
       body: Form(
         key: controller.formKey,
@@ -675,7 +675,7 @@ class AddProductScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Product Images',
+                    'product_images'.tr,
                     style: context.textTheme.titleMedium,
                   ),
                   Obx(() => Text(
@@ -708,12 +708,12 @@ class AddProductScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Tap to add product images',
+                        'tap_to_add_images'.tr,
                         style: context.textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Camera or Gallery',
+                        'camera_or_gallery'.tr,
                         style: context.textTheme.bodySmall,
                       ),
                     ],
@@ -786,7 +786,7 @@ class AddProductScreen extends StatelessWidget {
               const SizedBox(height: 10),
 
               AppInputTextField(
-                label: "Product Name",
+                label: "product_name".tr,
                 textInputType: TextInputType.text,
                 controller: controller.nameController,
                 hint: const [AutofillHints.name],
@@ -795,7 +795,7 @@ class AddProductScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               AppInputTextField(
-                label: "Product Description",
+                label: "product_description".tr,
                 textInputType: TextInputType.text,
                 controller: controller.descriptionController,
                 hint: const [AutofillHints.name],
@@ -804,7 +804,7 @@ class AddProductScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               AppInputTextField(
-                label: "Product Price",
+                label: "product_price".tr,
                 textInputType: TextInputType.number,
                 controller: controller.priceController,
               ),
@@ -984,7 +984,7 @@ class AddProductScreen extends StatelessWidget {
 
               Obx(() => CustomButton(
                 onPressed: controller.isLoading.value ? null : controller.createProduct,
-                title: controller.isLoading.value ? "Creating..." : "Create Product",
+                title: controller.isLoading.value ? "creating".tr : "create_product".tr,
               )),
 
               // Obx(() => SizedBox(

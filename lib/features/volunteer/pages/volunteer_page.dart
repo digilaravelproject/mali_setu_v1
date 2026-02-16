@@ -90,7 +90,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Community",
+                          "community".tr,
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
                             fontSize: 14,
@@ -98,8 +98,8 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          "Volunteers",
+                        Text(
+                          "volunteers".tr,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 28,
@@ -157,7 +157,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "My Volunteer Profile",
+                                  "my_volunteer_profile".tr,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -165,7 +165,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                                   ),
                                 ),
                                 Text(
-                                  "Manage your contributions",
+                                  "manage_contributions".tr,
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontSize: 12,
@@ -207,7 +207,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "No volunteers found",
+                        "no_volunteers_found".tr,
                         style: TextStyle(color: Colors.grey[500]),
                       ),
                     ],
@@ -229,7 +229,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Available Volunteers",
+                            "available_volunteers".tr,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -246,7 +246,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              "${controller.allVolunteerList.length} Found",
+                              "${controller.allVolunteerList.length} found".tr,
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -351,7 +351,7 @@ class VolunteerCard extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  volunteer.contactPerson ?? "Volunteer",
+                                  volunteer.contactPerson ?? "volunteer".tr,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -360,12 +360,12 @@ class VolunteerCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              _buildStatusChip(volunteer.status ?? "Offline"),
+                              _buildStatusChip(volunteer.status ?? "offline".tr),
                             ],
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            volunteer.organization ?? "Individual Volunteer",
+                            volunteer.organization ?? "individual_volunteer".tr,
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 13,
@@ -394,7 +394,7 @@ class VolunteerCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        volunteer.location ?? "Unknown Location",
+                        volunteer.location ?? "unknown_location".tr,
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -409,7 +409,7 @@ class VolunteerCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        volunteer.contactEmail ?? "No Email",
+                        volunteer.contactEmail ?? "no_email".tr,
                         style: TextStyle(color: Colors.grey[600], fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -609,7 +609,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
         backgroundColor: Colors.white,
         centerTitle: true,
         title: Text(
-          "Volunteer Profile",
+          "volunteer_profile".tr,
           style: textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -655,8 +655,8 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                   color: Colors.grey[300],
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  "Profile not found",
+                Text(
+                  "profile_not_found".tr,
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 16),
@@ -672,7 +672,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text("Create Profile"),
+                  child:  Text("create_profile".tr),
                 ),
               ],
             ),
@@ -715,7 +715,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      userData['name'] ?? "Volunteer",
+                      userData['name'] ?? "volunteer".tr,
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -731,7 +731,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        "Active Volunteer",
+                        "active_volunteer".tr,
                         style: textTheme.bodySmall?.copyWith(
                           color: Colors.green,
                           fontWeight: FontWeight.bold,
@@ -749,7 +749,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                 children: [
                   Expanded(
                     child: _buildInfoCard(
-                      label: "Experience",
+                      label: "experience".tr,
                       value: profile.experience ?? "N/A",
                       icon: Icons.work_outline,
                       color: Colors.orange,
@@ -758,7 +758,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildInfoCard(
-                      label: "Availability",
+                      label: "availability".tr,
                       value: profile.availability ?? "N/A",
                       icon: Icons.access_time,
                       color: Colors.blue,
@@ -773,10 +773,10 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
 
               // 3. Bio Section
               _buildContentSection(
-                title: "About Me",
+                title: "about_me".tr,
                 icon: Icons.person_outline,
                 child: Text(
-                  profile.bio ?? "No bio added yet.",
+                  profile.bio ?? "no_bio_added".tr,
                   style: TextStyle(
                     color: Colors.grey[700],
                     height: 1.5,
@@ -789,7 +789,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
 
               // 4. Skills Section
               _buildContentSection(
-                title: "Skills",
+                title: "skills".tr,
                 icon: Icons.star_outline,
                 child: (profile.skills != null && profile.skills!.isNotEmpty)
                     ? Wrap(
@@ -803,8 +803,8 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                             )
                             .toList(),
                       )
-                    : const Text(
-                        "No skills listed",
+                    :  Text(
+                        "no_skills_listed".tr,
                         style: TextStyle(color: Colors.grey),
                       ),
               ),
@@ -813,7 +813,7 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
 
               // 5. Interests Section
               _buildContentSection(
-                title: "Interests",
+                title: "interests".tr,
                 icon: Icons.favorite_outline,
                 child:
                     (profile.interests != null && profile.interests!.isNotEmpty)
@@ -826,8 +826,8 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
                             )
                             .toList(),
                       )
-                    : const Text(
-                        "No interests listed",
+                    :  Text(
+                        "no_interests_listed".tr,
                         style: TextStyle(color: Colors.grey),
                       ),
               ),
@@ -906,8 +906,8 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Location",
+              Text(
+                "location".tr,
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(height: 2),

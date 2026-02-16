@@ -100,7 +100,7 @@ class NotificationPage extends GetView<NotificationController> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Notifications',
+                    'notifications'.tr,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 20,
@@ -115,7 +115,7 @@ class NotificationPage extends GetView<NotificationController> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${controller.unreadCount.value} New',
+                            '${controller.unreadCount.value} new'.tr,
                             style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                           ),
                         ) 
@@ -125,7 +125,7 @@ class NotificationPage extends GetView<NotificationController> {
               Obx(() => controller.isSelectMode.value
                   ? TextButton(
                       onPressed: controller.toggleSelectMode,
-                      child: const Text("Done"),
+                      child:  Text("done".tr),
                     )
                   : IconButton(
                         onPressed: controller.notifications.isNotEmpty 
@@ -149,8 +149,8 @@ class NotificationPage extends GetView<NotificationController> {
   }) {
     // Determine data from map
     final data = notification.data ?? {};
-    final title = notification.type ?? 'Notification';
-    final message = notification.message ?? 'You have a new notification';
+    final title = notification.type ?? 'notification'.tr;
+    final message = notification.message ?? 'new_notification_message'.tr;
     final isRead = notification.readAt != null;
     
     // Determine visuals based on type or content
@@ -171,7 +171,7 @@ class NotificationPage extends GetView<NotificationController> {
     }
 
     // Format Date
-    String timeString = "Just now";
+    String timeString = "just_now".tr;
     if (notification.createdAt != null) {
       try {
         final date = DateTime.parse(notification.createdAt!);
@@ -344,7 +344,7 @@ class NotificationPage extends GetView<NotificationController> {
                     side: BorderSide(color: theme.primaryColor),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text("Select All"),
+                  child: Text("select_all".tr),
                 ),
               ),
               const SizedBox(width: 16),
@@ -360,7 +360,7 @@ class NotificationPage extends GetView<NotificationController> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 0,
                   ),
-                  child: Text("Delete (${controller.selectedNotifications.length})"),
+                  child: Text("delete (${controller.selectedNotifications.length})".tr),
                 )),
               ),
             ],
@@ -372,9 +372,9 @@ class NotificationPage extends GetView<NotificationController> {
 
   void _showDeleteConfirmDialog(BuildContext context) {
     CustomConfirmDialog.show(
-      title: 'Delete Notifications',
+      title: 'delete_notifications'.tr,
       message: 'Are you sure you want to delete ${controller.selectedNotifications.length} notifications?',
-      confirmText: 'Delete',
+      confirmText: 'delete'.tr,
       confirmColor: Colors.red,
       icon: Icons.delete_outline,
       onConfirm: () {
@@ -391,7 +391,7 @@ class NotificationPage extends GetView<NotificationController> {
           Icon(Icons.notifications_off_outlined, size: 80, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
-            "No Notifications",
+            "no_notifications".tr,
             style: theme.textTheme.titleMedium?.copyWith(
               color: Colors.grey.shade600,
               fontWeight: FontWeight.w600,

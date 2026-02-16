@@ -257,35 +257,35 @@ class DashboardController extends GetxController {
     final theme = Theme.of(context).colorScheme;
     return [
       BtmNavModel(
-        title: "Home",
+        title: "home".tr,
         icon: CupertinoIcons.home,
         selectedIcon: CupertinoIcons.house_fill,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "Business",
+        title: "business".tr,
         icon: Icons.business,
         selectedIcon: Icons.shop,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "Matrimony",
+        title: "matrimony".tr,
         icon: CupertinoIcons.heart,
         selectedIcon: CupertinoIcons.heart_fill,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "Volunteer",
+        title: "volunteer".tr,
         icon: CupertinoIcons.person_2,
         selectedIcon: CupertinoIcons.person_2_fill,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "More",
+        title: "more".tr,
         icon: Icons.more_vert,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,

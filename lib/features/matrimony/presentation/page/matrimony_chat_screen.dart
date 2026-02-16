@@ -200,8 +200,8 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
                 ),
                 child: TextField(
                   controller: controller.messageController,
-                  decoration: const InputDecoration(
-                    hintText: "Type a message...",
+                  decoration:  InputDecoration(
+                    hintText: "type_message".tr,
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
@@ -240,13 +240,13 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
             child: const Icon(Icons.chat_bubble_outline, size: 60, color: Colors.purple),
           ),
           const SizedBox(height: 16),
-          const Text(
-            "No messages yet",
+           Text(
+            "no_messages_yet".tr,
             style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          const Text(
-            "Send a message to start the conversation",
+          Text(
+            "start_conversation".tr,
             style: TextStyle(color: Colors.grey, fontSize: 14),
           ),
         ],

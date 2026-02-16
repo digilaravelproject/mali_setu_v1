@@ -16,20 +16,20 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
         appBar: AppBar(
-          title: const Text("Connection Requests", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+          title:  Text("connection_requests".tr, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
             onPressed: () => Get.back(),
           ),
-          bottom: const TabBar(
+          bottom:  TabBar(
             labelColor: Colors.purple,
             unselectedLabelColor: Colors.grey,
             indicatorColor: Colors.purple,
             tabs: [
-              Tab(text: "Received"),
-              Tab(text: "Sent"),
+              Tab(text: "received".tr),
+              Tab(text: "sent".tr),
             ],
           ),
         ),
@@ -49,7 +49,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
         return _buildLoading();
       }
       if (controller.receivedRequests.isEmpty) {
-        return _buildEmptyState("No received requests yet.");
+        return _buildEmptyState("no_received_requests".tr);
       }
       return ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -67,7 +67,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
         return _buildLoading();
       }
       if (controller.sentRequests.isEmpty) {
-        return _buildEmptyState("No sent requests yet.");
+        return _buildEmptyState("no_sent_requests".tr);
       }
       return ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -210,7 +210,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
                          padding: const EdgeInsets.symmetric(vertical: 12),
                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                        ),
-                       child: const Text("Decline", style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text("Decline", style: TextStyle(fontWeight: FontWeight.bold)),
                      ),
                    ),
                    const SizedBox(width: 12),
@@ -224,7 +224,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
                          padding: const EdgeInsets.symmetric(vertical: 12),
                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                        ),
-                       child: const Text("Accept", style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text("Accept", style: TextStyle(fontWeight: FontWeight.bold)),
                      ),
                    ),
                  ],

@@ -24,7 +24,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
               pinned: true,
               centerTitle: false,
               title: Text(
-                'My Businesses',
+                'my_businesses'.tr,
                 style: context.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
@@ -42,7 +42,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                 IconButton(
                   onPressed: () => Get.toNamed(AppRoutes.jobAnalytics),
                   icon: const Icon(Icons.analytics_outlined),
-                  tooltip: 'Job Analytics',
+                  tooltip: 'job_analytics'.tr,
                 ),
               ],
             ),
@@ -82,7 +82,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                "Expand Your Business Network",
+                                "expand_network".tr,
                                 style: context.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -92,12 +92,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "Add another business to increase your reach and connect with more customers",
+                          "add_another_business".tr,
                           style: context.textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 16),
                         CustomButton(
-                          title: "Add New Business",
+                          title: "add_new_business".tr,
                           height: 40,
                           borderRadius: 12,
                           onPressed: () {
@@ -119,7 +119,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "My Businesses (${businesses.length})",
+                      "my_businesses (${businesses.length})".tr,
                       style: context.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -131,9 +131,9 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
 
             // Business List
             if (businesses.isEmpty)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
-                  child: Text("No Businesses Found"),
+                  child: Text("no_businesses_found".tr),
                 ),
               )
             else
@@ -199,7 +199,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                         children: [
                           Expanded(
                             child: Text(
-                              business.businessName ?? 'Unnamed Business',
+                              business.businessName ?? 'unnamed_business'.tr,
                               style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -225,7 +225,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        business.category?.name ?? 'Category',
+                        business.category?.name ?? 'category'.tr,
                         style: context.textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 8),
@@ -269,21 +269,21 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                 _buildStatItem(
                   context: context,
                   icon: Icons.inventory,
-                  label: 'Products',
+                  label: 'products'.tr,
                   value: '${business.products?.length ?? 0}',
                   color: Colors.blue,
                 ),
                 _buildStatItem(
                   context: context,
                   icon: Icons.design_services,
-                  label: 'Services',
+                  label: 'services'.tr,
                   value: '${business.services?.length ?? 0}',
                   color: Colors.purple,
                 ),
                 _buildStatItem(
                   context: context,
                   icon: Icons.currency_rupee,
-                  label: 'Revenue',
+                  label: 'revenue'.tr,
                   value: '0', // No revenue in API yet
                   color: Colors.green,
                 ),
@@ -366,7 +366,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       _buildIconActionButton(
                         context: context,
                         icon: Icons.visibility_outlined,
-                        label: 'View',
+                        label: 'view'.tr,
                         color: Colors.blue.shade600,
                         onPressed: () {
                           // TODO: Pass business ID
@@ -378,7 +378,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       _buildIconActionButton(
                         context: context,
                         icon: Icons.edit_outlined,
-                        label: 'Edit',
+                        label: 'edit'.tr,
                         color: Colors.green.shade600,
                         onPressed: () {
                           Get.toNamed(AppRoutes.regBusiness, arguments: business);
@@ -389,7 +389,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       _buildIconActionButton(
                         context: context,
                         icon: Icons.delete_outline,
-                        label: 'Delete',
+                        label: 'delete'.tr,
                         color: Colors.red.shade600,
                         onPressed: () {
                           Get.dialog(
@@ -410,12 +410,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
-                                      "Delete Business?",
+                                      "delete_business".tr,
                                       style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      "Are you sure you want to delete this business? This action cannot be undone.",
+                                      "delete_confirmation".tr,
                                       textAlign: TextAlign.center,
                                       style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                                     ),
@@ -424,7 +424,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                                       children: [
                                         Expanded(
                                           child: CustomOutlinedButton(
-                                            title: "Cancel",
+                                            title: "cancel".tr,
                                             height: 44,
                                             onPressed: () => Get.back(),
                                           ),
@@ -432,7 +432,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: CustomButton(
-                                            title: "Delete",
+                                            title: "delete".tr,
                                             height: 44,
                                             onPressed: () {
                                               Get.back(); // Dismiss confirmation dialog first

@@ -154,8 +154,8 @@ import '../controller/register_controller.dart';
                 textInputType: TextInputType.number,
                 validator: FormValidator.pincode,
                 controller: controller.pinCodeCtrl,
-                endIcon: controller.isFetchingPincode.value 
-                    ? null 
+                endIcon: controller.isFetchingPincode.value
+                    ? null
                     : Icons.location_on,
                 suffixWidget: controller.isFetchingPincode.value
                     ? const Padding(
@@ -440,7 +440,7 @@ class RegisterPage extends GetWidget<RegisterController> {
           icon: Icon(AppAssets.backArrow),
           style: IconButton.styleFrom(side: BorderSide.none),
         ),
-        title: const Text("Create Account"),
+        title:  Text("create_account".tr),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -450,11 +450,11 @@ class RegisterPage extends GetWidget<RegisterController> {
             children: [
               _buildFormSection(
                 context,
-                title: "Personal Information",
+                title: "personal_information".tr,
                 icon: Icons.person_outline_rounded,
                 children: [
                   AppInputTextField(
-                    label: "Full Name",
+                    label: "full_name".tr,
                     textInputType: TextInputType.name,
                     validator: FormValidator.name,
                     controller: controller.nameCtrl,
@@ -462,7 +462,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Email ID",
+                    label: "email_id".tr,
                     textInputType: TextInputType.emailAddress,
                     validator: FormValidator.email,
                     controller: controller.emailCtrl,
@@ -470,7 +470,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Date of Birth",
+                    label: "date_of_birth".tr,
                     textInputType: TextInputType.none,
                     controller: controller.ageCtrl,
                     validator: (value) {
@@ -517,7 +517,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Mobile Number",
+                    label: "mobile_number".tr,
                     textInputType: TextInputType.phone,
                     validator: FormValidator.mobile,
                     controller: controller.mobileCtrl,
@@ -528,7 +528,7 @@ class RegisterPage extends GetWidget<RegisterController> {
               const SizedBox(height: 20),
               _buildFormSection(
                 context,
-                title: "Caste Certificate",
+                title: "caste_certificate".tr,
                 icon: Icons.description_outlined,
                 children: [
                   Obx(() => _buildCasteCertificateUpload(context)),
@@ -537,20 +537,20 @@ class RegisterPage extends GetWidget<RegisterController> {
               const SizedBox(height: 20),
               _buildFormSection(
                 context,
-                title: "Address Details",
+                title: "address_details".tr,
                 icon: Icons.location_on_outlined,
                 children: [
                   AppInputTextField(
-                    label: "Address",
+                    label: "address".tr,
                     textInputType: TextInputType.text,
                     controller: controller.addressCtrl,
                     validator: (value) =>
-                        FormValidator.emptycheck(value, "Address"),
+                        FormValidator.emptycheck(value, "address".tr),
                     iconData: CupertinoIcons.location_solid,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Nearby Location",
+                    label: "nearby_location".tr,
                     textInputType: TextInputType.text,
                     controller: controller.nearbyLocationCtrl,
                     validator: (value) =>
@@ -559,7 +559,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   Obx(() => AppInputTextField(
-                    label: "Pin Code",
+                    label: "pin_code".tr,
                     textInputType: TextInputType.number,
                     validator: FormValidator.pincode,
                     controller: controller.pinCodeCtrl,
@@ -585,23 +585,23 @@ class RegisterPage extends GetWidget<RegisterController> {
                     children: [
                       Expanded(
                         child: AppInputTextField(
-                          label: "State",
+                          label: "state".tr,
                           textInputType: TextInputType.none,
                           controller: controller.stateCtrl,
                           validator: controller.validateState,
                           enable: false,
-                          hintText: "Auto-filled",
+                          hintText: "auto_filled".tr,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: AppInputTextField(
-                          label: "District",
+                          label: "district".tr,
                           textInputType: TextInputType.none,
                           controller: controller.districtCtrl,
                           validator: controller.validateDistrict,
                           enable: false,
-                          hintText: "Auto-filled",
+                          hintText: "auto_filled".tr,
                         ),
                       ),
                     ],
@@ -611,18 +611,18 @@ class RegisterPage extends GetWidget<RegisterController> {
                     children: [
                       Expanded(
                         child: AppInputTextField(
-                          label: "City",
+                          label: "city".tr,
                           textInputType: TextInputType.none,
                           controller: controller.cityCtrl,
                           validator: controller.validateCity,
                           enable: false,
-                          hintText: "Auto-filled",
+                          hintText: "auto_filled".tr,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: AppInputTextField(
-                          label: "Road Number",
+                          label: "road_number".tr,
                           textInputType: TextInputType.text,
                           validator: FormValidator.roadNumber,
                           controller: controller.roadNumberCtrl,
@@ -635,7 +635,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     children: [
                       Expanded(
                         child: AppInputTextField(
-                          label: "Sector",
+                          label: "sector".tr,
                           controller: controller.sectorCtrl,
                           validator: (value) =>
                               FormValidator.emptycheck(value, "Sector"),
@@ -645,7 +645,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: AppInputTextField(
-                          label: "Destination",
+                          label: "destination".tr,
                           textInputType: TextInputType.text,
                           validator: (value) =>
                               FormValidator.emptycheck(value, "Destination"),
@@ -659,25 +659,25 @@ class RegisterPage extends GetWidget<RegisterController> {
               const SizedBox(height: 20),
               _buildFormSection(
                 context,
-                title: "Professional Details",
+                title: "professional_details".tr,
                 icon: Icons.business_center_outlined,
                 children: [
                   AppInputTextField(
-                    label: "Company Name",
+                    label: "company_name".tr,
                     textInputType: TextInputType.text,
                     controller: controller.companynameCtrl,
                     iconData: CupertinoIcons.building_2_fill,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Department Name",
+                    label: "department_name".tr,
                     textInputType: TextInputType.text,
                     controller: controller.deptCtrl,
                     iconData: CupertinoIcons.group_solid,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "User Type",
+                    label: "user_type".tr,
                     isDropdown: true,
                     controller: controller.userTypeCtrl,
                     validator: (value) =>
@@ -687,7 +687,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Occupation",
+                    label: "occupation".tr,
                     textInputType: TextInputType.text,
                     validator: (value) =>
                         FormValidator.emptycheck(value, "Occupation"),
@@ -696,7 +696,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Designation",
+                    label: "designation".tr,
                     textInputType: TextInputType.text,
                     validator: (value) => FormValidator.emptycheck(value, "Designation"),
                     controller: controller.designationCtrl,
@@ -704,14 +704,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
-                    label: "Referral Code (Optional)",
+                    label: "referral_code_optional".tr,
                     textInputType: TextInputType.text,
                     controller: controller.referralCtrl,
                     iconData: CupertinoIcons.share_up,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "* Referral code is optional",
+                    "referral_code_note".tr,
                     style: textTheme.bodySmall?.copyWith(
                       color: theme.hintColor,
                       fontStyle: FontStyle.italic,
@@ -722,12 +722,12 @@ class RegisterPage extends GetWidget<RegisterController> {
               const SizedBox(height: 20),
               _buildFormSection(
                 context,
-                title: "Security",
+                title: "security".tr,
                 icon: Icons.lock_outline_rounded,
                 children: [
                   Obx(
                         () => AppInputTextField(
-                      label: "Password",
+                      label: "password".tr,
                       isObscure: !controller.isPasswordValue.value,
                       validator: FormValidator.password,
                       controller: controller.passwordCtrl,
@@ -741,7 +741,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   const SizedBox(height: 12),
                   Obx(
                         () => AppInputTextField(
-                      label: "Confirm Password",
+                      label: "confirm_password".tr,
                       isObscure: !controller.isCnfPasswordValue.value,
                       validator: (value) => FormValidator.confirmPassword(
                         value,
@@ -760,7 +760,7 @@ class RegisterPage extends GetWidget<RegisterController> {
               const SizedBox(height: 30),
               CustomButton(
                 onPressed: controller.onRegister,
-                title: "Create Account",
+                title: "create_account".tr,
                 height: 50,
               ),
               SizedBox(height: context.mediaQueryPadding.bottom + 16),
@@ -874,8 +874,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                     const SizedBox(height: 12),
                     Text(
                       controller.casteCertificatePath.value.isEmpty
-                          ? "Upload Caste Certificate"
-                          : "Certificate Uploaded",
+                          ? "upload_caste_certificate".tr
+                          : "certificate_uploaded".tr,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,

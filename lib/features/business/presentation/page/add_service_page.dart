@@ -447,8 +447,8 @@ class AddServiceScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Select Image Source',
+            Text(
+              'select_image_source'.tr,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -460,7 +460,7 @@ class AddServiceScreen extends StatelessWidget {
               children: [
                 _buildImageSourceOption(
                   icon: Icons.camera_alt,
-                  label: 'Camera',
+                  label: 'camera'.tr,
                   onTap: () {
                     Navigator.pop(context);
                     controller.pickImage(ImageSource.camera);
@@ -468,7 +468,7 @@ class AddServiceScreen extends StatelessWidget {
                 ),
                 _buildImageSourceOption(
                   icon: Icons.photo_library,
-                  label: 'Gallery',
+                  label: 'gallery'.tr,
                   onTap: () {
                     Navigator.pop(context);
                     controller.pickImage(ImageSource.gallery);
@@ -524,7 +524,7 @@ class AddServiceScreen extends StatelessWidget {
           onPressed: Get.back,
           icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
         ),
-        title: Text("Add Service", style: context.textTheme.titleMedium),
+        title: Text("add_service".tr, style: context.textTheme.titleMedium),
       ),
       body: Form(
         key: controller.formKey,
@@ -538,7 +538,7 @@ class AddServiceScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Upload Images',
+                    'upload_images'.tr,
                     style: context.textTheme.titleMedium,
                   ),
                   Obx(() => Text(
@@ -571,12 +571,12 @@ class AddServiceScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Tap to add product images',
+                        'tap_to_add_images'.tr,
                         style: context.textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Camera or Gallery (Max 5)',
+                        'camera_or_gallery'.tr,
                         style: context.textTheme.bodySmall,
                       ),
                     ],
@@ -647,7 +647,7 @@ class AddServiceScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Add',
+                                  'add'.tr,
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: context.theme.focusColor,
@@ -664,7 +664,7 @@ class AddServiceScreen extends StatelessWidget {
               const SizedBox(height: 10),
 
               AppInputTextField(
-                label: "Service Name",
+                label: "service_name".tr,
                 textInputType: TextInputType.text,
                 controller: controller.nameController,
                 hint: const [AutofillHints.name],
@@ -673,7 +673,7 @@ class AddServiceScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               AppInputTextField(
-                label: "Service Description",
+                label: "service_description".tr,
                 textInputType: TextInputType.text,
                 controller: controller.descriptionController,
                 hint: const [AutofillHints.name],
@@ -683,7 +683,7 @@ class AddServiceScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               AppInputTextField(
-                label: "Service Price",
+                label: "service_price".tr,
                 textInputType: TextInputType.number,
                 controller: controller.priceController,
               ),
@@ -692,7 +692,7 @@ class AddServiceScreen extends StatelessWidget {
 
               Obx(() => CustomButton(
                 onPressed: controller.isLoading.value ? null : controller.createProduct,
-                title: controller.isLoading.value ? "Creating..." : "Create Service",
+                title: controller.isLoading.value ? "creating".tr : "create_service".tr,
               )),
 
               const SizedBox(height: 20),

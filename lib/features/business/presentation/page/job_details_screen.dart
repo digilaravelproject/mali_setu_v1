@@ -37,16 +37,16 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       createJobCtrl.populateFields(job);
       Get.toNamed(AppRoutes.createJob);
     } else {
-      CustomSnackBar.showError(message: "Could not initialize job editor. Please try again.");
+      CustomSnackBar.showError(message: 'job_editor_init_error'.tr);
     }
   }
 
   void _handleDelete(int? jobId) {
     if (jobId == null) return;
     CustomConfirmDialog.show(
-      title: "Delete Job Posting",
-      message: "Are you sure you want to delete this job? This action cannot be undone.",
-      confirmText: "Delete",
+      title: 'delete_job_posting'.tr,
+      message: 'delete_job_confirmation'.tr,
+      confirmText: 'delete'.tr,
       confirmColor: Colors.redAccent,
       icon: Icons.delete_forever_outlined,
       onConfirm: () {
@@ -59,11 +59,11 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     if (job.id == null) return;
     final bool currentlyActive = job.isActive ?? false;
     CustomConfirmDialog.show(
-      title: currentlyActive ? "Deactivate Job" : "Activate Job",
+      title: currentlyActive ? 'deactivate_job'.tr : 'activate_job'.tr,
       message: currentlyActive 
-          ? "Are you sure you want to deactivate this job posting? It will no longer be visible to applicants."
-          : "Are you sure you want to activate this job posting? It will become visible to applicants.",
-      confirmText: currentlyActive ? "Deactivate" : "Activate",
+          ? 'deactivate_job_confirmation'.tr
+          : 'activate_job_confirmation'.tr,
+      confirmText: currentlyActive ? 'deactivate'.tr : 'activate'.tr,
       confirmColor: currentlyActive ? Colors.redAccent : Colors.green,
       onConfirm: () {
         controller.toggleJobStatus(job.id!);
@@ -127,33 +127,33 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                     ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
                             Icon(Icons.edit, size: 20, color: Colors.blue),
                             SizedBox(width: 12),
-                            Text("Edit Job"),
+                            Text('edit_job'.tr),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'toggle',
                         child: Row(
                           children: [
                             Icon(Icons.visibility_off, size: 20, color: Colors.orange),
                             SizedBox(width: 12),
-                            Text("Toggle Visibility"),
+                            Text('toggle_visibility'.tr),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
                             Icon(Icons.delete_outline, size: 20, color: Colors.red),
                             SizedBox(width: 12),
-                            Text("Delete Job"),
+                            Text('delete_job'.tr),
                           ],
                         ),
                       ),
@@ -220,7 +220,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                             ),
                           const SizedBox(height: 8),
                           Text(
-                            job.title ?? 'No Title',
+                            job.title ?? 'no_title'.tr,
                             style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w800),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -232,7 +232,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  job.business?.businessName ?? 'Unknown Company',
+                                  job.business?.businessName ?? 'unknown_company'.tr,
                                   style: const TextStyle(color: Colors.white70, fontSize: 14),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -256,27 +256,27 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                     // Quick Stats Row
                     Row(
                       children: [
-                        _buildStatCard(context, Icons.currency_rupee, "Salary", job.salaryRange ?? "N/A"),
+                        _buildStatCard(context, Icons.currency_rupee, 'salary'.tr, job.salaryRange ?? "N/A"),
                         const SizedBox(width: 12),
-                        _buildStatCard(context, Icons.work_outline, "Type", job.jobType ?? "N/A"),
+                        _buildStatCard(context, Icons.work_outline, 'job_type'.tr, job.jobType ?? "N/A"),
                         const SizedBox(width: 12),
-                        _buildStatCard(context, Icons.groups_outlined, "Level", job.experienceLevel ?? "Entry"),
+                        _buildStatCard(context, Icons.groups_outlined, 'experience_level'.tr, job.experienceLevel ?? 'entry_level'.tr),
                       ],
                     ),
                     const SizedBox(height: 24),
 
                     // Section: Overview
-                    _buildSectionHeader(context, "Overview"),
+                    _buildSectionHeader(context, 'overview'.tr),
                     const SizedBox(height: 12),
                     Text(
-                      job.description ?? "No description available.",
+                      job.description ?? 'no_description'.tr,
                       style: context.textTheme.bodyMedium?.copyWith(height: 1.5, color: context.textTheme.bodyMedium?.color?.withOpacity(0.8)),
                     ),
                     const SizedBox(height: 24),
 
                     // Section: Requirements
                     if (job.requirements != null && job.requirements!.isNotEmpty) ...[
-                      _buildSectionHeader(context, "Requirements"),
+                      _buildSectionHeader(context, 'requirements'.tr),
                       const SizedBox(height: 12),
                       Text(
                         job.requirements!,
@@ -287,7 +287,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
                     // Section: Skills
                     if (job.skillsRequired != null && job.skillsRequired!.isNotEmpty) ...[
-                      _buildSectionHeader(context, "Required Skills"),
+                      _buildSectionHeader(context, 'required_skills'.tr),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
@@ -299,7 +299,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
                     // Section: Benefits
                     if (job.benefits != null && job.benefits!.isNotEmpty) ...[
-                      _buildSectionHeader(context, "Benefits"),
+                      _buildSectionHeader(context, 'benefits'.tr),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
@@ -311,7 +311,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
                     // Section: About Business
                     if (job.business != null) ...[
-                      _buildSectionHeader(context, "About ${job.business?.businessName}"),
+                      _buildSectionHeader(context, "${'about'.tr} ${job.business?.businessName}"),
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -324,15 +324,15 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              job.business?.description ?? "No company information provided.",
+                              job.business?.description ?? 'no_company_info'.tr,
                               style: context.textTheme.bodySmall,
                             ),
                             const Divider(height: 24),
-                            _buildBusinessInfo(Icons.language, "Website", job.business?.website ?? "N/A"),
+                            _buildBusinessInfo(Icons.language, 'website'.tr, job.business?.website ?? "N/A"),
                             const SizedBox(height: 8),
-                            _buildBusinessInfo(Icons.email_outlined, "Email", job.business?.contactEmail ?? "N/A"),
+                            _buildBusinessInfo(Icons.email_outlined, 'email'.tr, job.business?.contactEmail ?? "N/A"),
                             const SizedBox(height: 8),
-                            _buildBusinessInfo(Icons.phone_outlined, "Phone", job.business?.contactPhone ?? "N/A"),
+                            _buildBusinessInfo(Icons.phone_outlined, 'phone'.tr, job.business?.contactPhone ?? "N/A"),
                           ],
                         ),
                       ),
@@ -341,7 +341,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
                     // Section: Similar Jobs
                     if (similarJobs.isNotEmpty) ...[
-                      _buildSectionHeader(context, "Similar Jobs"),
+                      _buildSectionHeader(context, 'similar_jobs'.tr),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 140,
@@ -506,9 +506,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(job.title ?? "Job Title", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(job.title ?? 'job_title_fallback'.tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 4),
-            Text(job.business?.businessName ?? "Company", style: const TextStyle(fontSize: 12, color: Colors.grey), maxLines: 1),
+            Text(job.business?.businessName ?? 'company_fallback'.tr, style: const TextStyle(fontSize: 12, color: Colors.grey), maxLines: 1),
             const Spacer(),
             Row(
               children: [
@@ -560,7 +560,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  isMyJob ? "View Appliers" : (hasApplied ? "Applied" : "Apply Now"),
+                  isMyJob ? 'view_appliers'.tr : (hasApplied ? 'applied'.tr : 'apply_now'.tr),
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),

@@ -101,7 +101,7 @@ class HomePage extends GetWidget<HomeController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Welcome Back,",
+                            'welcome_back_comma'.tr,
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.9),
                               fontSize: 12,
@@ -203,7 +203,7 @@ class HomePage extends GetWidget<HomeController> {
                     child: TextField(
                       readOnly: true,
                       decoration: InputDecoration(
-                        hintText: "Search here...",
+                        hintText: 'search_here'.tr,
                         hintStyle: TextStyle(
                           color: Colors.grey[400],
                           fontSize: 14,
@@ -312,7 +312,7 @@ class HomePage extends GetWidget<HomeController> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Categories",
+                              'categories'.tr,
                               style: context.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 18,
@@ -330,7 +330,7 @@ class HomePage extends GetWidget<HomeController> {
                               },
                               borderRadius: BorderRadius.circular(8),
                               child: Text(
-                                "View All",
+                                'view_all'.tr,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: theme.primaryColor,
@@ -374,10 +374,10 @@ class HomePage extends GetWidget<HomeController> {
                         // 5. Promotional Banners
                         _buildPromoCard(
                           context,
-                          title: "Register your Business",
-                          subtitle: "Showcase your ideas and generate leads",
+                          title: 'register_your_business'.tr,
+                          subtitle: 'showcase_ideas'.tr,
                           image: "https://img.freepik.com/free-vector/modern-business-team-working-open-office-space_74855-5541.jpg",
-                          buttonText: "Start Now",
+                          buttonText: 'start_now'.tr,
                           onTap: () => Get.toNamed(AppRoutes.regBusiness),
                           color1: const Color(0xFF6B8EFF),
                           color2: const Color(0xFF536DFE),
@@ -387,10 +387,10 @@ class HomePage extends GetWidget<HomeController> {
 
                         _buildPromoCard(
                           context,
-                          title: "Register Matrimony",
-                          subtitle: "Find your soulmate for a journey of love",
+                          title: 'register_matrimony'.tr,
+                          subtitle: 'find_soulmate'.tr,
                           image: "https://img.freepik.com/free-vector/wedding-couple-love_23-2148633454.jpg",
-                          buttonText: "Join Now",
+                          buttonText: 'join_now'.tr,
                           onTap: () => Get.toNamed(AppRoutes.regMatrimony),
                           color1: const Color(0xFFF48FB1),
                           color2: const Color(0xFFE91E63),
@@ -576,7 +576,7 @@ class HomePage extends GetWidget<HomeController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "All Categories",
+                "all_categories".tr,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),

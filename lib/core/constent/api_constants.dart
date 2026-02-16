@@ -37,6 +37,7 @@ class ApiConstants {
     
     static const String getCategory = "category";
     static const String getCategoryDetails = "category";
+    static const String registerCategory = "category/register";
 
     static const String getCategoryBusiness = "business/category";
 

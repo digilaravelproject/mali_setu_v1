@@ -112,7 +112,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Text(
-              "Apply for Job",
+              "apply_for_job".tr,
               style: context.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -149,7 +149,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
                             side: BorderSide(color: context.theme.primaryColor),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text(_currentStep == 0 ? "CANCEL" : "BACK"),
+                          child: Text(_currentStep == 0 ? "cancel".tr : "back".tr),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -163,7 +163,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: Text(_currentStep == 2 ? "SUBMIT" : "CONTINUE"),
+                          child: Text(_currentStep == 2 ? "submit".tr : "continue".tr),
                         ),
                       ),
                     ],
@@ -180,11 +180,11 @@ class _JobApplyFormState extends State<JobApplyForm> {
   Widget _buildCustomStepperHeader() {
     return Row(
       children: [
-        _buildStepIndicator(0, "Letter"),
+        _buildStepIndicator(0, "letter".tr),
         _buildStepConnector(0),
-        _buildStepIndicator(1, "Resume"),
+        _buildStepIndicator(1, "resume".tr),
         _buildStepConnector(1),
-        _buildStepIndicator(2, "Info"),
+        _buildStepIndicator(2, "info".tr),
       ],
     );
   }
@@ -249,7 +249,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
           controller: _coverLetterController,
           maxLines: 6,
           decoration: InputDecoration(
-            label: const Text("Cover Letter"),
+            label: Text("cover_letter".tr),
             alignLabelWithHint: true,
             hintText: "Describe why you are a good fit for this position...",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -276,8 +276,8 @@ class _JobApplyFormState extends State<JobApplyForm> {
                     children: [
                       Icon(Icons.cloud_upload_outlined, size: 48, color: context.theme.primaryColor),
                       const SizedBox(height: 12),
-                      const Text(
-                        "Tap to Upload Resume",
+                      Text(
+                        "tap_to_upload_resume".tr,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
@@ -299,7 +299,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
           controller: _additionalInfoController,
           maxLines: 4,
           decoration: InputDecoration(
-            label: const Text("Additional Information"),
+            label:  Text("additional_information".tr),
             alignLabelWithHint: true,
             hintText: "Any other details? (Optional)",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

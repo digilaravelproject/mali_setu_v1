@@ -35,7 +35,7 @@ class SavedSearchSheet extends StatelessWidget {
             ).marginOnly(bottom: 16),
           ),
           Text(
-            "Saved Searches",
+            'saved_searches'.tr,
             style: context.textTheme.headlineSmall,
           ),
            Padding(
@@ -44,11 +44,11 @@ class SavedSearchSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Your Saved Search...",
+                  'your_saved_search'.tr,
                   style: context.textTheme.titleMedium,
                 ),
                 Text(
-                  "Total (75)",
+                  "${'total'.tr} (75)",
                   style: context.textTheme.titleMedium?.copyWith(
                     color: context.theme.primaryColor,
                   ),
@@ -73,7 +73,7 @@ class SavedSearchSheet extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Search Title",
+                            'search_title'.tr,
                             style: context.textTheme.labelMedium,
                           ),
                           Icon(
@@ -84,13 +84,13 @@ class SavedSearchSheet extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        "${index * 7} Matches",
+                        "${index * 7} ${'matches'.tr}",
                         style: context.textTheme.titleLarge,
                       ),
                       Center(
                         child: BgGradientBorder(
                           child: Text(
-                            "Show Matches",
+                            'show_matches'.tr,
                             style: context.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                               color: context.theme.primaryColor,

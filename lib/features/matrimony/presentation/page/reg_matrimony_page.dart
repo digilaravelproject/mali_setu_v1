@@ -19,7 +19,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           onPressed: Get.back,
           icon: Icon(AppAssets.backArrow),
         ),
-        title: const Text("Matrimony Registration"),
+        title:  Text("register_matrimony".tr),
       ),
       body: Obx(
         () => Column(
@@ -53,13 +53,13 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
               if (controller.currentStep.value > 0)
                 Expanded(
                   child: CustomOutlinedButton(
-                    title: "Back",
+                    title: "back".tr,
                     onPressed: controller.previousStep,
                   ).marginOnly(right: 8),
                 ),
               Expanded(
                 child: CustomButton(
-                  title: controller.currentStep.value == 3 ? "Register" : "Next",
+                  title: controller.currentStep.value == 3 ? "register".tr : "next".tr,
                   onPressed: controller.currentStep.value == 3
                       ? controller.onRegister
                       : controller.nextStep,
@@ -145,7 +145,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStepHeader("Personal Details", "Start with your basic info"),
+        _buildStepHeader("personal_details".tr, "personal_details_sub".tr),
         
         Card(
           elevation: 0,
@@ -153,17 +153,17 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 16,right: 16,bottom: 16),
             child: Column(
               children: [
                 AppInputTextField(
                   controller: controller.nameCtrl,
-                  label: "Full Name *",
+                  label: "full_name".tr,
                 ),
                 const SizedBox(height: 12),
                 
                 Obx(() => SelectionTile(
-                  label: "Profile Created By *",
+                  label: "profile_created_by".tr,
                   value: controller.profileCreatedBy.value,
                   icon: Icons.person_add_alt,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -172,7 +172,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Gender *",
+                  label: "gender".tr,
                   value: controller.gender.value,
                   icon: Icons.person_outline,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -181,7 +181,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Date of Birth *",
+                  label: "date_of_birth".tr,
                   value: controller.rxDob.value,
                   icon: Icons.calendar_today,
                   onTap: () => controller.selectDate(context),
@@ -193,7 +193,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     Expanded(
                       child: AppInputTextField(
                         controller: controller.heightCtrl,
-                        label: "Height (ft) *",
+                        label: "height".tr,
                         hintText: "5.6",
                       ),
                     ),
@@ -201,7 +201,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     Expanded(
                       child: AppInputTextField(
                         controller: controller.weightCtrl,
-                        label: "Weight (kg) *",
+                        label: "weight".tr,
                         hintText: "65",
                       ),
                     ),
@@ -210,7 +210,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Complexion *",
+                  label: "complexion".tr,
                   value: controller.complexion.value,
                   icon: Icons.face,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -219,7 +219,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Marital Status *",
+                  label: "marital_status".tr,
                   value: controller.maritalStatus.value,
                   icon: Icons.favorite_border,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -228,7 +228,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Physical Status *",
+                  label: "physical_status".tr,
                   value: controller.physicalStatus.value,
                   icon: Icons.accessibility_new,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -237,7 +237,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                  const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Language *",
+                  label: "language".tr,
                   value: controller.language.value,
                   icon: Icons.language,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -246,7 +246,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                  const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Citizenship *",
+                  label: "citizenship".tr,
                   value: controller.citizenship.value,
                   icon: Icons.flag_outlined,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -265,7 +265,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStepHeader("Religious & Horoscope", "Your astrological details"),
+        _buildStepHeader("religious_horoscope".tr, "religious_horoscope_sub".tr),
 
         Card(
           elevation: 0,
@@ -277,7 +277,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
             child: Column(
               children: [
                 Obx(() => SelectionTile(
-                  label: "Religion *",
+                  label: "religion".tr,
                   value: controller.religion.value,
                   icon: Icons.temple_hindu,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -287,12 +287,12 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 AppInputTextField(
                   controller: controller.casteCtrl,
-                  label: "Caste *",
+                  label: "caste".tr,
                 ),
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Star *",
+                  label: "star".tr,
                   value: controller.star.value,
                   icon: Icons.star_border,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -301,7 +301,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Raasi *",
+                  label: "raasi".tr,
                   value: controller.raasi.value,
                   icon: Icons.nightlight_round,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -310,7 +310,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                  Obx(() => SelectionTile(
-                  label: "Manglik *",
+                  label: "manglik".tr,
                   value: controller.manglik.value,
                   icon: Icons.warning_amber_rounded,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -319,7 +319,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Dosh *",
+                  label: "dosh".tr,
                   value: controller.dosh.value,
                   icon: Icons.error_outline,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -338,7 +338,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStepHeader("Education & Career", "Qualifications & Occupation"),
+        _buildStepHeader("education_career".tr, "education_career_sub".tr),
 
         Card(
           elevation: 0,
@@ -350,7 +350,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
             child: Column(
               children: [
                  Obx(() => SelectionTile(
-                  label: "Highest Qualification *",
+                  label: "highest_qualification".tr,
                   value: controller.education.value,
                   icon: Icons.school_outlined,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -360,12 +360,12 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 AppInputTextField(
                   controller: controller.collegeCtrl,
-                  label: "College / University *",
+                  label: "college".tr,
                 ),
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "Employment Type *",
+                  label: "employment_type".tr,
                   value: controller.employmentType.value,
                   icon: Icons.work_outline,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -375,20 +375,20 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 AppInputTextField(
                   controller: controller.jobTitleCtrl,
-                  label: "Job Title *",
+                  label: "job_title".tr,
                 ),
                 const SizedBox(height: 12),
 
                 AppInputTextField(
                   controller: controller.companyCtrl,
-                  label: "Company Name *",
+                  label: "company_name".tr,
                 ),
                 const SizedBox(height: 12),
 
                  AppInputTextField(
                   controller: controller.annualIncomeCtrl,
-                  label: "Annual Income *",
-                  hintText: "e.g. 10 Lakhs",
+                  label: "annual_income".tr,
+                  hintText: "annual_income".tr,
                   textInputType: TextInputType.number,
                 ),
               ],
@@ -404,7 +404,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildStepHeader("Family & Lifestyle", "Family background & habits"),
+        _buildStepHeader("family_lifestyle".tr, "family_lifestyle_sub".tr),
 
         Card(
           elevation: 0,
@@ -417,7 +417,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
               children: [
                  // Family
                  Obx(() => SelectionTile(
-                  label: "Family Type *",
+                  label: "family_type".tr,
                   value: controller.familyType.value,
                   icon: Icons.family_restroom,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -426,7 +426,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                  Obx(() => SelectionTile(
-                  label: "Family Class *",
+                  label: "family_class".tr,
                   value: controller.familyClass.value,
                   icon: Icons.monetization_on_outlined,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -435,7 +435,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
 
                  Obx(() => SelectionTile(
-                  label: "Family Value *",
+                  label: "family_value".tr,
                   value: controller.familyValue.value,
                   icon: Icons.volunteer_activism,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -445,19 +445,19 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 AppInputTextField(
                   controller: controller.fatherOccupationCtrl,
-                  label: "Father's Occupation *",
+                  label: "father_occupation".tr,
                 ),
                 const SizedBox(height: 12),
                  AppInputTextField(
                   controller: controller.motherOccupationCtrl,
-                  label: "Mother's Occupation *",
+                  label: "mother_occupation".tr,
                 ),
                 const SizedBox(height: 20),
                 
                 // Lifestyle
-                _buildSectionHeader("Lifestyle"),
+                _buildSectionHeader("lifestyle".tr),
                  Obx(() => SelectionTile(
-                  label: "Diet *",
+                  label: "diet".tr,
                   value: controller.diet.value,
                   icon: Icons.restaurant,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -465,7 +465,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
                  Obx(() => SelectionTile(
-                  label: "Smoking *",
+                  label: "smoking".tr,
                   value: controller.smoking.value,
                   icon: Icons.smoking_rooms,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -473,7 +473,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
                   Obx(() => SelectionTile(
-                  label: "Drinking *",
+                  label: "drinking".tr,
                   value: controller.drinking.value,
                   icon: Icons.local_bar,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -482,9 +482,9 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 20),
 
                 // Location
-                _buildSectionHeader("Location"),
+                _buildSectionHeader("location".tr),
                  Obx(() => SelectionTile(
-                  label: "Country *",
+                  label: "country".tr,
                   value: controller.country.value,
                   icon: Icons.public,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -492,7 +492,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
                  Obx(() => SelectionTile(
-                  label: "State *",
+                  label: "state".tr,
                   value: controller.state.value,
                   icon: Icons.map,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -501,7 +501,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 12),
                  AppInputTextField(
                   controller: controller.cityCtrl,
-                  label: "City *",
+                  label: "city".tr,
                 ),
               ],
             ),

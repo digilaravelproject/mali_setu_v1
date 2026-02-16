@@ -123,7 +123,7 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
 
                 /// Title
                 Text(
-                  "Verify Your Number",
+                  "verify_your_number".tr,
                   style: context.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -134,7 +134,7 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                 /// Subtext
                 /// Subtext
                 Text(
-                  "Enter the 6-digit code sent to\n your mobile number", // Fixed: Removed missing controller fields
+                  "enter_otp_mobile".tr, // Fixed: Removed missing controller fields
                   textAlign: TextAlign.center,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: Colors.grey.shade600,
@@ -190,14 +190,14 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Didn't receive code? ",
+                        "didnt_receive_code".tr,
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                       GestureDetector(
                         onTap: isResendEnabled.value ? resetTimer : null,
                         child: Text(
                           isResendEnabled.value
-                              ? "Resend OTP"
+                              ? "resend_otp".tr
                               : "Resend in ${countdown.value}s",
                           style: TextStyle(
                             color: isResendEnabled.value
@@ -218,7 +218,7 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                   onPressed: () {
                     Get.toNamed(AppRoutes.register);
                   },
-                  title: "VERIFY & CONTINUE",
+                  title: "verify_continue".tr,
                 ),
               ],
             ),
