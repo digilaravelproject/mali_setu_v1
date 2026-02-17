@@ -38,12 +38,12 @@ class FilterBottomSheet extends GetWidget<FilterController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GetBuilder<FilterController>(
-                builder: (ctrl) {
-                  return Text(
-                    "${'filters'.tr}${ctrl.activeFilterCount > 0 ? " (${ctrl.activeFilterCount})" : ""}", 
-                    style: context.textTheme.headlineSmall
-                  );
-                }
+                  builder: (ctrl) {
+                    return Text(
+                        "${'filters'.tr}${ctrl.activeFilterCount > 0 ? " (${ctrl.activeFilterCount})" : ""}",
+                        style: context.textTheme.headlineSmall
+                    );
+                  }
               ),
               TextButton(
                 onPressed: controller.resetFilters,
@@ -260,16 +260,16 @@ class FilterScreen extends GetWidget<FilterController> {
                     Center(
                       child: BgGradientBorder(
                         child:
-                            Text(
-                              'show_matches'.tr,
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: context.theme.primaryColor,
-                              ),
-                            ).marginSymmetric(
-                              horizontal: Get.width * 0.1,
-                              vertical: 8,
-                            ),
+                        Text(
+                          'show_matches'.tr,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: context.theme.primaryColor,
+                          ),
+                        ).marginSymmetric(
+                          horizontal: Get.width * 0.1,
+                          vertical: 8,
+                        ),
                       ),
                     ).marginOnly(top: 12),
                   ],
@@ -315,43 +315,43 @@ class _ExpandableFilterSectionState extends State<ExpandableFilterSection> {
   @override
   Widget build(BuildContext context) {
     return
-    //Card(
-    // margin: EdgeInsets.only(bottom: 12),
-    // elevation: 1,
-    // shape: RoundedRectangleBorder(
-    //   borderRadius: BorderRadius.circular(12),
-    // ),
-    // child:
-    ExpansionTile(
-      tilePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      initiallyExpanded: _isExpanded,
-      onExpansionChanged: (expanded) {
-        setState(() {
-          _isExpanded = expanded;
-        });
-      },
-      leading: Icon(widget.icon, color: context.theme.primaryColor),
-      title: Text(
-        widget.title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.grey[800],
+      //Card(
+      // margin: EdgeInsets.only(bottom: 12),
+      // elevation: 1,
+      // shape: RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.circular(12),
+      // ),
+      // child:
+      ExpansionTile(
+        tilePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        initiallyExpanded: _isExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() {
+            _isExpanded = expanded;
+          });
+        },
+        leading: Icon(widget.icon, color: context.theme.primaryColor),
+        title: Text(
+          widget.title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[800],
+          ),
         ),
-      ),
-      trailing: Icon(
-        _isExpanded ? Icons.expand_less : Icons.expand_more,
-        color: context.theme.primaryColor,
-      ),
-      children: [
-        //  Divider(height: 1, thickness: 1, color: Colors.grey[200]),
-        Padding(padding: EdgeInsets.all(16), child: widget.content),
-      ],
-    );
+        trailing: Icon(
+          _isExpanded ? Icons.expand_less : Icons.expand_more,
+          color: context.theme.primaryColor,
+        ),
+        children: [
+          //  Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+          Padding(padding: EdgeInsets.all(16), child: widget.content),
+        ],
+      );
     // );
   }
 
-  /* @override
+/* @override
   Widget build(BuildContext context) {
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
@@ -423,7 +423,7 @@ class FilterCriteriaSection extends StatefulWidget {
   final FilterController controller;
 
   const FilterCriteriaSection({Key? key, required this.controller})
-    : super(key: key);
+      : super(key: key);
 
   @override
   _FilterCriteriaSectionState createState() => _FilterCriteriaSectionState();
@@ -450,7 +450,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
   // The user image shows "Brand", "RAM" etc which are for PHONES.
   // BUT the app is Matrimony. The user likely wants the LAYOUT, not the content.
   // I should keep the EXISTING categories ("Basic Details", "Professional Details" etc) but use the NEW layout.
-  
+
   final List<Map<String, dynamic>> _sections = [
     {"title": "basic_details", "icon": Icons.person_outline},
     {"title": "professional_details", "icon": Icons.work_outline},
@@ -501,7 +501,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                                   ),
                                 ),
                               ).marginOnly(right: 6),
-                             Expanded(
+                            Expanded(
                               child: Text(
                                 _sections[index]['title'].toString().tr,
                                 style: TextStyle(
@@ -543,7 +543,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                           ),
                         ),
                       ),
-                      
+
                       // Scrollable Content
                       Expanded(
                         child: SingleChildScrollView(
@@ -558,7 +558,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             ],
           ),
         ),
-        
+
         // Footer Actions (Apply Button)
         Container(
           padding: const EdgeInsets.all(16),
@@ -842,7 +842,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             const SizedBox(height: 16),
 
             Obx(
-              () => Wrap(
+                  () => Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 alignment: WrapAlignment.start,
@@ -851,11 +851,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     title: 'nuclear'.tr,
                     icon: AppAssets.imgnuclearFamily,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "ignored",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "ignored";
+                      "ignored";
                     },
                   ),
 
@@ -863,11 +863,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     title: 'joint'.tr,
                     icon: AppAssets.imgjointFamily,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "shortlisted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "shortlisted";
+                      "shortlisted";
                     },
                   ),
 
@@ -875,7 +875,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     title: 'doesnt_matter'.tr,
                     icon: AppAssets.imgNull,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "viewed",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value = "viewed";
@@ -886,11 +886,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     title: 'not_specified'.tr,
                     icon: AppAssets.imgAppLogo,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "contacted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "contacted";
+                      "contacted";
                     },
                   ),
                 ],
@@ -991,7 +991,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
               ),
             ),
             Obx(
-              () => Checkbox(
+                  () => Checkbox(
                 value: widget.controller.isNearbyChecked.value,
                 onChanged: (bool? value) {
                   widget.controller.isNearbyChecked.value = value ?? false;
@@ -1006,7 +1006,22 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           controller: widget.controller.countryCtrl,
           items: widget.controller.countryList,
         ),
-        SizedBox(height: 16),
+
+        // State Dropdown
+        SingleDropdown(
+          label: 'state'.tr,
+          controller: widget.controller.stateCtrl,
+          items: widget.controller.stateList,
+        ),
+
+        // City Dropdown
+        SingleDropdown(
+          label: 'city'.tr,
+          controller: widget.controller.cityCtrl,
+          items: widget.controller.cityList,
+        ),
+
+        SizedBox(height: 8,),
 
         MultiCheckboxList(
           title: '${'citizenship'.tr}:',
@@ -1137,7 +1152,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             ),
             SizedBox(width: 10),
             Obx(
-              () => Checkbox(
+                  () => Checkbox(
                 value: widget.controller.isProfileWithPhoto.value,
                 onChanged: (bool? value) {
                   widget.controller.isProfileWithPhoto.value = value ?? false;
@@ -1158,18 +1173,18 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
 
             // Options in a Column
             Obx(
-              () => Column(
+                  () => Column(
                 children: [
                   _buildProfileOption(
                     title: 'ignored'.tr,
                     subtitle: 'profiles_ignored'.tr,
                     icon: Icons.block,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "ignored",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "ignored";
+                      "ignored";
                     },
                   ),
                   const SizedBox(height: 12),
@@ -1179,11 +1194,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     subtitle: 'profiles_shortlisted'.tr,
                     icon: Icons.star_border,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "shortlisted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "shortlisted";
+                      "shortlisted";
                     },
                   ),
                   const SizedBox(height: 12),
@@ -1193,7 +1208,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     subtitle: 'profiles_viewed'.tr,
                     icon: Icons.remove_red_eye_outlined,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "viewed",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value = "viewed";
@@ -1206,11 +1221,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                     subtitle: 'profiles_contacted'.tr,
                     icon: Icons.chat_bubble_outline,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "contacted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "contacted";
+                      "contacted";
                     },
                   ),
                 ],
@@ -1955,15 +1970,15 @@ class _FamilyTypeSelectionPageState extends State<FamilyTypeSelectionPage> {
                 ),
                 child: isSelected
                     ? Center(
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      )
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue,
+                    ),
+                  ),
+                )
                     : null,
               ),
             ],
@@ -2122,7 +2137,7 @@ class _MultiCheckboxListState extends State<MultiCheckboxList> {
   @override
   void didUpdateWidget(MultiCheckboxList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.items.length != oldWidget.items.length || 
+    if (widget.items.length != oldWidget.items.length ||
         widget.items != oldWidget.items ||
         widget.initiallySelected != oldWidget.initiallySelected) {
       _initCheckedItems();
@@ -2245,7 +2260,7 @@ class _MultiCheckboxListState extends State<MultiCheckboxList> {
   List<Widget> _buildCheckboxList(Color selectedColor, Color checkboxColor) {
     return List<Widget>.generate(
       widget.items.length,
-      (index) => Padding(
+          (index) => Padding(
         padding: EdgeInsets.only(bottom: widget.spacing),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

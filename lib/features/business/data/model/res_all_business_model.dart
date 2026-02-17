@@ -363,10 +363,12 @@ class CategoryResponse {
 class CategoryData {
   int? currentPage;
   List<Category>? data;
-  Category? singleCategory; // For single category details
+  Category? singleCategory;
   int? total;
   String? firstPageUrl;
   String? lastPageUrl;
+  int? lastPage;
+  String? nextPageUrl;
   
   CategoryData({
     this.currentPage,
@@ -375,6 +377,8 @@ class CategoryData {
     this.total,
     this.firstPageUrl,
     this.lastPageUrl,
+    this.lastPage,
+    this.nextPageUrl,
   });
 
   factory CategoryData.fromJson(Map<String, dynamic> json) {
@@ -395,6 +399,8 @@ class CategoryData {
       total: json['total'],
       firstPageUrl: json['first_page_url'],
       lastPageUrl: json['last_page_url'],
+      lastPage: json['last_page'],
+      nextPageUrl: json['next_page_url'],
     );
   }
 }

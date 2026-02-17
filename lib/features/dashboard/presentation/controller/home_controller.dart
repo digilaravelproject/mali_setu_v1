@@ -45,6 +45,25 @@ class HomeController extends GetxController {
     fetchBanners();
   }
 
+
+  Future<void> refreshHomeData() async {
+    try {
+      isLoadingBanners.value = true;
+      isLoadingCategories.value = true;
+
+      await Future.wait([
+        fetchBanners(),
+        fetchCategories(),
+      ]);
+    } catch (e) {
+      print("Refresh error: $e");
+    } finally {
+      isLoadingBanners.value = false;
+      isLoadingCategories.value = false;
+    }
+  }
+
+
   Future<void> fetchBanners() async {
     try {
       isLoadingBanners.value = true;

@@ -10,12 +10,15 @@ class FilterController extends GetxController {
   // Distance range (in km)
   final RxDouble maxDistance = 50.0.obs;
 
+  // Text Controllers
   final educationCtrl = TextEditingController();
   final familyStatusCtrl = TextEditingController();
   final countryCtrl = TextEditingController();
   final smokingCtrl = TextEditingController();
   final profileCreatedByCtrl = TextEditingController();
   final mothertangueCtrl = TextEditingController();
+  final stateCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
 
   RxBool isProfileWithPhoto = false.obs;
 
@@ -60,6 +63,71 @@ class FilterController extends GetxController {
   String state = '';
   String city = '';
   List<String> citizenship = [];
+
+  // State and City lists
+  final stateList = [
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+  ];
+
+  final cityList = [
+    'Mumbai',
+    'Delhi',
+    'Bangalore',
+    'Hyderabad',
+    'Chennai',
+    'Kolkata',
+    'Pune',
+    'Ahmedabad',
+    'Jaipur',
+    'Lucknow',
+    'Chandigarh',
+    'Indore',
+    'Kochi',
+    'Visakhapatnam',
+    'Surat',
+    'Nagpur',
+    'Bhopal',
+    'Coimbatore',
+    'Vadodara',
+    'Ghaziabad',
+    'Ludhiana',
+    'Agra',
+    'Nashik',
+    'Faridabad',
+    'Meerut',
+    'Rajkot',
+    'Kalyan-Dombivali',
+    'Vasai-Virar',
+    'Varanasi',
+    'Srinagar',
+  ];
 
   // Lifestyle
   List<String> diet = [];
@@ -236,7 +304,7 @@ class FilterController extends GetxController {
     lastActive = ['Any'];
     updatedProfiles = 'Any';
     recentlyCreated.value = 'all';
-    
+
     // Clear text controllers
     educationCtrl.clear();
     familyStatusCtrl.clear();
@@ -244,7 +312,9 @@ class FilterController extends GetxController {
     smokingCtrl.clear();
     profileCreatedByCtrl.clear();
     mothertangueCtrl.clear();
-    
+    stateCtrl.clear();
+    cityCtrl.clear();
+
     update();
   }
 
@@ -257,13 +327,13 @@ class FilterController extends GetxController {
       filters['age_min'] = ageRange.start.round();
       filters['age_max'] = ageRange.end.round();
     }
-    
+
     if (maritalStatus.isNotEmpty && maritalStatus.first != 'Any') filters['marital_status'] = maritalStatus.first;
     if (profileCreatedBy.isNotEmpty && profileCreatedBy.first != 'Any') filters['profile_created_by'] = profileCreatedBy.first;
     if (mothertangueCtrl.text.isNotEmpty) filters['language'] = mothertangueCtrl.text;
-    
+
     if (heightRange.start > 140 || heightRange.end < 200) {
-       filters['height'] = heightRange.start.toStringAsFixed(1); 
+      filters['height'] = heightRange.start.toStringAsFixed(1);
     }
 
     // Professional
@@ -271,7 +341,7 @@ class FilterController extends GetxController {
       filters['annual_income'] = "${salaryRange.start.round()}-${salaryRange.end.round()}";
     }
     if (educationCtrl.text.isNotEmpty) filters['education'] = educationCtrl.text;
-    
+
     // Family
     if (familyStatusCtrl.text.isNotEmpty) filters['family_status'] = familyStatusCtrl.text;
     if (familyType.isNotEmpty && familyType.first != 'Any') filters['family_type'] = familyType.first;
@@ -279,6 +349,8 @@ class FilterController extends GetxController {
 
     // Location
     if (countryCtrl.text.isNotEmpty) filters['country'] = countryCtrl.text;
+    if (stateCtrl.text.isNotEmpty) filters['state'] = stateCtrl.text;
+    if (cityCtrl.text.isNotEmpty) filters['city'] = cityCtrl.text;
     if (citizenship.isNotEmpty && citizenship.first != 'Any') filters['citizenship'] = citizenship.first;
 
     // Lifestyle
@@ -286,11 +358,11 @@ class FilterController extends GetxController {
     if (smokingCtrl.text.isNotEmpty && smokingCtrl.text != 'Any') filters['smoking'] = smokingCtrl.text;
 
     if (isProfileWithPhoto.value) filters['photo'] = true;
-    
+
     if (recentlyCreated.value != 'all') {
       filters['created_at'] = recentlyCreated.value;
     }
-    
+
     return filters;
   }
 
@@ -312,6 +384,8 @@ class FilterController extends GetxController {
     if (familyType.isNotEmpty && familyType.first != 'Any') count++;
     if (familyValues.isNotEmpty && familyValues.first != 'Any') count++;
     if (countryCtrl.text.isNotEmpty) count++;
+    if (stateCtrl.text.isNotEmpty) count++;
+    if (cityCtrl.text.isNotEmpty) count++;
     if (citizenship.isNotEmpty && citizenship.first != 'Any') count++;
     if (diet.isNotEmpty && diet.first != 'Any') count++;
     if (smokingCtrl.text.isNotEmpty && smokingCtrl.text != 'Any') count++;

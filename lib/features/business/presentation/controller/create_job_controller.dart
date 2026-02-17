@@ -162,6 +162,7 @@ class CreateJobController extends GetxController {
       'design'.tr,
       'finance'.tr,
       'human_resources'.tr,
+      'other'.tr,
     ];
   }
 
@@ -197,6 +198,57 @@ class CreateJobController extends GetxController {
   }
 
   final isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Listen to category changes
+    categoryCtrl.addListener(_onCategoryChanged);
+  }
+
+  void _onCategoryChanged() {
+    if (categoryCtrl.text == 'other'.tr) {
+      // Show dialog to enter custom category
+      _showCustomCategoryDialog();
+    }
+  }
+
+  void _showCustomCategoryDialog() {
+    final customCategoryCtrl = TextEditingController();
+    Get.dialog(
+      AlertDialog(
+        title: Text('enter_job_category'.tr),
+        content: TextField(
+          controller: customCategoryCtrl,
+          decoration: InputDecoration(
+            hintText: 'job_category_hint'.tr,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              categoryCtrl.text = 'other'.tr;
+              Get.back();
+            },
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () {
+              if (customCategoryCtrl.text.trim().isNotEmpty) {
+                categoryCtrl.text = customCategoryCtrl.text.trim();
+                Get.back();
+              }
+            },
+            child: Text('submit'.tr),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
 
   void populateFields(Job job) {
     isEditMode.value = true;
@@ -236,6 +288,28 @@ class CreateJobController extends GetxController {
     expiryCtrl.clear();
     selectedBenefits.clear();
     selectedSkills.clear();
+  }
+
+  @override
+  void onClose() {
+    categoryCtrl.removeListener(_onCategoryChanged);
+    titleCtrl.dispose();
+    descriptionCtrl.dispose();
+    requirementsCtrl.dispose();
+    salaryRangeCtrl.dispose();
+    locationCtrl.dispose();
+    countryCtrl.dispose();
+    stateCtrl.dispose();
+    cityCtrl.dispose();
+    jobTypeCtrl.dispose();
+    experienceCtrl.dispose();
+    employmentCtrl.dispose();
+    categoryCtrl.dispose();
+    deadlineCtrl.dispose();
+    expiryCtrl.dispose();
+    benefitsCtrl.dispose();
+    skillsCtrl.dispose();
+    super.onClose();
   }
 
   Future<void> onRegister() async {

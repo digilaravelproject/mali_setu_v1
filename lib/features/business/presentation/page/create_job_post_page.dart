@@ -103,6 +103,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               controller: controller.categoryCtrl,
               label: 'job_category'.tr,
               items: controller.getCategories(),
+              onOtherSelected: () => _showCustomCategoryDialog(context),
             ),
 
             const SizedBox(height: 16),
@@ -342,6 +343,42 @@ class CreateJobPage extends GetWidget<CreateJobController> {
       ),
     );
   }
+
+  void _showCustomCategoryDialog(BuildContext context) {
+    final customCategoryCtrl = TextEditingController();
+    Get.dialog(
+      AlertDialog(
+        title: Text('enter_job_category'.tr),
+        content: TextField(
+          controller: customCategoryCtrl,
+          decoration: InputDecoration(
+            hintText: 'job_category_hint'.tr,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () {
+              if (customCategoryCtrl.text.trim().isNotEmpty) {
+                controller.categoryCtrl.text = customCategoryCtrl.text.trim();
+                Get.back();
+              }
+            },
+            child: Text('submit'.tr),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
 }
 
 class SectionTitle extends StatelessWidget {
@@ -377,6 +414,7 @@ class SingleDropdown extends StatelessWidget {
   final String? label;
   final String? hint;
   final List<String> items;
+  final VoidCallback? onOtherSelected;
 
   const SingleDropdown({
     super.key,
@@ -384,6 +422,7 @@ class SingleDropdown extends StatelessWidget {
     required this.items,
     this.label,
     this.hint,
+    this.onOtherSelected,
   });
 
   @override
@@ -393,6 +432,7 @@ class SingleDropdown extends StatelessWidget {
       label: label ?? 'no_label'.tr,
       isDropdown: true,
       dropdownItems: items,
+      onOtherSelected: onOtherSelected,
       validator: (v) => (v == null || v.isEmpty) ? "${label ?? 'no_label'.tr} ${'field_required'.tr}" : null,
     );
   }

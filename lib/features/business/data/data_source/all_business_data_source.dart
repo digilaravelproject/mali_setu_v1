@@ -18,7 +18,7 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images);
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
-  Future<CategoryResponse> getBusinessCategories();
+  Future<CategoryResponse> getBusinessCategories({int page = 1});
   Future<CategoryResponse> getCategoryDetails(int id);
   
   // Job Methods
@@ -119,8 +119,11 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   }
 
   @override
-  Future<CategoryResponse> getBusinessCategories() async {
-    final response = await apiClient.get(ApiConstants.getCategory);
+  Future<CategoryResponse> getBusinessCategories({int page = 1}) async {
+    final response = await apiClient.get(
+      ApiConstants.getCategory,
+      queryParameters: {'page': page},
+    );
     return CategoryResponse.fromJson(response.data);
   }
 

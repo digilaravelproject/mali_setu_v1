@@ -1,4 +1,6 @@
+import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
+import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/features/volunteer/controller/volunteerController.dart';
 import 'package:get/get.dart';
 
@@ -72,7 +74,10 @@ class DashboardBinding extends Bindings {
 
     // Controller
     Get.lazyPut(() => AllVolunteerController(useCase: Get.find()));
+
+    Get.lazyPut(() => PaymentRepository());
+    Get.put(RazorpayController(), permanent: true);
   }
-  }
+}
 
 

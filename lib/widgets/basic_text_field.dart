@@ -31,6 +31,8 @@ class AppInputTextField extends StatelessWidget {
   final ValueChanged<String>? onDropdownChanged;
   final int? maxLines;
   final bool? readOnly;
+  final Color? textColor;
+  final VoidCallback? onOtherSelected;
 
   const AppInputTextField({
     super.key,
@@ -52,6 +54,8 @@ class AppInputTextField extends StatelessWidget {
     this.onTap,
     this.suffixWidget,
     this.readOnly,
+    this.textColor,
+    this.onOtherSelected,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
@@ -93,6 +97,7 @@ class AppInputTextField extends StatelessWidget {
           validator: validator,
           inputFormatters: isDropdown ? null : inputFormatters,
           onChanged: isDropdown ? null : onChanged,
+          style: textColor != null ? TextStyle(color: textColor) : null,
 
           /// 🔽 Handle tap for dropdown
           //onTap: isDropdown ? () => _showDropdown(context) : null,
@@ -182,9 +187,15 @@ class AppInputTextField extends StatelessWidget {
                         return ListTile(
                           title: Text(item, style: context.textTheme.bodyLarge),
                           onTap: () {
-                            controller?.text = item;
-                            onDropdownChanged?.call(item);
                             Navigator.pop(context);
+                            
+                            // Check if "Other" is selected
+                            if (item == 'other'.tr && onOtherSelected != null) {
+                              onOtherSelected!.call();
+                            } else {
+                              controller?.text = item;
+                              onDropdownChanged?.call(item);
+                            }
                           },
                         );
                       },

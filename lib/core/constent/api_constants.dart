@@ -52,6 +52,15 @@ class ApiConstants {
     static const String matrimonyMessages = "matrimony/messages"; // matrimony/messages/{conversation_id}
     static const String matrimonyRemoveRequest = "matrimony/remove-request";
     static const String matrimonyConnectedUsers = "matrimony/connected-users";
+    static const String matrimonyCasts = "matrimony/casts";
+    static const String matrimonySubCasts = "matrimony/casts"; // matrimony/casts/{id}/subcasts
+    static const String matrimonySubscriptionPlans = "plans/matrimony";
+
+    // Payment Api
+    static const String createOrderBusiness = "payment/create-order/business";
+    static const String createOrderMatrimony = "payment/create-order/matrimony";
+    static const String verifyPayment = "payment/verify";
+    static const String matrimonyPlans = "plans/matrimony";
 
     // Volunteer Api
     static const String volunteerProfile = "volunteer/profile";
@@ -79,4 +88,9 @@ class ApiConstants {
 
     // Banner Api
     static const String getBanner = "banner";
+
+
+
+    static const String matrimonyPymentOrder = "payment/create-order/matrimony";
+    static const String paymentVerify = "payment/verify";
 }

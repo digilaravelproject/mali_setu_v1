@@ -124,7 +124,6 @@ class VoluntProfileUpdateController extends GetxController {
   ];
   
   final availabilities = [
-    "Full-time",
     "Part-time",
     "Weekends Only",
     "Evenings Only"

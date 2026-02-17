@@ -56,6 +56,85 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 items: controller.businessCategories.toList(),
               )),
 
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: controller.bCategoryCtrl, 
+                builder: (context, value, child) {
+                  if (value.text == "Other") {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 1.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end, // 👈 ye add karo
+                        children: [
+                          Expanded(
+                            child: AppInputTextField(
+                              label: 'enter_custom_category'.tr,
+                              controller: controller.customCategoryCtrl,
+                              textInputType: TextInputType.text,
+                              iconData: Icons.add,
+                              validator: FormValidator.name,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Obx(() => IconButton(
+                              onPressed: controller.isRegisteringCategory.value
+                                  ? null
+                                  : () {
+                                if (controller.customCategoryCtrl.text.isNotEmpty) {
+                                  controller.registerCustomCategory(
+                                      controller.customCategoryCtrl.text);
+                                }
+                              },
+                              icon: controller.isRegisteringCategory.value
+                                  ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                                  : const Icon(Icons.check_circle,
+                                  color: Colors.green, size: 30),
+                            )),
+                          )
+                        ],
+                      ),
+
+                      /*child: Row(
+                        children: [
+                          Expanded(
+                            child: AppInputTextField(
+                              label: 'enter_custom_category'.tr,
+                              controller: controller.customCategoryCtrl,
+                              textInputType: TextInputType.text,
+                              iconData: Icons.add,
+                              validator: FormValidator.name,
+                            ),
+                          ),
+                          const SizedBox(height: 8,),
+                          Obx(() => IconButton(
+                            onPressed: controller.isRegisteringCategory.value 
+                                ? null 
+                                : () {
+                                    if (controller.customCategoryCtrl.text.isNotEmpty) {
+                                       controller.registerCustomCategory(controller.customCategoryCtrl.text);
+                                    }
+                                  },
+                            icon: controller.isRegisteringCategory.value 
+                                ? const SizedBox(
+                                    width: 20, 
+                                    height: 20, 
+                                    child: CircularProgressIndicator(strokeWidth: 2)
+                                  ) 
+                                : const Icon(Icons.check_circle, color: Colors.green, size: 30),
+                          ))
+                        ],
+                      ),*/
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+
               AppInputTextField(
                 label: 'business_description'.tr,
                 textInputType: TextInputType.text,
@@ -119,6 +198,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 iconData: CupertinoIcons.phone,
                 textInputType: TextInputType.phone,
                 controller: controller.phoneCtrl,
+                validator: FormValidator.mobile,
                 hint: const [AutofillHints.telephoneNumber],
               ),
               AppInputTextField(
@@ -300,7 +380,13 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
     );
 
     if (picked != null) {
-      timeCtrl.text = picked.format(context);
+      // timeCtrl.text = picked.format(context); // This uses localized format (e.g. 5:30 PM) which fails validation
+      
+      // Format to HH:mm (24-hour format) for API validation
+      final hour = picked.hour.toString().padLeft(2, '0');
+      final minute = picked.minute.toString().padLeft(2, '0');
+      timeCtrl.text = "$hour:$minute";
+      
       if (isOpening) {
         controller.openingTime = picked;
       } else {

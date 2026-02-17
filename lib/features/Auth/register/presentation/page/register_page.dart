@@ -178,6 +178,8 @@ import '../controller/register_controller.dart';
                 validator: controller.validateState,
                 enable: false,
                 hintText: "Auto-filled from pincode",
+                suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                textColor: Colors.black,
               ),
 
               AppInputTextField(
@@ -187,6 +189,8 @@ import '../controller/register_controller.dart';
                 validator: controller.validateDistrict,
                 enable: false,
                 hintText: "Auto-filled from pincode",
+                suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                textColor: Colors.black,
               ),
 
               AppInputTextField(
@@ -196,6 +200,8 @@ import '../controller/register_controller.dart';
                 validator: controller.validateCity,
                 enable: false,
                 hintText: "Auto-filled from pincode",
+                suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                textColor: Colors.black,
               ),
 
               AppInputTextField(
@@ -591,6 +597,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                           validator: controller.validateState,
                           enable: false,
                           hintText: "auto_filled".tr,
+                         // suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                          textColor: Colors.black,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -602,6 +610,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                           validator: controller.validateDistrict,
                           enable: false,
                           hintText: "auto_filled".tr,
+                         // suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                          textColor: Colors.black,
                         ),
                       ),
                     ],
@@ -611,12 +621,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                     children: [
                       Expanded(
                         child: AppInputTextField(
-                          label: "city".tr,
+                          label: "country".tr,
                           textInputType: TextInputType.none,
                           controller: controller.cityCtrl,
                           validator: controller.validateCity,
                           enable: false,
                           hintText: "auto_filled".tr,
+                         // suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
+                          textColor: Colors.black,
                         ),
                       ),
                       const SizedBox(width: 12),

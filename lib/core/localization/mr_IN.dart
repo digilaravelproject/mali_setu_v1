@@ -118,6 +118,8 @@ const Map<String, String> mrIN = {
   'matches_near_location': 'तुमच्या स्थानाजवळील जुळण्या',
   'country': 'देश',
   'citizenship': 'नागरिकत्व',
+  'state': 'राज्य',
+  'city': 'शहर',
   
   // Lifestyle Filters
   'eggetarian': 'अंडाहारी',
@@ -179,9 +181,7 @@ const Map<String, String> mrIN = {
   'address': 'पत्ता',
   'nearby_location': 'जवळचे स्थान',
   'pin_code': 'पिन कोड',
-  'state': 'राज्य',
   'district': 'जिल्हा',
-  'city': 'शहर',
   'auto_filled': 'स्वयं-भरलेले',
   'road_number': 'रस्ता क्रमांक',
   'sector': 'सेक्टर',
@@ -675,6 +675,14 @@ const Map<String, String> mrIN = {
   
   // Job Categories
   "software_development": "सॉफ्टवेअर विकास",
+  "marketing": "विपणन",
+  "sales": "विक्रय",
+  "design": "डिजाइन",
+  "finance": "वित्त",
+  "human_resources": "मानव संसाधन",
+  "other": "अन्य",
+  "enter_job_category": "नोकरी श्रेणी प्रविष्ट करा",
+  "job_category_hint": "उदा., सल्लागारी, स्वास्थ्यसेवा",
   
   // Popular Benefits
   "health_insurance": "आरोग्य विमा",
@@ -775,6 +783,12 @@ const Map<String, String> mrIN = {
   'add_new_business': 'नवीन व्यवसाय जोडा',
   'revenue': 'उत्पन्न',
   'delete_confirmation': 'आपण नक्कीच हा व्यवसाय हटवू इच्छिता का? ही क्रिया पूर्ववत करता येणार नाही.',
+
+
+  'blood_group': 'रक्तगट',
+  'referral_name': 'संदर्भ देणाऱ्याचे नाव',
+  'enter_custom_category': 'सानुकूल श्रेणी प्रविष्ट करा',
+
 
 
 };

@@ -4,6 +4,8 @@ import '../model/matrimony_response.dart';
 import '../model/matrimony_chat_response.dart';
 import '../model/search_matrimony_response.dart';
 import '../model/connection_requests_response.dart';
+import '../model/matrimony_cast_model.dart';
+import '../model/matrimony_plan_model.dart';
 
 abstract class MatrimonyDataSource {
   Future<MatrimonyResponse> createProfile(Map<String, dynamic> data);
@@ -18,6 +20,9 @@ abstract class MatrimonyDataSource {
   Future<dynamic> sendMessage(Map<String, dynamic> data);
   Future<dynamic> removeConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectedUsers();
+  Future<CastResponse> getCasts();
+  Future<SubCastResponse> getSubCasts(int castId);
+  Future<MatrimonyPlanResponse> getMatrimonyPlans();
 }
 
 class MatrimonyDataSourceImpl implements MatrimonyDataSource {
@@ -95,5 +100,23 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   Future<ConnectionRequestsResponse> getConnectedUsers() async {
     final response = await apiClient.get(ApiConstants.matrimonyConnectedUsers);
     return ConnectionRequestsResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<CastResponse> getCasts() async {
+    final response = await apiClient.get(ApiConstants.matrimonyCasts);
+    return CastResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<SubCastResponse> getSubCasts(int castId) async {
+    final response = await apiClient.get("${ApiConstants.matrimonySubCasts}/$castId/subcasts");
+    return SubCastResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<MatrimonyPlanResponse> getMatrimonyPlans() async {
+    final response = await apiClient.get(ApiConstants.matrimonyPlans);
+    return MatrimonyPlanResponse.fromJson(response.data);
   }
 }

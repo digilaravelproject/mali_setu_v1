@@ -123,6 +123,8 @@ const Map<String, String> enUS = {
   'matches_near_location': 'Matches Near your location',
   'country': 'Country',
   'citizenship': 'Citizenship',
+  'state': 'State',
+  'city': 'City',
   
   // Lifestyle Filters
   'eggetarian': 'Eggetarian',
@@ -183,9 +185,7 @@ const Map<String, String> enUS = {
   'address': 'Address',
   'nearby_location': 'Nearby Location',
   'pin_code': 'Pin Code',
-  'state': 'State',
   'district': 'District',
-  'city': 'City',
   'auto_filled': 'Auto-filled',
   'road_number': 'Road Number',
   'sector': 'Sector',
@@ -665,6 +665,14 @@ const Map<String, String> enUS = {
   
   // Job Categories
   "software_development": "Software Development",
+  "marketing": "Marketing",
+  "sales": "Sales",
+  "design": "Design",
+  "finance": "Finance",
+  "human_resources": "Human Resources",
+  "other": "Other",
+  "enter_job_category": "Enter Job Category",
+  "job_category_hint": "e.g., Consulting, Healthcare",
   
   // Popular Benefits
   "health_insurance": "Health insurance",
@@ -774,6 +782,18 @@ const Map<String, String> enUS = {
   'add_new_business': 'Add New Business',
   'revenue': 'Revenue',
   'delete_confirmation': 'Are you sure you want to delete this business? This action cannot be undone.',
+
+
+
+
+  'blood_group': 'Blood Group',
+  'referral_name': 'Referral Name',
+  'enter_custom_category' : 'Custom Category '
+
+
+
+
+
 
 };
 

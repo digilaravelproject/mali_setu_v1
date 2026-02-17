@@ -2,6 +2,7 @@ import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matri
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -252,6 +253,16 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Citizenship", controller.citizenshipList, controller.citizenship.call),
                 )),
+                const SizedBox(height: 12),
+                AppInputTextField(
+                  controller: controller.bloodGroupCtrl,
+                  label: "blood_group".tr,
+                ),
+                const SizedBox(height: 12),
+                AppInputTextField(
+                  controller: controller.ref_nameCtrl,
+                  label: "referral_name".tr,
+                ),
               ],
             ),
           ),
@@ -277,17 +288,39 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
             child: Column(
               children: [
                 Obx(() => SelectionTile(
-                  label: "religion".tr,
+                  label: "Caste", // Formerly Religion
                   value: controller.religion.value,
-                  icon: Icons.temple_hindu,
+                  icon: Icons.group_work, 
                   onTap: () => _showSingleSelectBottomSheet(
-                      context, "Religion", controller.religionList, controller.religion.call),
+                      context, 
+                      "Select Caste", 
+                      controller.casteList.map((e) => e.name ?? "").toList(), 
+                      controller.onCasteSelected
+                  ),
                 )),
                 const SizedBox(height: 12),
-
-                AppInputTextField(
-                  controller: controller.casteCtrl,
-                  label: "caste".tr,
+                
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: controller.casteCtrl,
+                  builder: (context, value, child) {
+                    return SelectionTile(
+                      label: "Sub-Caste", // Formerly Caste
+                      value: value.text, // Using text controller value for display in tile
+                      icon: Icons.subdirectory_arrow_right,
+                      onTap: () {
+                        if (controller.casteList.isEmpty) {
+                           CustomSnackBar.showError(message: "Please select Caste first");
+                           return;
+                        }
+                        _showSingleSelectBottomSheet(
+                          context, 
+                          "Select Sub-Caste", 
+                          controller.subCasteList.map((e) => e.name ?? "").toList(), 
+                          controller.onSubCasteSelected
+                        );
+                      },
+                    );
+                  }
                 ),
                 const SizedBox(height: 12),
 

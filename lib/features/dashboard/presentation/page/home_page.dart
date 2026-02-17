@@ -43,186 +43,192 @@ class HomePage extends GetWidget<HomeController> {
       backgroundColor: Colors.grey[50],
       body: Obx(() {
         final user = authService.currentUser.value;
-        return CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // 1. Modern Header
-            SliverAppBar(
-              expandedHeight: 70, 
-              toolbarHeight: 70,
-              pinned: true,
-              floating: false,
-              backgroundColor: theme.primaryColor,
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        theme.primaryColor,
-                        theme.primaryColor.withOpacity(0.9),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              title: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                     Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: InkWell(
-                          onTap: () => Get.toNamed(AppRoutes.profileScreen),
-                        child: CircleAvatar(
-                          radius: 22,
-                          backgroundColor: Colors.white,
-                          backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
-                              ? NetworkImage(user.profileImage!)
-                              : null,
-                          child: (user?.profileImage == null || user!.profileImage!.isEmpty)
-                              ? Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Image.asset(AppAssets.imgAppLogo),
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'welcome_back_comma'.tr,
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          Text(
-                            user?.name.toTitleCase() ?? "User Name",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+        return RefreshIndicator(
+          onRefresh: () async {
+          await controller.refreshHomeData();
+        },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
+              // 1. Modern Header
+              SliverAppBar(
+                expandedHeight: 70,
+                toolbarHeight: 70,
+                pinned: true,
+                floating: false,
+                backgroundColor: theme.primaryColor,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          theme.primaryColor,
+                          theme.primaryColor.withOpacity(0.9),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              actions: [
-                 Container(
-                   margin: const EdgeInsets.only(right: 16, top: 8),
-                   decoration: BoxDecoration(
-                     color: Colors.white.withOpacity(0.2),
-                     borderRadius: BorderRadius.circular(12),
-                   ),
-                   child: IconButton(
-                    onPressed: () {
-                      Get.toNamed(AppRoutes.notification);
-                    },
-                    icon: Obx(() {
-                      int count = 0;
-                      try {
-                        final notificationController = Get.find<NotificationController>();
-                        count = notificationController.unreadCount.value;
-                      } catch (e) {
-                        count = 0;
-                      }
-                  
-                      return Badge(
-                        label: Text(count.toString()),
-                        isLabelVisible: count > 0,
-                        backgroundColor: Colors.redAccent,
-                        child: const Icon(CupertinoIcons.bell, color: Colors.white, size: 22),
-                      );
-                    }),
                   ),
                 ),
-              ],
-            ),
-
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  // Search Bar with visual overlap
-                  Stack(
-                    alignment: Alignment.topCenter,
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
                     children: [
-                      // Header Extension (Purple background to bridge the gap)
                       Container(
-                        height: 45, // Deeper curve
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.primaryColor,
-                              theme.primaryColor.withOpacity(0.9),
-                            ],
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: InkWell(
+                          onTap: () => Get.toNamed(AppRoutes.profileScreen),
+                          child: CircleAvatar(
+                            radius: 22,
+                            backgroundColor: Colors.white,
+                            backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                                ? NetworkImage(user.profileImage!)
+                                : null,
+                            child: (user?.profileImage == null || user!.profileImage!.isEmpty)
+                                ? Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Image.asset(AppAssets.imgAppLogo),
+                            )
+                                : null,
                           ),
-                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)), // Smoother curve
                         ),
                       ),
-                      // Search Bar
-
-
-              InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {
-                  Get.to(() => const AllBusinessesScreen());
-                },
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      )
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'welcome_back_comma'.tr,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                            Text(
+                              user?.name.toTitleCase() ?? "User Name",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  child: AbsorbPointer( // 🔥 MAIN FIX
-                    child: TextField(
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        hintText: 'search_here'.tr,
-                        hintStyle: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(
-                          CupertinoIcons.search,
-                          color: theme.primaryColor,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                      ),
+                ),
+                actions: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 16, top: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.notification);
+                      },
+                      icon: Obx(() {
+                        int count = 0;
+                        try {
+                          final notificationController = Get.find<NotificationController>();
+                          count = notificationController.unreadCount.value;
+                        } catch (e) {
+                          count = 0;
+                        }
+
+                        return Badge(
+                          label: Text(count.toString()),
+                          isLabelVisible: count > 0,
+                          backgroundColor: Colors.redAccent,
+                          child: const Icon(CupertinoIcons.bell, color: Colors.white, size: 22),
+                        );
+                      }),
                     ),
                   ),
-                ),
+                ],
               ),
 
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    // Search Bar with visual overlap
+                    Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        // Header Extension (Purple background to bridge the gap)
+                        Container(
+                          height: 45, // Deeper curve
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                theme.primaryColor,
+                                theme.primaryColor.withOpacity(0.9),
+                              ],
+                            ),
+                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)), // Smoother curve
+                          ),
+                        ),
+                        // Search Bar
 
-              /* InkWell(
+
+                        InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            Get.to(() => const AllBusinessesScreen());
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                )
+                              ],
+                            ),
+                            child: AbsorbPointer( // 🔥 MAIN FIX
+                              child: TextField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  hintText: 'search_here'.tr,
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                  ),
+                                  prefixIcon: Icon(
+                                    CupertinoIcons.search,
+                                    color: theme.primaryColor,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                  const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+
+                        /* InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () {
                   Get.to(() => const AllBusinessesScreen());
@@ -259,152 +265,154 @@ class HomePage extends GetWidget<HomeController> {
                 ),
               ),*/
 
-              ],
-                  ),
+                      ],
+                    ),
 
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Column(
-                      children: [
-                        // 2. Banners Slider
-                        Obx(() {
-                          if (controller.isLoadingBanners.value) {
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Column(
+                        children: [
+                          // 2. Banners Slider
+                          Obx(() {
+                            if (controller.isLoadingBanners.value) {
+                              return Container(
+                                height: 150,
+                                decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(16)
+                                ),
+                                child: const Center(child: CircularProgressIndicator()),
+                              );
+                            }
+                            if (controller.banners.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
                             return Container(
                               height: 150,
                               decoration: BoxDecoration(
-                                 color: Colors.grey[200],
-                                 borderRadius: BorderRadius.circular(16)
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                                  ]
                               ),
-                              child: const Center(child: CircularProgressIndicator()),
-                            );
-                          }
-                          if (controller.banners.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          return Container(
-                            height: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                 BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
-                              ]
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: ImageSlider(
-                                indicatorType: IndicatorType.rectangle,
-                                images: controller.banners
-                                    .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
-                                    .toList(),
-                                onImageTap: (index) {
-                                  // Handle banner tap
-                                  controller.onBannerTap(index);
-                                },
-                              ),
-                            ),
-                          );
-                        }),
-                        
-                        const SizedBox(height: 16),
-
-                        // 3. Categories Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'categories'.tr,
-                              style: context.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                 if (controller.categories.isNotEmpty) {
-                                   Get.bottomSheet(
-                                     _buildAllCategoriesSheet(context),
-                                     isScrollControlled: true,
-                                   );
-                                 }
-                              },
-                              borderRadius: BorderRadius.circular(8),
-                              child: Text(
-                                'view_all'.tr,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.primaryColor,
-                                  fontSize: 14,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: ImageSlider(
+                                  indicatorType: IndicatorType.rectangle,
+                                  images: controller.banners
+                                      .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
+                                      .toList(),
+                                  onImageTap: (index) {
+                                    // Handle banner tap
+                                    controller.onBannerTap(index);
+                                  },
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      //  const SizedBox(height: 8),
+                            );
+                          }),
 
-                        // 4. Categories Grid (Home)
-                        Obx(() {
-                          if (controller.isLoadingCategories.value) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                          if (controller.categories.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          
-                          final displayList = controller.categories.take(8).toList();
-                          
-                          return GridView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: displayList.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 0.95,
-                            ),
-                            itemBuilder: (_, index) {
-                              return _buildCategoryItem(context, displayList[index]);
-                            },
-                          );
-                        }),
+                          const SizedBox(height: 16),
 
-                        const SizedBox(height: 20),
+                          // 3. Categories Header
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'categories'.tr,
+                                style: context.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  if (controller.categories.isNotEmpty) {
+                                    Get.bottomSheet(
+                                      _buildAllCategoriesSheet(context),
+                                      isScrollControlled: true,
+                                    );
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(8),
+                                child: Text(
+                                  'view_all'.tr,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.primaryColor,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          //  const SizedBox(height: 8),
 
-                        // 5. Promotional Banners
-                        _buildPromoCard(
-                          context,
-                          title: 'register_your_business'.tr,
-                          subtitle: 'showcase_ideas'.tr,
-                          image: "https://img.freepik.com/free-vector/modern-business-team-working-open-office-space_74855-5541.jpg",
-                          buttonText: 'start_now'.tr,
-                          onTap: () => Get.toNamed(AppRoutes.regBusiness),
-                          color1: const Color(0xFF6B8EFF),
-                          color2: const Color(0xFF536DFE),
-                        ),
+                          // 4. Categories Grid (Home)
+                          Obx(() {
+                            if (controller.isLoadingCategories.value) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            if (controller.categories.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
 
-                        const SizedBox(height: 16),
+                            final displayList = controller.categories.take(8).toList();
 
-                        _buildPromoCard(
-                          context,
-                          title: 'register_matrimony'.tr,
-                          subtitle: 'find_soulmate'.tr,
-                          image: "https://img.freepik.com/free-vector/wedding-couple-love_23-2148633454.jpg",
-                          buttonText: 'join_now'.tr,
-                          onTap: () => Get.toNamed(AppRoutes.regMatrimony),
-                          color1: const Color(0xFFF48FB1),
-                          color2: const Color(0xFFE91E63),
-                        ),
+                            return GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: displayList.length,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 0.95,
+                              ),
+                              itemBuilder: (_, index) {
+                                return _buildCategoryItem(context, displayList[index]);
+                              },
+                            );
+                          }),
 
-                         const SizedBox(height: 80), // Bottom padding
-                      ],
+                          const SizedBox(height: 20),
+
+                          // 5. Promotional Banners
+                          _buildPromoCard(
+                            context,
+                            title: 'register_your_business'.tr,
+                            subtitle: 'showcase_ideas'.tr,
+                            image: "https://img.freepik.com/free-vector/modern-business-team-working-open-office-space_74855-5541.jpg",
+                            buttonText: 'start_now'.tr,
+                            onTap: () => Get.toNamed(AppRoutes.regBusiness),
+                            color1: const Color(0xFF6B8EFF),
+                            color2: const Color(0xFF536DFE),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          _buildPromoCard(
+                            context,
+                            title: 'register_matrimony'.tr,
+                            subtitle: 'find_soulmate'.tr,
+                            image: "https://img.freepik.com/free-vector/wedding-couple-love_23-2148633454.jpg",
+                            buttonText: 'join_now'.tr,
+                            onTap: () => Get.toNamed(AppRoutes.regMatrimony),
+                            color1: const Color(0xFFF48FB1),
+                            color2: const Color(0xFFE91E63),
+                          ),
+
+                          const SizedBox(height: 80), // Bottom padding
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          )
         );
+
       }),
     );
   }
