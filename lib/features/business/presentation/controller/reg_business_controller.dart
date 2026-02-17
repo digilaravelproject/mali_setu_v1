@@ -12,11 +12,19 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/network/multipart.dart';
 import 'package:edu_cluezer/core/helper/img_picker_helper.dart';
+import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
+import 'package:edu_cluezer/features/business/presentation/page/business_subscription_plan.dart';
+import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
+import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
+  final BusinessRepository _repository = Get.find<BusinessRepository>();
+  final PaymentRepository _paymentRepository = Get.find<PaymentRepository>();
+  final RazorpayController _razorpayController = Get.find<RazorpayController>();
 
   RegBusinessController({required this.getBusinessCategoriesUseCase});
 
@@ -45,13 +53,13 @@ class RegBusinessController extends GetxController {
   // };
 
   var businessTypes = <String>[
-    "Proprietary / Partnership-LLP",
+    "Proprietary /Partnership - LLP",
     "Private Ltd",
     "Public Ltd"
   ].obs;
 
   Map<String, String> typeIdMap = {
-    "Proprietary / Partnership-LLP": "Proprietary / Partnership-LLP",
+    "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
     "Private Ltd": "Private Ltd",
     "Public Ltd": "Public Ltd"
   };
@@ -326,15 +334,15 @@ class RegBusinessController extends GetxController {
 
   Future<void> loadBusinessTypes() async {
     businessTypes.assignAll([
-      "Proprietary / Partnership",
+      "Proprietary /Partnership - LLP",
       "Private Ltd",
       "Public Ltd"
     ]);
 
     typeIdMap = {
-      "Proprietary / Partnership": "proprietary",
-      "Private Ltd": "private_ltd",
-      "Public Ltd": "public_ltd"
+      "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
+      "Private Ltd": "Private Ltd",
+      "Public Ltd": "Public Ltd"
     };
   }
 
@@ -361,6 +369,9 @@ class RegBusinessController extends GetxController {
   }
 
   Future<void> onRegister() async {
+
+   // await fetchAndShowBusinessPlans();
+
     // Basic Validation
     if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
       CustomSnackBar.showError(message: "Please fill required fields");
@@ -419,13 +430,16 @@ class RegBusinessController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          Get.back(); // Close screen
-          CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
+          // CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
           
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
              Get.find<BusinessController>().fetchMyBusinesses();
           }
+
+          // Fetch and Show Plans
+          await fetchAndShowBusinessPlans();
+          
         } else {
           // Handle server-side validation/business logic errors
           CustomSnackBar.showError(message: data['message'] ?? "Registration failed");
@@ -437,6 +451,87 @@ class RegBusinessController extends GetxController {
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(); // Close Loading if open
       CustomSnackBar.showError(message: "An unexpected error occurred: ${e.toString()}");
+    }
+  }
+
+  Future<void> fetchAndShowBusinessPlans() async {
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false);
+      final response = await _repository.getBusinessPlans();
+      Get.back(); // Close Loading
+
+      if (response.success == true && response.data?.plans != null) {
+        // Filter plans by company type
+        final selectedType = typeIdMap[bTypeCtrl.text] ?? bTypeCtrl.text;
+        
+        // Match logic: filter plans where company_type matches selectedType
+        final filteredPlans = response.data!.plans!.where((plan) {
+          final planType = plan.companyType?.toLowerCase() ?? "";
+          final targetType = bTypeCtrl.text.toLowerCase();
+          
+          // Flexible matching
+          return planType.contains(targetType) || targetType.contains(planType);
+        }).toList();
+
+        if (filteredPlans.isEmpty) {
+          CustomSnackBar.showInfo(message: "No specific plans found for your business type. Showing all plans.");
+          filteredPlans.addAll(response.data!.plans!);
+        }
+
+        final selectedPlan = await showBusinessSubscriptionBottomSheet(filteredPlans);
+        
+        if (selectedPlan != null) {
+          await initiateBusinessPayment(selectedPlan);
+        }
+        
+        // Close Registration Screen
+        Get.back(); 
+
+      } else {
+        Get.back(); // Close Registration Screen if no plans
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      Get.back(); // Close Registration Screen
+      print("Error fetching business plans: $e");
+    }
+  }
+
+  Future<void> initiateBusinessPayment(BusinessPlan plan) async {
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false);
+      
+      final response = await _paymentRepository.createBusinessPaymentOrder(
+        planId: plan.id!,
+        //type: "business" // Ensure type is business
+      );
+
+      Get.back(); // Close Loading
+
+      if (response.success && response.data != null) {
+        final orderData = response.data!;
+
+        _razorpayController.openCheckout(
+          amount: ((double.tryParse(plan.price?.toString() ?? "0") ?? 0)).toInt(),
+          name: bNameCtrl.text,
+          description: "Business Subscription Plan",
+          mobile: phoneCtrl.text,
+          email: emailCtrl.text,
+          orderId: orderData['order_id'],
+          transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+          key: orderData['key_id'],
+          type: 'business',
+        );
+      } else {
+        CustomSnackBar.showError(
+            message: response.message ?? "Failed to create payment order");
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      print("Error initiating payment: $e");
+      CustomSnackBar.showError(message: "Payment initialization failed: $e");
     }
   }
 

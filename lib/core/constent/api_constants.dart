@@ -61,6 +61,11 @@ class ApiConstants {
     static const String createOrderMatrimony = "payment/create-order/matrimony";
     static const String verifyPayment = "payment/verify";
     static const String matrimonyPlans = "plans/matrimony";
+    static const String businessSubscriptionPlans = "plans/business";
+    static const String paymentTransactions = "payment/transactions";
+    static const String donationCauses = "donation/causes";
+    static const String donationCreateOrder = "donation/create-order";
+    static const String donationVerifyPayment = "donation/verify-payment";
 
     // Volunteer Api
     static const String volunteerProfile = "volunteer/profile";
@@ -91,6 +96,8 @@ class ApiConstants {
 
 
 
+
     static const String matrimonyPymentOrder = "payment/create-order/matrimony";
     static const String paymentVerify = "payment/verify";
+    static const String businessPymentOrder = "payment/create-order/business";
 }

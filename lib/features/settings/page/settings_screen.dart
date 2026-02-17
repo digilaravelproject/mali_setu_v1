@@ -72,6 +72,11 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     icon: CupertinoIcons.person_2,
                     onTap: () => _showComingSoonDialog(context),
                   ),
+                  _SettingsItem(
+                    title: 'transaction_history'.tr,
+                    icon: CupertinoIcons.list_bullet_indent,
+                    onTap: () => Get.toNamed(AppRoutes.transactionHistory),
+                  ),
                 ],
               ),
 

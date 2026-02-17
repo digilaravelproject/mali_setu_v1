@@ -3,6 +3,12 @@ import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:get/get.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/features/donation/domain/repository/donation_repository.dart';
+import 'package:edu_cluezer/features/donation/presentation/controller/donation_controller.dart';
+import 'package:edu_cluezer/features/donation/binding/donation_binding.dart';
+import 'package:edu_cluezer/features/donation/presentation/widget/donation_bottom_sheet.dart';
+import 'package:edu_cluezer/core/network/api_response.dart';
 
 class RazorpayController extends GetxController {
   late Razorpay _razorpay;
@@ -51,9 +57,10 @@ class RazorpayController extends GetxController {
     String? orderId,
     String? key,
     required int transaction_id,
+    String type = 'general', // New parameter to track payment type
   }) {
     var options = {
-      'key': key ?? 'rzp_test_S9yXFuXcf0S6Ll', // Use key from create-order API
+      'key': key ?? 'rzp_test_S9yXFuXcf0S6Ll',
       'amount': amount * 100,
       'name': name,
       'description': description,
@@ -70,11 +77,11 @@ class RazorpayController extends GetxController {
       options['order_id'] = orderId;
     }
 
-    // Store these for verification after success
     _pendingVerification = {
       'transaction_id': transaction_id,
       'amount': amount,
       'order_id': orderId,
+      'type': type,
     };
 
     try {
@@ -91,46 +98,47 @@ class RazorpayController extends GetxController {
     debugPrint("RZP SUCCESS: paymentId=${response.paymentId}, signature=${response.signature}");
 
     if (_pendingVerification != null) {
-      debugPrint("RZP PENDING VERIFICATION: $_pendingVerification");
-
       final orderId = _pendingVerification!['order_id'];
+      final type = _pendingVerification!['type'];
+      final amount = _pendingVerification!['amount'];
 
       if (orderId == null) {
         print("⚠️ Order ID is null – skipping verification");
         return;
       }
-      // await _verifyPayment(
-      //   razorpayOrderId: orderId,
-      //   razorpayPaymentId: response.paymentId ?? '',
-      //   razorpaySignature: response.signature ?? '',
-      //   userId: _pendingVerification!['user_id'],
-      //   amount: _pendingVerification!['amount'],
-      //   treeIds: List<int>.from(_pendingVerification!['tree_ids']),
-      // );
 
+      ApiResponse<Map<String, dynamic>> res;
 
-      final res = await _paymentRepository.verifyPayment(
-        razorpayOrderId: orderId,
-        razorpayPaymentId: response.paymentId ?? "",
-        razorpaySignature: response.signature ?? '',
-       // userId: _pendingVerification!['user_id'],
-        transaction_id:_pendingVerification!['transaction_id'],
-      );
+      if (type == 'donation') {
+        final donationRepo = Get.find<DonationRepository>();
+        res = await donationRepo.verifyDonationPayment(
+          razorpayOrderId: orderId,
+          razorpayPaymentId: response.paymentId ?? "",
+          razorpaySignature: response.signature ?? '',
+          donationId: _pendingVerification!['transaction_id'],
+        );
+      } else {
+        res = await _paymentRepository.verifyPayment(
+          razorpayOrderId: orderId,
+          razorpayPaymentId: response.paymentId ?? "",
+          razorpaySignature: response.signature ?? '',
+          transaction_id: _pendingVerification!['transaction_id'],
+        );
+      }
 
       if (res.success) {
-        // Show success dialog instead of snackbar
-        print("response for verify : "+response.toString());
-        
         PaymentSuccessDialog.show(
-          amount: _pendingVerification!['amount'].toString(),
+          amount: amount.toString(),
           paymentId: response.paymentId ?? '',
           onOkPressed: () {
-            // Optional: Navigate back or refresh data
-            debugPrint("Payment success dialog OK pressed");
+            if (type == 'matrimony') {
+              _showDonationPromptAfterDelay();
+            } else if (type == 'donation') {
+              Get.back(); // Go back from details page
+            }
           },
         );
       } else {
-        // error toast
         Get.snackbar(
           'Verification Failed',
           res.message ?? 'Payment verification failed',
@@ -139,8 +147,36 @@ class RazorpayController extends GetxController {
         );
       }
 
+      _pendingVerification = null;
+    }
+  }
 
-      _pendingVerification = null; // clear after verification
+  void _showDonationPromptAfterDelay() async {
+    debugPrint("RZP: _showDonationPromptAfterDelay called");
+    try {
+      // Give time for the success dialog to fully close
+      await Future.delayed(const Duration(milliseconds: 600));
+      
+      if (!Get.isRegistered<DonationController>()) {
+        debugPrint("RZP: Registering DonationBinding");
+        final donationBinding = DonationBinding();
+        donationBinding.dependencies();
+      }
+      
+      final donationController = Get.find<DonationController>();
+      debugPrint("RZP: Fetching donation causes");
+      await donationController.fetchDonationCauses();
+      
+      if (donationController.causes.isNotEmpty) {
+        debugPrint("RZP: Showing donation prompt");
+        showDonationPrompt(donationController.causes, (cause) {
+          Get.toNamed(AppRoutes.donationDetails, arguments: cause);
+        });
+      } else {
+        debugPrint("RZP: No donation causes found");
+      }
+    } catch (e) {
+      debugPrint("Error showing donation prompt: $e");
     }
   }
 

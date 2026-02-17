@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../data/model/matrimony_plan_model.dart';
+import '../../data/model/business_plan_model.dart';
 
-Future<MatrimonyPlan?> showSubscriptionBottomSheet(List<MatrimonyPlan> plans) async {
-  return await Get.bottomSheet<MatrimonyPlan>(
-    _MatrimonyBottomSheet(plans: plans),
+Future<BusinessPlan?> showBusinessSubscriptionBottomSheet(List<BusinessPlan> plans) async {
+  return await Get.bottomSheet<BusinessPlan>(
+    _BusinessBottomSheet(plans: plans),
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
   );
 }
 
-class _MatrimonyBottomSheet extends StatefulWidget {
-  final List<MatrimonyPlan> plans;
+class _BusinessBottomSheet extends StatefulWidget {
+  final List<BusinessPlan> plans;
 
-  const _MatrimonyBottomSheet({required this.plans});
+  const _BusinessBottomSheet({required this.plans});
 
   @override
-  State<_MatrimonyBottomSheet> createState() => _MatrimonyBottomSheetState();
+  State<_BusinessBottomSheet> createState() => _BusinessBottomSheetState();
 }
 
-class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
-  MatrimonyPlan? selectedPlan;
+class _BusinessBottomSheetState extends State<_BusinessBottomSheet> {
+  BusinessPlan? selectedPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -36,52 +36,6 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // const SizedBox(height: 12),
-          // Container(
-          //   width: 40,
-          //   height: 4,
-          //   decoration: BoxDecoration(
-          //     color: Colors.grey.shade300,
-          //     borderRadius: BorderRadius.circular(2),
-          //   ),
-          // ),
-         // const SizedBox(height: 24),
-          
-          // Header
-         /* Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Premium Plans",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    Text(
-                      "Choose your perfect match",
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: const Icon(Icons.close_rounded),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Colors.grey.shade100,
-                  ),
-                ),
-              ],
-            ),
-          ),*/
-
-
           //Premium Header with Gradient
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -93,8 +47,6 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                   context.theme.primaryColorDark,
                   context.theme.primaryColor,
                   context.theme.primaryColor,
-                  // Color(0xFFFF8E8E),
-                  // Color(0xFFFFB6B6),
                 ],
               ),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
@@ -112,7 +64,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                   ),
                 ),
 
-                // Header with Crown Icon
+                // Header with Icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -125,7 +77,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.emoji_events_rounded,
+                            Icons.business_center_rounded,
                             color: Colors.white,
                             size: 24,
                           ),
@@ -135,7 +87,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Unlock Premium Features",
+                              "Business Subscription",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -143,7 +95,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                               ),
                             ),
                             Text(
-                              "Choose your perfect plan",
+                              "Boost your business reach",
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.white70,
@@ -227,7 +179,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                       elevation: 0,
                     ),
                     child: const Text(
-                      "Subscription",
+                      "Select Plan",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -240,7 +192,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
     );
   }
 
-  Widget _buildPlanCard(MatrimonyPlan plan) {
+  Widget _buildPlanCard(BusinessPlan plan) {
     final bool isSelected = selectedPlan?.id == plan.id;
 
     return GestureDetector(
@@ -269,7 +221,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                _getPlanIcon(plan.planName),
+                _getPlanIcon(plan.durationYears),
                 color: isSelected ? Colors.white : Colors.grey.shade400,
                 size: 20,
               ),
@@ -280,7 +232,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    plan.planName ?? "Plan",
+                    "${plan.durationYears} ${plan.durationYears == 1 ? 'Year' : 'Years'} Plan",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -288,7 +240,7 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                     ),
                   ),
                   Text(
-                    "${plan.durationYears} ${plan.durationYears == 1 ? 'Year' : 'Years'} Validity",
+                    plan.companyType ?? "Standard Business",
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                 ],
@@ -308,12 +260,10 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
     );
   }
 
-
-  IconData _getPlanIcon(String? name) {
-    final n = name?.toLowerCase() ?? "";
-    if (n.contains("silver")) return Icons.stars_rounded;
-    if (n.contains("gold")) return Icons.workspace_premium_rounded;
-    if (n.contains("platinum")) return Icons.diamond_rounded;
+  IconData _getPlanIcon(int? years) {
+    if (years == 1) return Icons.star_outline_rounded;
+    if (years == 2) return Icons.star_half_rounded;
+    if (years != null && years >= 3) return Icons.stars_rounded;
     return Icons.card_membership_rounded;
   }
 }

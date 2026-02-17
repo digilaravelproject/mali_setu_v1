@@ -788,7 +788,8 @@ const Map<String, String> enUS = {
 
   'blood_group': 'Blood Group',
   'referral_name': 'Referral Name',
-  'enter_custom_category' : 'Custom Category '
+  'enter_custom_category' : 'Custom Category ',
+  'transaction_history' : 'Transaction History'
 
 
 

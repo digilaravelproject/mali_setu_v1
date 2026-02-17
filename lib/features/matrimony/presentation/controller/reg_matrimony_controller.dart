@@ -386,6 +386,7 @@ class RegMatrimonyController extends GetxController {
           orderId: orderData['order_id'],
           transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
           key: orderData['key_id'],
+          type: 'matrimony',
         );
       } else {
         CustomSnackBar.showError(

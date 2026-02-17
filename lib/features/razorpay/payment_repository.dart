@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../core/constent/api_constants.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_response.dart';
+import 'transaction_model.dart';
 
 class PaymentRepository {
   final ApiClient _apiClient = Get.find<ApiClient>();
@@ -56,6 +57,54 @@ class PaymentRepository {
 
 
 
+  Future<ApiResponse<Map<String, dynamic>>> createBusinessPaymentOrder({
+    required int planId,
+  }) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.businessPymentOrder,
+        data: {
+          'plan_id': planId,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+
+        if (data['success'] == true) {
+          return ApiResponse.success(
+            {
+              'order_id': data['data']['order_id'],
+              'key_id': data['data']['key_id'],
+              'transaction_id': data['data']['transaction_id'],
+              'amount': data['data']['amount'],
+            },
+            message: data['message'] ?? 'Order created successfully',
+            code: response.statusCode,
+          );
+        } else {
+          return ApiResponse.error(
+            data['message'] ?? 'Failed to create order',
+            code: response.statusCode,
+          );
+        }
+      } else {
+        return ApiResponse.error(
+          'Failed to create order',
+          code: response.statusCode,
+        );
+      }
+    } catch (e) {
+      return ApiResponse.error(
+        'Error creating order: $e',
+        error: e,
+      );
+    }
+  }
+
+
+
+
   /// Verify Razorpay payment
   Future<ApiResponse<Map<String, dynamic>>> verifyPayment({
     required String razorpayOrderId,
@@ -104,4 +153,31 @@ class PaymentRepository {
     }
   }
 
+  /// Get transaction history with pagination
+  Future<ApiResponse<TransactionResponse>> getTransactions({int page = 1}) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.paymentTransactions,
+        queryParameters: {'page': page},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ApiResponse.success(
+          TransactionResponse.fromJson(response.data),
+          message: response.data['message'] ?? 'Transactions fetched successfully',
+          code: response.statusCode,
+        );
+      } else {
+        return ApiResponse.error(
+          'Failed to fetch transactions',
+          code: response.statusCode,
+        );
+      }
+    } catch (e) {
+      return ApiResponse.error(
+        'Error fetching transactions: $e',
+        error: e,
+      );
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 
 
@@ -32,6 +33,7 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> applyJob(Map<String, dynamic> data);
   Future<MyApplicationsResponse> getMyApplications();
   Future<JobApplicationsResponse> getJobApplications(int jobId);
+  Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
 }
 
@@ -217,6 +219,12 @@ class BusinessDataSourceImpl implements BusinessDataSource {
       },
     );
     return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessPlanResponse> getBusinessPlans() async {
+    final response = await apiClient.get(ApiConstants.businessSubscriptionPlans);
+    return BusinessPlanResponse.fromJson(response.data);
   }
 }
 
