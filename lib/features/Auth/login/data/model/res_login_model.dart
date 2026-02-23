@@ -1,3 +1,28 @@
+// class ResLoginModel {
+//   bool? success;
+//   String? message;
+//   LoginData? data;
+//
+//   ResLoginModel({this.success, this.message, this.data});
+//
+//   ResLoginModel.fromJson(Map<String, dynamic> json) {
+//     success = json['success'];
+//     message = json['message'];
+//     data = json['data'] != null ? LoginData.fromJson(json['data']) : null;
+//   }
+//
+//   Map<String, dynamic> toJson() {
+//     final Map<String, dynamic> data = <String, dynamic>{};
+//     data['success'] = success;
+//     data['message'] = message;
+//     if (this.data != null) {
+//       data['data'] = this.data!.toJson();
+//     }
+//     return data;
+//   }
+// }
+
+
 class ResLoginModel {
   bool? success;
   String? message;
@@ -6,9 +31,25 @@ class ResLoginModel {
   ResLoginModel({this.success, this.message, this.data});
 
   ResLoginModel.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
+    // Handle both: success OR status
+    if (json.containsKey('success')) {
+      success = _parseBool(json['success']);
+    } else if (json.containsKey('status')) {
+      success = _parseBool(json['status']);
+    }
+
     message = json['message'];
     data = json['data'] != null ? LoginData.fromJson(json['data']) : null;
+  }
+
+  bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) {
+      return value.toLowerCase() == 'true' ||
+          value.toLowerCase() == 'success';
+    }
+    return false;
   }
 
   Map<String, dynamic> toJson() {
@@ -21,6 +62,7 @@ class ResLoginModel {
     return data;
   }
 }
+
 
 class LoginData {
   User? user;
@@ -48,12 +90,23 @@ class LoginData {
 
 class User {
   int? id;
+
+  String? googleId; // 🆕 ADDED
+
   String? name;
   String? email;
+
+  String? companyName; // 🆕 ADDED
+  String? deptName;    // 🆕 ADDED
+  String? designation; // 🆕 ADDED
+
   String? otp;
   String? otpExpiresAt;
   String? phone;
   int? age;
+
+  String? dob; // 🆕 ADDED (yyyy-MM-dd HH:mm:ss)
+
   String? castCertificate;
   String? occupation;
   String? reffralCode;
@@ -77,12 +130,23 @@ class User {
 
   User(
       {this.id,
-      this.name,
+
+        this.googleId,
+
+        this.name,
       this.email,
+
+        this.companyName,
+        this.deptName,
+        this.designation,
+
       this.otp,
       this.otpExpiresAt,
       this.phone,
       this.age,
+
+        this.dob,
+
       this.castCertificate,
       this.occupation,
       this.reffralCode,
@@ -106,12 +170,24 @@ class User {
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+
+    googleId = json['google_id']; // 🆕
+
     name = json['name'];
     email = json['email'];
+
+    companyName = json['company_name']; // 🆕
+    deptName = json['dept_name'];       // 🆕
+    designation = json['designation'];  // 🆕
+
+
     otp = json['otp'];
     otpExpiresAt = json['otp_expires_at'];
     phone = json['phone'];
     age = json['age'];
+
+    dob = json['dob']; // 🆕
+
     castCertificate = json['cast_certificate'];
     occupation = json['occupation'];
     reffralCode = json['reffral_code'];
@@ -137,12 +213,23 @@ class User {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
+
+    data['google_id'] = googleId;
+
     data['name'] = name;
     data['email'] = email;
+
+    data['company_name'] = companyName;
+    data['dept_name'] = deptName;
+    data['designation'] = designation;
+
     data['otp'] = otp;
     data['otp_expires_at'] = otpExpiresAt;
     data['phone'] = phone;
     data['age'] = age;
+
+    data['dob'] = dob;
+
     data['cast_certificate'] = castCertificate;
     data['occupation'] = occupation;
     data['reffral_code'] = reffralCode;

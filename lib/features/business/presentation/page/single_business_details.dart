@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,10 +23,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   Widget build(BuildContext context) {
     // Initial fetch
     final argBusiness = Get.arguments as Business;
-   // final businessId = Get.arguments as int;
-    // We can use the passed business object for initial display,
-    // but we should also fetch fresh details.
-    // Let's trigger the fetch.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (argBusiness.id != null) {
         controller.fetchBusinessDetails(argBusiness.id!);
@@ -52,15 +51,20 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       pinned: true,
                       centerTitle: false,
                       backgroundColor: context.theme.scaffoldBackgroundColor,
-                      elevation: 0,
+                      elevation: innerBoxIsScrolled ? 4 : 0,
                       shadowColor: Colors.black.withOpacity(0.05),
                       expandedHeight: isOwner ? 600 : 480,
-                      title: Text(
-                        business.businessName ?? '',
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          color: Colors.black87,
+                      forceElevated: innerBoxIsScrolled,
+                      title: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: innerBoxIsScrolled ? 1.0 : 0.0,
+                        child: Text(
+                          business.businessName ?? '',
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
                       leading: InkWell(
@@ -121,11 +125,11 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
                             ),
-                            tabs: const [
-                              Tab(text: 'Products'),
-                              Tab(text: 'Services'),
-                              Tab(text: 'Jobs'),
-                              Tab(text: 'Info'),
+                            tabs: [
+                              Tab(text: 'products'.tr),
+                              Tab(text: 'services'.tr),
+                              Tab(text: 'jobs'.tr),
+                              Tab(text: 'info'.tr),
                             ],
                           ),
                         ),
@@ -142,10 +146,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   Builder(builder: (context) => _buildProductsTab(context)),
                   Builder(builder: (context) => _buildServicesTab(context)),
                   Builder(builder: (context) => _buildJobsTab(context)),
-                  Builder(builder: (context) => Obx(() {
+                  Builder(builder: (context) {
                      final business = controller.selectedBusiness.value ?? argBusiness;
                      return _buildBusinessInfoTab(business, context);
-                  })),
+                  }),
                 ],
               ),
             ),
@@ -175,7 +179,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      business.businessName ?? 'Unnamed Business',
+                      business.businessName ?? 'unnamed_business'.tr,
                       style: context.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 24,
@@ -190,35 +194,35 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       runSpacing: 8,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Text(
-                                '4.4',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Icon(Icons.star, color: Colors.white, size: 12),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          '118 Ratings',
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.green,
+                        //     borderRadius: BorderRadius.circular(6),
+                        //   ),
+                        //   child: Row(
+                        //     mainAxisSize: MainAxisSize.min,
+                        //     children: const [
+                        //       Text(
+                        //         '4.4',
+                        //         style: TextStyle(
+                        //           color: Colors.white,
+                        //           fontSize: 12,
+                        //           fontWeight: FontWeight.bold,
+                        //         ),
+                        //       ),
+                        //       SizedBox(width: 4),
+                        //       Icon(Icons.star, color: Colors.white, size: 12),
+                        //     ],
+                        //   ),
+                        // ),
+                        // Text(
+                        //   '118 Ratings',
+                        //   style: context.textTheme.bodyMedium?.copyWith(
+                        //     color: Colors.grey[600],
+                        //     fontWeight: FontWeight.w500,
+                        //   ),
+                        // ),
                         if (business.verificationStatus == 'approved')
                           Row(
                             mainAxisSize: MainAxisSize.min,
@@ -226,7 +230,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                               const Icon(Icons.verified, color: Colors.blue, size: 18),
                               const SizedBox(width: 4),
                               Text(
-                                'Verified',
+                                'verified'.tr,
                                 style: TextStyle(
                                   color: Colors.blue[700],
                                   fontSize: 13,
@@ -259,7 +263,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   borderRadius: BorderRadius.circular(16),
                   child: business.photo != null
                       ? Image.network(
-                          business.photo!,
+                    ApiConstants.imageBaseUrl+ business.photo!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
                         )
@@ -273,17 +277,17 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             spacing: 16,
             runSpacing: 10,
             children: [
-              _buildHeaderIconLabel(Icons.category_outlined, business.category?.name ?? 'Category', context),
-              _buildHeaderIconLabel(Icons.directions_walk, '6 min • 500 mts', context),
+              _buildHeaderIconLabel(Icons.category_outlined, business.category?.name ?? 'category'.tr, context),
+             // _buildHeaderIconLabel(Icons.directions_walk, '6 min • 500 mts', context),
             ],
           ),
           const SizedBox(height: 10),
-          _buildHeaderIconLabel(Icons.info_outline, 'AC Repair & Services • 5 Years in Business', context),
+          _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
           const SizedBox(height: 12),
           Row(
             children: [
               Text(
-                'Open Now:',
+                'open_now'.tr,
                 style: context.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: Colors.green[700],
@@ -291,21 +295,21 @@ class BusinessDetailScreen extends GetView<BusinessController> {
               ),
               const SizedBox(width: 4),
               Text(
-                'until 9:00 pm',
+                '${'until'.tr} 9:00 pm',
                 style: context.textTheme.bodyMedium,
               ),
-              Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey[600]),
+              //Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey[600]),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: business.status == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
+                  color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  (business.status ?? 'active').toTitleCase(),
+                  (business.verificationStatus ?? 'active').toTitleCase(),
                   style: TextStyle(
-                    color: business.status == 'active' ? Colors.green[800] : Colors.grey[800],
+                    color: business.verificationStatus == 'active' ? Colors.green[800] : Colors.grey[800],
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
@@ -347,7 +351,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
         children: [
           _buildQuickActionButton(
             Icons.call_rounded,
-            'Call',
+            'call'.tr,
             Colors.blue,
             context,
             onTap: () => controller.launchPhone(business.user!.phone.toString()),
@@ -355,7 +359,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           const SizedBox(width: 24),
           _buildQuickActionButton(
             Icons.mail_outline_rounded,
-            'Email',
+            'email'.tr,
             Colors.green,
             context,
             onTap: () => controller.launchEmail(business.user!.email.toString()),
@@ -422,13 +426,13 @@ class BusinessDetailScreen extends GetView<BusinessController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('Products', '${business.products?.length ?? 0}', Icons.inventory_2_outlined, context),
+          _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.inventory_2_outlined, context),
           _buildVerticalDivider(context),
-          _buildStatItem('Services', '${business.services?.length ?? 0}', Icons.room_service_outlined, context),
+          _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.room_service_outlined, context),
           _buildVerticalDivider(context),
-          _buildStatItem('Jobs', '0', Icons.work_outline, context),
+          _buildStatItem('jobs'.tr, '0', Icons.work_outline, context),
           _buildVerticalDivider(context),
-          _buildStatItem('Value', '0', Icons.currency_rupee, context),
+          _buildStatItem('value'.tr, '0', Icons.currency_rupee, context),
         ],
       ),
     );
@@ -518,7 +522,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   onTap: () {
                     Get.toNamed(AppRoutes.addProduct, arguments: business.id);
                   },
-                  child: _buildActionButton('Add Product', Icons.add_box_outlined, context),
+                  child: _buildActionButton('add_product'.tr, Icons.add_box_outlined, context),
                 ),
               ),
               const SizedBox(width: 10),
@@ -528,7 +532,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   onTap: () {
                     Get.toNamed(AppRoutes.addService, arguments: business.id);
                   },
-                  child: _buildActionButton('Add Service', Icons.add_circle_outline, context),
+                  child: _buildActionButton('add_service'.tr, Icons.add_circle_outline, context),
                 ),
               ),
               const SizedBox(width: 10),
@@ -540,7 +544,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       }
                       Get.toNamed(AppRoutes.createJob);
                     },
-                    child: _buildActionButton('Create Job', Icons.work_outline, context)),
+                    child: _buildActionButton('create_job'.tr, Icons.work_outline, context)),
               ),
             ],
           ),
@@ -616,7 +620,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             },
             icon: const Icon(Icons.call, size: 20),
             label: Text(
-              'Call Now',
+              'call_now'.tr,
               style: context.textTheme.titleMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -639,12 +643,11 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   }
  
   Widget _buildProductsTab(BuildContext context) {
-    return Obx(() {
         if (controller.isDetailsLoading.isTrue) {
              return _buildShimmerList(context);
         }
         if (controller.businessProducts.isEmpty) {
-            return const Center(child: Text("No Products Found"));
+            return Center(child: Text('no_products_found'.tr));
         }
         return CustomScrollView(
           physics: const ClampingScrollPhysics(),
@@ -656,7 +659,95 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final product = controller.businessProducts[index];
-                    return Card(
+                    return  Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      elevation: 1,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: context.theme.dividerColor),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Product Image
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: context.theme.primaryColorLight,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: product.imagePath != null
+                                  ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  product.imagePath!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (c, e, s) =>
+                                      Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
+                                ),
+                              )
+                                  : Icon(
+                                Icons.shopping_bag_outlined,
+                                color: context.theme.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Product Info
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Product Name
+                                  Text(
+                                    product.name ?? 'unknown_product'.tr,
+                                    style: context.textTheme.titleLarge,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+
+                                  const SizedBox(height: 4),
+
+                                  // Amount (conditionally)
+                                  if (product.cost != null)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: context.theme.primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        '₹${product.cost}',
+                                        style: context.textTheme.bodyMedium?.copyWith(
+                                          color: context.theme.primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                  // Description (conditionally)
+                                  if (product.description != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 6),
+                                      child: Text(
+                                        product.description!,
+                                        style: context.textTheme.bodyMedium,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+
+                    /*  Card(
                       margin: const EdgeInsets.only(bottom: 12),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -713,7 +804,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           ],
                         ),
                       ),
-                    );
+                    );*/
                   },
                   childCount: controller.businessProducts.length,
                 ),
@@ -721,16 +812,14 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             ),
           ],
         );
-    });
   }
 
   Widget _buildServicesTab(BuildContext context) {
-    return Obx(() {
         if (controller.isDetailsLoading.isTrue) {
              return _buildShimmerList(context);
         }
         if (controller.businessServices.isEmpty) {
-            return const Center(child: Text("No Services Found"));
+            return Center(child: Text('no_services_found'.tr));
         }
         return CustomScrollView(
           physics: const ClampingScrollPhysics(),
@@ -778,7 +867,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      service.name ?? 'Unknown Service',
+                                      service.name ?? 'unknown_service'.tr,
                                       style: context.textTheme.titleLarge,
                                        maxLines: 1, overflow: TextOverflow.ellipsis,
                                     ),
@@ -805,11 +894,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             ),
           ],
         );
-    });
   }
 
   Widget _buildJobsTab(BuildContext context) {
-    return Obx(() {
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
       }
@@ -850,7 +937,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   children: [
                     Expanded(
                       child: CustomButton(
-                        title: "Job Analytics",
+                        title: "job_analytics".tr,
                         height: 40,
                         borderRadius: 12,
                         onPressed: () {
@@ -861,7 +948,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomButton(
-                        title: "Applied Jobs",
+                        title: "applied_jobs".tr,
                         height: 40,
                         borderRadius: 12,
                         onPressed: () {
@@ -909,7 +996,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            job.title ?? 'No Title',
+                                            job.title ?? 'no_title'.tr,
                                             style: context.textTheme.titleLarge,
                                           ),
                                         ),
@@ -918,7 +1005,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                                       ],
                                     ),
                                     Text(
-                                      job.salaryRange ?? 'Salary not specified',
+                                      job.salaryRange ?? 'salary_not_specified'.tr,
                                       style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
                                     ),
                                   ],
@@ -940,7 +1027,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  job.location ?? 'Unknown',
+                                  job.location ?? 'unknown'.tr,
                                   style: context.textTheme.titleSmall,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -955,7 +1042,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  job.jobType ?? 'Not specified',
+                                  job.jobType ?? 'not_specified'.tr,
                                   style: context.textTheme.titleSmall,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -970,7 +1057,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  job.employmentType ?? 'Full Time',
+                                  job.employmentType ?? 'full_time'.tr,
                                   style: context.textTheme.titleSmall,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -996,7 +1083,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           const SizedBox(height: 10),
                           if (job.status == 'pending')
                             CustomButton(
-                              title: "Waiting for Approval",
+                              title: "waiting_for_approval".tr,
                               backgroundColor: Colors.orange,
                               borderRadius: 12,
                               height: 40,
@@ -1005,7 +1092,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           const SizedBox(height: 10),
                           CustomButton(
                             backgroundColor: context.theme.primaryColor,
-                            title: "View Details",
+                            title: "view_details".tr,
                             borderRadius: 12,
                             height: 40,
                             onPressed: () {
@@ -1022,7 +1109,6 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           ),
         ],
       );
-    });
   }
 
   Widget _buildBusinessInfoTab(Business business, BuildContext context) {
@@ -1037,30 +1123,30 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           padding: const EdgeInsets.all(16),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildInfoCard('Business Details', [
-                _buildInfoRow(Icons.business, 'Name', business.businessName ?? 'N/A', context),
-                _buildInfoRow(Icons.category, 'Category', business.category?.name ?? 'N/A', context),
-                _buildInfoRow(Icons.verified, 'Verification Status', (business.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: business.verificationStatus == 'approved'),
-                _buildInfoRow(Icons.stacked_bar_chart_sharp, 'Business Status', (business.status ?? 'active').toTitleCase(), context),
-                _buildInfoRow(Icons.description, 'Description', business.description ?? 'No description available', context, maxLines: 5),
+              _buildInfoCard('business_details'.tr, [
+                _buildInfoRow(Icons.business, 'name'.tr, business.businessName ?? 'N/A', context),
+                _buildInfoRow(Icons.category, 'category'.tr, business.category?.name ?? 'N/A', context),
+                _buildInfoRow(Icons.verified, 'verification_status'.tr, (business.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: business.verificationStatus == 'approved'),
+                _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (business.verificationStatus ?? 'active').toTitleCase(), context),
+                _buildInfoRow(Icons.description, 'description'.tr, business.description ?? 'No description available', context, maxLines: 5),
               ], context),
               const SizedBox(height: 16),
-              _buildInfoCard('Contact Information', [
-                _buildInfoRow(Icons.phone, 'Phone', business.contactPhone ?? 'N/A', context),
-                _buildInfoRow(Icons.email, 'Email', business.contactEmail ?? 'N/A', context),
-                _buildInfoRow(Icons.language, 'Website', business.website ?? 'N/A', context),
+              _buildInfoCard('contact_info'.tr, [
+                _buildInfoRow(Icons.phone, 'phone'.tr, business.contactPhone ?? 'N/A', context),
+                _buildInfoRow(Icons.email, 'email'.tr, business.contactEmail ?? 'N/A', context),
+                _buildInfoRow(Icons.language, 'website'.tr, business.website ?? 'N/A', context),
               ], context),
               const SizedBox(height: 16),
-              _buildInfoCard('Additional Information', [
-                _buildInfoRow(Icons.calendar_today, 'Created At', business.createdAt != null ? business.createdAt!.split('T')[0] : 'N/A', context),
-                 _buildInfoRow(Icons.update, 'Last Updated', business.updatedAt != null ? business.updatedAt!.split('T')[0] : 'N/A', context),
+              _buildInfoCard('additional_information'.tr, [
+                _buildInfoRow(Icons.calendar_today, 'created_at'.tr, business.createdAt != null ? business.createdAt!.split('T')[0] : 'N/A', context),
+                 _buildInfoRow(Icons.update, 'last_updated'.tr, business.updatedAt != null ? business.updatedAt!.split('T')[0] : 'N/A', context),
               ], context),
               const SizedBox(height: 30),
               const SizedBox(height: 16),
-              _buildInfoCard('Additional Information', [
-                _buildInfoRow(Icons.inventory, 'Total Products', '${business.products?.length ?? 0}', context),
-                _buildInfoRow(Icons.room_service, 'Total Services', '${business.services?.length ?? 0}', context),
-                _buildInfoRow(Icons.work, 'Active Jobs', '0', context),
+              _buildInfoCard('additional_information'.tr, [
+                _buildInfoRow(Icons.inventory, 'total_products'.tr, '${business.products?.length ?? 0}', context),
+                _buildInfoRow(Icons.room_service, 'total_services'.tr, '${business.services?.length ?? 0}', context),
+                _buildInfoRow(Icons.work, 'active_jobs'.tr, '0', context),
               ], context),
               const SizedBox(height: 20),
             ]),

@@ -4,12 +4,13 @@ import 'package:dio/dio.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 
 
 
 abstract class BusinessDataSource {
-  Future<BusinessResponse> getAllBusinesses();
+  Future<BusinessResponse> getAllBusinesses({int page = 1});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);
@@ -18,7 +19,7 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images);
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
-  Future<CategoryResponse> getBusinessCategories();
+  Future<CategoryResponse> getBusinessCategories({int page = 1});
   Future<CategoryResponse> getCategoryDetails(int id);
   
   // Job Methods
@@ -32,6 +33,7 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> applyJob(Map<String, dynamic> data);
   Future<MyApplicationsResponse> getMyApplications();
   Future<JobApplicationsResponse> getJobApplications(int jobId);
+  Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
 }
 
@@ -41,8 +43,11 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   BusinessDataSourceImpl({required this.apiClient});
 
   @override
-  Future<BusinessResponse> getAllBusinesses() async {
-    final response = await apiClient.get(ApiConstants.allBusiness);
+  Future<BusinessResponse> getAllBusinesses({int page = 1}) async {
+    final response = await apiClient.get(
+      ApiConstants.allBusiness,
+      queryParameters: {'page': page},
+    );
     return BusinessResponse.fromJson(response.data);
   }
 
@@ -116,8 +121,11 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   }
 
   @override
-  Future<CategoryResponse> getBusinessCategories() async {
-    final response = await apiClient.get(ApiConstants.getCategory);
+  Future<CategoryResponse> getBusinessCategories({int page = 1}) async {
+    final response = await apiClient.get(
+      ApiConstants.getCategory,
+      queryParameters: {'page': page},
+    );
     return CategoryResponse.fromJson(response.data);
   }
 
@@ -211,6 +219,12 @@ class BusinessDataSourceImpl implements BusinessDataSource {
       },
     );
     return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessPlanResponse> getBusinessPlans() async {
+    final response = await apiClient.get(ApiConstants.businessSubscriptionPlans);
+    return BusinessPlanResponse.fromJson(response.data);
   }
 }
 

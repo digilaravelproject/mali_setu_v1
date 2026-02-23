@@ -74,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         title: Text(
-          "My Profile",
+          "my_profile".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: Colors.black87,
@@ -96,21 +96,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // Basic Information
             _buildSectionCard(
-              title: 'BASIC INFORMATION',
+              title: 'basic_information'.tr,
               icon: Icons.person_outline_rounded,
               child: _buildBasicInfo(),
             ),
 
             // Contact Information
             _buildSectionCard(
-              title: 'CONTACT INFORMATION',
+              title: 'contact_information'.tr,
               icon: Icons.contact_phone_outlined,
               child: _buildContactInfo(),
             ),
 
             // Address Information
             _buildSectionCard(
-              title: 'ADDRESS INFORMATION',
+              title: 'address_information'.tr,
               icon: Icons.location_on_outlined,
               child: _buildAddressInfo(),
             ),
@@ -119,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             CustomButton(
               height: 48,
               borderRadius: 14,
-              title: "Change Password",
+              title: "change_password".tr,
               onPressed: () {
                 Get.toNamed(AppRoutes.changePassword);
               },
@@ -198,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           icon: Icon(Icons.edit_outlined, size: 16, color: context.theme.primaryColor),
           label: Text(
-            'Edit Profile',
+            'edit_profile'.tr,
             style: TextStyle(
               color: context.theme.primaryColor,
               fontWeight: FontWeight.w600,
@@ -265,21 +265,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         _buildInfoRow(
-          label: 'Full Name',
+          label: 'full_name'.tr,
           value: userData['fullName']!,
           icon: Icons.person_outline,
         ),
         const SizedBox(height: 16),
-        _buildInfoRow(label: 'Age', value: userData['age']!, icon: Icons.cake_outlined),
+        _buildInfoRow(label: 'age'.tr, value: userData['age']!, icon: Icons.cake_outlined),
         const SizedBox(height: 16),
         _buildInfoRow(
-          label: 'Occupation',
+          label: 'occupation'.tr,
           value: userData['occupation']!,
           icon: Icons.work_outline,
         ),
         const SizedBox(height: 16),
         _buildInfoRow(
-          label: 'Referral Code',
+          label: 'referral_code'.tr,
           value: userData['referralCode']!,
           icon: Icons.confirmation_number_outlined,
         ),
@@ -291,13 +291,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         _buildInfoRow(
-          label: 'Email Address',
+          label: 'email_address'.tr,
           value: userData['email']!,
           icon: Icons.email_outlined,
         ),
         const SizedBox(height: 16),
         _buildInfoRow(
-          label: 'Mobile Number',
+          label: 'mobile_number'.tr,
           value: userData['mobile']!,
           icon: Icons.phone_android_outlined,
         ),
@@ -309,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         _buildInfoRow(
-          label: 'Street Address',
+          label: 'street_address'.tr,
           value: userData['streetAddress']!,
           icon: Icons.home_outlined,
           isFullWidth: true,
@@ -320,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: _buildInfoRow(
-                label: 'City',
+                label: 'city'.tr,
                 value: userData['city']!,
                 icon: Icons.location_city_outlined,
               ),
@@ -328,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildInfoRow(
-                label: 'State',
+                label: 'state'.tr,
                 value: userData['state']!,
                 icon: Icons.map_outlined,
               ),
@@ -341,7 +341,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
              Expanded(
               child: _buildInfoRow(
-                label: 'District',
+                label: 'district'.tr,
                 value: userData['district']!,
                 icon: Icons.terrain_outlined,
               ),
@@ -349,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildInfoRow(
-                label: 'Pincode',
+                label: 'pincode'.tr,
                 value: userData['pincode']!,
                 icon: Icons.pin_drop_outlined,
               ),

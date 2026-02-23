@@ -12,6 +12,7 @@ import '../../../business/domain/usecase/get_business_categories_usecase.dart';
 import '../../../business/domain/repository/all_business_repository.dart';
 import '../../domain/usecase/get_banners_usecase.dart';
 import '../../data/model/banner_model.dart';
+import '../../../business/domain/repository/all_business_repository.dart';
 
 class HomeController extends GetxController {
   final RxInt currentIndex = 0.obs;
@@ -44,6 +45,25 @@ class HomeController extends GetxController {
     fetchBanners();
   }
 
+
+  Future<void> refreshHomeData() async {
+    try {
+      isLoadingBanners.value = true;
+      isLoadingCategories.value = true;
+
+      await Future.wait([
+        fetchBanners(),
+        fetchCategories(),
+      ]);
+    } catch (e) {
+      print("Refresh error: $e");
+    } finally {
+      isLoadingBanners.value = false;
+      isLoadingCategories.value = false;
+    }
+  }
+
+
   Future<void> fetchBanners() async {
     try {
       isLoadingBanners.value = true;
@@ -56,6 +76,7 @@ class HomeController extends GetxController {
     }
   }
   
+
   Future<void> fetchCategories() async {
     try {
       isLoadingCategories.value = true;
@@ -88,6 +109,39 @@ class HomeController extends GetxController {
       if (Get.isDialogOpen == true) Get.back();
       print("Error fetching category details: $e");
       CustomSnackBar.showError(message: "Failed to fetch category details: $e");
+    }
+  }
+
+  Future<void> onBannerTap(int index) async {
+    if (index < 0 || index >= banners.length) return;
+    
+    final banner = banners[index];
+    final bizId = banner.businessId;
+    
+    if (bizId == null) {
+      print("No business ID found in banner URL: ${banner.url}");
+      return;
+    }
+
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+      
+      final repository = Get.find<BusinessRepository>();
+      final response = await repository.getBusinessDetails(bizId);
+      
+      Get.back(); // Close loading dialog
+
+      if (response.success == true && response.data?.data != null && response.data!.data!.isNotEmpty) {
+        final business = response.data!.data!.first;
+        Get.toNamed(AppRoutes.businessDetails, arguments: business);
+      } else {
+        print("Business Details not found for ID: $bizId");
+        CustomSnackBar.showError(message: "Business details not found.");
+      }
+    } catch (e) {
+      if (Get.isDialogOpen == true) Get.back();
+      print("Error fetching business details from banner: $e");
+      CustomSnackBar.showError(message: "Failed to fetch business details: $e");
     }
   }
 
@@ -234,6 +288,7 @@ class HomeController extends GetxController {
     }
     return null;
   }
+
 
   void onSwipeComplete(
     int oldIndex,

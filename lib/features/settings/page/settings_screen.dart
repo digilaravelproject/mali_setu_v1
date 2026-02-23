@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../widgets/custom_buttons.dart';
 import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
+import 'change_language_page.dart';
 
 class SettingsScreen extends GetWidget<SettingsController> {
   const SettingsScreen({super.key});
@@ -22,7 +23,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
       backgroundColor: Colors.grey[50], // Light background for contrast
       appBar: AppBar(
         title: Text(
-          "Profile & Settings",
+          "profile & settings".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             fontSize: 22,
@@ -47,55 +48,60 @@ class SettingsScreen extends GetWidget<SettingsController> {
 
               // Settings List
               // User Information Section
-              _buildSectionHeader(context, 'USER INFORMATION'),
+              _buildSectionHeader(context, 'user_information'.tr),
               _buildSettingsGroup(
                 context,
                 [
                   _SettingsItem(
-                    title: 'My Profile',
+                    title: 'my_profile'.tr,
                     icon: Icons.person_outline_rounded,
                     onTap: () => Get.toNamed(AppRoutes.profileScreen),
                   ),
                   _SettingsItem(
-                    title: 'App Language',
+                    title: 'app_language'.tr,
                     icon: Icons.language_rounded,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () => Get.to(() => const ChangeLanguagePage()),
                   ),
                   _SettingsItem(
-                    title: 'User Approval',
+                    title: 'user_approval'.tr,
                     icon: Icons.verified_user_outlined,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Active User',
+                    title: 'active_user'.tr,
                     icon: CupertinoIcons.person_2,
                     onTap: () => _showComingSoonDialog(context),
+                  ),
+                  _SettingsItem(
+                    title: 'transaction_history'.tr,
+                    icon: CupertinoIcons.list_bullet_indent,
+                    onTap: () => Get.toNamed(AppRoutes.transactionHistory),
                   ),
                 ],
               ),
 
               // Business Section
-              _buildSectionHeader(context, 'BUSINESS'),
+              _buildSectionHeader(context, 'business'.tr),
               _buildSettingsGroup(
                 context,
                 [
                   _SettingsItem(
-                    title: 'Active Business',
+                    title: 'active_business'.tr,
                     icon: Icons.business_rounded,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Business Approval',
+                    title: 'business_approval'.tr,
                     icon: Icons.verified_outlined,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Business Type',
+                    title: 'business_type'.tr,
                     icon: Icons.list_alt_rounded,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Saved Business',
+                    title: 'saved_business'.tr,
                     icon: Icons.bookmark_border_rounded,
                     onTap: () => _showComingSoonDialog(context),
                   ),
@@ -103,22 +109,22 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
 
               // Volunteer Section
-              _buildSectionHeader(context, 'VOLUNTEER'),
+              _buildSectionHeader(context, 'volunteer'.tr),
               _buildSettingsGroup(
                 context,
                 [
                   _SettingsItem(
-                    title: 'Active Volunteer',
+                    title: 'active_volunteer'.tr,
                     icon: Icons.favorite_border_rounded,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Volunteer Approval',
+                    title: 'volunteer_approval'.tr,
                     icon: Icons.verified_outlined,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Volunteer Excel Download',
+                    title: 'volunteer_excel_download'.tr,
                     icon: Icons.download_for_offline_outlined,
                     onTap: () => _showComingSoonDialog(context),
                   ),
@@ -126,22 +132,22 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
 
               // Legal Section
-              _buildSectionHeader(context, 'LEGAL'),
+              _buildSectionHeader(context, 'legal'.tr),
               _buildSettingsGroup(
                 context,
                 [
                   _SettingsItem(
-                    title: 'Privacy Policy',
+                    title: 'privacy_policy'.tr,
                     icon: Icons.privacy_tip_outlined,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Terms & Conditions',
+                    title: 'terms & conditions'.tr,
                     icon: Icons.description_outlined,
                     onTap: () => _showComingSoonDialog(context),
                   ),
                   _SettingsItem(
-                    title: 'Contact Support',
+                    title: 'contact_support'.tr,
                     icon: Icons.support_agent_rounded,
                     onTap: () => _showComingSoonDialog(context),
                   ),
@@ -149,12 +155,12 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
 
               // App Settings Section
-              _buildSectionHeader(context, 'APP SETTINGS'),
+              _buildSectionHeader(context, 'app_settings'.tr),
               _buildSettingsGroup(
                 context,
                 [
                   _SettingsItem(
-                    title: 'Share App',
+                    title: 'share_app'.tr,
                     icon: CupertinoIcons.share,
                     onTap: () async {
                       try {
@@ -168,14 +174,14 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     },
                   ),
                   _SettingsItem(
-                    title: 'Logout',
+                    title: 'logout'.tr,
                     icon: Icons.logout_rounded,
                     isDestructive: true,
                     onTap: () async {
                       final confirm = await LogoutDialog.show(
                         context: context,
-                        title: 'Confirm Logout',
-                        message: 'You will be redirected to the login screen.',
+                        title: 'logout'.tr,
+                        message: 'are_you_sure_for_logout'.tr,
                       );
                       if (confirm == true) {
                         authService.logout();
@@ -204,7 +210,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                 child: Column(
                   children: [
                     Text(
-                      "Want to grow your business?",
+                      "want_to_grow_your_business".tr,
                       style: context.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -213,7 +219,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     CustomButton(
                       height: 48,
                       borderRadius: 14,
-                      title: "Register Your Business",
+                      title: "register_your_business".tr,
                       onPressed: () {}, // Add route if available
                     ),
                   ],
@@ -226,7 +232,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                 child: Column(
                   children: [
                     Text(
-                      "Initiative By",
+                      "initiative_by".tr,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w600,
@@ -234,7 +240,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Anushka Foundation",
+                      "anushka_foundation".tr,
                       style: context.textTheme.titleLarge?.copyWith(
                         color: context.theme.primaryColor,
                         fontWeight: FontWeight.w800,
@@ -459,7 +465,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
               const SizedBox(height: 20),
               Text(
-                "Coming Soon!",
+                "coming_soon".tr,
                 style: context.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 22,
@@ -467,7 +473,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
               const SizedBox(height: 12),
               Text(
-                "We are currently working on this feature.\nIt will be available in future updates!",
+                "coming_soon_msg".tr,
                 textAlign: TextAlign.center,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[600],
@@ -488,8 +494,8 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    "Got it!",
+                  child:  Text(
+                    "got_it".tr,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),

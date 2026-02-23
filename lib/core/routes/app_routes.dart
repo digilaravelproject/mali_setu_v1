@@ -17,6 +17,10 @@ import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
 import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_page.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_update_profile_screen.dart';
+import 'package:edu_cluezer/features/settings/page/transaction_history_page.dart';
+import 'package:edu_cluezer/features/settings/binding/transaction_history_binding.dart';
+import 'package:edu_cluezer/features/donation/presentation/page/donation_details_page.dart';
+import 'package:edu_cluezer/features/donation/binding/donation_binding.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../features/matrimony/binding/matrimony_details_binding.dart';
@@ -90,6 +94,8 @@ class AppRoutes {
   static const String categoryDetails = "/categoryDetails";
   static const String jobAppliers = "/jobAppliers";
   static const String volunteerOpportunityDetails = "/volunteerOpportunityDetails";
+  static const String transactionHistory = "/transactionHistory";
+  static const String donationDetails = "/donationDetails";
 }
 
 class AppPages {
@@ -325,6 +331,20 @@ class AppPages {
       name: AppRoutes.volunteerOpportunityDetails,
       page: () => const OpportunityDetailsPage(),
       binding: VolunteerBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.transactionHistory,
+      page: () => const TransactionHistoryPage(),
+      binding: TransactionHistoryBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.donationDetails,
+      page: () => const DonationDetailsPage(),
+      binding: DonationBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

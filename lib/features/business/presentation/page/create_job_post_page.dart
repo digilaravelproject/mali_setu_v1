@@ -21,89 +21,89 @@ class CreateJobPage extends GetWidget<CreateJobController> {
           onPressed: Get.back,
           icon: Icon(AppAssets.backArrow),
         ),
-        title: Obx(() => Text(controller.isEditMode.value ? "Update Job Posting" : "Create Job Posting")),
+        title: Obx(() => Text(controller.isEditMode.value ? 'update_job_posting'.tr : 'create_job_posting'.tr)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(controller.isEditMode.value ? "Edit Job Details" : "Job Details", style: context.textTheme.displaySmall),
+            Text(controller.isEditMode.value ? 'edit_job_details'.tr : 'job_details'.tr, style: context.textTheme.displaySmall),
             Text(
               controller.isEditMode.value 
-                  ? "Update the information for your job posting" 
-                  : "Fill in the details to create your job posting",
+                  ? 'update_job_info'.tr
+                  : 'fill_job_details'.tr,
               style: context.textTheme.labelMedium,
             ),
 
             const SizedBox(height: 16),
-            const SectionTitle("Basic Information"),
+            SectionTitle('basic_information'.tr),
 
             AppInputTextField(
-              label: "Job Title ",
-              hintText: "Job title",
+              label: 'job_title'.tr,
+              hintText: 'job_title_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.titleCtrl,
               validator: FormValidator.jobTitle,
             ),
 
             AppInputTextField(
-              label: "Job Description",
-              hintText: "Describe the role, responsibility",
+              label: 'job_description'.tr,
+              hintText: 'job_description_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.descriptionCtrl,
               maxLines: 4,
-              // validator: FormValidator.jobDescription(),
               validator: (value) =>
-                  FormValidator.jobDescription(value, "Job Description"),
+                  FormValidator.jobDescription(value, 'job_description'.tr),
             ),
 
             AppInputTextField(
-              label: "Requirements",
-              hintText: "List the required skills, qualifications",
+              label: 'requirements'.tr,
+              hintText: 'requirements_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.requirementsCtrl,
               maxLines: 4,
               validator: (value) =>
-                  FormValidator.jobDescription(value, "Requirements"),
+                  FormValidator.jobDescription(value, 'requirements'.tr),
             ),
 
             const SizedBox(height: 16),
 
-            const SectionTitle("Job Details"),
+            SectionTitle('job_details'.tr),
             AppInputTextField(
-              label: "Salary Range",
-              hintText: "₹5,000 - ₹50,000 per month",
+              label: 'salary_range'.tr,
+              hintText: 'salary_range_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.salaryRangeCtrl,
-              validator: (v) => v!.isEmpty ? "Salary range is required" : null,
+              validator: (v) => v!.isEmpty ? 'salary_required'.tr : null,
             ),
             SingleDropdown(
               controller: controller.jobTypeCtrl,
-              label: "Job Type",
-              items: CreateJobController.JOB_TYPES,
+              label: 'job_type'.tr,
+              items: controller.getJobTypes(),
             ),
             AppInputTextField(
-              label: "Location",
-              hintText: "City name (e.g., Lucknow)",
+              label: 'location'.tr,
+              hintText: 'location_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.locationCtrl,
-              validator: (v) => v!.isEmpty ? "Location is required" : null,
+              validator: (v) => v!.isEmpty ? 'location_required'.tr : null,
             ),
             SingleDropdown(
               controller: controller.experienceCtrl,
-              label: "Experience Level",
-              items: CreateJobController.EXP_LEVELS,
+              label: 'experience_level'.tr,
+              items: controller.getExperienceLevels(),
             ),
             SingleDropdown(
               controller: controller.employmentCtrl,
-              label: "Employment Type",
-              items: CreateJobController.EMPLOYMENT_TYPES,
+              label: 'employment_type'.tr,
+              items: controller.getEmploymentTypes(),
             ),
             SingleDropdown(
               controller: controller.categoryCtrl,
-              label: "Job Category",
-              items: CreateJobController.CATEGORIES,
+              label: 'job_category'.tr,
+              items: controller.getCategories(),
+              onOtherSelected: () => _showCustomCategoryDialog(context),
             ),
 
             const SizedBox(height: 16),
@@ -115,10 +115,10 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                     onTap: () => controller.selectDate(context, controller.deadlineCtrl),
                     child: AbsorbPointer(
                       child: AppInputTextField(
-                        label: "Application Deadline",
-                        hintText: "YYYY-MM-DD",
+                        label: 'application_deadline'.tr,
+                        hintText: 'deadline_hint'.tr,
                         controller: controller.deadlineCtrl,
-                        validator: (v) => v!.isEmpty ? "Deadline is required" : null,
+                        validator: (v) => v!.isEmpty ? 'deadline_required'.tr : null,
                       ),
                     ),
                   ),
@@ -129,10 +129,10 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                     onTap: () => controller.selectDate(context, controller.expiryCtrl),
                     child: AbsorbPointer(
                       child: AppInputTextField(
-                        label: "Job Expiry Date",
-                        hintText: "YYYY-MM-DD",
+                        label: 'job_expiry_date'.tr,
+                        hintText: 'deadline_hint'.tr,
                         controller: controller.expiryCtrl,
-                        validator: (v) => v!.isEmpty ? "Expiry date is required" : null,
+                        validator: (v) => v!.isEmpty ? 'expiry_required'.tr : null,
                       ),
                     ),
                   ),
@@ -143,7 +143,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             const SizedBox(height: 16),
 
             // ================ Benefits & Perks Section ================
-            const SectionTitle("Benefits & Perks"),
+            SectionTitle('benefits_perks'.tr),
 
             // Add Custom Benefit
             Row(
@@ -151,8 +151,8 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                 Expanded(
                   child: AppInputTextField(
                     controller: controller.benefitsCtrl,
-                    label: "Add Benefit",
-                    hintText: "e.g., Health insurance",
+                    label: 'add_benefit'.tr,
+                    hintText: 'benefit_hint'.tr,
                     textInputType: TextInputType.text,
                   ),
                 ),
@@ -173,7 +173,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             
             // Popular Benefits
             Text(
-              "Quick Add Benefits:",
+              'quick_add_benefits'.tr,
               style: context.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: context.theme.hintColor,
@@ -183,7 +183,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             Obx(() => Wrap(
               spacing: 8,
               runSpacing: 0,
-              children: CreateJobController.POPULAR_BENEFITS
+              children: controller.getPopularBenefits()
                   .map(
                     (benefit) => FilterChip(
                       label: Text(benefit, style: TextStyle(fontSize: 12)),
@@ -212,7 +212,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                       children: [
                         const SizedBox(height: 12),
                         Text(
-                          "Selected Benefits:",
+                          'selected_benefits'.tr,
                           style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
@@ -238,7 +238,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
 
             // ================ Skills Required Section ================
 
-            const SectionTitle("Skills Required"),
+            SectionTitle('skills_required'.tr),
 
             // Add Custom Skill
             Row(
@@ -246,8 +246,8 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                 Expanded(
                   child: AppInputTextField(
                     controller: controller.skillsCtrl,
-                    label: "Add Skill",
-                    hintText: "e.g., Flutter, Laravel",
+                    label: 'add_skill'.tr,
+                    hintText: 'skill_hint'.tr,
                     textInputType: TextInputType.text,
                   ),
                 ),
@@ -268,7 +268,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             
             // Popular Skills
             Text(
-              "Quick Add Skills:",
+              'quick_add_skills'.tr,
               style: context.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: context.theme.hintColor,
@@ -278,7 +278,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             Obx(() => Wrap(
               spacing: 8,
               runSpacing: 0,
-              children: CreateJobController.POPULAR_SKILLS
+              children: controller.getPopularSkills()
                   .map(
                     (skill) => FilterChip(
                   label: Text(skill, style: TextStyle(fontSize: 12)),
@@ -307,7 +307,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                 children: [
                   const SizedBox(height: 12),
                   Text(
-                    "Selected Skills:",
+                    'selected_skills'.tr,
                     style: context.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
@@ -336,11 +336,47 @@ class CreateJobPage extends GetWidget<CreateJobController> {
       bottomNavigationBar: BottomAppBar(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Obx(() => CustomButton(
-          title: controller.isEditMode.value ? "Update Job" : "Post Job Now",
+          title: controller.isEditMode.value ? 'update_job'.tr : 'post_job_now'.tr,
           isLoading: controller.isLoading.value,
           onPressed: controller.onRegister,
         )),
       ),
+    );
+  }
+
+  void _showCustomCategoryDialog(BuildContext context) {
+    final customCategoryCtrl = TextEditingController();
+    Get.dialog(
+      AlertDialog(
+        title: Text('enter_job_category'.tr),
+        content: TextField(
+          controller: customCategoryCtrl,
+          decoration: InputDecoration(
+            hintText: 'job_category_hint'.tr,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+            },
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () {
+              if (customCategoryCtrl.text.trim().isNotEmpty) {
+                controller.categoryCtrl.text = customCategoryCtrl.text.trim();
+                Get.back();
+              }
+            },
+            child: Text('submit'.tr),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
     );
   }
 }
@@ -378,6 +414,7 @@ class SingleDropdown extends StatelessWidget {
   final String? label;
   final String? hint;
   final List<String> items;
+  final VoidCallback? onOtherSelected;
 
   const SingleDropdown({
     super.key,
@@ -385,16 +422,18 @@ class SingleDropdown extends StatelessWidget {
     required this.items,
     this.label,
     this.hint,
+    this.onOtherSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return AppInputTextField(
       controller: controller,
-      label: label ?? "No Label",
+      label: label ?? 'no_label'.tr,
       isDropdown: true,
       dropdownItems: items,
-      validator: (v) => (v == null || v.isEmpty) ? "${label ?? 'Field'} is required" : null,
+      onOtherSelected: onOtherSelected,
+      validator: (v) => (v == null || v.isEmpty) ? "${label ?? 'no_label'.tr} ${'field_required'.tr}" : null,
     );
   }
 }

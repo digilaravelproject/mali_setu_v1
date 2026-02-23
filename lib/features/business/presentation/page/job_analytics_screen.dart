@@ -42,7 +42,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
               pinned: true,
               centerTitle: false,
               title: Text(
-                'Job Analysis Dashboard',
+                'job_analysis_dashboard'.tr,
                 style: context.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 22,
@@ -63,7 +63,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Job Statistics',
+                  'job_statistics'.tr,
                   style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
                 ),
               ),
@@ -79,7 +79,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                         Expanded(
                           child: statCard(
                             context: context,
-                            title: 'Total Jobs',
+                            title: 'total_jobs'.tr,
                             count: analytics?.totalJobs ?? 0,
                             color: Colors.blue,
                             icon: Icons.work_outline
@@ -89,7 +89,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                         Expanded(
                           child: statCard(
                             context: context,
-                            title: 'Active Jobs',
+                            title: 'active_jobs'.tr,
                             count: analytics?.activeJobs ?? 0,
                             color: Colors.green,
                             icon: Icons.work,
@@ -103,7 +103,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                         Expanded(
                           child: statCard(
                             context: context,
-                            title: 'Pending Jobs',
+                            title: 'pending_jobs'.tr,
                             count: analytics?.pendingJobs ?? 0,
                             color: Colors.orange,
                             icon: Icons.pending_actions,
@@ -113,7 +113,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                         Expanded(
                           child: statCard(
                             context: context,
-                            title: 'Total Applications',
+                            title: 'total_applications'.tr,
                             count: analytics?.totalApplications ?? 0,
                             color: Colors.purple,
                             icon: Icons.people_outline,
@@ -127,7 +127,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                         Expanded(
                           child: statCard(
                             context: context,
-                            title: 'Pending Applications',
+                            title: 'pending_applications'.tr,
                             count: analytics?.pendingApplications ?? 0,
                             color: Colors.red,
                             icon: Icons.hourglass_empty,
@@ -137,7 +137,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                         Expanded(
                           child: statCard(
                             context: context,
-                            title: 'Accepted Applications',
+                            title: 'accepted_applications'.tr,
                             count: analytics?.acceptedApplications ?? 0,
                             color: Colors.teal,
                             icon: Icons.check_circle_outline,
@@ -154,7 +154,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Application Progress',
+                  'application_progress'.tr,
                   style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
                 ),
               ),
@@ -170,13 +170,13 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Recent Applications',
+                      'recent_applications'.tr,
                       style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
                     ),
                     TextButton(
                       onPressed: () {},
                       child: Text(
-                        'View All',
+                        'view_all'.tr,
                         style: context.textTheme.titleMedium?.copyWith(color: Colors.blue)
                       ),
                     ),
@@ -187,10 +187,10 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
 
             // Applications List
             if (analytics?.recentApplications == null || analytics!.recentApplications!.isEmpty)
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
-                  child: Center(child: Text("No recent applications found")),
+                  child: Center(child: Text("no_recent_applications".tr)),
                 ),
               )
             else
@@ -282,7 +282,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Application Status Distribution',
+                'application_status_distribution'.tr,
                 style: context.textTheme.titleMedium
               ),
               Container(
@@ -295,7 +295,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Lifetime',
+                  'lifetime'.tr,
                   style: context.textTheme.bodyMedium?.copyWith(color: Colors.blue.shade700, fontSize: 10)
                 ),
               ),
@@ -321,7 +321,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                       ),
                     ),
                     Text(
-                      'Success',
+                      'success'.tr,
                       style: context.textTheme.bodyMedium?.copyWith(fontSize: 10),
                     ),
                   ],
@@ -336,9 +336,9 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLegendItem('Accepted', analytics?.acceptedApplications ?? 0, Colors.teal, context: context),
-                    _buildLegendItem('Pending', analytics?.pendingApplications ?? 0, Colors.orange, context: context),
-                    _buildLegendItem('Total', analytics?.totalApplications ?? 0, Colors.blue, context: context),
+                    _buildLegendItem('accepted'.tr, analytics?.acceptedApplications ?? 0, Colors.teal, context: context),
+                    _buildLegendItem('pending'.tr, analytics?.pendingApplications ?? 0, Colors.orange, context: context),
+                    _buildLegendItem('total'.tr, analytics?.totalApplications ?? 0, Colors.blue, context: context),
                   ],
                 ),
               ),
@@ -377,10 +377,10 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
 
   Widget _buildApplicationCard(dynamic application) {
     // Assuming application structure from API or placeholder
-    final String name = application['name'] ?? 'Unknown Applicant';
-    final String jobTitle = application['job'] ?? 'Job Application';
+    final String name = application['user']['name'] ?? 'Unknown Applicant';
+    final String jobTitle = application['user']['company_name'] ?? 'Job Application';
     final String status = application['status'] ?? 'Pending';
-    final String time = application['time'] ?? 'Recently';
+    final String time = application['user']['address'] ?? 'Address';
     final String avatarText = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'A';
     
     Color statusColor = Colors.orange;

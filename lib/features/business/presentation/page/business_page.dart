@@ -14,17 +14,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 
-class BusinessPage extends GetWidget<BusinessController> {
-  const BusinessPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const BusinessScreen();
-  }
-}
-
-// Dashboard Screen
-// Dashboard Screen
 class BusinessScreen extends GetView<BusinessController> {
   const BusinessScreen({Key? key}) : super(key: key);
   @override
@@ -33,6 +23,7 @@ class BusinessScreen extends GetView<BusinessController> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: Obx(() {
+
         if (controller.isLoading.value) {
           return _buildShimmerLoading(context);
         }
@@ -48,7 +39,7 @@ class BusinessScreen extends GetView<BusinessController> {
               elevation: 0,
               automaticallyImplyLeading: false,
               title: Text(
-                "Business Dashboard",
+                'business_dashboard'.tr,
                 style: context.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: Colors.black87,
@@ -110,16 +101,16 @@ class BusinessScreen extends GetView<BusinessController> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          'My Business',
-                                          style: TextStyle(
+                                        Text(
+                                          'my_business'.tr,
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          'Manage your business details',
+                                          'manage_business'.tr,
                                           style: TextStyle(
                                             color: Colors.white.withOpacity(0.8),
                                             fontSize: 14,
@@ -166,7 +157,7 @@ class BusinessScreen extends GetView<BusinessController> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            controller.myBusiness.value?.category?.name ?? 'Category',
+                                            controller.myBusiness.value?.category?.name ?? 'business_category'.tr,
                                             style: TextStyle(
                                               color: Colors.white.withOpacity(0.7),
                                               fontSize: 14,
@@ -228,16 +219,16 @@ class BusinessScreen extends GetView<BusinessController> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text(
-                                          'Register Business',
-                                          style: TextStyle(
+                                        Text(
+                                          'register_business'.tr,
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          'Start your digital journey',
+                                          'start_digital_journey'.tr,
                                           style: TextStyle(
                                             color: Colors.white.withOpacity(0.8),
                                             fontSize: 14,
@@ -270,7 +261,7 @@ class BusinessScreen extends GetView<BusinessController> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    'Register Now',
+                                    'register_now'.tr,
                                     style: TextStyle(
                                       color: theme.primaryColor,
                                       fontSize: 16,
@@ -291,7 +282,7 @@ class BusinessScreen extends GetView<BusinessController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Featured Businesses',
+                          'featured_businesses'.tr,
                           style: context.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: Colors.black87,
@@ -310,7 +301,7 @@ class BusinessScreen extends GetView<BusinessController> {
                             child: Row(
                               children: [
                                 Text(
-                                  'View All',
+                                  'view_all'.tr,
                                   style: TextStyle(
                                     color: theme.primaryColor,
                                     fontWeight: FontWeight.w600,
@@ -345,6 +336,39 @@ class BusinessScreen extends GetView<BusinessController> {
                  childCount: controller.businesses.length > 10 ? 10 : controller.businesses.length,
                ),
              ),
+             // Show pagination info if there are more businesses
+             SliverToBoxAdapter(
+               child: controller.businesses.length > 10 || controller.hasNextPage.value
+                 ? Container(
+                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                     padding: const EdgeInsets.all(12),
+                     decoration: BoxDecoration(
+                       color: Colors.blue.withOpacity(0.1),
+                       borderRadius: BorderRadius.circular(12),
+                       border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                     ),
+                     child: Row(
+                       children: [
+                         Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                         const SizedBox(width: 8),
+                         Expanded(
+                           child: Text(
+                             controller.businesses.length > 10 
+                               ? "Showing first 10 businesses. Tap 'View All' to see all ${controller.businesses.length} businesses."
+                               : "Total ${controller.businesses.length} businesses available.",
+                             style: TextStyle(
+                               color: Colors.blue[700],
+                               fontSize: 13,
+                               fontWeight: FontWeight.w500,
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                   )
+                 : const SizedBox.shrink()
+               
+             ),
              const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
           ],
         );
@@ -364,43 +388,169 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          icon:  Icon(Icons.arrow_back_ios_new_rounded,color: Get.iconColor,),
           onPressed: () => Get.back(),
         ),
         elevation: 0,
-        backgroundColor: context.theme.primaryColor,
+        //backgroundColor: context.theme.primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: false,
         titleSpacing: 0, 
-        title: Text(
-          "All Businesses",
+        title:
+        //Obx(() =>
+            Text(
+          "all_businesses".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-            color: Colors.white
+           // color: Colors.white
+         // ),
+        )),
+        actions: [
+          Obx(() => controller.hasNextPage.value 
+            ? IconButton(
+                icon: const Icon(Icons.info_outline, color: Colors.white),
+                onPressed: () {
+                  Get.snackbar(
+                    "Pagination Info",
+                    "Page ${controller.currentPage.value} of ${controller.totalPages.value}",
+                    backgroundColor: Colors.white,
+                    colorText: Colors.black87,
+                  );
+                },
+              )
+            : const SizedBox.shrink()
           ),
-        ),
+        ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return _buildShimmerLoading(context);
-        }
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                onChanged: (value) {
+                  controller.searchText.value = value;
+                },
+                decoration: InputDecoration(
+                  hintText: "search_business_by_name".tr,
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                      ? InkWell(
+                    child: const Icon(Icons.clear, color: Colors.grey),
+                          onTap: () {
+                            controller.searchText.value = "";
+                          },
+                        )
+                      : const SizedBox.shrink()),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+              ),
+            ),
+          ),
+          
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.businesses.isEmpty) {
+                return _buildShimmerLoading(context);
+              }
 
-        if (controller.businesses.isEmpty) {
-          return const Center(child: Text("No Businesses Found"));
-        }
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.businesses.length,
-          physics: const BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: BusinessListCard(business: controller.businesses[index]),
-            );
-          },
-        );
-      }),
+              final filteredList = controller.filteredBusinesses;
+              final hasNext = controller.hasNextPage.value;
+              final isLoadMore = controller.isLoadingMore.value;
+              final currentPg = controller.currentPage.value;
+
+              if (filteredList.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off_rounded, size: 64, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        "no_businesses_found".tr,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              
+              return RefreshIndicator(
+                onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    // Load more when user scrolls to 80% of the list, only if not searching
+                    if (controller.searchText.isEmpty && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent * 0.8) {
+                      controller.loadMoreBusinesses();
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredList.length + (hasNext && controller.searchText.isEmpty ? 1 : 0),
+                    physics: const BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      // Show business card
+                      if (index < filteredList.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: BusinessListCard(business: filteredList[index]),
+                        );
+                      }
+                      
+                      // Show loading indicator at bottom (only if not searching)
+                      return isLoadMore
+                        ? Container(
+                            padding: const EdgeInsets.all(16),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : hasNext
+                          ? Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: ElevatedButton(
+                                  onPressed: controller.loadMoreBusinesses,
+                                  child: Text("Load More (Page ${currentPg + 1})"),
+                                ),
+                              ),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(
+                                child: Text(
+                                  "All businesses loaded",
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            );
+                    },
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -489,15 +639,15 @@ class BusinessListCard extends StatelessWidget {
                              margin: const EdgeInsets.only(left: 8),
                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                              decoration: BoxDecoration(
-                               color: business.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                               color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
                                borderRadius: BorderRadius.circular(8)
                              ),
                              child: Text(
-                               (business.status ?? "Unknown").toUpperCase(),
+                               (business.verificationStatus ?? "Unknown").toUpperCase(),
                                style: TextStyle(
                                  fontSize: 10,
                                  fontWeight: FontWeight.bold,
-                                 color: business.status == 'active' ? Colors.green : Colors.grey,
+                                 color: business.verificationStatus == 'active' ? Colors.green : Colors.grey,
                                ),
                              ),
                           ),

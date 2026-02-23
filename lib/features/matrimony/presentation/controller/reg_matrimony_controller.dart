@@ -1,10 +1,18 @@
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
+import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
+import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../data/model/matrimony_cast_model.dart';
+import '../../data/model/matrimony_plan_model.dart';
+import '../page/matrimony_subscription_plan.dart';
+
 class RegMatrimonyController extends GetxController {
   final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
+  final PaymentRepository _paymentRepository = Get.find<PaymentRepository>();
+  final RazorpayController _razorpayController = Get.find<RazorpayController>();
 
   final ScrollController scrollController = ScrollController();
 
@@ -21,7 +29,9 @@ class RegMatrimonyController extends GetxController {
   final fatherOccupationCtrl = TextEditingController();
   final motherOccupationCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
-  
+  final bloodGroupCtrl = TextEditingController();
+  final ref_nameCtrl = TextEditingController();
+
   // Keep some old ones if needed or reuse
   final casteCtrl = TextEditingController(); 
   final subCasteCtrl = TextEditingController();
@@ -95,7 +105,10 @@ class RegMatrimonyController extends GetxController {
   final List<String> countryList = ['India', 'USA', 'UK', 'Canada', 'Australia', 'UAE', 'Other'];
   final List<String> stateList = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Other'];
 
+
+
   /// --- Methods ---
+
 
   void selectDate(BuildContext context) async {
     final now = DateTime.now();
@@ -160,12 +173,14 @@ class RegMatrimonyController extends GetxController {
   }
 
   Future<void> onRegister() async {
+
+
+    //await fetchAndShowPlans();
     // Basic Validation
     if (nameCtrl.text.isEmpty || gender.value.isEmpty || dobCtrl.text.isEmpty) {
         CustomSnackBar.showError(message: "Please fill required fields");
         return;
     }
-
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
@@ -181,15 +196,17 @@ class RegMatrimonyController extends GetxController {
             "dob": dobCtrl.text, // "1997-05-12"
             "annual_income": annualIncomeCtrl.text,
             "occupation": jobTitleCtrl.text,
+            "blood_group": bloodGroupCtrl.text,
+            "refferal_name": ref_nameCtrl.text,
             "profile_created_by": profileCreatedBy.value,
-            "hobbies": ["reading"], // Hardcoded for now 
+            "hobbies": ["reading"], // Hardcoded for now
             "language": language.value,
             "citizenship": citizenship.value,
             "employment_type": employmentType.value,
             "family_type": familyType.value,
             "marital_status": maritalStatus.value,
             "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
-            "star_details": [star.value, raasi.value, "manglik-${manglik.value}"], 
+            "star_details": [star.value, raasi.value, "manglik-${manglik.value}"],
             "dosh": dosh.value
         },
         "family_details": {
@@ -226,16 +243,21 @@ class RegMatrimonyController extends GetxController {
             "show_contact": "premium_only"
         }
       };
-      
+
       print("Calling API with Body: $body");
-      
+
       final response = await _repository.createProfile(body);
-      
+
       Get.back(); // Close Loading
 
       if (response.success == true) {
-         Get.back(); // Close Registration Screen
+
+         // Get.back(); // Close Registration Screen // Removed to show plans first
          CustomSnackBar.showSuccess(message: response.message ?? "Profile Created Successfully");
+         
+         // Fetch Plans and Show Dialog
+         await fetchAndShowPlans();
+         
       } else {
          CustomSnackBar.showError(message: response.message ?? "Failed to create profile");
       }
@@ -245,6 +267,55 @@ class RegMatrimonyController extends GetxController {
       print("API Error: $e");
       CustomSnackBar.showError(message: "Something went wrong. Please try again.");
     }
+  }
+
+  // Dynamic Lists
+  final RxList<Cast> casteList = <Cast>[].obs;
+  final RxList<SubCast> subCasteList = <SubCast>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCasts();
+  }
+
+  Future<void> fetchCasts() async {
+    try {
+      final response = await _repository.getCasts();
+      if (response.success == true && response.data?.casts != null) {
+        casteList.assignAll(response.data!.casts!);
+      }
+    } catch (e) {
+      print("Error fetching casts: $e");
+    }
+  }
+
+  Future<void> fetchSubCasts(int castId) async {
+    try {
+      subCasteList.clear();
+      final response = await _repository.getSubCasts(castId);
+      if (response.success == true && response.data?.subCasts != null) {
+        subCasteList.assignAll(response.data!.subCasts!);
+      }
+    } catch (e) {
+      print("Error fetching sub-casts: $e");
+    }
+  }
+
+  void onCasteSelected(String casteName) {
+    religion.value = casteName; // Using religion variable to store Caste Name as per plan
+    
+    // Find ID
+    final selectedCast = casteList.firstWhereOrNull((c) => c.name == casteName);
+    if (selectedCast != null && selectedCast.id != null) {
+      fetchSubCasts(selectedCast.id!);
+    }
+    
+    casteCtrl.clear(); // Clear sub-caste selection
+  }
+
+  void onSubCasteSelected(String subCasteName) {
+    casteCtrl.text = subCasteName; // Using casteCtrl to store Sub-caste Name
   }
 
   @override
@@ -263,5 +334,68 @@ class RegMatrimonyController extends GetxController {
     casteCtrl.dispose();
     subCasteCtrl.dispose();
     super.onClose();
+  }
+
+
+  Future<void> fetchAndShowPlans() async {
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false);
+      final response = await _repository.getMatrimonyPlans();
+      Get.back(); // Close Loading
+
+      if (response.success == true && response.data?.plans != null) {
+        final selectedPlan = await showSubscriptionBottomSheet(response.data!.plans!);
+        
+        if (selectedPlan != null) {
+          await initiateMatrimonyPayment(selectedPlan);
+        } else {
+          // User closed the bottom sheet without selecting
+          Get.back(); // Close Registration Screen
+        }
+      } else {
+        Get.back(); // Close Registration Screen if no plans
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      Get.back(); // Close Registration Screen
+      print("Error fetching plans: $e");
+    }
+  }
+
+  Future<void> initiateMatrimonyPayment(MatrimonyPlan plan) async {
+    try {
+      if (plan.id == null) return;
+
+      Get.dialog(const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false);
+
+      final response = await _paymentRepository.createOrder(planId: plan.id!);
+
+      Get.back(); // Close Loading
+
+      if (response.success && response.data != null) {
+        final orderData = response.data!;
+
+        _razorpayController.openCheckout(
+          amount: ((double.tryParse(orderData['amount']?.toString() ?? "0") ?? 0) / 100).toInt(),
+          name: nameCtrl.text,
+          description: "Matrimony Subscription: ${plan.planName}",
+          mobile: "", // Optional: fetch from Auth if needed
+          email: "", // Optional: fetch from Auth if needed
+          orderId: orderData['order_id'],
+          transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+          key: orderData['key_id'],
+          type: 'matrimony',
+        );
+      } else {
+        CustomSnackBar.showError(
+            message: response.message ?? "Failed to create payment order");
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      print("Payment Error: $e");
+      CustomSnackBar.showError(message: "Payment initialization failed");
+    }
   }
 }

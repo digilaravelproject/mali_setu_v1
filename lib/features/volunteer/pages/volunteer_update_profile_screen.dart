@@ -25,7 +25,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
         backgroundColor: Colors.white,
         centerTitle: true,
         title: Text(
-          controller.isEdit.value ? "Update Profile" : "Create Profile",
+          controller.isEdit.value ? "update_profile".tr : "create_profile".tr,
           style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ),
@@ -42,42 +42,42 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
               // Header Text
               Text(
                 controller.isEdit.value 
-                    ? "Update your volunteer information to get better matches." 
-                    : "Fill in your information to join as a volunteer.",
+                    ? "update_info_desc".tr
+                    : "fill_info_desc".tr,
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
               const SizedBox(height: 20),
 
               // 1. Basic Information Card
               _buildSectionCard(
-                title: "Basic Information",
+                title: "basic_information".tr,
                 icon: Icons.person_outline,
                 colorScheme: colorScheme,
                 children: [
                    AppInputTextField(
                     controller: controller.bioCtrl,
-                    label: "Bio",
-                    hintText: "Tell us about yourself...",
+                    label: "bio".tr,
+                    hintText: "bio_hint".tr,
                     maxLines: 4,
                     textInputType: TextInputType.multiline,
                   ),
                   const SizedBox(height: 16),
                   AppInputTextField(
                     controller: controller.locationCtrl,
-                    label: "Location",
-                    hintText: "e.g., Pune, Maharashtra",
+                    label: "location".tr,
+                    hintText: "location_hint".tr,
                     textInputType: TextInputType.text,
                   ),
                   const SizedBox(height: 16),
                   SingleDropdown(
                     controller: controller.experienceCtrl,
-                    label: "Experience Level",
+                    label: "experience_level".tr,
                     items: controller.expLevels,
                   ),
                   const SizedBox(height: 16),
                   SingleDropdown(
                     controller: controller.availabilityCtrl,
-                    label: "Availability",
+                    label: "availability".tr,
                     items: controller.availabilities,
                   ),
                 ],
@@ -87,7 +87,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
 
               // 2. Skills Section
               _buildSectionCard(
-                title: "Skills",
+                title: "skills".tr,
                 icon: Icons.star_outline,
                 colorScheme: colorScheme,
                 children: [
@@ -96,8 +96,8 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                       Expanded(
                         child: AppInputTextField(
                           controller: controller.skillsCtrl,
-                          label: "Add Skill",
-                          hintText: "e.g. Teaching",
+                          label: "add_skill".tr,
+                          hintText: "skill_hint".tr,
                           textInputType: TextInputType.text,
                         ),
                       ),
@@ -125,7 +125,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   Obx(() => controller.selectedSkills.isNotEmpty ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Selected Skills", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      Text("selected_skills".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -148,7 +148,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   ) : const SizedBox.shrink()),
 
                    // Popular Skills
-                  const Text("Popular Skills", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Text("popular_skills".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                   const SizedBox(height: 8),
                   Obx(() => Wrap(
                     spacing: 8,
@@ -183,7 +183,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
 
               // 3. Interests Section
               _buildSectionCard(
-                title: "Interests",
+                title: "interests".tr,
                 icon: Icons.favorite_outline,
                 colorScheme: colorScheme,
                 children: [
@@ -192,8 +192,8 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                       Expanded(
                         child: AppInputTextField(
                           controller: controller.interestsCtrl,
-                          label: "Add Interest",
-                          hintText: "e.g. Environment",
+                          label: "add_interest".tr,
+                          hintText: "interest_hint".tr,
                           textInputType: TextInputType.text,
                         ),
                       ),
@@ -221,7 +221,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   Obx(() => controller.selectedInterests.isNotEmpty ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Selected Interests", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      Text("selected_interests".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -244,7 +244,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   ) : const SizedBox.shrink()),
 
                    // Popular Interests
-                  const Text("Popular Interests", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Text("popular_interests".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                   const SizedBox(height: 8),
                   Obx(() => Wrap(
                     spacing: 8,
@@ -289,7 +289,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
         ),
         child: Obx(() => CustomButton(
               isLoading: controller.isLoading.value,
-              title: controller.isEdit.value ? "Update Profile" : "Create Profile",
+              title: controller.isEdit.value ? "update_profile".tr : "create_profile".tr,
               onPressed: controller.onSaveProfile,
             )),
       ),

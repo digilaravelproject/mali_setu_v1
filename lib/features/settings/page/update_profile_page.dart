@@ -34,7 +34,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
           ),
         ),
         title: Text(
-          "Update Profile",
+          "update_profile".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: Colors.black87,
@@ -55,18 +55,18 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             const SizedBox(height: 30),
 
             // Personal Information
-            _buildSectionHeader(context, "PERSONAL INFORMATION"),
+            _buildSectionHeader(context, "personal_information".tr),
             _buildPersonalInfoSection(context),
             const SizedBox(height: 24),
 
             // Address Information
-            _buildSectionHeader(context, "ADDRESS INFORMATION"),
+            _buildSectionHeader(context, "address_information".tr),
             _buildAddressInfoSection(context),
             const SizedBox(height: 40),
 
             // Update Button
             CustomButton(
-              title: "Update Profile",
+              title: "update_profile".tr,
               onPressed: () => controller.updateProfile(),
               height: 50,
               borderRadius: 16,
@@ -168,7 +168,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
           }),
           const SizedBox(height: 16),
           Text(
-            'Tap camera icon to update photo',
+            'tap_camera_update_photo'.tr,
             style: Get.textTheme.bodyMedium?.copyWith(
               color: Colors.grey[500],
             ),
@@ -195,7 +195,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
       child: Column(
         children: [
           AppInputTextField(
-            label: "Full Name",
+            label: "full_name".tr,
             controller: controller.fullNameCtrl,
             textInputType: TextInputType.name,
             iconData: Icons.person_outline_rounded,
@@ -206,7 +206,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             children: [
               Expanded(
                 child: AppInputTextField(
-                  label: "Age",
+                  label: "age".tr,
                   controller: controller.ageCtrl,
                   textInputType: TextInputType.number,
                   iconData: Icons.cake_outlined,
@@ -216,7 +216,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               const SizedBox(width: 16),
               Expanded(
                 child: AppInputTextField(
-                  label: "Phone",
+                  label: "phone".tr,
                   controller: controller.phoneNumberCtrl,
                   enable: false,
                   textInputType: TextInputType.phone,
@@ -227,7 +227,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
           ),
           const SizedBox(height: 16),
           AppInputTextField(
-            label: "Email Address",
+            label: "email_address".tr,
             controller: controller.emailCtrl,
             enable: false,
             textInputType: TextInputType.emailAddress,
@@ -236,7 +236,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
           ),
           const SizedBox(height: 16),
           AppInputTextField(
-            label: "Occupation",
+            label: "occupation".tr,
             controller: controller.occupationCtrl,
             textInputType: TextInputType.text,
             iconData: Icons.work_outline_rounded,
@@ -269,7 +269,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
       child: Column(
         children: [
           AppInputTextField(
-            label: "Street Address",
+            label: "street_address".tr,
             controller: controller.streetAddressCtrl,
             textInputType: TextInputType.streetAddress,
             iconData: Icons.home_outlined,
@@ -279,7 +279,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             children: [
               Expanded(
                 child: AppInputTextField(
-                  label: "Nearby",
+                  label: "nearby".tr,
                   controller: controller.nearbyLocationCtrl,
                   textInputType: TextInputType.text,
                   iconData: Icons.location_searching_rounded,
@@ -288,7 +288,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               const SizedBox(width: 16),
               Expanded(
                 child: AppInputTextField(
-                  label: "Road No.",
+                  label: "road_number".tr,
                   controller: controller.roadNumberCtrl,
                   textInputType: TextInputType.text,
                   iconData: Icons.signpost_outlined,
@@ -302,7 +302,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               Expanded(
                 child: SingleDropdown(
                   controller: controller.cityCtrl,
-                  label: "City",
+                  label: "city".tr,
                   items: controller.cities,
                   icon: Icons.location_city_rounded,
                 ),
@@ -311,7 +311,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               Expanded(
                 child: SingleDropdown(
                   controller: controller.stateCtrl,
-                  label: "State",
+                  label: "state".tr,
                   items: controller.states,
                   icon: Icons.map_outlined,
                 ),
@@ -324,7 +324,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               Expanded(
                 child: SingleDropdown(
                   controller: controller.districtCtrl,
-                  label: "District",
+                  label: "district".tr,
                   items: controller.districts,
                   icon: Icons.terrain_rounded,
                 ),
@@ -332,7 +332,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               const SizedBox(width: 16),
               Expanded(
                 child: AppInputTextField(
-                  label: "Pincode",
+                  label: "pincode".tr,
                   controller: controller.pincodeCtrl,
                   textInputType: TextInputType.number,
                   iconData: Icons.pin_drop_outlined,
@@ -345,7 +345,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             children: [
               Expanded(
                 child: AppInputTextField(
-                  label: "Sector",
+                  label: "sector".tr,
                   controller: controller.sectorCtrl,
                   textInputType: TextInputType.text,
                   iconData: Icons.domain_rounded,
@@ -354,7 +354,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               const SizedBox(width: 16),
               Expanded(
                 child: AppInputTextField(
-                  label: "Destination",
+                  label: "destination".tr,
                   controller: controller.destinationCtrl,
                   textInputType: TextInputType.text,
                   iconData: Icons.place_outlined,

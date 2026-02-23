@@ -38,17 +38,17 @@ class FilterBottomSheet extends GetWidget<FilterController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GetBuilder<FilterController>(
-                builder: (ctrl) {
-                  return Text(
-                    "Filters${ctrl.activeFilterCount > 0 ? " (${ctrl.activeFilterCount})" : ""}", 
-                    style: context.textTheme.headlineSmall
-                  );
-                }
+                  builder: (ctrl) {
+                    return Text(
+                        "${'filters'.tr}${ctrl.activeFilterCount > 0 ? " (${ctrl.activeFilterCount})" : ""}",
+                        style: context.textTheme.headlineSmall
+                    );
+                  }
               ),
               TextButton(
                 onPressed: controller.resetFilters,
                 child: Text(
-                  "Reset",
+                  'reset'.tr,
                   style: TextStyle(color: context.theme.primaryColor),
                 ),
               ),
@@ -88,12 +88,12 @@ class FilterScreen extends GetWidget<FilterController> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Filters", style: context.textTheme.headlineSmall),
+          title: Text('filters'.tr, style: context.textTheme.headlineSmall),
           actions: [
             TextButton(
               onPressed: controller.resetFilters,
               child: Text(
-                "Reset",
+                'reset'.tr,
                 style: TextStyle(color: context.theme.primaryColor),
               ),
             ),
@@ -130,10 +130,10 @@ class FilterScreen extends GetWidget<FilterController> {
                     indicatorSize: TabBarIndicatorSize.label,
                     labelColor: context.theme.colorScheme.primary,
                     unselectedLabelColor: context.theme.colorScheme.onSurface,
-                    tabs: const [
-                      Tab(text: "By Criteria"),
-                      Tab(text: "By Profile Id"),
-                      Tab(text: "Saved Search"),
+                    tabs: [
+                      Tab(text: 'by_criteria'.tr),
+                      Tab(text: 'by_profile_id'.tr),
+                      Tab(text: 'saved_search'.tr),
                     ],
                   ),
                 ),
@@ -198,10 +198,10 @@ class FilterScreen extends GetWidget<FilterController> {
       children: [
         AppInputTextField(
           hintText: "Eg. MMS939290",
-          label: "Matrimony Id",
+          label: 'matrimony_id'.tr,
           iconData: CupertinoIcons.search,
         ),
-        CustomButton(title: "View Profile", onPressed: () {}),
+        CustomButton(title: 'view_profile'.tr, onPressed: () {}),
       ],
     ).marginAll(12);
   }
@@ -216,11 +216,11 @@ class FilterScreen extends GetWidget<FilterController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Your Saved Search...",
+                'your_saved_search'.tr,
                 style: context.textTheme.titleMedium,
               ),
               Text(
-                "Total (75)",
+                "${'total'.tr} (75)",
                 style: context.textTheme.titleMedium?.copyWith(
                   color: context.theme.primaryColor,
                 ),
@@ -243,7 +243,7 @@ class FilterScreen extends GetWidget<FilterController> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Search Title",
+                          'search_title'.tr,
                           style: context.textTheme.labelMedium,
                         ),
                         Icon(
@@ -254,22 +254,22 @@ class FilterScreen extends GetWidget<FilterController> {
                       ],
                     ),
                     Text(
-                      "${index * 7} Matches",
+                      "${index * 7} ${'matches'.tr}",
                       style: context.textTheme.titleLarge,
                     ),
                     Center(
                       child: BgGradientBorder(
                         child:
-                            Text(
-                              "Show Matches",
-                              style: context.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w500,
-                                color: context.theme.primaryColor,
-                              ),
-                            ).marginSymmetric(
-                              horizontal: Get.width * 0.1,
-                              vertical: 8,
-                            ),
+                        Text(
+                          'show_matches'.tr,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: context.theme.primaryColor,
+                          ),
+                        ).marginSymmetric(
+                          horizontal: Get.width * 0.1,
+                          vertical: 8,
+                        ),
                       ),
                     ).marginOnly(top: 12),
                   ],
@@ -315,43 +315,43 @@ class _ExpandableFilterSectionState extends State<ExpandableFilterSection> {
   @override
   Widget build(BuildContext context) {
     return
-    //Card(
-    // margin: EdgeInsets.only(bottom: 12),
-    // elevation: 1,
-    // shape: RoundedRectangleBorder(
-    //   borderRadius: BorderRadius.circular(12),
-    // ),
-    // child:
-    ExpansionTile(
-      tilePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      initiallyExpanded: _isExpanded,
-      onExpansionChanged: (expanded) {
-        setState(() {
-          _isExpanded = expanded;
-        });
-      },
-      leading: Icon(widget.icon, color: context.theme.primaryColor),
-      title: Text(
-        widget.title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.grey[800],
+      //Card(
+      // margin: EdgeInsets.only(bottom: 12),
+      // elevation: 1,
+      // shape: RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.circular(12),
+      // ),
+      // child:
+      ExpansionTile(
+        tilePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        initiallyExpanded: _isExpanded,
+        onExpansionChanged: (expanded) {
+          setState(() {
+            _isExpanded = expanded;
+          });
+        },
+        leading: Icon(widget.icon, color: context.theme.primaryColor),
+        title: Text(
+          widget.title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[800],
+          ),
         ),
-      ),
-      trailing: Icon(
-        _isExpanded ? Icons.expand_less : Icons.expand_more,
-        color: context.theme.primaryColor,
-      ),
-      children: [
-        //  Divider(height: 1, thickness: 1, color: Colors.grey[200]),
-        Padding(padding: EdgeInsets.all(16), child: widget.content),
-      ],
-    );
+        trailing: Icon(
+          _isExpanded ? Icons.expand_less : Icons.expand_more,
+          color: context.theme.primaryColor,
+        ),
+        children: [
+          //  Divider(height: 1, thickness: 1, color: Colors.grey[200]),
+          Padding(padding: EdgeInsets.all(16), child: widget.content),
+        ],
+      );
     // );
   }
 
-  /* @override
+/* @override
   Widget build(BuildContext context) {
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
@@ -423,7 +423,7 @@ class FilterCriteriaSection extends StatefulWidget {
   final FilterController controller;
 
   const FilterCriteriaSection({Key? key, required this.controller})
-    : super(key: key);
+      : super(key: key);
 
   @override
   _FilterCriteriaSectionState createState() => _FilterCriteriaSectionState();
@@ -450,16 +450,16 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
   // The user image shows "Brand", "RAM" etc which are for PHONES.
   // BUT the app is Matrimony. The user likely wants the LAYOUT, not the content.
   // I should keep the EXISTING categories ("Basic Details", "Professional Details" etc) but use the NEW layout.
-  
+
   final List<Map<String, dynamic>> _sections = [
-    {"title": "Basic Details", "icon": Icons.person_outline},
-    {"title": "Professional Details", "icon": Icons.work_outline},
-    {"title": "Religion Details", "icon": Icons.temple_hindu_outlined},
-    {"title": "Family Details", "icon": Icons.family_restroom},
-    {"title": "Location Details", "icon": Icons.location_on_outlined},
-    {"title": "Lifestyle", "icon": Icons.fitness_center_outlined},
-    {"title": "Profile Type", "icon": Icons.category_outlined},
-    {"title": "Recently Created", "icon": Icons.access_time_outlined},
+    {"title": "basic_details", "icon": Icons.person_outline},
+    {"title": "professional_details", "icon": Icons.work_outline},
+    {"title": "religion_details", "icon": Icons.temple_hindu_outlined},
+    {"title": "family_details", "icon": Icons.family_restroom},
+    {"title": "location_details", "icon": Icons.location_on_outlined},
+    {"title": "lifestyle", "icon": Icons.fitness_center_outlined},
+    {"title": "profile_type", "icon": Icons.category_outlined},
+    {"title": "recently_created", "icon": Icons.access_time_outlined},
   ];
 
   @override
@@ -501,9 +501,9 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                                   ),
                                 ),
                               ).marginOnly(right: 6),
-                             Expanded(
+                            Expanded(
                               child: Text(
-                                _sections[index]['title'],
+                                _sections[index]['title'].toString().tr,
                                 style: TextStyle(
                                   fontSize: 12, // Reduced font size
                                   fontWeight: isSelected
@@ -537,13 +537,13 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                           border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
                         ),
                         child: Text(
-                          _sections[_selectedIndex]['title'],
+                          _sections[_selectedIndex]['title'].toString().tr,
                           style: context.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      
+
                       // Scrollable Content
                       Expanded(
                         child: SingleChildScrollView(
@@ -558,7 +558,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             ],
           ),
         ),
-        
+
         // Footer Actions (Apply Button)
         Container(
           padding: const EdgeInsets.all(16),
@@ -584,7 +584,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                 ),
               ),
               child: Text(
-                "Apply Filters",
+                'apply_filters'.tr,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -626,11 +626,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
       children: [
         // Age Range
         _buildRangeFilter(
-          title: "Age",
+          title: 'age'.tr,
           range: widget.controller.ageRange,
           min: 18,
           max: 60,
-          unit: "years",
+          unit: 'years'.tr,
           onChanged: (range) {
             setState(() {
               widget.controller.ageRange = range;
@@ -641,15 +641,15 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SizedBox(height: 16),
 
         SingleDropdown(
-          label: "Profile Created by",
+          label: 'profile_created_by'.tr,
           controller: widget.controller.profileCreatedByCtrl,
           items: widget.controller.profileCreatedByList,
         ),
 
         SizedBox(height: 16),
         SelectableChipGroup(
-          title: "Maritial  Status ",
-          items: ["Any", "Divorced", "Widow", "Single", "Awaiting Divorce"],
+          title: 'marital_status'.tr,
+          items: ['any'.tr, 'divorced'.tr, 'widow'.tr, 'single'.tr, 'awaiting_divorce'.tr],
           onSelectionChanged: (selected) {
             print(selected);
           },
@@ -657,18 +657,18 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SizedBox(height: 16),
 
         SingleDropdown(
-          label: "Mother Tongue",
+          label: 'mother_tongue'.tr,
           controller: widget.controller.mothertangueCtrl,
           items: widget.controller.languageList,
         ),
         SizedBox(height: 16),
         // Height Range
         _buildRangeFilter(
-          title: "Height",
+          title: 'height'.tr,
           range: widget.controller.heightRange,
           min: 140,
           max: 200,
-          unit: "cm",
+          unit: 'cm'.tr,
           onChanged: (range) {
             setState(() {
               widget.controller.heightRange = range;
@@ -678,8 +678,8 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
 
         SizedBox(height: 16),
         SelectableChipGroup(
-          title: "Physical  Status ",
-          items: ["Normal", "Doesn't Matter", "Physically Challenged"],
+          title: 'physical_status'.tr,
+          items: ['normal'.tr, 'doesnt_matter'.tr, 'physically_challenged'.tr],
           onSelectionChanged: (selected) {
             print(selected);
           },
@@ -693,7 +693,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
       children: [
         // Education
         _buildRangeFilter(
-          title: "Annual Income",
+          title: 'annual_income'.tr,
           range: widget.controller.salaryRange,
           min: 0,
           max: 5000000,
@@ -705,42 +705,23 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           },
         ),
 
-        // _buildMultiSelectFilter(
-        //   title: "Education",
-        //   options: [
-        //     'High School',
-        //     'Bachelor\'s Degree',
-        //     'Master\'s Degree',
-        //     'PhD',
-        //     'Diploma',
-        //     'CA/CS/ICWA',
-        //     'MBA',
-        //     'Other'
-        //   ],
-        //   selectedOptions: widget.controller.education,
-        //   onChanged: (selected) {
-        //     setState(() {
-        //       widget.controller.education = selected;
-        //     });
-        //   },
-        // ),
         SingleDropdown(
           controller: widget.controller.educationCtrl,
-          label: "Education",
+          label: 'education'.tr,
           items: widget.controller.educationList,
         ),
 
         SizedBox(height: 20),
 
         RadioCheckboxList(
-          title: "Employement Type",
+          title: 'employment_type'.tr,
           items: [
-            "Any",
-            "Business Owner",
-            "Defence Sector",
-            "Government / PSU,",
-            "Private Sector",
-            "Self Employed",
+            'any'.tr,
+            'business_owner'.tr,
+            'defence_sector'.tr,
+            'government_psu'.tr,
+            'private_sector'.tr,
+            'self_employed'.tr,
           ],
           onSelectionChanged: (selectedList) {
             print(selectedList);
@@ -750,13 +731,13 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SizedBox(height: 20),
 
         SelectableChipGroup(
-          title: "Occupation",
+          title: 'occupation'.tr,
           items: [
-            "Any",
-            "Airline",
-            "Engineering",
-            "IT & Software",
-            "Civil Services",
+            'any'.tr,
+            'airline'.tr,
+            'engineering'.tr,
+            'it_software'.tr,
+            'civil_services'.tr,
           ],
           onSelectionChanged: (selected) {
             print(selected);
@@ -783,7 +764,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                 Image.asset(AppAssets.imgCrown, height: 50, width: 50),
                 Center(
                   child: Text(
-                    "PREMIUM",
+                    'premium'.tr,
                     style: context.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -791,7 +772,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                 ),
                 Center(
                   child: Text(
-                    "To access these premium filters, UPGRADE NOW",
+                    'upgrade_message'.tr,
                     style: context.textTheme.bodyMedium,
                   ),
                 ),
@@ -802,7 +783,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                   children: [
                     Expanded(
                       child: Text(
-                        "Profiles with horoscope",
+                        'profiles_with_horoscope'.tr,
                         style: context.textTheme.titleMedium,
                       ),
                     ),
@@ -810,7 +791,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                   ],
                 ),
                 Text(
-                  "Matches who have added horoscope",
+                  'matches_with_horoscope'.tr,
                   style: context.textTheme.bodyLarge,
                 ),
                 SizedBox(height: 10),
@@ -820,7 +801,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                   children: [
                     Expanded(
                       child: Text(
-                        "Profiles with horoscope",
+                        'profiles_with_horoscope'.tr,
                         style: context.textTheme.titleMedium,
                       ),
                     ),
@@ -834,8 +815,8 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         // Religion
         SizedBox(height: 20),
         SelectableChipGroup(
-          title: "Manglik",
-          items: ["Don't Know", "Yes", "Doesn't Matter", "No"],
+          title: 'manglik'.tr,
+          items: ['dont_know'.tr, 'yes'.tr, 'doesnt_matter'.tr, 'no'.tr],
           onSelectionChanged: (selected) {
             print(selected);
           },
@@ -848,7 +829,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
     return Column(
       children: [
         SingleDropdown(
-          label: "Family Status",
+          label: 'family_status'.tr,
           controller: widget.controller.familyStatusCtrl,
           items: widget.controller.familyList,
         ),
@@ -857,51 +838,44 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Family Type", style: Get.textTheme.titleMedium),
+            Text('family_type'.tr, style: Get.textTheme.titleMedium),
             const SizedBox(height: 16),
 
             Obx(
-              () => Wrap(
+                  () => Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 alignment: WrapAlignment.start,
-                // () => GridView.count(
-                //   crossAxisCount: 4,
-                //   shrinkWrap: true,
-                //   physics: const NeverScrollableScrollPhysics(),
-                //   mainAxisSpacing: 16,
-                //   childAspectRatio: 0.95,
-                //   crossAxisSpacing: 12,
                 children: [
                   _buildCircleOption(
-                    title: "Nuclear",
+                    title: 'nuclear'.tr,
                     icon: AppAssets.imgnuclearFamily,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "ignored",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "ignored";
+                      "ignored";
                     },
                   ),
 
                   _buildCircleOption(
-                    title: "Joint",
+                    title: 'joint'.tr,
                     icon: AppAssets.imgjointFamily,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "shortlisted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "shortlisted";
+                      "shortlisted";
                     },
                   ),
 
                   _buildCircleOption(
-                    title: "Doesn't matter",
+                    title: 'doesnt_matter'.tr,
                     icon: AppAssets.imgNull,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "viewed",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value = "viewed";
@@ -909,14 +883,14 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                   ),
 
                   _buildCircleOption(
-                    title: "Not Specified",
+                    title: 'not_specified'.tr,
                     icon: AppAssets.imgAppLogo,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "contacted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "contacted";
+                      "contacted";
                     },
                   ),
                 ],
@@ -927,14 +901,14 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SizedBox(height: 16),
 
         SelectableChipGroup(
-          title: "Family Value ",
+          title: 'family_value'.tr,
           items: [
-            "Liberal",
-            "Moderate",
-            "Traditional",
-            "Doesn't Matter ",
-            "Otherdox",
-            "Not Specified",
+            'liberal'.tr,
+            'moderate'.tr,
+            'traditional'.tr,
+            'doesnt_matter'.tr,
+            'orthodox'.tr,
+            'not_specified'.tr,
           ],
           onSelectionChanged: (selected) {
             print(selected);
@@ -1007,17 +981,17 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Nearby Profiles", style: Get.textTheme.titleMedium),
+                  Text('nearby_profiles'.tr, style: Get.textTheme.titleMedium),
                   SizedBox(height: 5),
                   Text(
-                    "Matches Near your location",
+                    'matches_near_location'.tr,
                     style: Get.textTheme.bodyMedium,
                   ),
                 ],
               ),
             ),
             Obx(
-              () => Checkbox(
+                  () => Checkbox(
                 value: widget.controller.isNearbyChecked.value,
                 onChanged: (bool? value) {
                   widget.controller.isNearbyChecked.value = value ?? false;
@@ -1028,16 +1002,31 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         ),
 
         SingleDropdown(
-          label: "Country",
+          label: 'country'.tr,
           controller: widget.controller.countryCtrl,
           items: widget.controller.countryList,
         ),
-        SizedBox(height: 16),
+
+        // State Dropdown
+        SingleDropdown(
+          label: 'state'.tr,
+          controller: widget.controller.stateCtrl,
+          items: widget.controller.stateList,
+        ),
+
+        // City Dropdown
+        SingleDropdown(
+          label: 'city'.tr,
+          controller: widget.controller.cityCtrl,
+          items: widget.controller.cityList,
+        ),
+
+        SizedBox(height: 8,),
 
         MultiCheckboxList(
-          title: 'Citizenship:',
+          title: '${'citizenship'.tr}:',
           items: [
-            'Any',
+            'any'.tr,
             'Antarctica',
             'Armenia',
             'Vanuatu',
@@ -1061,7 +1050,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
     return Column(
       children: [
         customToggleTile(
-          title: "Any",
+          title: 'any'.tr,
           initialValue: widget.controller.isPrivate.value,
           onChanged: (val) => widget.controller.isPrivate.value = val,
         ),
@@ -1072,7 +1061,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         ),
 
         customToggleTile(
-          title: "Eggetarian",
+          title: 'eggetarian'.tr,
           initialValue: widget.controller.isPrivate.value,
           onChanged: (val) => widget.controller.isPrivate.value = val,
         ),
@@ -1082,7 +1071,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         ),
 
         customToggleTile(
-          title: "Vegetarian",
+          title: 'vegetarian'.tr,
           initialValue: widget.controller.isPrivate.value,
           onChanged: (val) => widget.controller.isPrivate.value = val,
         ),
@@ -1092,7 +1081,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           child: Divider(),
         ),
         customToggleTile(
-          title: "Non-Vegetarian",
+          title: 'non_vegetarian'.tr,
           initialValue: widget.controller.isPrivate.value,
           onChanged: (val) => widget.controller.isPrivate.value = val,
         ),
@@ -1102,7 +1091,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           child: Divider(),
         ),
         customToggleTile(
-          title: "Not Specified",
+          title: 'not_specified'.tr,
           initialValue: widget.controller.isPrivate.value,
           onChanged: (val) => widget.controller.isPrivate.value = val,
         ),
@@ -1111,7 +1100,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           child: Divider(),
         ),
         SingleDropdown(
-          label: "Smoking Habits",
+          label: 'smoking_habits'.tr,
           controller: widget.controller.smokingCtrl,
           items: widget.controller.smokingHabits,
         ),
@@ -1119,13 +1108,13 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SizedBox(height: 16),
 
         MultiCheckboxList(
-          title: 'Drinking Habits:',
+          title: '${'drinking_habits'.tr}:',
           items: [
-            'Never',
-            'Socially',
-            'Regularly',
-            'Not-Specified',
-            "Dosen't Matter",
+            'never'.tr,
+            'socially'.tr,
+            'regularly'.tr,
+            'not_specified'.tr,
+            'doesnt_matter'.tr,
           ],
           onSelectionChanged: (selected) {
             setState(() {
@@ -1150,10 +1139,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Profile with Photo", style: Get.textTheme.titleMedium),
+                  Text('profile_with_photo'.tr, style: Get.textTheme.titleMedium),
                   SizedBox(height: 5),
                   Text(
-                    "Matches who have added photos",
+                    'matches_with_photos'.tr,
                     style: Get.textTheme.bodyMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -1163,7 +1152,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             ),
             SizedBox(width: 10),
             Obx(
-              () => Checkbox(
+                  () => Checkbox(
                 value: widget.controller.isProfileWithPhoto.value,
                 onChanged: (bool? value) {
                   widget.controller.isProfileWithPhoto.value = value ?? false;
@@ -1179,47 +1168,47 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Don't Show Profile", style: Get.textTheme.titleMedium),
+            Text('dont_show_profile'.tr, style: Get.textTheme.titleMedium),
             SizedBox(height: 12),
 
             // Options in a Column
             Obx(
-              () => Column(
+                  () => Column(
                 children: [
                   _buildProfileOption(
-                    title: "Ignored",
-                    subtitle: "Profiles you have ignored",
+                    title: 'ignored'.tr,
+                    subtitle: 'profiles_ignored'.tr,
                     icon: Icons.block,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "ignored",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "ignored";
+                      "ignored";
                     },
                   ),
                   const SizedBox(height: 12),
 
                   _buildProfileOption(
-                    title: "Shortlisted",
-                    subtitle: "Profiles you have shortlisted",
+                    title: 'shortlisted'.tr,
+                    subtitle: 'profiles_shortlisted'.tr,
                     icon: Icons.star_border,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "shortlisted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "shortlisted";
+                      "shortlisted";
                     },
                   ),
                   const SizedBox(height: 12),
 
                   _buildProfileOption(
-                    title: "Already Viewed",
-                    subtitle: "Profiles you have already seen",
+                    title: 'already_viewed'.tr,
+                    subtitle: 'profiles_viewed'.tr,
                     icon: Icons.remove_red_eye_outlined,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "viewed",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value = "viewed";
@@ -1228,15 +1217,15 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
                   const SizedBox(height: 12),
 
                   _buildProfileOption(
-                    title: "Already Contacted",
-                    subtitle: "Profiles you have contacted",
+                    title: 'already_contacted'.tr,
+                    subtitle: 'profiles_contacted'.tr,
                     icon: Icons.chat_bubble_outline,
                     isSelected:
-                        widget.controller.selectedDontShowOption.value ==
+                    widget.controller.selectedDontShowOption.value ==
                         "contacted",
                     onTap: () {
                       widget.controller.selectedDontShowOption.value =
-                          "contacted";
+                      "contacted";
                     },
                   ),
                 ],
@@ -1323,19 +1312,19 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
 
   Widget _buildRecentlyCreatedSection() {
     final options = {
-      'all': 'All Time',
-      'today': 'Today',
-      'last_7_days': 'Last 7 Days',
-      'last_30_days': 'Last 30 Days',
-      'one_week': 'One Week',
-      'one_month': 'One Month',
+      'all': 'all_time'.tr,
+      'today': 'today'.tr,
+      'last_7_days': 'last_7_days'.tr,
+      'last_30_days': 'last_30_days'.tr,
+      'one_week': 'one_week'.tr,
+      'one_month': 'one_month'.tr,
     };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Profile Created",
+          'profile_created'.tr,
           style: context.textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
@@ -1981,15 +1970,15 @@ class _FamilyTypeSelectionPageState extends State<FamilyTypeSelectionPage> {
                 ),
                 child: isSelected
                     ? Center(
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      )
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue,
+                    ),
+                  ),
+                )
                     : null,
               ),
             ],
@@ -2148,7 +2137,7 @@ class _MultiCheckboxListState extends State<MultiCheckboxList> {
   @override
   void didUpdateWidget(MultiCheckboxList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.items.length != oldWidget.items.length || 
+    if (widget.items.length != oldWidget.items.length ||
         widget.items != oldWidget.items ||
         widget.initiallySelected != oldWidget.initiallySelected) {
       _initCheckedItems();
@@ -2271,7 +2260,7 @@ class _MultiCheckboxListState extends State<MultiCheckboxList> {
   List<Widget> _buildCheckboxList(Color selectedColor, Color checkboxColor) {
     return List<Widget>.generate(
       widget.items.length,
-      (index) => Padding(
+          (index) => Padding(
         padding: EdgeInsets.only(bottom: widget.spacing),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

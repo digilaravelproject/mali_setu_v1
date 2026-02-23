@@ -31,14 +31,14 @@ class LoginPage extends GetWidget<LoginController> {
           children: [
             const SizedBox(height: 32),
             Text(
-              "Welcome Back",
+              'welcome_back'.tr,
               style: context.textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              "Login to continue your journey",
+              'login_to_continue'.tr,
               style: context.textTheme.bodyLarge?.copyWith(
                 color: context.theme.colorScheme.onSurface.withValues(
                   alpha: 0.7,
@@ -51,7 +51,7 @@ class LoginPage extends GetWidget<LoginController> {
               child: Column(
                 children: [
                   AppInputTextField(
-                    label: "Email ",
+                    label: 'email_label'.tr,
                     iconData: CupertinoIcons.mail_solid,
                     textInputType: TextInputType.emailAddress,
                     controller: controller.emailController,
@@ -61,7 +61,7 @@ class LoginPage extends GetWidget<LoginController> {
                   const SizedBox(height: 16),
                   Obx(
                     () => AppInputTextField(
-                      label: "Password",
+                      label: 'password_label'.tr,
                       iconData: CupertinoIcons.lock_fill,
                       textInputType: TextInputType.visiblePassword,
                       controller: controller.passwordController,
@@ -89,7 +89,7 @@ class LoginPage extends GetWidget<LoginController> {
                             ),
                           ),
                           Text(
-                            "Remember Me",
+                            'remember_me'.tr,
                             style: context.textTheme.labelSmall,
                           ),
                         ],
@@ -98,17 +98,15 @@ class LoginPage extends GetWidget<LoginController> {
                         onPressed: () {
                           Get.toNamed(AppRoutes.emailPasswordReset);
                         },
-                        child: Text("Forget Password"),
+                        child: Text('forget_password'.tr),
                       ),
                     ],
                   ).marginSymmetric(vertical: 12),
                   Obx(
                     () => CustomButton(
-                      title: "Login",
+                      title: 'login_button'.tr,
                       isLoading: controller.isLoading.value,
-                      onPressed:
-                        //  (){Get.toNamed(AppRoutes.dashboard);}
-                      controller.performLogin,
+                      onPressed: controller.performLogin,
                     ),
                   ),
                 ],
@@ -129,7 +127,7 @@ class LoginPage extends GetWidget<LoginController> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
-                      "OR",
+                      'or'.tr,
                       style: context.textTheme.bodySmall?.copyWith(
                         color: context.theme.colorScheme.onSurface.withValues(
                           alpha: 0.5,
@@ -164,7 +162,7 @@ class LoginPage extends GetWidget<LoginController> {
                       height: 24,
                     ),
                     Text(
-                      "Sign in with Google",
+                      'sign_in_with_google'.tr,
                       style: context.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -181,7 +179,7 @@ class LoginPage extends GetWidget<LoginController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      'dont_have_account'.tr,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.theme.colorScheme.onSurface.withValues(
                           alpha: 0.7,
@@ -191,7 +189,7 @@ class LoginPage extends GetWidget<LoginController> {
                     GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.register),
                       child: Text(
-                        "Register",
+                        'register'.tr,
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: context.theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,

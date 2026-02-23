@@ -35,25 +35,25 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
     
     switch (status) {
       case 'accepted':
-        actionText = "Accept";
+        actionText = 'accept'.tr;
         actionColor = Colors.green;
         break;
       case 'rejected':
-        actionText = "Reject";
+        actionText = 'reject'.tr;
         actionColor = Colors.redAccent;
         break;
       case 'reviewed':
-        actionText = "Mark as Reviewed";
+        actionText = 'mark_as_reviewed'.tr;
         actionColor = Colors.blue;
         break;
       default:
-        actionText = "Update Status";
+        actionText = 'update_status'.tr;
         actionColor = Colors.grey;
     }
 
     CustomConfirmDialog.show(
-      title: "$actionText Application",
-      message: "Are you sure you want to change the status to '$status' for ${application.user?.name ?? 'this user'}?",
+      title: "$actionText ${'applications'.tr}",
+      message: 'verify_status_change_message'.trParams({'status': status.tr, 'user': application.user?.name ?? 'unknown_applicant'.tr}),
       confirmText: actionText,
       confirmColor: actionColor,
       onConfirm: () {
@@ -99,7 +99,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
               children: [
                 Icon(Icons.people_outline, size: 64, color: Colors.grey[300]),
                 const SizedBox(height: 16),
-                const Text("No applications yet", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                Text('no_applications'.tr, style: const TextStyle(color: Colors.grey, fontSize: 16)),
               ],
             ),
           );
@@ -161,9 +161,9 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(user?.name ?? "Unknown Applicant", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(user?.name ?? 'unknown_applicant'.tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(height: 2),
-                    Text(user?.email ?? "No email", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                    Text(user?.email ?? 'no_email'.tr, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                   ],
                 ),
               ),
@@ -197,7 +197,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
             const SizedBox(height: 12),
           ],
           if (application.coverLetter != null && application.coverLetter!.isNotEmpty) ...[
-            const Text("Cover Letter", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            Text('cover_letter'.tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             const SizedBox(height: 4),
             Text(
               application.coverLetter!,
@@ -215,7 +215,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                   const Icon(Icons.access_time, size: 14, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
-                    "Applied on ${application.appliedAt?.split('T').first ?? 'N/A'}",
+                    "${'applied_on'.tr} ${application.appliedAt?.split('T').first ?? 'N/A'}",
                     style: const TextStyle(color: Colors.grey, fontSize: 11),
                   ),
                 ],
@@ -251,7 +251,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                         TextButton.icon(
                           onPressed: () => controller.launchResume(fullUrl),
                           icon: Icon(fileIcon, size: 16, color: iconColor),
-                          label: Text("View", style: TextStyle(fontSize: 12, color: iconColor)),
+                          label: Text('view'.tr, style: TextStyle(fontSize: 12, color: iconColor)),
                           style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),
                         ),
                         const SizedBox(width: 8),
@@ -262,7 +262,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                             controller.downloadResume(fullUrl, fileName);
                           },
                           icon: const Icon(Icons.download_rounded, size: 20, color: Colors.grey),
-                          tooltip: "Download Resume",
+                          tooltip: 'download_resume'.tr,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
@@ -271,9 +271,9 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                   }
                 ),
               ] else
-                const Text(
-                  "Resume not uploaded",
-                  style: TextStyle(color: Colors.redAccent, fontSize: 11, fontStyle: FontStyle.italic),
+                Text(
+                  'resume_not_uploaded'.tr,
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontStyle: FontStyle.italic),
                 ),
             ],
           ),
@@ -299,7 +299,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                     ),
                     child: (loadingStatus == 'reviewed') 
                       ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue))
-                      : const Text("Review", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      : Text('review'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -317,7 +317,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                     ),
                     child: (loadingStatus == 'rejected')
                       ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.redAccent))
-                      : const Text("Reject", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      : Text('reject'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -336,7 +336,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                     ),
                     child: (loadingStatus == 'accepted')
                       ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text("Accept", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      : Text('accept'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

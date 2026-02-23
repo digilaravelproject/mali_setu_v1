@@ -35,7 +35,7 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
             ),
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                category.name?.toTitleCase() ?? "Category Details",
+                category.name?.toTitleCase() ?? "category_details".tr,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -107,9 +107,9 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                         children: [
                           const Icon(Icons.info_outline, color: Colors.red, size: 20),
                           const SizedBox(width: 8),
-                          const Expanded(
+                           Expanded(
                             child: Text(
-                              "This category is currently inactive.",
+                              "category_inactive".tr,
                               style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
                             ),
                           ),
@@ -131,7 +131,7 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        "Related Businesses",
+                        "related_businesses".tr,
                         style: context.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
@@ -155,7 +155,7 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                       Icon(Icons.store_mall_directory_outlined, size: 60, color: Colors.grey[300]),
                       const SizedBox(height: 16),
                       Text(
-                        "No businesses found in this category.",
+                        "no_business_found".tr,
                         style: TextStyle(color: Colors.grey[500], fontSize: 16),
                       ),
                     ],
@@ -228,7 +228,7 @@ class BusinessListCard extends StatelessWidget {
                 contactEmail: business.contactEmail,
                 website: business.website,
                 verificationStatus: business.verificationStatus,
-                status: business.status,
+                status: business.verificationStatus,
                 user: business.user != null
                     ? User(
                         id: business.user!.id,
@@ -282,7 +282,7 @@ class BusinessListCard extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              business.businessName ?? "Business Name",
+                              business.businessName ?? "business_name".tr,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -320,7 +320,7 @@ class BusinessListCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              address.isNotEmpty ? address : "Location not available",
+                              address.isNotEmpty ? address : "location_na".tr,
                               style: TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey[600],
@@ -341,13 +341,13 @@ class BusinessListCard extends StatelessWidget {
                         children: [
                            _buildStatItem(
                              icon: CupertinoIcons.cube_box,
-                             label: "${business.products?.length ?? 0} Products",
+                             label: "${business.products?.length ?? 0} products".tr,
                              color: Colors.blueAccent
                            ),
                            const SizedBox(width: 16),
                            _buildStatItem(
                              icon: CupertinoIcons.wrench,
-                             label: "${business.services?.length ?? 0} Services",
+                             label: "${business.services?.length ?? 0} services".tr,
                              color: Colors.orangeAccent
                            ),
                         ],

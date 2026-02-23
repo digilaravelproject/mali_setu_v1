@@ -12,11 +12,19 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/network/multipart.dart';
 import 'package:edu_cluezer/core/helper/img_picker_helper.dart';
+import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
+import 'package:edu_cluezer/features/business/presentation/page/business_subscription_plan.dart';
+import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
+import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
+  final BusinessRepository _repository = Get.find<BusinessRepository>();
+  final PaymentRepository _paymentRepository = Get.find<PaymentRepository>();
+  final RazorpayController _razorpayController = Get.find<RazorpayController>();
 
   RegBusinessController({required this.getBusinessCategoriesUseCase});
 
@@ -29,15 +37,33 @@ class RegBusinessController extends GetxController {
   final emailCtrl = TextEditingController();
   final websiteCtrl = TextEditingController();
 
+  TextEditingController openingTimeCtrl = TextEditingController();
+  TextEditingController closingTimeCtrl = TextEditingController();
+  TimeOfDay? openingTime;
+  TimeOfDay? closingTime;
+
   /// Dropdown DataContainer
-  var businessTypes = <String>["Product", "Service"].obs;
+ // var businessTypes = <String>["Product", "Service"].obs;
   var businessCategories = <String>[].obs;
   
   // Maps to store ID mapping - Initialize with defaults
+  // Map<String, String> typeIdMap = {
+  //   "Product": "product",
+  //   "Service": "service"
+  // };
+
+  var businessTypes = <String>[
+    "Proprietary /Partnership - LLP",
+    "Private Ltd",
+    "Public Ltd"
+  ].obs;
+
   Map<String, String> typeIdMap = {
-    "Product": "product", 
-    "Service": "service"
+    "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
+    "Private Ltd": "Private Ltd",
+    "Public Ltd": "Public Ltd"
   };
+
   Map<String, int> categoryIdMap = {};
 
   /// Image Selection
@@ -48,6 +74,10 @@ class RegBusinessController extends GetxController {
   bool isEditMode = false;
   int? businessId;
   int? editingCategoryId;
+  
+  // For custom category registration
+  final isRegisteringCategory = false.obs;
+  final customCategoryCtrl = TextEditingController();
 
   @override
   void onInit() {
@@ -71,6 +101,19 @@ class RegBusinessController extends GetxController {
       } else {
          bTypeCtrl.text = (business.businessType ?? "").toTitleCase();
       }
+
+      // Handle Business Type
+      // String type = (business.businessType ?? "").toLowerCase();
+      // if (type.contains("proprietary")) {
+      //   bTypeCtrl.text = "Proprietary / Partnership";
+      // } else if (type.contains("private")) {
+      //   bTypeCtrl.text = "Private Ltd";
+      // } else if (type.contains("public")) {
+      //   bTypeCtrl.text = "Public Ltd";
+      // } else {
+      //   bTypeCtrl.text = (business.businessType ?? "").toTitleCase();
+      // }
+
 
       bDescCtrl.text = business.description ?? "";
       phoneCtrl.text = business.contactPhone ?? "";
@@ -101,20 +144,89 @@ class RegBusinessController extends GetxController {
         loadBusinessTypes();
     }
     fetchCategories();
+    
+    // Listen to category changes
+    bCategoryCtrl.addListener(_onCategoryChanged);
+  }
+  
+  void _onCategoryChanged() {
+    // if (bCategoryCtrl.text == "Other") {
+    //   // Show dialog when "Other" is selected
+    //   Future.delayed(const Duration(milliseconds: 100), () {
+    //     Get.dialog(
+    //       AlertDialog(
+    //         title: Text('add_custom_category'.tr),
+    //         content: Column(
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: [
+    //             Text(
+    //               'enter_category_name'.tr,
+    //               style: Get.context?.textTheme.bodyMedium,
+    //             ),
+    //             const SizedBox(height: 16),
+    //             TextField(
+    //               controller: customCategoryCtrl,
+    //               decoration: InputDecoration(
+    //                 hintText: 'category_name_hint'.tr,
+    //                 border: OutlineInputBorder(
+    //                   borderRadius: BorderRadius.circular(8),
+    //                 ),
+    //                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //         actions: [
+    //           TextButton(
+    //             onPressed: () {
+    //               customCategoryCtrl.clear();
+    //               bCategoryCtrl.clear();
+    //               Get.back();
+    //             },
+    //             child: Text('cancel'.tr),
+    //           ),
+    //           Obx(() => TextButton(
+    //             onPressed: isRegisteringCategory.value
+    //                 ? null
+    //                 : () {
+    //                     registerCustomCategory(customCategoryCtrl.text);
+    //                   },
+    //             child: isRegisteringCategory.value
+    //                 ? const SizedBox(
+    //                     width: 20,
+    //                     height: 20,
+    //                     child: CircularProgressIndicator(strokeWidth: 2),
+    //                   )
+    //                 : Text('add_category'.tr),
+    //           )),
+    //         ],
+    //       ),
+    //       barrierDismissible: false,
+    //     );
+    //   });
+    // }
   }
   
   Future<void> fetchCategories() async {
     try {
       final categories = await getBusinessCategoriesUseCase();
-      businessCategories.clear();
-      categoryIdMap.clear();
+      
+      final tempCategories = <String>[];
+      final tempIdMap = <String, int>{};
       
       for(var cat in categories) {
         if (cat.name != null && cat.id != null) {
-           businessCategories.add(cat.name!);
-           categoryIdMap[cat.name!] = cat.id!;
+           tempCategories.add(cat.name!);
+           tempIdMap[cat.name!] = cat.id!;
         }
       }
+      
+      // Add "Other" option at the end
+      tempCategories.add("Other");
+      
+      // Atomic updates
+      categoryIdMap = tempIdMap;
+      businessCategories.assignAll(tempCategories);
       
       // If in edit mode, re-trigger category name set after fetch
       if(isEditMode && editingCategoryId != null) {
@@ -137,28 +249,103 @@ class RegBusinessController extends GetxController {
        print("Categories loaded: ${businessCategories.length}");
     }
   }
+  
+  Future<void> registerCustomCategory(String categoryName) async {
+    if (categoryName.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter a category name");
+      return;
+    }
 
-  Future<void> loadBusinessTypes() async {
     try {
-      // Just load types from JSON or hardcode
-      final String response = await rootBundle.loadString('assets/json/business_data.json');
-      final data = await json.decode(response);
+      isRegisteringCategory.value = true;
       
-      if (data['business_types'] != null) {
-        businessTypes.clear();
-        typeIdMap.clear();
-        for (var item in data['business_types']) {
-          businessTypes.add(item['name']);
-          typeIdMap[item['name']] = item['id'].toString();
+      final body = {
+        "name": categoryName.trim(),
+        "description": "",
+        "photo": ""
+      };
+
+      final response = await _apiClient.post(
+        ApiConstants.registerCategory,
+        data: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data['success'] == true) {
+          final categoryData = data['data']['business_category'];
+          final newCategoryId = categoryData['id'];
+          final newCategoryName = categoryData['name'];
+          
+          // Add to local lists
+          businessCategories.remove("Other");
+          businessCategories.add(newCategoryName);
+          businessCategories.add("Other");
+          categoryIdMap[newCategoryName] = newCategoryId;
+          
+          // Set the newly created category as selected
+          bCategoryCtrl.text = newCategoryName;
+          customCategoryCtrl.clear();
+          
+          // Refresh categories from server as requested
+          await fetchCategories();
+          
+          // Ensure the selected value remains valid after fetch
+          // (fetchCategories clears and rebuilds the list, so we might need to ensure the name logic in UI holds)
+          // Since bCategoryCtrl.text is just a string, it should be fine.
+          
+          CustomSnackBar.showSuccess(message: "Category added successfully");
+        } else {
+          CustomSnackBar.showError(message: data['message'] ?? "Failed to add category");
         }
+      } else {
+        final data = response.data;
+        CustomSnackBar.showError(message: data['message'] ?? "Something went wrong");
       }
     } catch (e) {
-      print("Error loading types: $e");
-      // Fallback
-      businessTypes.assignAll(["Product", "Service"]);
-      typeIdMap.assignAll({"Product": "product", "Service": "service"});
+      CustomSnackBar.showError(message: "Error: ${e.toString()}");
+    } finally {
+      isRegisteringCategory.value = false;
     }
   }
+
+  // Future<void> loadBusinessTypes() async {
+  //   try {
+  //     // Just load types from JSON or hardcode
+  //     final String response = await rootBundle.loadString('assets/json/business_data.json');
+  //     final data = await json.decode(response);
+  //
+  //     if (data['business_types'] != null) {
+  //       businessTypes.clear();
+  //       typeIdMap.clear();
+  //       for (var item in data['business_types']) {
+  //         businessTypes.add(item['name']);
+  //         typeIdMap[item['name']] = item['id'].toString();
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print("Error loading types: $e");
+  //     // Fallback
+  //     businessTypes.assignAll(["Product", "Service"]);
+  //     typeIdMap.assignAll({"Product": "product", "Service": "service"});
+  //   }
+  // }
+
+
+  Future<void> loadBusinessTypes() async {
+    businessTypes.assignAll([
+      "Proprietary /Partnership - LLP",
+      "Private Ltd",
+      "Public Ltd"
+    ]);
+
+    typeIdMap = {
+      "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
+      "Private Ltd": "Private Ltd",
+      "Public Ltd": "Public Ltd"
+    };
+  }
+
 
   String _toTitleCase(String text) {
       if (text.isEmpty) return text;
@@ -182,6 +369,9 @@ class RegBusinessController extends GetxController {
   }
 
   Future<void> onRegister() async {
+
+    await fetchAndShowBusinessPlans();
+
     // Basic Validation
     if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
       CustomSnackBar.showError(message: "Please fill required fields");
@@ -202,7 +392,10 @@ class RegBusinessController extends GetxController {
         "contact_phone": phoneCtrl.text,
         "contact_email": emailCtrl.text,
         "website": websiteCtrl.text,
+        "opening_time" : openingTimeCtrl.text,
+        "closing_time" : closingTimeCtrl.text
       };
+      print("registerbusiness : "+body.toString());
 
       if (isEditMode && businessId != null) {
           final success = await Get.find<BusinessController>().updateBusiness(businessId!, body);
@@ -237,13 +430,16 @@ class RegBusinessController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          Get.back(); // Close screen
-          CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
+          // CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
           
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
              Get.find<BusinessController>().fetchMyBusinesses();
           }
+
+          // Fetch and Show Plans
+          await fetchAndShowBusinessPlans();
+          
         } else {
           // Handle server-side validation/business logic errors
           CustomSnackBar.showError(message: data['message'] ?? "Registration failed");
@@ -258,8 +454,90 @@ class RegBusinessController extends GetxController {
     }
   }
 
+  Future<void> fetchAndShowBusinessPlans() async {
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false);
+      final response = await _repository.getBusinessPlans();
+      Get.back(); // Close Loading
+
+      if (response.success == true && response.data?.plans != null) {
+        // Filter plans by company type
+        final selectedType = typeIdMap[bTypeCtrl.text] ?? bTypeCtrl.text;
+        
+        // Match logic: filter plans where company_type matches selectedType
+        final filteredPlans = response.data!.plans!.where((plan) {
+          final planType = plan.companyType?.toLowerCase() ?? "";
+          final targetType = bTypeCtrl.text.toLowerCase();
+          
+          // Flexible matching
+          return planType.contains(targetType) || targetType.contains(planType);
+        }).toList();
+
+        if (filteredPlans.isEmpty) {
+          CustomSnackBar.showInfo(message: "No specific plans found for your business type. Showing all plans.");
+          filteredPlans.addAll(response.data!.plans!);
+        }
+
+        final selectedPlan = await showBusinessSubscriptionBottomSheet(filteredPlans);
+        
+        if (selectedPlan != null) {
+          await initiateBusinessPayment(selectedPlan);
+        }
+        
+        // Close Registration Screen
+        Get.back(); 
+
+      } else {
+        Get.back(); // Close Registration Screen if no plans
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      Get.back(); // Close Registration Screen
+      print("Error fetching business plans: $e");
+    }
+  }
+
+  Future<void> initiateBusinessPayment(BusinessPlan plan) async {
+    try {
+      Get.dialog(const Center(child: CircularProgressIndicator()),
+          barrierDismissible: false);
+      
+      final response = await _paymentRepository.createBusinessPaymentOrder(
+        planId: plan.id!,
+        //type: "business" // Ensure type is business
+      );
+
+      Get.back(); // Close Loading
+
+      if (response.success && response.data != null) {
+        final orderData = response.data!;
+
+        _razorpayController.openCheckout(
+          amount: ((double.tryParse(plan.price?.toString() ?? "0") ?? 0)).toInt(),
+          name: bNameCtrl.text,
+          description: "Business Subscription Plan",
+          mobile: phoneCtrl.text,
+          email: emailCtrl.text,
+          orderId: orderData['order_id'],
+          transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+          key: orderData['key_id'],
+          type: 'business',
+        );
+      } else {
+        CustomSnackBar.showError(
+            message: response.message ?? "Failed to create payment order");
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      print("Error initiating payment: $e");
+      CustomSnackBar.showError(message: "Payment initialization failed: $e");
+    }
+  }
+
   @override
   void onClose() {
+    bCategoryCtrl.removeListener(_onCategoryChanged);
     bNameCtrl.dispose();
     bTypeCtrl.dispose();
     bCategoryCtrl.dispose();
@@ -267,6 +545,7 @@ class RegBusinessController extends GetxController {
     phoneCtrl.dispose();
     emailCtrl.dispose();
     websiteCtrl.dispose();
+    customCategoryCtrl.dispose();
     super.onClose();
   }
 }

@@ -2,7 +2,7 @@ class ApiConstants {
     ApiConstants._();
 
     static const String baseUrl = "https://greenyellow-grouse-707123.hostingersite.com";
-    static const String imageBaseUrl = "https://greenyellow-grouse-707123.hostingersite.com/storage/app/public/";
+    static const String imageBaseUrl = "https://greenyellow-grouse-707123.hostingersite.com/storage/";
     static const String apiBaseUrl = "$baseUrl/api/";
 
     static const String xApiKey = "X-API-KEY";
@@ -21,7 +21,6 @@ class ApiConstants {
     static const String resetPassword = "auth/password/reset";
 
 
-
     // Bussiness Api
     static const String allBusiness = "business";
     static const String getSingleBusiness = "business";
@@ -38,6 +37,7 @@ class ApiConstants {
     
     static const String getCategory = "category";
     static const String getCategoryDetails = "category";
+    static const String registerCategory = "category/register";
 
     static const String getCategoryBusiness = "business/category";
 
@@ -52,6 +52,20 @@ class ApiConstants {
     static const String matrimonyMessages = "matrimony/messages"; // matrimony/messages/{conversation_id}
     static const String matrimonyRemoveRequest = "matrimony/remove-request";
     static const String matrimonyConnectedUsers = "matrimony/connected-users";
+    static const String matrimonyCasts = "matrimony/casts";
+    static const String matrimonySubCasts = "matrimony/casts"; // matrimony/casts/{id}/subcasts
+    static const String matrimonySubscriptionPlans = "plans/matrimony";
+
+    // Payment Api
+    static const String createOrderBusiness = "payment/create-order/business";
+    static const String createOrderMatrimony = "payment/create-order/matrimony";
+    static const String verifyPayment = "payment/verify";
+    static const String matrimonyPlans = "plans/matrimony";
+    static const String businessSubscriptionPlans = "plans/business";
+    static const String paymentTransactions = "payment/transactions";
+    static const String donationCauses = "donation/causes";
+    static const String donationCreateOrder = "donation/create-order";
+    static const String donationVerifyPayment = "donation/verify-payment";
 
     // Volunteer Api
     static const String volunteerProfile = "volunteer/profile";
@@ -79,4 +93,11 @@ class ApiConstants {
 
     // Banner Api
     static const String getBanner = "banner";
+
+
+
+
+    static const String matrimonyPymentOrder = "payment/create-order/matrimony";
+    static const String paymentVerify = "payment/verify";
+    static const String businessPymentOrder = "payment/create-order/business";
 }

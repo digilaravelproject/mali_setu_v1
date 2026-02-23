@@ -1,4 +1,5 @@
 import '../../../Auth/login/data/model/res_login_model.dart';
+import 'search_matrimony_response.dart';
 
 class MatrimonyConversationResponse {
   bool? success;
@@ -34,8 +35,8 @@ class MatrimonyConversation {
   String? lastMessageAt;
   String? createdAt;
   String? updatedAt;
-  User? user1;
-  User? user2;
+  MatrimonyProfile? user1;
+  MatrimonyProfile? user2;
   List<MatrimonyMessage>? messages;
 
   MatrimonyConversation({
@@ -57,8 +58,8 @@ class MatrimonyConversation {
     lastMessageAt = json['last_message_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    user1 = json['user1'] != null ? User.fromJson(json['user1']) : null;
-    user2 = json['user2'] != null ? User.fromJson(json['user2']) : null;
+    user1 = json['user1'] != null ? MatrimonyProfile.fromJson(json['user1']) : null;
+    user2 = json['user2'] != null ? MatrimonyProfile.fromJson(json['user2']) : null;
     if (json['messages'] != null) {
       messages = <MatrimonyMessage>[];
       json['messages'].forEach((v) {

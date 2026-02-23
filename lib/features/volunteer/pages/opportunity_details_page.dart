@@ -24,7 +24,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
           ),
         ),
         title: Text(
-          "Details",
+          "details".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w800,
             color: Colors.black87,
@@ -41,7 +41,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
 
         final data = controller.opportunity.value;
         if (data == null) {
-          return const Center(child: Text("Opportunity not found"));
+          return  Center(child: Text("opportunity_not_found".tr));
         }
 
         return SingleChildScrollView(
@@ -78,7 +78,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            data.status?.toUpperCase() ?? "ACTIVE",
+                            data.status?.toUpperCase() ?? "active".tr,
                             style: TextStyle(
                               color: Get.theme.primaryColor,
                               fontSize: 12,
@@ -90,7 +90,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      data.title ?? "Volunteer Opportunity",
+                      data.title ?? "volunteer_opportunity".tr,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -107,7 +107,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          data.organization ?? "Unknown Organization",
+                          data.organization ?? "unknown_organization".tr,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -142,21 +142,21 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
                     _buildInfoItem(
                       context,
                       Icons.location_on_outlined,
-                      "Location",
-                      data.location ?? "Remote",
+                      "location".tr,
+                      data.location ?? "remote".tr,
                     ),
                     Container(height: 30, width: 1, color: Colors.grey[200]),
                     _buildInfoItem(
                       context,
                       Icons.people_outline_rounded,
-                      "Needed",
-                      "${data.volunteersNeeded ?? 0} spots",
+                      "needed".tr,
+                      "${data.volunteersNeeded ?? 0} spots".tr,
                     ),
                     Container(height: 30, width: 1, color: Colors.grey[200]),
                     _buildInfoItem(
                       context,
                       Icons.calendar_today_rounded,
-                      "Deadline",
+                      "deadline".tr,
                       _formatDate(data.endDate),
                     ),
                   ],
@@ -166,8 +166,8 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
               const SizedBox(height: 24),
 
               // About Section
-              const Text(
-                "About this Opportunity",
+               Text(
+                "about_opportunity".tr,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -176,7 +176,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
               ),
               const SizedBox(height: 12),
               Text(
-                data.description ?? "No description provided.",
+                data.description ?? "no_description".tr,
                 style: TextStyle(
                   color: Colors.grey[600],
                   height: 1.6,
@@ -188,8 +188,8 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
 
               // Requirements
               if (data.requirements != null && data.requirements!.isNotEmpty) ...[
-                const Text(
-                  "Requirements",
+                 Text(
+                  "requirements".tr,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -218,8 +218,8 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
               ],
 
               // Contact Information
-              const Text(
-                "Contact Information",
+               Text(
+                "contact_information".tr,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -244,24 +244,24 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
                   children: [
                     _buildContactRow(
                       Icons.person_outline_rounded,
-                      "Contact Person",
-                      data.contactPerson ?? "Not specified"
+                      "contact_person".tr,
+                      data.contactPerson ?? "not_specified".tr
                     ),
                     const SizedBox(height: 16),
                     const Divider(height: 1, thickness: 0.5),
                     const SizedBox(height: 16),
                     _buildContactRow(
                       Icons.email_outlined,
-                      "Email Address",
-                      data.contactEmail ?? "Not specified"
+                      "email_address".tr,
+                      data.contactEmail ?? "not_specified".tr
                     ),
                     const SizedBox(height: 16),
                      const Divider(height: 1, thickness: 0.5),
                     const SizedBox(height: 16),
                     _buildContactRow(
                       Icons.phone_outlined,
-                      "Phone Number",
-                      data.contactPhone ?? "Not specified"
+                      "mobile_number".tr,
+                      data.contactPhone ?? "not_specified".tr
                     ),
                   ],
                 ),
@@ -343,7 +343,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
   }
 
   String _formatDate(String? dateStr) {
-    if (dateStr == null) return "TBD";
+    if (dateStr == null) return "tbd".tr;
     try {
       final date = DateTime.parse(dateStr);
       return DateFormat('MMM dd, yyyy').format(date);

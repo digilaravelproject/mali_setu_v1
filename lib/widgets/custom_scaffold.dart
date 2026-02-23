@@ -13,6 +13,7 @@ class CustomScaffold extends StatefulWidget {
   final bool? extendBody;
   final bool extendBodyBehindAppBar;
   final bool enableDoubleTapExit;
+  final Future<bool> Function()? onWillPop;
 
   const CustomScaffold({
     super.key,
@@ -25,6 +26,7 @@ class CustomScaffold extends StatefulWidget {
     this.floatingActionButtonLocation,
     this.extendBodyBehindAppBar = false,
     this.enableDoubleTapExit = false,
+    this.onWillPop,
   });
 
   @override
@@ -38,11 +40,17 @@ class _CustomScaffoldState extends State<CustomScaffold> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: !widget.enableDoubleTapExit,
-      onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (widget.enableDoubleTapExit && !didPop) {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) return;
+
+        bool shouldPop = true;
+        if (widget.onWillPop != null) {
+          shouldPop = await widget.onWillPop!();
+        }
+
+        if (shouldPop && widget.enableDoubleTapExit) {
           final now = DateTime.now();
-          final bool shouldShowPrompt =
-              _lastPressed == null ||
+          final bool shouldShowPrompt = _lastPressed == null ||
               now.difference(_lastPressed!) > const Duration(seconds: 2);
           if (shouldShowPrompt) {
             _lastPressed = now;
@@ -50,6 +58,8 @@ class _CustomScaffoldState extends State<CustomScaffold> {
           } else {
             SystemNavigator.pop();
           }
+        } else if (shouldPop) {
+          Navigator.of(context).pop();
         }
       },
       child: Scaffold(

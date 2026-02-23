@@ -63,6 +63,8 @@ class LoginController extends GetxController {
           );
         }
 
+        print("usertype : "+AppConstants.userTypeUser);
+
         // Set Logged In
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
@@ -93,12 +95,18 @@ class LoginController extends GetxController {
       isLoading.value = true;
       final response = await loginUseCase.google(data);
 
+      print("googlelogin1 : "+response.message.toString());
+
       if (response.success == true) {
+        print("googlelogin2 : "+response.message.toString());
          // Save Token
         if (response.data?.token != null) {
           await TokenManager.saveToken(response.data!.token!);
+          print(" token : "+response.data!.token.toString());
         }
-        
+
+        print("DEBUG_TOKEN: Retrieved token = '${await TokenManager.getToken() ?? 'NULL/EMPTY'}'");
+
         // Save User Data
         if (response.data?.user != null) {
           final user = response.data!.user!;
@@ -112,12 +120,16 @@ class LoginController extends GetxController {
         // Set Logged In
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
+        print("googlelogin : "+response.message.toString());
+
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
         CustomSnackBar.showError(message: response.message ?? "Login failed");
       }
     } catch (e) {
+      print("googlelogincatch : "+e.toString());
+
       CustomSnackBar.showError(message: e.toString());
     } finally {
       isLoading.value = false;

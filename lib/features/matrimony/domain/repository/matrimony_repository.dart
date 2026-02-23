@@ -1,5 +1,7 @@
+import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_chat_response.dart';
 import '../../data/model/matrimony_response.dart';
+import '../../data/model/matrimony_plan_model.dart';
 
 import '../../data/model/search_matrimony_response.dart';
 import '../../data/model/connection_requests_response.dart';
@@ -17,4 +19,7 @@ abstract class MatrimonyRepository {
   Future<dynamic> sendMessage(Map<String, dynamic> data);
   Future<dynamic> removeConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectedUsers();
+  Future<CastResponse> getCasts();
+  Future<SubCastResponse> getSubCasts(int castId);
+  Future<MatrimonyPlanResponse> getMatrimonyPlans();
 }

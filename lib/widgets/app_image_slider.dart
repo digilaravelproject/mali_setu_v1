@@ -16,6 +16,7 @@ class ImageSlider extends StatefulWidget {
   final double borderRadius;
   final bool enableNavigation;
   final IndicatorType indicatorType;
+  final Function(int index)? onImageTap; // Callback when image is tapped
 
   const ImageSlider({
     super.key,
@@ -28,6 +29,7 @@ class ImageSlider extends StatefulWidget {
     this.borderRadius = 16,
     this.autoScroll = true,
     this.indicatorType = IndicatorType.dot,
+    this.onImageTap, // Optional tap callback
   });
 
   @override
@@ -111,6 +113,16 @@ class _ImageSliderState extends State<ImageSlider> {
                           curve: Curves.easeInOut,
                         );
                       }
+                    }
+                  },
+                  onTap: () {
+                    // Call the onImageTap callback with the actual image index (not loop index)
+                    if (widget.onImageTap != null) {
+                      // Convert loop index to actual image index
+                      int actualIndex = index - 1; // Remove first duplicate
+                      if (actualIndex < 0) actualIndex = widget.images.length - 1;
+                      if (actualIndex >= widget.images.length) actualIndex = 0;
+                      widget.onImageTap!(actualIndex);
                     }
                   },
                   child: CustomImageView(

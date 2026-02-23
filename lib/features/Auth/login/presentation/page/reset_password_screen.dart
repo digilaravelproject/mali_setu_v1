@@ -52,14 +52,14 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
 
                   // Header section
                   Text(
-                    'Reset Password',
+                    'reset_password'.tr,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 12.0),
                   Text(
-                    'Enter your email address and we\'ll send you OTP to reset your password.',
+                    'enter_email_otp'.tr,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       height: 1.5,
                     ),
@@ -72,7 +72,7 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
                     child: Column(
                       children: [
                         AppInputTextField(
-                          label: "Email ",
+                          label: "email".tr,
                           iconData: CupertinoIcons.mail_solid,
                           textInputType: TextInputType.emailAddress,
                           controller: controller.emailController,
@@ -85,7 +85,7 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
                         // Submit button
                         CustomButton(
                           borderRadius: 12,
-                          title: "Send Otp",
+                          title: "send_otp".tr,
                           // isLoading: controller.isLoading.value,
                           onPressed: controller.sendOtp,
                           // controller.performLogin,
@@ -102,7 +102,7 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
                   // Helper text
                   Center(
                     child: Text(
-                      'We\'ll email you a link to reset your password',
+                      'email_link_info'.tr,
                       style: theme.textTheme.bodyMedium?.copyWith(
                       ),
                     ),
@@ -127,11 +127,11 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
                           const SizedBox(height: 20.0),
                           RichText(
                             text: TextSpan(
-                              text: 'Need help? ',
+                              text: 'need_help'.tr,
                               style: const TextStyle(color: Colors.grey),
                               children: [
                                 TextSpan(
-                                  text: 'Contact Support',
+                                  text: 'contact_support'.tr,
                                   style: TextStyle(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w600,
@@ -200,14 +200,14 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
 
                   // Header section
                   Text(
-                    'Create New Password',
+                    'create_new_password'.tr,
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 12.0),
                   Text(
-                    'Enter OTP received on your email and set your new password',
+                    'enter_otp_email'.tr,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       height: 1.5,
                     ),
@@ -221,11 +221,11 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                      children: [
                        // OTP Input Field
                        AppInputTextField(
-                         label: "OTP",
+                         label: "otp".tr,
                          iconData: CupertinoIcons.number_square,
                          textInputType: TextInputType.number,
                           controller: controller.otpController,
-                         hint: const ["Enter 6-digit OTP"],
+                         hint:  ["enter_6_digit_otp".tr],
                          // validator: FormValidator.otp,
                          //maxLength: 6,
                        ),
@@ -235,7 +235,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                        // New Password Field
                        Obx(
                              ()=>AppInputTextField(
-                           label: "Password",
+                           label: "password".tr,
                            iconData: CupertinoIcons.lock_fill,
                            textInputType: TextInputType.visiblePassword,
                            controller: controller.passwordController,
@@ -254,7 +254,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                        // Confirm Password Field
                        Obx(
                              ()=>AppInputTextField(
-                           label: "Confirm Password",
+                           label: "confirm_password".tr,
                            iconData: CupertinoIcons.lock_fill,
                            textInputType: TextInputType.visiblePassword,
                            controller: controller.confPasswordController,
@@ -273,7 +273,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                        // Submit button
                        CustomButton(
                            borderRadius: 12,
-                           title: "Reset Password",
+                           title: "reset_password_btn".tr,
                            // isLoading: controller.isLoading.value,
                            onPressed: () {
                              controller.resetPassword();
@@ -290,7 +290,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Didn't receive OTP? ",
+                        "didnt_receive_otp".tr,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.grey.shade600,
                         ),
@@ -300,7 +300,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                           Get.back();
                         },
                         child: Text(
-                          "Resend OTP",
+                          "resend_otp".tr,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -331,11 +331,11 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                           const SizedBox(height: 20.0),
                           RichText(
                             text: TextSpan(
-                              text: 'Need help? ',
+                              text: 'need_help'.tr,
                               style: TextStyle(color: Colors.grey.shade600),
                               children: [
                                 TextSpan(
-                                  text: 'Contact Support',
+                                  text: 'contact_support'.tr,
                                   style: TextStyle(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w600,

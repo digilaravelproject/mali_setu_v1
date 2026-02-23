@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/business/data/data_source/all_business_data_source.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 
 class BusinessRepositoryImpl implements BusinessRepository {
@@ -10,8 +11,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   BusinessRepositoryImpl({required this.dataSource});
 
   @override
-  Future<BusinessResponse> getAllBusinesses() {
-    return dataSource.getAllBusinesses();
+  Future<BusinessResponse> getAllBusinesses({int page = 1}) {
+    return dataSource.getAllBusinesses(page: page);
   }
 
   @override
@@ -56,11 +57,32 @@ class BusinessRepositoryImpl implements BusinessRepository {
 
   @override
   Future<List<Category>> getBusinessCategories() async {
-    final response = await dataSource.getBusinessCategories();
-    if (response.success == true && response.data != null && response.data!.data != null) {
-      return response.data!.data!;
+    List<Category> allCategories = [];
+    int currentPage = 1;
+    bool hasMorePages = true;
+
+    try {
+      while (hasMorePages) {
+        final response = await dataSource.getBusinessCategories(page: currentPage);
+        
+        if (response.success == true && response.data != null && response.data!.data != null) {
+          allCategories.addAll(response.data!.data!);
+          
+          if (response.data!.nextPageUrl != null) {
+            currentPage++;
+          } else {
+            hasMorePages = false;
+          }
+        } else {
+          hasMorePages = false;
+        }
+      }
+    } catch (e) {
+      print("Error fetching categories page $currentPage: $e");
+      // If error occurs (e.g. network issue on page 2), return what we have so far
     }
-    return [];
+    
+    return allCategories;
   }
 
   @override
@@ -125,5 +147,10 @@ class BusinessRepositoryImpl implements BusinessRepository {
   @override
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes}) {
     return dataSource.updateApplicationStatus(applicationId, status, notes: notes);
+  }
+
+  @override
+  Future<BusinessPlanResponse> getBusinessPlans() {
+    return dataSource.getBusinessPlans();
   }
 }

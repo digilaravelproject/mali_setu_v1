@@ -2,7 +2,12 @@ import 'package:edu_cluezer/features/dashboard/data/model/btm_nav_model.dart';
 import 'package:edu_cluezer/features/dashboard/presentation/controller/dashboard_controller.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/features/donation/presentation/controller/donation_controller.dart';
+import 'package:edu_cluezer/features/donation/binding/donation_binding.dart';
+import 'package:edu_cluezer/features/donation/presentation/widget/donation_bottom_sheet.dart';
+import 'package:edu_cluezer/core/routes/app_routes.dart';
 
 class DashboardPage extends GetWidget<DashboardController> {
   const DashboardPage({super.key});
@@ -11,6 +16,27 @@ class DashboardPage extends GetWidget<DashboardController> {
   Widget build(BuildContext context) {
     return CustomScaffold(
       enableDoubleTapExit: true,
+      onWillPop: () async {
+        // Show donation prompt on exit
+        if (!Get.isRegistered<DonationController>()) {
+          final donationBinding = DonationBinding();
+          donationBinding.dependencies();
+        }
+
+        final donationController = Get.find<DonationController>();
+        await donationController.fetchDonationCauses();
+
+        if (donationController.causes.isNotEmpty) {
+          showDonationPrompt(donationController.causes, (cause) {
+            Get.toNamed(AppRoutes.donationDetails, arguments: cause);
+          }, onClose: () {
+            // If user clicks "Not right now" on exit, really exit
+            SystemNavigator.pop();
+          });
+          return false; // Don't exit yet, we are showing the sheet
+        }
+        return true; // No causes? Just let normal exit flow handle it
+      },
       extendBody: false,
       body: PageView.builder(
         physics: const NeverScrollableScrollPhysics(),

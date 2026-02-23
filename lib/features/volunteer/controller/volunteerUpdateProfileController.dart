@@ -124,7 +124,6 @@ class VoluntProfileUpdateController extends GetxController {
   ];
   
   final availabilities = [
-    "Full-time",
     "Part-time",
     "Weekends Only",
     "Evenings Only"
@@ -152,11 +151,13 @@ class VoluntProfileUpdateController extends GetxController {
       }
 
       if (response.success == true) {
+        Get.back();
         CustomSnackBar.showSuccess(message: response.message ?? (isEdit.value ? "Profile updated successfully" : "Profile created successfully"));
         // Refresh profile data
         Get.find<VolunteerProfileController>().fetchVolunteerProfile();
-        await Future.delayed(const Duration(milliseconds: 500));
+       // await Future.delayed(const Duration(milliseconds: 700));
         Get.back();
+
       } else {
         CustomSnackBar.showError(message: response.message ?? "Failed to save profile");
       }

@@ -1,0 +1,826 @@
+const Map<String, String> enUS = {
+  // Language Settings
+  'select_language': 'Select Language',
+  'search_language': 'Search language...',
+  'selected_language': 'Selected Language',
+  'available_languages': 'Available Languages',
+  'languages_count': '@count languages',
+  'apply_language': 'Apply Language',
+  'language_changed_success': 'Language changed successfully',
+  'language_change_failed': 'Failed to change language: @error',
+  // Common
+  'home': 'Home',
+  'business': 'Business',
+  'matrimony': 'Matrimony',
+  'volunteer': 'Volunteer',
+  'settings': 'Settings',
+  'profile': 'Profile',
+  'logout': 'Logout',
+  'save': 'Save',
+  'cancel': 'Cancel',
+  'delete': 'Delete',
+  'edit': 'Edit',
+  'update': 'Update',
+  'submit': 'Submit',
+  'search': 'Search',
+  'filter': 'Filter',
+  'loading': 'Loading...',
+  'error': 'Error',
+  'success': 'Success',
+  'welcome': 'Welcome',
+  'continue': 'Continue',
+  'letter': 'Letter',
+  'resume': 'Resume',
+  'info': 'Info',
+  'cover_letter': 'Cover Letter',
+  'tap_to_upload_resume': 'Tap to Upload Resume',
+  'additional_information': 'Additional Information',
+
+  // Filter Screen
+  'filters': 'Filters',
+  'reset': 'Reset',
+  'by_criteria': 'By Criteria',
+  'by_profile_id': 'By Profile Id',
+  'saved_search': 'Saved Search',
+  'apply_filters': 'Apply Filters',
+  'matrimony_id': 'Matrimony Id',
+  'view_profile': 'View Profile',
+  'your_saved_search': 'Your Saved Search...',
+  'total': 'Total',
+  'search_title': 'Search Title',
+  'matches': 'Matches',
+  'show_matches': 'Show Matches',
+  'saved_searches': 'Saved Searches',
+  'search_by_profile_id': 'Search by Profile ID',
+
+  // Filter Categories
+  'basic_details': 'Basic Details',
+  'professional_details': 'Professional Details',
+  'religion_details': 'Religion Details',
+  'family_details': 'Family Details',
+  'location_details': 'Location Details',
+  'lifestyle': 'Lifestyle',
+  'profile_type': 'Profile Type',
+  'recently_created': 'Recently Created',
+
+  // Basic Details Filters
+  'age': 'Age',
+  'years': 'years',
+  'profile_created_by': 'Profile Created by',
+  'marital_status': 'Marital Status',
+  'any': 'Any',
+  'divorced': 'Divorced',
+  'widow': 'Widow',
+  'single': 'Single',
+  'awaiting_divorce': 'Awaiting Divorce',
+  'mother_tongue': 'Mother Tongue',
+  'height': 'Height',
+  'cm': 'cm',
+  'physical_status': 'Physical Status',
+  'normal': 'Normal',
+  'doesnt_matter': "Doesn't Matter",
+  'physically_challenged': 'Physically Challenged',
+
+  // Professional Details Filters
+  'annual_income': 'Annual Income',
+  'education': 'Education',
+  'employment_type': 'Employment Type',
+  'business_owner': 'Business Owner',
+  'defence_sector': 'Defence Sector',
+  'government_psu': 'Government / PSU',
+  'private_sector': 'Private Sector',
+  'self_employed': 'Self Employed',
+  'occupation': 'Occupation',
+  'airline': 'Airline',
+  'engineering': 'Engineering',
+  'it_software': 'IT & Software',
+  'civil_services': 'Civil Services',
+
+  // Religion Details Filters
+  'premium': 'PREMIUM',
+  'upgrade_message': 'To access these premium filters, UPGRADE NOW',
+  'profiles_with_horoscope': 'Profiles with horoscope',
+  'matches_with_horoscope': 'Matches who have added horoscope',
+  'manglik': 'Manglik',
+  'dont_know': "Don't Know",
+  'yes': 'Yes',
+  'no': 'No',
+
+  // Family Details Filters
+  'family_status': 'Family Status',
+  'family_type': 'Family Type',
+  'nuclear': 'Nuclear',
+  'joint': 'Joint',
+  'not_specified': 'Not Specified',
+  'family_value': 'Family Value',
+  'liberal': 'Liberal',
+  'moderate': 'Moderate',
+  'traditional': 'Traditional',
+  'orthodox': 'Orthodox',
+
+  // Location Details Filters
+  'nearby_profiles': 'Nearby Profiles',
+  'matches_near_location': 'Matches Near your location',
+  'country': 'Country',
+  'citizenship': 'Citizenship',
+  'state': 'State',
+  'city': 'City',
+
+  // Lifestyle Filters
+  'eggetarian': 'Eggetarian',
+  'vegetarian': 'Vegetarian',
+  'non_vegetarian': 'Non-Vegetarian',
+  'smoking_habits': 'Smoking Habits',
+  'drinking_habits': 'Drinking Habits',
+  'never': 'Never',
+  'socially': 'Socially',
+  'regularly': 'Regularly',
+
+  // Profile Type Filters
+  'profile_with_photo': 'Profile with Photo',
+  'matches_with_photos': 'Matches who have added photos',
+  'dont_show_profile': "Don't Show Profile",
+  'ignored': 'Ignored',
+  'profiles_ignored': 'Profiles you have ignored',
+  'shortlisted': 'Shortlisted',
+  'profiles_shortlisted': 'Profiles you have shortlisted',
+  'already_viewed': 'Already Viewed',
+  'profiles_viewed': 'Profiles you have already seen',
+  'already_contacted': 'Already Contacted',
+  'profiles_contacted': 'Profiles you have contacted',
+
+  // Recently Created Filters
+  'profile_created': 'Profile Created',
+  'all_time': 'All Time',
+  'today': 'Today',
+  'last_7_days': 'Last 7 Days',
+  'last_30_days': 'Last 30 Days',
+  'one_week': 'One Week',
+  'one_month': 'One Month',
+
+  // Auth - Login Page
+  'welcome_back': 'Welcome Back',
+  'login_to_continue': 'Login to continue your journey',
+  'email_label': 'Email',
+  'password_label': 'Password',
+  'remember_me': 'Remember Me',
+  'forget_password': 'Forget Password',
+  'login_button': 'Login',
+  'or': 'OR',
+  'sign_in_with_google': 'Sign in with Google',
+  'dont_have_account': "Don't have an account? ",
+  'register': 'Register',
+
+  // Auth - Register Page
+  'create_account': 'Create Account',
+  'personal_information': 'Personal Information',
+  'full_name': 'Full Name',
+  'email_id': 'Email ID',
+  'date_of_birth': 'Date of Birth',
+  'mobile_number': 'Mobile Number',
+  'caste_certificate': 'Caste Certificate',
+  'tap_to_upload': 'Tap to upload caste certificate',
+  'certificate_uploaded': 'Caste certificate uploaded',
+  'address_details': 'Address Details',
+  'address': 'Address',
+  'nearby_location': 'Nearby Location',
+  'pin_code': 'Pin Code',
+  'district': 'District',
+  'auto_filled': 'Auto-filled',
+  'road_number': 'Road Number',
+  'sector': 'Sector',
+  'destination': 'Destination',
+  'company_name': 'Company Name',
+  'department_name': 'Department Name',
+  'user_type': 'User Type',
+  'designation': 'Designation',
+  'referral_code': 'Referral Code (Optional)',
+  'referral_optional': '* Referral code is optional',
+  'security': 'Security',
+  'password': 'Password',
+  'confirm_password': 'Confirm Password',
+  'register_button': 'Register',
+
+  // Dashboard - Home Page
+  'welcome_back_comma': 'Welcome Back,',
+  'search_here': 'Search here...',
+  'categories': 'Categories',
+  'view_all': 'View All',
+  'register_your_business': 'Register your Business',
+  'showcase_ideas': 'Showcase your ideas and generate leads',
+  'start_now': 'Start Now',
+  'register_matrimony': 'Register Matrimony',
+  'find_soulmate': 'Find your soulmate for a journey of love',
+  'join_now': 'Join Now',
+  'all_categories': 'All Categories',
+
+  // Business Page
+  'business_dashboard': 'Business Dashboard',
+  'my_business': 'My Business',
+  'manage_business': 'Manage your business details',
+  'register_business': 'Register Business',
+  'start_digital_journey': 'Start your digital journey',
+  'register_now': 'Register Now',
+  'featured_businesses': 'Featured Businesses',
+  'showing_first_10': 'Showing first 10 businesses. Tap \'View All\' to see all',
+  'businesses_available': 'businesses available.',
+  'all_businesses': 'All Businesses',
+  'pagination_info': 'Pagination Info',
+  'page_of': 'Page',
+  'of': 'of',
+  'search_business': 'Search business by name...',
+  'no_businesses_found': 'No Businesses Found',
+  'load_more': 'Load More',
+  'all_businesses_loaded': 'All businesses loaded',
+  'business_name': 'Business Name',
+  'location_not_available': 'Location not available',
+  'active': 'Active',
+  'inactive': 'Inactive',
+  'unknown': 'Unknown',
+
+  // Business Details
+  'business_details': 'Business Details',
+  'about_business': 'About Business',
+  'contact_info': 'Contact Information',
+  'products': 'Products',
+  'services': 'Services',
+  'jobs': 'Jobs',
+  'gallery': 'Gallery',
+  'reviews': 'Reviews',
+  'share': 'Share',
+  'call': 'Call',
+  'message': 'Message',
+  'website': 'Website',
+  'no_description': 'No description available',
+  'no_products': 'No products available',
+  'no_services': 'No services available',
+  'no_jobs': 'No jobs available',
+  'view_details': 'View Details',
+  'apply_now': 'Apply Now',
+  'add_product': 'Add Product',
+  'add_service': 'Add Service',
+  'create_job': 'Create Job',
+
+  // Job Related
+  'job_title': 'Job Title',
+  'job_description': 'Job Description',
+  'job_type': 'Job Type',
+  'salary': 'Salary',
+  'experience': 'Experience',
+  'location': 'Location',
+  'posted_on': 'Posted on',
+  'apply': 'Apply',
+  'applications': 'Applications',
+  'job_details': 'Job Details',
+  'full_time': 'Full Time',
+  'part_time': 'Part Time',
+  'contract': 'Contract',
+  'internship': 'Internship',
+  'remote': 'Remote',
+  'on_site': 'On Site',
+  'hybrid': 'Hybrid',
+
+  // My Business
+  'edit_business': 'Edit Business',
+  'delete_business': 'Delete Business',
+  'business_info': 'Business Information',
+  'business_category': 'Business Category',
+  'business_address': 'Business Address',
+  'business_phone': 'Business Phone',
+  'business_email': 'Business Email',
+  'business_website': 'Business Website',
+  'business_description': 'Business Description',
+  'save_changes': 'Save Changes',
+  'confirm_delete': 'Confirm Delete',
+  'delete_business_message': 'Are you sure you want to delete this business?',
+
+  // Job Applications
+  'job_applications': 'Job Applications',
+  'status': 'Status',
+  'applied_on': 'Applied on',
+  'no_applications': 'No applications found',
+  'applicant_name': 'Applicant Name',
+  'applicant_email': 'Email',
+  'applicant_phone': 'Phone',
+  'view_resume': 'View Resume',
+  'download_resume': 'Download Resume',
+  'resume_not_uploaded': 'Resume not uploaded',
+  'unknown_applicant': 'Unknown Applicant',
+  'no_email': 'No email',
+  'review': 'Review',
+  'reject': 'Reject',
+  'accept': 'Accept',
+  'mark_as_reviewed': 'Mark as Reviewed',
+  'update_status': 'Update Status',
+  'verify_status_change_message': 'Are you sure you want to change the status to @status for @user?',
+  'confirm': 'Confirm',
+  'view': 'View',
+  'accepted': 'Accepted',
+  'rejected': 'Rejected',
+  'reviewed': 'Reviewed',
+  'pending': 'Pending',
+  'job_editor_init_error': 'Could not initialize job editor. Please try again.',
+  'delete_job_posting': 'Delete Job Posting',
+  'delete_job_confirmation': 'Are you sure you want to delete this job? This action cannot be undone.',
+  'deactivate_job': 'Deactivate Job',
+  'activate_job': 'Activate Job',
+  'deactivate_job_confirmation': 'Are you sure you want to deactivate this job posting? It will no longer be visible to applicants.',
+  'activate_job_confirmation': 'Are you sure you want to activate this job posting? It will become visible to applicants.',
+  'deactivate': 'Deactivate',
+  'activate': 'Activate',
+  'edit_job': 'Edit Job',
+  'toggle_visibility': 'Toggle Visibility',
+  'delete_job': 'Delete Job',
+  'no_title': 'No Title',
+  'unknown_company': 'Unknown Company',
+  'experience_level': 'Level',
+  'entry_level': 'Entry',
+  'overview': 'Overview',
+  'requirements': 'Requirements',
+  'required_skills': 'Required Skills',
+  'benefits': 'Benefits',
+  'about': 'About',
+  'no_company_info': 'No company information provided.',
+  'email': 'Email',
+  'phone': 'Phone',
+  'similar_jobs': 'Similar Jobs',
+  'job_title_fallback': 'Job Title',
+  'company_fallback': 'Company',
+  'view_appliers': 'View Appliers',
+  'applied': 'Applied',
+  'discover': 'DISCOVER',
+  'members': 'Members',
+  'all_matches': 'ALL MATCHES',
+  'newly_joined': 'NEWLY JOINED',
+  'no_matches_found': 'No matches found',
+  'no_more_profiles': 'No more profiles',
+  'seen_all_matches': 'You have seen all available matches',
+  'new': 'NEW',
+  'professional': 'Professional',
+  'no_name': 'No Name',
+  'unknown_city': 'Unknown',
+
+
+
+  'waiting_for_approval': 'Waiting for Approval',
+  'name': 'Name',
+  'got_it': 'Got it!',
+  'are_you_sure_for_logout': 'Are you sure you want to log out?',
+  'coming_soon': 'Coming Soon!',
+  'choose_your_preferred_language': 'Choose your preferred language',
+  'coming_soon_msg': 'We are currently working on this feature.\nIt will be available in future updates!',
+
+
+  ////  Settings Screen
+  'profile & settings': 'Profile & Settings',
+  'user_information': 'User Information',
+  'my_profile': 'My Profile',
+  'app_language': 'App Language',
+  'user_approval': 'User Approval',
+  'active_user': 'Active User',
+  'active_business': 'Active Business',
+  'business_approval': 'Business Approval',
+  'business_type': 'Business Type',
+  'saved_business': 'Saved Business',
+  'active_volunteer': 'Active Volunteer',
+  'volunteer_approval': 'Volunteer Approval',
+  'volunteer_excel_download': 'Volunteer Excel Download',
+  'legal': 'LEGAL',
+  'privacy_policy': 'Privacy Policy',
+  'terms & conditions': 'Terms & Conditions',
+  'contact_support': 'Contact Support',
+  'app_settings': 'APP SETTINGS',
+  'share_app': 'Share App',
+  'confirm_logout': 'Confirm Logout',
+  'you_will_be_redirected_to_the_login_screen': 'You will be redirected to the login screen.',
+  'want_to_grow_your_business': 'Want to grow your business?.',
+  'initiative_by': 'Initiative By',
+  'anushka_foundation': 'Anushka Foundation',
+
+
+  'change_password': 'Change Password',
+
+
+  // Section Titles
+  'basic_information': 'BASIC INFORMATION',
+  'contact_information': 'CONTACT INFORMATION',
+  'address_information': 'ADDRESS INFORMATION',
+
+  // Contact fields
+  'email_address': 'Email Address',
+  'salary_not_specified': 'Salary not specified',
+
+  // Address fields
+  'street_address': 'Street Address',
+  'pincode': 'Pincode',
+
+  // Fallback texts
+  'name_not_available': 'Name Not Available',
+  'email_not_available': 'Email Not Available',
+  'not_available': 'N/A',
+
+
+//// change password screen
+
+  'create_new_password': 'Create a New Password',
+  'password_subtitle': 'Your new password must be different from previous passwords',
+  'current_password': 'Current Password',
+  'new_password': 'New Password',
+  'password_guidelines': 'Password Guidelines',
+  'password_rule_length': 'At least 6 characters long',
+  'password_rule_letters_numbers': 'Must contain letters and numbers',
+  'password_rule_different': 'Different from current password',
+  'password_rule_personal': 'Avoid using personal information',
+
+
+
+
+  'update_profile': 'Update Profile',
+  'create_profile': 'Create Profile',
+  'update_info_desc': 'Update your volunteer information to get better matches.',
+  'fill_info_desc': 'Fill in your information to join as a volunteer.',
+  'skills': 'Skills',
+  'interests': 'Interests',
+  'bio': 'Bio',
+  'bio_hint': 'Tell us about yourself...',
+  'location_hint': 'e.g., Pune, Maharashtra',
+  'availability': 'Availability',
+  'add_skill': 'Add Skill',
+  'skill_hint': 'e.g. Teaching',
+  'selected_skills': 'Selected Skills',
+  'popular_skills': 'Popular Skills',
+  'add_interest': 'Add Interest',
+  'interest_hint': 'e.g. Environment',
+  'selected_interests': 'Selected Interests',
+  'popular_interests': 'Popular Interests',
+  'no_label': 'No Label',
+
+
+
+
+  'community': 'Community',
+  'volunteers': 'Volunteers',
+  'my_volunteer_profile': 'My Volunteer Profile',
+  'manage_contributions': 'Manage your contributions',
+  'no_volunteers_found': 'No volunteers found',
+  'available_volunteers': 'Available Volunteers',
+  'found': 'Found',
+  'offline': 'Offline',
+  'individual_volunteer': 'Individual Volunteer',
+  'unknown_location': 'Unknown Location',
+
+
+  'volunteer_profile': 'Volunteer Profile',
+  'profile_not_found': 'Profile not found',
+  'about_me': 'About Me',
+  'no_bio_added': 'No bio added yet.',
+  'no_skills_listed': 'No skills listed',
+  'no_interests_listed': 'No interests listed',
+
+
+
+  'details': 'Details',
+  'opportunity_not_found': 'Opportunity not found',
+  'volunteer_opportunity': 'Volunteer Opportunity',
+  'unknown_organization': 'Unknown Organization',
+  'needed': 'Needed',
+  'spots': 'spots',
+  'deadline': 'Deadline',
+  'about_opportunity': 'About this Opportunity',
+  'contact_person': 'Contact Person',
+  'phone_number': 'Phone Number',
+  'tbd': 'TBD',
+
+
+
+  'notifications': 'Notifications',
+  'done': 'Done',
+  'no_notifications': 'No Notifications',
+  'notification': 'Notification',
+  'new_notification_message': 'You have a new notification',
+  'just_now': 'Just now',
+  'hours_ago': 'h ago',
+  'minutes_ago': 'm ago',
+  'select_all': 'Select All',
+  'delete_notifications': 'Delete Notifications',
+  'delete_confirm_message': 'Are you sure you want to delete @count notifications?',
+
+
+  'chat': 'Chat',
+  'online': 'Online',
+  'type_message': 'Type a message...',
+  'no_messages_yet': 'No messages yet',
+  'start_conversation': 'Send a message to start the conversation',
+
+
+  'category_details': 'Category Details',
+  'category_inactive': 'This category is currently inactive.',
+  'related_businesses': 'Related Businesses',
+  'no_business_found': 'No businesses found in this category.',
+  'location_na': 'Location not available',
+
+
+
+
+  "reset_password": "Reset Password",
+  "enter_email_otp": "Enter your email address and we'll send you OTP to reset your password.",
+  "send_otp": "Send Otp",
+  "email_link_info": "We'll email you a link to reset your password",
+  "need_help": "Need help?",
+  "enter_otp_email": "Enter OTP received on your email and set your new password",
+  "otp": "OTP",
+  "enter_6_digit_otp": "Enter 6-digit OTP",
+  "reset_password_btn": "Reset Password",
+  "didnt_receive_otp": "Didn't receive OTP?",
+  "resend_otp": "Resend OTP",
+
+
+
+  "verify_your_number": "Verify Your Number",
+  "enter_otp_mobile": "Enter the 6-digit code sent to\n your mobile number",
+  "didnt_receive_code": "Didn't receive code?",
+  "resend_in": "Resend in {countdown}s",
+  "verify_continue": "VERIFY & CONTINUE",
+
+
+
+
+
+
+  "upload_caste_certificate": "Upload Caste Certificate",
+  "referral_code_optional": "Referral Code (Optional)",
+  "referral_code_note": "* Referral code is optional",
+
+
+
+
+  'select_image_source': 'Select Image Source',
+  'camera': 'Camera',
+  'product_images': 'Product Images',
+  'tap_to_add_images': 'Tap to add product images',
+  'camera_or_gallery': 'Camera or Gallery',
+  'product_name': 'Product Name',
+  'product_description': 'Product Description',
+  'product_price': 'Product Price',
+  'create_product': 'Create Product',
+  'creating': 'Creating...',
+
+
+
+
+  'upload_images': 'Upload Images',
+  'add': 'Add',
+  'service_name': 'Service Name',
+  'service_description': 'Service Description',
+  'service_price': 'Service Price',
+  'create_service': 'Create Service',
+
+
+  'my_applications': 'My Applications',
+  'unknown_position': 'Unknown Position',
+  'unknown_business': 'Unknown Business',
+  'approved': 'approved',
+  'declined': 'declined',
+  'na': 'N/A',
+  'explore_jobs': 'Explore jobs and start applying!',
+  'go_back': 'Go Back',
+  'application_details': 'Application Details',
+  'no_cover_letter': 'No cover letter provided',
+  'additional_info': 'Additional Info',
+  'available_online': 'Available online',
+  'close': 'Close',
+  'edit_profile': 'Edit Profile',
+
+
+  'tap_camera_update_photo': 'Tap to update photo',
+  'personal_details_sub': 'Start with your basic info',
+  'gender': 'Gender',
+  'complexion': 'Complexion',
+  'language': 'Language',
+  'religious_horoscope': 'Religious Horoscope',
+  'religious_horoscope_sub': 'Your Astrological Details',
+  'religion': 'Religion',
+  'caste': 'Caste',
+  'star': 'Star',
+  'raasi': 'Raasi',
+  'dosh': 'Dosh',
+  'next': 'Next',
+  'back': 'Back',
+  'education_career': 'Education Career',
+  'education_career_sub': 'Qualification & Occupation',
+  'highest_qualification': 'Highest Qualification',
+  'college': 'College',
+  'family_lifestyle': 'Family & Lifestyle',
+  'family_lifestyle_sub': 'Family background & habits',
+  'family_class': 'Family Class',
+  'father_occupation': "Father's Occupation" ,
+  'mother_occupation': "Mother Occupation" ,
+  'diet': "Diet" ,
+  'smoking': "Smoking" ,
+  'drinking': "Drinking" ,
+  'apply_for_job': "Apply for Job" ,
+
+
+
+  'salary_range'  : 'Salary Range'  ,
+  "job_category" : "Job Category",
+  "application_deadline"  : "Application Deadline",
+  "job_expiry_date" : "Job Expiry Date",
+  "skills_required" :"Skills Required ",
+
+
+  // Create Job Post Page
+  "update_job_posting": "Update Job Posting",
+  "create_job_posting": "Create Job Posting",
+  "edit_job_details": "Edit Job Details",
+  "update_job_info": "Update the information for your job posting",
+  "fill_job_details": "Fill in the details to create your job posting",
+  "job_title_hint": "Job title",
+  "job_description_hint": "Describe the role, responsibility",
+  "requirements_hint": "List the required skills, qualifications",
+  "salary_range_hint": "₹5,000 - ₹50,000 per month",
+  "salary_required": "Salary range is required",
+  "location_required": "Location is required",
+  "deadline_hint": "YYYY-MM-DD",
+  "deadline_required": "Deadline is required",
+  "expiry_required": "Expiry date is required",
+  "benefits_perks": "Benefits & Perks",
+  "add_benefit": "Add Benefit",
+  "benefit_hint": "e.g., Health insurance",
+  "quick_add_benefits": "Quick Add Benefits:",
+  "selected_benefits": "Selected Benefits:",
+  "quick_add_skills": "Quick Add Skills:",
+  "update_job": "Update Job",
+  "post_job_now": "Post Job Now",
+  "field_required": "is required",
+
+  // Job Types
+
+  // Experience Levels
+  "mid": "Mid",
+  "expert": "Expert",
+
+  // Employment Types
+  "freelance": "Freelance",
+
+  // Job Categories
+  "software_development": "Software Development",
+  "marketing": "Marketing",
+  "sales": "Sales",
+  "design": "Design",
+  "finance": "Finance",
+  "human_resources": "Human Resources",
+  "other": "Other",
+  "enter_job_category": "Enter Job Category",
+  "job_category_hint": "e.g., Consulting, Healthcare",
+
+  // Popular Benefits
+  "health_insurance": "Health insurance",
+  "flexible_working_hours": "Flexible working hours",
+  "paid_time_off": "Paid time off",
+  "remote_work_options": "Remote work options",
+  "professional_development": "Professional development",
+  "stock_options": "Stock options",
+  "performance_bonus": "Performance Bonus",
+  "gym_membership": "Gym Membership",
+  "free_meals": "Free Meals",
+
+  // Popular Skills
+  "php": "PHP",
+  "laravel": "Laravel",
+  "mysql": "MySQL",
+  "rest_api": "REST API",
+  "flutter": "Flutter",
+  "dart": "Dart",
+  "android": "Android",
+  "react_native": "React Native",
+  "java": "Java",
+  "python": "Python",
+  "nodejs": "Node.js",
+  "ui_ux_design": "UI/UX Design",
+
+  // Messages
+  "register_business_first": "Please Register/Select a Business first",
+  "job_created_success": "Job posting created successfully",
+  "job_updated_success": "Job posting updated successfully",
+  "job_save_failed": "Failed to save job posting",
+
+
+
+
+  'job_analysis_dashboard': 'Job Analysis Dashboard',
+  'job_statistics': 'Job Statistics',
+  'total_jobs': 'Total Jobs',
+  'active_jobs': 'Active Jobs',
+  'pending_jobs': 'Pending Jobs',
+  'total_applications': 'Total Applications',
+  'pending_applications': 'Pending Applications',
+  'accepted_applications': 'Accepted Applications',
+  'application_progress': 'Application Progress',
+  'application_status_distribution': 'Application Status Distribution',
+  'lifetime': 'Lifetime',
+  'recent_applications': 'Recent Applications',
+  'no_recent_applications': 'No recent applications found',
+  'job_application': 'Job Application',
+
+
+  // Register Business Screen
+  "update_business": "Update Business",
+  "business_information": "Business Information",
+  "business_description_hint": "Describe your business, products",
+  "opening_time": "Opening Time",
+  "closing_time": "Closing Time",
+  "select_opening_time": "Please select opening time",
+  "select_closing_time": "Please select closing time",
+  "business_photos": "Business Photos",
+  "contact_number": "Contact Number",
+  "add_business_photos": "Add Business Photos",
+  "add_more_photos": "Add More Photos",
+
+  // Custom Category Dialog
+  "add_custom_category": "Add Custom Category",
+  "enter_category_name": "Enter category name",
+  "category_name_hint": "e.g., Medical, Consulting",
+  "add_category": "Add Category",
+  "category_added_success": "Category added successfully",
+
+  // Single Business Details Screen
+  "unnamed_business": "Unnamed Business",
+  "verified": "Verified",
+  "category": "Category",
+  "open_now": "Open Now:",
+  "until": "until",
+  "no_products_found": "No Products Found",
+  "unknown_product": "Unknown Product",
+  "no_services_found": "No Services Found",
+  "unknown_service": "Unknown Service",
+  "no_jobs_found": "No Jobs Found",
+  "verification_status": "Verification Status",
+  "business_status": "Business Status",
+  "total_products": "Total Products",
+  "total_services": "Total Services",
+  "total_value": "Total Value",
+  "created_at": "Created At",
+  "last_updated": "Last Updated",
+  "description": "Description",
+
+
+
+
+  'more' : 'More',
+  'applied_jobs' : 'Applied Jobs',
+  'search_business_by_name' : 'Search business by name..."',
+
+
+
+
+
+  'my_businesses': 'My Businesses',
+  'job_analytics': 'Job Analytics',
+  'expand_network': 'Expand Your Business Network',
+  'add_another_business': 'Add another business to increase your reach and connect with more customers',
+  'add_new_business': 'Add New Business',
+  'revenue': 'Revenue',
+  'delete_confirmation': 'Are you sure you want to delete this business? This action cannot be undone.',
+
+
+
+
+  'blood_group': 'Blood Group',
+  'referral_name': 'Referral Name',
+  'enter_custom_category' : 'Custom Category ',
+  'transaction_history' : 'Transaction History',
+  'call_now' : 'Call Now',
+  'image_load_failed': 'Image load failed',
+  'error_loading_profile': 'Error loading profile',
+  'error_loading_profiles': 'Error loading profiles',
+  'retry': 'Retry',
+  'error_loading': 'Error loading',
+  'connection_requests': 'Connection Requests',
+  'received': 'Received',
+  'sent': 'Sent',
+  'no_received_requests': 'No Received Requests',
+  'send_connection_request': 'Send Connection Request',
+  'partner_preferences': 'Partner Preferences',
+  'personal_details': 'Personal Details',
+
+
+
+
+
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+

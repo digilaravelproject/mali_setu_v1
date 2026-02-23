@@ -19,7 +19,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
         }
 
         if (controller.profile.value == null) {
-          return const Center(child: Text("Profile not found"));
+          return  Center(child: Text("profile_not_found".tr));
         }
 
         final profile = controller.profile.value!;
@@ -110,12 +110,12 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                             color: Colors.green,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Row(
+                          child:  Row(
                             children: [
                               Icon(Icons.check_circle, color: Colors.white, size: 14),
                               SizedBox(width: 4),
                               Text(
-                                "Verified",
+                                "verified".tr,
                                 style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -125,7 +125,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    profile.professionalDetails?.jobTitle ?? 'Designation Not Added',
+                    profile.professionalDetails?.jobTitle ?? 'designation_not_added'.tr,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Colors.white.withOpacity(0.9),
                         ),
@@ -162,21 +162,21 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
             children: [
               _buildSectionCard(
                 context,
-                title: 'Basic Information',
+                title: 'basic_information'.tr,
                 icon: Icons.person_outline,
                 children: [
-                  _buildInfoRow('Marital Status', profile.personalDetails?.maritalStatus ?? '-'),
+                  _buildInfoRow('marital_status'.tr, profile.personalDetails?.maritalStatus ?? '-'),
                   _buildInfoRow('Religion', (profile.personalDetails?.religion ?? []).join(", ")),
                   _buildInfoRow('Caste', "General"), // Example: Add caste field if available
                   _buildInfoRow('Height', profile.height ?? '-'),
-                  _buildInfoRow('Weight', profile.weight ?? '-'),
-                  _buildInfoRow('Complexion', profile.complexion ?? '-'),
+                  _buildInfoRow('weight'.tr, profile.weight ?? '-'),
+                  _buildInfoRow('complexion'.tr, profile.complexion ?? '-'),
                 ],
               ),
               const SizedBox(height: 16),
               _buildSectionCard(
                 context,
-                title: 'Professional Details',
+                title: 'professional_details'.tr,
                 icon: Icons.work_outline,
                 children: [
                   _buildInfoRow('Occupation', profile.personalDetails?.occupation ?? '-'),
@@ -187,22 +187,22 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
               const SizedBox(height: 16),
               _buildSectionCard(
                 context,
-                title: 'Education',
+                title: 'education'.tr,
                 icon: Icons.school_outlined,
                 children: [
                   _buildInfoRow('Highest Degree', profile.educationDetails?.highestQualification ?? '-'),
-                  _buildInfoRow('College/University', profile.educationDetails?.college ?? '-'), // Added College
+                  _buildInfoRow('College / University', profile.educationDetails?.college ?? '-'), // Added College
                 ],
               ),
               const SizedBox(height: 16),
               _buildSectionCard(
                 context,
-                title: 'Family Details',
+                title: 'family_details'.tr,
                 icon: Icons.family_restroom,
                 children: [
-                  _buildInfoRow('Father', profile.familyDetails?.father ?? '-'),
-                  _buildInfoRow('Mother', profile.familyDetails?.mother ?? '-'),
-                  _buildInfoRow('Family Type', profile.personalDetails?.familyType ?? '-'),
+                  _buildInfoRow('father'.tr, profile.familyDetails?.father ?? '-'),
+                  _buildInfoRow('mother'.tr, profile.familyDetails?.mother ?? '-'),
+                  _buildInfoRow('family_type'.tr, profile.personalDetails?.familyType ?? '-'),
                   _buildInfoRow('Family Value', profile.familyDetails?.familyValue ?? '-'),
                   _buildInfoRow('Family Status', profile.familyDetails?.familyClass ?? '-'), // Added Family Class
                 ],
@@ -210,19 +210,19 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
               const SizedBox(height: 16),
               _buildSectionCard(
                 context,
-                title: 'Lifestyle',
+                title: 'lifestyle'.tr,
                 icon: Icons.local_dining,
                 children: [
-                  _buildInfoRow('Diet', profile.lifestyleDetails?.diet ?? '-'),
-                  _buildInfoRow('Smoking', profile.lifestyleDetails?.smoking ?? '-'),
-                  _buildInfoRow('Drinking', profile.lifestyleDetails?.drinking ?? '-'), // Added Drinking
+                  _buildInfoRow('diet'.tr, profile.lifestyleDetails?.diet ?? '-'),
+                  _buildInfoRow('smoking'.tr, profile.lifestyleDetails?.smoking ?? '-'),
+                  _buildInfoRow('drinking'.tr, profile.lifestyleDetails?.drinking ?? '-'), // Added Drinking
                 ],
               ),
               const SizedBox(height: 16),
               if (profile.partnerPreferences != null)
                 _buildSectionCard(
                   context,
-                  title: 'Partner Preferences',
+                  title: 'partner_preferences'.tr,
                   icon: Icons.favorite_border,
                   children: [
                     _buildInfoRow('Age Range', profile.partnerPreferences?.ageRange ?? '-'),
@@ -345,18 +345,18 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
             flex: 2,
             child: Obx(() {
               final status = profile.connectionStatus?.toLowerCase();
-              String buttonText = "Send Connection Request";
+              String buttonText = "send_connection_request".tr;
               bool isActionable = true;
               Color buttonColor = Colors.purple;
               VoidCallback? onPressed = controller.sendRequest;
 
               if (status == "pending") {
-                buttonText = "Request Sent";
+                buttonText = "request_sent".tr;
                 isActionable = false;
                 buttonColor = Colors.grey;
                 onPressed = null;
               } else if (status == "accepted") {
-                buttonText = "Start Chat";
+                buttonText = "start_chat".tr;
                 isActionable = true;
                 buttonColor = Colors.green;
                 onPressed = () {

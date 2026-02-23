@@ -30,7 +30,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
           icon: Icon(Icons.arrow_back_ios_new, color: context.textTheme.bodyLarge?.color),
         ),
         title: Text(
-          "My Applications",
+          "my_applications".tr,
           style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -99,14 +99,14 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          job?.title ?? "Unknown Position",
+                          job?.title ?? "unknown_position".tr,
                           style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          business?.businessName ?? "Unknown Business",
+                          business?.businessName ?? "unknown_business".tr,
                           style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -207,15 +207,15 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
           Icon(Icons.assignment_outlined, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
           Text(
-            "No Applications Yet",
+            "no_applications".tr,
             style: context.textTheme.titleLarge?.copyWith(color: Colors.grey),
           ),
           const SizedBox(height: 8),
-          const Text("Explore jobs and start applying!"),
+          Text("explore_jobs".tr),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => Get.back(),
-            child: const Text("Go Back"),
+            child: Text("go_back".tr),
           ),
         ],
       ),
@@ -251,28 +251,28 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Application Details",
+                  "application_details".tr,
                   style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 _buildStatusBadge(application.status ?? "pending"),
               ],
             ),
             const Divider(height: 32),
-            _buildDetailItem("Cover Letter", application.coverLetter ?? "No cover letter provided"),
+            _buildDetailItem("cover_letter".tr, application.coverLetter ?? "no_cover_letter".tr),
             const SizedBox(height: 16),
             if (application.additionalInfo != null && application.additionalInfo!.isNotEmpty) ...[
-              _buildDetailItem("Additional Info", application.additionalInfo!),
+              _buildDetailItem("additional_info".tr, application.additionalInfo!),
               const SizedBox(height: 16),
             ],
             if (application.resumeUrl != null) ...[
-              _buildDetailItem("Resume", "Available online"),
+              _buildDetailItem("resume".tr, "available_online".tr),
               const SizedBox(height: 8),
               ElevatedButton.icon(
                 onPressed: () {
                    // Logic to view resume
                 },
                 icon: const Icon(Icons.remove_red_eye_outlined),
-                label: const Text("View Resume"),
+                label:  Text("view_resume".tr),
               ),
               const SizedBox(height: 16),
             ],
@@ -280,7 +280,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => Get.back(),
-                child: const Text("Close"),
+                child:  Text("close".tr),
               ),
             ),
             const SizedBox(height: 16),

@@ -1,9 +1,10 @@
 import 'dart:io';
 import '../../data/model/res_all_business_model.dart';
+import '../../data/model/business_plan_model.dart';
 
 
 abstract class BusinessRepository {
-  Future<BusinessResponse> getAllBusinesses();
+  Future<BusinessResponse> getAllBusinesses({int page = 1});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);
@@ -26,5 +27,6 @@ abstract class BusinessRepository {
   Future<BusinessResponse> applyJob(Map<String, dynamic> data);
   Future<MyApplicationsResponse> getMyApplications();
   Future<JobApplicationsResponse> getJobApplications(int jobId);
+  Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
 }

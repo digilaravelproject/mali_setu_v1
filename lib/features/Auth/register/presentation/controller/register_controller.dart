@@ -3,12 +3,13 @@ import 'dart:io';
 
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/routes/app_routes.dart';
+import '../../../../../core/helper/pincode_helper.dart';
 import '../../data/model/req_register_model.dart';
-import '../../data/model/state_model.dart';
 import '../../domain/usecase/register_usecase.dart';
 
 class RegisterController extends GetxController {
@@ -16,6 +17,7 @@ class RegisterController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   /// BASIC DETAILS
+  var selectedBirthDate = Rxn<DateTime>();
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController ageCtrl = TextEditingController();
@@ -36,6 +38,9 @@ class RegisterController extends GetxController {
   /// PROFESSIONAL DETAILS
   final TextEditingController occupationCtrl = TextEditingController();
   final TextEditingController referralCtrl = TextEditingController();
+  final TextEditingController companynameCtrl = TextEditingController();
+  final TextEditingController deptCtrl = TextEditingController();
+  final TextEditingController designationCtrl = TextEditingController();
 
   /// SECURITY
   final TextEditingController passwordCtrl = TextEditingController();
@@ -49,381 +54,123 @@ class RegisterController extends GetxController {
   final isLoading = false.obs;
   String? casteCertificateBase64;
 
+  /// PINCODE AUTO-FILL
+  final isFetchingPincode = false.obs;
 
-  final List<StateModel> statesData = [
-    StateModel(
-      id: '1',
-      name: 'Maharashtra',
-      districts: [
-        DistrictModel(
-          id: '11',
-          name: 'Pune',
-          cities: [
-            CityModel(id: '111', name: 'Pune City'),
-            CityModel(id: '112', name: 'Pimpri-Chinchwad'),
-            CityModel(id: '113', name: 'Hinjewadi'),
-            CityModel(id: '114', name: 'Hadapsar'),
-            CityModel(id: '115', name: 'Kharadi'),
-          ],
-        ),
-        DistrictModel(
-          id: '12',
-          name: 'Mumbai',
-          cities: [
-            CityModel(id: '121', name: 'South Mumbai'),
-            CityModel(id: '122', name: 'Western Suburbs'),
-            CityModel(id: '123', name: 'Eastern Suburbs'),
-            CityModel(id: '124', name: 'Nav Mumbai'),
-            CityModel(id: '125', name: 'Thane'),
-          ],
-        ),
-        DistrictModel(
-          id: '13',
-          name: 'Nagpur',
-          cities: [
-            CityModel(id: '131', name: 'Nagpur City'),
-            CityModel(id: '132', name: 'Katol'),
-            CityModel(id: '133', name: 'Kalmeshwar'),
-            CityModel(id: '134', name: 'Ramtek'),
-          ],
-        ),
-        DistrictModel(
-          id: '14',
-          name: 'Nashik',
-          cities: [
-            CityModel(id: '141', name: 'Nashik City'),
-            CityModel(id: '142', name: 'Deolali'),
-            CityModel(id: '143', name: 'Satpur'),
-            CityModel(id: '144', name: 'Gangapur'),
-          ],
-        ),
-      ],
-    ),
-    StateModel(
-      id: '2',
-      name: 'Uttar Pradesh',
-      districts: [
-        DistrictModel(
-          id: '21',
-          name: 'Lucknow',
-          cities: [
-            CityModel(id: '211', name: 'Lucknow City'),
-            CityModel(id: '212', name: 'Gomti Nagar'),
-            CityModel(id: '213', name: 'Hazratganj'),
-            CityModel(id: '214', name: 'Aliganj'),
-            CityModel(id: '215', name: 'Chowk'),
-          ],
-        ),
-        DistrictModel(
-          id: '22',
-          name: 'Kanpur',
-          cities: [
-            CityModel(id: '221', name: 'Kanpur City'),
-            CityModel(id: '222', name: 'Panki'),
-            CityModel(id: '223', name: 'Kalyanpur'),
-            CityModel(id: '224', name: 'Govind Nagar'),
-          ],
-        ),
-        DistrictModel(
-          id: '23',
-          name: 'Varanasi',
-          cities: [
-            CityModel(id: '231', name: 'Varanasi City'),
-            CityModel(id: '232', name: 'Assi Ghat'),
-            CityModel(id: '233', name: 'Dashashwamedh Ghat'),
-            CityModel(id: '234', name: 'Bhelupur'),
-          ],
-        ),
-        DistrictModel(
-          id: '24',
-          name: 'Ayodhya',
-          cities: [
-            CityModel(id: '241', name: 'Ayodhya City'),
-            CityModel(id: '242', name: 'Faizabad'),
-            CityModel(id: '243', name: 'Saket'),
-            CityModel(id: '244', name: 'Naya Ghat'),
-          ],
-        ),
-      ],
-    ),
-    StateModel(
-      id: '3',
-      name: 'Karnataka',
-      districts: [
-        DistrictModel(
-          id: '31',
-          name: 'Bengaluru',
-          cities: [
-            CityModel(id: '311', name: 'Bengaluru City'),
-            CityModel(id: '312', name: 'Whitefield'),
-            CityModel(id: '313', name: 'Electronic City'),
-            CityModel(id: '314', name: 'Koramangala'),
-            CityModel(id: '315', name: 'Indiranagar'),
-          ],
-        ),
-        DistrictModel(
-          id: '32',
-          name: 'Mysuru',
-          cities: [
-            CityModel(id: '321', name: 'Mysuru City'),
-            CityModel(id: '322', name: 'Vijayanagar'),
-            CityModel(id: '323', name: 'Kuvempunagar'),
-            CityModel(id: '324', name: 'Gokulam'),
-          ],
-        ),
-        DistrictModel(
-          id: '33',
-          name: 'Hubballi',
-          cities: [
-            CityModel(id: '331', name: 'Hubballi City'),
-            CityModel(id: '332', name: 'Old Hubballi'),
-            CityModel(id: '333', name: 'New Hubballi'),
-            CityModel(id: '334', name: 'Gokul Road'),
-          ],
-        ),
-      ],
-    ),
-    StateModel(
-      id: '4',
-      name: 'Delhi',
-      districts: [
-        DistrictModel(
-          id: '41',
-          name: 'Central Delhi',
-          cities: [
-            CityModel(id: '411', name: 'Connaught Place'),
-            CityModel(id: '412', name: 'Karol Bagh'),
-            CityModel(id: '413', name: 'Paharganj'),
-            CityModel(id: '414', name: 'Daryaganj'),
-          ],
-        ),
-        DistrictModel(
-          id: '42',
-          name: 'South Delhi',
-          cities: [
-            CityModel(id: '421', name: 'Saket'),
-            CityModel(id: '422', name: 'Hauz Khas'),
-            CityModel(id: '423', name: 'Greater Kailash'),
-            CityModel(id: '424', name: 'Vasant Kunj'),
-          ],
-        ),
-        DistrictModel(
-          id: '43',
-          name: 'East Delhi',
-          cities: [
-            CityModel(id: '431', name: 'Preet Vihar'),
-            CityModel(id: '432', name: 'Mayur Vihar'),
-            CityModel(id: '433', name: 'Patparganj'),
-            CityModel(id: '434', name: 'Shahdara'),
-          ],
-        ),
-      ],
-    ),
-    StateModel(
-      id: '5',
-      name: 'Tamil Nadu',
-      districts: [
-        DistrictModel(
-          id: '51',
-          name: 'Chennai',
-          cities: [
-            CityModel(id: '511', name: 'Chennai City'),
-            CityModel(id: '512', name: 'Adyar'),
-            CityModel(id: '513', name: 'Anna Nagar'),
-            CityModel(id: '514', name: 'T Nagar'),
-            CityModel(id: '515', name: 'Velachery'),
-          ],
-        ),
-        DistrictModel(
-          id: '52',
-          name: 'Coimbatore',
-          cities: [
-            CityModel(id: '521', name: 'Coimbatore City'),
-            CityModel(id: '522', name: 'Peelamedu'),
-            CityModel(id: '523', name: 'Saibaba Colony'),
-            CityModel(id: '524', name: 'Ramanathapuram'),
-          ],
-        ),
-        DistrictModel(
-          id: '53',
-          name: 'Madurai',
-          cities: [
-            CityModel(id: '531', name: 'Madurai City'),
-            CityModel(id: '532', name: 'Koodal Nagar'),
-            CityModel(id: '533', name: 'Simmakkal'),
-            CityModel(id: '534', name: 'Villapuram'),
-          ],
-        ),
-      ],
-    ),
-  ];
-
-
-  /// OBSERVABLE LISTS FOR DROPDOWNS
-  final stateList = <String>[].obs;
-  final districtList = <String>[].obs;
-  final cityList = <String>[].obs;
-
-
-
-  final RxString selectedState = ''.obs;
-  final RxString selectedDistrict = ''.obs;
-  final RxString selectedCity = ''.obs;
-
-  // final selectedStateName = stateCtrl.text.trim();
-  // final selectedDistrictName = districtCtrl.text.trim();
-
-
-
-  /// OBSERVABLE FOR VALIDATION ERRORS
-  final stateError = ''.obs;
-  final districtError = ''.obs;
-  final cityError = ''.obs;
-
-  final usertypeList = ['general',
+  final usertypeList = [
+    'general',
     'individual',
     'business',
     'matrimony',
-    'volunteer'];
-
+    'volunteer'
+  ];
 
   /// PASSWORD VISIBILITY
   final isCnfPasswordValue = false.obs;
   final isPasswordValue = false.obs;
 
-
   @override
   void onInit() {
     super.onInit();
-    // Initialize state list
-    _initializeStateList();
-
-    ever(selectedState, (_) => _onStateChanged());
-    ever(selectedDistrict, (_) => _onDistrictChanged());
-
-    // Listen to state changes
-    // ever(stateCtrl as RxInterface<Object?>, (_) => _onStateChanged());
-    //
-    // // Listen to district changes
-    // ever(districtCtrl as RxInterface<Object?>, (_) => _onDistrictChanged());
+    // Listen to pincode changes for auto-fill
+    pinCodeCtrl.addListener(_onPincodeChanged);
   }
 
-  /// Initialize state list from data
-  void _initializeStateList() {
-    stateList.value = statesData.map((state) => state.name).toList();
+  /// Handle pincode changes for auto-fill
+  void _onPincodeChanged() {
+    final pincode = pinCodeCtrl.text.trim();
+
+    // Only fetch if pincode is exactly 6 digits
+    if (pincode.length == 6 && int.tryParse(pincode) != null) {
+      _fetchAddressFromPincode(pincode);
+    } else {
+      // Clear fields if pincode is invalid or incomplete
+      if (pincode.length < 6) {
+        stateCtrl.clear();
+        districtCtrl.clear();
+        cityCtrl.clear();
+      }
+    }
   }
 
-  /// When state changes, update district list
+  /// Fetch address details from pincode API
+  Future<void> _fetchAddressFromPincode(String pincode) async {
+    try {
+      isFetchingPincode.value = true;
 
-  void _onStateChanged() {
-    final selectedStateName = selectedState.value.trim();
+      // Show loading message
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: "Fetching address details...",
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.blue,
+          icon: Icon(Icons.location_searching, color: Colors.white),
+        ),
+      );
 
-    stateError.value = '';
-    districtError.value = '';
-    cityError.value = '';
+      final response = await PincodeHelper.fetchAddressFromPincode(pincode);
 
-    if (selectedStateName.isEmpty) {
+      if (response != null) {
+        print("DEBUG_PINCODE: ========================================");
+        print("DEBUG_PINCODE: Pincode API Response: $response");
+        print("DEBUG_PINCODE: State: ${response.state}");
+        print("DEBUG_PINCODE: District: ${response.district}");
+        print("DEBUG_PINCODE: City: ${response.country}");
+        print("DEBUG_PINCODE: Country: ${response.country}");
+        print("DEBUG_PINCODE: ========================================");
+
+        // Auto-fill state, district, and city from first PostOffice object
+        stateCtrl.text = response.state;
+        districtCtrl.text = response.district;
+        cityCtrl.text = response.country; // Post office name as city
+
+        CustomSnackBar.showSuccess(
+          message: "Address details fetched successfully!",
+        );
+      } else {
+        CustomSnackBar.showError(
+          message: "Invalid pincode or no data found",
+        );
+        // Clear fields on error
+        stateCtrl.clear();
+        districtCtrl.clear();
+        cityCtrl.clear();
+      }
+    } catch (e) {
+      print("DEBUG_PINCODE: ❌ Error fetching pincode: $e");
+      CustomSnackBar.showError(
+        message: "Failed to fetch address details",
+      );
+      // Clear fields on error
+      stateCtrl.clear();
       districtCtrl.clear();
       cityCtrl.clear();
-      districtList.clear();
-      cityList.clear();
-      return;
-    }
-
-    final state = statesData.firstWhere(
-          (s) => s.name == selectedStateName,
-      orElse: () => StateModel(id: '', name: '', districts: []),
-    );
-
-    if (state.name.isNotEmpty) {
-      districtList.value =
-          state.districts.map((d) => d.name).toList();
-
-      districtCtrl.clear();
-      cityCtrl.clear();
-      cityList.clear();
+    } finally {
+      isFetchingPincode.value = false;
     }
   }
-
-
-  /// When district changes, update city list
-
-  void _onDistrictChanged() {
-    final stateName = selectedState.value.trim();
-    final districtName = selectedDistrict.value.trim();
-
-    districtError.value = '';
-    cityError.value = '';
-
-    if (stateName.isEmpty || districtName.isEmpty) {
-      cityCtrl.clear();
-      cityList.clear();
-      return;
-    }
-
-    final state = statesData.firstWhere(
-          (s) => s.name == stateName,
-      orElse: () => StateModel(id: '', name: '', districts: []),
-    );
-
-    final district = state.districts.firstWhere(
-          (d) => d.name == districtName,
-      orElse: () => DistrictModel(id: '', name: '', cities: []),
-    );
-
-    if (district.name.isNotEmpty) {
-      cityList.value =
-          district.cities.map((c) => c.name).toList();
-
-      cityCtrl.clear();
-    }
-  }
-
 
   /// VALIDATE STATE
   String? validateState(String? value) {
     if (value == null || value.isEmpty) {
-     // stateError.value = "Please select state";
-      return "Please select state";
+      return "Please enter pincode to auto-fill state";
     }
-    stateError.value = '';
     return null;
   }
 
-
-
   /// VALIDATE DISTRICT
   String? validateDistrict(String? value) {
-    if (selectedState.value.isEmpty) {
-      //districtError.value = "Please select state first";
-      return "Please select state first";
-    }
-
     if (value == null || value.isEmpty) {
-     // districtError.value = "Please select district";
-      return "Please select district";
+      return "Please enter pincode to auto-fill district";
     }
-    districtError.value = '';
     return null;
   }
 
   /// VALIDATE CITY
   String? validateCity(String? value) {
-    if (stateCtrl.text.isEmpty) {
-      cityError.value = "Please select state first";
-      return "Please select state first";
-    }
-
-    if (districtCtrl.text.isEmpty) {
-      cityError.value = "Please select district first";
-      return "Please select district first";
-    }
-
     if (value == null || value.isEmpty) {
-      cityError.value = "Please select city";
-      return "Please select city";
+      return "Please enter pincode to auto-fill city";
     }
-    cityError.value = '';
     return null;
   }
 
@@ -451,7 +198,8 @@ class RegisterController extends GetxController {
         // Check file type
         final extension = image.path.split('.').last.toLowerCase();
         if (!['jpg', 'jpeg', 'png', 'pdf'].contains(extension)) {
-          casteCertificateError.value = "Only JPG, PNG, and PDF files are allowed";
+          casteCertificateError.value =
+              "Only JPG, PNG, and PDF files are allowed";
           return;
         }
 
@@ -489,7 +237,6 @@ class RegisterController extends GetxController {
     return true;
   }
 
-
   String _getMimeType(String filePath) {
     final ext = filePath.split('.').last.toLowerCase();
     switch (ext) {
@@ -510,27 +257,12 @@ class RegisterController extends GetxController {
   /// Register Action
   Future<void> onRegister() async {
     // Clear all validation errors first
-    stateError.value = '';
-    districtError.value = '';
-    cityError.value = '';
     casteCertificateError.value = '';
 
     print("call registration function ");
 
     // Validate form
     if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-
-
-    // Validate address hierarchy
-    final stateValidation = validateState(stateCtrl.text.trim());
-    final districtValidation = validateDistrict(districtCtrl.text.trim());
-    final cityValidation = validateCity(cityCtrl.text.trim());
-
-    if (stateValidation != null || districtValidation != null || cityValidation != null) {
-      CustomSnackBar.showError(message: "Please fill all address fields properly");
       return;
     }
 
@@ -551,11 +283,12 @@ class RegisterController extends GetxController {
       // Prepare caste certificate data URL
       String castCertificateData = '';
       if (casteCertificateFile != null) {
-         final bytes = await casteCertificateFile!.readAsBytes();
-         casteCertificateBase64 = base64Encode(bytes);
+        final bytes = await casteCertificateFile!.readAsBytes();
+        casteCertificateBase64 = base64Encode(bytes);
       }
-      
-      if (casteCertificateBase64 != null && casteCertificatePath.value.isNotEmpty) {
+
+      if (casteCertificateBase64 != null &&
+          casteCertificatePath.value.isNotEmpty) {
         final mimeType = _getMimeType(casteCertificatePath.value);
         castCertificateData = 'data:$mimeType;base64,$casteCertificateBase64';
       }
@@ -563,10 +296,12 @@ class RegisterController extends GetxController {
       final reqModel = ReqRegisterModel(
         name: nameCtrl.text.trim(),
         email: emailCtrl.text.trim(),
-        age: int.tryParse(ageCtrl.text.trim()) ?? 0,
+        dob: ageCtrl.text.trim() ,
         phone: mobileCtrl.text.trim(),
         occupation: occupationCtrl.text.trim(),
-        reffralCode: referralCtrl.text.trim().isEmpty ? null : referralCtrl.text.trim(),
+        reffralCode: referralCtrl.text.trim().isEmpty
+            ? null
+            : referralCtrl.text.trim(),
         address: addressCtrl.text.trim(),
         nearbyLocation: nearbyLocationCtrl.text.trim(),
         pincode: pinCodeCtrl.text.trim(),
@@ -581,13 +316,17 @@ class RegisterController extends GetxController {
         userType: userTypeCtrl.text.trim(),
         castCertificate: castCertificateData,
         termCondition: true,
+        company_name: companynameCtrl.text.trim(),
+        dept_name: deptCtrl.text.trim(),
+        designation: designationCtrl.text.trim()
       );
 
       final response = await registerUseCase(reqModel);
 
-      print("registerresponse : "+response.toString());
+      print("registerresponse : " + response.toString());
 
-      if (response.success == true || response.message == "User registered successfully") {
+      if (response.success == true ||
+          response.message == "User registered successfully") {
         CustomSnackBar.showSuccess(
           message: response.message ?? "Registration completed successfully",
         );
@@ -595,16 +334,17 @@ class RegisterController extends GetxController {
         await Future.delayed(const Duration(seconds: 2));
         Get.offAllNamed(AppRoutes.login);
       } else {
-        CustomSnackBar.showError(message: response.message ?? "Registration failed");
+        CustomSnackBar.showError(
+            message: response.message ?? "Registration failed");
       }
     } catch (e) {
       debugPrint("Registration error: $e");
-      CustomSnackBar.showError(message: "Registration failed: ${e.toString()}");
+      CustomSnackBar.showError(
+          message: "Registration failed: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
   }
-
 
   /// CLEANUP
   @override
@@ -619,12 +359,19 @@ class RegisterController extends GetxController {
     cityCtrl.dispose();
     stateCtrl.dispose();
     pinCodeCtrl.dispose();
+    districtCtrl.dispose();
+    sectorCtrl.dispose();
+    destinationCtrl.dispose();
+    roadNumberCtrl.dispose();
 
     occupationCtrl.dispose();
     referralCtrl.dispose();
 
     passwordCtrl.dispose();
     confirmPasswordCtrl.dispose();
+
+
+    pinCodeCtrl.removeListener(_onPincodeChanged);
 
     super.onClose();
   }

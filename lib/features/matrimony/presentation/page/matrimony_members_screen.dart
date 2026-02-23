@@ -1,7 +1,7 @@
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
-import 'package:edu_cluezer/features/matrimony/data/model/connection_requests_response.dart';
+import 'package:edu_cluezer/features/matrimony/data/model/matrimony_chat_response.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_members_controller.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text("Members", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        title: Text("members".tr, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -27,7 +27,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
           IconButton(
             icon: const Icon(Icons.swap_horizontal_circle_outlined, color: Colors.purple, size: 28),
             onPressed: () => Get.toNamed(AppRoutes.matrimonyRequests),
-            tooltip: "Requests",
+            tooltip: "requests".tr,
           ),
           const SizedBox(width: 8),
         ],
@@ -69,7 +69,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
         child: TextField(
           onChanged: (value) => controller.filterMembers(value),
           decoration: InputDecoration(
-            hintText: "Search members...",
+            hintText: "search_members".tr,
             prefixIcon: const Icon(Icons.search, color: Colors.grey),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -79,20 +79,26 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
     );
   }
 
-  Widget _buildMemberCard(ConnectionRequest member) {
+  Widget _buildMemberCard(MatrimonyConversation conversation) {
     final currentUserId = Get.find<AuthService>().currentUser.value?.id;
-    // Fallback logic to find the "other" user.
-    final user = member.connectedProfile ?? (member.senderId == currentUserId ? member.receiver : member.sender);
+    final user = conversation.user1Id == currentUserId ? conversation.user1 : conversation.user2;
     
-    // Correct mapping
-    final name = user?.name ?? "Matrimony Member"; 
-    final profession = user?.occupation ?? "Member";
-    final location = user?.city ?? "Unknown Location";
-    
+    // Correct mapping from MatrimonyProfile
+    final name = user?.personalDetails?.name ?? "Matrimony Member";
+    final profession = user?.professionalDetails?.jobTitle ?? user?.personalDetails?.occupation ?? "Member";
+    final location = user?.locationDetails?.city ?? "Unknown Location";
+    print("name : "+name+" profession :"+profession+"  location :"+location);
+
+    print("conversation.user1 : ${conversation.user1}");
+    print("conversation.user2 : ${conversation.user2}");
+    print("currentUserId : $currentUserId");
+    print("conversation.user1Id : ${conversation.user1Id}, conversation.user2Id: ${conversation.user2Id}");
+
+
     // Correct image logic
     String? imageUrl;
-    if (user?.profileImage != null && user!.profileImage!.isNotEmpty) {
-       imageUrl = ApiConstants.imageBaseUrl + user.profileImage!;
+    if (user?.personalDetails?.photos != null && user!.personalDetails!.photos!.isNotEmpty) {
+       imageUrl = ApiConstants.imageBaseUrl + user.personalDetails!.photos![0];
     }
     
     // Fallback widget
@@ -145,7 +151,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
                 const SizedBox(height: 4),
                 Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                 const SizedBox(height: 2),
@@ -163,8 +169,9 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
             icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
             onPressed: () {
                Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                 'conversation_id': null, // Can be improved if we have conv ID in member model
-                 'other_user_id': user?.id,
+                 'conversation_id': conversation.id, 
+                 'other_user_id': user?.userId, // userId from MatrimonyProfile
+                 'user_name': user?.personalDetails?.name.toString(), // userId from MatrimonyProfile
                });
             },
           ),

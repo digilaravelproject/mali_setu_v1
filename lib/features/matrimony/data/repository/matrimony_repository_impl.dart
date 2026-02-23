@@ -1,10 +1,12 @@
 import '../../data/data_source/matrimony_data_source.dart';
-import '../../data/model/matrimony_chat_response.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../domain/repository/matrimony_repository.dart';
+import '../../data/model/matrimony_plan_model.dart';
 
 import '../../data/model/search_matrimony_response.dart';
 import '../../data/model/connection_requests_response.dart';
+import '../model/matrimony_cast_model.dart';
+import '../model/matrimony_chat_response.dart';
 
 class MatrimonyRepositoryImpl implements MatrimonyRepository {
   final MatrimonyDataSource dataSource;
@@ -69,5 +71,20 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   @override
   Future<ConnectionRequestsResponse> getConnectedUsers() async {
     return await dataSource.getConnectedUsers();
+  }
+
+  @override
+  Future<CastResponse> getCasts() async {
+    return await dataSource.getCasts();
+  }
+
+  @override
+  Future<SubCastResponse> getSubCasts(int castId) async {
+    return await dataSource.getSubCasts(castId);
+  }
+
+  @override
+  Future<MatrimonyPlanResponse> getMatrimonyPlans() async {
+    return await dataSource.getMatrimonyPlans();
   }
 }
