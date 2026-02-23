@@ -108,6 +108,9 @@ flutter:
     - assets/fonts/
     - assets/icons/
     - assets/images/
+    - assets/images/app_logo_en.png
+    - assets/images/app_logo_mr.png
+    - assets/images/person_images.png
     - assets/json/
     - assets/json/business_data.json
 
