@@ -100,7 +100,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                         const SizedBox(height: 4),
                         Text(
                           "volunteers".tr,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -116,7 +116,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                       child: IconButton(
                         icon: const Icon(Icons.search, color: Colors.white),
                         onPressed: () {
-                          // Search functionality
+                          Get.toNamed(AppRoutes.volunteerSearch);
                         },
                       ),
                     ),
@@ -195,7 +195,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (controller.allVolunteerList.isEmpty) {
+              if (controller.filteredVolunteerList.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -219,7 +219,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.all(20),
                 itemCount:
-                    controller.allVolunteerList.length +
+                    controller.filteredVolunteerList.length +
                     1, // +1 for header title
                 itemBuilder: (context, index) {
                   if (index == 0) {
@@ -246,7 +246,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              "${controller.allVolunteerList.length} found".tr,
+                              "${controller.filteredVolunteerList.length} found".tr,
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -259,7 +259,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                     );
                   }
 
-                  final volunteer = controller.allVolunteerList[index - 1];
+                  final volunteer = controller.filteredVolunteerList[index - 1];
                   return VolunteerCard(
                     volunteer: volunteer,
                     onTap: () {

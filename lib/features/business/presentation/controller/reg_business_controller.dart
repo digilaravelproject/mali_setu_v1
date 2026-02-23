@@ -129,6 +129,9 @@ class RegBusinessController extends GetxController {
       if (business.photo != null && business.photo!.isNotEmpty) {
         existingImages.add(business.photo!);
       }
+    } else {
+      // Auto-fill website with https:// for new registrations
+      websiteCtrl.text = "https://";
     }
 
     _imagePickerHelper = ImagePickerHelper(
@@ -370,12 +373,61 @@ class RegBusinessController extends GetxController {
 
   Future<void> onRegister() async {
 
-    await fetchAndShowBusinessPlans();
-
-    // Basic Validation
-    if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
-      CustomSnackBar.showError(message: "Please fill required fields");
+    // Comprehensive Validation
+    if (bNameCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter business name");
       return;
+    }
+    if (bTypeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please select business type");
+      return;
+    }
+    if (bCategoryCtrl.text.trim().isEmpty || bCategoryCtrl.text == "Select Category") {
+      CustomSnackBar.showError(message: "Please select business category");
+      return;
+    }
+    if (bDescCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter business description");
+      return;
+    }
+    if (openingTimeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please select opening time");
+      return;
+    }
+    if (closingTimeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please select closing time");
+      return;
+    }
+    if (phoneCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter contact number");
+      return;
+    }
+    if (emailCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter email address");
+      return;
+    }
+    String website = websiteCtrl.text.trim();
+    if (website.isEmpty || website == "https://") {
+      CustomSnackBar.showError(message: "Please enter website");
+      return;
+    }
+    
+    // Basic URL validation: must contain at least one dot and some characters after https://
+    if (!website.contains(".") || website.length < 12) { // https://a.co is 12 chars
+      CustomSnackBar.showError(message: "Please enter a valid website URL");
+      return;
+    }
+    
+    // Check for images in new registration
+    if (!isEditMode && selectedImages.isEmpty) {
+      CustomSnackBar.showError(message: "Please add at least one business photo");
+      return;
+    }
+    
+    // Check for images in edit mode (if all existing were removed and no new ones added)
+    if (isEditMode && existingImages.isEmpty && selectedImages.isEmpty) {
+       CustomSnackBar.showError(message: "Please add at least one business photo");
+       return;
     }
 
     try {

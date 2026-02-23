@@ -2,8 +2,9 @@ class BusinessResponse {
   bool? success;
   BusinessData? data;
   String? message;
+  Map<String, dynamic>? errors;
 
-  BusinessResponse({this.success, this.data, this.message});
+  BusinessResponse({this.success, this.data, this.message, this.errors});
 
   factory BusinessResponse.fromJson(Map<String, dynamic> json) {
     // Check if directly a list response (pagination) or single object
@@ -41,6 +42,7 @@ class BusinessResponse {
     return BusinessResponse(
       success: json['success'],
       message: json['message'],
+      errors: json['errors'],
       data: businessData,
     );
   }
