@@ -788,10 +788,24 @@ const Map<String, String> mrIN = {
   'blood_group': 'रक्तगट',
   'referral_name': 'संदर्भ देणाऱ्याचे नाव',
   'enter_custom_category': 'सानुकूल श्रेणी प्रविष्ट करा',
-
-
-
+  'transaction_history' : 'व्यवहार इतिहास',
+  'call_now' : 'आता कॉल करा',
+  'image_load_failed': 'प्रतिमा लोड करण्यात अयशस्वी',
+  'error_loading_profile': 'प्रोफाइल लोड करण्यात त्रुटी',
+  'error_loading_profiles': 'प्रोफाइल लोड करण्यात त्रुटी',
+  'retry': 'पुन्हा प्रयत्न करा',
+  'error_loading': 'लोड करण्यात त्रुटी',
+  'connection_requests': 'कनेक्शन विनंत्या',
+  'received': 'प्राप्त झालेले',
+  'sent': 'पाठवलेले',
+  'no_received_requests': 'प्राप्त विनंत्या नाहीत',
+  'send_connection_request': 'संपर्क विनंती पाठवा',
+  'partner_preferences': 'जोडीदाराच्या अपेक्षा',
 };
+
+
+
+
 
 
 

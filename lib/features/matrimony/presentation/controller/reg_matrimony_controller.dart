@@ -175,7 +175,7 @@ class RegMatrimonyController extends GetxController {
   Future<void> onRegister() async {
 
 
-    await fetchAndShowPlans();
+    //await fetchAndShowPlans();
     // Basic Validation
     if (nameCtrl.text.isEmpty || gender.value.isEmpty || dobCtrl.text.isEmpty) {
         CustomSnackBar.showError(message: "Please fill required fields");

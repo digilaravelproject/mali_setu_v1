@@ -370,7 +370,7 @@ class RegBusinessController extends GetxController {
 
   Future<void> onRegister() async {
 
-   // await fetchAndShowBusinessPlans();
+    await fetchAndShowBusinessPlans();
 
     // Basic Validation
     if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {

@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     // Get the LanguageController to use saved locale
     final languageController = Get.find<LanguageController>();
     
-    return Obx(() => GetMaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
       translations: Languages(),
@@ -43,6 +43,6 @@ class MyApp extends StatelessWidget {
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       getPages: AppPages.getPages,
       initialRoute: AppRoutes.splash,
-    ));
+    );
   }
 }

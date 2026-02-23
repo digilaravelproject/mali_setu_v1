@@ -12,6 +12,7 @@ class SplashPage extends GetWidget<InitController> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
      // backgroundColor: context.theme.primaryColor,
       body: Stack(
@@ -214,3 +215,5 @@ class SplashPage extends GetWidget<InitController> {
     );
   }
 }
+
+

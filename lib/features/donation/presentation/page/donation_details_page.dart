@@ -31,7 +31,7 @@ class DonationDetailsPage extends GetView<DonationController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomImageView(
-              url: cause.imageUrl != null ? "${ApiConstants.imageBaseUrl}${cause.imageUrl}" : null,
+              url: cause.imageUrl != null ? "${ApiConstants.baseUrl}${cause.imageUrl}" : null,
               width: double.infinity,
               height: 250,
               fit: BoxFit.cover,

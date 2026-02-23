@@ -4,11 +4,14 @@ import '../../data/model/donation_cause_model.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 
-Future<void> showDonationPrompt(List<DonationCauseItem> causes, Function(DonationCauseItem) onDetails) async {
+Future<void> showDonationPrompt(
+    List<DonationCauseItem> causes, Function(DonationCauseItem) onDetails,
+    {VoidCallback? onClose}) async {
   if (causes.isEmpty) return;
-  
+
   await Get.bottomSheet(
-    _DonationBottomSheet(causes: causes, onDetails: onDetails),
+    _DonationBottomSheet(
+        causes: causes, onDetails: onDetails, onClose: onClose),
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
   );
@@ -17,8 +20,10 @@ Future<void> showDonationPrompt(List<DonationCauseItem> causes, Function(Donatio
 class _DonationBottomSheet extends StatelessWidget {
   final List<DonationCauseItem> causes;
   final Function(DonationCauseItem) onDetails;
+  final VoidCallback? onClose;
 
-  const _DonationBottomSheet({required this.causes, required this.onDetails});
+  const _DonationBottomSheet(
+      {required this.causes, required this.onDetails, this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +76,12 @@ class _DonationBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("Not right now", style: TextStyle(color: Colors.grey)),
+            onPressed: () {
+              Get.back();
+              if (onClose != null) onClose!();
+            },
+            child: const Text("Not right now",
+                style: TextStyle(color: Colors.grey)),
           ),
         ],
       ),
@@ -93,7 +102,7 @@ class _DonationBottomSheet extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: CustomImageView(
-              url: cause.imageUrl != null ? "${ApiConstants.imageBaseUrl}${cause.imageUrl}" : null,
+              url: cause.imageUrl != null ? "${ApiConstants.baseUrl}${cause.imageUrl}" : null,
               width: 80,
               height: 80,
               fit: BoxFit.cover,

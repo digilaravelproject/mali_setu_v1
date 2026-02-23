@@ -146,10 +146,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   Builder(builder: (context) => _buildProductsTab(context)),
                   Builder(builder: (context) => _buildServicesTab(context)),
                   Builder(builder: (context) => _buildJobsTab(context)),
-                  Builder(builder: (context) => Obx(() {
+                  Builder(builder: (context) {
                      final business = controller.selectedBusiness.value ?? argBusiness;
                      return _buildBusinessInfoTab(business, context);
-                  })),
+                  }),
                 ],
               ),
             ),
@@ -303,13 +303,13 @@ class BusinessDetailScreen extends GetView<BusinessController> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: business.status == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
+                  color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  (business.status ?? 'active').toTitleCase(),
+                  (business.verificationStatus ?? 'active').toTitleCase(),
                   style: TextStyle(
-                    color: business.status == 'active' ? Colors.green[800] : Colors.grey[800],
+                    color: business.verificationStatus == 'active' ? Colors.green[800] : Colors.grey[800],
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
@@ -643,7 +643,6 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   }
  
   Widget _buildProductsTab(BuildContext context) {
-    return Obx(() {
         if (controller.isDetailsLoading.isTrue) {
              return _buildShimmerList(context);
         }
@@ -813,11 +812,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             ),
           ],
         );
-    });
   }
 
   Widget _buildServicesTab(BuildContext context) {
-    return Obx(() {
         if (controller.isDetailsLoading.isTrue) {
              return _buildShimmerList(context);
         }
@@ -897,11 +894,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             ),
           ],
         );
-    });
   }
 
   Widget _buildJobsTab(BuildContext context) {
-    return Obx(() {
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
       }
@@ -1114,7 +1109,6 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           ),
         ],
       );
-    });
   }
 
   Widget _buildBusinessInfoTab(Business business, BuildContext context) {
@@ -1133,7 +1127,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                 _buildInfoRow(Icons.business, 'name'.tr, business.businessName ?? 'N/A', context),
                 _buildInfoRow(Icons.category, 'category'.tr, business.category?.name ?? 'N/A', context),
                 _buildInfoRow(Icons.verified, 'verification_status'.tr, (business.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: business.verificationStatus == 'approved'),
-                _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (business.status ?? 'active').toTitleCase(), context),
+                _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (business.verificationStatus ?? 'active').toTitleCase(), context),
                 _buildInfoRow(Icons.description, 'description'.tr, business.description ?? 'No description available', context, maxLines: 5),
               ], context),
               const SizedBox(height: 16),

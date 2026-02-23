@@ -274,22 +274,8 @@ class ChangeLanguagePage extends GetView<LanguageController> {
 
   Future<void> _changeLanguage(String languageCode) async {
     try {
-      // Show loading
-      Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
-        barrierDismissible: false,
-      );
-      
       // Change language
       await controller.changeLanguage(languageCode);
-      
-      // Small delay for smooth transition
-      await Future.delayed(const Duration(milliseconds: 500));
-      
-      // Close loading
-      Get.back();
       
       // Show success message
       CustomSnackBar.showSuccess(
@@ -300,9 +286,6 @@ class ChangeLanguagePage extends GetView<LanguageController> {
       Get.back();
       
     } catch (e) {
-      // Close loading if open
-      if (Get.isDialogOpen == true) Get.back();
-      
       CustomSnackBar.showError(
         message: 'Failed to change language: $e',
       );

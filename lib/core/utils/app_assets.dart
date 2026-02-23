@@ -6,7 +6,7 @@ class AppAssets {
 
   /// Images
   static const String _imgPrefix = 'assets/images';
-  static const String imgAppLogo = '$_imgPrefix/app_logo.png';
+  static const String imgAppLogo = '$_imgPrefix/app_logo_en.png';
   static const String imgTitleLogo = '$_imgPrefix/app_title_logo.png';
   static const String imgBgApp = '$_imgPrefix/bg_app.jpg';
   static const String imgAppTitle = '$_imgPrefix/app_title.png';

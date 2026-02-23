@@ -10,11 +10,13 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 class MyBusinessScreen extends GetWidget<BusinessController> {
   const MyBusinessScreen({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
         final businesses = controller.myBusinesses;
+
 
         return CustomScrollView(
           slivers: [
@@ -119,7 +121,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "my_businesses (${businesses.length})".tr,
+                      "my_businesses".tr,
                       style: context.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -211,13 +213,17 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
+                              color: (business.verificationStatus?.toLowerCase() == 'approved')
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.grey.withOpacity(0.1), // Dust color
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              business.status.toTitleCase() ?? 'Active',
+                              business.verificationStatus?.toTitleCase() ?? 'Active',
                               style: context.textTheme.bodyMedium?.copyWith(
-                                color: Colors.green.shade700,
+                                color: (business.verificationStatus?.toLowerCase() == 'approved')
+                                    ? Colors.green.shade700
+                                    : Colors.grey.shade700, // Dust text color
                               ),
                             ),
                           ),

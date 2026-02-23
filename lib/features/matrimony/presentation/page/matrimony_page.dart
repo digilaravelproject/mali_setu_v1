@@ -3,6 +3,7 @@ import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/features/filter/presentation/page/filter_page.dart';
 import 'package:edu_cluezer/packages/card_swiper/flutter_card_swiper.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:ui';
@@ -161,37 +162,63 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           ),
         ),
         body: Obx(() {
-          if (controller.isLoading.value) {
-            return Center(child: CircularProgressIndicator(color: theme.primaryColor));
-          }
-          
-          if (controller.profiles.isEmpty) {
+          try {
+            if (controller.isLoading.value) {
+              return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+            }
+            
+            if (controller.profiles.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'no_matches_found'.tr,
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+                _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+              ],
+            );
+          } catch (e) {
+            print("Error in matrimony page body: $e");
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
+                  Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
                   const SizedBox(height: 16),
                   Text(
-                    'no_matches_found'.tr,
+                    'error_loading_profiles'.tr,
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: Colors.red[500],
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => controller.fetchProfiles(),
+                    child: Text('retry'.tr),
                   ),
                 ],
               ),
             );
           }
-
-          return TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
-              _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
-            ],
-          );
         }),
       ),
     );
@@ -225,21 +252,28 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     return Column(
       children: [
         Expanded(
-          child: CardSwiper(
-            controller: controller.swiperController,
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            duration: const Duration(milliseconds: 400),
-            onSwipe: (previousIndex, currentIndex, direction) {
-              if (currentIndex != null) {
-                controller.currentIndex.value = currentIndex;
-              }
-              return true;
-            },
-            cardBuilder: (context, index, dx, dy) {
-              return _buildUserCard(context, list[index]);
-            },
-            cardsCount: list.length,
-            numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
+          child: SafeArea(
+            child: CardSwiper(
+              controller: controller.swiperController,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              duration: const Duration(milliseconds: 400),
+              onSwipe: (previousIndex, currentIndex, direction) {
+                if (currentIndex != null) {
+                  controller.currentIndex.value = currentIndex;
+                }
+                return true;
+              },
+              cardBuilder: (context, index, dx, dy) {
+                try {
+                  return _buildUserCard(context, list[index]);
+                } catch (e) {
+                  print("Error building card at index $index: $e");
+                  return _buildErrorCard(context);
+                }
+              },
+              cardsCount: list.length,
+              numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -368,7 +402,12 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   Widget _buildUserCard(BuildContext context, UserProfile user) {
     return GestureDetector(
       onTap: (){
-        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': user.id});
+        try {
+          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': user.id});
+        } catch (e) {
+          print("Error navigating to profile: $e");
+          CustomSnackBar.showError(message: 'Error opening profile');
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -385,13 +424,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           borderRadius: BorderRadius.circular(24),
           child: Stack(
             children: [
-              // BACKGROUND IMAGE
-              CustomImageView(
-                url: user.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
+              // BACKGROUND IMAGE with error handling
+              _buildCardImage(user),
 
               // GRADIENT OVERLAY
               Container(
@@ -519,6 +553,121 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     );
   }
 
+  Widget _buildCardImage(UserProfile user) {
+    if (user.imageUrl == null || user.imageUrl!.isEmpty) {
+      return  CustomImageView(
+        imagePath: "assets/images/person_images.png",
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorWidget: (context, url, error) {
+          print("Image load error for $url: $error");
+          return Container(
+            color: Colors.grey[300],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.image_not_supported_rounded, size: 60, color: Colors.grey[600]),
+                  const SizedBox(height: 8),
+                  Text(
+                    'image_load_failed'.tr,
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        placeHolder: (context, url) {
+          return Container(
+            color: Colors.grey[200],
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(Get.context!).primaryColor,
+              ),
+            ),
+          );
+        },
+      );
+      //   Container(
+      //   height: double.infinity,
+      //   width: double.infinity,
+      //   color: Colors.grey[300],
+      //   child: Center(
+      //     child: Image.asset("assets/images/person_images.png", fit: BoxFit.cover),
+      //
+      //     //Icon(Icons.image_not_supported_rounded, size: 60, color: Colors.grey[600]),
+      //   ),
+      // );
+    }
+
+    return CustomImageView(
+      url: user.imageUrl,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorWidget: (context, url, error) {
+        print("Image load error for $url: $error");
+        return Container(
+          color: Colors.grey[300],
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.image_not_supported_rounded, size: 60, color: Colors.grey[600]),
+                const SizedBox(height: 8),
+                Text(
+                  'image_load_failed'.tr,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+      placeHolder: (context, url) {
+        return Container(
+          color: Colors.grey[200],
+          child: Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(Get.context!).primaryColor,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildErrorCard(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 60, color: Colors.grey[600]),
+            const SizedBox(height: 12),
+            Text(
+              'error_loading_profile'.tr,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildGlassChip(BuildContext context, {Widget? child, String? text, IconData? icon, Color? color}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
@@ -555,43 +704,59 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   }
 
   UserProfile _mapToUserProfile(dynamic data) {
-    // If it's already a UserProfile (e.g. from local tests), return it
-    if (data is UserProfile) return data;
-    
-    if (data is MatrimonyProfile) {
-       return UserProfile(
-          id: data.id,
-          name: data.personalDetails?.name ?? 'no_name'.tr,
-          age: data.age ?? 0,
-          location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
-          occupation: data.professionalDetails?.jobTitle ?? data.personalDetails?.occupation ?? 'professional'.tr,
-          imageUrl: (data.personalDetails?.photos != null && data.personalDetails!.photos!.isNotEmpty) 
-              ? "${ApiConstants.imageBaseUrl}${data.personalDetails!.photos![0]}" 
-              : "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-          distance: 0.0, // Backend might need to provide this
-          isNew: data.createdAt != null && DateTime.now().difference(DateTime.parse(data.createdAt!)).inDays < 7,
-          isOnline: false,
-          interests: data.personalDetails?.hobbies ?? [],
-          connectionStatus: data.connectionStatus,
-       );
-    }
+    try {
+      // If it's already a UserProfile (e.g. from local tests), return it
+      if (data is UserProfile) return data;
+      
+      if (data is MatrimonyProfile) {
+         return UserProfile(
+            id: data.id,
+            name: data.personalDetails?.name ?? 'no_name'.tr,
+            age: data.age ?? 0,
+            location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
+            occupation: data.professionalDetails?.jobTitle ?? data.personalDetails?.occupation ?? 'professional'.tr,
+            imageUrl: (data.personalDetails?.photos != null && data.personalDetails!.photos!.isNotEmpty) 
+                ? "${ApiConstants.imageBaseUrl}${data.personalDetails!.photos![0]}" 
+                : null,
+            distance: 0.0, // Backend might need to provide this
+            isNew: data.createdAt != null && DateTime.now().difference(DateTime.parse(data.createdAt!)).inDays < 7,
+            isOnline: false,
+            interests: data.personalDetails?.hobbies ?? [],
+            connectionStatus: data.connectionStatus,
+         );
+      }
 
-    // Fallback/Legacy Mapping
-    final personal = data['personal_details'] ?? {};
-    final location = data['location_details'] ?? {};
-    
-    return UserProfile(
-      id: data['id'],
-      name: personal['name'] ?? data['name'] ?? 'no_name'.tr,
-      age: int.tryParse(personal['age']?.toString() ?? data['age']?.toString() ?? "0") ?? 0,
-      location: "${location['city'] ?? ''}, ${location['state'] ?? ''}",
-      occupation: personal['occupation'] ?? 'professional'.tr,
-      imageUrl: data['image'] ?? data['imageUrl'] ?? "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-      distance: double.tryParse(data['distance']?.toString() ?? "0") ?? 0.0,
-      isNew: data['is_new'] == true,
-      isOnline: data['is_online'] == true,
-      interests: List<String>.from(personal['hobbies'] ?? []),
-    );
+      // Fallback/Legacy Mapping
+      final personal = data['personal_details'] ?? {};
+      final location = data['location_details'] ?? {};
+      
+      return UserProfile(
+        id: data['id'],
+        name: personal['name'] ?? data['name'] ?? 'no_name'.tr,
+        age: int.tryParse(personal['age']?.toString() ?? data['age']?.toString() ?? "0") ?? 0,
+        location: "${location['city'] ?? ''}, ${location['state'] ?? ''}",
+        occupation: personal['occupation'] ?? 'professional'.tr,
+        imageUrl: data['image'] ?? data['imageUrl'],
+        distance: double.tryParse(data['distance']?.toString() ?? "0") ?? 0.0,
+        isNew: data['is_new'] == true,
+        isOnline: data['is_online'] == true,
+        interests: List<String>.from(personal['hobbies'] ?? []),
+      );
+    } catch (e) {
+      print("Error mapping user profile: $e");
+      // Return a safe fallback profile
+      return UserProfile(
+        id: null,
+        name: 'error_loading'.tr,
+        age: 0,
+        location: 'unknown_location'.tr,
+        imageUrl: null,
+        distance: 0.0,
+        isNew: false,
+        isOnline: false,
+        interests: [],
+      );
+    }
   }
 }
 
@@ -600,7 +765,7 @@ class UserProfile {
   final String name;
   final int age;
   final String location;
-  final String imageUrl;
+  final String? imageUrl;
   final double distance;
   final bool isNew;
   final bool isOnline;

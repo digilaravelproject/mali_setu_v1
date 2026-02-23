@@ -123,7 +123,7 @@ class LoginController extends GetxController {
         print("googlelogin : "+response.message.toString());
 
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
-      //  Get.offAllNamed(AppRoutes.dashboard);
+        Get.offAllNamed(AppRoutes.dashboard);
       } else {
         CustomSnackBar.showError(message: response.message ?? "Login failed");
       }

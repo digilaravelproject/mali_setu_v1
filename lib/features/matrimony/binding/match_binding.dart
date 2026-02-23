@@ -15,11 +15,19 @@ class MatrimonyBinding extends Bindings {
     Get.lazyPut(() => MatrimonyController());
     Get.lazyPut(() => FilterController(), fenix: true);
     Get.lazyPut(() => PaymentRepository());
-    
+
     // Data Layer
-    Get.lazyPut<MatrimonyDataSource>(() => MatrimonyDataSourceImpl(apiClient: Get.find()));
-    Get.lazyPut<MatrimonyRepository>(() => MatrimonyRepositoryImpl(dataSource: Get.find()));
-    
+    Get.lazyPut<MatrimonyDataSource>(
+      () => MatrimonyDataSourceImpl(apiClient: Get.find()),
+      fenix: true,
+    );
+
+    Get.lazyPut<MatrimonyRepository>(
+      () =>
+          MatrimonyRepositoryImpl(dataSource: Get.find<MatrimonyDataSource>()),
+      fenix: true,
+    );
+
     Get.lazyPut(() => RegMatrimonyController());
   }
 }

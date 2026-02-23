@@ -52,7 +52,7 @@ const Map<String, String> enUS = {
   'show_matches': 'Show Matches',
   'saved_searches': 'Saved Searches',
   'search_by_profile_id': 'Search by Profile ID',
-  
+
   // Filter Categories
   'basic_details': 'Basic Details',
   'professional_details': 'Professional Details',
@@ -62,7 +62,7 @@ const Map<String, String> enUS = {
   'lifestyle': 'Lifestyle',
   'profile_type': 'Profile Type',
   'recently_created': 'Recently Created',
-  
+
   // Basic Details Filters
   'age': 'Age',
   'years': 'years',
@@ -80,7 +80,7 @@ const Map<String, String> enUS = {
   'normal': 'Normal',
   'doesnt_matter': "Doesn't Matter",
   'physically_challenged': 'Physically Challenged',
-  
+
   // Professional Details Filters
   'annual_income': 'Annual Income',
   'education': 'Education',
@@ -95,7 +95,7 @@ const Map<String, String> enUS = {
   'engineering': 'Engineering',
   'it_software': 'IT & Software',
   'civil_services': 'Civil Services',
-  
+
   // Religion Details Filters
   'premium': 'PREMIUM',
   'upgrade_message': 'To access these premium filters, UPGRADE NOW',
@@ -105,7 +105,7 @@ const Map<String, String> enUS = {
   'dont_know': "Don't Know",
   'yes': 'Yes',
   'no': 'No',
-  
+
   // Family Details Filters
   'family_status': 'Family Status',
   'family_type': 'Family Type',
@@ -117,7 +117,7 @@ const Map<String, String> enUS = {
   'moderate': 'Moderate',
   'traditional': 'Traditional',
   'orthodox': 'Orthodox',
-  
+
   // Location Details Filters
   'nearby_profiles': 'Nearby Profiles',
   'matches_near_location': 'Matches Near your location',
@@ -125,7 +125,7 @@ const Map<String, String> enUS = {
   'citizenship': 'Citizenship',
   'state': 'State',
   'city': 'City',
-  
+
   // Lifestyle Filters
   'eggetarian': 'Eggetarian',
   'vegetarian': 'Vegetarian',
@@ -135,7 +135,7 @@ const Map<String, String> enUS = {
   'never': 'Never',
   'socially': 'Socially',
   'regularly': 'Regularly',
-  
+
   // Profile Type Filters
   'profile_with_photo': 'Profile with Photo',
   'matches_with_photos': 'Matches who have added photos',
@@ -148,7 +148,7 @@ const Map<String, String> enUS = {
   'profiles_viewed': 'Profiles you have already seen',
   'already_contacted': 'Already Contacted',
   'profiles_contacted': 'Profiles you have contacted',
-  
+
   // Recently Created Filters
   'profile_created': 'Profile Created',
   'all_time': 'All Time',
@@ -157,7 +157,7 @@ const Map<String, String> enUS = {
   'last_30_days': 'Last 30 Days',
   'one_week': 'One Week',
   'one_month': 'One Month',
-  
+
   // Auth - Login Page
   'welcome_back': 'Welcome Back',
   'login_to_continue': 'Login to continue your journey',
@@ -170,7 +170,7 @@ const Map<String, String> enUS = {
   'sign_in_with_google': 'Sign in with Google',
   'dont_have_account': "Don't have an account? ",
   'register': 'Register',
-  
+
   // Auth - Register Page
   'create_account': 'Create Account',
   'personal_information': 'Personal Information',
@@ -200,7 +200,7 @@ const Map<String, String> enUS = {
   'password': 'Password',
   'confirm_password': 'Confirm Password',
   'register_button': 'Register',
-  
+
   // Dashboard - Home Page
   'welcome_back_comma': 'Welcome Back,',
   'search_here': 'Search here...',
@@ -213,7 +213,7 @@ const Map<String, String> enUS = {
   'find_soulmate': 'Find your soulmate for a journey of love',
   'join_now': 'Join Now',
   'all_categories': 'All Categories',
-  
+
   // Business Page
   'business_dashboard': 'Business Dashboard',
   'my_business': 'My Business',
@@ -237,7 +237,7 @@ const Map<String, String> enUS = {
   'active': 'Active',
   'inactive': 'Inactive',
   'unknown': 'Unknown',
-  
+
   // Business Details
   'business_details': 'Business Details',
   'about_business': 'About Business',
@@ -260,7 +260,7 @@ const Map<String, String> enUS = {
   'add_product': 'Add Product',
   'add_service': 'Add Service',
   'create_job': 'Create Job',
-  
+
   // Job Related
   'job_title': 'Job Title',
   'job_description': 'Job Description',
@@ -279,7 +279,7 @@ const Map<String, String> enUS = {
   'remote': 'Remote',
   'on_site': 'On Site',
   'hybrid': 'Hybrid',
-  
+
   // My Business
   'edit_business': 'Edit Business',
   'delete_business': 'Delete Business',
@@ -293,7 +293,7 @@ const Map<String, String> enUS = {
   'save_changes': 'Save Changes',
   'confirm_delete': 'Confirm Delete',
   'delete_business_message': 'Are you sure you want to delete this business?',
-  
+
   // Job Applications
   'job_applications': 'Job Applications',
   'status': 'Status',
@@ -653,16 +653,16 @@ const Map<String, String> enUS = {
   "update_job": "Update Job",
   "post_job_now": "Post Job Now",
   "field_required": "is required",
-  
+
   // Job Types
 
   // Experience Levels
   "mid": "Mid",
   "expert": "Expert",
-  
+
   // Employment Types
   "freelance": "Freelance",
-  
+
   // Job Categories
   "software_development": "Software Development",
   "marketing": "Marketing",
@@ -673,7 +673,7 @@ const Map<String, String> enUS = {
   "other": "Other",
   "enter_job_category": "Enter Job Category",
   "job_category_hint": "e.g., Consulting, Healthcare",
-  
+
   // Popular Benefits
   "health_insurance": "Health insurance",
   "flexible_working_hours": "Flexible working hours",
@@ -684,7 +684,7 @@ const Map<String, String> enUS = {
   "performance_bonus": "Performance Bonus",
   "gym_membership": "Gym Membership",
   "free_meals": "Free Meals",
-  
+
   // Popular Skills
   "php": "PHP",
   "laravel": "Laravel",
@@ -698,7 +698,7 @@ const Map<String, String> enUS = {
   "python": "Python",
   "nodejs": "Node.js",
   "ui_ux_design": "UI/UX Design",
-  
+
   // Messages
   "register_business_first": "Please Register/Select a Business first",
   "job_created_success": "Job posting created successfully",
@@ -789,7 +789,21 @@ const Map<String, String> enUS = {
   'blood_group': 'Blood Group',
   'referral_name': 'Referral Name',
   'enter_custom_category' : 'Custom Category ',
-  'transaction_history' : 'Transaction History'
+  'transaction_history' : 'Transaction History',
+  'call_now' : 'Call Now',
+  'image_load_failed': 'Image load failed',
+  'error_loading_profile': 'Error loading profile',
+  'error_loading_profiles': 'Error loading profiles',
+  'retry': 'Retry',
+  'error_loading': 'Error loading',
+  'connection_requests': 'Connection Requests',
+  'received': 'Received',
+  'sent': 'Sent',
+  'no_received_requests': 'No Received Requests',
+  'send_connection_request': 'Send Connection Request',
+  'partner_preferences': 'Partner Preferences',
+  'personal_details': 'Personal Details',
+
 
 
 

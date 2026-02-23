@@ -139,7 +139,7 @@ class BusinessController extends GetxController {
       }
       
       final response = await getAllBusinessesUseCase(page: currentPage.value);
-      
+
       if (isRefresh) {
         businesses.value = response.businesses;
       } else {

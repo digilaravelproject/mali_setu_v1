@@ -14,17 +14,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 
-class BusinessPage extends GetWidget<BusinessController> {
-  const BusinessPage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const BusinessScreen();
-  }
-}
-
-// Dashboard Screen
-// Dashboard Screen
 class BusinessScreen extends GetView<BusinessController> {
   const BusinessScreen({Key? key}) : super(key: key);
   @override
@@ -33,6 +23,7 @@ class BusinessScreen extends GetView<BusinessController> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: Obx(() {
+
         if (controller.isLoading.value) {
           return _buildShimmerLoading(context);
         }
@@ -347,7 +338,7 @@ class BusinessScreen extends GetView<BusinessController> {
              ),
              // Show pagination info if there are more businesses
              SliverToBoxAdapter(
-               child: Obx(() => controller.businesses.length > 10 || controller.hasNextPage.value
+               child: controller.businesses.length > 10 || controller.hasNextPage.value
                  ? Container(
                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                      padding: const EdgeInsets.all(12),
@@ -376,7 +367,7 @@ class BusinessScreen extends GetView<BusinessController> {
                      ),
                    )
                  : const SizedBox.shrink()
-               ),
+               
              ),
              const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
           ],
@@ -458,9 +449,9 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                   hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
-                          onPressed: () {
+                      ? InkWell(
+                    child: const Icon(Icons.clear, color: Colors.grey),
+                          onTap: () {
                             controller.searchText.value = "";
                           },
                         )
@@ -479,6 +470,9 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
               }
 
               final filteredList = controller.filteredBusinesses;
+              final hasNext = controller.hasNextPage.value;
+              final isLoadMore = controller.isLoadingMore.value;
+              final currentPg = controller.currentPage.value;
 
               if (filteredList.isEmpty) {
                 return Center(
@@ -508,7 +502,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                   },
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: filteredList.length + (controller.hasNextPage.value && controller.searchText.isEmpty ? 1 : 0),
+                    itemCount: filteredList.length + (hasNext && controller.searchText.isEmpty ? 1 : 0),
                     physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, index) {
                       // Show business card
@@ -520,20 +514,20 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                       }
                       
                       // Show loading indicator at bottom (only if not searching)
-                      return Obx(() => controller.isLoadingMore.value
+                      return isLoadMore
                         ? Container(
                             padding: const EdgeInsets.all(16),
                             child: const Center(
                               child: CircularProgressIndicator(),
                             ),
                           )
-                        : controller.hasNextPage.value
+                        : hasNext
                           ? Container(
                               padding: const EdgeInsets.all(16),
                               child: Center(
                                 child: ElevatedButton(
                                   onPressed: controller.loadMoreBusinesses,
-                                  child: Text("Load More (Page ${controller.currentPage.value + 1})"),
+                                  child: Text("Load More (Page ${currentPg + 1})"),
                                 ),
                               ),
                             )
@@ -548,8 +542,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                                   ),
                                 ),
                               ),
-                            )
-                      );
+                            );
                     },
                   ),
                 ),
@@ -646,15 +639,15 @@ class BusinessListCard extends StatelessWidget {
                              margin: const EdgeInsets.only(left: 8),
                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                              decoration: BoxDecoration(
-                               color: business.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                               color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
                                borderRadius: BorderRadius.circular(8)
                              ),
                              child: Text(
-                               (business.status ?? "Unknown").toUpperCase(),
+                               (business.verificationStatus ?? "Unknown").toUpperCase(),
                                style: TextStyle(
                                  fontSize: 10,
                                  fontWeight: FontWeight.bold,
-                                 color: business.status == 'active' ? Colors.green : Colors.grey,
+                                 color: business.verificationStatus == 'active' ? Colors.green : Colors.grey,
                                ),
                              ),
                           ),

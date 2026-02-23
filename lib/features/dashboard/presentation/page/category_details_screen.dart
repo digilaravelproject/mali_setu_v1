@@ -228,7 +228,7 @@ class BusinessListCard extends StatelessWidget {
                 contactEmail: business.contactEmail,
                 website: business.website,
                 verificationStatus: business.verificationStatus,
-                status: business.status,
+                status: business.verificationStatus,
                 user: business.user != null
                     ? User(
                         id: business.user!.id,
