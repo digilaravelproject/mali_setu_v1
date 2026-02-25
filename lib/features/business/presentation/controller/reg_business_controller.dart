@@ -5,12 +5,10 @@ import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
-import 'package:edu_cluezer/core/network/multipart.dart';
 import 'package:edu_cluezer/core/helper/img_picker_helper.dart';
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/business/presentation/page/business_subscription_plan.dart';
@@ -130,19 +128,7 @@ class RegBusinessController extends GetxController {
 
       // Handle Existing Photo
       if (business.photo != null && business.photo!.isNotEmpty) {
-        // Construct full URL for existing photo
-        String photoUrl = business.photo!;
-        print("DEBUG_EDIT: Original photo value: $photoUrl");
-        print("DEBUG_EDIT: Base URL: ${ApiConstants.imageBaseUrl}");
-        
-        if (!photoUrl.startsWith('http')) {
-          // Add base URL if it's a relative path
-          photoUrl = ApiConstants.imageBaseUrl + photoUrl;
-        }
-        
-        existingImages.add(photoUrl);
-        print("DEBUG_EDIT: Final constructed URL: $photoUrl");
-        print("DEBUG_EDIT: existingImages list: $existingImages");
+        existingImages.add(business.photo!);
       }
     } else {
       // Auto-fill website with https:// for new registrations
@@ -270,7 +256,7 @@ class RegBusinessController extends GetxController {
   
   Future<void> registerCustomCategory(String categoryName) async {
     if (categoryName.trim().isEmpty) {
-      CustomSnackBar.showError(message: "please_enter_category_name");
+      CustomSnackBar.showError(message: "Please enter a category name");
       return;
     }
 
@@ -312,18 +298,16 @@ class RegBusinessController extends GetxController {
           // (fetchCategories clears and rebuilds the list, so we might need to ensure the name logic in UI holds)
           // Since bCategoryCtrl.text is just a string, it should be fine.
           
-          CustomSnackBar.showSuccess(message: "category_added_successfully");
+          CustomSnackBar.showSuccess(message: "Category added successfully");
         } else {
-          final errorMsg = data['message'] ?? "failed_to_add_category";
-          CustomSnackBar.showError(message: errorMsg);
+          CustomSnackBar.showError(message: data['message'] ?? "Failed to add category");
         }
       } else {
         final data = response.data;
-        final errorMsg = data['message'] ?? "something_went_wrong";
-        CustomSnackBar.showError(message: errorMsg);
+        CustomSnackBar.showError(message: data['message'] ?? "Something went wrong");
       }
     } catch (e) {
-      CustomSnackBar.showError(message: "error_occurred");
+      CustomSnackBar.showError(message: "Error: ${e.toString()}");
     } finally {
       isRegisteringCategory.value = false;
     }
@@ -387,118 +371,92 @@ class RegBusinessController extends GetxController {
   }
 
   Future<void> onRegister() async {
-
-    // Comprehensive Validation with proper translation
+    // Comprehensive Validation
     if (bNameCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_business_name');
-      return;
-    }
-
-    // Basic Validation
-    if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
-      CustomSnackBar.showError(message: 'please_fill_required_fields');
+      CustomSnackBar.showError(message: "Please enter business name");
       return;
     }
     if (bTypeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_business_type');
+      CustomSnackBar.showError(message: "Please select business type");
       return;
     }
     if (bCategoryCtrl.text.trim().isEmpty || bCategoryCtrl.text == "Select Category") {
-      CustomSnackBar.showError(message: 'please_select_business_category');
+      CustomSnackBar.showError(message: "Please select business category");
       return;
     }
     if (bDescCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_business_description');
+      CustomSnackBar.showError(message: "Please enter business description");
       return;
     }
     if (openingTimeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_opening_time');
+      CustomSnackBar.showError(message: "Please select opening time");
       return;
     }
     if (closingTimeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_closing_time');
+      CustomSnackBar.showError(message: "Please select closing time");
       return;
     }
     if (phoneCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_contact_number');
+      CustomSnackBar.showError(message: "Please enter contact number");
       return;
     }
     if (emailCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_email_address');
+      CustomSnackBar.showError(message: "Please enter email address");
       return;
     }
     String website = websiteCtrl.text.trim();
     if (website.isEmpty || website == "https://") {
-      CustomSnackBar.showError(message: 'please_enter_website');
+      CustomSnackBar.showError(message: "Please enter website");
       return;
     }
-    
+
     // Basic URL validation: must contain at least one dot and some characters after https://
     if (!website.contains(".") || website.length < 12) { // https://a.co is 12 chars
-      CustomSnackBar.showError(message: 'please_enter_valid_website_url');
+      CustomSnackBar.showError(message: "Please enter a valid website URL");
       return;
     }
-    
+
     // Check for images in new registration
     if (!isEditMode && selectedImages.isEmpty) {
-      CustomSnackBar.showError(message: 'please_add_business_photo');
+      CustomSnackBar.showError(message: "Please add at least one business photo");
       return;
     }
-    
+
     // Check for images in edit mode (if all existing were removed and no new ones added)
     if (isEditMode && existingImages.isEmpty && selectedImages.isEmpty) {
-       CustomSnackBar.showError(message: 'please_add_business_photo');
-       return;
+      CustomSnackBar.showError(message: "Please add at least one business photo");
+      return;
     }
 
     try {
       // Get IDs from maps
-      final typeId = typeIdMap[bTypeCtrl.text] ?? "product"; 
-      final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1; 
-      
+      final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
+      final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1;
+
       // Prepare Request Body
-      final Map<String, dynamic> body = {
+      final body = <String, dynamic>{
         "business_name": bNameCtrl.text,
         "business_type": typeId,
-        "category_id": categoryId.toString(), 
+        "category_id": categoryId.toString(),
         "description": bDescCtrl.text,
         "contact_phone": phoneCtrl.text,
         "contact_email": emailCtrl.text,
         "website": websiteCtrl.text,
-        "opening_time" : openingTimeCtrl.text,
-        "closing_time" : closingTimeCtrl.text
+        "opening_time": openingTimeCtrl.text,
+        "closing_time": closingTimeCtrl.text
       };
-      print("registerbusiness : "+body.toString());
+      print("registerbusiness : " + body.toString());
 
       if (isEditMode && businessId != null) {
-          // Convert new selected images to base64
-          List<String> base64Photos = [];
-          if (selectedImages.isNotEmpty) {
-            print("DEBUG_EDIT_BUSINESS: Converting ${selectedImages.length} new photos to base64");
-            for (int i = 0; i < selectedImages.length; i++) {
-              var file = selectedImages[i];
-              List<int> imageBytes = await file.readAsBytes();
-              String base64Image = base64Encode(imageBytes);
-              base64Photos.add(base64Image);
-              print("DEBUG_EDIT_BUSINESS: Image $i converted - Size: ${file.lengthSync()} bytes");
-            }
-          }
-          
-          // Add photos to body if there are new images
-          if (base64Photos.isNotEmpty) {
-            body['photos'] = base64Photos;
-          }
-          
-          // Note: existingImages are already on server, no need to send them again
-          // Backend should handle keeping existing images if no new photos are sent
-          
-          final success = await Get.find<BusinessController>().updateBusiness(businessId!, body);
-          print("updatebusiness : "+success.toString());
-          if (success) {
-            Get.back(); // Close Screen
-            CustomSnackBar.showSuccess(message: "business_updated_successfully");
-          }
-          return;
+        final success = await Get.find<BusinessController>().updateBusiness(
+            businessId!, body);
+        print("updatebusiness : " + success.toString());
+        if (success) {
+          Get.back(); // Close Screen
+          CustomSnackBar.showSuccess(
+              message: "Business updated successfully");
+        }
+        return;
       }
 
       Get.dialog(
@@ -506,19 +464,16 @@ class RegBusinessController extends GetxController {
         barrierDismissible: false,
       );
 
-      // Convert images to base64 strings
-      List<String> base64Photos = [];
-      print("DEBUG_REG_BUSINESS: Converting ${selectedImages.length} photos to base64");
-      for (int i = 0; i < selectedImages.length; i++) {
-        var file = selectedImages[i];
-        List<int> imageBytes = await file.readAsBytes();
-        String base64Image = base64Encode(imageBytes);
-        base64Photos.add(base64Image);
-        print("DEBUG_REG_BUSINESS: Image $i converted - Size: ${file.lengthSync()} bytes");
+      // Convert images to base64
+      List<String> base64Images = [];
+      for (var file in selectedImages) {
+        final bytes = await file.readAsBytes();
+        final base64String = base64Encode(bytes);
+        base64Images.add(base64String);
       }
 
-      // Add photos to body as base64 strings array
-      body['photos'] = base64Photos;
+      // Add photos array to body
+      body['photos'] = base64Images;
 
       final response = await _apiClient.post(
         ApiConstants.regBusiness,
@@ -530,63 +485,29 @@ class RegBusinessController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          // CustomSnackBar.showSuccess(message: data['message'] ?? 'business_registered_successfully'.tr);
-          
+          // CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
+
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
-             Get.find<BusinessController>().fetchMyBusinesses();
+            Get.find<BusinessController>().fetchMyBusinesses();
           }
 
           // Fetch and Show Plans
           await fetchAndShowBusinessPlans();
-          
         } else {
-          // Handle server-side validation/business logic errors - API returns translation key
-          final errorMsg = data['message']?.toString() ?? 'registration_failed';
-          CustomSnackBar.showError(message: errorMsg);
-        }
-      } else if (response.statusCode == 422) {
-        // Handle validation errors
-        final data = response.data;
-        
-        if (data['errors'] != null) {
-          var errors = data['errors'];
-          String errorMessage = 'validation_failed';
-          
-          if (errors is Map<String, dynamic>) {
-            // Errors is an OBJECT (Map) - Laravel format
-            // Get all error messages and combine them
-            List<String> allErrors = [];
-            errors.forEach((field, messages) {
-              if (messages is List && messages.isNotEmpty) {
-                allErrors.addAll(messages.map((e) => e.toString()));
-              }
-            });
-            
-            if (allErrors.isNotEmpty) {
-              // Show first error or combine multiple errors
-              errorMessage = allErrors.first;
-              // If you want to show all errors:
-              // errorMessage = allErrors.join('\n');
-            }
-          } else if (errors is List && errors.isNotEmpty) {
-            // Errors is an ARRAY (List)
-            errorMessage = errors.first.toString();
-          }
-          
-          CustomSnackBar.showError(message: errorMessage);
-        } else {
-          final errorMsg = data['message']?.toString() ?? 'validation_failed';
-          CustomSnackBar.showError(message: errorMsg);
+          // Handle server-side validation/business logic errors
+          CustomSnackBar.showError(
+              message: data['message'] ?? "Registration failed");
         }
       } else {
-         final data = response.data;
-         final errorMsg = data['message']?.toString() ?? 'something_went_wrong';
-         CustomSnackBar.showError(message: errorMsg);
+        final data = response.data;
+        CustomSnackBar.showError(
+            message: data['message'] ?? "Something went wrong");
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(); // Close Loading if open
-      CustomSnackBar.showError(message: 'unexpected_error_occurred');
+      CustomSnackBar.showError(
+          message: "An unexpected error occurred: ${e.toString()}");
     }
   }
 
@@ -611,7 +532,7 @@ class RegBusinessController extends GetxController {
         }).toList();
 
         if (filteredPlans.isEmpty) {
-          CustomSnackBar.showInfo(message: "no_plans_found_showing_all");
+          CustomSnackBar.showInfo(message: "No specific plans found for your business type. Showing all plans.");
           filteredPlans.addAll(response.data!.plans!);
         }
 
@@ -661,13 +582,13 @@ class RegBusinessController extends GetxController {
           type: 'business',
         );
       } else {
-        final errorMsg = response.message ?? "failed_to_create_payment_order";
-        CustomSnackBar.showError(message: errorMsg);
+        CustomSnackBar.showError(
+            message: response.message ?? "Failed to create payment order");
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
       print("Error initiating payment: $e");
-      CustomSnackBar.showError(message: "payment_initialization_failed");
+      CustomSnackBar.showError(message: "Payment initialization failed: $e");
     }
   }
 

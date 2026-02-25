@@ -6,6 +6,8 @@ import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
+import '../../../../core/constent/api_constants.dart';
+
 
 class MyBusinessScreen extends GetWidget<BusinessController> {
   const MyBusinessScreen({super.key});
@@ -183,7 +185,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                     borderRadius: BorderRadius.circular(12),
                     child: (business.photo != null)
                         ? Image.network(
-                            business.photo!,
+                      ApiConstants.imageBaseUrl+business.photo!,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
                           )

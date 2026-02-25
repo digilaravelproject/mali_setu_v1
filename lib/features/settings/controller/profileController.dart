@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
@@ -286,6 +287,13 @@ class UpProfileController extends GetxController {
         'sector': sectorCtrl.text,
         'destination': destinationCtrl.text,
       };
+
+      // Add profile image as base64 if selected
+      if (profileImage.value != null) {
+        final bytes = await profileImage.value!.readAsBytes();
+        final base64String = base64Encode(bytes);
+        updateData['photos'] = [base64String];
+      }
 
       // Call API via AuthService
       final response = await Get.find<AuthService>().updateProfile(updateData);
