@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -133,7 +134,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                               fit: BoxFit.cover,
                             )
                           : CustomImageView(
-                              url: user?.profileImage,
+                              url: "${ApiConstants.imageBaseUrl}${user!.profileImage}",
                               imagePath: AppAssets.imgAppLogo,
                               fit: BoxFit.cover,
                             ),

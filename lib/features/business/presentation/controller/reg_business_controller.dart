@@ -5,12 +5,10 @@ import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
-import 'package:edu_cluezer/core/network/multipart.dart';
 import 'package:edu_cluezer/core/helper/img_picker_helper.dart';
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/business/presentation/page/business_subscription_plan.dart';
@@ -132,6 +130,9 @@ class RegBusinessController extends GetxController {
       if (business.photo != null && business.photo!.isNotEmpty) {
         existingImages.add(business.photo!);
       }
+    } else {
+      // Auto-fill website with https:// for new registrations
+      websiteCtrl.text = "https://";
     }
 
     _imagePickerHelper = ImagePickerHelper(
@@ -370,42 +371,92 @@ class RegBusinessController extends GetxController {
   }
 
   Future<void> onRegister() async {
+    // Comprehensive Validation
+    if (bNameCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter business name");
+      return;
+    }
+    if (bTypeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please select business type");
+      return;
+    }
+    if (bCategoryCtrl.text.trim().isEmpty || bCategoryCtrl.text == "Select Category") {
+      CustomSnackBar.showError(message: "Please select business category");
+      return;
+    }
+    if (bDescCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter business description");
+      return;
+    }
+    if (openingTimeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please select opening time");
+      return;
+    }
+    if (closingTimeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please select closing time");
+      return;
+    }
+    if (phoneCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter contact number");
+      return;
+    }
+    if (emailCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "Please enter email address");
+      return;
+    }
+    String website = websiteCtrl.text.trim();
+    if (website.isEmpty || website == "https://") {
+      CustomSnackBar.showError(message: "Please enter website");
+      return;
+    }
 
-   // await fetchAndShowBusinessPlans();
+    // Basic URL validation: must contain at least one dot and some characters after https://
+    if (!website.contains(".") || website.length < 12) { // https://a.co is 12 chars
+      CustomSnackBar.showError(message: "Please enter a valid website URL");
+      return;
+    }
 
-    // Basic Validation
-    if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {
-      CustomSnackBar.showError(message: "Please fill required fields");
+    // Check for images in new registration
+    if (!isEditMode && selectedImages.isEmpty) {
+      CustomSnackBar.showError(message: "Please add at least one business photo");
+      return;
+    }
+
+    // Check for images in edit mode (if all existing were removed and no new ones added)
+    if (isEditMode && existingImages.isEmpty && selectedImages.isEmpty) {
+      CustomSnackBar.showError(message: "Please add at least one business photo");
       return;
     }
 
     try {
       // Get IDs from maps
-      final typeId = typeIdMap[bTypeCtrl.text] ?? "product"; 
-      final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1; 
-      
+      final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
+      final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1;
+
       // Prepare Request Body
-      final body = {
+      final body = <String, dynamic>{
         "business_name": bNameCtrl.text,
         "business_type": typeId,
-        "category_id": categoryId.toString(), 
+        "category_id": categoryId.toString(),
         "description": bDescCtrl.text,
         "contact_phone": phoneCtrl.text,
         "contact_email": emailCtrl.text,
         "website": websiteCtrl.text,
-        "opening_time" : openingTimeCtrl.text,
-        "closing_time" : closingTimeCtrl.text
+        "opening_time": openingTimeCtrl.text,
+        "closing_time": closingTimeCtrl.text
       };
-      print("registerbusiness : "+body.toString());
+      print("registerbusiness : " + body.toString());
 
       if (isEditMode && businessId != null) {
-          final success = await Get.find<BusinessController>().updateBusiness(businessId!, body);
-          print("updatebusiness : "+success.toString());
-          if (success) {
-            Get.back(); // Close Screen
-            CustomSnackBar.showSuccess(message: "Business updated successfully");
-          }
-          return;
+        final success = await Get.find<BusinessController>().updateBusiness(
+            businessId!, body);
+        print("updatebusiness : " + success.toString());
+        if (success) {
+          Get.back(); // Close Screen
+          CustomSnackBar.showSuccess(
+              message: "Business updated successfully");
+        }
+        return;
       }
 
       Get.dialog(
@@ -413,17 +464,20 @@ class RegBusinessController extends GetxController {
         barrierDismissible: false,
       );
 
-      // Prepare Multipart Body for Photos
-      List<MultipartBody> multipartPhotos = [];
+      // Convert images to base64
+      List<String> base64Images = [];
       for (var file in selectedImages) {
-        multipartPhotos.add(MultipartBody(file: file, key: "photos[]"));
+        final bytes = await file.readAsBytes();
+        final base64String = base64Encode(bytes);
+        base64Images.add(base64String);
       }
 
-      final response = await _apiClient.postMultipartData(
+      // Add photos array to body
+      body['photos'] = base64Images;
+
+      final response = await _apiClient.post(
         ApiConstants.regBusiness,
-        body.cast<String, String>(),
-        multipartPhotos,
-        [], // No other documents
+        data: body,
       );
 
       Get.back(); // Close Loading
@@ -432,26 +486,28 @@ class RegBusinessController extends GetxController {
         final data = response.data;
         if (data['success'] == true) {
           // CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
-          
+
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
-             Get.find<BusinessController>().fetchMyBusinesses();
+            Get.find<BusinessController>().fetchMyBusinesses();
           }
 
           // Fetch and Show Plans
           await fetchAndShowBusinessPlans();
-          
         } else {
           // Handle server-side validation/business logic errors
-          CustomSnackBar.showError(message: data['message'] ?? "Registration failed");
+          CustomSnackBar.showError(
+              message: data['message'] ?? "Registration failed");
         }
       } else {
-         final data = response.data;
-         CustomSnackBar.showError(message: data['message'] ?? "Something went wrong");
+        final data = response.data;
+        CustomSnackBar.showError(
+            message: data['message'] ?? "Something went wrong");
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(); // Close Loading if open
-      CustomSnackBar.showError(message: "An unexpected error occurred: ${e.toString()}");
+      CustomSnackBar.showError(
+          message: "An unexpected error occurred: ${e.toString()}");
     }
   }
 

@@ -16,6 +16,7 @@ import 'package:edu_cluezer/features/settings/page/my_profile.dart';
 import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
 import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_page.dart';
+import 'package:edu_cluezer/features/volunteer/pages/volunteer_search_page.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_update_profile_screen.dart';
 import 'package:edu_cluezer/features/settings/page/transaction_history_page.dart';
 import 'package:edu_cluezer/features/settings/binding/transaction_history_binding.dart';
@@ -96,6 +97,7 @@ class AppRoutes {
   static const String volunteerOpportunityDetails = "/volunteerOpportunityDetails";
   static const String transactionHistory = "/transactionHistory";
   static const String donationDetails = "/donationDetails";
+  static const String volunteerSearch = "/volunteerSearch";
 }
 
 class AppPages {
@@ -345,6 +347,13 @@ class AppPages {
       name: AppRoutes.donationDetails,
       page: () => const DonationDetailsPage(),
       binding: DonationBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.volunteerSearch,
+      page: () => const VolunteerSearchPage(),
+      binding: VolunteerBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
