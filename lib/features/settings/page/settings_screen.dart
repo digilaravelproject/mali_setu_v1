@@ -220,7 +220,9 @@ class SettingsScreen extends GetWidget<SettingsController> {
                       height: 48,
                       borderRadius: 14,
                       title: "register_your_business".tr,
-                      onPressed: () {}, // Add route if available
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.regBusiness);
+                      }, // Add route if available
                     ),
                   ],
                 ),

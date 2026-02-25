@@ -8,9 +8,9 @@ class FormValidator {
     if (value.trim().length < 3) {
       return "Name must be at least 3 characters";
     }
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
-      return "Name can only contain alphabets";
-    }
+    // if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+    //   return "Name can only contain alphabets";
+    // }
     return null;
   }
 

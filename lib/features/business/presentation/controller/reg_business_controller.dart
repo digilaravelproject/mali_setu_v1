@@ -35,7 +35,8 @@ class RegBusinessController extends GetxController {
   final bDescCtrl = TextEditingController();
   final phoneCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
-  final websiteCtrl = TextEditingController();
+  //final websiteCtrl = TextEditingController();
+  final websiteCtrl = TextEditingController(text: "https://");
 
   TextEditingController openingTimeCtrl = TextEditingController();
   TextEditingController closingTimeCtrl = TextEditingController();
@@ -331,7 +332,6 @@ class RegBusinessController extends GetxController {
   //   }
   // }
 
-
   Future<void> loadBusinessTypes() async {
     businessTypes.assignAll([
       "Proprietary /Partnership - LLP",
@@ -345,7 +345,6 @@ class RegBusinessController extends GetxController {
       "Public Ltd": "Public Ltd"
     };
   }
-
 
   String _toTitleCase(String text) {
       if (text.isEmpty) return text;
@@ -370,7 +369,7 @@ class RegBusinessController extends GetxController {
 
   Future<void> onRegister() async {
 
-    await fetchAndShowBusinessPlans();
+   // await fetchAndShowBusinessPlans();
 
     // Basic Validation
     if (bNameCtrl.text.isEmpty || bTypeCtrl.text.isEmpty || phoneCtrl.text.isEmpty) {

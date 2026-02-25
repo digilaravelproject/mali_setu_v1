@@ -897,6 +897,14 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   }
 
   Widget _buildJobsTab(BuildContext context) {
+    final authService = Get.find<AuthService>();
+    final currentUser = authService.currentUser.value;
+    final business = controller.selectedBusiness.value ?? Get.arguments as Business;
+
+    // If user is not logged in or doesn't match owner ID, hide section
+    // if (currentUser?.id != business.userId) {
+    //   return const SizedBox.shrink();
+    // }
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
       }
@@ -933,6 +941,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                if(!(currentUser?.id != business.userId))
                 Row(
                   children: [
                     Expanded(

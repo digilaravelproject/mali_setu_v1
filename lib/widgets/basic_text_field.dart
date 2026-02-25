@@ -22,6 +22,9 @@ class AppInputTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final GestureTapCallback? onTap;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final FocusNode? focusNode;
 
 
 
@@ -52,6 +55,9 @@ class AppInputTextField extends StatelessWidget {
     this.textInputType = TextInputType.text,
     this.maxLines,
     this.onTap,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.focusNode,
     this.suffixWidget,
     this.readOnly,
     this.textColor,
@@ -84,12 +90,15 @@ class AppInputTextField extends StatelessWidget {
 
         TextFormField(
           controller: controller,
+          focusNode: focusNode,
           enabled: enable,
           readOnly: readOnly ?? isDropdown || onTap != null,
          // readOnly: isDropdown || onTap != null, // dropdown ya custom onTap
           canRequestFocus: !isDropdown && enable,
           obscureText: isObscure,
           keyboardType: textInputType,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           maxLines: maxLines ?? 1,
           autofillHints: hint,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
