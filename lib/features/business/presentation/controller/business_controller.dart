@@ -414,7 +414,20 @@ class BusinessController extends GetxController {
            return true; // Return true to close the form
         }
         
-        CustomSnackBar.showError(message: response.message ?? "Failed to apply");
+        // Handle validation errors specifically
+        String errorMessage = response.message ?? "Failed to apply";
+        if (response.errors != null && response.errors!.isNotEmpty) {
+          // Extract the first error message from the errors map
+          // e.g., {resume: [The resume failed to upload.]}
+          var firstError = response.errors!.values.first;
+          if (firstError is List && firstError.isNotEmpty) {
+            errorMessage = firstError.first.toString();
+          } else {
+            errorMessage = firstError.toString();
+          }
+        }
+        
+        CustomSnackBar.showError(message: errorMessage);
         return false;
       }
     } catch (e) {

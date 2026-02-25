@@ -9,6 +9,7 @@ import 'package:edu_cluezer/features/donation/domain/repository/donation_reposit
 import 'package:edu_cluezer/features/donation/presentation/controller/donation_controller.dart';
 import 'package:edu_cluezer/features/donation/binding/donation_binding.dart';
 import 'package:edu_cluezer/features/donation/presentation/widget/donation_bottom_sheet.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/core/network/api_response.dart';
 
 class RazorpayController extends GetxController {
@@ -136,6 +137,11 @@ class RazorpayController extends GetxController {
               _showDonationPromptAfterDelay();
             } else if (type == 'donation') {
               Get.back(); // Go back from details page
+            } else if (type == 'business') {
+              // Refresh business list after successful payment to update status
+              if (Get.isRegistered<BusinessController>()) {
+                Get.find<BusinessController>().fetchMyBusinesses();
+              }
             }
           },
         );

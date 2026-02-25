@@ -10,6 +10,20 @@ class AllVolunteerController extends GetxController {
 
   var isLoading = false.obs;
   var allVolunteerList = <Volunteer>[].obs; // ✅ Reactive list
+  var searchText = "".obs; // ✅ Search text
+
+  List<Volunteer> get filteredVolunteerList {
+    if (searchText.isEmpty) {
+      return allVolunteerList;
+    }
+    return allVolunteerList.where((v) {
+      final name = (v.contactPerson ?? "").toLowerCase();
+      final org = (v.organization ?? "").toLowerCase();
+      final loc = (v.location ?? "").toLowerCase();
+      final query = searchText.value.toLowerCase();
+      return name.contains(query) || org.contains(query) || loc.contains(query);
+    }).toList();
+  }
 
   @override
   void onInit() {

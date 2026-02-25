@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:edu_cluezer/features/business/presentation/page/single_business_details.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
@@ -13,6 +14,8 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart' as model;
 import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
+
+import '../../../../core/constent/api_constants.dart';
 
 
 class BusinessScreen extends GetView<BusinessController> {
@@ -595,7 +598,7 @@ class BusinessListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Business Icon / Initial
-                Container(
+                /*Container(
                   height: 60,
                   width: 60,
                   decoration: BoxDecoration(
@@ -610,7 +613,34 @@ class BusinessListCard extends StatelessWidget {
                       color: theme.primaryColor,
                     ),
                   ),
+                ),*/
+
+
+                Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
+                    image: business.photo != null && business.photo!.isNotEmpty
+                        ? DecorationImage(
+                      image: NetworkImage(ApiConstants.imageBaseUrl+business.photo!),
+                      fit: BoxFit.cover,
+                    )
+                        : null, // agar image null ho to background image nahi lagegi
+                  ),
+                  child: business.photo == null || business.photo!.isEmpty
+                      ? Center(
+                    child: Icon(
+                      Icons.store_rounded,
+                      size: 30,
+                      color: theme.primaryColor,
+                    ),
+                  )
+                      : null, // agar image hai to icon nahi dikhana
                 ),
+
                 const SizedBox(width: 14),
                 
                 // Content

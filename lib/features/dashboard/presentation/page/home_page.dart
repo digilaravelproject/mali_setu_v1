@@ -367,7 +367,7 @@ class HomePage extends GetWidget<HomeController> {
                                 crossAxisCount: 4,
                                 crossAxisSpacing: 16,
                                 mainAxisSpacing: 12,
-                                childAspectRatio: 0.95,
+                                childAspectRatio: 0.85,
                               ),
                               itemBuilder: (_, index) {
                                 return _buildCategoryItem(context, displayList[index]);
@@ -445,7 +445,7 @@ class HomePage extends GetWidget<HomeController> {
                 fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             category.name ?? "",
             textAlign: TextAlign.center,

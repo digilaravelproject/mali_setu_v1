@@ -315,6 +315,7 @@ class ApiClient {
               await MultipartFile.fromFile(
                 file.path,
                 filename: basename(file.path),
+                contentType: MediaType('image', 'jpeg'),
               ),
             ));
           }

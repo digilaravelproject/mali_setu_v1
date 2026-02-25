@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 
@@ -240,8 +241,9 @@ class ImagePickerHelper {
 
       if (compressedBytes == null) break;
 
+      final tempDir = await getTemporaryDirectory();
       final tempPath =
-          "${originalFile.parent.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg";
+          "${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg";
 
       resultFile = await File(tempPath).writeAsBytes(compressedBytes);
 

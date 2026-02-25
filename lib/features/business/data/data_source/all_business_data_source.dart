@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart'; // Added for MediaType
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -182,11 +183,29 @@ class BusinessDataSourceImpl implements BusinessDataSource {
     if (data['resume'] is File) {
       final File file = data['resume'];
       String fileName = file.path.split('/').last;
+      String extension = fileName.split('.').last.toLowerCase();
+      MediaType? contentType;
+      
+      if (extension == 'pdf') {
+        contentType = MediaType('application', 'pdf');
+      } else if (['jpg', 'jpeg', 'png'].contains(extension)) {
+        contentType = MediaType('image', extension == 'jpg' ? 'jpeg' : extension);
+      } else if (extension == 'doc' || extension == 'docx') {
+        contentType = MediaType('application', 'msword');
+      }
+
+      // Create a copy of the data and remove the resume File object
+      final Map<String, dynamic> body = Map<String, dynamic>.from(data);
+      body.remove('resume');
 
       // Create FormData
       FormData formData = FormData.fromMap({
-        ...data,
-        'resume': await MultipartFile.fromFile(file.path, filename: fileName),
+        ...body,
+        'resume': await MultipartFile.fromFile(
+          file.path, 
+          filename: fileName,
+          contentType: contentType,
+        ),
       });
       
       final response = await apiClient.post(ApiConstants.applyJob, data: formData);

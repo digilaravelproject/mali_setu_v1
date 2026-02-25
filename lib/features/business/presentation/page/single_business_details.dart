@@ -430,7 +430,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           _buildVerticalDivider(context),
           _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.room_service_outlined, context),
           _buildVerticalDivider(context),
-          _buildStatItem('jobs'.tr, '0', Icons.work_outline, context),
+          _buildStatItem('jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', Icons.work_outline, context),
           _buildVerticalDivider(context),
           _buildStatItem('value'.tr, '0', Icons.currency_rupee, context),
         ],
@@ -908,7 +908,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
       }
-      if (controller.businessJobs.isEmpty) {
+      
+      final displayedJobs = controller.businessJobs.where((job) => job.status != 'pending').toList();
+      
+      if (displayedJobs.isEmpty) {
          return CustomScrollView(
            physics: const ClampingScrollPhysics(),
            slivers: [
@@ -968,7 +971,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                ...controller.businessJobs.map((job) {
+                ...displayedJobs.map((job) {
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     elevation: 0,
@@ -1155,7 +1158,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
               _buildInfoCard('additional_information'.tr, [
                 _buildInfoRow(Icons.inventory, 'total_products'.tr, '${business.products?.length ?? 0}', context),
                 _buildInfoRow(Icons.room_service, 'total_services'.tr, '${business.services?.length ?? 0}', context),
-                _buildInfoRow(Icons.work, 'active_jobs'.tr, '0', context),
+                _buildInfoRow(Icons.work, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),
               ], context),
               const SizedBox(height: 20),
             ]),

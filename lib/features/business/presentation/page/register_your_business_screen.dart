@@ -35,7 +35,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
             children: [
               SectionTitle('business_information'.tr),
               AppInputTextField(
-                label: 'business_name'.tr,
+                label: '${'business_name'.tr} *',
                 controller: controller.bNameCtrl,
                 textInputType: TextInputType.text,
                 iconData: Icons.business_outlined,
@@ -44,14 +44,14 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               Obx(() => SingleDropdown(
                 controller: controller.bTypeCtrl,
-                label: 'business_type'.tr,
+                label: '${'business_type'.tr} *',
                 prefixIcon: Icons.category_rounded,
                 items: controller.businessTypes.toList(), // Using observable list
               )),
 
               Obx(() => SingleDropdown(
                 controller: controller.bCategoryCtrl,
-                label: 'business_category'.tr,
+                label: '${'business_category'.tr} *',
                 prefixIcon: Icons.category_rounded,
                 items: controller.businessCategories.toList(),
               )),
@@ -136,7 +136,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
               ),
 
               AppInputTextField(
-                label: 'business_description'.tr,
+                label: '${'business_description'.tr} *',
                 textInputType: TextInputType.text,
                 controller: controller.bDescCtrl,
                 maxLines: 4,
@@ -149,7 +149,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 children: [
                   Expanded(
                     child: AppInputTextField(
-                      label: 'opening_time'.tr,
+                      label: '${'opening_time'.tr} *',
                       controller: controller.openingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.sunny,
@@ -167,7 +167,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                   const SizedBox(width: 12),
                   Expanded(
                     child: AppInputTextField(
-                      label: 'closing_time'.tr,
+                      label: '${'closing_time'.tr} *',
                       controller: controller.closingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.nightlight_outlined,
@@ -194,7 +194,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               SectionTitle('contact_information'.tr),
               AppInputTextField(
-                label: 'contact_number'.tr,
+                label: '${'contact_number'.tr} *',
                 iconData: CupertinoIcons.phone,
                 textInputType: TextInputType.phone,
                 controller: controller.phoneCtrl,
@@ -202,7 +202,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 hint: const [AutofillHints.telephoneNumber],
               ),
               AppInputTextField(
-                label: 'email'.tr,
+                label: '${'email'.tr} *',
                 iconData: CupertinoIcons.mail_solid,
                 textInputType: TextInputType.emailAddress,
                 controller: controller.emailCtrl,
@@ -210,7 +210,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 validator: FormValidator.email,
               ),
               AppInputTextField(
-                label: 'website'.tr,
+                label: '${'website'.tr} *',
                 iconData: Icons.language_rounded,
                 textInputType: TextInputType.webSearch,
                 controller: controller.websiteCtrl,
