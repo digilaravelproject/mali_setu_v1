@@ -120,7 +120,9 @@ class RegBusinessController extends GetxController {
       phoneCtrl.text = business.contactPhone ?? "";
       emailCtrl.text = business.contactEmail ?? "";
       websiteCtrl.text = business.website ?? "";
-      
+      openingTimeCtrl.text = business.opening_time ?? "";
+      closingTimeCtrl.text = business.closing_time ?? "";
+
       // Handle Category (Fallback if needed, main logic in fetchCategories)
       if (business.category != null) {
           bCategoryCtrl.text = business.category!.name ?? "";

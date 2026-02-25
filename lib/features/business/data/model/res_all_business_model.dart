@@ -139,6 +139,8 @@ class Business {
   String? contactPhone;
   String? contactEmail;
   String? website;
+  String? opening_time;
+  String? closing_time;
   String? verificationStatus;
   String? verifiedAt;
   String? photo;
@@ -163,6 +165,8 @@ class Business {
     this.contactPhone,
     this.contactEmail,
     this.website,
+    this.opening_time,
+    this.closing_time,
     this.verificationStatus,
     this.verifiedAt,
     this.photo,
@@ -189,6 +193,8 @@ class Business {
       contactPhone: json['contact_phone'],
       contactEmail: json['contact_email'],
       website: json['website'],
+      opening_time: json['opening_time'],
+      closing_time: json['closing_time'],
       verificationStatus: json['verification_status'],
       verifiedAt: json['verified_at'],
       photo: json['photo'],
