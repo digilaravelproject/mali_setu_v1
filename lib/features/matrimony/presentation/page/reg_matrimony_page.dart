@@ -479,11 +479,13 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 AppInputTextField(
                   controller: controller.fatherOccupationCtrl,
                   label: "father_occupation".tr,
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 12),
                  AppInputTextField(
                   controller: controller.motherOccupationCtrl,
                   label: "mother_occupation".tr,
+                  textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: 20),
                 
@@ -535,6 +537,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                  AppInputTextField(
                   controller: controller.cityCtrl,
                   label: "city".tr,
+                  textInputAction: TextInputAction.done,
                 ),
               ],
             ),

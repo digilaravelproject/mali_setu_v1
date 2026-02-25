@@ -252,7 +252,7 @@ class RegMatrimonyController extends GetxController {
 
       if (response.success == true) {
 
-         // Get.back(); // Close Registration Screen // Removed to show plans first
+          Get.back(); // Close Registration Screen // Removed to show plans first
          CustomSnackBar.showSuccess(message: response.message ?? "Profile Created Successfully");
          
          // Fetch Plans and Show Dialog
@@ -339,8 +339,8 @@ class RegMatrimonyController extends GetxController {
 
   Future<void> fetchAndShowPlans() async {
     try {
-      Get.dialog(const Center(child: CircularProgressIndicator()),
-          barrierDismissible: false);
+      // Get.dialog(const Center(child: CircularProgressIndicator()),
+      //     barrierDismissible: false);
       final response = await _repository.getMatrimonyPlans();
       Get.back(); // Close Loading
 

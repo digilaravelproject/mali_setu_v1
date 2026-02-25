@@ -617,22 +617,28 @@ class VolunteerProfilePage extends GetView<VolunteerProfileController> {
         ),
 
         actions: [
-          if (controller.volunteerData != null) ...[
-            IconButton(
-              onPressed: () {
-                Get.toNamed(
-                  AppRoutes.volunteerCreateProfile,
-                  arguments: {'isEdit': true},
-                );
-              },
-              icon: CircleAvatar(
-                radius: 16,
-                backgroundColor: colorScheme.primary.withOpacity(0.1),
-                child: Icon(Icons.edit, size: 16, color: colorScheme.primary),
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
+          Obx(() {
+            return Row(
+              children: [
+                if (controller.profileData.value != null) ...[
+                  IconButton(
+                    onPressed: () {
+                      Get.toNamed(
+                        AppRoutes.volunteerCreateProfile,
+                        arguments: {'isEdit': true},
+                      );
+                    },
+                    icon: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: colorScheme.primary.withOpacity(0.1),
+                      child: Icon(Icons.edit, size: 16, color: colorScheme.primary),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ],
+            );
+          })
         ],
       ),
       body: Obx(() {

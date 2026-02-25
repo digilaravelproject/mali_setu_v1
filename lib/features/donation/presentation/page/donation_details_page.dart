@@ -6,6 +6,7 @@ import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
+/*
 class DonationDetailsPage extends GetView<DonationController> {
   const DonationDetailsPage({super.key});
 
@@ -85,7 +86,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   const Text(
                     "About the Cause",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -95,7 +96,12 @@ class DonationDetailsPage extends GetView<DonationController> {
                     cause.description ?? "No description available.",
                     style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.6),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Target Amount to Donate ${cause.targetAmount}",
+                    style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.6,fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 25),
                   const Text(
                     "Donate Amount",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -151,5 +157,398 @@ class DonationDetailsPage extends GetView<DonationController> {
         ),
       ),
     );
+  }
+}
+*/
+
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controller/donation_controller.dart';
+import '../../data/model/donation_cause_model.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+
+class DonationDetailsPage extends GetView<DonationController> {
+  const DonationDetailsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final DonationCauseItem cause = Get.arguments;
+    final authService = Get.find<AuthService>();
+    final user = authService.currentUser.value;
+
+    final TextEditingController amountController = TextEditingController();
+
+    final double target =
+        double.tryParse(cause.targetAmount ?? "0") ?? 0;
+    final double raised =
+        double.tryParse(cause.raisedAmount ?? "0") ?? 0;
+    final double progress =
+    target == 0 ? 0 : (raised / target);
+
+    Map<String, dynamic>? contact;
+    if (cause.contactInfo != null) {
+      contact = jsonDecode(cause.contactInfo!);
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: Stack(
+        children: [
+
+          /// 🔥 MAIN SCROLL CONTENT
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                /// IMAGE HEADER
+                Stack(
+                  children: [
+                    CustomImageView(
+                      url: cause.imageUrl != null
+                          ? "${ApiConstants.baseUrl}${cause.imageUrl}"
+                          : null,
+                      width: double.infinity,
+                      height: 300,
+                      fit: BoxFit.cover,
+                    ),
+                    Container(
+                      height: 300,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withOpacity(0.6),
+                            Colors.transparent
+                          ],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 25,
+                      left: 20,
+                      right: 20,
+                      child: Text(
+                        cause.title ?? "",
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                /// CONTENT SECTION
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                      /// CATEGORY + URGENCY
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildChip(
+                            cause.category?.toUpperCase() ??
+                                "GENERAL",
+                            Colors.blue,
+                          ),
+                          _buildChip(
+                            cause.urgency?.toUpperCase() ??
+                                "NORMAL",
+                            _getUrgencyColor(
+                                cause.urgency),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// ORGANIZATION
+                      Row(
+                        children: [
+                          const Icon(Icons.business,
+                              size: 18,
+                              color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Text(
+                            cause.organization ??
+                                "Trusted NGO",
+                            style: const TextStyle(
+                                fontWeight:
+                                FontWeight.w500),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      /// LOCATION
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on,
+                              size: 18,
+                              color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(cause.location ?? ""),
+                        ],
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      /// PROGRESS CARD
+                      Container(
+                        padding:
+                        const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                          BorderRadius.circular(
+                              16),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 15,
+                              color: Colors.black
+                                  .withOpacity(0.05),
+                            )
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "₹${raised.toStringAsFixed(0)} raised of ₹${target.toStringAsFixed(0)}",
+                              style: const TextStyle(
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius:
+                              BorderRadius
+                                  .circular(10),
+                              child:
+                              LinearProgressIndicator(
+                                value:
+                                progress.clamp(
+                                    0, 1),
+                                minHeight: 10,
+                                backgroundColor:
+                                Colors.grey[300],
+                                color:
+                                Colors.green,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                                "${cause.donationsCount ?? 0} donors"),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      /// DESCRIPTION
+                      const Text(
+                        "About the Cause",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight:
+                            FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        cause.description ??
+                            "No description available.",
+                        style: TextStyle(
+                          height: 1.6,
+                          color:
+                          Colors.grey[700],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// CONTACT INFO
+                      if (contact != null)
+                        Row(
+                          children: [
+                            const Icon(
+                                Icons.phone,
+                                size: 18,
+                                color:
+                                Colors.green),
+                            const SizedBox(
+                                width: 8),
+                            Text(
+                                contact["phone"]
+                                    .toString()),
+                          ],
+                        ),
+
+                      const SizedBox(height: 220),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          /// 💚 FIXED DONATION SECTION
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding:
+              const EdgeInsets.all(20),
+              decoration:
+              const BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                BorderRadius.vertical(
+                    top: Radius.circular(
+                        25)),
+                boxShadow: [
+                  BoxShadow(
+                    blurRadius: 20,
+                    color: Colors.black12,
+                  )
+                ],
+              ),
+              child: Column(
+                mainAxisSize:
+                MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller:
+                    amountController,
+                    keyboardType:
+                    TextInputType.number,
+                    decoration:
+                    InputDecoration(
+                      hintText:
+                      "Enter donation amount",
+                      prefixIcon:
+                      const Icon(Icons
+                          .currency_rupee_rounded),
+                      border:
+                      OutlineInputBorder(
+                        borderRadius:
+                        BorderRadius
+                            .circular(14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    width:
+                    double.infinity,
+                    height: 52,
+                    child:
+                    ElevatedButton(
+                      onPressed: () {
+                        final amount =
+                            double.tryParse(
+                                amountController
+                                    .text) ??
+                                0;
+                        if (amount <=
+                            0) {
+                          Get.snackbar(
+                              "Error",
+                              "Enter valid amount");
+                          return;
+                        }
+                        controller
+                            .initiateDonationPayment(
+                          cause,
+                          amount,
+                          user?.name ??
+                              "Guest",
+                          user?.email ??
+                              "",
+                          user?.phone ??
+                              "",
+                        );
+                      },
+                      style:
+                      ElevatedButton
+                          .styleFrom(
+                        backgroundColor:
+                        context.theme
+                            .primaryColor,
+                        shape:
+                        RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius
+                              .circular(
+                              14),
+                        ),
+                      ),
+                      child:
+                      const Text(
+                        "Donate Now",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight:
+                            FontWeight
+                                .bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip(
+      String text, Color color) {
+    return Container(
+      padding:
+      const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius:
+        BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight:
+          FontWeight.bold,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  Color _getUrgencyColor(
+      String? urgency) {
+    switch (urgency) {
+      case "high":
+        return Colors.red;
+      case "medium":
+        return Colors.orange;
+      default:
+        return Colors.green;
+    }
   }
 }

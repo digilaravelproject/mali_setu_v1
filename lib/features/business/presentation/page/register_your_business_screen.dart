@@ -141,7 +141,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 controller: controller.bDescCtrl,
                 maxLines: 4,
                 hintText: 'business_description_hint'.tr,
-                validator: FormValidator.name,
+                validator: (value) => FormValidator.jobDescription(value, 'business_description_hint'.tr),
               ),
              // const SizedBox(height: 16),
 

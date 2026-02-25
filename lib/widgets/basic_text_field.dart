@@ -22,6 +22,9 @@ class AppInputTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final GestureTapCallback? onTap;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final FocusNode? focusNode;
 
 
 
@@ -33,6 +36,7 @@ class AppInputTextField extends StatelessWidget {
   final bool? readOnly;
   final Color? textColor;
   final VoidCallback? onOtherSelected;
+  final bool isRequired;
 
   const AppInputTextField({
     super.key,
@@ -52,10 +56,14 @@ class AppInputTextField extends StatelessWidget {
     this.textInputType = TextInputType.text,
     this.maxLines,
     this.onTap,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.focusNode,
     this.suffixWidget,
     this.readOnly,
     this.textColor,
     this.onOtherSelected,
+    this.isRequired = false,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
@@ -76,20 +84,34 @@ class AppInputTextField extends StatelessWidget {
       children: [
         if (showLabel) ...[
           const SizedBox(height: 8),
-          Text(
-            label,
-            style: theme.textTheme.titleMedium
+          Row(
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.titleMedium
+              ),
+              if (isRequired)
+                Text(
+                  ' *',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.red,
+                  ),
+                ),
+            ],
           ),
         ],
 
         TextFormField(
           controller: controller,
+          focusNode: focusNode,
           enabled: enable,
           readOnly: readOnly ?? isDropdown || onTap != null,
          // readOnly: isDropdown || onTap != null, // dropdown ya custom onTap
           canRequestFocus: !isDropdown && enable,
           obscureText: isObscure,
           keyboardType: textInputType,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
           maxLines: maxLines ?? 1,
           autofillHints: hint,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),

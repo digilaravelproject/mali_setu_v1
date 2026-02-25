@@ -465,6 +465,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     validator: FormValidator.name,
                     controller: controller.nameCtrl,
                     iconData: CupertinoIcons.profile_circled,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
@@ -473,12 +474,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                     validator: FormValidator.email,
                     controller: controller.emailCtrl,
                     iconData: CupertinoIcons.mail,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
                     label: "date_of_birth".tr,
                     textInputType: TextInputType.none,
                     controller: controller.ageCtrl,
+                    isRequired: true,
                     validator: (value) {
                       if (controller.selectedBirthDate.value == null) {
                         return "Please select your date of birth";
@@ -528,6 +531,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     validator: FormValidator.mobile,
                     controller: controller.mobileCtrl,
                     iconData: CupertinoIcons.phone,
+                    isRequired: true,
                   ),
                 ],
               ),
@@ -536,6 +540,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                 context,
                 title: "caste_certificate".tr,
                 icon: Icons.description_outlined,
+                isRequired: true,
                 children: [
                   Obx(() => _buildCasteCertificateUpload(context)),
                 ],
@@ -553,6 +558,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     validator: (value) =>
                         FormValidator.emptycheck(value, "address".tr),
                     iconData: CupertinoIcons.location_solid,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
@@ -562,6 +568,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     validator: (value) =>
                         FormValidator.emptycheck(value, "Nearby Location"),
                     iconData: CupertinoIcons.placemark,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   Obx(() => AppInputTextField(
@@ -569,6 +576,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     textInputType: TextInputType.number,
                     validator: FormValidator.pincode,
                     controller: controller.pinCodeCtrl,
+                    isRequired: true,
                     endIcon: controller.isFetchingPincode.value
                         ? null
                         : Icons.location_on,
@@ -599,6 +607,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           hintText: "auto_filled".tr,
                          // suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
                           textColor: Colors.black,
+                          isRequired: true,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -612,6 +621,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           hintText: "auto_filled".tr,
                          // suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
                           textColor: Colors.black,
+                          isRequired: true,
                         ),
                       ),
                     ],
@@ -629,6 +639,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           hintText: "auto_filled".tr,
                          // suffixWidget: Icon(Icons.lock_outline, size: 18, color: Colors.grey),
                           textColor: Colors.black,
+                          isRequired: true,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -638,6 +649,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           textInputType: TextInputType.text,
                           validator: FormValidator.roadNumber,
                           controller: controller.roadNumberCtrl,
+                          isRequired: true,
                         ),
                       ),
                     ],
@@ -652,6 +664,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           validator: (value) =>
                               FormValidator.emptycheck(value, "Sector"),
                           textInputType: TextInputType.text,
+                          isRequired: true,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -662,6 +675,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           validator: (value) =>
                               FormValidator.emptycheck(value, "Destination"),
                           controller: controller.destinationCtrl,
+                          isRequired: true,
                         ),
                       ),
                     ],
@@ -696,6 +710,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         FormValidator.emptycheck(value, "User Type"),
                     dropdownItems: controller.usertypeList,
                     iconData: CupertinoIcons.person_2_fill,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
@@ -705,6 +720,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         FormValidator.emptycheck(value, "Occupation"),
                     controller: controller.occupationCtrl,
                     iconData: CupertinoIcons.briefcase_fill,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
@@ -713,6 +729,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     validator: (value) => FormValidator.emptycheck(value, "Designation"),
                     controller: controller.designationCtrl,
                     iconData: CupertinoIcons.briefcase_fill,
+                    isRequired: true,
                   ),
                   const SizedBox(height: 12),
                   AppInputTextField(
@@ -748,6 +765,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           : Icons.visibility_off,
                       onEndIconTap: controller.isPasswordValue.toggle,
                       iconData: CupertinoIcons.lock_fill,
+                      isRequired: true,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -765,6 +783,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           : Icons.visibility_off,
                       onEndIconTap: controller.isCnfPasswordValue.toggle,
                       iconData: CupertinoIcons.lock_fill,
+                      isRequired: true,
                     ),
                   ),
                 ],
@@ -788,6 +807,7 @@ class RegisterPage extends GetWidget<RegisterController> {
         required String title,
         required IconData icon,
         required List<Widget> children,
+        bool isRequired = false,
       }) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -834,6 +854,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (isRequired)
+                  Text(
+                    ' *',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red,
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
