@@ -128,7 +128,7 @@ class _ImageSliderState extends State<ImageSlider> {
                   child: CustomImageView(
                     url: _loopImages[index],
                     errorBuilder: (ctx, p, q) =>
-                        Center(child: Image.asset(AppAssets.imgAppLogo)),
+                        Center(child: Image.asset(AppAssets.getAppLogo())),
                   ),
                 ),
               ),

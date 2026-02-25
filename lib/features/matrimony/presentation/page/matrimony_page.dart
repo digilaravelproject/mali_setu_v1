@@ -55,7 +55,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   child: ClipOval(
                     child: CustomImageView(
                       url: user?.profileImage,
-                      imagePath: AppAssets.imgAppLogo,
+                      imagePath: AppAssets.getAppLogo(),
                       fit: BoxFit.cover,
                     ),
                   ),

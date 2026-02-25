@@ -316,7 +316,63 @@ class CreateJobController extends GetxController {
     final businessId = Get.find<BusinessController>().myBusiness.value?.id;
     
     if (businessId == null) {
-      CustomSnackBar.showError(message: 'register_business_first'.tr);
+      CustomSnackBar.showError(message: 'register_business_first');
+      return;
+    }
+
+    // Comprehensive Validation
+    if (titleCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_enter_job_title');
+      return;
+    }
+    
+    if (descriptionCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_enter_job_description');
+      return;
+    }
+    
+    if (requirementsCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_enter_requirements');
+      return;
+    }
+    
+    if (salaryRangeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'salary_required');
+      return;
+    }
+    
+    if (jobTypeCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_select_job_type');
+      return;
+    }
+    
+    if (locationCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'location_required');
+      return;
+    }
+    
+    if (experienceCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_select_experience_level');
+      return;
+    }
+    
+    if (employmentCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_select_employment_type');
+      return;
+    }
+    
+    if (categoryCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'please_select_job_category');
+      return;
+    }
+    
+    if (deadlineCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'deadline_required');
+      return;
+    }
+    
+    if (expiryCtrl.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: 'expiry_required');
       return;
     }
 
@@ -348,7 +404,7 @@ class CreateJobController extends GetxController {
       
       if (response.success == true) {
         Get.back();
-        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? 'job_updated_success'.tr : 'job_created_success'.tr));
+        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? 'job_updated_success' : 'job_created_success'));
         
         // Refresh business jobs list
         final bController = Get.find<BusinessController>();
@@ -360,10 +416,31 @@ class CreateJobController extends GetxController {
           bController.fetchJobDetails(editingJobId.value!);
         }
       } else {
-        CustomSnackBar.showError(message: response.message ?? 'job_save_failed'.tr);
+        // Handle API error response with proper error extraction
+        if (response.errors != null && response.errors!.isNotEmpty) {
+          var errors = response.errors!;
+          String errorMessage = 'validation_failed';
+          
+          // Errors is an OBJECT (Map) - Laravel format
+          List<String> allErrors = [];
+          errors.forEach((field, messages) {
+            if (messages is List && messages.isNotEmpty) {
+              allErrors.addAll(messages.map((e) => e.toString()));
+            }
+          });
+          
+          if (allErrors.isNotEmpty) {
+            errorMessage = allErrors.first;
+          }
+          
+          CustomSnackBar.showError(message: errorMessage);
+        } else {
+          CustomSnackBar.showError(message: response.message ?? 'job_save_failed');
+        }
       }
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: 'unexpected_error_occurred');
+      print("Job creation error: $e");
     } finally {
       isLoading.value = false;
     }

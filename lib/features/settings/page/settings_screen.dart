@@ -300,7 +300,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   height: 60,
                   width: 60,
                   radius: BorderRadius.circular(30),
-                  imagePath: AppAssets.imgAppLogo,
+                  imagePath: AppAssets.getAppLogo(),
                   fit: BoxFit.cover,
                 ),
               ),

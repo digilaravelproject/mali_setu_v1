@@ -27,7 +27,7 @@ class ProfilePage extends GetWidget<ProfileController> {
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: CustomImageView(
-              imagePath: AppAssets.imgAppLogo,
+              imagePath: AppAssets.getAppLogo(),
               fit: BoxFit.contain,
             ),
           ),

@@ -48,8 +48,10 @@ class CustomSnackBar {
     VoidCallback? onTap,
     BuildContext? context,
   }) {
+    // Translate message if it's a translation key
+    final translatedMessage = message.tr;
     show(
-      message: message,
+      message: translatedMessage,
       type: SnackBarType.success,
       duration: duration,
       onTap: onTap,
@@ -63,8 +65,10 @@ class CustomSnackBar {
     VoidCallback? onTap,
     BuildContext? context,
   }) {
+    // Translate message if it's a translation key
+    final translatedMessage = message.tr;
     show(
-      message: message,
+      message: translatedMessage,
       type: SnackBarType.warning,
       duration: duration,
       onTap: onTap,
@@ -78,8 +82,10 @@ class CustomSnackBar {
     VoidCallback? onTap,
     BuildContext? context,
   }) {
+    // Translate message if it's a translation key
+    final translatedMessage = message.tr;
     show(
-      message: message,
+      message: translatedMessage,
       type: SnackBarType.error,
       duration: duration,
       onTap: onTap,
@@ -93,8 +99,10 @@ class CustomSnackBar {
     VoidCallback? onTap,
     BuildContext? context,
   }) {
+    // Translate message if it's a translation key
+    final translatedMessage = message.tr;
     show(
-      message: message,
+      message: translatedMessage,
       type: SnackBarType.info,
       duration: duration,
       onTap: onTap,

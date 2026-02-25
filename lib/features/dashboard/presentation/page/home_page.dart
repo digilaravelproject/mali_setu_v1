@@ -15,22 +15,6 @@ import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../controller/home_controller.dart';
 
-import 'package:edu_cluezer/common/widgets/bg_gradient_border.dart';
-import 'package:edu_cluezer/core/routes/app_routes.dart';
-import 'package:edu_cluezer/core/styles/app_decoration.dart';
-import 'package:edu_cluezer/widgets/app_image_slider.dart';
-import 'package:edu_cluezer/widgets/custom_image_view.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
-import 'package:edu_cluezer/core/utils/app_assets.dart';
-import 'package:edu_cluezer/core/helper/string_extensions.dart';
-import 'package:edu_cluezer/core/constent/api_constants.dart';
-import '../../../notification/presentation/controller/notification_controller.dart';
-import '../controller/home_controller.dart';
-
 class HomePage extends GetWidget<HomeController> {
   const HomePage({super.key});
 
@@ -95,7 +79,7 @@ class HomePage extends GetWidget<HomeController> {
                             child: (user?.profileImage == null || user!.profileImage!.isEmpty)
                                 ? Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: Image.asset(AppAssets.imgAppLogo),
+                              child: Image.asset(AppAssets.getAppLogo()),
                             )
                                 : null,
                           ),
@@ -268,50 +252,51 @@ class HomePage extends GetWidget<HomeController> {
                       ],
                     ),
 
+                    // 2. Banners Slider (Full Width - No Padding)
+                    Obx(() {
+                      if (controller.isLoadingBanners.value) {
+                        return Container(
+                          height: 150,
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                          decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(16)
+                          ),
+                          child: const Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      if (controller.banners.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        height: 150,
+                        margin: const EdgeInsets.only(top: 0, bottom: 16),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(0),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                            ]
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(0),
+                          child: ImageSlider(
+                            indicatorType: IndicatorType.rectangle,
+                            images: controller.banners
+                                .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
+                                .toList(),
+                            onImageTap: (index) {
+                              controller.onBannerTap(index);
+                            },
+                          ),
+                        ),
+                      );
+                    }),
+
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       child: Column(
                         children: [
-                          // 2. Banners Slider
-                          Obx(() {
-                            if (controller.isLoadingBanners.value) {
-                              return Container(
-                                height: 150,
-                                decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(16)
-                                ),
-                                child: const Center(child: CircularProgressIndicator()),
-                              );
-                            }
-                            if (controller.banners.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-                            return Container(
-                              height: 150,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
-                                  ]
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: ImageSlider(
-                                  indicatorType: IndicatorType.rectangle,
-                                  images: controller.banners
-                                      .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
-                                      .toList(),
-                                  onImageTap: (index) {
-                                    // Handle banner tap
-                                    controller.onBannerTap(index);
-                                  },
-                                ),
-                              ),
-                            );
-                          }),
-
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 0),
 
                           // 3. Categories Header
                           Row(
@@ -367,7 +352,7 @@ class HomePage extends GetWidget<HomeController> {
                                 crossAxisCount: 4,
                                 crossAxisSpacing: 16,
                                 mainAxisSpacing: 12,
-                                childAspectRatio: 0.85,
+                                childAspectRatio: 0.80,
                               ),
                               itemBuilder: (_, index) {
                                 return _buildCategoryItem(context, displayList[index]);
@@ -382,7 +367,7 @@ class HomePage extends GetWidget<HomeController> {
                             context,
                             title: 'register_your_business'.tr,
                             subtitle: 'showcase_ideas'.tr,
-                            image: "https://img.freepik.com/free-vector/modern-business-team-working-open-office-space_74855-5541.jpg",
+                            icon: Icons.store_rounded,
                             buttonText: 'start_now'.tr,
                             onTap: () => Get.toNamed(AppRoutes.regBusiness),
                             color1: const Color(0xFF6B8EFF),
@@ -395,7 +380,7 @@ class HomePage extends GetWidget<HomeController> {
                             context,
                             title: 'register_matrimony'.tr,
                             subtitle: 'find_soulmate'.tr,
-                            image: "https://img.freepik.com/free-vector/wedding-couple-love_23-2148633454.jpg",
+                            icon: Icons.favorite_rounded,
                             buttonText: 'join_now'.tr,
                             onTap: () => Get.toNamed(AppRoutes.regMatrimony),
                             color1: const Color(0xFFF48FB1),
@@ -428,33 +413,31 @@ class HomePage extends GetWidget<HomeController> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(2),
-            // decoration: BoxDecoration(
-            //   shape: BoxShape.circle,
-            //   border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.1), width: 1),
-            //    boxShadow: [
-            //     BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))
-            //   ]
-            // ),
-               child: CustomImageView(
-                height: 28,
-                width: 28,
-                 url: category.photo != null && category.photo!.isNotEmpty
-                    ? category.photo
-                    : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
-                fit: BoxFit.cover,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).primaryColor.withOpacity(0.08),
+            ),
+            child: CustomImageView(
+              height: 32,
+              width: 32,
+              url: category.photo != null && category.photo!.isNotEmpty
+                  ? category.photo
+                  : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
+              fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 5),
           Text(
-            category.name ?? "",
+            _capitalizeText(category.name ?? ""),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
               color: Colors.grey[800],
+              height: 1.2,
             ),
           ),
         ],
@@ -466,7 +449,7 @@ class HomePage extends GetWidget<HomeController> {
     BuildContext context, {
     required String title,
     required String subtitle,
-    required String image,
+    required IconData icon,
     required String buttonText,
     required VoidCallback onTap,
     required Color color1,
@@ -541,13 +524,20 @@ class HomePage extends GetWidget<HomeController> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: CustomImageView(
-                    url: image,
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.cover,
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [color1.withOpacity(0.2), color2.withOpacity(0.1)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 60,
+                    color: color1,
                   ),
                 ),
               ],
@@ -598,7 +588,7 @@ class HomePage extends GetWidget<HomeController> {
                 crossAxisCount: 4,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12, 
-                childAspectRatio: 0.85, // Same as Home Screen
+                childAspectRatio: 0.80,
               ),
               itemBuilder: (_, index) {
                 return _buildCategoryItem(context, controller.categories[index]);
@@ -608,6 +598,14 @@ class HomePage extends GetWidget<HomeController> {
         ],
       ),
     );
+  }
+
+  String _capitalizeText(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 }
 

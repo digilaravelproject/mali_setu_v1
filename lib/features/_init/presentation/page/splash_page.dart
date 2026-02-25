@@ -38,7 +38,7 @@ class SplashPage extends GetWidget<InitController> {
                 child: CustomImageView(
                   height: 120,
                   width: 120,
-                  imagePath: AppAssets.imgAppLogo,
+                  imagePath: AppAssets.getAppLogo(),
                   fit: BoxFit.contain,
                 ),
               ),

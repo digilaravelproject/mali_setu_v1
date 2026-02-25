@@ -806,6 +806,44 @@ const Map<String, String> mrIN = {
   'father' : 'बाबा',
   'mother' : 'आई',
   'search_members' : 'सदस्य शोधा',
+
+  // Business Registration Validation Messages
+  'please_enter_business_name': 'कृपया व्यवसायाचे नाव प्रविष्ट करा',
+  'please_fill_required_fields': 'कृपया सर्व आवश्यक फील्ड भरा',
+  'please_select_business_type': 'कृपया व्यवसायाचा प्रकार निवडा',
+  'please_select_business_category': 'कृपया व्यवसायाची श्रेणी निवडा',
+  'please_enter_business_description': 'कृपया व्यवसायाचे वर्णन प्रविष्ट करा',
+  'please_select_opening_time': 'कृपया उघडण्याची वेळ निवडा',
+  'please_select_closing_time': 'कृपया बंद होण्याची वेळ निवडा',
+  'please_enter_contact_number': 'कृपया संपर्क क्रमांक प्रविष्ट करा',
+  'please_enter_email_address': 'कृपया ईमेल पत्ता प्रविष्ट करा',
+  'please_enter_website': 'कृपया वेबसाइट प्रविष्ट करा',
+  'please_enter_valid_website_url': 'कृपया वैध वेबसाइट URL प्रविष्ट करा',
+  'please_add_business_photo': 'कृपया किमान एक व्यवसाय फोटो जोडा',
+  
+  'registration_failed': 'नोंदणी अयशस्वी',
+  'validation_failed': 'प्रमाणीकरण अयशस्वी',
+  'something_went_wrong': 'काहीतरी चूक झाली',
+  'unexpected_error_occurred': 'अनपेक्षित त्रुटी आली',
+  'business_updated_successfully': 'व्यवसाय यशस्वीरित्या अपडेट केला',
+  
+  'please_enter_category_name': 'कृपया श्रेणीचे नाव प्रविष्ट करा',
+  'category_added_successfully': 'श्रेणी यशस्वीरित्या जोडली',
+  'failed_to_add_category': 'श्रेणी जोडण्यात अयशस्वी',
+  'error_occurred': 'त्रुटी आली',
+  
+  'no_plans_found_showing_all': 'तुमच्या व्यवसाय प्रकारासाठी कोणतीही विशिष्ट योजना आढळली नाही. सर्व योजना दाखवत आहे.',
+  'failed_to_create_payment_order': 'पेमेंट ऑर्डर तयार करण्यात अयशस्वी',
+  'payment_initialization_failed': 'पेमेंट सुरू करण्यात अयशस्वी',
+
+  // Job Creation Validation Messages
+  'please_enter_job_title': 'कृपया नोकरीचे शीर्षक प्रविष्ट करा',
+  'please_enter_job_description': 'कृपया नोकरीचे वर्णन प्रविष्ट करा',
+  'please_enter_requirements': 'कृपया आवश्यकता प्रविष्ट करा',
+  'please_select_job_type': 'कृपया नोकरीचा प्रकार निवडा',
+  'please_select_experience_level': 'कृपया अनुभव स्तर निवडा',
+  'please_select_employment_type': 'कृपया रोजगार प्रकार निवडा',
+  'please_select_job_category': 'कृपया नोकरी श्रेणी निवडा',
 };
 
 

@@ -1,4 +1,31 @@
 {
-  "loading": "Loading...",
-  "hello": "Hello"
+  "loading": "جاري التحميل...",
+  "hello": "مرحبا",
+  
+  "please_enter_business_name": "الرجاء إدخال اسم العمل",
+  "please_fill_required_fields": "يرجى ملء جميع الحقول المطلوبة",
+  "please_select_business_type": "الرجاء تحديد نوع العمل",
+  "please_select_business_category": "الرجاء تحديد فئة العمل",
+  "please_enter_business_description": "الرجاء إدخال وصف العمل",
+  "please_select_opening_time": "الرجاء تحديد وقت الافتتاح",
+  "please_select_closing_time": "الرجاء تحديد وقت الإغلاق",
+  "please_enter_contact_number": "الرجاء إدخال رقم الاتصال",
+  "please_enter_email_address": "الرجاء إدخال عنوان البريد الإلكتروني",
+  "please_enter_website": "الرجاء إدخال الموقع الإلكتروني",
+  "please_enter_valid_website_url": "الرجاء إدخال عنوان URL صالح للموقع",
+  "please_add_business_photo": "يرجى إضافة صورة واحدة على الأقل للعمل",
+  
+  "registration_failed": "فشل التسجيل",
+  "something_went_wrong": "حدث خطأ ما",
+  "unexpected_error_occurred": "حدث خطأ غير متوقع",
+  "business_updated_successfully": "تم تحديث العمل بنجاح",
+  
+  "please_enter_category_name": "الرجاء إدخال اسم الفئة",
+  "category_added_successfully": "تمت إضافة الفئة بنجاح",
+  "failed_to_add_category": "فشل في إضافة الفئة",
+  "error_occurred": "حدث خطأ",
+  
+  "no_plans_found_showing_all": "لم يتم العثور على خطط محددة لنوع عملك. عرض جميع الخطط.",
+  "failed_to_create_payment_order": "فشل في إنشاء أمر الدفع",
+  "payment_initialization_failed": "فشل تهيئة الدفع"
 }

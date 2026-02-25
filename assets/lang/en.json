@@ -1,4 +1,31 @@
 {
   "loading": "Loading...",
-  "hello": "Hello"
+  "hello": "Hello",
+  
+  "please_enter_business_name": "Please enter business name",
+  "please_fill_required_fields": "Please fill all required fields",
+  "please_select_business_type": "Please select business type",
+  "please_select_business_category": "Please select business category",
+  "please_enter_business_description": "Please enter business description",
+  "please_select_opening_time": "Please select opening time",
+  "please_select_closing_time": "Please select closing time",
+  "please_enter_contact_number": "Please enter contact number",
+  "please_enter_email_address": "Please enter email address",
+  "please_enter_website": "Please enter website",
+  "please_enter_valid_website_url": "Please enter a valid website URL",
+  "please_add_business_photo": "Please add at least one business photo",
+  
+  "registration_failed": "Registration failed",
+  "something_went_wrong": "Something went wrong",
+  "unexpected_error_occurred": "An unexpected error occurred",
+  "business_updated_successfully": "Business updated successfully",
+  
+  "please_enter_category_name": "Please enter category name",
+  "category_added_successfully": "Category added successfully",
+  "failed_to_add_category": "Failed to add category",
+  "error_occurred": "An error occurred",
+  
+  "no_plans_found_showing_all": "No specific plans found for your business type. Showing all plans.",
+  "failed_to_create_payment_order": "Failed to create payment order",
+  "payment_initialization_failed": "Payment initialization failed"
 }

@@ -35,7 +35,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
             children: [
               SectionTitle('business_information'.tr),
               AppInputTextField(
-                label: '${'business_name'.tr} *',
+                label: 'business_name'.tr,
+                isRequired: true,
                 controller: controller.bNameCtrl,
                 textInputType: TextInputType.text,
                 iconData: Icons.business_outlined,
@@ -44,14 +45,16 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               Obx(() => SingleDropdown(
                 controller: controller.bTypeCtrl,
-                label: '${'business_type'.tr} *',
+                label: 'business_type'.tr,
+                isRequired: true,
                 prefixIcon: Icons.category_rounded,
                 items: controller.businessTypes.toList(), // Using observable list
               )),
 
               Obx(() => SingleDropdown(
                 controller: controller.bCategoryCtrl,
-                label: '${'business_category'.tr} *',
+                label: 'business_category'.tr,
+                isRequired: true,
                 prefixIcon: Icons.category_rounded,
                 items: controller.businessCategories.toList(),
               )),
@@ -136,7 +139,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
               ),
 
               AppInputTextField(
-                label: '${'business_description'.tr} *',
+                label: 'business_description'.tr,
+                isRequired: true,
                 textInputType: TextInputType.text,
                 controller: controller.bDescCtrl,
                 maxLines: 4,
@@ -149,7 +153,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 children: [
                   Expanded(
                     child: AppInputTextField(
-                      label: '${'opening_time'.tr} *',
+                      label: 'opening_time'.tr,
+                      isRequired: true,
                       controller: controller.openingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.sunny,
@@ -167,7 +172,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                   const SizedBox(width: 12),
                   Expanded(
                     child: AppInputTextField(
-                      label: '${'closing_time'.tr} *',
+                      label: 'closing_time'.tr,
+                      isRequired: true,
                       controller: controller.closingTimeCtrl,
                       textInputType: TextInputType.none,
                       iconData: Icons.nightlight_outlined,
@@ -194,7 +200,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               SectionTitle('contact_information'.tr),
               AppInputTextField(
-                label: '${'contact_number'.tr} *',
+                label: 'contact_number'.tr,
+                isRequired: true,
                 iconData: CupertinoIcons.phone,
                 textInputType: TextInputType.phone,
                 controller: controller.phoneCtrl,
@@ -202,7 +209,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 hint: const [AutofillHints.telephoneNumber],
               ),
               AppInputTextField(
-                label: '${'email'.tr} *',
+                label: 'email'.tr,
+                isRequired: true,
                 iconData: CupertinoIcons.mail_solid,
                 textInputType: TextInputType.emailAddress,
                 controller: controller.emailCtrl,
@@ -210,7 +218,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 validator: FormValidator.email,
               ),
               AppInputTextField(
-                label: '${'website'.tr} *',
+                label: 'website'.tr,
+                isRequired: true,
                 iconData: Icons.language_rounded,
                 textInputType: TextInputType.webSearch,
                 controller: controller.websiteCtrl,
@@ -251,6 +260,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
               if (index < controller.existingImages.length) {
                   // Show Existing Image
                   final imageUrl = controller.existingImages[index];
+                  print("DEBUG_IMAGE_DISPLAY: Loading image from URL: $imageUrl");
                   return Stack(
                     children: [
                       ClipRRect(
@@ -260,7 +270,24 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(color: Colors.grey[200], child: Icon(Icons.broken_image, color: Colors.grey)),
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            print("DEBUG_IMAGE_ERROR: Failed to load $imageUrl - Error: $error");
+                            return Container(
+                              color: Colors.grey[200], 
+                              child: Icon(Icons.broken_image, color: Colors.grey)
+                            );
+                          },
                         ),
                       ),
                       Positioned(

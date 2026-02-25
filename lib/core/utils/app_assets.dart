@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class AppAssets {
   AppAssets._();
@@ -7,10 +8,21 @@ class AppAssets {
   /// Images
   static const String _imgPrefix = 'assets/images';
   static const String imgAppLogo = '$_imgPrefix/app_logo_en.png';
+  static const String imgAppLogoMr = '$_imgPrefix/app_logo_mr.png';
   static const String imgTitleLogo = '$_imgPrefix/app_title_logo.png';
   static const String imgBgApp = '$_imgPrefix/bg_app.jpg';
   static const String imgAppTitle = '$_imgPrefix/app_title.png';
   static const String imgBirthday = '$_imgPrefix/img_birthday.svg';
+  
+  /// Get logo based on current language
+  static String getAppLogo() {
+    // Get current locale from GetX
+    final locale = Get.locale;
+    if (locale?.languageCode == 'mr') {
+      return imgAppLogoMr;
+    }
+    return imgAppLogo;
+  }
 
   static const String imgIntro1 = '$_imgPrefix/img_intro_page_1.png';
   static const String imgIntro2 = '$_imgPrefix/img_intro_page_2.jpg';

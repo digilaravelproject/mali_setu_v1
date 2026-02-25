@@ -426,9 +426,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.inventory_2_outlined, context),
+          _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.shopping_bag_outlined, context),
           _buildVerticalDivider(context),
-          _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.room_service_outlined, context),
+          _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, context),
           _buildVerticalDivider(context),
           _buildStatItem('jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', Icons.work_outline, context),
           _buildVerticalDivider(context),
@@ -1156,9 +1156,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
               const SizedBox(height: 30),
               const SizedBox(height: 16),
               _buildInfoCard('additional_information'.tr, [
-                _buildInfoRow(Icons.inventory, 'total_products'.tr, '${business.products?.length ?? 0}', context),
-                _buildInfoRow(Icons.room_service, 'total_services'.tr, '${business.services?.length ?? 0}', context),
-                _buildInfoRow(Icons.work, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),
+                _buildInfoRow(Icons.shopping_bag_outlined, 'total_products'.tr, '${business.products?.length ?? 0}', context),
+                _buildInfoRow(Icons.design_services_outlined, 'total_services'.tr, '${business.services?.length ?? 0}', context),
+                _buildInfoRow(Icons.work_outline, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),
               ], context),
               const SizedBox(height: 20),
             ]),

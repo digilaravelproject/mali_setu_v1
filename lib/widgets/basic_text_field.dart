@@ -257,6 +257,7 @@ class SingleDropdown extends StatelessWidget {
   final IconData? suffixIcon;
   final String? hint;
   final List<String> items;
+  final bool isRequired;
 
   const SingleDropdown({
     super.key,
@@ -267,6 +268,7 @@ class SingleDropdown extends StatelessWidget {
     this.suffixIcon,
     this.icon,
     this.hint,
+    this.isRequired = false,
   });
 
   @override
@@ -274,6 +276,7 @@ class SingleDropdown extends StatelessWidget {
     return AppInputTextField(
       controller: controller,
       label: label ?? "No Label",
+      isRequired: isRequired,
       isDropdown: true,
       dropdownItems: items,
       iconData: prefixIcon != null ? prefixIcon : null, // prefix icon

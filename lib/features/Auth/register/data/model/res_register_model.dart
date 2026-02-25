@@ -15,13 +15,53 @@ class ResRegisterModel {
 
   String? get messageString {
     if (errors != null && errors!.isNotEmpty) {
-      // Aggregate all errors into a single string
+      // Create a map of field names to user-friendly labels
+      final fieldLabels = {
+        'title': 'Title',
+        'name': 'Full Name',
+        'email': 'Email',
+        'phone': 'Mobile Number',
+        'dob': 'Date of Birth',
+        'age': 'Age',
+        'occupation': 'Occupation',
+        'address': 'Address',
+        'nearby_location': 'Nearby Location',
+        'pincode': 'Pin Code',
+        'road_number': 'Road Number',
+        'state': 'State',
+        'city': 'City',
+        'sector': 'Sector',
+        'district': 'District',
+        'destination': 'Destination',
+        'cast_certificate': 'Caste Certificate',
+        'user_type': 'User Type',
+        'password': 'Password',
+        'password_confirmation': 'Confirm Password',
+        'company_name': 'Company Name',
+        'dept_name': 'Department Name',
+        'designation': 'Designation',
+      };
+      
+      // Aggregate all errors with proper field names
       List<String> allErrors = [];
       errors!.forEach((key, value) {
+        // Get user-friendly field name
+        String fieldName = fieldLabels[key] ?? key.replaceAll('_', ' ').split(' ').map((word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1)).join(' ');
+        
         if (value is List) {
-          allErrors.addAll(value.map((e) => e.toString()));
+          for (var error in value) {
+            String errorMsg = error.toString();
+            // Replace generic field references with actual field name
+            errorMsg = errorMsg.replaceAll('title field', '$fieldName field');
+            errorMsg = errorMsg.replaceAll('The title', 'The $fieldName');
+            allErrors.add(errorMsg);
+          }
         } else {
-          allErrors.add(value.toString());
+          String errorMsg = value.toString();
+          // Replace generic field references with actual field name
+          errorMsg = errorMsg.replaceAll('title field', '$fieldName field');
+          errorMsg = errorMsg.replaceAll('The title', 'The $fieldName');
+          allErrors.add(errorMsg);
         }
       });
       return allErrors.join("\n");

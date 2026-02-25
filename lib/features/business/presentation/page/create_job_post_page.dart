@@ -41,6 +41,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
 
             AppInputTextField(
               label: 'job_title'.tr,
+              isRequired: true,
               hintText: 'job_title_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.titleCtrl,
@@ -49,6 +50,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
 
             AppInputTextField(
               label: 'job_description'.tr,
+              isRequired: true,
               hintText: 'job_description_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.descriptionCtrl,
@@ -59,6 +61,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
 
             AppInputTextField(
               label: 'requirements'.tr,
+              isRequired: true,
               hintText: 'requirements_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.requirementsCtrl,
@@ -72,6 +75,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             SectionTitle('job_details'.tr),
             AppInputTextField(
               label: 'salary_range'.tr,
+              isRequired: true,
               hintText: 'salary_range_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.salaryRangeCtrl,
@@ -80,10 +84,12 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             SingleDropdown(
               controller: controller.jobTypeCtrl,
               label: 'job_type'.tr,
+              isRequired: true,
               items: controller.getJobTypes(),
             ),
             AppInputTextField(
               label: 'location'.tr,
+              isRequired: true,
               hintText: 'location_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.locationCtrl,
@@ -92,16 +98,19 @@ class CreateJobPage extends GetWidget<CreateJobController> {
             SingleDropdown(
               controller: controller.experienceCtrl,
               label: 'experience_level'.tr,
+              isRequired: true,
               items: controller.getExperienceLevels(),
             ),
             SingleDropdown(
               controller: controller.employmentCtrl,
               label: 'employment_type'.tr,
+              isRequired: true,
               items: controller.getEmploymentTypes(),
             ),
             SingleDropdown(
               controller: controller.categoryCtrl,
               label: 'job_category'.tr,
+              isRequired: true,
               items: controller.getCategories(),
               onOtherSelected: () => _showCustomCategoryDialog(context),
             ),
@@ -116,6 +125,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                     child: AbsorbPointer(
                       child: AppInputTextField(
                         label: 'application_deadline'.tr,
+                        isRequired: true,
                         hintText: 'deadline_hint'.tr,
                         controller: controller.deadlineCtrl,
                         validator: (v) => v!.isEmpty ? 'deadline_required'.tr : null,
@@ -130,6 +140,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
                     child: AbsorbPointer(
                       child: AppInputTextField(
                         label: 'job_expiry_date'.tr,
+                        isRequired: true,
                         hintText: 'deadline_hint'.tr,
                         controller: controller.expiryCtrl,
                         validator: (v) => v!.isEmpty ? 'expiry_required'.tr : null,
@@ -414,6 +425,7 @@ class SingleDropdown extends StatelessWidget {
   final String? label;
   final String? hint;
   final List<String> items;
+  final bool isRequired;
   final VoidCallback? onOtherSelected;
 
   const SingleDropdown({
@@ -422,6 +434,7 @@ class SingleDropdown extends StatelessWidget {
     required this.items,
     this.label,
     this.hint,
+    this.isRequired = false,
     this.onOtherSelected,
   });
 
@@ -430,6 +443,7 @@ class SingleDropdown extends StatelessWidget {
     return AppInputTextField(
       controller: controller,
       label: label ?? 'no_label'.tr,
+      isRequired: isRequired,
       isDropdown: true,
       dropdownItems: items,
       onOtherSelected: onOtherSelected,

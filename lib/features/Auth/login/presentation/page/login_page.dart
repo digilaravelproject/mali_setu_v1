@@ -19,33 +19,43 @@ class LoginPage extends GetWidget<LoginController> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.transparent,
-        surfaceTintColor: AppColors.transparent,
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 32),
-            Text(
-              'welcome_back'.tr,
-              style: context.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+            const SizedBox(height: 48),
+            // Logo at the top - centered (language-based)
+            Center(
+              child: CustomImageView(
+                imagePath: AppAssets.getAppLogo(),
+                height: 80,
+                width: 80,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'login_to_continue'.tr,
-              style: context.textTheme.bodyLarge?.copyWith(
-                color: context.theme.colorScheme.onSurface.withValues(
-                  alpha: 0.7,
-                ),
+            const SizedBox(height: 24),
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    'welcome_back'.tr,
+                    style: context.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'login_to_continue'.tr,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: context.theme.colorScheme.onSurface.withValues(
+                        alpha: 0.7,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Form(
               key: controller.formKey,
               child: Column(
@@ -114,7 +124,7 @@ class LoginPage extends GetWidget<LoginController> {
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Row(
                 children: [
                   Expanded(
@@ -174,7 +184,7 @@ class LoginPage extends GetWidget<LoginController> {
 
             Center(
               child: Padding(
-                padding: const EdgeInsets.only(top: 24, bottom: 32),
+                padding: const EdgeInsets.only(top: 16, bottom: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

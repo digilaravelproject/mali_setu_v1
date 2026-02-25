@@ -1,4 +1,31 @@
 {
-  "loading": "Loading...",
-  "hello": "Hello"
+  "loading": "लोड हो रहा है...",
+  "hello": "नमस्ते",
+  
+  "please_enter_business_name": "कृपया व्यवसाय का नाम दर्ज करें",
+  "please_fill_required_fields": "कृपया सभी आवश्यक फ़ील्ड भरें",
+  "please_select_business_type": "कृपया व्यवसाय का प्रकार चुनें",
+  "please_select_business_category": "कृपया व्यवसाय की श्रेणी चुनें",
+  "please_enter_business_description": "कृपया व्यवसाय का विवरण दर्ज करें",
+  "please_select_opening_time": "कृपया खुलने का समय चुनें",
+  "please_select_closing_time": "कृपया बंद होने का समय चुनें",
+  "please_enter_contact_number": "कृपया संपर्क नंबर दर्ज करें",
+  "please_enter_email_address": "कृपया ईमेल पता दर्ज करें",
+  "please_enter_website": "कृपया वेबसाइट दर्ज करें",
+  "please_enter_valid_website_url": "कृपया एक मान्य वेबसाइट URL दर्ज करें",
+  "please_add_business_photo": "कृपया कम से कम एक व्यवसाय फोटो जोड़ें",
+  
+  "registration_failed": "पंजीकरण विफल रहा",
+  "something_went_wrong": "कुछ गलत हो गया",
+  "unexpected_error_occurred": "एक अप्रत्याशित त्रुटि हुई",
+  "business_updated_successfully": "व्यवसाय सफलतापूर्वक अपडेट किया गया",
+  
+  "please_enter_category_name": "कृपया श्रेणी का नाम दर्ज करें",
+  "category_added_successfully": "श्रेणी सफलतापूर्वक जोड़ी गई",
+  "failed_to_add_category": "श्रेणी जोड़ने में विफल",
+  "error_occurred": "एक त्रुटि हुई",
+  
+  "no_plans_found_showing_all": "आपके व्यवसाय प्रकार के लिए कोई विशिष्ट योजना नहीं मिली। सभी योजनाएं दिखा रहे हैं।",
+  "failed_to_create_payment_order": "भुगतान आदेश बनाने में विफल",
+  "payment_initialization_failed": "भुगतान प्रारंभ करने में विफल"
 }

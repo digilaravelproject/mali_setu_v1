@@ -20,51 +20,122 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
     final theme = context.theme;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Light background for contrast
+      backgroundColor: Colors.white,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 220,
+            expandedHeight: 180,
             pinned: true,
             backgroundColor: theme.primaryColor,
             elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () => Get.back(),
+            leading: Container(
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                onPressed: () => Get.back(),
+              ),
             ),
             flexibleSpace: FlexibleSpaceBar(
+              centerTitle: true,
               title: Text(
-                category.name?.toTitleCase() ?? "category_details".tr,
+                category.name?.toTitleCase() ?? "",
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
                   fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              centerTitle: false,
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  CustomImageView(
-                    url: category.photo != null && category.photo!.isNotEmpty
-                        ? category.photo
-                        : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
-                    fit: BoxFit.cover,
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      theme.primaryColor,
+                      theme.primaryColor.withOpacity(0.8),
+                    ],
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -30,
+                      top: -30,
+                      child: TweenAnimationBuilder(
+                        duration: const Duration(seconds: 3),
+                        tween: Tween<double>(begin: 0, end: 1),
+                        builder: (context, double value, child) {
+                          return Transform.rotate(
+                            angle: value * 6.28,
+                            child: child,
+                          );
+                        },
+                        child: Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      left: -50,
+                      bottom: -50,
+                      child: Container(
+                        width: 180,
+                        height: 180,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.05),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 40),
+                        child: TweenAnimationBuilder(
+                          duration: const Duration(milliseconds: 800),
+                          tween: Tween<double>(begin: 0, end: 1),
+                          builder: (context, double value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: Opacity(
+                                opacity: value,
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _getCategoryIcon(category.name),
+                              size: 50,
+                              color: theme.primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -74,29 +145,9 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   if (category.description != null && category.description!.isNotEmpty)
-                     Container(
-                       padding: const EdgeInsets.all(12),
-                       decoration: BoxDecoration(
-                         color: Colors.white,
-                         borderRadius: BorderRadius.circular(12),
-                         boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5))
-                         ]
-                       ),
-                       child: Text(
-                        category.description!,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700], 
-                          height: 1.5
-                        ),
-                      ),
-                     ),
-                  
                   if (category.isActive == false)
                     Container(
-                      margin: const EdgeInsets.only(top: 16),
+                      margin: const EdgeInsets.only(bottom: 16),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                          color: Colors.red.withOpacity(0.1),
@@ -116,8 +167,6 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                         ],
                       ),
                     ),
-                  
-                  const SizedBox(height: 24),
                   
                   Row(
                     children: [
@@ -181,6 +230,25 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String? categoryName) {
+    if (categoryName == null) return Icons.category;
+    
+    final name = categoryName.toLowerCase();
+    
+    if (name.contains('health')) return Icons.local_hospital;
+    if (name.contains('food')) return Icons.restaurant;
+    if (name.contains('repair') || name.contains('service')) return Icons.build;
+    if (name.contains('packer') || name.contains('mover')) return Icons.local_shipping;
+    if (name.contains('gym')) return Icons.fitness_center;
+    if (name.contains('education')) return Icons.school;
+    if (name.contains('medical')) return Icons.medical_services;
+    if (name.contains('test')) return Icons.science;
+    if (name.contains('laundry') || name.contains('laundries')) return Icons.local_laundry_service;
+    if (name.contains('fruit')) return Icons.apple;
+    
+    return Icons.category;
   }
 }
 

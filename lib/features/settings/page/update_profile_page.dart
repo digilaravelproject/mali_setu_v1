@@ -134,7 +134,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                             )
                           : CustomImageView(
                               url: user?.profileImage,
-                              imagePath: AppAssets.imgAppLogo,
+                              imagePath: AppAssets.getAppLogo(),
                               fit: BoxFit.cover,
                             ),
                     ),
