@@ -59,7 +59,6 @@ class RegisterController extends GetxController {
 
   final usertypeList = [
     'general',
-    'individual',
     'business',
     'matrimony',
     'volunteer'

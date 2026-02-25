@@ -83,6 +83,7 @@ class ImagePickerHelper {
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
+              const SizedBox(height: 16),
             ],
           ),
         );

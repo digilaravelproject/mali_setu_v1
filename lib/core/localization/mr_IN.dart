@@ -801,6 +801,11 @@ const Map<String, String> mrIN = {
   'no_received_requests': 'प्राप्त विनंत्या नाहीत',
   'send_connection_request': 'संपर्क विनंती पाठवा',
   'partner_preferences': 'जोडीदाराच्या अपेक्षा',
+  'request_sent': 'विनंती पाठवली',
+
+  'father' : 'बाबा',
+  'mother' : 'आई',
+  'search_members' : 'सदस्य शोधा',
 };
 
 

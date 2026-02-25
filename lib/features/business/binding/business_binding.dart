@@ -39,34 +39,34 @@ class BusinessBinding extends Bindings {
     // Get.lazyPut(() => MatrimonyController());
     // Get.lazyPut(() => FilterController(), fenix: true);
     // UseCases
-    Get.lazyPut<GetBusinessCategoriesUseCase>(() => GetBusinessCategoriesUseCase(repository: Get.find<BusinessRepository>()));
+    Get.lazyPut<GetBusinessCategoriesUseCase>(() => GetBusinessCategoriesUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
 
     Get.lazyPut<RegBusinessController>(() => RegBusinessController(
       getBusinessCategoriesUseCase: Get.find<GetBusinessCategoriesUseCase>(),
-    ));
+    ), fenix: true);
 
-    Get.lazyPut<BusinessDataSource>(() => BusinessDataSourceImpl(apiClient: Get.find()));
-    Get.lazyPut<BusinessRepository>(() => BusinessRepositoryImpl(dataSource: Get.find()));
-    Get.lazyPut<GetAllBusinessesUseCase>(() => GetAllBusinessesUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetMyBusinessesUseCase>(() => GetMyBusinessesUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetBusinessDetailsUseCase>(() => GetBusinessDetailsUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetBusinessProductsUseCase>(() => GetBusinessProductsUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetBusinessServicesUseCase>(() => GetBusinessServicesUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<AddBusinessProductUseCase>(() => AddBusinessProductUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<AddBusinessServiceUseCase>(() => AddBusinessServiceUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<UpdateBusinessUseCase>(() => UpdateBusinessUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<DeleteBusinessUseCase>(() => DeleteBusinessUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<CreateJobUseCase>(() => CreateJobUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<UpdateJobUseCase>(() => UpdateJobUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<DeleteJobUseCase>(() => DeleteJobUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetMyJobsUseCase>(() => GetMyJobsUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetJobDetailsUseCase>(() => GetJobDetailsUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<ToggleJobStatusUseCase>(() => ToggleJobStatusUseCase(Get.find<BusinessRepository>()));
-    Get.lazyPut<GetJobAnalyticsUseCase>(() => GetJobAnalyticsUseCase(Get.find<BusinessRepository>()));
-    Get.lazyPut<ApplyJobUseCase>(() => ApplyJobUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetMyApplicationsUseCase>(() => GetMyApplicationsUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<GetJobApplicationsUseCase>(() => GetJobApplicationsUseCase(repository: Get.find<BusinessRepository>()));
-    Get.lazyPut<UpdateApplicationStatusUseCase>(() => UpdateApplicationStatusUseCase(repository: Get.find<BusinessRepository>()));
+    Get.lazyPut<BusinessDataSource>(() => BusinessDataSourceImpl(apiClient: Get.find()), fenix: true);
+    Get.lazyPut<BusinessRepository>(() => BusinessRepositoryImpl(dataSource: Get.find()), fenix: true);
+    Get.lazyPut<GetAllBusinessesUseCase>(() => GetAllBusinessesUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetMyBusinessesUseCase>(() => GetMyBusinessesUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetBusinessDetailsUseCase>(() => GetBusinessDetailsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetBusinessProductsUseCase>(() => GetBusinessProductsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetBusinessServicesUseCase>(() => GetBusinessServicesUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<AddBusinessProductUseCase>(() => AddBusinessProductUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<AddBusinessServiceUseCase>(() => AddBusinessServiceUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<UpdateBusinessUseCase>(() => UpdateBusinessUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<DeleteBusinessUseCase>(() => DeleteBusinessUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<CreateJobUseCase>(() => CreateJobUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<UpdateJobUseCase>(() => UpdateJobUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<DeleteJobUseCase>(() => DeleteJobUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetMyJobsUseCase>(() => GetMyJobsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetJobDetailsUseCase>(() => GetJobDetailsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<ToggleJobStatusUseCase>(() => ToggleJobStatusUseCase(Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetJobAnalyticsUseCase>(() => GetJobAnalyticsUseCase(Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<ApplyJobUseCase>(() => ApplyJobUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetMyApplicationsUseCase>(() => GetMyApplicationsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetJobApplicationsUseCase>(() => GetJobApplicationsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<UpdateApplicationStatusUseCase>(() => UpdateApplicationStatusUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     
     // Controllers at the end
     Get.lazyPut<CreateJobController>(() => CreateJobController(

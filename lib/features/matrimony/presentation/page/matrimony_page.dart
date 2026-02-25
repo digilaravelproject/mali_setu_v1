@@ -135,6 +135,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                     filterCtrl.recentlyCreated.value = 'one_week';
                   }
                   filterCtrl.update();
+                  // Reset current index when tab changes
+                  controller.currentIndex.value = 0;
                   controller.fetchProfiles(filters: filterCtrl.getFilters());
                 },
                 dividerHeight: 0,
@@ -281,91 +283,77 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         // ACTION BUTTONS
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Reject Button
-              _buildActionButton(
-                onTap: () {
-                    final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
-                    controller.rejectRequest(currentProfileId);
-                    controller.swiperController.swipe(CardSwiperDirection.left);
-                },
-                icon: Icons.close_rounded,
-                color: Colors.redAccent,
-                size: 30,
-                elevation: 5,
-              ),
+          child: Obx(() {
+            // Check if profiles exist and index is valid
+            if (controller.profiles.isEmpty || controller.currentIndex.value >= controller.profiles.length) {
+              return const SizedBox.shrink();
+            }
 
-              // Super Like / Chat (Middle)
-              Obx(() {
-                 if (controller.profiles.isEmpty) return const SizedBox();
-                 final currentProfile = controller.profiles[controller.currentIndex.value];
-                 // If already connected, show chat
-                 final status = currentProfile.connectionStatus?.toLowerCase();
-                 final isAccepted = status == "accepted";
+            final currentProfile = controller.profiles[controller.currentIndex.value];
+            final status = currentProfile.connectionStatus?.toLowerCase();
+            final isAccepted = status == "accepted";
+            final isConnected = status != "not_connected";
 
-                 return _buildActionButton(
-                    onTap: isAccepted ? () => Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                      'conversation_id': null,
-                      'other_user_id': currentProfile.user?.id,
-                    }) : () {
-                      // Maybe super like functionality or just info
-                      Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentProfile.id});
-                    },
-                    icon: isAccepted ? Icons.chat_bubble_rounded : Icons.info_rounded,
-                    color: Colors.blueAccent,
-                    size: 24,
-                    elevation: 3,
-                    isSmall: true,
-                 );
-              }),
-
-              // // Connect/Like Button
-              //  Obx(() {
-              //     if (controller.profiles.isEmpty) return const SizedBox();
-              //     final currentProfile = controller.profiles[controller.currentIndex.value];
-              //     final status = currentProfile.connectionStatus?.toLowerCase();
-              //     final isConnected = status != "not_connected";
-              //
-              //     return _buildActionButton(
-              //       onTap: isConnected ? null : () {
-              //         controller.sendConnectionRequest(currentProfile.id);
-              //         controller.swiperController.swipe(CardSwiperDirection.right);
-              //       },
-              //       icon: isConnected ? Icons.check : Icons.favorite_rounded,
-              //       color: isConnected ? Colors.green : Colors.purpleAccent,
-              //       size: 32,
-              //       elevation: 5,
-              //     );
-              //  }),
-
-              Obx(() {
-                if (controller.profiles.isEmpty) return const SizedBox();
-
-                final currentProfile = controller.profiles[controller.currentIndex.value];
-                final status = currentProfile.connectionStatus?.toLowerCase();
-                final isConnected = status != "not_connected";
-
-                // Agar already connected, button hide
-                if (isConnected) return const SizedBox();
-
-                // NOT connected → show check icon
-                return _buildActionButton(
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Reject Button
+                if (!isConnected)
+                _buildActionButton(
                   onTap: () {
-                    controller.sendConnectionRequest(currentProfile.id);
-                    controller.swiperController.swipe(CardSwiperDirection.right);
+                    try {
+                      final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
+                      controller.rejectRequest(currentProfileId);
+                      controller.swiperController.swipe(CardSwiperDirection.left);
+                    } catch (e) {
+                      print("Error rejecting request: $e");
+                    }
                   },
-                  icon: Icons.check, // ✅ icon
-                  color: Colors.green,
-                  size: 32,
+                  icon: Icons.close_rounded,
+                  color: Colors.redAccent,
+                  size: 30,
                   elevation: 5,
-                );
-              }),
+                )
+                else
+                  const SizedBox(width: 56), // Placeholder to maintain spacing
 
 
-            ],
-          ),
+                // Super Like / Chat (Middle)
+                _buildActionButton(
+                  onTap: isAccepted ? () => Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                    'conversation_id': null,
+                    'other_user_id': currentProfile.user?.id,
+                  }) : () {
+                    Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentProfile.id});
+                  },
+                  icon: isAccepted ? Icons.chat_bubble_rounded : Icons.info_rounded,
+                  color: Colors.blueAccent,
+                  size: 24,
+                  elevation: 3,
+                  isSmall: true,
+                ),
+
+                // Connect Button
+                if (!isConnected)
+                  _buildActionButton(
+                    onTap: () {
+                      try {
+                        controller.sendConnectionRequest(currentProfile.userId);
+                        controller.swiperController.swipe(CardSwiperDirection.right);
+                      } catch (e) {
+                        print("Error sending connection request: $e");
+                      }
+                    },
+                    icon: Icons.check,
+                    color: Colors.green,
+                    size: 32,
+                    elevation: 5,
+                  )
+                else
+                  const SizedBox(width: 56), // Placeholder to maintain spacing
+              ],
+            );
+          }),
         ),
       ],
     );

@@ -803,7 +803,12 @@ const Map<String, String> enUS = {
   'send_connection_request': 'Send Connection Request',
   'partner_preferences': 'Partner Preferences',
   'personal_details': 'Personal Details',
+  'request_sent': 'Request Sent',
 
+
+  'father' : 'Father',
+  'mother' : 'Mother',
+  'search_members' : 'Search Member',
 
 
 
