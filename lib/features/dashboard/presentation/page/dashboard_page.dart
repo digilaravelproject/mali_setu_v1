@@ -38,13 +38,10 @@ class DashboardPage extends GetWidget<DashboardController> {
         return true; // No causes? Just let normal exit flow handle it
       },
       extendBody: false,
-      body: PageView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: controller.pageController,
-        onPageChanged: (p) => controller.currentPage.value = p,
-        itemCount: controller.screenList.length,
-        itemBuilder: (context, index) => controller.screenList.elementAt(index),
-      ),
+      body: Obx(() => IndexedStack(
+        index: controller.currentPage.value,
+        children: controller.screenList,
+      )),
       bottomNavigationBar: BottomAppBar(
         padding: EdgeInsets.zero,
         child: Row(

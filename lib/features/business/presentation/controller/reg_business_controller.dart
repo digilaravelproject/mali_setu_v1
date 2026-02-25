@@ -466,7 +466,9 @@ class RegBusinessController extends GetxController {
 
       // Prepare Multipart Body for Photos
       List<MultipartBody> multipartPhotos = [];
+      print("DEBUG_REG_BUSINESS: Preparing ${selectedImages.length} photos");
       for (var file in selectedImages) {
+        print("DEBUG_REG_BUSINESS: Image path: ${file.path}, Size: ${file.lengthSync()} bytes");
         multipartPhotos.add(MultipartBody(file: file, key: "photos[]"));
       }
 

@@ -1,14 +1,45 @@
 class ResRegisterModel {
   bool? success;
-  String? message;
+  dynamic message;
+  Map<String, dynamic>? errors;
   Data? data;
 
-  ResRegisterModel({this.success, this.message, this.data});
+  ResRegisterModel({this.success, this.message, this.errors, this.data});
 
   ResRegisterModel.fromJson(Map<String, dynamic> json) {
     success = json['success'];
     message = json['message'];
+    errors = json['errors'];
     data = json['data'] != null ? Data.fromJson(json['data']) : null;
+  }
+
+  String? get messageString {
+    if (errors != null && errors!.isNotEmpty) {
+      // Aggregate all errors into a single string
+      List<String> allErrors = [];
+      errors!.forEach((key, value) {
+        if (value is List) {
+          allErrors.addAll(value.map((e) => e.toString()));
+        } else {
+          allErrors.add(value.toString());
+        }
+      });
+      return allErrors.join("\n");
+    }
+    
+    if (message == null) return null;
+    if (message is String) return message;
+    if (message is Map) {
+      final messagesMap = message as Map;
+      if (messagesMap.isNotEmpty) {
+        final firstValue = messagesMap.values.first;
+        if (firstValue is List && firstValue.isNotEmpty) {
+          return firstValue.first.toString();
+        }
+        return firstValue.toString();
+      }
+    }
+    return message.toString();
   }
 
   Map<String, dynamic> toJson() {

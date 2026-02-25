@@ -328,14 +328,14 @@ class RegisterController extends GetxController {
       if (response.success == true ||
           response.message == "User registered successfully") {
         CustomSnackBar.showSuccess(
-          message: response.message ?? "Registration completed successfully",
+          message: response.messageString ?? "Registration completed successfully",
         );
 
         await Future.delayed(const Duration(seconds: 2));
         Get.offAllNamed(AppRoutes.login);
       } else {
         CustomSnackBar.showError(
-            message: response.message ?? "Registration failed");
+            message: response.messageString ?? "Registration failed");
       }
     } catch (e) {
       debugPrint("Registration error: $e");

@@ -253,6 +253,10 @@ class ApiChecker {
           message;
     }
 
+    if (message.contains("Disk quota exceeded")) {
+      message = "The server is currently experiencing temporary storage issues. Please contact support or try again later.";
+    }
+
     CustomSnackBar.showError(message: message);
   }
 

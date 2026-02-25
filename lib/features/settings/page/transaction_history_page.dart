@@ -475,6 +475,8 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
                           fontSize: 16,
                           color: Color(0xFF1A1D2E),
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -485,12 +487,16 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
                             color: Colors.grey[400],
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            _formatDate(transaction.createdAt),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[500],
-                              fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Text(
+                              _formatDate(transaction.createdAt),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[500],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -538,12 +544,16 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    "Valid for ${transaction.subscriptionPeriod} months",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                      fontWeight: FontWeight.w500,
+                  Expanded(
+                    child: Text(
+                      "Valid for ${transaction.subscriptionPeriod} months",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

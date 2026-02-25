@@ -173,7 +173,9 @@ class _SnackBarContent extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        message,
+                        message.length > 1000 ? "${message.substring(0, 1000)}..." : message,
+                        maxLines: 15,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: _getTextColor(context),
                           fontSize: 13,

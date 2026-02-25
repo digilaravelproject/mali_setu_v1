@@ -50,7 +50,17 @@ class ApiClient {
         if (language != null && language.isNotEmpty) {
           options.headers["language"] = language;
         }
-        options.headers["Content-Type"] = "application/json";
+        
+        // Add Accept header to tell server we expect JSON
+        options.headers["Accept"] = "application/json";
+
+        // Only set Content-Type to json if NOT sending FormData
+        // FormData sets its own Content-Type with boundary
+        if (options.data is FormData) {
+          options.headers.remove("Content-Type");
+        } else {
+          options.headers["Content-Type"] = "application/json";
+        }
 
         // Logging Request
         print("DEBUG_HEADERS: ${options.headers}"); // FORCE PRINT
@@ -310,12 +320,26 @@ class ApiClient {
             ));
           } else {
             File file = File(multipart.file!.path);
+            String fileName = basename(file.path);
+            String ext = extension(fileName).toLowerCase().replaceAll('.', '');
+            
+            // Map extension to media type
+            MediaType mediaType;
+            if (ext == 'png') {
+              mediaType = MediaType('image', 'png');
+            } else if (ext == 'pdf') {
+              mediaType = MediaType('application', 'pdf');
+            } else {
+              mediaType = MediaType('image', 'jpeg');
+            }
+
+            print("DEBUG_MULTIPART: Adding file: key=${multipart.key}, name=$fileName, size=${file.lengthSync()} bytes, mime=$mediaType");
             formData.files.add(MapEntry(
               multipart.key,
               await MultipartFile.fromFile(
                 file.path,
-                filename: basename(file.path),
-                contentType: MediaType('image', 'jpeg'),
+                filename: fileName,
+                contentType: mediaType,
               ),
             ));
           }

@@ -18,8 +18,6 @@ class DashboardController extends GetxController {
   var currentPage = 0.obs;
   var hasShownBusinessDialog = false.obs;
 
-  var pageController = PageController();
-
   var screenList = <Widget>[
     HomePage(),
     //BusinessPage(),
@@ -244,7 +242,7 @@ class DashboardController extends GetxController {
   }
 
   changePage(int index) {
-    pageController.jumpToPage(index);
+    currentPage.value = index;
   }
 
   // Method to manually trigger business dialog check
