@@ -74,7 +74,11 @@ class HomePage extends GetWidget<HomeController> {
                             radius: 22,
                             backgroundColor: Colors.white,
                             backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
-                                ? NetworkImage(user.profileImage!)
+                                ? NetworkImage(
+                                    user.profileImage!.startsWith('http')
+                                        ? user.profileImage!
+                                        : "${ApiConstants.imageBaseUrl}${user.profileImage}"
+                                  )
                                 : null,
                             child: (user?.profileImage == null || user!.profileImage!.isEmpty)
                                 ? Padding(

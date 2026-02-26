@@ -711,6 +711,7 @@ const Map<String, String> mrIN = {
   
   // Messages
   "register_business_first": "कृपया प्रथम व्यवसाय नोंदवा/निवडा",
+  "business_verification_required": "नोकरी पोस्ट करण्यासाठी तुमचा व्यवसाय सत्यापित असणे आवश्यक आहे. कृपया प्रशासकाशी संपर्क साधा.",
   "job_created_success": "नोकरी पोस्टिंग यशस्वीरित्या तयार केली",
   "job_updated_success": "नोकरी पोस्टिंग यशस्वीरित्या अपडेट केली",
   "job_save_failed": "नोकरी पोस्टिंग जतन करण्यात अयशस्वी",

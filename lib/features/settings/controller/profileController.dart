@@ -301,6 +301,18 @@ class UpProfileController extends GetxController {
       Get.back(); // Close loading
 
       if (response.success) {
+        debugPrint("✅ Profile updated successfully");
+        debugPrint("📸 Current profile image: ${Get.find<AuthService>().currentUser.value?.profileImage}");
+        
+        // Refresh user data from AuthService to get updated profile image
+        final refreshResponse = await Get.find<AuthService>().refreshProfile();
+        
+        debugPrint("🔄 Refresh response success: ${refreshResponse.success}");
+        debugPrint("📸 After refresh profile image: ${Get.find<AuthService>().currentUser.value?.profileImage}");
+        
+        // Clear the local selected image so it shows server image
+        profileImage.value = null;
+        
         Get.back(); // Close update screen
         CustomSnackBar.showSuccess(
           message: 'Profile updated successfully',

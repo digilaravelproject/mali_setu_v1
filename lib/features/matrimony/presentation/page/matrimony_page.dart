@@ -543,51 +543,71 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
   Widget _buildCardImage(UserProfile user) {
     if (user.imageUrl == null || user.imageUrl!.isEmpty) {
-      return  CustomImageView(
-        imagePath: "assets/images/person_images.png",
-        fit: BoxFit.cover,
+      return Container(
         width: double.infinity,
         height: double.infinity,
-        errorWidget: (context, url, error) {
-          print("Image load error for $url: $error");
-          return Container(
-            color: Colors.grey[300],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.image_not_supported_rounded, size: 60, color: Colors.grey[600]),
-                  const SizedBox(height: 8),
-                  Text(
-                    'image_load_failed'.tr,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(Get.context!).primaryColor.withOpacity(0.8),
+              Theme.of(Get.context!).primaryColor,
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Decorative circles
+            Positioned(
+              top: -30,
+              right: -30,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.15),
+                ),
               ),
             ),
-          );
-        },
-        placeHolder: (context, url) {
-          return Container(
-            color: Colors.grey[200],
-            child: Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(Get.context!).primaryColor,
+            Positioned(
+              bottom: -20,
+              left: -20,
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withOpacity(0.15),
+                ),
               ),
             ),
-          );
-        },
+            // Center icon
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 80,
+                  color: Theme.of(Get.context!).primaryColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       );
-      //   Container(
-      //   height: double.infinity,
-      //   width: double.infinity,
-      //   color: Colors.grey[300],
-      //   child: Center(
-      //     child: Image.asset("assets/images/person_images.png", fit: BoxFit.cover),
-      //
-      //     //Icon(Icons.image_not_supported_rounded, size: 60, color: Colors.grey[600]),
-      //   ),
-      // );
     }
 
     return CustomImageView(

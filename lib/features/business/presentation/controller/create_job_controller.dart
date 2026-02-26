@@ -21,6 +21,10 @@ class CreateJobController extends GetxController {
   final isEditMode = false.obs;
   final editingJobId = Rxn<int>();
 
+  /// Business Selection
+  final selectedBusinessId = Rxn<int>();
+  final businessCtrl = TextEditingController();
+
   /// Text Controllers
   final titleCtrl = TextEditingController();
   final descriptionCtrl = TextEditingController();
@@ -202,6 +206,15 @@ class CreateJobController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    
+    // Auto-select business if coming from business detail page
+    final businessController = Get.find<BusinessController>();
+    if (businessController.myBusiness.value != null) {
+      selectedBusinessId.value = businessController.myBusiness.value!.id;
+      businessCtrl.text = businessController.myBusiness.value!.businessName ?? '';
+      debugPrint("🏢 Auto-selected business: ${businessCtrl.text} (ID: ${selectedBusinessId.value})");
+    }
+    
     // Listen to category changes
     categoryCtrl.addListener(_onCategoryChanged);
   }
@@ -254,6 +267,18 @@ class CreateJobController extends GetxController {
     isEditMode.value = true;
     editingJobId.value = job.id;
 
+    // Set business ID
+    selectedBusinessId.value = job.businessId ?? job.business?.id;
+    if (selectedBusinessId.value != null) {
+      final businessController = Get.find<BusinessController>();
+      final business = businessController.myBusinesses.firstWhereOrNull(
+        (b) => b.id == selectedBusinessId.value
+      );
+      if (business != null) {
+        businessCtrl.text = business.businessName ?? '';
+      }
+    }
+
     titleCtrl.text = job.title ?? '';
     descriptionCtrl.text = job.description ?? '';
     requirementsCtrl.text = job.requirements ?? '';
@@ -275,6 +300,8 @@ class CreateJobController extends GetxController {
   void clearFields() {
     isEditMode.value = false;
     editingJobId.value = null;
+    selectedBusinessId.value = null;
+    businessCtrl.clear();
     titleCtrl.clear();
     descriptionCtrl.clear();
     requirementsCtrl.clear();
@@ -293,6 +320,7 @@ class CreateJobController extends GetxController {
   @override
   void onClose() {
     categoryCtrl.removeListener(_onCategoryChanged);
+    businessCtrl.dispose();
     titleCtrl.dispose();
     descriptionCtrl.dispose();
     requirementsCtrl.dispose();
@@ -313,12 +341,15 @@ class CreateJobController extends GetxController {
   }
 
   Future<void> onRegister() async {
-    final businessId = Get.find<BusinessController>().myBusiness.value?.id;
+    // Use selected business ID or fallback to current business
+    final businessId = selectedBusinessId.value ?? Get.find<BusinessController>().myBusiness.value?.id;
     
     if (businessId == null) {
       CustomSnackBar.showError(message: 'register_business_first');
       return;
     }
+
+    debugPrint("🏢 Using business ID: $businessId");
 
     // Comprehensive Validation
     if (titleCtrl.text.trim().isEmpty) {
@@ -395,12 +426,23 @@ class CreateJobController extends GetxController {
 
     try {
       isLoading.value = true;
+      
+      debugPrint("🔧 ${isEditMode.value ? 'Updating' : 'Creating'} job with data:");
+      debugPrint("📦 Request data: $data");
+      
       final BusinessResponse response;
       if (isEditMode.value && editingJobId.value != null) {
+        debugPrint("✏️ Edit mode - Job ID: ${editingJobId.value}");
         response = await updateJobUseCase(editingJobId.value!, data);
       } else {
+        debugPrint("➕ Create mode");
         response = await createJobUseCase(data);
       }
+      
+      debugPrint("📡 API Response:");
+      debugPrint("  - Success: ${response.success}");
+      debugPrint("  - Message: ${response.message}");
+      debugPrint("  - Errors: ${response.errors}");
       
       if (response.success == true) {
         Get.back();
@@ -416,10 +458,18 @@ class CreateJobController extends GetxController {
           bController.fetchJobDetails(editingJobId.value!);
         }
       } else {
+        // Handle specific error messages from API
+        String errorMessage = response.message ?? 'job_save_failed';
+        
+        // Check for business verification error
+        if (errorMessage.toLowerCase().contains('verified') || 
+            errorMessage.toLowerCase().contains('verification')) {
+          errorMessage = 'business_verification_required'.tr;
+        }
+        
         // Handle API error response with proper error extraction
         if (response.errors != null && response.errors!.isNotEmpty) {
           var errors = response.errors!;
-          String errorMessage = 'validation_failed';
           
           // Errors is an OBJECT (Map) - Laravel format
           List<String> allErrors = [];
@@ -432,13 +482,12 @@ class CreateJobController extends GetxController {
           if (allErrors.isNotEmpty) {
             errorMessage = allErrors.first;
           }
-          
-          CustomSnackBar.showError(message: errorMessage);
-        } else {
-          CustomSnackBar.showError(message: response.message ?? 'job_save_failed');
         }
+        
+        CustomSnackBar.showError(message: errorMessage);
       }
     } catch (e) {
+      debugPrint("❌ Job creation/update error: $e");
       CustomSnackBar.showError(message: 'unexpected_error_occurred');
       print("Job creation error: $e");
     } finally {

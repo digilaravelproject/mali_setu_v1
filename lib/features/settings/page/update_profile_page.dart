@@ -133,11 +133,18 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                               profileImage,
                               fit: BoxFit.cover,
                             )
-                          : CustomImageView(
-                              url: "${ApiConstants.imageBaseUrl}${user!.profileImage}",
-                              imagePath: AppAssets.imgAppLogo,
-                              fit: BoxFit.cover,
-                            ),
+                          : (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                              ? CustomImageView(
+                                  url: user.profileImage!.startsWith('http')
+                                      ? user.profileImage!
+                                      : "${ApiConstants.imageBaseUrl}${user.profileImage}",
+                                  imagePath: AppAssets.imgAppLogo,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  AppAssets.imgAppLogo,
+                                  fit: BoxFit.cover,
+                                ),
                     ),
                   ),
                 ),

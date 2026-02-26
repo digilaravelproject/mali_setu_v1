@@ -701,6 +701,7 @@ const Map<String, String> enUS = {
 
   // Messages
   "register_business_first": "Please Register/Select a Business first",
+  "business_verification_required": "Your business must be verified to post jobs. Please contact admin.",
   "job_created_success": "Job posting created successfully",
   "job_updated_success": "Job posting updated successfully",
   "job_save_failed": "Failed to save job posting",

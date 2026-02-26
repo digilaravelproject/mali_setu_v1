@@ -253,15 +253,25 @@ class AuthService extends GetxService {
   /// Update profile data
   Future<ApiResponse<User>> updateProfile(Map<String, dynamic> updateData) async {
     try {
+      debugPrint("🔧 Updating profile with data: $updateData");
+      
       final response = await _apiClient.put(
         ApiConstants.authProfileUpdate,
         data: updateData,
       );
 
+      debugPrint("📡 Update profile response status: ${response.statusCode}");
+      debugPrint("📡 Update profile response data: ${response.data}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         final userData = data['user'] ?? data['data']?['user'] ?? data['data'] ?? data;
+        
+        debugPrint("👤 Parsed user data: $userData");
+        
         final user = User.fromJson(userData);
+        
+        debugPrint("📸 New profile image from API: ${user.profileImage}");
         
         currentUser.value = user;
         await SharedPrefs.setString(
@@ -269,11 +279,15 @@ class AuthService extends GetxService {
           jsonEncode(user.toJson()),
         );
         
+        debugPrint("✅ User data saved to SharedPrefs");
+        debugPrint("📸 Current user profile image: ${currentUser.value?.profileImage}");
+        
         return ApiResponse.success(user);
       } else {
         return ApiResponse.error(response.data['message'] ?? 'Failed to update profile');
       }
     } catch (e) {
+      debugPrint("❌ Update profile error: $e");
       return ApiResponse.error(e.toString());
     }
   }

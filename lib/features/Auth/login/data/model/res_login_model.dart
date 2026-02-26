@@ -207,7 +207,8 @@ class User {
     emailVerifiedAt = json['email_verified_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    profileImage = json['profile_image'];
+    // Handle both 'profile_image' and 'photo' fields
+    profileImage = json['profile_image'] ?? json['photo'];
   }
 
   Map<String, dynamic> toJson() {

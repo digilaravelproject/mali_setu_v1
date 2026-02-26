@@ -408,6 +408,16 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   }
  
   Widget _buildStatsRow(Business business, BuildContext context) {
+    // Check if current user is the owner
+    final authService = Get.find<AuthService>();
+    final currentUser = authService.currentUser.value;
+    final isOwner = currentUser?.id == business.userId;
+    
+    // If owner, show all jobs count. Otherwise, hide pending jobs from count
+    final jobCount = isOwner 
+        ? controller.businessJobs.length 
+        : controller.businessJobs.where((j) => j.status != 'pending').length;
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -430,7 +440,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           _buildVerticalDivider(context),
           _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, context),
           _buildVerticalDivider(context),
-          _buildStatItem('jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', Icons.work_outline, context),
+          _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, context),
           _buildVerticalDivider(context),
           _buildStatItem('value'.tr, '0', Icons.currency_rupee, context),
         ],
@@ -900,6 +910,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
     final authService = Get.find<AuthService>();
     final currentUser = authService.currentUser.value;
     final business = controller.selectedBusiness.value ?? Get.arguments as Business;
+    
+    // Check if current user is the owner
+    final isOwner = currentUser?.id == business.userId;
 
     // If user is not logged in or doesn't match owner ID, hide section
     // if (currentUser?.id != business.userId) {
@@ -909,7 +922,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
         return _buildShimmerList(context);
       }
       
-      final displayedJobs = controller.businessJobs.where((job) => job.status != 'pending').toList();
+      // If owner, show all jobs including pending. Otherwise, hide pending jobs
+      final displayedJobs = isOwner 
+          ? controller.businessJobs 
+          : controller.businessJobs.where((job) => job.status != 'pending').toList();
       
       if (displayedJobs.isEmpty) {
          return CustomScrollView(

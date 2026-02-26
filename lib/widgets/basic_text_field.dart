@@ -86,9 +86,12 @@ class AppInputTextField extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Text(
-                label,
-                style: theme.textTheme.titleMedium
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               if (isRequired)
                 Text(
