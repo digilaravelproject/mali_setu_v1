@@ -241,32 +241,29 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
   }
 
   Widget _buildPhotoGrid(BuildContext context) {
+    final hasImage = controller.selectedImages.isNotEmpty || controller.existingImages.isNotEmpty;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (controller.selectedImages.isNotEmpty || controller.existingImages.isNotEmpty)
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            // Total count = existing + new
-            itemCount: controller.existingImages.length + controller.selectedImages.length,
-            itemBuilder: (context, index) {
-              // Check if index is within existing images range
-              if (index < controller.existingImages.length) {
-                  // Show Existing Image
-                  final imageUrl = controller.existingImages[index];
-                  print("DEBUG_IMAGE_DISPLAY: Loading image from URL: $imageUrl");
-                  return Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          imageUrl,
+        if (hasImage)
+          Container(
+            width: double.infinity,
+            height: 200,
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: controller.selectedImages.isNotEmpty
+                      ? Image.file(
+                          controller.selectedImages[0],
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.network(
+                          controller.existingImages[0],
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
@@ -282,99 +279,108 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
-                            print("DEBUG_IMAGE_ERROR: Failed to load $imageUrl - Error: $error");
                             return Container(
-                              color: Colors.grey[200], 
-                              child: Icon(Icons.broken_image, color: Colors.grey)
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.broken_image, color: Colors.grey),
                             );
                           },
                         ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (controller.selectedImages.isNotEmpty) {
+                        controller.removeImage(0);
+                      } else {
+                        controller.removeExistingImage(0);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
                       ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () => controller.removeExistingImage(index),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, size: 16, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-              } else {
-                  // Show New Selected Image
-                  // Adjust index for selectedImages list
-                  final newIndex = index - controller.existingImages.length;
-                  return Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          controller.selectedImages[newIndex],
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () => controller.removeImage(newIndex),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, size: 16, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-              }
-            },
-          ).marginOnly(bottom: 16),
-        
-        InkWell(
-          onTap: () => controller.pickImages(context),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            decoration: BoxDecoration(
-              color: context.theme.primaryColor.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: context.theme.primaryColor.withValues(alpha: 0.3),
-                style: BorderStyle.solid,
-                width: 1.5,
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(Icons.add_a_photo_outlined, size: 32, color: context.theme.primaryColor),
-                const SizedBox(height: 8),
-                Text(
-                  controller.selectedImages.isEmpty 
-                    ? 'add_business_photos'.tr
-                    : 'add_more_photos'.tr,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: context.theme.primaryColor,
-                    fontWeight: FontWeight.w600,
+                      child: const Icon(Icons.close, size: 18, color: Colors.white),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        
+        if (!hasImage)
+          InkWell(
+            onTap: () => controller.pickImages(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              decoration: BoxDecoration(
+                color: context.theme.primaryColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: context.theme.primaryColor.withValues(alpha: 0.3),
+                  style: BorderStyle.solid,
+                  width: 1.5,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.add_a_photo_outlined, size: 40, color: context.theme.primaryColor),
+                  const SizedBox(height: 12),
+                  Text(
+                    'add_business_photos'.tr,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.theme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap to select a photo',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.theme.hintColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          InkWell(
+            onTap: () => controller.pickImages(context),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: context.theme.primaryColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: context.theme.primaryColor.withValues(alpha: 0.3),
+                  style: BorderStyle.solid,
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.edit, size: 18, color: context.theme.primaryColor),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Change Photo',
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.theme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }

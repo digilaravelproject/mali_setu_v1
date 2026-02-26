@@ -16,6 +16,7 @@ import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
+import 'package:intl/intl.dart';
 
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
@@ -118,8 +119,19 @@ class RegBusinessController extends GetxController {
       phoneCtrl.text = business.contactPhone ?? "";
       emailCtrl.text = business.contactEmail ?? "";
       websiteCtrl.text = business.website ?? "";
-      openingTimeCtrl.text = business.opening_time ?? "";
-      closingTimeCtrl.text = business.closing_time ?? "";
+      // openingTimeCtrl.text = business.opening_time ?? "";
+      // closingTimeCtrl.text = business.closing_time ?? "";
+
+
+      if (business.opening_time != null && business.opening_time!.isNotEmpty) {
+        DateTime openTime = DateTime.parse("2000-01-01 ${business.opening_time!}");
+        openingTimeCtrl.text = DateFormat.Hm().format(openTime); // HH:mm
+      }
+
+      if (business.closing_time != null && business.closing_time!.isNotEmpty) {
+        DateTime closeTime = DateTime.parse("2000-01-01 ${business.closing_time!}");
+        closingTimeCtrl.text = DateFormat.Hm().format(closeTime); // HH:mm
+      }
 
       // Handle Category (Fallback if needed, main logic in fetchCategories)
       if (business.category != null) {
@@ -128,7 +140,11 @@ class RegBusinessController extends GetxController {
 
       // Handle Existing Photo
       if (business.photo != null && business.photo!.isNotEmpty) {
-        existingImages.add(business.photo!);
+        // Prepend base URL if it's not already a full URL
+        final photoUrl = business.photo!.startsWith('http') 
+            ? business.photo! 
+            : ApiConstants.imageBaseUrl + business.photo!;
+        existingImages.add(photoUrl);
       }
     } else {
       // Auto-fill website with https:// for new registrations
@@ -358,7 +374,7 @@ class RegBusinessController extends GetxController {
     _imagePickerHelper.showImagePickerDialog(
       context,
       "business_photos",
-      allowMultiple: true,
+      allowMultiple: false,  // Changed to false for single image
     );
   }
 
@@ -422,7 +438,7 @@ class RegBusinessController extends GetxController {
       return;
     }
 
-    // Check for images in edit mode (if all existing were removed and no new ones added)
+    // Check for images in edit mode (must have at least one image - either existing or new)
     if (isEditMode && existingImages.isEmpty && selectedImages.isEmpty) {
       CustomSnackBar.showError(message: "Please add at least one business photo");
       return;
@@ -447,25 +463,58 @@ class RegBusinessController extends GetxController {
       };
       print("registerbusiness : " + body.toString());
 
-      if (isEditMode && businessId != null) {
-        final success = await Get.find<BusinessController>().updateBusiness(
-            businessId!, body);
-        print("updatebusiness : " + success.toString());
-        if (success) {
-          Get.back(); // Close Screen
-          CustomSnackBar.showSuccess(
-              message: "Business updated successfully");
-        }
-        return;
-      }
-
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
 
-      // Convert images to base64
+      if (isEditMode && businessId != null) {
+        // Convert images to base64
+        List<String> base64Images = [];
+        
+        // Add newly selected images as base64
+        for (var file in selectedImages) {
+          final bytes = await file.readAsBytes();
+          final base64String = base64Encode(bytes);
+          base64Images.add(base64String);
+        }
+
+        // Always add photos array (even if empty, to clear old images if user removed them)
+        body['photos'] = base64Images;
+
+        final response = await _apiClient.put(
+          "${ApiConstants.updateBusinessServices}/$businessId",
+          data: body,
+        );
+
+        Get.back(); // Close Loading
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final data = response.data;
+          if (data['success'] == true) {
+            // Refresh list if controller exists
+            if (Get.isRegistered<BusinessController>()) {
+              Get.find<BusinessController>().fetchMyBusinesses();
+            }
+            Get.back(); // Close Screen
+            CustomSnackBar.showSuccess(
+                message: "Business updated successfully");
+          } else {
+            CustomSnackBar.showError(
+                message: data['message'] ?? "Update failed");
+          }
+        } else {
+          final data = response.data;
+          CustomSnackBar.showError(
+              message: data['message'] ?? "Something went wrong");
+        }
+        return;
+      }
+
+      // Convert images to base64 for new registration
       List<String> base64Images = [];
+      
+      // Add newly selected images as base64
       for (var file in selectedImages) {
         final bytes = await file.readAsBytes();
         final base64String = base64Encode(bytes);
@@ -485,8 +534,6 @@ class RegBusinessController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
-          // CustomSnackBar.showSuccess(message: data['message'] ?? "Business registered successfully");
-
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
             Get.find<BusinessController>().fetchMyBusinesses();
