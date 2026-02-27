@@ -11,7 +11,7 @@ import 'package:edu_cluezer/features/business/data/model/business_plan_model.dar
 
 
 abstract class BusinessDataSource {
-  Future<BusinessResponse> getAllBusinesses({int page = 1});
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);
@@ -44,10 +44,15 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   BusinessDataSourceImpl({required this.apiClient});
 
   @override
-  Future<BusinessResponse> getAllBusinesses({int page = 1}) async {
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search}) async {
+    final Map<String, dynamic> queryParams = {'page': page};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    
     final response = await apiClient.get(
       ApiConstants.allBusiness,
-      queryParameters: {'page': page},
+      queryParameters: queryParams,
     );
     return BusinessResponse.fromJson(response.data);
   }

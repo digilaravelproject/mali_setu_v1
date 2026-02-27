@@ -386,13 +386,21 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
 
   @override
   Widget build(BuildContext context) {
+    // Clear search text when screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.searchText.value = "";
+    });
+    
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(
           icon:  Icon(Icons.arrow_back_ios_new_rounded,color: Get.iconColor,),
-          onPressed: () => Get.back(),
+          onPressed: () {
+            controller.searchText.value = ""; // Clear search on back
+            Get.back();
+          },
         ),
         elevation: 0,
         //backgroundColor: context.theme.primaryColor,
@@ -445,7 +453,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
               ),
               child: TextField(
                 onChanged: (value) {
-                  controller.searchText.value = value;
+                  controller.onSearchChanged(value);
                 },
                 decoration: InputDecoration(
                   hintText: "search_business_by_name".tr,
@@ -456,6 +464,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                     child: const Icon(Icons.clear, color: Colors.grey),
                           onTap: () {
                             controller.searchText.value = "";
+                            controller.fetchAllBusinesses(isRefresh: true);
                           },
                         )
                       : const SizedBox.shrink()),

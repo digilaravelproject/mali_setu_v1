@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:edu_cluezer/widgets/name_field_component.dart';
+import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +17,12 @@ import '../../domain/usecase/register_usecase.dart';
 class RegisterController extends GetxController {
   /// FORM KEY
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  
+  /// NAME FIELD COMPONENT KEY
+  final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
+  
+  /// PHONE FIELD COMPONENT KEY
+  final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
 
   /// BASIC DETAILS
   var selectedBirthDate = Rxn<DateTime>();
@@ -264,6 +272,20 @@ class RegisterController extends GetxController {
     if (!formKey.currentState!.validate()) {
       return;
     }
+    
+    // Validate name field component
+    final nameValidation = nameFieldKey.currentState?.validate();
+    if (nameValidation != null) {
+      CustomSnackBar.showError(message: nameValidation);
+      return;
+    }
+    
+    // Validate phone field component
+    final phoneValidation = phoneFieldKey.currentState?.validate();
+    if (phoneValidation != null) {
+      CustomSnackBar.showError(message: phoneValidation);
+      return;
+    }
 
     // Validate caste certificate
     if (!_validateCasteCertificate()) {
@@ -292,11 +314,17 @@ class RegisterController extends GetxController {
         castCertificateData = 'data:$mimeType;base64,$casteCertificateBase64';
       }
 
+      // Get combined name from NameFieldComponent
+      final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
+      
+      // Get combined phone from PhoneFieldComponent
+      final combinedPhone = phoneFieldKey.currentState?.getCombinedPhone() ?? '';
+
       final reqModel = ReqRegisterModel(
-        name: nameCtrl.text.trim(),
+        name: combinedName,
         email: emailCtrl.text.trim(),
         dob: ageCtrl.text.trim() ,
-        phone: mobileCtrl.text.trim(),
+        phone: combinedPhone,
         occupation: occupationCtrl.text.trim(),
         reffralCode: referralCtrl.text.trim().isEmpty
             ? null

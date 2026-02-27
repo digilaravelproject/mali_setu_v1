@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:edu_cluezer/widgets/name_field_component.dart';
+import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -91,6 +93,12 @@ import 'package:image_picker/image_picker.dart';
 
 
 class UpProfileController extends GetxController {
+  // NAME FIELD COMPONENT KEY
+  final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
+  
+  // PHONE FIELD COMPONENT KEY
+  final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
+  
   // Personal Information Controllers
   final fullNameCtrl = TextEditingController();
   final ageCtrl = TextEditingController();
@@ -246,17 +254,22 @@ class UpProfileController extends GetxController {
 
   // Update Profile
   Future<void> updateProfile() async {
-    // Validate fields
-    if (fullNameCtrl.text.isEmpty) {
-      CustomSnackBar.showError(message: 'Please enter full name');
+    // Validate name field component
+    final nameValidation = nameFieldKey.currentState?.validate();
+    if (nameValidation != null) {
+      CustomSnackBar.showError(message: nameValidation);
       return;
     }
+    
+    // Validate phone field component
+    final phoneValidation = phoneFieldKey.currentState?.validate();
+    if (phoneValidation != null) {
+      CustomSnackBar.showError(message: phoneValidation);
+      return;
+    }
+    
     if (emailCtrl.text.isEmpty || !GetUtils.isEmail(emailCtrl.text)) {
       CustomSnackBar.showError(message: 'Please enter valid email');
-      return;
-    }
-    if (phoneNumberCtrl.text.isEmpty) {
-      CustomSnackBar.showError(message: 'Please enter phone number');
       return;
     }
 
@@ -269,11 +282,17 @@ class UpProfileController extends GetxController {
         barrierDismissible: false,
       );
 
+      // Get combined name from NameFieldComponent
+      final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
+      
+      // Get combined phone from PhoneFieldComponent
+      final combinedPhone = phoneFieldKey.currentState?.getCombinedPhone() ?? '';
+
       // Prepare data
       final Map<String, dynamic> updateData = {
-        'name': fullNameCtrl.text,
+        'name': combinedName,
         'email': emailCtrl.text,
-        'phone': phoneNumberCtrl.text,
+        'phone': combinedPhone,
         'age': int.tryParse(ageCtrl.text),
         'occupation': occupationCtrl.text,
         'reffral_code': Get.find<AuthService>().currentUser.value?.reffralCode,

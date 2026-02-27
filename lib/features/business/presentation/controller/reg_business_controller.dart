@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -26,6 +27,9 @@ class RegBusinessController extends GetxController {
   final RazorpayController _razorpayController = Get.find<RazorpayController>();
 
   RegBusinessController({required this.getBusinessCategoriesUseCase});
+
+  /// PHONE FIELD COMPONENT KEY
+  final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
 
   /// Text Controllers
   final bNameCtrl = TextEditingController();
@@ -413,8 +417,12 @@ class RegBusinessController extends GetxController {
       return;
     }
     if (phoneCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please enter contact number");
-      return;
+      // Validate phone field component
+      final phoneValidation = phoneFieldKey.currentState?.validate();
+      if (phoneValidation != null) {
+        CustomSnackBar.showError(message: phoneValidation);
+        return;
+      }
     }
     if (emailCtrl.text.trim().isEmpty) {
       CustomSnackBar.showError(message: "Please enter email address");
@@ -449,13 +457,16 @@ class RegBusinessController extends GetxController {
       final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
       final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1;
 
+      // Get combined phone from PhoneFieldComponent
+      final combinedPhone = phoneFieldKey.currentState?.getCombinedPhone() ?? '';
+
       // Prepare Request Body
       final body = <String, dynamic>{
         "business_name": bNameCtrl.text,
         "business_type": typeId,
         "category_id": categoryId.toString(),
         "description": bDescCtrl.text,
-        "contact_phone": phoneCtrl.text,
+        "contact_phone": combinedPhone,
         "contact_email": emailCtrl.text,
         "website": websiteCtrl.text,
         "opening_time": openingTimeCtrl.text,

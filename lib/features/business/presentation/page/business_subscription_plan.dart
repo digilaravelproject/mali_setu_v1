@@ -24,6 +24,19 @@ class _BusinessBottomSheetState extends State<_BusinessBottomSheet> {
   BusinessPlan? selectedPlan;
 
   @override
+  void initState() {
+    super.initState();
+    // Select the highest price plan by default
+    if (widget.plans.isNotEmpty) {
+      selectedPlan = widget.plans.reduce((current, next) {
+        final currentPrice = double.tryParse(current.price ?? '0') ?? 0;
+        final nextPrice = double.tryParse(next.price ?? '0') ?? 0;
+        return currentPrice > nextPrice ? current : next;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(

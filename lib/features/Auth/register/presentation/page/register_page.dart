@@ -427,6 +427,8 @@ import 'package:get/get.dart';
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../../widgets/basic_text_field.dart';
+import '../../../../../widgets/name_field_component.dart';
+import '../../../../../widgets/phone_field_component.dart';
 import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_scaffold.dart';
 import '../controller/register_controller.dart';
@@ -459,12 +461,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                 title: "personal_information".tr,
                 icon: Icons.person_outline_rounded,
                 children: [
-                  AppInputTextField(
-                    label: "full_name".tr,
-                    textInputType: TextInputType.name,
-                    validator: FormValidator.name,
-                    controller: controller.nameCtrl,
-                    iconData: CupertinoIcons.profile_circled,
+                  NameFieldComponent(
+                    key: controller.nameFieldKey,
                     isRequired: true,
                   ),
                   const SizedBox(height: 12),
@@ -525,12 +523,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                     iconData: CupertinoIcons.calendar,
                   ),
                   const SizedBox(height: 12),
-                  AppInputTextField(
-                    label: "mobile_number".tr,
-                    textInputType: TextInputType.phone,
-                    validator: FormValidator.mobile,
-                    controller: controller.mobileCtrl,
-                    iconData: CupertinoIcons.phone,
+                  PhoneFieldComponent(
+                    key: controller.phoneFieldKey,
                     isRequired: true,
                   ),
                 ],

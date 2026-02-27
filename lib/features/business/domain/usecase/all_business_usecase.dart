@@ -22,8 +22,8 @@ class GetAllBusinessesUseCase {
 
   GetAllBusinessesUseCase({required this.repository});
 
-  Future<BusinessPaginationResult> call({int page = 1}) async {
-    final response = await repository.getAllBusinesses(page: page);
+  Future<BusinessPaginationResult> call({int page = 1, String? search}) async {
+    final response = await repository.getAllBusinesses(page: page, search: search);
     
     final businesses = response.data?.data ?? [];
     final currentPage = response.data?.currentPage ?? 1;

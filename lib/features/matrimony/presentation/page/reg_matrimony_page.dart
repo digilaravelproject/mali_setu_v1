@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
+import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
@@ -157,9 +158,9 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
             padding: const EdgeInsets.only(left: 16,right: 16,bottom: 16),
             child: Column(
               children: [
-                AppInputTextField(
-                  controller: controller.nameCtrl,
-                  label: "full_name".tr,
+                NameFieldComponent(
+                  key: controller.nameFieldKey,
+                  isRequired: true,
                 ),
                 const SizedBox(height: 12),
                 

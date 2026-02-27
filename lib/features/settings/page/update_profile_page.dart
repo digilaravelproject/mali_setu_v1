@@ -1,6 +1,8 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
+import 'package:edu_cluezer/widgets/name_field_component.dart';
+import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 // import 'package:edu_cluezer/widgets/custom_scaffold.dart'; // Removed as we use standard Scaffold
 import 'package:flutter/material.dart';
@@ -202,36 +204,24 @@ class UpdateProfilePage extends GetView<UpProfileController> {
       ),
       child: Column(
         children: [
-          AppInputTextField(
-            label: "full_name".tr,
-            controller: controller.fullNameCtrl,
-            textInputType: TextInputType.name,
-            iconData: Icons.person_outline_rounded,
-            validator: FormValidator.name,
+          NameFieldComponent(
+            key: controller.nameFieldKey,
+            initialName: Get.find<AuthService>().currentUser.value?.name,
+            isRequired: true,
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: AppInputTextField(
-                  label: "age".tr,
-                  controller: controller.ageCtrl,
-                  textInputType: TextInputType.number,
-                  iconData: Icons.cake_outlined,
-                  validator: FormValidator.age,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AppInputTextField(
-                  label: "phone".tr,
-                  controller: controller.phoneNumberCtrl,
-                  enable: false,
-                  textInputType: TextInputType.phone,
-                  iconData: Icons.phone_outlined,
-                ),
-              ),
-            ],
+          AppInputTextField(
+            label: "age".tr,
+            controller: controller.ageCtrl,
+            textInputType: TextInputType.number,
+            iconData: Icons.cake_outlined,
+            validator: FormValidator.age,
+          ),
+          const SizedBox(height: 16),
+          PhoneFieldComponent(
+            key: controller.phoneFieldKey,
+            initialPhone: Get.find<AuthService>().currentUser.value?.phone,
+            isRequired: true,
           ),
           const SizedBox(height: 16),
           AppInputTextField(

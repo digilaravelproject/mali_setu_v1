@@ -8,6 +8,7 @@ import 'package:get/get_utils/src/extensions/context_extensions.dart';
 
 import 'package:edu_cluezer/core/helper/form_validator.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
+import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 
@@ -199,14 +200,9 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
               const SizedBox(height: 24),
 
               SectionTitle('contact_information'.tr),
-              AppInputTextField(
-                label: 'contact_number'.tr,
+              PhoneFieldComponent(
+                key: controller.phoneFieldKey,
                 isRequired: true,
-                iconData: CupertinoIcons.phone,
-                textInputType: TextInputType.phone,
-                controller: controller.phoneCtrl,
-                validator: FormValidator.mobile,
-                hint: const [AutofillHints.telephoneNumber],
               ),
               AppInputTextField(
                 label: 'email'.tr,

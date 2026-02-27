@@ -2,6 +2,7 @@ import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repos
 import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +17,8 @@ class RegMatrimonyController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
 
+  /// NAME FIELD COMPONENT KEY
+  final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
 
   /// --- Text Controllers ---
   final nameCtrl = TextEditingController();
@@ -176,13 +179,24 @@ class RegMatrimonyController extends GetxController {
 
 
     //await fetchAndShowPlans();
+    
+    // Validate name field component
+    final nameValidation = nameFieldKey.currentState?.validate();
+    if (nameValidation != null) {
+      CustomSnackBar.showError(message: nameValidation);
+      return;
+    }
+    
     // Basic Validation
-    if (nameCtrl.text.isEmpty || gender.value.isEmpty || dobCtrl.text.isEmpty) {
+    if (gender.value.isEmpty || dobCtrl.text.isEmpty) {
         CustomSnackBar.showError(message: "Please fill required fields");
         return;
     }
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+
+      // Get combined name from NameFieldComponent
+      final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
 
       // Construct Nested JSON
       final Map<String, dynamic> body = {
@@ -192,7 +206,7 @@ class RegMatrimonyController extends GetxController {
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
         "personal_details": {
-            "name": nameCtrl.text,
+            "name": combinedName,
             "dob": dobCtrl.text, // "1997-05-12"
             "annual_income": annualIncomeCtrl.text,
             "occupation": jobTitleCtrl.text,

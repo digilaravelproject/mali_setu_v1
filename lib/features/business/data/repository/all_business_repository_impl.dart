@@ -11,8 +11,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   BusinessRepositoryImpl({required this.dataSource});
 
   @override
-  Future<BusinessResponse> getAllBusinesses({int page = 1}) {
-    return dataSource.getAllBusinesses(page: page);
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search}) {
+    return dataSource.getAllBusinesses(page: page, search: search);
   }
 
   @override

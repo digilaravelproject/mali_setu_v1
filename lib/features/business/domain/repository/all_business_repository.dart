@@ -4,7 +4,7 @@ import '../../data/model/business_plan_model.dart';
 
 
 abstract class BusinessRepository {
-  Future<BusinessResponse> getAllBusinesses({int page = 1});
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);

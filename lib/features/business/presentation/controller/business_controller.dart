@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -100,21 +101,35 @@ class BusinessController extends GetxController {
 
   // Search logic
   var searchText = "".obs;
-  List<Business> get filteredBusinesses {
-    if (searchText.isEmpty) {
-      return businesses;
-    }
-    return businesses
-        .where((b) => (b.businessName ?? "")
-            .toLowerCase()
-            .contains(searchText.value.toLowerCase()))
-        .toList();
+  Timer? _searchDebounce;
+  
+  // Getter for filtered businesses - now returns all loaded businesses
+  // Backend handles the filtering
+  List<Business> get filteredBusinesses => businesses;
+  
+  // Search with debounce
+  void onSearchChanged(String value) {
+    searchText.value = value;
+    
+    // Cancel previous timer
+    _searchDebounce?.cancel();
+    
+    // Start new timer - wait 500ms after user stops typing
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+      fetchAllBusinesses(isRefresh: true);
+    });
   }
 
   @override
   void onInit() {
     super.onInit();
     fetchData();
+  }
+  
+  @override
+  void onClose() {
+    _searchDebounce?.cancel();
+    super.onClose();
   }
 
   Future<void> fetchData() async {
@@ -138,7 +153,9 @@ class BusinessController extends GetxController {
         businesses.clear();
       }
       
-      final response = await getAllBusinessesUseCase(page: currentPage.value);
+      // Pass search text to API
+      final searchQuery = searchText.value.trim().isEmpty ? null : searchText.value.trim();
+      final response = await getAllBusinessesUseCase(page: currentPage.value, search: searchQuery);
 
       if (isRefresh) {
         businesses.value = response.businesses;
@@ -168,7 +185,9 @@ class BusinessController extends GetxController {
       
       print("DEBUG_PAGINATION: Loading page ${currentPage.value}");
       
-      final response = await getAllBusinessesUseCase(page: currentPage.value);
+      // Pass search text to API
+      final searchQuery = searchText.value.trim().isEmpty ? null : searchText.value.trim();
+      final response = await getAllBusinessesUseCase(page: currentPage.value, search: searchQuery);
       businesses.addAll(response.businesses);
       
       // Update pagination info
