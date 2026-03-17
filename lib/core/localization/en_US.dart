@@ -860,7 +860,9 @@ const Map<String, String> enUS = {
   'please_select_job_category': 'Please select job category',
 
 
-  'blogs' : "Blogs"
+  'blogs' : "Blogs",
+  'contribute' : "Contribute",
+  'clear_all' : "Clear All"
 
 };
 

@@ -199,6 +199,88 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
               Obx(() => _buildPhotoGrid(context)),
               const SizedBox(height: 24),
 
+              SectionTitle('location_information'.tr),
+              Obx(() => AppInputTextField(
+                label: 'pincode'.tr,
+                isRequired: true,
+                controller: controller.pinCodeCtrl,
+                textInputType: TextInputType.number,
+                iconData: Icons.pin_drop_outlined,
+              //  maxLength: 6,
+                suffixWidget: controller.isFetchingPincode.value 
+                    ? const SizedBox(width: 20, height: 20, child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ))
+                    : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'enter_pincode'.tr;
+                  if (value.length != 6) return 'invalid_pincode'.tr;
+                  return null;
+                },
+              )),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: AppInputTextField(
+                      label: 'city'.tr,
+                      isRequired: true,
+                      controller: controller.cityCtrl,
+                      textInputType: TextInputType.text,
+                      iconData: Icons.location_city_rounded,
+                      validator: FormValidator.name,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppInputTextField(
+                      label: 'district'.tr,
+                      isRequired: true,
+                      controller: controller.districtCtrl,
+                      textInputType: TextInputType.text,
+                      iconData: Icons.map_outlined,
+                      validator: FormValidator.name,
+                    ),
+                  ),
+                ],
+              ),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: AppInputTextField(
+                      label: 'state'.tr,
+                      isRequired: true,
+                      controller: controller.stateCtrl,
+                      textInputType: TextInputType.text,
+                      iconData: Icons.landscape_rounded,
+                      validator: FormValidator.name,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppInputTextField(
+                      label: 'country'.tr,
+                      isRequired: true,
+                      controller: controller.countryCtrl,
+                      textInputType: TextInputType.text,
+                      iconData: Icons.public_rounded,
+                      validator: FormValidator.name,
+                    ),
+                  ),
+                ],
+              ),
+
+              AppInputTextField(
+                label: 'taluka'.tr,
+                controller: controller.talukaCtrl,
+                textInputType: TextInputType.text,
+                iconData: Icons.location_on_outlined,
+              ),
+
+              const SizedBox(height: 24),
+
               SectionTitle('contact_information'.tr),
               PhoneFieldComponent(
                 key: controller.phoneFieldKey,
@@ -213,6 +295,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 hint: const [AutofillHints.email],
                 validator: FormValidator.email,
               ),
+
               AppInputTextField(
                 label: 'website'.tr,
                 isRequired: true,
@@ -386,26 +469,42 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
       TextEditingController timeCtrl,
       bool isOpening,
       ) async {
+    // Unfocus to hide keyboard and ensure TimePicker has enough vertical height
+    FocusScope.of(context).unfocus();
+
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: isOpening ? (controller.openingTime ?? TimeOfDay.now()) : (controller.closingTime ?? TimeOfDay.now()),
+      initialEntryMode: TimePickerEntryMode.dial,
       builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).primaryColor,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+          child: Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: ColorScheme.light(
+                primary: Theme.of(context).primaryColor,
+                onPrimary: Colors.white,
+                onSurface: Colors.black,
+              ),
             ),
+            child: child ?? const SizedBox(),
           ),
-          child: child!,
         );
       },
     );
 
     if (picked != null) {
-      // Use localized format for user-friendly display in the text field
-      timeCtrl.text = picked.format(context);
+      // Force 1-12 hour format display
+      int hour = picked.hour;
+      String period = hour >= 12 ? 'PM' : 'AM';
+      if (hour > 12) {
+        hour -= 12;
+      } else if (hour == 0) {
+        hour = 12;
+      }
+
+      final String minuteStr = picked.minute.toString().padLeft(2, '0');
+      timeCtrl.text = "$hour:$minuteStr $period";
       
       if (isOpening) {
         controller.openingTime = picked;

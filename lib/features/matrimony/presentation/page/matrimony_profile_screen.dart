@@ -47,7 +47,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
   SliverAppBar _buildProfileHeader(BuildContext context, MatrimonyProfile profile) {
     final images = profile.personalDetails?.photos ?? [];
     return SliverAppBar(
-      expandedHeight: 450,
+      expandedHeight: 350,
       pinned: true,
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(

@@ -29,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'fullName': user?.name.toTitleCase() ?? 'Name Not Available',
     'email': user?.email ?? 'Email Not Available',
     'mobile': user?.phone ?? 'N/A',
-    'age': user?.age != null ? '${user!.age} Years' : 'N/A',
+    'age': user?.age != null ? '${user!.age} Years' : '',
     'phoneNumber': user?.phone ?? 'N/A',
     'occupation': user?.occupation.toTitleCase() ?? 'N/A',
     'referralCode': user?.reffralCode ?? 'N/A',
@@ -269,9 +269,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           value: userData['fullName']!,
           icon: Icons.person_outline,
         ),
-        const SizedBox(height: 16),
-        // _buildInfoRow(label: 'age'.tr, value: userData['age']!, icon: Icons.cake_outlined),
         // const SizedBox(height: 16),
+        // _buildInfoRow(label: 'age'.tr, value: userData['age']!, icon: Icons.cake_outlined),
+        if (userData['age'] != null && userData['age'].toString().isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'age'.tr,
+            value: userData['age'].toString(),
+            icon: Icons.cake_outlined,
+          ),
+        ],
+        const SizedBox(height: 16),
         _buildInfoRow(
           label: 'occupation'.tr,
           value: userData['occupation']!,

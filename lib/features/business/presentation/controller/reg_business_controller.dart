@@ -19,6 +19,8 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_business_catego
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/helper/pincode_helper.dart';
+
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
@@ -40,6 +42,14 @@ class RegBusinessController extends GetxController {
   final emailCtrl = TextEditingController();
   //final websiteCtrl = TextEditingController();
   final websiteCtrl = TextEditingController(text: "https://");
+  final pinCodeCtrl = TextEditingController();
+  final cityCtrl = TextEditingController();
+  final stateCtrl = TextEditingController();
+  final districtCtrl = TextEditingController();
+  final countryCtrl = TextEditingController(text: "India");
+  final talukaCtrl = TextEditingController();
+  
+  final isFetchingPincode = false.obs;
 
   TextEditingController openingTimeCtrl = TextEditingController();
   TextEditingController closingTimeCtrl = TextEditingController();
@@ -157,6 +167,8 @@ class RegBusinessController extends GetxController {
       websiteCtrl.text = "https://";
     }
 
+    pinCodeCtrl.addListener(_onPincodeChanged);
+
     _imagePickerHelper = ImagePickerHelper(
       onImagePicked: (files, flags) {
         if (files != null && files.isNotEmpty) {
@@ -173,6 +185,33 @@ class RegBusinessController extends GetxController {
     
     // Listen to category changes
     bCategoryCtrl.addListener(_onCategoryChanged);
+  }
+
+  void _onPincodeChanged() {
+    final pincode = pinCodeCtrl.text.trim();
+    if (pincode.length == 6 && int.tryParse(pincode) != null) {
+      _fetchAddressFromPincode(pincode);
+    }
+  }
+
+  Future<void> _fetchAddressFromPincode(String pincode) async {
+    try {
+      isFetchingPincode.value = true;
+      final response = await PincodeHelper.fetchAddressFromPincode(pincode);
+
+      if (response != null) {
+        cityCtrl.text = response.district; // Or response.city if available
+        stateCtrl.text = response.state;
+        districtCtrl.text = response.district;
+        countryCtrl.text = "India";
+        talukaCtrl.text = response.block; 
+        CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+      }
+    } catch (e) {
+      print("Error fetching pincode info: $e");
+    } finally {
+      isFetchingPincode.value = false;
+    }
   }
   
   void _onCategoryChanged() {
@@ -471,6 +510,12 @@ class RegBusinessController extends GetxController {
         "contact_phone": combinedPhone,
         "contact_email": emailCtrl.text,
         "website": websiteCtrl.text,
+        "country": countryCtrl.text,
+        "state": stateCtrl.text,
+        "district": districtCtrl.text,
+        "taluka": talukaCtrl.text,
+        "city": cityCtrl.text,
+        "pincode": pinCodeCtrl.text,
         "opening_time": openingTime == null ? "" : "${openingTime!.hour.toString().padLeft(2, '0')}:${openingTime!.minute.toString().padLeft(2, '0')}",
         "closing_time": closingTime == null ? "" : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}"
       };
@@ -662,6 +707,12 @@ class RegBusinessController extends GetxController {
     phoneCtrl.dispose();
     emailCtrl.dispose();
     websiteCtrl.dispose();
+    pinCodeCtrl.dispose();
+    cityCtrl.dispose();
+    stateCtrl.dispose();
+    districtCtrl.dispose();
+    countryCtrl.dispose();
+    talukaCtrl.dispose();
     customCategoryCtrl.dispose();
     super.onClose();
   }

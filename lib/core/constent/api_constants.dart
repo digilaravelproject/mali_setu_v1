@@ -34,6 +34,7 @@ class ApiConstants {
 
     static const String addBusinessProduct = "business/products";
     static const String addBusinessService = "business/services";
+    static const String searchBusiness = "search/search_business";
     
     static const String getCategory = "category";
     static const String getCategoryDetails = "category";

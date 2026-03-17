@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../controller/blog_controller.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_detail_screen.dart';
+import 'create_blogs.dart';
 
 class BlogsScreen extends StatelessWidget {
   const BlogsScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +32,49 @@ class BlogsScreen extends StatelessWidget {
             fontSize: 22,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: GestureDetector(
+              onTap: () {
+                Get.to(CreateBlogScreen());
+              },
+              child: Container(
+                height: 30,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
           // Pink header background for search bar
-          Container(
-            color: const Color(0xFFFCE4EC),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _buildSearchBar(context, controller, primaryColor),
-          ),
+          // Container(
+          //   color: const Color(0xFFFCE4EC),
+          //   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          //   child:
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: _buildSearchBar( controller),
+            ),
+         // ),
           // Blog list
           Expanded(
             child: Obx(() {
@@ -74,6 +112,61 @@ class BlogsScreen extends StatelessWidget {
     );
   }
 
+
+
+
+
+  Widget _buildSearchBar(BlogController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 2),
+      child: Container(
+        height: 45,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            SvgPicture.string(
+              '''<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 21L16.65 16.65" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>''',
+              width: 20,
+              height: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: controller.searchTextController,
+                onChanged: (value) => controller.searchBlogs(value),
+                decoration: InputDecoration(
+                  hintText: 'Search blogs...',
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey[500],
+                    fontSize: 14,
+                    backgroundColor: Colors.transparent,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                ),
+                style: GoogleFonts.poppins(color: Colors.black, fontSize: 13),
+              ),
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+/*
   Widget _buildSearchBar(BuildContext context, BlogController controller, Color primaryColor) {
     return Container(
       decoration: BoxDecoration(
@@ -105,6 +198,7 @@ class BlogsScreen extends StatelessWidget {
       ),
     );
   }
+*/
 
   Widget _buildImageBlogCard(
       BuildContext context, Blog blog, Color primaryColor, BlogController controller) {

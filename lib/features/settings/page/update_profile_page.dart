@@ -209,14 +209,14 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             initialName: Get.find<AuthService>().currentUser.value?.name,
             isRequired: true,
           ),
-          // const SizedBox(height: 16),
-          // AppInputTextField(
-          //   label: "age".tr,
-          //   controller: controller.ageCtrl,
-          //   textInputType: TextInputType.number,
-          //   iconData: Icons.cake_outlined,
-          //   validator: FormValidator.age,
-          // ),
+          const SizedBox(height: 16),
+          AppInputTextField(
+            label: "age".tr,
+            controller: controller.ageCtrl,
+            textInputType: TextInputType.number,
+            iconData: Icons.cake_outlined,
+           // validator: FormValidator.age,
+          ),
           const SizedBox(height: 16),
           PhoneFieldComponent(
             key: controller.phoneFieldKey,
@@ -230,7 +230,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             enable: false,
             textInputType: TextInputType.emailAddress,
             iconData: Icons.email_outlined,
-            validator: FormValidator.email,
+           // validator: FormValidator.email,
           ),
           const SizedBox(height: 16),
           AppInputTextField(
@@ -238,12 +238,12 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             controller: controller.occupationCtrl,
             textInputType: TextInputType.text,
             iconData: Icons.work_outline_rounded,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter occupation';
-              }
-              return null;
-            },
+            // validator: (value) {
+            //   if (value == null || value.isEmpty) {
+            //     return 'Please enter occupation';
+            //   }
+            //   return null;
+            // },
           ),
         ],
       ),

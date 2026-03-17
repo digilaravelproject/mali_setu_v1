@@ -153,4 +153,9 @@ class BusinessRepositoryImpl implements BusinessRepository {
   Future<BusinessPlanResponse> getBusinessPlans() {
     return dataSource.getBusinessPlans();
   }
+
+  @override
+  Future<BusinessResponse> searchBusiness(String query) {
+    return dataSource.searchBusiness(query);
+  }
 }

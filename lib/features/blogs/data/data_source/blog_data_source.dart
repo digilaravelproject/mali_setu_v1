@@ -7,6 +7,8 @@ import '../model/blog_model.dart';
 class BlogRepository {
   final Dio _dio = Dio(BaseOptions(
     baseUrl: ApiConstants.apiBaseUrl,
+    connectTimeout: const Duration(seconds: 30),
+    receiveTimeout: const Duration(seconds: 30),
     headers: {
       'Accept': 'application/json',
       'X-API-KEY': ApiConstants.xApiValue,
@@ -37,6 +39,27 @@ class BlogRepository {
       }
     } catch (e) {
       debugPrint('Error fetching blogs: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> createBlog(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.getBlogs,
+        data: data,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+         return response.data;
+      }
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data is Map<String, dynamic>) {
+        return e.response?.data as Map<String, dynamic>;
+      }
+      debugPrint('DioError creating blog: ${e.message}');
+    } catch (e) {
+      debugPrint('Error creating blog: $e');
     }
     return null;
   }
