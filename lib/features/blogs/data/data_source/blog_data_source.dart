@@ -1,0 +1,85 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import '../../../../core/constent/api_constants.dart';
+import '../../../../core/storage/token_manger.dart';
+import '../model/blog_model.dart';
+
+class BlogRepository {
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: ApiConstants.apiBaseUrl,
+    headers: {
+      'Accept': 'application/json',
+      'X-API-KEY': ApiConstants.xApiValue,
+    },
+  ));
+
+  BlogRepository() {
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await TokenManager.getToken();
+        if (token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        return handler.next(options);
+      },
+    ));
+  }
+
+  Future<BlogResponse?> getBlogs({int page = 1}) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.getBlogs,
+        queryParameters: {'page': page},
+      );
+
+      if (response.statusCode == 200) {
+        return BlogResponse.fromJson(response.data);
+      }
+    } catch (e) {
+      debugPrint('Error fetching blogs: $e');
+    }
+    return null;
+  }
+
+  Future<BlogDetailResponse?> getBlogDetail(int id) async {
+    try {
+      final response = await _dio.get("${ApiConstants.getBlogDetail}/$id");
+
+      if (response.statusCode == 200) {
+        return BlogDetailResponse.fromJson(response.data);
+      }
+    } catch (e) {
+      debugPrint('Error fetching blog detail: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> toggleLike(int id) async {
+    try {
+      final response = await _dio.post("${ApiConstants.toggleBlogLike}/$id/like");
+
+      if (response.statusCode == 200) {
+        return response.data;
+      }
+    } catch (e) {
+      debugPrint('Error toggling like: $e');
+    }
+    return null;
+  }
+
+  Future<BlogResponse?> searchBlogs(String query) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.searchBlogs,
+        queryParameters: {'query': query},
+      );
+
+      if (response.statusCode == 200) {
+        return BlogResponse.fromJson(response.data);
+      }
+    } catch (e) {
+      debugPrint('Error searching blogs: $e');
+    }
+    return null;
+  }
+}

@@ -178,57 +178,120 @@ class AppInputTextField extends StatelessWidget {
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allow it to take required height up to max
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (_) {
+        final List<String> items = dropdownItems!;
+        List<String> filteredItems = List.from(items);
+
         return DraggableScrollableSheet(
-            initialChildSize: 0.5,
-            minChildSize: 0.3,
-            maxChildSize: 0.9,
-            expand: false,
-            builder: (context, scrollController) {
-              return Column(
-                children: [
-                   // Handle bar
-                   Container(
-                     margin: const EdgeInsets.symmetric(vertical: 10),
-                     width: 40,
-                     height: 4,
-                     decoration: BoxDecoration(
-                       color: Colors.grey[300],
-                       borderRadius: BorderRadius.circular(2),
-                     ),
-                   ),
-                   Expanded(
-                     child: ListView.separated(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: dropdownItems!.length,
-                      separatorBuilder: (_, __) => const Divider(),
-                      itemBuilder: (context, index) {
-                        final item = dropdownItems![index];
-                        return ListTile(
-                          title: Text(item, style: context.textTheme.bodyLarge),
-                          onTap: () {
-                            Navigator.pop(context);
-                            
-                            // Check if "Other" is selected
-                            if (item == 'other'.tr && onOtherSelected != null) {
-                              onOtherSelected!.call();
-                            } else {
-                              controller?.text = item;
-                              onDropdownChanged?.call(item);
-                            }
-                          },
-                        );
-                      },
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: context.theme.scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   ),
-                   ),
-                ],
-              );
-            }
+                  child: Column(
+                    children: [
+                      // Handle bar
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 12),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      
+                      // Search Bar
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: TextField(
+                          autofocus: false,
+                          decoration: InputDecoration(
+                            hintText: "Search...",
+                            prefixIcon: const Icon(Icons.search, size: 20),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[500]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[500]!),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                            fillColor: (Colors.grey[50] ?? Colors.white).withValues(alpha: 0.5),
+                            filled: true,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              filteredItems = items
+                                  .where((item) => item.toLowerCase().contains(value.toLowerCase()))
+                                  .toList();
+                            });
+                          },
+                        ),
+                      ),
+
+                      Expanded(
+                        child: filteredItems.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.search_off_rounded, size: 48, color: Colors.grey[300]),
+                                    const SizedBox(height: 12),
+                                    Text("No results found", style: TextStyle(color: Colors.grey[500])),
+                                  ],
+                                ),
+                              )
+                            : ListView.separated(
+                                controller: scrollController,
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                                itemCount: filteredItems.length,
+                                separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[100]),
+                                itemBuilder: (context, index) {
+                                  final item = filteredItems[index];
+                                  final isSelected = controller?.text == item;
+                                  
+                                  return ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    title: Text(
+                                      item,
+                                      style: context.textTheme.bodyLarge?.copyWith(
+                                        color: isSelected ? context.theme.primaryColor : null,
+                                        fontWeight: isSelected ? FontWeight.w600 : null,
+                                      ),
+                                    ),
+                                    trailing: isSelected 
+                                      ? Icon(Icons.check_circle, color: context.theme.primaryColor, size: 20)
+                                      : null,
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      if (item == 'other'.tr && onOtherSelected != null) {
+                                        onOtherSelected!.call();
+                                      } else {
+                                        controller?.text = item;
+                                        onDropdownChanged?.call(item);
+                                      }
+                                    },
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            );
+          },
         );
       },
     );

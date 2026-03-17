@@ -66,7 +66,7 @@ class RegisterController extends GetxController {
   final isFetchingPincode = false.obs;
 
   final usertypeList = [
-    'general',
+    'General(Member Mali Setu)',
     'business',
     'matrimony',
     'volunteer'

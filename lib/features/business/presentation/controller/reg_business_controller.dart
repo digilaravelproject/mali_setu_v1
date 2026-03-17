@@ -129,12 +129,14 @@ class RegBusinessController extends GetxController {
 
       if (business.opening_time != null && business.opening_time!.isNotEmpty) {
         DateTime openTime = DateTime.parse("2000-01-01 ${business.opening_time!}");
-        openingTimeCtrl.text = DateFormat.Hm().format(openTime); // HH:mm
+        openingTime = TimeOfDay.fromDateTime(openTime);
+        openingTimeCtrl.text = DateFormat.jm().format(openTime); // Use jm() for AM/PM
       }
 
       if (business.closing_time != null && business.closing_time!.isNotEmpty) {
         DateTime closeTime = DateTime.parse("2000-01-01 ${business.closing_time!}");
-        closingTimeCtrl.text = DateFormat.Hm().format(closeTime); // HH:mm
+        closingTime = TimeOfDay.fromDateTime(closeTime);
+        closingTimeCtrl.text = DateFormat.jm().format(closeTime); // Use jm() for AM/PM
       }
 
       // Handle Category (Fallback if needed, main logic in fetchCategories)
@@ -428,17 +430,17 @@ class RegBusinessController extends GetxController {
       CustomSnackBar.showError(message: "Please enter email address");
       return;
     }
-    String website = websiteCtrl.text.trim();
-    if (website.isEmpty || website == "https://") {
-      CustomSnackBar.showError(message: "Please enter website");
-      return;
-    }
+     String website = websiteCtrl.text.trim();
+    // if (website.isEmpty || website == "https://") {
+    //   CustomSnackBar.showError(message: "Please enter website");
+    //   return;
+    // }
 
     // Basic URL validation: must contain at least one dot and some characters after https://
-    if (!website.contains(".") || website.length < 12) { // https://a.co is 12 chars
-      CustomSnackBar.showError(message: "Please enter a valid website URL");
-      return;
-    }
+    // if (!website.contains(".") || website.length < 12) { // https://a.co is 12 chars
+    //   CustomSnackBar.showError(message: "Please enter a valid website URL");
+    //   return;
+    // }
 
     // Check for images in new registration
     if (!isEditMode && selectedImages.isEmpty) {
@@ -469,8 +471,8 @@ class RegBusinessController extends GetxController {
         "contact_phone": combinedPhone,
         "contact_email": emailCtrl.text,
         "website": websiteCtrl.text,
-        "opening_time": openingTimeCtrl.text,
-        "closing_time": closingTimeCtrl.text
+        "opening_time": openingTime == null ? "" : "${openingTime!.hour.toString().padLeft(2, '0')}:${openingTime!.minute.toString().padLeft(2, '0')}",
+        "closing_time": closingTime == null ? "" : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}"
       };
       print("registerbusiness : " + body.toString());
 

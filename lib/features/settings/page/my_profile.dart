@@ -270,8 +270,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: Icons.person_outline,
         ),
         const SizedBox(height: 16),
-        _buildInfoRow(label: 'age'.tr, value: userData['age']!, icon: Icons.cake_outlined),
-        const SizedBox(height: 16),
+        // _buildInfoRow(label: 'age'.tr, value: userData['age']!, icon: Icons.cake_outlined),
+        // const SizedBox(height: 16),
         _buildInfoRow(
           label: 'occupation'.tr,
           value: userData['occupation']!,

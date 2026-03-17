@@ -239,7 +239,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                  const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
-                  label: "language".tr,
+                  label: "mother_tongue".tr,
                   value: controller.language.value,
                   icon: Icons.language,
                   onTap: () => _showSingleSelectBottomSheet(
@@ -524,7 +524,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   value: controller.country.value,
                   icon: Icons.public,
                   onTap: () => _showSingleSelectBottomSheet(
-                      context, "Country", controller.countryList, controller.country.call),
+                      context, "Country", controller.countryList, controller.onCountryChanged),
                 )),
                 const SizedBox(height: 12),
                  Obx(() => SelectionTile(

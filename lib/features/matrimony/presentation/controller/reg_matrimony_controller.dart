@@ -95,9 +95,9 @@ class RegMatrimonyController extends GetxController {
   final List<String> doshList = ['No', 'Yes', 'Don\'t Know'];
 
   final List<String> educationList = ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other'];
-  final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Business', 'Self Employed', 'Not Working'];
+  final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Self Employed', 'Not Working'];
   
-  final List<String> familyTypeList = ['Joint', 'Nuclear'];
+  final List<String> familyTypeList = ['Nuclear', 'Joint'];
   final List<String> familyClassList = ['Rich', 'Upper Middle Class', 'Middle Class', 'Lower Middle Class', 'Lower Class'];
   final List<String> familyValueList = ['Orthodox', 'Traditional', 'Moderate', 'Liberal'];
   
@@ -105,8 +105,16 @@ class RegMatrimonyController extends GetxController {
   final List<String> smokingList = ['No', 'Yes', 'Occasionally'];
   final List<String> drinkingList = ['No', 'Yes', 'Occasionally'];
 
-  final List<String> countryList = ['India', 'USA', 'UK', 'Canada', 'Australia', 'UAE', 'Other'];
-  final List<String> stateList = ['Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Other'];
+  final Map<String, List<String>> countryStateMap = {
+    'India': ['Maharashtra', 'Gujarat', 'Karnataka', 'Punjab', 'Delhi'],
+    'USA': ['California', 'Texas', 'Florida', 'New York', 'Washington'],
+    'Canada': ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba'],
+    'UK': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
+    'Australia': ['New South Wales', 'Victoria', 'Queensland', 'Western Australia'],
+  };
+
+  final List<String> countryList = ['India', 'USA', 'UK', 'Canada', 'Australia', 'Other'];
+  final RxList<String> stateList = <String>[].obs;
 
 
 
@@ -291,6 +299,18 @@ class RegMatrimonyController extends GetxController {
   void onInit() {
     super.onInit();
     fetchCasts();
+    // Initialize stateList for default country (India)
+    onCountryChanged(country.value);
+  }
+
+  void onCountryChanged(String countryName) {
+    country.value = countryName;
+    state.value = ''; // Reset state when country changes
+    if (countryStateMap.containsKey(countryName)) {
+      stateList.assignAll(countryStateMap[countryName]!);
+    } else {
+      stateList.assignAll(['Other']);
+    }
   }
 
   Future<void> fetchCasts() async {

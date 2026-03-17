@@ -6,6 +6,7 @@ class LanguageController extends GetxController {
   static const String _languageKey = 'app_language';
   
   final Rx<Locale> currentLocale = const Locale('en', 'US').obs;
+  final RxString tempLanguageCode = 'en'.obs;
   final RxBool isLoading = false.obs;
   
   @override
@@ -24,6 +25,7 @@ class LanguageController extends GetxController {
       print("DEBUG_LANGUAGE: Saved language code: $languageCode");
       
       if (languageCode != null && languageCode.isNotEmpty) {
+        tempLanguageCode.value = languageCode;
         if (languageCode == 'mr') {
           currentLocale.value = const Locale('mr', 'IN');
           Get.updateLocale(const Locale('mr', 'IN'));
@@ -36,6 +38,7 @@ class LanguageController extends GetxController {
       } else {
         // Default to English
         currentLocale.value = const Locale('en', 'US');
+        tempLanguageCode.value = 'en';
         print("DEBUG_LANGUAGE: ℹ️ No saved language, using default (English)");
       }
       print("DEBUG_LANGUAGE: ========================================");

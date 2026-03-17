@@ -100,4 +100,10 @@ class ApiConstants {
     static const String matrimonyPymentOrder = "payment/create-order/matrimony";
     static const String paymentVerify = "payment/verify";
     static const String businessPymentOrder = "payment/create-order/business";
+
+    // Blogs Api
+    static const String getBlogs = "blogs";
+    static const String getBlogDetail = "blogs"; // blogs/{id}
+    static const String toggleBlogLike = "blogs"; // blogs/{id}/like
+    static const String searchBlogs = "blogs/search";
 }

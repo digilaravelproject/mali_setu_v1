@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -286,19 +287,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Text(
-                'open_now'.tr,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green[700],
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '${'until'.tr} 9:00 pm',
-                style: context.textTheme.bodyMedium,
-              ),
-              //Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey[600]),
+              _buildTimingHighlight(business, context),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -1157,6 +1146,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                 _buildInfoRow(Icons.verified, 'verification_status'.tr, (business.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: business.verificationStatus == 'approved'),
                 _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (business.verificationStatus ?? 'active').toTitleCase(), context),
                 _buildInfoRow(Icons.description, 'description'.tr, business.description ?? 'No description available', context, maxLines: 5),
+                _buildInfoRow(Icons.access_time_filled_rounded, 'business_hours'.tr, "${_formatTimeString(business.opening_time)} - ${_formatTimeString(business.closing_time)}", context),
               ], context),
               const SizedBox(height: 16),
               _buildInfoCard('contact_info'.tr, [
@@ -1369,6 +1359,71 @@ class BusinessDetailScreen extends GetView<BusinessController> {
       onConfirm: () {
         controller.toggleJobStatus(job.id!);
       },
+    );
+  }
+
+  String _formatTimeString(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return "N/A";
+    try {
+      // Input is 24-hour format HH:mm
+      DateTime dateTime = DateTime.parse("2000-01-01 $timeStr");
+      // Output is localized AM/PM
+      return DateFormat('hh:mm a').format(dateTime);
+    } catch (e) {
+      return timeStr;
+    }
+  }
+
+  Widget _buildTimingHighlight(Business business, BuildContext context) {
+    final openTime = _formatTimeString(business.opening_time);
+    final closeTime = _formatTimeString(business.closing_time);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: context.theme.primaryColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: context.theme.primaryColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.access_time_filled_rounded,
+            size: 16,
+            color: context.theme.primaryColor,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            "$openTime - $closeTime",
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.theme.primaryColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 4,
+            height: 4,
+            decoration: const BoxDecoration(
+              color: Colors.green,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            "Open",
+            style: context.textTheme.bodySmall?.copyWith(
+              color: Colors.green[700],
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

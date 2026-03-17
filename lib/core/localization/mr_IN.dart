@@ -69,7 +69,7 @@ const Map<String, String> mrIN = {
   'single': 'अविवाहित',
   'awaiting_divorce': 'घटस्फोट प्रलंबित',
   'mother_tongue': 'मातृभाषा',
-  'height': 'उंची',
+  'height': 'उंची (फूट)',
   'cm': 'सेमी',
   'physical_status': 'शारीरिक स्थिती',
   'normal': 'सामान्य',
@@ -309,7 +309,7 @@ const Map<String, String> mrIN = {
   'dosh': 'दोष',
   'next': 'पुढे',
   'back': 'मागे',
-  'weight': 'वजन',
+  'weight': 'वजन (किलो)',
   'education_career': 'शिक्षण आणि करिअर',
   'education_career_sub': 'पात्रता आणि व्यवसाय',
   'highest_qualification': 'सर्वोच्च पात्रता',
@@ -854,6 +854,12 @@ const Map<String, String> mrIN = {
   'please_select_experience_level': 'कृपया अनुभव स्तर निवडा',
   'please_select_employment_type': 'कृपया रोजगार प्रकार निवडा',
   'please_select_job_category': 'कृपया नोकरी श्रेणी निवडा',
+
+
+
+
+
+  'blogs' : "ब्लॉग्स"
 };
 
 

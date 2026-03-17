@@ -48,8 +48,8 @@ class ChangeLanguagePage extends GetView<LanguageController> {
               languageName: 'English',
               nativeName: 'English',
               flag: '🇬🇧',
-              isSelected: controller.currentLanguageCode == 'en',
-              onTap: () => _changeLanguage('en'),
+              isSelected: controller.tempLanguageCode.value == 'en',
+              onTap: () => controller.tempLanguageCode.value = 'en',
             )),
             
             const SizedBox(height: 16),
@@ -61,11 +61,49 @@ class ChangeLanguagePage extends GetView<LanguageController> {
               languageName: 'Marathi',
               nativeName: 'मराठी',
               flag: '🇮🇳',
-              isSelected: controller.currentLanguageCode == 'mr',
-              onTap: () => _changeLanguage('mr'),
+              isSelected: controller.tempLanguageCode.value == 'mr',
+              onTap: () => controller.tempLanguageCode.value = 'mr',
             )),
-            
 
+            const Spacer(),
+
+            // Apply Button
+            Obx(() {
+              final isAlreadySelected = controller.currentLanguageCode == controller.tempLanguageCode.value;
+              return Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 20),
+                child: ElevatedButton(
+                  onPressed: isAlreadySelected ? null : () => _changeLanguage(controller.tempLanguageCode.value),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primaryColor,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey[300],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'apply'.tr,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              );
+            }),
           ],
         ),
       ),

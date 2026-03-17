@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../blogs/presentation/screens/blogs_screen.dart';
 import '../../../business/data/model/res_all_business_model.dart';
 import '../../../business/presentation/page/business_page.dart';
 import '../../../settings/page/settings_screen.dart';
@@ -23,7 +24,7 @@ class DashboardController extends GetxController {
     //BusinessPage(),
     BusinessScreen(),
     MatrimonyPage(),
-    VolunteerPage(),
+    BlogsScreen(),
     SettingsScreen()
  //   MorePage(),
   ];
@@ -276,9 +277,9 @@ class DashboardController extends GetxController {
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "volunteer".tr,
-        icon: CupertinoIcons.person_2,
-        selectedIcon: CupertinoIcons.person_2_fill,
+        title: "blogs".tr,
+        icon: Icons.article_outlined,
+        selectedIcon: Icons.article,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),

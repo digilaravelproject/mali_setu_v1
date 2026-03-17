@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/features/blogs/presentation/screens/blogs_screen.dart';
 import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
@@ -10,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../widgets/custom_buttons.dart';
 import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
+import '../../volunteer/pages/volunteer_page.dart';
 import 'change_language_page.dart';
 
 class SettingsScreen extends GetWidget<SettingsController> {
@@ -116,7 +118,9 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   _SettingsItem(
                     title: 'active_volunteer'.tr,
                     icon: Icons.favorite_border_rounded,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () {
+                      Get.to(() => const VolunteerPage());
+                    },
                   ),
                   _SettingsItem(
                     title: 'volunteer_approval'.tr,

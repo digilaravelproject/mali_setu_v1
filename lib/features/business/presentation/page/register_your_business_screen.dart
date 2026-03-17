@@ -388,33 +388,24 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
       ) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: isOpening ? (controller.openingTime ?? TimeOfDay.now()) : (controller.closingTime ?? TimeOfDay.now()),
       builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            alwaysUse24HourFormat: true, // ⛔ hides keyboard input
-            textScaleFactor: 1.0,
-          ),
-          child: Theme(
-            data: ThemeData.light().copyWith(
-              colorScheme: ColorScheme.light(
-                primary: Theme.of(context).primaryColor,
-                onPrimary: Colors.white,
-              ),
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).primaryColor,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
             ),
-            child: child!,
           ),
+          child: child!,
         );
       },
     );
 
     if (picked != null) {
-      // timeCtrl.text = picked.format(context); // This uses localized format (e.g. 5:30 PM) which fails validation
-      
-      // Format to HH:mm (24-hour format) for API validation
-      final hour = picked.hour.toString().padLeft(2, '0');
-      final minute = picked.minute.toString().padLeft(2, '0');
-      timeCtrl.text = "$hour:$minute";
+      // Use localized format for user-friendly display in the text field
+      timeCtrl.text = picked.format(context);
       
       if (isOpening) {
         controller.openingTime = picked;

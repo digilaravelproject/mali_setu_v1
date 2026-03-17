@@ -64,15 +64,13 @@ class DashboardPage extends GetWidget<DashboardController> {
       return GestureDetector(
         onTap: () => controller.changePage(index),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 400),
-          curve: Curves.easeInOutCubic,
+          duration: const Duration(milliseconds: 300),
           padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 6 : 12,
-            vertical: 6,
+            horizontal: 8,
+            vertical: 4,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: 4,
             children: [
               TweenAnimationBuilder<double>(
                 duration: Duration(milliseconds: 400),
@@ -80,14 +78,14 @@ class DashboardPage extends GetWidget<DashboardController> {
                 tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
                 builder: (context, value, child) {
                   return Transform.scale(
-                    scale: 1.0 + (value * 0.15),
+                    scale: 1.0 + (value * 0.1),
                     child: Container(
                       width: 32,
                       height: 32,
                       decoration: BoxDecoration(
                         color: isSelected
                             ? e.selectedColor
-                            : e.unselectedColor.withAlpha(20),
+                            : e.unselectedColor.withAlpha(15),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -99,43 +97,15 @@ class DashboardPage extends GetWidget<DashboardController> {
                   );
                 },
               ),
-
-              AnimatedSize(
-                duration: Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                child: Builder(
-                  builder: (_) {
-                    if (isSelected) {
-                      return Padding(
-                        padding: EdgeInsets.only(left: 10, right: 4),
-                        child: TweenAnimationBuilder<double>(
-                          duration: Duration(milliseconds: 400),
-                          curve: Curves.easeOutCubic,
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value,
-                              child: Transform.translate(
-                                offset: Offset((1 - value) * 20, 0),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: Text(
-                            e.title,
-                            style: TextStyle(
-                              color: e.selectedColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ),
-                      );
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                  },
+              const SizedBox(height: 4),
+              Text(
+                e.title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: isSelected ? e.selectedColor : e.unselectedColor,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 11,
+                  letterSpacing: 0.2,
                 ),
               ),
             ],

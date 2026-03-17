@@ -209,14 +209,14 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             initialName: Get.find<AuthService>().currentUser.value?.name,
             isRequired: true,
           ),
-          const SizedBox(height: 16),
-          AppInputTextField(
-            label: "age".tr,
-            controller: controller.ageCtrl,
-            textInputType: TextInputType.number,
-            iconData: Icons.cake_outlined,
-            validator: FormValidator.age,
-          ),
+          // const SizedBox(height: 16),
+          // AppInputTextField(
+          //   label: "age".tr,
+          //   controller: controller.ageCtrl,
+          //   textInputType: TextInputType.number,
+          //   iconData: Icons.cake_outlined,
+          //   validator: FormValidator.age,
+          // ),
           const SizedBox(height: 16),
           PhoneFieldComponent(
             key: controller.phoneFieldKey,

@@ -480,10 +480,10 @@ class RegisterPage extends GetWidget<RegisterController> {
                     textInputType: TextInputType.none,
                     controller: controller.ageCtrl,
                     isRequired: true,
-                    validator: (value) {
-                      if (controller.selectedBirthDate.value == null) {
-                        return "Please select your date of birth";
-                      }
+                  /*  validator: (value) {
+                      // if (controller.selectedBirthDate.value == null) {
+                      //   return "Please select your date of birth";
+                      // }
                       final today = DateTime.now();
                       final dob = controller.selectedBirthDate.value!;
                       final age = today.year -
@@ -495,7 +495,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                               : 0);
                       if (age < 18) return "You must be at least 18 years old";
                       return null;
-                    },
+                    },*/
                     onTap: () async {
                       final today = DateTime.now();
                       final initialDate = controller.selectedBirthDate.value ??
@@ -641,7 +641,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         child: AppInputTextField(
                           label: "road_number".tr,
                           textInputType: TextInputType.text,
-                          validator: FormValidator.roadNumber,
+                          //  validator: FormValidator.roadNumber,
                           controller: controller.roadNumberCtrl,
                           isRequired: true,
                         ),
@@ -655,8 +655,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         child: AppInputTextField(
                           label: "sector".tr,
                           controller: controller.sectorCtrl,
-                          validator: (value) =>
-                              FormValidator.emptycheck(value, "Sector"),
+                        //  validator: (value) => FormValidator.emptycheck(value, "Sector"),
                           textInputType: TextInputType.text,
                           isRequired: true,
                         ),
@@ -666,8 +665,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         child: AppInputTextField(
                           label: "destination".tr,
                           textInputType: TextInputType.text,
-                          validator: (value) =>
-                              FormValidator.emptycheck(value, "Destination"),
+                         // validator: (value) => FormValidator.emptycheck(value, "Destination"),
                           controller: controller.destinationCtrl,
                           isRequired: true,
                         ),
@@ -710,8 +708,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   AppInputTextField(
                     label: "occupation".tr,
                     textInputType: TextInputType.text,
-                    validator: (value) =>
-                        FormValidator.emptycheck(value, "Occupation"),
+                   // validator: (value) => FormValidator.emptycheck(value, "Occupation"),
                     controller: controller.occupationCtrl,
                     iconData: CupertinoIcons.briefcase_fill,
                     isRequired: true,
@@ -720,7 +717,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   AppInputTextField(
                     label: "designation".tr,
                     textInputType: TextInputType.text,
-                    validator: (value) => FormValidator.emptycheck(value, "Designation"),
+                  //  validator: (value) => FormValidator.emptycheck(value, "Designation"),
                     controller: controller.designationCtrl,
                     iconData: CupertinoIcons.briefcase_fill,
                     isRequired: true,

@@ -74,7 +74,8 @@ const Map<String, String> enUS = {
   'single': 'Single',
   'awaiting_divorce': 'Awaiting Divorce',
   'mother_tongue': 'Mother Tongue',
-  'height': 'Height',
+  'height': 'Height (Feet)',
+  'weight': 'Weight (kg)',
   'cm': 'cm',
   'physical_status': 'Physical Status',
   'normal': 'Normal',
@@ -857,6 +858,9 @@ const Map<String, String> enUS = {
   'please_select_experience_level': 'Please select experience level',
   'please_select_employment_type': 'Please select employment type',
   'please_select_job_category': 'Please select job category',
+
+
+  'blogs' : "Blogs"
 
 };
 
