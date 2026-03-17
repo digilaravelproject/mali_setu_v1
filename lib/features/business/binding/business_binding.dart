@@ -30,6 +30,7 @@ import 'package:edu_cluezer/features/business/domain/usecase/apply_job_usecase.d
 import 'package:edu_cluezer/features/business/domain/usecase/get_my_applications_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_job_applications_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_application_status_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/search_business_usecase.dart';
 
 
 
@@ -67,6 +68,7 @@ class BusinessBinding extends Bindings {
     Get.lazyPut<GetMyApplicationsUseCase>(() => GetMyApplicationsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<GetJobApplicationsUseCase>(() => GetJobApplicationsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<UpdateApplicationStatusUseCase>(() => UpdateApplicationStatusUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<SearchBusinessUseCase>(() => SearchBusinessUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     
     // Controllers at the end
     Get.lazyPut<CreateJobController>(() => CreateJobController(
@@ -93,7 +95,9 @@ class BusinessBinding extends Bindings {
           applyJobUseCase: Get.find<ApplyJobUseCase>(),
           getMyApplicationsUseCase: Get.find<GetMyApplicationsUseCase>(),
           getJobApplicationsUseCase: Get.find<GetJobApplicationsUseCase>(),
+       //   getJobApplicationsUseCase: Get.find<GetJobApplicationsUseCase>(),
           updateApplicationStatusUseCase: Get.find<UpdateApplicationStatusUseCase>(),
+          searchBusinessUseCase: Get.find<SearchBusinessUseCase>(),
         ), fenix: true);
   }
 }

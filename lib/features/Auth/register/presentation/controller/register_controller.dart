@@ -67,10 +67,25 @@ class RegisterController extends GetxController {
 
   final usertypeList = [
     'General(Member Mali Setu)',
-    'business',
-    'matrimony',
-    'volunteer'
+    'Business',
+    'Matrimony',
+    'Volunteer'
   ];
+
+  String _getApiUserType(String displayType) {
+    switch (displayType) {
+      case 'General(Member Mali Setu)':
+        return 'general';
+      case 'Business':
+        return 'business';
+      case 'Matrimony':
+        return 'matrimony';
+      case 'Volunteer':
+        return 'volunteer';
+      default:
+        return displayType.toLowerCase();
+    }
+  }
 
   /// PASSWORD VISIBILITY
   final isCnfPasswordValue = false.obs;
@@ -340,7 +355,7 @@ class RegisterController extends GetxController {
         destination: destinationCtrl.text.trim(),
         password: passwordCtrl.text.trim(),
         passwordConfirmation: confirmPasswordCtrl.text.trim(),
-        userType: userTypeCtrl.text.trim(),
+        userType: _getApiUserType(userTypeCtrl.text.trim()),
         castCertificate: castCertificateData,
         termCondition: true,
         company_name: companynameCtrl.text.trim(),

@@ -29,6 +29,7 @@ import 'package:edu_cluezer/features/business/domain/usecase/apply_job_usecase.d
 import 'package:edu_cluezer/features/business/domain/usecase/get_my_applications_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_job_applications_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_application_status_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/search_business_usecase.dart';
 
 
 class BusinessController extends GetxController {
@@ -51,6 +52,7 @@ class BusinessController extends GetxController {
   final GetMyApplicationsUseCase getMyApplicationsUseCase;
   final GetJobApplicationsUseCase getJobApplicationsUseCase;
   final UpdateApplicationStatusUseCase updateApplicationStatusUseCase;
+  final SearchBusinessUseCase searchBusinessUseCase;
   final AuthService _authService = Get.find<AuthService>();
 
   BusinessController({
@@ -73,6 +75,7 @@ class BusinessController extends GetxController {
     required this.getMyApplicationsUseCase,
     required this.getJobApplicationsUseCase,
     required this.updateApplicationStatusUseCase,
+    required this.searchBusinessUseCase,
   });
 
   var businesses = <Business>[].obs;
@@ -102,6 +105,13 @@ class BusinessController extends GetxController {
   // Search logic
   var searchText = "".obs;
   Timer? _searchDebounce;
+
+  // Filter logic
+  var isFilterVisible = false.obs;
+  final filterCityCtrl = TextEditingController();
+  final filterStateCtrl = TextEditingController();
+  final filterTalukaCtrl = TextEditingController();
+  final filterDistrictCtrl = TextEditingController();
   
   // Getter for filtered businesses - now returns all loaded businesses
   // Backend handles the filtering
@@ -174,6 +184,51 @@ class BusinessController extends GetxController {
     } catch (e) {
       print('Error fetching all businesses: $e');
     }
+  }
+
+  Future<void> searchBusinessWithFilters() async {
+    try {
+      isLoading.value = true;
+      
+      // Combine filters into a single search query or handle specifically if API supports it
+      // Users requested: "city state taluka distrcit kisi bhi chij ko enter karke search pe click kre"
+      // Since API is {"search": "Latur"}, I will use the first non-empty filter or combine them
+      
+      List<String> activeFilters = [];
+      if (filterCityCtrl.text.trim().isNotEmpty) activeFilters.add(filterCityCtrl.text.trim());
+      if (filterStateCtrl.text.trim().isNotEmpty) activeFilters.add(filterStateCtrl.text.trim());
+      if (filterTalukaCtrl.text.trim().isNotEmpty) activeFilters.add(filterTalukaCtrl.text.trim());
+      if (filterDistrictCtrl.text.trim().isNotEmpty) activeFilters.add(filterDistrictCtrl.text.trim());
+      
+      if (activeFilters.isEmpty) {
+        await fetchAllBusinesses(isRefresh: true);
+        return;
+      }
+      
+      final query = activeFilters.join(" ");
+      final response = await searchBusinessUseCase(query);
+      
+      businesses.value = response.businesses;
+      currentPage.value = response.currentPage;
+      totalPages.value = response.lastPage;
+      hasNextPage.value = response.hasNextPage;
+      
+      isFilterVisible.value = false; // Hide filter after search
+      
+    } catch (e) {
+      print('Error searching businesses with filters: $e');
+      CustomSnackBar.showError(message: "Search failed: ${e.toString()}");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void clearFilters() {
+    filterCityCtrl.clear();
+    filterStateCtrl.clear();
+    filterTalukaCtrl.clear();
+    filterDistrictCtrl.clear();
+    fetchAllBusinesses(isRefresh: true);
   }
 
   Future<void> loadMoreBusinesses() async {
@@ -586,6 +641,11 @@ class BusinessController extends GetxController {
       
     } catch (e) {
       CustomSnackBar.showError(message: "Download failed: $e");
+    } finally {
+       filterCityCtrl.dispose();
+       filterStateCtrl.dispose();
+       filterTalukaCtrl.dispose();
+       filterDistrictCtrl.dispose();
     }
   }
 }

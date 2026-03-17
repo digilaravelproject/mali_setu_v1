@@ -2,6 +2,7 @@ import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/blogs/presentation/screens/blogs_screen.dart';
 import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/features/business/presentation/page/business_page.dart';
 import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -64,16 +65,16 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     icon: Icons.language_rounded,
                     onTap: () => Get.to(() => const ChangeLanguagePage()),
                   ),
-                  _SettingsItem(
-                    title: 'user_approval'.tr,
-                    icon: Icons.verified_user_outlined,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
-                  _SettingsItem(
-                    title: 'active_user'.tr,
-                    icon: CupertinoIcons.person_2,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
+                  // _SettingsItem(
+                  //   title: 'user_approval'.tr,
+                  //   icon: Icons.verified_user_outlined,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
+                  // _SettingsItem(
+                  //   title: 'active_user'.tr,
+                  //   icon: CupertinoIcons.person_2,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
                   _SettingsItem(
                     title: 'transaction_history'.tr,
                     icon: CupertinoIcons.list_bullet_indent,
@@ -87,25 +88,28 @@ class SettingsScreen extends GetWidget<SettingsController> {
               _buildSettingsGroup(
                 context,
                 [
-                  _SettingsItem(
-                    title: 'active_business'.tr,
-                    icon: Icons.business_rounded,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
-                  _SettingsItem(
-                    title: 'business_approval'.tr,
-                    icon: Icons.verified_outlined,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
-                  _SettingsItem(
-                    title: 'business_type'.tr,
-                    icon: Icons.list_alt_rounded,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
+                  // _SettingsItem(
+                  //   title: 'active_business'.tr,
+                  //   icon: Icons.business_rounded,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
+                  // _SettingsItem(
+                  //   title: 'business_approval'.tr,
+                  //   icon: Icons.verified_outlined,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
+                  // _SettingsItem(
+                  //   title: 'business_type'.tr,
+                  //   icon: Icons.list_alt_rounded,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
                   _SettingsItem(
                     title: 'saved_business'.tr,
                     icon: Icons.bookmark_border_rounded,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () {
+                      Get.to(AllBusinessesScreen());
+                    }
+                    //=> _showComingSoonDialog(context),
                   ),
                 ],
               ),
@@ -122,16 +126,16 @@ class SettingsScreen extends GetWidget<SettingsController> {
                       Get.to(() => const VolunteerPage());
                     },
                   ),
-                  _SettingsItem(
-                    title: 'volunteer_approval'.tr,
-                    icon: Icons.verified_outlined,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
-                  _SettingsItem(
-                    title: 'volunteer_excel_download'.tr,
-                    icon: Icons.download_for_offline_outlined,
-                    onTap: () => _showComingSoonDialog(context),
-                  ),
+                  // _SettingsItem(
+                  //   title: 'volunteer_approval'.tr,
+                  //   icon: Icons.verified_outlined,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
+                  // _SettingsItem(
+                  //   title: 'volunteer_excel_download'.tr,
+                  //   icon: Icons.download_for_offline_outlined,
+                  //   onTap: () => _showComingSoonDialog(context),
+                  // ),
                 ],
               ),
 

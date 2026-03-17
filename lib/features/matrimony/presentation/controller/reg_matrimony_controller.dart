@@ -8,6 +8,10 @@ import 'package:get/get.dart';
 
 import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_plan_model.dart';
+import '../../../../core/helper/pincode_helper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../page/matrimony_subscription_plan.dart';
 
 class RegMatrimonyController extends GetxController {
@@ -32,6 +36,7 @@ class RegMatrimonyController extends GetxController {
   final fatherOccupationCtrl = TextEditingController();
   final motherOccupationCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
+  final pinCodeCtrl = TextEditingController();
   final bloodGroupCtrl = TextEditingController();
   final ref_nameCtrl = TextEditingController();
 
@@ -55,6 +60,7 @@ class RegMatrimonyController extends GetxController {
   final raasi = ''.obs;
   final manglik = ''.obs;
   final dosh = ''.obs;
+  final bloodGroup = ''.obs;
 
   // Education & Career
   final education = ''.obs;
@@ -71,6 +77,12 @@ class RegMatrimonyController extends GetxController {
   // Location
   final country = 'India'.obs;
   final state = ''.obs;
+  
+  // Pincode
+  final isFetchingPincode = false.obs;
+
+  // Photos
+  final RxList<File> selectedPhotos = <File>[].obs;
 
   // Formatting variables
   DateTime? selectedDate;
@@ -93,9 +105,10 @@ class RegMatrimonyController extends GetxController {
   final List<String> raasiList = ['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)'];
   final List<String> manglikList = ['Yes', 'No', 'Anshik (Partial)', 'Don\'t Know'];
   final List<String> doshList = ['No', 'Yes', 'Don\'t Know'];
+  final List<String> bloodGroupList = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   final List<String> educationList = ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other'];
-  final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Self Employed', 'Not Working'];
+  final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Owner', 'Self Employed', 'Not Working'];
   
   final List<String> familyTypeList = ['Nuclear', 'Joint'];
   final List<String> familyClassList = ['Rich', 'Upper Middle Class', 'Middle Class', 'Lower Middle Class', 'Lower Class'];
@@ -119,6 +132,86 @@ class RegMatrimonyController extends GetxController {
 
 
   /// --- Methods ---
+  
+  /// Pick Multiple Photos
+  Future<void> pickPhotos() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final List<XFile> images = await picker.pickMultiImage(
+        imageQuality: 80,
+        maxWidth: 1080,
+      );
+
+      if (images.isNotEmpty) {
+        // Limit to max 5 photos for example
+        int remainingSlots = 5 - selectedPhotos.length;
+        for (var i = 0; i < images.length && i < remainingSlots; i++) {
+          selectedPhotos.add(File(images[i].path));
+        }
+        
+        if (images.length > remainingSlots) {
+          CustomSnackBar.showError(message: "You can only select up to 5 photos.");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error picking photos: $e");
+    }
+  }
+
+  void removePhoto(int index) {
+    selectedPhotos.removeAt(index);
+  }
+
+  /// Handle pincode changes for auto-fill
+  void _onPincodeChanged() {
+    final pincode = pinCodeCtrl.text.trim();
+
+    // Only fetch if pincode is exactly 6 digits
+    if (pincode.length == 6 && int.tryParse(pincode) != null) {
+      _fetchAddressFromPincode(pincode);
+    } else {
+      if (pincode.length < 6) {
+        state.value = '';
+        cityCtrl.clear();
+      }
+    }
+  }
+
+  Future<void> _fetchAddressFromPincode(String pincode) async {
+    try {
+      isFetchingPincode.value = true;
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: "Fetching address details...",
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.blue,
+          icon: Icon(Icons.location_searching, color: Colors.white),
+        ),
+      );
+
+      final response = await PincodeHelper.fetchAddressFromPincode(pincode);
+
+      if (response != null) {
+        // Find existing state or add it
+        final fetchedState = response.state;
+        if (!stateList.contains(fetchedState)) {
+           stateList.add(fetchedState);
+        }
+        
+        state.value = fetchedState;
+        cityCtrl.text = response.district; // Using district as major city
+        country.value = 'India'; // Assumed Indian via API
+
+        CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+      } else {
+        CustomSnackBar.showError(message: "Invalid pincode or no data found");
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: "Failed to fetch address details");
+    } finally {
+      isFetchingPincode.value = false;
+    }
+  }
 
 
   void selectDate(BuildContext context) async {
@@ -205,12 +298,22 @@ class RegMatrimonyController extends GetxController {
 
       // Get combined name from NameFieldComponent
       final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
+      
+      // Convert images to base64
+      List<String> base64Photos = [];
+      for (var file in selectedPhotos) {
+        final bytes = await file.readAsBytes();
+        final base64String = base64Encode(bytes);
+        final ext = file.path.split('.').last.toLowerCase();
+        final mimeType = (ext == 'png') ? 'image/png' : 'image/jpeg';
+        base64Photos.add('data:$mimeType;base64,$base64String');
+      }
 
       // Construct Nested JSON
       final Map<String, dynamic> body = {
         "age": calculateAge(), // 28
-        "height": heightCtrl.text, // "5.6"
-        "weight": weightCtrl.text, // "65"
+        "height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text, 
+        "weight": weightCtrl.text.isEmpty ? "0" : weightCtrl.text,
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
         "personal_details": {
@@ -218,8 +321,6 @@ class RegMatrimonyController extends GetxController {
             "dob": dobCtrl.text, // "1997-05-12"
             "annual_income": annualIncomeCtrl.text,
             "occupation": jobTitleCtrl.text,
-            "blood_group": bloodGroupCtrl.text,
-            "refferal_name": ref_nameCtrl.text,
             "profile_created_by": profileCreatedBy.value,
             "hobbies": ["reading"], // Hardcoded for now
             "language": language.value,
@@ -228,8 +329,11 @@ class RegMatrimonyController extends GetxController {
             "family_type": familyType.value,
             "marital_status": maritalStatus.value,
             "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
-            "star_details": [star.value, raasi.value, "manglik-${manglik.value}"],
-            "dosh": dosh.value
+            "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
+            "dosh": dosh.value,
+            "photos": base64Photos,
+            "blood_group": bloodGroup.value,
+            "refferal_name": ref_nameCtrl.text,
         },
         "family_details": {
             "father": fatherOccupationCtrl.text,
@@ -253,7 +357,8 @@ class RegMatrimonyController extends GetxController {
         "location_details": {
             "city": cityCtrl.text,
             "state": state.value,
-            "country": country.value
+            "country": country.value,
+            "pincode": pinCodeCtrl.text
         },
         "partner_preferences": {
             "age_range": "20-30",
@@ -301,6 +406,8 @@ class RegMatrimonyController extends GetxController {
     fetchCasts();
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
+    
+    pinCodeCtrl.addListener(_onPincodeChanged);
   }
 
   void onCountryChanged(String countryName) {
@@ -365,6 +472,8 @@ class RegMatrimonyController extends GetxController {
     fatherOccupationCtrl.dispose();
     motherOccupationCtrl.dispose();
     cityCtrl.dispose();
+    pinCodeCtrl.removeListener(_onPincodeChanged);
+    pinCodeCtrl.dispose();
     casteCtrl.dispose();
     subCasteCtrl.dispose();
     super.onClose();

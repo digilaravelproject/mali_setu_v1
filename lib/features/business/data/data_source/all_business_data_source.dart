@@ -22,6 +22,7 @@ abstract class BusinessDataSource {
   Future<void> deleteBusiness(int id);
   Future<CategoryResponse> getBusinessCategories({int page = 1});
   Future<CategoryResponse> getCategoryDetails(int id);
+  Future<BusinessResponse> searchBusiness(String query);
   
   // Job Methods
   Future<BusinessResponse> createJob(Map<String, dynamic> data);
@@ -249,6 +250,15 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   Future<BusinessPlanResponse> getBusinessPlans() async {
     final response = await apiClient.get(ApiConstants.businessSubscriptionPlans);
     return BusinessPlanResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessResponse> searchBusiness(String query) async {
+    final response = await apiClient.post(
+      ApiConstants.searchBusiness,
+      data: {'search': query},
+    );
+    return BusinessResponse.fromJson(response.data);
   }
 }
 

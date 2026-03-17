@@ -498,7 +498,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                       ),
                       child:
                       const Text(
-                        "Donate Now",
+                        "Contribute",
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight:

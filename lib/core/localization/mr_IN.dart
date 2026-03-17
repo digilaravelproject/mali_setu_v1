@@ -859,7 +859,9 @@ const Map<String, String> mrIN = {
 
 
 
-  'blogs' : "ब्लॉग्स"
+  'blogs' : "ब्लॉग्स",
+  'contribute' : "योगदान द्या",
+  'clear_all' : "सर्व हटवा"
 };
 
 

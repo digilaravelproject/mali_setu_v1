@@ -89,68 +89,76 @@ class _DonationBottomSheet extends StatelessWidget {
   }
 
   Widget _buildCauseCard(BuildContext context, DonationCauseItem cause) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: CustomImageView(
-              url: cause.imageUrl != null ? "${ApiConstants.baseUrl}${cause.imageUrl}" : null,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Get.back();
+        onDetails(cause);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CustomImageView(
+                url: cause.imageUrl != null ? "${ApiConstants.baseUrl}${cause.imageUrl}" : null,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cause.title ?? "Cause",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  cause.organization ?? "Organization",
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Goal: ₹${cause.targetAmount}",
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: context.theme.primaryColor,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cause.title ?? "Cause",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  Text(
+                    cause.organization ?? "Organization",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Goal: ₹${cause.targetAmount}",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: context.theme.primaryColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              onDetails(cause);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.theme.primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              elevation: 0,
-            ),
-            child: const Text("Donate"),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_forward_ios, size: 16, color: context.theme.primaryColor)
+            
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Get.back();
+            //     onDetails(cause);
+            //   },
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: context.theme.primaryColor,
+            //     foregroundColor: Colors.white,
+            //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            //     elevation: 0,
+            //   ),
+            //   child: const Text("Donate"),
+            // ),
+          ],
+        ),
       ),
     );
   }

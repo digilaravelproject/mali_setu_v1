@@ -15,7 +15,8 @@ abstract class BusinessRepository {
   Future<void> deleteBusiness(int id);
   Future<List<Category>> getBusinessCategories();
   Future<Category?> getCategoryDetails(int id);
-
+  Future<BusinessResponse> searchBusiness(String query);
+  
   // Job Methods
   Future<BusinessResponse> createJob(Map<String, dynamic> data);
   Future<BusinessResponse> updateJob(int id, Map<String, dynamic> data);
