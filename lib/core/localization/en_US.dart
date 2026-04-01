@@ -862,11 +862,12 @@ const Map<String, String> enUS = {
 
   'blogs' : "Blogs",
   'contribute' : "Contribute",
-  'clear_all' : "Clear All",
   'whatsapp' : "Whatsapp",
   'invalid_pincode' : "Invalid Pincode",
   'location_information' : "Location Information",
   'taluka' : "Taluka",
+  'clear_all' : "Clear All"
+
 
 };
 

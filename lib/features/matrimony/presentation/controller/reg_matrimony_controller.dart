@@ -77,12 +77,18 @@ class RegMatrimonyController extends GetxController {
   // Location
   final country = 'India'.obs;
   final state = ''.obs;
-
+  
   // Pincode
   final isFetchingPincode = false.obs;
 
   // Photos
   final RxList<File> selectedPhotos = <File>[].obs;
+
+  // Pincode
+  // final isFetchingPincode = false.obs;
+  //
+  // // Photos
+  // final RxList<File> selectedPhotos = <File>[].obs;
 
   // Formatting variables
   DateTime? selectedDate;
@@ -132,9 +138,89 @@ class RegMatrimonyController extends GetxController {
 
 
   /// --- Methods ---
-
+  
   /// Pick Multiple Photos
   Future<void> pickPhotos() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final List<XFile> images = await picker.pickMultiImage(
+        imageQuality: 80,
+        maxWidth: 1080,
+      );
+
+      if (images.isNotEmpty) {
+        // Limit to max 5 photos for example
+        int remainingSlots = 5 - selectedPhotos.length;
+        for (var i = 0; i < images.length && i < remainingSlots; i++) {
+          selectedPhotos.add(File(images[i].path));
+        }
+        
+        if (images.length > remainingSlots) {
+          CustomSnackBar.showError(message: "You can only select up to 5 photos.");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error picking photos: $e");
+    }
+  }
+
+  void removePhoto(int index) {
+    selectedPhotos.removeAt(index);
+  }
+
+  /// Handle pincode changes for auto-fill
+  void _onPincodeChanged() {
+    final pincode = pinCodeCtrl.text.trim();
+
+    // Only fetch if pincode is exactly 6 digits
+    if (pincode.length == 6 && int.tryParse(pincode) != null) {
+      _fetchAddressFromPincode(pincode);
+    } else {
+      if (pincode.length < 6) {
+        state.value = '';
+        cityCtrl.clear();
+      }
+    }
+  }
+
+  Future<void> _fetchAddressFromPincode(String pincode) async {
+    try {
+      isFetchingPincode.value = true;
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: "Fetching address details...",
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.blue,
+          icon: Icon(Icons.location_searching, color: Colors.white),
+        ),
+      );
+
+      final response = await PincodeHelper.fetchAddressFromPincode(pincode);
+
+      if (response != null) {
+        // Find existing state or add it
+        final fetchedState = response.state;
+        if (!stateList.contains(fetchedState)) {
+           stateList.add(fetchedState);
+        }
+        
+        state.value = fetchedState;
+        cityCtrl.text = response.district; // Using district as major city
+        country.value = 'India'; // Assumed Indian via API
+
+        CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+      } else {
+        CustomSnackBar.showError(message: "Invalid pincode or no data found");
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: "Failed to fetch address details");
+    } finally {
+      isFetchingPincode.value = false;
+    }
+  }
+
+  /// Pick Multiple Photos
+/*  Future<void> pickPhotos() async {
     try {
       final ImagePicker picker = ImagePicker();
       final List<XFile> images = await picker.pickMultiImage(
@@ -211,7 +297,7 @@ class RegMatrimonyController extends GetxController {
     } finally {
       isFetchingPincode.value = false;
     }
-  }
+  }*/
 
 
   void selectDate(BuildContext context) async {
@@ -298,7 +384,7 @@ class RegMatrimonyController extends GetxController {
 
       // Get combined name from NameFieldComponent
       final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
-
+      
       // Convert images to base64
       List<String> base64Photos = [];
       for (var file in selectedPhotos) {
@@ -309,10 +395,21 @@ class RegMatrimonyController extends GetxController {
         base64Photos.add('data:$mimeType;base64,$base64String');
       }
 
+      // Convert images to base64
+      // List<String> base64Photos = [];
+      // for (var file in selectedPhotos) {
+      //   final bytes = await file.readAsBytes();
+      //   final base64String = base64Encode(bytes);
+      //   final ext = file.path.split('.').last.toLowerCase();
+      //   final mimeType = (ext == 'png') ? 'image/png' : 'image/jpeg';
+      //   base64Photos.add('data:$mimeType;base64,$base64String');
+      // }
+
       // Construct Nested JSON
       final Map<String, dynamic> body = {
         "age": calculateAge(), // 28
         "height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text,
+        //"height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text,
         "weight": weightCtrl.text.isEmpty ? "0" : weightCtrl.text,
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
@@ -334,6 +431,25 @@ class RegMatrimonyController extends GetxController {
           "photos": base64Photos,
           "blood_group": bloodGroup.value,
           "refferal_name": ref_nameCtrl.text,
+
+            // "name": combinedName,
+            // "dob": dobCtrl.text, // "1997-05-12"
+            // "annual_income": annualIncomeCtrl.text,
+            // "occupation": jobTitleCtrl.text,
+            // "profile_created_by": profileCreatedBy.value,
+            // "hobbies": ["reading"], // Hardcoded for now
+            // "language": language.value,
+            // "citizenship": citizenship.value,
+            // "employment_type": employmentType.value,
+            // "family_type": familyType.value,
+            // "marital_status": maritalStatus.value,
+            // "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
+            // "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
+            // "dosh": dosh.value,
+            // "photos": base64Photos,
+            // "blood_group": bloodGroup.value,
+            // "refferal_name": ref_nameCtrl.text,
+
         },
         "family_details": {
           "father": fatherOccupationCtrl.text,
@@ -355,10 +471,17 @@ class RegMatrimonyController extends GetxController {
           "drinking": drinking.value
         },
         "location_details": {
+
           "city": cityCtrl.text,
           "state": state.value,
           "country": country.value,
           "pincode": pinCodeCtrl.text
+
+            // "city": cityCtrl.text,
+            // "state": state.value,
+            // "country": country.value,
+            // "pincode": pinCodeCtrl.text
+
         },
         "partner_preferences": {
           "age_range": "20-30",
@@ -417,7 +540,6 @@ class RegMatrimonyController extends GetxController {
     fetchCasts();
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
-
     pinCodeCtrl.addListener(_onPincodeChanged);
   }
 

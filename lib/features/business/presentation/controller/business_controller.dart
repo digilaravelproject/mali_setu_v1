@@ -34,6 +34,7 @@ import 'package:edu_cluezer/features/business/domain/usecase/search_business_use
 import '../../../../core/routes/app_routes.dart';
 
 
+
 class BusinessController extends GetxController {
   final GetAllBusinessesUseCase getAllBusinessesUseCase;
   final GetMyBusinessesUseCase getMyBusinessesUseCase;

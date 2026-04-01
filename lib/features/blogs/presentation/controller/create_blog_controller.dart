@@ -20,12 +20,21 @@ class CreateBlogController extends GetxController {
   final isSubmitting = false.obs;
   
   final List<String> blogTypesList = [
+<<<<<<< HEAD
     "Investment Guidance",
     "Legal Guidance",
     "Job opportunity",
     "Farming made easy",
     "Education Guidance / Competitive Exams Guidance",
     "How Become an Entrepreneur / Opportunities"
+=======
+    'Investment Guidance',
+    'Business Strategy',
+    'Financial Planning',
+    'Career Advice',
+    'Industry News',
+    'Other'
+>>>>>>> origin/dev_firoz
   ];
 
   Future<void> pickImage() async {

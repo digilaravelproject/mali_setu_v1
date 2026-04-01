@@ -439,50 +439,166 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
           // Search Bar & Filter Toggle
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                onChanged: (value) {
-                  controller.onSearchChanged(value);
-                },
-                decoration: InputDecoration(
-                  hintText: "Search by name, category, or location...",
-                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                  prefixIcon: Obx(() => controller.isLoading.value
-                      ? Container(
-                    padding: const EdgeInsets.all(12),
-                    child: const SizedBox(
-                      width: 10,
-                      height: 10,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+            // child: Row(
+            //   children: [
+            //     Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  )
-                      : const Icon(Icons.search, color: Colors.grey)),
-                  suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                      ? InkWell(
-                    child: const Icon(Icons.clear, color: Colors.grey),
-                    onTap: () {
-                      controller.searchText.value = "";
-                      controller.fetchAllBusinesses(isRefresh: true);
-                    },
-                  )
-                      : const SizedBox.shrink()),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-              ),
-            ),
+                      child: TextField(
+                        onChanged: (value) {
+                          controller.onSearchChanged(value);
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search by name, category, or location...",
+                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                          prefixIcon: Obx(() => controller.isLoading.value
+                              ? Container(
+                            padding: const EdgeInsets.all(12),
+                            child: const SizedBox(
+                              width: 10,
+                              height: 10,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                              : const Icon(Icons.search, color: Colors.grey)),
+                          suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                              ? InkWell(
+                            child: const Icon(Icons.clear, color: Colors.grey),
+                            onTap: () {
+                              controller.searchText.value = "";
+                              controller.fetchAllBusinesses(isRefresh: true);
+                            },
+                          )
+                              : const SizedBox.shrink()),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+
+                        ),
+                      )
+                   /* child: TextField(
+                      onChanged: (value) {
+                        controller.onSearchChanged(value);
+                      },
+                      decoration: InputDecoration(
+                        hintText: "search_business_by_name".tr,
+                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                            ? InkWell(
+                          child: const Icon(Icons.clear, color: Colors.grey),
+                                onTap: () {
+                                  controller.searchText.value = "";
+                                  controller.fetchAllBusinesses(isRefresh: true);
+                                },
+                              )
+                            : const SizedBox.shrink()),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                      ),
+                    ),*/
+                  ),
           ),
+               // ],
+             // ),
+
+               // const SizedBox(width: 12),
+                // GestureDetector(
+                //   onTap: () {
+                //     controller.isFilterVisible.value = !controller.isFilterVisible.value;
+                //   },
+                //   child: Obx(() => Container(
+                //     padding: const EdgeInsets.all(12),
+                //     decoration: BoxDecoration(
+                //       color: controller.isFilterVisible.value ? Get.theme.primaryColor : Colors.white,
+                //       borderRadius: BorderRadius.circular(12),
+                //       boxShadow: [
+                //         BoxShadow(
+                //           color: Colors.black.withOpacity(0.05),
+                //           blurRadius: 10,
+                //           offset: const Offset(0, 4),
+                //         ),
+                //       ],
+                //     ),
+                //     child: Icon(
+                //       Icons.tune_rounded,
+                //       color: controller.isFilterVisible.value ? Colors.white : Colors.grey[600],
+                //     ),
+                //   )),
+                // ),
+             // ],
+           // );
+         // ),
+
+          // Advanced Filter Section
+          Obx(() => AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            height: controller.isFilterVisible.value ? null : 0,
+            child: controller.isFilterVisible.value 
+              ? Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      _buildFilterField(
+                        controller: controller.filterCityCtrl,
+                        label: 'search'.tr,
+                        icon: Icons.search,
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: controller.clearFilters,
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Text('clear_all'.tr),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: controller.searchBusinessWithFilters,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                backgroundColor: Get.theme.primaryColor,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: Text('search'.tr),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(),
+          )),
+          
           
           
           Expanded(
