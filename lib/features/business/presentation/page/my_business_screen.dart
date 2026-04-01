@@ -239,18 +239,18 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            '0.0', // No rating in API yet
-                            style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '(0 reviews)',
-                            style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-                          ),
-                          const Spacer(),
+                          // const Icon(Icons.star, color: Colors.amber, size: 16),
+                          // const SizedBox(width: 4),
+                          // Text(
+                          //   '0.0', // No rating in API yet
+                          //   style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                          // ),
+                          // const SizedBox(width: 4),
+                          // Text(
+                          //   '(0 reviews)',
+                          //   style: context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                          // ),
+                          // const Spacer(),
                           const SizedBox(width: 4),
                           Text(
                             business.createdAt != null ? _calculateTimeAgo(business.createdAt!) : '',
@@ -288,13 +288,13 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                   value: '${business.services?.length ?? 0}',
                   color: Colors.purple,
                 ),
-                _buildStatItem(
-                  context: context,
-                  icon: Icons.currency_rupee,
-                  label: 'revenue'.tr,
-                  value: '0', // No revenue in API yet
-                  color: Colors.green,
-                ),
+                // _buildStatItem(
+                //   context: context,
+                //   icon: Icons.currency_rupee,
+                //   label: 'revenue'.tr,
+                //   value: '0', // No revenue in API yet
+                //   color: Colors.green,
+                // ),
               ],
             ),
           ),

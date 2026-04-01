@@ -861,7 +861,11 @@ const Map<String, String> mrIN = {
 
   'blogs' : "ब्लॉग्स",
   'contribute' : "योगदान द्या",
-  'clear_all' : "सर्व हटवा"
+  'clear_all' : "सर्व हटवा",
+  'whatsapp' : "व्हॉट्सअ‍ॅप",
+  'invalid_pincode' : "अयोग्य पिनकोड",
+  'location_information' : "स्थान माहिती",
+  'taluka' : "तालुका",
 };
 
 

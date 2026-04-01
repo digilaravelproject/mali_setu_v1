@@ -15,6 +15,7 @@ class BlogController extends GetxController {
   final RxBool hasMore = true.obs;
   final RxString searchQuery = ''.obs;
   final searchTextController = TextEditingController();
+  final RxString selectedCategory = 'All'.obs;
 
   // Detail State
   final Rxn<Blog> selectedBlog = Rxn<Blog>();
@@ -77,6 +78,20 @@ class BlogController extends GetxController {
     searchTextController.clear();
     searchQuery.value = '';
     filteredBlogs.assignAll(blogs);
+  }
+
+  void filterByCategory(String category) {
+    selectedCategory.value = category;
+    searchTextController.clear();
+    searchQuery.value = '';
+    
+    if (category == 'All') {
+      filteredBlogs.assignAll(blogs);
+    } else {
+      filteredBlogs.assignAll(
+        blogs.where((blog) => blog.blogType == category).toList(),
+      );
+    }
   }
 
   Future<void> _performSearch(String query) async {

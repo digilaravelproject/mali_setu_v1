@@ -14,6 +14,7 @@ class AppConstants {
   static const String has_seen_intro = "has_seen_intro";
   static const String tokenPref = "auth_token";
   static const String userDataPref = "user_data";
+  static const String profileDataPref = "profile_data";
   static const String userIdPref = "userIdPref";
   static const String isLoggedInPref = "is_logged_in";
   static const String isCompanyLoginPref = "is_company_login";

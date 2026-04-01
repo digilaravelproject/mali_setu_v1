@@ -65,6 +65,7 @@ class Blog {
   final List<String>? tags;
   final String? mediaPath;
   final String? mediaType;
+  final String? blogType;
   final bool? isActive;
   final String? createdAt;
   final String? updatedAt;
@@ -80,6 +81,7 @@ class Blog {
     this.tags,
     this.mediaPath,
     this.mediaType,
+    this.blogType,
     this.isActive,
     this.createdAt,
     this.updatedAt,
@@ -96,6 +98,7 @@ class Blog {
         tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
         mediaPath: json['media_path'],
         mediaType: json['media_type'],
+        blogType: json['blog_type'] ?? json['blogs_type'],
         isActive: json['is_active'] == 1 || json['is_active'] == true,
         createdAt: json['created_at'],
         updatedAt: json['updated_at'],
@@ -112,6 +115,7 @@ class Blog {
     List<String>? tags,
     String? mediaPath,
     String? mediaType,
+    String? blogType,
     bool? isActive,
     String? createdAt,
     String? updatedAt,
@@ -127,6 +131,7 @@ class Blog {
         tags: tags ?? this.tags,
         mediaPath: mediaPath ?? this.mediaPath,
         mediaType: mediaType ?? this.mediaType,
+        blogType: blogType ?? this.blogType,
         isActive: isActive ?? this.isActive,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,

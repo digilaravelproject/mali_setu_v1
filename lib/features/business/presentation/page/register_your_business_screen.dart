@@ -298,7 +298,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
 
               AppInputTextField(
                 label: 'website'.tr,
-                isRequired: true,
+                //isRequired: true,
                 iconData: Icons.language_rounded,
                 textInputType: TextInputType.webSearch,
                 controller: controller.websiteCtrl,

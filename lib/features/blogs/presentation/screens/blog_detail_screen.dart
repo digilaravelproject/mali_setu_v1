@@ -39,8 +39,11 @@ class BlogDetailScreen extends StatelessWidget {
         final String date = blog.createdAt?.split('T')[0] ?? '';
         final int likes = blog.likesCount ?? 0;
         final List<String> tags = blog.tags ?? [];
-        final String description = blog.description ?? 'No description available.';
-        final String avatarLetter = author.isNotEmpty ? author[0].toUpperCase() : 'A';
+        final String description =
+            blog.description ?? 'No description available.';
+        final String avatarLetter = author.isNotEmpty
+            ? author[0].toUpperCase()
+            : 'A';
 
         return SingleChildScrollView(
           child: Column(
@@ -51,7 +54,10 @@ class BlogDetailScreen extends StatelessWidget {
 
               // ── Content Section
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -65,11 +71,29 @@ class BlogDetailScreen extends StatelessWidget {
                         height: 1.3,
                       ),
                     ),
+                    const SizedBox(height: 5),
+                    Text(
+                      blog.blogType?? "",
+                      style: context.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.grey[900],
+                        height: 1.3,
+                      ),
+                    ),
+
                     const SizedBox(height: 14),
 
                     // Author row
                     _buildAuthorRow(
-                        context, primaryColor, avatarLetter, author, date, likes, controller),
+                      context,
+                      primaryColor,
+                      avatarLetter,
+                      author,
+                      date,
+                      likes,
+                      controller,
+                    ),
                     const SizedBox(height: 14),
 
                     // Tags
@@ -97,36 +121,101 @@ class BlogDetailScreen extends StatelessWidget {
   // MEDIA SECTION (IMAGE OR VIDEO)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildMediaSection(
-      BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
+      BuildContext context,
+      Blog blog,
+      Color primaryColor,
+      BlogController controller,
+      ) {
     final hasImage = blog.mediaType == 'image';
     final mediaPath = blog.mediaPath;
-    final imageUrl = mediaPath != null ? "${ApiConstants.imageBaseUrl}$mediaPath" : null;
+    final imageUrl = mediaPath != null
+        ? "${ApiConstants.imageBaseUrl}$mediaPath"
+        : null;
 
-    if (hasImage && imageUrl != null) {
+    if (hasImage) {
       return Stack(
         children: [
           GestureDetector(
-            onTap: () {
+            onTap: imageUrl != null ? () {
               Get.to(() => FullImageScreen(imageUrl: imageUrl));
-            },
+            } : null,
             child: Container(
               height: 280,
               width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                ),
-              ),
+              color: Colors.grey[200],
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildDummyImage(primaryColor),
+                    )
+                  : _buildDummyImage(primaryColor),
             ),
           ),
           _buildTopBarActions(),
+          if (imageUrl != null)
+            Positioned(
+              bottom: 12,
+              right: 12,
+              child: GestureDetector(
+                onTap: () {
+                  Get.to(() => FullImageScreen(imageUrl: imageUrl));
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.fullscreen_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
         ],
       );
     }
 
     // Handle Video
     return _buildVideoPlayer(context, blog, primaryColor, controller);
+  }
+
+  Widget _buildDummyImage(Color primaryColor) {
+    return Container(
+      color: Colors.grey[100],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.image_outlined,
+                size: 80,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Image not available',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildTopBarActions() {
@@ -140,12 +229,15 @@ class BlogDetailScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _videoIconButton(Icons.arrow_back_ios_new_rounded, () => Get.back()),
+              _videoIconButton(
+                Icons.arrow_back_ios_new_rounded,
+                    () => Get.back(),
+              ),
               Row(
                 children: [
-                  _videoIconButton(Icons.bookmark_border_rounded, () {}),
-                  const SizedBox(width: 6),
-                  _videoIconButton(Icons.share_outlined, () {}),
+                  // _videoIconButton(Icons.bookmark_border_rounded, () {}),
+                  // const SizedBox(width: 6),
+                  // _videoIconButton(Icons.share_outlined, () {}),
                 ],
               ),
             ],
@@ -156,15 +248,16 @@ class BlogDetailScreen extends StatelessWidget {
   }
 
   Widget _buildVideoPlayer(
-      BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
-    // For video player in Stateless, we should ideally have the controller in BlogController
-    // BUT since we need a NEW controller per blog, we'll use a local controller wrap or just manage in BlogController's single detail slot.
-    
-    // For now, I'll update BlogController to manage a detailVideoController.
+      BuildContext context,
+      Blog blog,
+      Color primaryColor,
+      BlogController controller,
+      ) {
+    final String? imageUrl = blog.mediaPath != null ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}" : null;
     
     return Stack(
       children: [
-        // Video frame
+        // Video frame / Thumbnail
         GestureDetector(
           onTap: () {
             if (blog.mediaPath != null) {
@@ -176,23 +269,14 @@ class BlogDetailScreen extends StatelessWidget {
             height: 280,
             width: double.infinity,
             color: Colors.black,
-            child: Obx(() {
-              final vController = controller.detailVideoController.value;
-              final isInitialized = controller.isVideoInitialized.value;
-              
-              if (vController != null && isInitialized) {
-                return Center(
-                  child: AspectRatio(
-                    aspectRatio: vController.value.aspectRatio,
-                    child: VideoPlayer(vController),
-                  ),
-                );
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(color: Colors.white),
-                );
-              }
-            }),
+            child: imageUrl != null
+                ? Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildDummyVideoThumbnail(primaryColor),
+                  )
+                : _buildDummyVideoThumbnail(primaryColor),
           ),
         ),
 
@@ -203,11 +287,7 @@ class BlogDetailScreen extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0x88000000),
-                Color(0x00000000),
-                Color(0x88000000),
-              ],
+              colors: [Color(0x88000000), Color(0x00000000), Color(0x88000000)],
               stops: [0.0, 0.5, 1.0],
             ),
           ),
@@ -215,142 +295,63 @@ class BlogDetailScreen extends StatelessWidget {
 
         _buildTopBarActions(),
 
-        // Playback controls center
+        // Play button center
         Positioned.fill(
           child: Center(
-            child: Obx(() {
-              final vController = controller.detailVideoController.value;
-              if (vController == null || !controller.isVideoInitialized.value) {
-                return const SizedBox.shrink();
-              }
-              
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildControlButton(Icons.replay_10_rounded, () {
-                    final newPos = vController.value.position - const Duration(seconds: 10);
-                    vController.seekTo(newPos);
-                  }),
-                  const SizedBox(width: 24),
-                  ValueListenableBuilder(
-                    valueListenable: vController,
-                    builder: (context, VideoPlayerValue value, child) {
-                      return GestureDetector(
-                        onTap: () {
-                          value.isPlaying ? vController.pause() : vController.play();
-                        },
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.25),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
-                          ),
-                          child: Icon(
-                            value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                      );
-                    },
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: primaryColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                  const SizedBox(width: 24),
-                  _buildControlButton(Icons.forward_10_rounded, () {
-                    final newPos = vController.value.position + const Duration(seconds: 10);
-                    vController.seekTo(newPos);
-                  }),
-                ],
-              );
-            }),
-          ),
-        ),
-
-        // Bottom progress bar
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Obx(() {
-            final vController = controller.detailVideoController.value;
-            if (vController == null || !controller.isVideoInitialized.value) {
-              return const SizedBox.shrink();
-            }
-            
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-              child: Column(
-                children: [
-                  _buildProgressBar(vController),
-                  _buildTimestampRow(vController, blog),
                 ],
               ),
-            );
-          }),
+              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildProgressBar(VideoPlayerController vController) {
-    return ValueListenableBuilder(
-      valueListenable: vController,
-      builder: (context, VideoPlayerValue value, child) {
-        return SliderTheme(
-          data: SliderThemeData(
-            trackHeight: 2,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-            activeTrackColor: Colors.white,
-            inactiveTrackColor: Colors.white38,
-            thumbColor: Colors.white,
-            overlayColor: Colors.white24,
-          ),
-          child: Slider(
-            value: value.position.inMilliseconds.toDouble(),
-            min: 0.0,
-            max: value.duration.inMilliseconds.toDouble().clamp(0.01, double.infinity),
-            onChanged: (val) {
-              vController.seekTo(Duration(milliseconds: val.toInt()));
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildTimestampRow(VideoPlayerController vController, Blog blog) {
-    return ValueListenableBuilder(
-      valueListenable: vController,
-      builder: (context, VideoPlayerValue value, child) {
-        return Row(
+  Widget _buildDummyVideoThumbnail(Color primaryColor) {
+    return Container(
+      color: Colors.grey[900],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              '${_formatDuration(value.position)} / ${_formatDuration(value.duration)}',
-              style: const TextStyle(color: Colors.white, fontSize: 11),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.videocam_outlined,
+                size: 80,
+                color: Colors.white,
+              ),
             ),
-            const Spacer(),
-            GestureDetector(
-              onTap: () {
-                if (blog.mediaPath != null) {
-                  final videoUrl = "${ApiConstants.imageBaseUrl}${blog.mediaPath}";
-                  Get.to(() => FullVideoScreen(videoUrl: videoUrl));
-                }
-              },
-              child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 22),
+            const SizedBox(height: 12),
+            Text(
+              'Video not available',
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
-  }
-
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
   }
 
   Widget _videoIconButton(IconData icon, VoidCallback onTap) {
@@ -359,8 +360,8 @@ class BlogDetailScreen extends StatelessWidget {
       child: Container(
         width: 36,
         height: 36,
-        decoration: const BoxDecoration(
-          color: Colors.black26, // Fallback since withValues(alpha: 0.25) is not always available if not imported
+        decoration:  BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 18),
@@ -368,23 +369,35 @@ class BlogDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildControlButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          shape: BoxShape.circle,
+  Widget _buildRelatedDummyImage(Color primaryColor) {
+    return Container(
+      color: Colors.grey[100],
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: primaryColor.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.image_outlined,
+            size: 30,
+            color: primaryColor,
+          ),
         ),
-        child: Icon(icon, color: Colors.white, size: 26),
       ),
     );
   }
 
-  Widget _buildAuthorRow(BuildContext context, Color primaryColor, String avatarLetter,
-      String author, String date, int likes, BlogController controller) {
+  Widget _buildAuthorRow(
+      BuildContext context,
+      Color primaryColor,
+      String avatarLetter,
+      String author,
+      String date,
+      int likes,
+      BlogController controller,
+      ) {
     return Row(
       children: [
         Container(
@@ -410,13 +423,16 @@ class BlogDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(author,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.grey[850],
-                  )),
+              Text(
+                author,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey[850],
+                ),
+              ),
               const SizedBox(height: 3),
-              Row(
+
+              /*Row(
                 children: [
                   Icon(Icons.calendar_today_outlined, size: 13, color: Colors.grey[500]),
                   const SizedBox(width: 4),
@@ -432,6 +448,54 @@ class BlogDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text('${controller.selectedBlog.value?.likesCount ?? likes}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                ],
+              ),*/
+              Row(
+                children: [
+                  // LEFT SIDE
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 13,
+                        color: Colors.grey[500],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        date,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+
+                  const Spacer(), // pushes like to right
+                  // RIGHT SIDE (LIKE)
+                  GestureDetector(
+                    onTap: () => controller.toggleLike(
+                      controller.selectedBlog.value?.id ?? 0,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          controller.selectedBlog.value?.isLiked == true
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          size: 22, // 🔥 increased size
+                          color: controller.selectedBlog.value?.isLiked == true
+                              ? primaryColor
+                              : Colors.grey[500],
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${controller.selectedBlog.value?.likesCount ?? likes}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -466,7 +530,11 @@ class BlogDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDescription(BuildContext context, Color primaryColor, String description) {
+  Widget _buildDescription(
+      BuildContext context,
+      Color primaryColor,
+      String description,
+      ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -482,7 +550,11 @@ class BlogDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRelatedBlogs(BuildContext context, Color primaryColor, BlogController controller) {
+  Widget _buildRelatedBlogs(
+      BuildContext context,
+      Color primaryColor,
+      BlogController controller,
+      ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -497,32 +569,45 @@ class BlogDetailScreen extends StatelessWidget {
         const SizedBox(height: 12),
         controller.relatedBlogs.isEmpty
             ? const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(child: Text('No related data', style: TextStyle(color: Colors.grey))),
-              )
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Center(
+            child: Text(
+              'No related data',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+        )
             : SizedBox(
-                height: 160,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: controller.relatedBlogs.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final blog = controller.relatedBlogs[index];
-                    return _buildRelatedCard(context, primaryColor, blog);
-                  },
-                ),
-              ),
+          height: 160,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: controller.relatedBlogs.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final blog = controller.relatedBlogs[index];
+              return _buildRelatedCard(context, primaryColor, blog);
+            },
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildRelatedCard(BuildContext context, Color primaryColor, Blog blog) {
-    final String? imageUrl =
-        blog.mediaPath != null ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}" : null;
+  Widget _buildRelatedCard(
+      BuildContext context,
+      Color primaryColor,
+      Blog blog,
+      ) {
+    final String? imageUrl = blog.mediaPath != null
+        ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}"
+        : null;
 
     return GestureDetector(
       onTap: () {
-        Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0), preventDuplicates: false);
+        Get.to(
+              () => BlogDetailScreen(blogId: blog.id ?? 0),
+          preventDuplicates: false,
+        );
       },
       child: SizedBox(
         width: 140,
@@ -536,10 +621,13 @@ class BlogDetailScreen extends StatelessWidget {
                 width: 140,
                 color: Colors.grey[100],
                 child: imageUrl != null
-                    ? Image.network(imageUrl, fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.image_not_supported, size: 30, color: Colors.grey))
-                    : const Center(child: Icon(Icons.image_outlined, size: 36, color: Colors.white38)),
+                    ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                  _buildRelatedDummyImage(primaryColor),
+                )
+                    : _buildRelatedDummyImage(primaryColor),
               ),
             ),
             const SizedBox(height: 6),

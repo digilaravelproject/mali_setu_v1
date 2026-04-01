@@ -27,7 +27,7 @@ class BusinessScreen extends GetView<BusinessController> {
       backgroundColor: Colors.grey[50],
       body: Obx(() {
 
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value && controller.businesses.isEmpty && controller.myBusiness.value == null) {
           return _buildShimmerLoading(context);
         }
 
@@ -439,131 +439,50 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
           // Search Bar & Filter Toggle
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      onChanged: (value) {
-                        controller.onSearchChanged(value);
-                      },
-                      decoration: InputDecoration(
-                        hintText: "search_business_by_name".tr,
-                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                        suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                            ? InkWell(
-                          child: const Icon(Icons.clear, color: Colors.grey),
-                                onTap: () {
-                                  controller.searchText.value = "";
-                                  controller.fetchAllBusinesses(isRefresh: true);
-                                },
-                              )
-                            : const SizedBox.shrink()),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                      ),
-                    ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: () {
-                    controller.isFilterVisible.value = !controller.isFilterVisible.value;
-                  },
-                  child: Obx(() => Container(
+                ],
+              ),
+              child: TextField(
+                onChanged: (value) {
+                  controller.onSearchChanged(value);
+                },
+                decoration: InputDecoration(
+                  hintText: "Search by name, category, or location...",
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  prefixIcon: Obx(() => controller.isLoading.value
+                      ? Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: controller.isFilterVisible.value ? Get.theme.primaryColor : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                    child: const SizedBox(
+                      width: 10,
+                      height: 10,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    child: Icon(
-                      Icons.tune_rounded,
-                      color: controller.isFilterVisible.value ? Colors.white : Colors.grey[600],
-                    ),
-                  )),
+                  )
+                      : const Icon(Icons.search, color: Colors.grey)),
+                  suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                      ? InkWell(
+                    child: const Icon(Icons.clear, color: Colors.grey),
+                    onTap: () {
+                      controller.searchText.value = "";
+                      controller.fetchAllBusinesses(isRefresh: true);
+                    },
+                  )
+                      : const SizedBox.shrink()),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-              ],
+              ),
             ),
           ),
-
-          // Advanced Filter Section
-          Obx(() => AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: controller.isFilterVisible.value ? null : 0,
-            child: controller.isFilterVisible.value 
-              ? Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildFilterField(
-                        controller: controller.filterCityCtrl,
-                        label: 'search'.tr,
-                        icon: Icons.search,
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: controller.clearFilters,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: Text('clear_all'.tr),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: controller.searchBusinessWithFilters,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                backgroundColor: Get.theme.primaryColor,
-                                foregroundColor: Colors.white,
-                              ),
-                              child: Text('search'.tr),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              : const SizedBox.shrink(),
-          )),
           
           
           Expanded(
@@ -750,10 +669,18 @@ class BusinessListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
+    // String address = [
+    //    business.user?.city,
+    //    business.user?.district,
+    // ].where((e) => e != null && e.isNotEmpty).join(", ");
     String address = [
-       business.user?.city,
-       business.user?.district,
-    ].where((e) => e != null && e.isNotEmpty).join(", ");
+      business.state,
+      business.district,
+      business.city,
+      business.pincode,
+    ]
+        .where((e) => e != null && e.trim().isNotEmpty)
+        .join(", ");
 
     return Container(
       decoration: BoxDecoration(
@@ -869,7 +796,7 @@ class BusinessListCard extends StatelessWidget {
                       
                       const SizedBox(height: 6),
                       
-                      Row(
+                     /* Row(
                         children: [
                           Icon(CupertinoIcons.location_solid, size: 14, color: Colors.grey[400]),
                           const SizedBox(width: 4),
@@ -886,7 +813,33 @@ class BusinessListCard extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ),
+                      ),*/
+
+
+
+                      if (address.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              CupertinoIcons.location_solid,
+                              size: 14,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                address,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       
                       const SizedBox(height: 12),
                       Container(height: 1, color: Colors.grey[100]),

@@ -60,6 +60,19 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                     hintText: "bio_hint".tr,
                     maxLines: 4,
                     textInputType: TextInputType.multiline,
+                    isRequired: true,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Bio is required";
+                      }
+                      if (value.trim().length < 10) {
+                        return "Bio must be at least 10 characters";
+                      }
+                      if (value.trim().length > 500) {
+                        return "Bio cannot exceed 500 characters";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   AppInputTextField(
@@ -67,18 +80,39 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                     label: "location".tr,
                     hintText: "location_hint".tr,
                     textInputType: TextInputType.text,
+                    isRequired: true,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Location is required";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   SingleDropdown(
                     controller: controller.experienceCtrl,
                     label: "experience_level".tr,
                     items: controller.expLevels,
+                    isRequired: true,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Experience level is required";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
                   SingleDropdown(
                     controller: controller.availabilityCtrl,
                     label: "availability".tr,
                     items: controller.availabilities,
+                    isRequired: true,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Availability is required";
+                      }
+                      return null;
+                    },
                   ),
                 ],
               ),
@@ -103,7 +137,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                       ),
                       const SizedBox(width: 12),
                       Padding(
-                        padding: const EdgeInsets.only(top: 24.0), // Align with input field
+                        padding: const EdgeInsets.only(top: 40.0), // Align with input field
                         child: InkWell(
                           onTap: controller.addCustomSkill,
                           borderRadius: BorderRadius.circular(12),
@@ -125,7 +159,13 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   Obx(() => controller.selectedSkills.isNotEmpty ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("selected_skills".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("selected_skills".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text("${controller.selectedSkills.length}/10", style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                        ],
+                      ),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -199,7 +239,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                       ),
                       const SizedBox(width: 12),
                       Padding(
-                        padding: const EdgeInsets.only(top: 24.0),
+                        padding: const EdgeInsets.only(top: 40.0),
                         child: InkWell(
                           onTap: controller.addCustomInterest,
                           borderRadius: BorderRadius.circular(12),
@@ -221,7 +261,13 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   Obx(() => controller.selectedInterests.isNotEmpty ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("selected_interests".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("selected_interests".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text("${controller.selectedInterests.length}/10", style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                        ],
+                      ),
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
@@ -336,6 +382,8 @@ class SingleDropdown extends StatelessWidget {
   final String? label;
   final String? hint;
   final List<String> items;
+  final bool isRequired;
+  final String? Function(String?)? validator;
 
   const SingleDropdown({
     super.key,
@@ -343,6 +391,8 @@ class SingleDropdown extends StatelessWidget {
     required this.items,
     this.label,
     this.hint,
+    this.isRequired = false,
+    this.validator,
   });
 
   @override
@@ -352,6 +402,8 @@ class SingleDropdown extends StatelessWidget {
       label: label ?? "No Label",
       isDropdown: true,
       dropdownItems: items,
+      isRequired: isRequired,
+      validator: validator,
     );
   }
 }

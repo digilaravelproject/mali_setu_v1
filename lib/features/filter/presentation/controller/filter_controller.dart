@@ -181,12 +181,12 @@ class FilterController extends GetxController {
 
 
   final languageList =[
+    "Marathi",
     "Hindi",
     "English",
     "Bengali",
     "Tamil",
     "Telugu",
-    "Marathi",
   ];
 
   final smokingHabits =[

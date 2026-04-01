@@ -22,7 +22,6 @@
 //   }
 // }
 
-
 class ResLoginModel {
   bool? success;
   String? message;
@@ -63,7 +62,6 @@ class ResLoginModel {
   }
 }
 
-
 class LoginData {
   User? user;
   String? token;
@@ -97,7 +95,7 @@ class User {
   String? email;
 
   String? companyName; // 🆕 ADDED
-  String? deptName;    // 🆕 ADDED
+  String? deptName; // 🆕 ADDED
   String? designation; // 🆕 ADDED
 
   String? otp;
@@ -127,46 +125,51 @@ class User {
   String? createdAt;
   String? updatedAt;
   String? profileImage;
+  bool? hasPayment;
+  String? paymentPurpose;
 
-  User(
-      {this.id,
+  User({
+    this.id,
 
-        this.googleId,
+    this.googleId,
 
-        this.name,
-      this.email,
+    this.name,
+    this.email,
 
-        this.companyName,
-        this.deptName,
-        this.designation,
+    this.companyName,
+    this.deptName,
+    this.designation,
 
-      this.otp,
-      this.otpExpiresAt,
-      this.phone,
-      this.age,
+    this.otp,
+    this.otpExpiresAt,
+    this.phone,
+    this.age,
 
-        this.dob,
+    this.dob,
 
-      this.castCertificate,
-      this.occupation,
-      this.reffralCode,
-      this.address,
-      this.nearbyLocation,
-      this.pincode,
-      this.roadNumber,
-      this.state,
-      this.city,
-      this.sector,
-      this.district,
-      this.destination,
-      this.userType,
-      this.casteVerificationStatus,
-      this.status,
-      this.adminNotes,
-      this.emailVerifiedAt,
-      this.createdAt,
-      this.updatedAt,
-      this.profileImage});
+    this.castCertificate,
+    this.occupation,
+    this.reffralCode,
+    this.address,
+    this.nearbyLocation,
+    this.pincode,
+    this.roadNumber,
+    this.state,
+    this.city,
+    this.sector,
+    this.district,
+    this.destination,
+    this.userType,
+    this.casteVerificationStatus,
+    this.status,
+    this.adminNotes,
+    this.emailVerifiedAt,
+    this.createdAt,
+    this.updatedAt,
+    this.profileImage,
+    this.hasPayment,
+    this.paymentPurpose,
+  });
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -177,9 +180,8 @@ class User {
     email = json['email'];
 
     companyName = json['company_name']; // 🆕
-    deptName = json['dept_name'];       // 🆕
-    designation = json['designation'];  // 🆕
-
+    deptName = json['dept_name']; // 🆕
+    designation = json['designation']; // 🆕
 
     otp = json['otp'];
     otpExpiresAt = json['otp_expires_at'];
@@ -209,6 +211,8 @@ class User {
     updatedAt = json['updated_at'];
     // Handle both 'profile_image' and 'photo' fields
     profileImage = json['profile_image'] ?? json['photo'];
+    hasPayment = json['has_payment'];
+    paymentPurpose = json['payment_purpose'];
   }
 
   Map<String, dynamic> toJson() {
@@ -251,6 +255,8 @@ class User {
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     data['profile_image'] = profileImage;
+    data['has_payment'] = hasPayment;
+    data['payment_purpose'] = paymentPurpose;
     return data;
   }
 }

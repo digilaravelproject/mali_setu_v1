@@ -288,14 +288,105 @@ class CustomImageView extends StatelessWidget {
 class ImageFvScreen extends StatefulWidget {
   final String? imageUrl;
   final File? imageFile;
+  final List<String>? imageUrls;
+  final List<File>? imageFiles;
+  final int initialIndex;
 
-  const ImageFvScreen({super.key, this.imageUrl, this.imageFile});
+  const ImageFvScreen({
+    super.key,
+    this.imageUrl,
+    this.imageFile,
+    this.imageUrls,
+    this.imageFiles,
+    this.initialIndex = 0,
+  });
 
   @override
   State<ImageFvScreen> createState() => _ImageFvScreenState();
 }
 
 class _ImageFvScreenState extends State<ImageFvScreen> {
+  late PageController _pageController;
+  late int _currentIndex;
+  late List<String> _allUrls;
+  late List<File> _allFiles;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+
+    // Support both singular and plural image parameters
+    _allUrls = widget.imageUrls ?? [];
+    if (widget.imageUrl != null && !_allUrls.contains(widget.imageUrl)) {
+      _allUrls.insert(0, widget.imageUrl!);
+    }
+
+    _allFiles = widget.imageFiles ?? [];
+    if (widget.imageFile != null && !_allFiles.contains(widget.imageFile)) {
+      _allFiles.insert(0, widget.imageFile!);
+    }
+
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int count = _allUrls.isNotEmpty ? _allUrls.length : _allFiles.length;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: Icon(AppAssets.backArrow, color: Colors.white),
+        ),
+        title: count > 1
+            ? Text(
+          "${_currentIndex + 1} / $count",
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        )
+            : null,
+        centerTitle: true,
+      ),
+      body: PageView.builder(
+        controller: _pageController,
+        itemCount: count,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        itemBuilder: (context, index) {
+          return _ZoomableImage(
+            url: _allUrls.isNotEmpty ? _allUrls[index] : null,
+            file: _allFiles.isNotEmpty ? _allFiles[index] : null,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ZoomableImage extends StatefulWidget {
+  final String? url;
+  final File? file;
+
+  const _ZoomableImage({this.url, this.file});
+
+  @override
+  State<_ZoomableImage> createState() => _ZoomableImageState();
+}
+
+class _ZoomableImageState extends State<_ZoomableImage> {
   final TransformationController _controller = TransformationController();
   TapDownDetails? _tapDownDetails;
 
@@ -309,6 +400,11 @@ class _ImageFvScreenState extends State<ImageFvScreen> {
         ..translateByDouble(-position.dx * 2, -position.dy * 2, 0.0, 1.0)
         ..scaleByDouble(3.0, 3.0, 1.0, 1.0);
     }
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -331,21 +427,37 @@ class _ImageFvScreenState extends State<ImageFvScreen> {
             transformationController: _controller,
             minScale: 1.0,
             maxScale: 5.0,
-            panEnabled: true,
-            scaleEnabled: true,
-            child: _buildImage(),
+            child: Center(
+              child: widget.url != null
+                  ? CachedNetworkImage(
+                imageUrl: widget.url!,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+                errorWidget: (context, url, error) => const Icon(
+                  Icons.broken_image,
+                  color: Colors.white54,
+                  size: 64,
+                ),
+              )
+                  : widget.file != null
+                  ? Image.file(widget.file!, fit: BoxFit.contain)
+                  : const SizedBox.shrink(),
+            ),
           ),
-        ),
-      ),
+        )
+      )
     );
+      }
   }
 
-  Widget _buildImage() {
-    if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
-      return Image.network(widget.imageUrl!, fit: BoxFit.contain);
-    } else if (widget.imageFile != null) {
-      return Image.file(widget.imageFile!, fit: BoxFit.contain);
-    }
-    return const SizedBox.shrink();
-  }
-}
+//   Widget _buildImage() {
+//     if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
+//       return Image.network(widget.imageUrl!, fit: BoxFit.contain);
+//     } else if (widget.imageFile != null) {
+//       return Image.file(widget.imageFile!, fit: BoxFit.contain);
+//     }
+//     return const SizedBox.shrink();
+//   }
+// }

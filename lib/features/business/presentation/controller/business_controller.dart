@@ -31,6 +31,8 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_job_application
 import 'package:edu_cluezer/features/business/domain/usecase/update_application_status_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/search_business_usecase.dart';
 
+import '../../../../core/routes/app_routes.dart';
+
 
 class BusinessController extends GetxController {
   final GetAllBusinessesUseCase getAllBusinessesUseCase;
@@ -118,9 +120,12 @@ class BusinessController extends GetxController {
   List<Business> get filteredBusinesses => businesses;
   
   // Search with debounce
-  void onSearchChanged(String value) {
-    searchText.value = value;
-    
+  void onSearchChanged(String query) {
+    if (!_authService.hasPaymentFor('business_registration')) {
+      _showBusinessPaymentDialog();
+      return;
+    }
+    searchText.value = query;
     // Cancel previous timer
     _searchDebounce?.cancel();
     
@@ -156,23 +161,31 @@ class BusinessController extends GetxController {
     }
   }
 
+
   Future<void> fetchAllBusinesses({bool isRefresh = false}) async {
+    isLoading.value = true;
     try {
-      if (isRefresh) {
+      if (isRefresh && searchText.value.isEmpty) {
         currentPage.value = 1;
         businesses.clear();
       }
-      
-      // Pass search text to API
-      final searchQuery = searchText.value.trim().isEmpty ? null : searchText.value.trim();
-      final response = await getAllBusinessesUseCase(page: currentPage.value, search: searchQuery);
 
-      if (isRefresh) {
+      // Determine which API to use: specialized search (POST) or general list (GET)
+      final searchQuery = searchText.value.trim();
+      BusinessPaginationResult response;
+
+      if (searchQuery.isNotEmpty) {
+        response = await searchBusinessUseCase(searchQuery);
+      } else {
+        response = await getAllBusinessesUseCase(page: currentPage.value);
+      }
+
+      if (isRefresh || searchQuery.isNotEmpty) {
         businesses.value = response.businesses;
       } else {
         businesses.addAll(response.businesses);
       }
-      
+
       // Update pagination info
       currentPage.value = response.currentPage;
       totalPages.value = response.lastPage;
@@ -241,8 +254,17 @@ class BusinessController extends GetxController {
       print("DEBUG_PAGINATION: Loading page ${currentPage.value}");
       
       // Pass search text to API
-      final searchQuery = searchText.value.trim().isEmpty ? null : searchText.value.trim();
-      final response = await getAllBusinessesUseCase(page: currentPage.value, search: searchQuery);
+    //  final searchQuery = searchText.value.trim().isEmpty ? null : searchText.value.trim();
+   //   final response = await getAllBusinessesUseCase(page: currentPage.value, search: searchQuery);
+      final searchQuery = searchText.value.trim();
+      BusinessPaginationResult response;
+
+      if (searchQuery.isNotEmpty) {
+        response = await searchBusinessUseCase(searchQuery);
+      } else {
+        response = await getAllBusinessesUseCase(page: currentPage.value);
+      }
+
       businesses.addAll(response.businesses);
       
       // Update pagination info
@@ -580,6 +602,14 @@ class BusinessController extends GetxController {
     }
   }
 
+  // Controller me function
+  Future<void> launchWhatsApp(String phone) async {
+    final Uri uri = Uri.parse("https://wa.me/$phone");
+    if (!await launchUrl(uri)) {
+      throw 'Could not launch WhatsApp';
+    }
+  }
+
   Future<void> launchResume(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -647,6 +677,27 @@ class BusinessController extends GetxController {
        filterTalukaCtrl.dispose();
        filterDistrictCtrl.dispose();
     }
+  }
+  void _showBusinessPaymentDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Access Denied"),
+        content: const Text("Register business and pay"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("OK"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              Get.toNamed(AppRoutes.regBusiness); // Redirect to registration
+            },
+            child: const Text("Register Now"),
+          ),
+        ],
+      ),
+    );
   }
 }
 

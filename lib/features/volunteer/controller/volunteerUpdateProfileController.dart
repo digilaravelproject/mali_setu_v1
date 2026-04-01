@@ -118,9 +118,9 @@ class VoluntProfileUpdateController extends GetxController {
   }
 
   final expLevels = [
-    "Entry Level (0 Years - 2 Years)",
+    "Entry Level (0 Years - 3 Years)",
     "Mid Level (3 Years - 5 Years)",
-    "High Level (6 Years - 9 Years)"
+    "High Level (5 Years Plus)"
   ];
   
   final availabilities = [
@@ -130,6 +130,13 @@ class VoluntProfileUpdateController extends GetxController {
   ];
 
   Future<void> onSaveProfile() async {
+    // Validate all fields
+    final validationError = _validateProfile();
+    if (validationError != null) {
+      CustomSnackBar.showError(message: validationError);
+      return;
+    }
+
     isLoading.value = true;
     update();
 
@@ -167,6 +174,53 @@ class VoluntProfileUpdateController extends GetxController {
       isLoading.value = false;
       update();
     }
+  }
+
+  /// Validate all profile fields
+  String? _validateProfile() {
+    // Bio validation
+    if (bioCtrl.text.trim().isEmpty) {
+      return "Bio is required";
+    }
+    if (bioCtrl.text.trim().length < 10) {
+      return "Bio must be at least 10 characters";
+    }
+    if (bioCtrl.text.trim().length > 500) {
+      return "Bio cannot exceed 500 characters";
+    }
+
+    // Location validation
+    if (locationCtrl.text.trim().isEmpty) {
+      return "Location is required";
+    }
+
+    // Experience validation
+    if (experienceCtrl.text.trim().isEmpty) {
+      return "Experience level is required";
+    }
+
+    // Availability validation
+    if (availabilityCtrl.text.trim().isEmpty) {
+      return "Availability is required";
+    }
+
+    // Skills validation
+    if (selectedSkills.isEmpty) {
+      return "Please add at least one skill";
+    }
+    if (selectedSkills.length > 10) {
+      return "You can add maximum 10 skills";
+    }
+
+    // Interests validation
+    if (selectedInterests.isEmpty) {
+      return "Please add at least one interest";
+    }
+    if (selectedInterests.length > 10) {
+      return "You can add maximum 10 interests";
+    }
+
+    return null; // All validations passed
   }
 
   @override

@@ -56,11 +56,28 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
           children: [
             if (images.isNotEmpty)
               PageView.builder(
+                controller: controller.pageController,
                 itemCount: images.length,
+                onPageChanged: (index) {
+                  controller.currentImageIndex.value = index;
+                },
                 itemBuilder: (context, index) {
-                  return CustomImageView(
-                    url: "${ApiConstants.imageBaseUrl}${images[index]}",
-                    fit: BoxFit.cover,
+                  return GestureDetector(
+                    onTap: () {
+                      final List<String> imageUrls = images.map((img) {
+                        if (img.startsWith("http")) return img;
+                        return "${ApiConstants.imageBaseUrl}$img";
+                      }).toList();
+
+                      Get.to(() => ImageFvScreen(
+                        imageUrls: imageUrls,
+                        initialIndex: index,
+                      ));
+                    },
+                    child: CustomImageView(
+                      url: images[index],
+                      fit: BoxFit.cover,
+                    ),
                   );
                 },
               )
@@ -70,20 +87,46 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 child: const Icon(Icons.person, size: 100, color: Colors.grey),
               ),
             // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.8),
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
+            IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.8),
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
                 ),
               ),
             ),
+
+
+            if (images.length > 1)
+              Positioned(
+                bottom: 120,
+                left: 0,
+                right: 0,
+                child: Obx(() => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(images.length, (index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: controller.currentImageIndex.value == index
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.4),
+                      ),
+                    );
+                  }),
+                )),
+              ),
             // Header Info
             Positioned(
               bottom: 20,

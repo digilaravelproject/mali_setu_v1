@@ -189,13 +189,50 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  
+                  // Search Bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: TextField(
+                      controller: controller.searchController,
+                      onChanged: (value) => controller.searchBusinesses(value),
+                      decoration: InputDecoration(
+                        hintText: 'Search by name, location...',
+                        hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                        prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[500], size: 22),
+                        suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () => controller.clearSearch(),
+                                child: Icon(Icons.clear_rounded, color: Colors.grey[500], size: 20),
+                              )
+                            : const SizedBox.shrink()),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
+                      ),
+                      style: const TextStyle(color: Colors.black87, fontSize: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
           ),
           
           Obx(() {
-            if (controller.allBusinesses.isEmpty) {
+            if (controller.isLoading.value) {
+              return const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              );
+            }
+
+            if (controller.filteredBusinesses.isEmpty) {
               return SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
@@ -204,7 +241,9 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                       Icon(Icons.store_mall_directory_outlined, size: 60, color: Colors.grey[300]),
                       const SizedBox(height: 16),
                       Text(
-                        "no_business_found".tr,
+                        controller.searchQuery.value.isNotEmpty 
+                            ? "No businesses found for your search"
+                            : "no_business_found".tr,
                         style: TextStyle(color: Colors.grey[500], fontSize: 16),
                       ),
                     ],
@@ -218,10 +257,10 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                 (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: BusinessListCard(business: controller.allBusinesses[index]),
+                    child: BusinessListCard(business: controller.filteredBusinesses[index]),
                   );
                 },
-                childCount: controller.allBusinesses.length,
+                childCount: controller.filteredBusinesses.length,
               ),
             );
           }),

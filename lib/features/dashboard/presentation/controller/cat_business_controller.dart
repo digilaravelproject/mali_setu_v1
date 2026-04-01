@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
@@ -16,6 +17,9 @@ class CatBusinessController extends GetxController {
 
   // ✅ Store all businesses here
   var allBusinesses = <CatBusiness>[].obs;
+  var filteredBusinesses = <CatBusiness>[].obs;
+  var searchQuery = ''.obs;
+  final searchController = TextEditingController();
 
   @override
   void onInit() {
@@ -39,8 +43,10 @@ class CatBusinessController extends GetxController {
       if (res.success == true && res.businesses != null) {
         // Clear previous data
         allBusinesses.clear();
+        filteredBusinesses.clear();
         // Add new data
         allBusinesses.addAll(res.businesses!);
+        filteredBusinesses.addAll(res.businesses!);
       } else {
         errorMessage.value = res.message ?? 'Failed to fetch businesses';
       }
@@ -49,5 +55,49 @@ class CatBusinessController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void searchBusinesses(String query) {
+    searchQuery.value = query;
+    
+    if (query.isEmpty) {
+      filteredBusinesses.assignAll(allBusinesses);
+    } else {
+      final filtered = allBusinesses.where((business) {
+        final businessName = business.businessName?.toLowerCase() ?? '';
+        final businessType = business.businessType?.toLowerCase() ?? '';
+        final description = business.description?.toLowerCase() ?? '';
+        final city = business.user?.city?.toLowerCase() ?? '';
+        final address = business.user?.address?.toLowerCase() ?? '';
+        final phone = business.contactPhone?.toLowerCase() ?? '';
+        final email = business.contactEmail?.toLowerCase() ?? '';
+        final website = business.website?.toLowerCase() ?? '';
+        
+        final searchTerm = query.toLowerCase();
+        
+        return businessName.contains(searchTerm) ||
+               businessType.contains(searchTerm) ||
+               description.contains(searchTerm) ||
+               city.contains(searchTerm) ||
+               address.contains(searchTerm) ||
+               phone.contains(searchTerm) ||
+               email.contains(searchTerm) ||
+               website.contains(searchTerm);
+      }).toList();
+      
+      filteredBusinesses.assignAll(filtered);
+    }
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+    filteredBusinesses.assignAll(allBusinesses);
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 }

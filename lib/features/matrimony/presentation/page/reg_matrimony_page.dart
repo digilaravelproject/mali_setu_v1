@@ -24,7 +24,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
         title:  Text("register_matrimony".tr),
       ),
       body: Obx(
-        () => Column(
+            () => Column(
           children: [
             /// Progress Indicator
             _buildProgressIndicator(context),
@@ -48,7 +48,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
         ),
       ),
       bottomNavigationBar: Obx(
-        () => BottomAppBar(
+            () => BottomAppBar(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           child: Row(
             children: [
@@ -148,7 +148,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildStepHeader("personal_details".tr, "personal_details_sub".tr),
-        
+
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -163,7 +163,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   isRequired: true,
                 ),
                 const SizedBox(height: 12),
-                
+
                 Obx(() => SelectionTile(
                   label: "profile_created_by".tr,
                   value: controller.profileCreatedBy.value,
@@ -236,7 +236,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Physical Status", controller.physicalStatusList, controller.physicalStatus.call),
                 )),
-                 const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
                   label: "mother_tongue".tr,
@@ -245,7 +245,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Language", controller.languageList, controller.language.call),
                 )),
-                 const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
                   label: "citizenship".tr,
@@ -284,7 +284,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
         Card(
           elevation: 0,
-           shape: RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
           child: Padding(
@@ -294,37 +294,37 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 Obx(() => SelectionTile(
                   label: "Caste", // Formerly Religion
                   value: controller.religion.value,
-                  icon: Icons.group_work, 
+                  icon: Icons.group_work,
                   onTap: () => _showSingleSelectBottomSheet(
-                      context, 
-                      "Select Caste", 
-                      controller.casteList.map((e) => e.name ?? "").toList(), 
+                      context,
+                      "Select Caste",
+                      controller.casteList.map((e) => e.name ?? "").toList(),
                       controller.onCasteSelected
                   ),
                 )),
                 const SizedBox(height: 12),
-                
+
                 ValueListenableBuilder<TextEditingValue>(
-                  valueListenable: controller.casteCtrl,
-                  builder: (context, value, child) {
-                    return SelectionTile(
-                      label: "Sub-Caste", // Formerly Caste
-                      value: value.text, // Using text controller value for display in tile
-                      icon: Icons.subdirectory_arrow_right,
-                      onTap: () {
-                        if (controller.casteList.isEmpty) {
-                           CustomSnackBar.showError(message: "Please select Caste first");
-                           return;
-                        }
-                        _showSingleSelectBottomSheet(
-                          context, 
-                          "Select Sub-Caste", 
-                          controller.subCasteList.map((e) => e.name ?? "").toList(), 
-                          controller.onSubCasteSelected
-                        );
-                      },
-                    );
-                  }
+                    valueListenable: controller.casteCtrl,
+                    builder: (context, value, child) {
+                      return SelectionTile(
+                        label: "Sub-Caste", // Formerly Caste
+                        value: value.text, // Using text controller value for display in tile
+                        icon: Icons.subdirectory_arrow_right,
+                        onTap: () {
+                          if (controller.casteList.isEmpty) {
+                            CustomSnackBar.showError(message: "Please select Caste first");
+                            return;
+                          }
+                          _showSingleSelectBottomSheet(
+                              context,
+                              "Select Sub-Caste",
+                              controller.subCasteList.map((e) => e.name ?? "").toList(),
+                              controller.onSubCasteSelected
+                          );
+                        },
+                      );
+                    }
                 ),
                 const SizedBox(height: 12),
 
@@ -346,7 +346,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
 
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "manglik".tr,
                   value: controller.manglik.value,
                   icon: Icons.warning_amber_rounded,
@@ -368,92 +368,92 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 _buildSectionHeader("Photos (Up to 5)"),
                 Obx(() => controller.selectedPhotos.isNotEmpty
                     ? SizedBox(
-                        height: 100,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: controller.selectedPhotos.length < 5
-                              ? controller.selectedPhotos.length + 1
-                              : 5,
-                          separatorBuilder: (_, __) => const SizedBox(width: 8),
-                          itemBuilder: (context, index) {
-                            if (index == controller.selectedPhotos.length) {
-                              return GestureDetector(
-                                onTap: controller.pickPhotos,
-                                child: Container(
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                    color: context.theme.primaryColor.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: context.theme.primaryColor.withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  child: Icon(Icons.add_a_photo,
-                                      color: context.theme.primaryColor),
-                                ),
-                              );
-                            }
-                            return Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    controller.selectedPhotos[index],
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: GestureDetector(
-                                    onTap: () => controller.removePhoto(index),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(Icons.close,
-                                          size: 14, color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: controller.pickPhotos,
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          decoration: BoxDecoration(
-                            color: context.theme.primaryColor.withValues(alpha: 0.05),
+                  height: 100,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: controller.selectedPhotos.length < 5
+                        ? controller.selectedPhotos.length + 1
+                        : 5,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      if (index == controller.selectedPhotos.length) {
+                        return GestureDetector(
+                          onTap: controller.pickPhotos,
+                          child: Container(
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: context.theme.primaryColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: context.theme.primaryColor.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Icon(Icons.add_a_photo,
+                                color: context.theme.primaryColor),
+                          ),
+                        );
+                      }
+                      return Stack(
+                        children: [
+                          ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: context.theme.primaryColor.withValues(alpha: 0.3),
-                              width: 1.5,
+                            child: Image.file(
+                              controller.selectedPhotos[index],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              Icon(Icons.add_photo_alternate_outlined,
-                                  size: 40, color: context.theme.primaryColor),
-                              const SizedBox(height: 8),
-                              Text(
-                                "Tap to upload photos",
-                                style: context.textTheme.bodyMedium?.copyWith(
-                                  color: context.theme.primaryColor,
-                                  fontWeight: FontWeight.w600,
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: () => controller.removePhoto(index),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
                                 ),
+                                child: const Icon(Icons.close,
+                                    size: 14, color: Colors.white),
                               ),
-                            ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                )
+                    : GestureDetector(
+                  onTap: controller.pickPhotos,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    decoration: BoxDecoration(
+                      color: context.theme.primaryColor.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: context.theme.primaryColor.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(Icons.add_photo_alternate_outlined,
+                            size: 40, color: context.theme.primaryColor),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Tap to upload photos",
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.theme.primaryColor,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      )),
+                      ],
+                    ),
+                  ),
+                )),
               ],
             ),
           ),
@@ -471,14 +471,14 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
         Card(
           elevation: 0,
-           shape: RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "highest_qualification".tr,
                   value: controller.education.value,
                   icon: Icons.school_outlined,
@@ -505,27 +505,27 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 Obx(() => controller.employmentType.value == 'Not Working'
                     ? const SizedBox.shrink()
                     : Column(
-                        children: [
-                          AppInputTextField(
-                            controller: controller.jobTitleCtrl,
-                            label: "job_title".tr,
-                          ),
-                          const SizedBox(height: 12),
+                  children: [
+                    AppInputTextField(
+                      controller: controller.jobTitleCtrl,
+                      label: "job_title".tr,
+                    ),
+                    const SizedBox(height: 12),
 
-                          AppInputTextField(
-                            controller: controller.companyCtrl,
-                            label: "company_name".tr,
-                          ),
-                          const SizedBox(height: 12),
+                    AppInputTextField(
+                      controller: controller.companyCtrl,
+                      label: "company_name".tr,
+                    ),
+                    const SizedBox(height: 12),
 
-                          AppInputTextField(
-                            controller: controller.annualIncomeCtrl,
-                            label: "annual_income".tr,
-                            hintText: "annual_income".tr,
-                            textInputType: TextInputType.number,
-                          ),
-                        ],
-                      ),
+                    AppInputTextField(
+                      controller: controller.annualIncomeCtrl,
+                      label: "annual_income".tr,
+                      hintText: "annual_income".tr,
+                      textInputType: TextInputType.number,
+                    ),
+                  ],
+                ),
                 ),
               ],
             ),
@@ -535,7 +535,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     );
   }
 
-   /// Step 4: Family, Lifestyle & Location
+  /// Step 4: Family, Lifestyle & Location
   Widget _buildFamilyLocationStep(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -544,15 +544,15 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
         Card(
           elevation: 0,
-           shape: RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1))),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                 // Family
-                 Obx(() => SelectionTile(
+                // Family
+                Obx(() => SelectionTile(
                   label: "family_type".tr,
                   value: controller.familyType.value,
                   icon: Icons.family_restroom,
@@ -561,7 +561,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
 
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "family_class".tr,
                   value: controller.familyClass.value,
                   icon: Icons.monetization_on_outlined,
@@ -570,7 +570,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
 
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "family_value".tr,
                   value: controller.familyValue.value,
                   icon: Icons.volunteer_activism,
@@ -585,16 +585,16 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 12),
-                 AppInputTextField(
+                AppInputTextField(
                   controller: controller.motherOccupationCtrl,
                   label: "mother_occupation".tr,
                   textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Lifestyle
                 _buildSectionHeader("lifestyle".tr),
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "diet".tr,
                   value: controller.diet.value,
                   icon: Icons.restaurant,
@@ -602,7 +602,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       context, "Diet", controller.dietList, controller.diet.call),
                 )),
                 const SizedBox(height: 12),
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "smoking".tr,
                   value: controller.smoking.value,
                   icon: Icons.smoking_rooms,
@@ -610,7 +610,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       context, "Smoking", controller.smokingList, controller.smoking.call),
                 )),
                 const SizedBox(height: 12),
-                  Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "drinking".tr,
                   value: controller.drinking.value,
                   icon: Icons.local_bar,
@@ -627,23 +627,23 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   textInputType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   endIcon: controller.isFetchingPincode.value
-                        ? null
-                        : Icons.location_on,
+                      ? null
+                      : Icons.location_on,
                   suffixWidget: controller.isFetchingPincode.value
-                        ? const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                      ? const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
                       ),
-                    )
-                        : null,
+                    ),
+                  )
+                      : null,
                 )),
                 const SizedBox(height: 12),
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "country".tr,
                   value: controller.country.value,
                   icon: Icons.public,
@@ -651,7 +651,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       context, "Country", controller.countryList, controller.onCountryChanged),
                 )),
                 const SizedBox(height: 12),
-                 Obx(() => SelectionTile(
+                Obx(() => SelectionTile(
                   label: "state".tr,
                   value: controller.state.value,
                   icon: Icons.map,
@@ -659,7 +659,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       context, "State", controller.stateList, controller.state.call),
                 )),
                 const SizedBox(height: 12),
-                 AppInputTextField(
+                AppInputTextField(
                   controller: controller.cityCtrl,
                   label: "city".tr,
                   textInputAction: TextInputAction.done,
@@ -749,7 +749,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       option,
                       style: context.textTheme.bodyLarge,
                     ),
-                   // trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    // trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
                     onTap: () {
                       onSelected(option);
                       Get.back();

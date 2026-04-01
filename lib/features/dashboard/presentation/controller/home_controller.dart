@@ -6,6 +6,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../../../../packages/card_swiper/src/controller/card_swiper_controller.dart';
 import '../../../../packages/card_swiper/src/direction/card_swiper_direction.dart';
 import '../../../../packages/card_swiper/src/direction/card_swiper_direction.dart';
+import '../../../Auth/service/auth_service.dart';
 import '../../data/model/user_profile_data.dart';
 import '../../../business/data/model/res_all_business_model.dart';
 import '../../../business/domain/usecase/get_business_categories_usecase.dart';
@@ -41,6 +42,10 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (Get.isRegistered<AuthService>()) {
+      Get.find<AuthService>().refreshProfile();
+    }
+
     fetchCategories();
     fetchBanners();
   }

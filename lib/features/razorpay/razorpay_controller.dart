@@ -12,6 +12,8 @@ import 'package:edu_cluezer/features/donation/presentation/widget/donation_botto
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/core/network/api_response.dart';
 
+import '../Auth/service/auth_service.dart';
+
 class RazorpayController extends GetxController {
   late Razorpay _razorpay;
   final PaymentRepository _paymentRepository = Get.find<PaymentRepository>();
@@ -133,6 +135,9 @@ class RazorpayController extends GetxController {
           amount: amount.toString(),
           paymentId: response.paymentId ?? '',
           onOkPressed: () {
+            if (Get.isRegistered<AuthService>()) {
+              Get.find<AuthService>().refreshProfile();
+            }
             if (type == 'matrimony') {
               _showDonationPromptAfterDelay();
             } else if (type == 'donation') {

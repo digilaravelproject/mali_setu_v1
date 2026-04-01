@@ -41,7 +41,7 @@ class RegMatrimonyController extends GetxController {
   final ref_nameCtrl = TextEditingController();
 
   // Keep some old ones if needed or reuse
-  final casteCtrl = TextEditingController(); 
+  final casteCtrl = TextEditingController();
   final subCasteCtrl = TextEditingController();
 
   /// --- Rx Selection Variables ---
@@ -53,7 +53,7 @@ class RegMatrimonyController extends GetxController {
   final maritalStatus = ''.obs;
   final language = ''.obs;
   final citizenship = ''.obs;
-  
+
   // Religious
   final religion = ''.obs;
   final star = ''.obs;
@@ -77,7 +77,7 @@ class RegMatrimonyController extends GetxController {
   // Location
   final country = 'India'.obs;
   final state = ''.obs;
-  
+
   // Pincode
   final isFetchingPincode = false.obs;
 
@@ -87,7 +87,7 @@ class RegMatrimonyController extends GetxController {
   // Formatting variables
   DateTime? selectedDate;
   final rxDob = ''.obs;
-  
+
   // Steps
   final currentStep = 0.obs;
 
@@ -99,7 +99,7 @@ class RegMatrimonyController extends GetxController {
   final List<String> maritalStatusList = ['Never Married', 'Divorced', 'Widowed', 'Awaiting Divorce'];
   final List<String> languageList = ['Hindi', 'English', 'Marathi', 'Gujarati', 'Punjabi', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Urdu', 'Other'];
   final List<String> citizenshipList = ['Indian', 'NRI', 'Other'];
-  
+
   final List<String> religionList = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jain', 'Buddhist', 'Parsi', 'Jewish', 'Other'];
   final List<String> starList = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashirsha', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'];
   final List<String> raasiList = ['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)'];
@@ -109,11 +109,11 @@ class RegMatrimonyController extends GetxController {
 
   final List<String> educationList = ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other'];
   final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Owner', 'Self Employed', 'Not Working'];
-  
+
   final List<String> familyTypeList = ['Nuclear', 'Joint'];
   final List<String> familyClassList = ['Rich', 'Upper Middle Class', 'Middle Class', 'Lower Middle Class', 'Lower Class'];
   final List<String> familyValueList = ['Orthodox', 'Traditional', 'Moderate', 'Liberal'];
-  
+
   final List<String> dietList = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian', 'Vegan'];
   final List<String> smokingList = ['No', 'Yes', 'Occasionally'];
   final List<String> drinkingList = ['No', 'Yes', 'Occasionally'];
@@ -132,7 +132,7 @@ class RegMatrimonyController extends GetxController {
 
 
   /// --- Methods ---
-  
+
   /// Pick Multiple Photos
   Future<void> pickPhotos() async {
     try {
@@ -148,7 +148,7 @@ class RegMatrimonyController extends GetxController {
         for (var i = 0; i < images.length && i < remainingSlots; i++) {
           selectedPhotos.add(File(images[i].path));
         }
-        
+
         if (images.length > remainingSlots) {
           CustomSnackBar.showError(message: "You can only select up to 5 photos.");
         }
@@ -195,9 +195,9 @@ class RegMatrimonyController extends GetxController {
         // Find existing state or add it
         final fetchedState = response.state;
         if (!stateList.contains(fetchedState)) {
-           stateList.add(fetchedState);
+          stateList.add(fetchedState);
         }
-        
+
         state.value = fetchedState;
         cityCtrl.text = response.district; // Using district as major city
         country.value = 'India'; // Assumed Indian via API
@@ -217,7 +217,7 @@ class RegMatrimonyController extends GetxController {
   void selectDate(BuildContext context) async {
     final now = DateTime.now();
     final lastAllowedDate = DateTime(now.year - 18, now.month, now.day);
-    
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: lastAllowedDate,
@@ -226,7 +226,7 @@ class RegMatrimonyController extends GetxController {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-             colorScheme: ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: Theme.of(context).primaryColor,
               onPrimary: Colors.white,
               onSurface: Colors.black,
@@ -280,25 +280,25 @@ class RegMatrimonyController extends GetxController {
 
 
     //await fetchAndShowPlans();
-    
+
     // Validate name field component
     final nameValidation = nameFieldKey.currentState?.validate();
     if (nameValidation != null) {
       CustomSnackBar.showError(message: nameValidation);
       return;
     }
-    
+
     // Basic Validation
-    if (gender.value.isEmpty || dobCtrl.text.isEmpty) {
-        CustomSnackBar.showError(message: "Please fill required fields");
-        return;
-    }
+    // if (gender.value.isEmpty || dobCtrl.text.isEmpty) {
+    //   CustomSnackBar.showError(message: "Please fill required fields");
+    //   return;
+    // }
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
       // Get combined name from NameFieldComponent
       final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
-      
+
       // Convert images to base64
       List<String> base64Photos = [];
       for (var file in selectedPhotos) {
@@ -312,62 +312,62 @@ class RegMatrimonyController extends GetxController {
       // Construct Nested JSON
       final Map<String, dynamic> body = {
         "age": calculateAge(), // 28
-        "height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text, 
+        "height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text,
         "weight": weightCtrl.text.isEmpty ? "0" : weightCtrl.text,
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
         "personal_details": {
-            "name": combinedName,
-            "dob": dobCtrl.text, // "1997-05-12"
-            "annual_income": annualIncomeCtrl.text,
-            "occupation": jobTitleCtrl.text,
-            "profile_created_by": profileCreatedBy.value,
-            "hobbies": ["reading"], // Hardcoded for now
-            "language": language.value,
-            "citizenship": citizenship.value,
-            "employment_type": employmentType.value,
-            "family_type": familyType.value,
-            "marital_status": maritalStatus.value,
-            "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
-            "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
-            "dosh": dosh.value,
-            "photos": base64Photos,
-            "blood_group": bloodGroup.value,
-            "refferal_name": ref_nameCtrl.text,
+          "name": combinedName,
+          "dob": dobCtrl.text, // "1997-05-12"
+          "annual_income": annualIncomeCtrl.text,
+          "occupation": jobTitleCtrl.text,
+          "profile_created_by": profileCreatedBy.value,
+          "hobbies": ["reading"], // Hardcoded for now
+          "language": language.value,
+          "citizenship": citizenship.value,
+          "employment_type": employmentType.value,
+          "family_type": familyType.value,
+          "marital_status": maritalStatus.value,
+          "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
+          "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
+          "dosh": dosh.value,
+          "photos": base64Photos,
+          "blood_group": bloodGroup.value,
+          "refferal_name": ref_nameCtrl.text,
         },
         "family_details": {
-            "father": fatherOccupationCtrl.text,
-            "mother": motherOccupationCtrl.text,
-            "family_class": familyClass.value,
-            "family_value": familyValue.value
+          "father": fatherOccupationCtrl.text,
+          "mother": motherOccupationCtrl.text,
+          "family_class": familyClass.value,
+          "family_value": familyValue.value
         },
         "education_details": {
-            "highest_qualification": education.value,
-            "college": collegeCtrl.text
+          "highest_qualification": education.value,
+          "college": collegeCtrl.text
         },
         "professional_details": {
-            "job_title": jobTitleCtrl.text,
-            "company": companyCtrl.text
+          "job_title": jobTitleCtrl.text,
+          "company": companyCtrl.text
         },
         "lifestyle_details": {
-            "diet": diet.value,
-            "smoking": smoking.value,
-            "drinking": drinking.value
+          "diet": diet.value,
+          "smoking": smoking.value,
+          "drinking": drinking.value
         },
         "location_details": {
-            "city": cityCtrl.text,
-            "state": state.value,
-            "country": country.value,
-            "pincode": pinCodeCtrl.text
+          "city": cityCtrl.text,
+          "state": state.value,
+          "country": country.value,
+          "pincode": pinCodeCtrl.text
         },
         "partner_preferences": {
-            "age_range": "20-30",
-            "education": "Any",
-            "location": "Any"
+          "age_range": "20-30",
+          "education": "Any",
+          "location": "Any"
         },
         "privacy_settings": {
-            "show_photos": "all",
-            "show_contact": "premium_only"
+          "show_photos": "all",
+          "show_contact": "premium_only"
         }
       };
 
@@ -379,14 +379,25 @@ class RegMatrimonyController extends GetxController {
 
       if (response.success == true) {
 
-          Get.back(); // Close Registration Screen // Removed to show plans first
-         CustomSnackBar.showSuccess(message: response.message ?? "Profile Created Successfully");
-         
-         // Fetch Plans and Show Dialog
-         await fetchAndShowPlans();
-         
+        Get.back(); // Close Registration Screen // Removed to show plans first
+        CustomSnackBar.showSuccess(message: response.message ?? "Profile Created Successfully");
+
+        // Fetch Plans and Show Dialog
+        await fetchAndShowPlans();
+
       } else {
-         CustomSnackBar.showError(message: response.message ?? "Failed to create profile");
+        String errorMsg = response.message ?? "Failed to create profile";
+        if (response.errors != null && response.errors!.isNotEmpty) {
+          // Extract first error message from the nested errors object
+          var firstErrorKey = response.errors!.keys.first;
+          var firstErrorValue = response.errors![firstErrorKey];
+          if (firstErrorValue is List && firstErrorValue.isNotEmpty) {
+            errorMsg = firstErrorValue.first.toString();
+          } else {
+            errorMsg = firstErrorValue.toString();
+          }
+        }
+        CustomSnackBar.showError(message: errorMsg);
       }
 
     } catch (e) {
@@ -406,7 +417,7 @@ class RegMatrimonyController extends GetxController {
     fetchCasts();
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
-    
+
     pinCodeCtrl.addListener(_onPincodeChanged);
   }
 
@@ -445,13 +456,13 @@ class RegMatrimonyController extends GetxController {
 
   void onCasteSelected(String casteName) {
     religion.value = casteName; // Using religion variable to store Caste Name as per plan
-    
+
     // Find ID
     final selectedCast = casteList.firstWhereOrNull((c) => c.name == casteName);
     if (selectedCast != null && selectedCast.id != null) {
       fetchSubCasts(selectedCast.id!);
     }
-    
+
     casteCtrl.clear(); // Clear sub-caste selection
   }
 
@@ -489,7 +500,7 @@ class RegMatrimonyController extends GetxController {
 
       if (response.success == true && response.data?.plans != null) {
         final selectedPlan = await showSubscriptionBottomSheet(response.data!.plans!);
-        
+
         if (selectedPlan != null) {
           await initiateMatrimonyPayment(selectedPlan);
         } else {

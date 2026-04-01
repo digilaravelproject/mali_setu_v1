@@ -94,9 +94,9 @@ class NameFieldComponentState extends State<NameFieldComponent> {
           isRequired: widget.isRequired,
           isDropdown: true,
           dropdownItems: [
-            'mr'.tr,
-            'mrs'.tr,
-            'ms'.tr,
+            // 'mr'.tr,
+            // 'mrs'.tr,
+            // 'ms'.tr,
             'dr'.tr,
             'prof'.tr,
           ],

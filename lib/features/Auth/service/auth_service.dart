@@ -87,12 +87,20 @@ class AuthService extends GetxService {
               AppConstants.userDataPref,
               jsonEncode(user.toJson()),
             );
+            await SharedPrefs.setString(
+              AppConstants.profileDataPref,
+              jsonEncode(data['data']['user']),
+            );
           } else if (data['user'] != null) {
             final user = User.fromJson(data['user']);
             currentUser.value = user;
             await SharedPrefs.setString(
               AppConstants.userDataPref,
               jsonEncode(user.toJson()),
+            );
+            await SharedPrefs.setString(
+              AppConstants.profileDataPref,
+              jsonEncode(data['user']),
             );
           }
 
@@ -240,6 +248,10 @@ class AuthService extends GetxService {
           AppConstants.userDataPref,
           jsonEncode(user.toJson()),
         );
+        await SharedPrefs.setString(
+          AppConstants.profileDataPref,
+          jsonEncode(data),
+        );
         
         return ApiResponse.success(user);
       } else {
@@ -248,6 +260,13 @@ class AuthService extends GetxService {
     } catch (e) {
       return ApiResponse.error(e.toString());
     }
+  }
+
+  /// Check if user has paid for a specific feature
+  bool hasPaymentFor(String purpose) {
+    final user = currentUser.value;
+    if (user == null) return false;
+    return user.hasPayment == true && user.paymentPurpose == purpose;
   }
 
   /// Update profile data
@@ -278,7 +297,13 @@ class AuthService extends GetxService {
           AppConstants.userDataPref,
           jsonEncode(user.toJson()),
         );
-        
+
+        await SharedPrefs.setString(
+          AppConstants.profileDataPref,
+          jsonEncode(data),
+        );
+
+
         debugPrint("✅ User data saved to SharedPrefs");
         debugPrint("📸 Current user profile image: ${currentUser.value?.profileImage}");
         

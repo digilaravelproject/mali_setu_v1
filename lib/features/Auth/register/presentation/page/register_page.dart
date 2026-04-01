@@ -643,7 +643,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           textInputType: TextInputType.text,
                           //  validator: FormValidator.roadNumber,
                           controller: controller.roadNumberCtrl,
-                          isRequired: true,
+                         // isRequired: true,
                         ),
                       ),
                     ],
@@ -657,7 +657,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           controller: controller.sectorCtrl,
                         //  validator: (value) => FormValidator.emptycheck(value, "Sector"),
                           textInputType: TextInputType.text,
-                          isRequired: true,
+                         // isRequired: true,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -680,6 +680,19 @@ class RegisterPage extends GetWidget<RegisterController> {
                 title: "professional_details".tr,
                 icon: Icons.business_center_outlined,
                 children: [
+
+                  AppInputTextField(
+                    label: "user_type".tr,
+                    isDropdown: true,
+                    controller: controller.userTypeCtrl,
+                    validator: (value) =>
+                        FormValidator.emptycheck(value, "User Type"),
+                    dropdownItems: controller.usertypeList,
+                    iconData: CupertinoIcons.person_2_fill,
+                    isRequired: true,
+                  ),
+                  const SizedBox(height: 12),
+
                   AppInputTextField(
                     label: "company_name".tr,
                     textInputType: TextInputType.text,
@@ -694,17 +707,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     iconData: CupertinoIcons.group_solid,
                   ),
                   const SizedBox(height: 12),
-                  AppInputTextField(
-                    label: "user_type".tr,
-                    isDropdown: true,
-                    controller: controller.userTypeCtrl,
-                    validator: (value) =>
-                        FormValidator.emptycheck(value, "User Type"),
-                    dropdownItems: controller.usertypeList,
-                    iconData: CupertinoIcons.person_2_fill,
-                    isRequired: true,
-                  ),
-                  const SizedBox(height: 12),
+
                   AppInputTextField(
                     label: "occupation".tr,
                     textInputType: TextInputType.text,

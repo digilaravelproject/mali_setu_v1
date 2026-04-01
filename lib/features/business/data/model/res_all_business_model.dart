@@ -108,7 +108,7 @@ class BusinessData {
     return BusinessData(
       currentPage: _asInt(json['current_page']),
       data: businesses.isNotEmpty ? businesses : [],
-      total: _asInt(json['total']),
+      total: _asInt(json['total'] ?? json['count']),
       firstPageUrl: json['first_page_url'],
       lastPageUrl: json['last_page_url'],
       nextPageUrl: json['next_page_url'],
@@ -152,6 +152,11 @@ class Business {
   String? createdAt;
   String? updatedAt;
   String? status;
+  String? state;
+  String? district;
+  String? taluka;
+  String? city;
+  String? pincode;
   User? user;
   Category? category;
   List<Product>? products;
@@ -178,6 +183,11 @@ class Business {
     this.createdAt,
     this.updatedAt,
     this.status,
+    this.state,
+    this.district,
+    this.taluka,
+    this.city,
+    this.pincode,
     this.user,
     this.category,
     this.products,
@@ -206,6 +216,11 @@ class Business {
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       status: json['status'],
+      state: json['state'],
+      district: json['district'],
+      taluka: json['taluka'],
+      city: json['city'],
+      pincode: json['pincode'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       category: json['category'] != null ? Category.fromJson(json['category']) : null,
       products: json['products'] != null

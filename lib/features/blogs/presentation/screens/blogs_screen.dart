@@ -8,9 +8,36 @@ import '../../data/model/blog_model.dart';
 import 'blog_detail_screen.dart';
 import 'create_blogs.dart';
 
-class BlogsScreen extends StatelessWidget {
+class BlogsScreen extends StatefulWidget {
   const BlogsScreen({super.key});
 
+  @override
+  State<BlogsScreen> createState() => _BlogsScreenState();
+}
+
+class _BlogsScreenState extends State<BlogsScreen> {
+  late ScrollController _tabScrollController;
+  final List<String> blogTypesList = [
+    'All',
+    'Investment Guidance',
+    'Business Strategy',
+    'Financial Planning',
+    'Career Advice',
+    'Industry News',
+    'Other'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _tabScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,16 +92,15 @@ class BlogsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Pink header background for search bar
-          // Container(
-          //   color: const Color(0xFFFCE4EC),
-          //   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          //   child:
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: _buildSearchBar( controller),
-            ),
-         // ),
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: _buildSearchBar(controller),
+          ),
+
+          // Category tabs
+          _buildCategoryTabs(controller, primaryColor),
+
           // Blog list
           Expanded(
             child: Obx(() {
@@ -102,6 +128,50 @@ class BlogsScreen extends StatelessWidget {
             }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryTabs(BlogController controller, Color primaryColor) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: SingleChildScrollView(
+        controller: _tabScrollController,
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Obx(() => Row(
+          children: blogTypesList.map((category) {
+            final isSelected = controller.selectedCategory.value == category;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: GestureDetector(
+                onTap: () {
+                  controller.filterByCategory(category);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? primaryColor : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? primaryColor : Colors.grey[300]!,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? Colors.white : Colors.grey[700],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        )),
       ),
     );
   }
@@ -231,14 +301,8 @@ class BlogsScreen extends StatelessWidget {
               child: imageUrl != null
                   ? Image.network(imageUrl, fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.image_not_supported, size: 50, color: Colors.grey))
-                  : Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 60,
-                        color: Colors.grey[300],
-                      ),
-                    ),
+                          _buildDummyImagePlaceholder(primaryColor))
+                  : _buildDummyImagePlaceholder(primaryColor),
             ),
           ),
           Padding(
@@ -394,8 +458,8 @@ class BlogsScreen extends StatelessWidget {
                   child: imageUrl != null
                       ? Image.network(imageUrl, fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.videocam_off, size: 50, color: Colors.grey))
-                      : const SizedBox(),
+                              _buildDummyVideoPlaceholder(primaryColor))
+                      : _buildDummyVideoPlaceholder(primaryColor),
                 ),
                 Positioned.fill(
                   child: Center(
@@ -594,3 +658,72 @@ class BlogsScreen extends StatelessWidget {
     );
   }
 }
+
+  Widget _buildDummyImagePlaceholder(Color primaryColor) {
+    return Container(
+      color: Colors.grey[100],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.image_outlined,
+                size: 60,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No image',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDummyVideoPlaceholder(Color primaryColor) {
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.videocam_outlined,
+                size: 60,
+                color: primaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No video',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+

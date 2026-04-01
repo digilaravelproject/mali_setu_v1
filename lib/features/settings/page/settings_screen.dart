@@ -14,6 +14,7 @@ import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
 import '../../volunteer/pages/volunteer_page.dart';
 import 'change_language_page.dart';
+import 'contact_support.dart';
 
 class SettingsScreen extends GetWidget<SettingsController> {
   const SettingsScreen({super.key});
@@ -157,7 +158,8 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   _SettingsItem(
                     title: 'contact_support'.tr,
                     icon: Icons.support_agent_rounded,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () => Get.to(ContactSupportPage())
+                        //_showComingSoonDialog(context),
                   ),
                 ],
               ),

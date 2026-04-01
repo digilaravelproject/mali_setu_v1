@@ -353,6 +353,14 @@ class BusinessDetailScreen extends GetView<BusinessController> {
             context,
             onTap: () => controller.launchEmail(business.user!.email.toString()),
           ),
+          const SizedBox(width: 24),
+          _buildQuickActionButton(
+            FontAwesomeIcons.whatsapp,
+            'whatsapp'.tr,
+            Colors.green,
+            context,
+            onTap: () => controller.launchWhatsApp(business.user!.phone.toString()),
+          ),
         ],
       ),
     );
