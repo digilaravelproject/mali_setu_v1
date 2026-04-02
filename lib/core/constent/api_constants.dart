@@ -72,6 +72,7 @@ class ApiConstants {
     static const String volunteerProfile = "volunteer/profile";
     static const String allVolunteer = "volunteer/opportunities";
     static const String volunteerOpportunity = "volunteer/opportunity";
+    static const String searchVolunteers = "search/volunteer-profiles";
 
     // Job Api
     static const String createJobs = "jobs";

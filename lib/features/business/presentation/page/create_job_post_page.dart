@@ -344,13 +344,15 @@ class CreateJobPage extends GetWidget<CreateJobController> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        child: Obx(() => CustomButton(
-          title: controller.isEditMode.value ? 'update_job'.tr : 'post_job_now'.tr,
-          isLoading: controller.isLoading.value,
-          onPressed: controller.onRegister,
-        )),
+      bottomNavigationBar: SafeArea(
+        child: BottomAppBar(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Obx(() => CustomButton(
+            title: controller.isEditMode.value ? 'update_job'.tr : 'post_job_now'.tr,
+            isLoading: controller.isLoading.value,
+            onPressed: controller.onRegister,
+          )),
+        ),
       ),
     );
   }

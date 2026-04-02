@@ -311,7 +311,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController>{
                 onPressed: controller.onRegister,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
             ],
           ),
         ),

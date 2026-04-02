@@ -47,27 +47,29 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           ],
         ),
       ),
-      bottomNavigationBar: Obx(
-            () => BottomAppBar(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-          child: Row(
-            children: [
-              if (controller.currentStep.value > 0)
+      bottomNavigationBar: SafeArea(
+        child: Obx(
+              () => BottomAppBar(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: [
+                if (controller.currentStep.value > 0)
+                  Expanded(
+                    child: CustomOutlinedButton(
+                      title: "back".tr,
+                      onPressed: controller.previousStep,
+                    ).marginOnly(right: 8),
+                  ),
                 Expanded(
-                  child: CustomOutlinedButton(
-                    title: "back".tr,
-                    onPressed: controller.previousStep,
-                  ).marginOnly(right: 8),
+                  child: CustomButton(
+                    title: controller.currentStep.value == 3 ? "register".tr : "next".tr,
+                    onPressed: controller.currentStep.value == 3
+                        ? controller.onRegister
+                        : controller.nextStep,
+                  ),
                 ),
-              Expanded(
-                child: CustomButton(
-                  title: controller.currentStep.value == 3 ? "register".tr : "next".tr,
-                  onPressed: controller.currentStep.value == 3
-                      ? controller.onRegister
-                      : controller.nextStep,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -608,7 +610,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     AppInputTextField(
                       controller: controller.annualIncomeCtrl,
                       label: "annual_income".tr,
-                      hintText: "annual_income".tr,
+                      hintText: "e.g. 4 Lakh",
                       textInputType: TextInputType.number,
                     ),
                   ],

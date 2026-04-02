@@ -195,81 +195,148 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (controller.filteredVolunteerList.isEmpty) {
+              // Show error state with retry option
+              if (controller.hasError.value && controller.allVolunteerList.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.group_off_outlined,
+                        Icons.error_outline,
                         size: 60,
-                        color: Colors.grey[300],
+                        color: Colors.grey[400],
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        "no_volunteers_found".tr,
-                        style: TextStyle(color: Colors.grey[500]),
+                        "failed_to_load_volunteers".tr,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        controller.errorMessage.value,
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: () => controller.fetchVolunteers(),
+                        icon: const Icon(Icons.refresh),
+                        label: Text("retry".tr),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 );
               }
 
-              return ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(20),
-                itemCount:
-                    controller.filteredVolunteerList.length +
-                    1, // +1 for header title
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "available_volunteers".tr,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[800],
+              if (controller.filteredVolunteerList.isEmpty) {
+                return RefreshIndicator(
+                  onRefresh: () => controller.refreshVolunteers(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.group_off_outlined,
+                              size: 60,
+                              color: Colors.grey[300],
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
+                            const SizedBox(height: 16),
+                            Text(
+                              "no_volunteers_found".tr,
+                              style: TextStyle(color: Colors.grey[500]),
                             ),
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              "${controller.filteredVolunteerList.length} found".tr,
+                            const SizedBox(height: 8),
+                            Text(
+                              "pull_to_refresh".tr,
                               style: TextStyle(
+                                color: Colors.grey[400],
                                 fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: theme.primaryColor,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    );
-                  }
+                    ),
+                  ),
+                );
+              }
 
-                  final volunteer = controller.filteredVolunteerList[index - 1];
-                  return VolunteerCard(
-                    volunteer: volunteer,
-                    onTap: () {
-                      Get.toNamed(
-                        AppRoutes.volunteerOpportunityDetails,
-                        arguments: volunteer.id,
+              return RefreshIndicator(
+                onRefresh: () => controller.refreshVolunteers(),
+                child: ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  itemCount:
+                      controller.filteredVolunteerList.length +
+                      1, // +1 for header title
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "available_volunteers".tr,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                "${controller.filteredVolunteerList.length} found".tr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
-                    },
-                  );
-                },
+                    }
+
+                    final volunteer = controller.filteredVolunteerList[index - 1];
+                    return VolunteerCard(
+                      volunteer: volunteer,
+                      onTap: () {
+                        Get.toNamed(
+                          AppRoutes.volunteerOpportunityDetails,
+                          arguments: volunteer.id,
+                        );
+                      },
+                    );
+                  },
+                ),
               );
             }),
           ),

@@ -530,55 +530,57 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   }
 
   Widget _buildBottomAction(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.theme.scaffoldBackgroundColor,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: isMyJob 
-                  ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
-                  : (hasApplied ? null : () {
-                      if (job.id != null) {
-                        Get.bottomSheet(
-                          JobApplyForm(jobId: job.id!),
-                          isScrollControlled: true,
-                        );
-                      }
-                    }),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isMyJob ? Colors.orange : context.theme.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  isMyJob ? 'view_appliers'.tr : (hasApplied ? 'applied'.tr : 'apply_now'.tr),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: context.theme.scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+          ],
+        ),
+        child: SafeArea(
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: isMyJob 
+                    ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
+                    : (hasApplied ? null : () {
+                        if (job.id != null) {
+                          Get.bottomSheet(
+                            JobApplyForm(jobId: job.id!),
+                            isScrollControlled: true,
+                          );
+                        }
+                      }),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isMyJob ? Colors.orange : context.theme.primaryColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    isMyJob ? 'view_appliers'.tr : (hasApplied ? 'applied'.tr : 'apply_now'.tr),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
-            ),
-            // if (!isMyJob) ...[
-            //   const SizedBox(width: 12),
-            //   Container(
-            //     decoration: BoxDecoration(
-            //       color: context.theme.primaryColor.withOpacity(0.1),
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //     child: IconButton(
-            //       onPressed: () {},
-            //       icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
-            //     ),
-            //   ),
-            // ],
-          ],
+              // if (!isMyJob) ...[
+              //   const SizedBox(width: 12),
+              //   Container(
+              //     decoration: BoxDecoration(
+              //       color: context.theme.primaryColor.withOpacity(0.1),
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     child: IconButton(
+              //       onPressed: () {},
+              //       icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
+              //     ),
+              //   ),
+              // ],
+            ],
+          ),
         ),
       ),
     );

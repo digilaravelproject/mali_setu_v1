@@ -138,12 +138,13 @@ class RegisterController extends GetxController {
         print("DEBUG_PINCODE: State: ${response.state}");
         print("DEBUG_PINCODE: District: ${response.district}");
         print("DEBUG_PINCODE: City: ${response.country}");
-        print("DEBUG_PINCODE: Country: ${response.country}");
+        print("DEBUG_PINCODE: Country: ${response.division}");
         print("DEBUG_PINCODE: ========================================");
 
         // Auto-fill state, district, and city from first PostOffice object
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
+        destinationCtrl.text = response.name;
         cityCtrl.text = response.country; // Post office name as city
 
         CustomSnackBar.showSuccess(

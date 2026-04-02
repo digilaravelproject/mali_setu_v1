@@ -42,16 +42,18 @@ class DashboardPage extends GetWidget<DashboardController> {
         index: controller.currentPage.value,
         children: controller.screenList,
       )),
-      bottomNavigationBar: BottomAppBar(
-        padding: EdgeInsets.zero,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: controller.navList(context).asMap().entries.map((entry) {
-            final index = entry.key;
-            final e = entry.value;
-            return _buildNavItems(e, index);
-          }).toList(),
+      bottomNavigationBar: SafeArea(
+        child: BottomAppBar(
+          padding: EdgeInsets.zero,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: controller.navList(context).asMap().entries.map((entry) {
+              final index = entry.key;
+              final e = entry.value;
+              return _buildNavItems(e, index);
+            }).toList(),
+          ),
         ),
       ),
     );

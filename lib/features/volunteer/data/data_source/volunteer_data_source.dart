@@ -9,6 +9,7 @@ abstract class VolunteerDataSource {
   Future<VolunteerProfileResponse> updateVolunteerProfile(Map<String, dynamic> data);
   Future<ResVolunteerModel> fetchAllVolunteers();
   Future<ResSingleVolunteerModel> getVolunteerOpportunity(int id);
+  Future<VolunteerSearchResponse> searchVolunteers(String query, {int size = 20});
 }
 
 class VolunteerDataSourceImpl implements VolunteerDataSource {
@@ -43,6 +44,18 @@ class VolunteerDataSourceImpl implements VolunteerDataSource {
   Future<ResSingleVolunteerModel> getVolunteerOpportunity(int id) async {
     final response = await apiClient.get("${ApiConstants.volunteerOpportunity}/$id");
     return ResSingleVolunteerModel.fromJson(response.data);
+  }
+
+  @override
+  Future<VolunteerSearchResponse> searchVolunteers(String query, {int size = 20}) async {
+    final response = await apiClient.get(
+      ApiConstants.searchVolunteers,
+      queryParameters: {
+        'query': query,
+        'size': size,
+      },
+    );
+    return VolunteerSearchResponse.fromJson(response.data);
   }
 }
 

@@ -534,42 +534,44 @@ class DateProfilePage extends GetWidget<DateProfileController> {
           ],
         ),
       ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Obx(
-            () => Row(
-              spacing: 16,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildActionButtons(
-                  context,
-                  icon: Icons.close,
-                  size: 45,
-                  color: Colors.red,
-                  onTap: controller.onCloseTap,
-                  isSelected: controller.isCloseSelected.value,
-                ),
-                _buildActionButtons(
-                  context,
-                  icon: Icons.star_rounded,
-                  size: 60,
-                  onTap: controller.onStarTap,
-                  isSelected: controller.isStarSelected.value,
-                ),
-                _buildActionButtons(
-                  context,
-                  icon: CupertinoIcons.heart_fill,
-                  size: 45,
-                  color: Colors.deepPurpleAccent,
-                  onTap: controller.onHeartTap,
-                  isSelected: controller.isHeartSelected.value,
-                ),
-              ],
+      bottomNavigationBar: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Obx(
+              () => Row(
+                spacing: 16,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildActionButtons(
+                    context,
+                    icon: Icons.close,
+                    size: 45,
+                    color: Colors.red,
+                    onTap: controller.onCloseTap,
+                    isSelected: controller.isCloseSelected.value,
+                  ),
+                  _buildActionButtons(
+                    context,
+                    icon: Icons.star_rounded,
+                    size: 60,
+                    onTap: controller.onStarTap,
+                    isSelected: controller.isStarSelected.value,
+                  ),
+                  _buildActionButtons(
+                    context,
+                    icon: CupertinoIcons.heart_fill,
+                    size: 45,
+                    color: Colors.deepPurpleAccent,
+                    onTap: controller.onHeartTap,
+                    isSelected: controller.isHeartSelected.value,
+                  ),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: context.mediaQueryPadding.bottom + 12),
-        ],
+            SizedBox(height: 12),
+          ],
+        ),
       ),
     );
   }

@@ -120,6 +120,7 @@ class User {
   String? userType;
   String? casteVerificationStatus;
   String? status;
+  bool? blogAccess;
   String? adminNotes;
   String? emailVerifiedAt;
   String? createdAt;
@@ -162,6 +163,7 @@ class User {
     this.userType,
     this.casteVerificationStatus,
     this.status,
+    this.blogAccess,
     this.adminNotes,
     this.emailVerifiedAt,
     this.createdAt,
@@ -205,6 +207,7 @@ class User {
     userType = json['user_type'];
     casteVerificationStatus = json['caste_verification_status'];
     status = json['status'];
+    blogAccess = json['blog_access'];
     adminNotes = json['admin_notes'];
     emailVerifiedAt = json['email_verified_at'];
     createdAt = json['created_at'];
@@ -250,6 +253,7 @@ class User {
     data['user_type'] = userType;
     data['caste_verification_status'] = casteVerificationStatus;
     data['status'] = status;
+    data['blog_access'] = blogAccess;
     data['admin_notes'] = adminNotes;
     data['email_verified_at'] = emailVerifiedAt;
     data['created_at'] = createdAt;

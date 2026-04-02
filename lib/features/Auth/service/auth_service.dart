@@ -269,6 +269,8 @@ class AuthService extends GetxService {
     return user.hasPayment == true && user.paymentPurpose == purpose;
   }
 
+
+
   /// Update profile data
   Future<ApiResponse<User>> updateProfile(Map<String, dynamic> updateData) async {
     try {

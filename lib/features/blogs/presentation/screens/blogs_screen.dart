@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../controller/blog_controller.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_detail_screen.dart';
+import 'create_blogs.dart';
+import '../../../Auth/service/auth_service.dart';
 
 class BlogsScreen extends StatelessWidget {
   const BlogsScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +33,21 @@ class BlogsScreen extends StatelessWidget {
             fontSize: 22,
           ),
         ),
+        actions: [
+          _buildCreateBlogButton(primaryColor),
+        ],
       ),
       body: Column(
         children: [
-          // Pink header background for search bar
-          Container(
-            color: const Color(0xFFFCE4EC),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _buildSearchBar(context, controller, primaryColor),
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: _buildSearchBar(controller),
           ),
+          
+          // Category tabs
+          _buildCategoryTabs(controller, primaryColor),
+          
           // Blog list
           Expanded(
             child: Obx(() {
@@ -74,6 +85,214 @@ class BlogsScreen extends StatelessWidget {
     );
   }
 
+ /* Widget _buildCreateBlogButton(Color primaryColor) {
+    try {
+      if (!Get.isRegistered<AuthService>()) {
+        return const SizedBox.shrink();
+      }
+      
+      final authService = Get.find<AuthService>();
+      
+      return Obx(() {
+        final user = authService.currentUser.value;
+        final hasBlogAccess = user?.blogAccess == 'true' || user?.blogAccess == true.toString();
+        
+       // if (!hasBlogAccess) return const SizedBox.shrink();
+        
+        return Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: GestureDetector(
+            onTap: () {
+              Get.to(() => const CreateBlogScreen());
+            },
+            child: Container(
+              height: 30,
+              width: 30,
+              decoration: BoxDecoration(
+                color: primaryColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        );
+      });
+    } catch (e) {
+      return const SizedBox.shrink();
+    }
+  }*/
+
+
+  Widget _buildCreateBlogButton(Color primaryColor) {
+    try {
+      if (!Get.isRegistered<AuthService>()) {
+        return const SizedBox.shrink();
+      }
+
+      final authService = Get.find<AuthService>();
+
+      return Obx(() {
+        final user = authService.currentUser.value;
+
+        // Direct boolean check
+        final hasBlogAccess = user?.blogAccess ?? false;
+
+        if (!hasBlogAccess) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: GestureDetector(
+            onTap: () {
+              Get.to(() => const CreateBlogScreen());
+            },
+            child: Container(
+              height: 30,
+              width: 30,
+              decoration: BoxDecoration(
+                color: primaryColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        );
+      });
+    } catch (e) {
+      return const SizedBox.shrink();
+    }
+  }
+
+
+
+
+
+  Widget _buildSearchBar(BlogController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 2),
+      child: Container(
+        height: 45,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            SvgPicture.string(
+              '''<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 21L16.65 16.65" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>''',
+              width: 20,
+              height: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: controller.searchTextController,
+                onChanged: (value) => controller.searchBlogs(value),
+                decoration: InputDecoration(
+                  hintText: 'Search blogs...',
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey[500],
+                    fontSize: 14,
+                    backgroundColor: Colors.transparent,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                ),
+                style: GoogleFonts.poppins(color: Colors.black, fontSize: 13),
+              ),
+            ),
+            const SizedBox(width: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryTabs(BlogController controller, Color primaryColor) {
+    return Container(
+      height: 35,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: controller.categories.length,
+        itemBuilder: (context, index) {
+          final category = controller.categories[index];
+          
+          return Container(
+            margin: const EdgeInsets.only(right: 12),
+            child: Obx(() {
+              final isSelected = controller.selectedCategory.value == category;
+              
+              return GestureDetector(
+                onTap: () => controller.filterByCategory(category),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? primaryColor : Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: isSelected ? primaryColor : Colors.grey[300]!,
+                      width: 1,
+                    ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ] : [],
+                  ),
+                  child: Center(
+                    child: Text(
+                      category,
+                      style: GoogleFonts.poppins(
+                        color: isSelected ? Colors.white : Colors.grey[700],
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        },
+      ),
+    );
+  }
+
+
+/*
   Widget _buildSearchBar(BuildContext context, BlogController controller, Color primaryColor) {
     return Container(
       decoration: BoxDecoration(
@@ -105,6 +324,7 @@ class BlogsScreen extends StatelessWidget {
       ),
     );
   }
+*/
 
   Widget _buildImageBlogCard(
       BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
@@ -136,15 +356,9 @@ class BlogsScreen extends StatelessWidget {
               color: const Color(0xFFE8F5E9),
               child: imageUrl != null
                   ? Image.network(imageUrl, fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.image_not_supported, size: 50, color: Colors.grey))
-                  : Center(
-                      child: Icon(
-                        Icons.image_outlined,
-                        size: 60,
-                        color: Colors.grey[300],
-                      ),
-                    ),
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildDummyImagePlaceholder(primaryColor))
+                  : _buildDummyImagePlaceholder(primaryColor),
             ),
           ),
           Padding(
@@ -196,21 +410,21 @@ class BlogsScreen extends StatelessWidget {
                     children: blog.tags!
                         .map(
                           (tag) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: primaryColor.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '#$tag',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '#$tag',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: primaryColor,
+                            fontWeight: FontWeight.w600,
                           ),
-                        )
+                        ),
+                      ),
+                    )
                         .toList(),
                   ),
                 const SizedBox(height: 12),
@@ -299,9 +513,9 @@ class BlogsScreen extends StatelessWidget {
                   color: const Color(0xFFEEEEEE),
                   child: imageUrl != null
                       ? Image.network(imageUrl, fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.videocam_off, size: 50, color: Colors.grey))
-                      : const SizedBox(),
+                      errorBuilder: (context, error, stackTrace) =>
+                          _buildDummyVideoPlaceholder(primaryColor))
+                      : _buildDummyVideoPlaceholder(primaryColor),
                 ),
                 Positioned.fill(
                   child: Center(
@@ -401,21 +615,21 @@ class BlogsScreen extends StatelessWidget {
                     children: blog.tags!
                         .map(
                           (tag) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: primaryColor.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '#$tag',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '#$tag',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: primaryColor,
+                            fontWeight: FontWeight.w600,
                           ),
-                        )
+                        ),
+                      ),
+                    )
                         .toList(),
                   ),
                 const SizedBox(height: 12),
@@ -500,3 +714,72 @@ class BlogsScreen extends StatelessWidget {
     );
   }
 }
+
+Widget _buildDummyImagePlaceholder(Color primaryColor) {
+  return Container(
+    color: Colors.grey[100],
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.image_outlined,
+              size: 60,
+              color: primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No image',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildDummyVideoPlaceholder(Color primaryColor) {
+  return Container(
+    color: Colors.grey[200],
+    child: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.videocam_outlined,
+              size: 60,
+              color: primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No video',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+

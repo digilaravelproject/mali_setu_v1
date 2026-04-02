@@ -325,10 +325,8 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
           ),
         );
       }),
-      bottomNavigationBar:
-      // SafeArea(
-      //   child:
-        Container(
+      bottomNavigationBar: SafeArea(
+        child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -342,6 +340,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                 onPressed: controller.onSaveProfile,
               )),
         ),
+      ),
     );
   }
 

@@ -14,9 +14,24 @@ class OpportunityDetailsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final id = Get.arguments as int?;
-    if (id != null) {
-      fetchOpportunity(id);
+    final arguments = Get.arguments;
+    
+    if (arguments is int) {
+      // If ID is passed, fetch from API
+      fetchOpportunity(arguments);
+    } else if (arguments is Volunteer) {
+      // If Volunteer object is passed directly, use it
+      opportunity.value = arguments;
+    } else if (arguments != null) {
+      // Try to parse as int if it's a string or other type
+      try {
+        final id = int.parse(arguments.toString());
+        fetchOpportunity(id);
+      } catch (e) {
+        CustomSnackBar.showError(message: 'Invalid opportunity ID: $arguments');
+      }
+    } else {
+      CustomSnackBar.showError(message: 'No opportunity data provided');
     }
   }
 

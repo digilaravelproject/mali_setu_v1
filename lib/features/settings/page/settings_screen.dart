@@ -124,7 +124,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     title: 'active_volunteer'.tr,
                     icon: Icons.favorite_border_rounded,
                     onTap: () {
-                      Get.to(() => const VolunteerPage());
+                      Get.toNamed(AppRoutes.volunteer);
                     },
                   ),
                   // _SettingsItem(

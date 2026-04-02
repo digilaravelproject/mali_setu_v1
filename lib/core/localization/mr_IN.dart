@@ -77,7 +77,7 @@ const Map<String, String> mrIN = {
   'physically_challenged': 'शारीरिकदृष्ट्या अक्षम',
   
   // Professional Details Filters
-  'annual_income': 'वार्षिक उत्पन्न',
+  'annual_income': 'वार्षिक उत्पन्न (लाख)',
   'education': 'शिक्षण',
   'employment_type': 'रोजगार प्रकार',
   'business_owner': 'व्यवसाय मालक',
@@ -856,9 +856,6 @@ const Map<String, String> mrIN = {
   'please_select_job_category': 'कृपया नोकरी श्रेणी निवडा',
 
 
-
-
-
   'blogs' : "ब्लॉग्स",
   'contribute' : "योगदान द्या",
   'clear_all' : "सर्व हटवा",
@@ -866,6 +863,7 @@ const Map<String, String> mrIN = {
   'invalid_pincode' : "अयोग्य पिनकोड",
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका",
+  'search_volunteers' : "स्वयंसेवक शोधा",
 };
 
 

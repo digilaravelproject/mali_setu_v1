@@ -17,6 +17,17 @@ class BlogController extends GetxController {
   final searchTextController = TextEditingController();
   final RxString selectedCategory = 'All'.obs;
 
+  // Category list
+  final List<String> categories = [
+    'All',
+    'Investment Guidance',
+    'Legal Guidance', 
+    'Job opportunity',
+    'Farming made easy',
+    'Education Guidance / Competitive Exams Guidance',
+    'How Become an Entrepreneur / Opportunities'
+  ];
+
   // Detail State
   final Rxn<Blog> selectedBlog = Rxn<Blog>();
   final RxList<Blog> relatedBlogs = <Blog>[].obs;

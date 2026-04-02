@@ -36,4 +36,10 @@ class VolunteerRepositoryImpl implements VolunteerRepository {
     final res = await dataSource.getVolunteerOpportunity(id);
     return res.data;
   }
+
+  @override
+  Future<List<VolunteerSearchProfile>> searchVolunteers(String query, {int size = 20}) async {
+    final res = await dataSource.searchVolunteers(query, size: size);
+    return res.data?.data ?? [];
+  }
 }

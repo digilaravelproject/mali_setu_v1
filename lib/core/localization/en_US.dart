@@ -83,7 +83,7 @@ const Map<String, String> enUS = {
   'physically_challenged': 'Physically Challenged',
 
   // Professional Details Filters
-  'annual_income': 'Annual Income',
+  'annual_income': 'Annual Income (Lac)',
   'education': 'Education',
   'employment_type': 'Employment Type',
   'business_owner': 'Business Owner',
@@ -866,7 +866,8 @@ const Map<String, String> enUS = {
   'invalid_pincode' : "Invalid Pincode",
   'location_information' : "Location Information",
   'taluka' : "Taluka",
-  'clear_all' : "Clear All"
+  'clear_all' : "Clear All",
+  'search_volunteers' : "Search Volunteers",
 
 
 };

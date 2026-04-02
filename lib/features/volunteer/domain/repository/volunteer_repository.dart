@@ -8,4 +8,5 @@ abstract class VolunteerRepository {
   Future<VolunteerProfileResponse> updateVolunteerProfile(Map<String, dynamic> data);
   Future<List<Volunteer>> getAllVolunteers();
   Future<Volunteer?> getVolunteerOpportunity(int id);
+  Future<List<VolunteerSearchProfile>> searchVolunteers(String query, {int size = 20});
 }

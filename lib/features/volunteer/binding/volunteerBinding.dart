@@ -2,6 +2,7 @@ import 'package:edu_cluezer/features/volunteer/controller/volunteerController.da
 import 'package:get/get.dart';
 
 import '../../../core/network/api_client.dart';
+import '../controller/all_volunteer_controller.dart';
 import '../controller/opportunity_details_controller.dart';
 import '../controller/volunteerUpdateProfileController.dart';
 import '../data/data_source/volunteer_data_source.dart';
@@ -24,6 +25,7 @@ class VolunteerBinding extends Bindings {
     Get.lazyPut(() => SingleVolunteerUseCase(repository: Get.find<VolunteerRepository>()));
 
     // Controller
+    Get.lazyPut(() => AllVolunteerController(useCase: Get.find<VolunteerUseCase>()));
     Get.lazyPut(() => VolunteerProfileController(repository: Get.find<VolunteerRepository>()));
     Get.lazyPut(() => VoluntProfileUpdateController(repository: Get.find<VolunteerRepository>()));
     Get.lazyPut(() => OpportunityDetailsController(useCase: Get.find<SingleVolunteerUseCase>()));

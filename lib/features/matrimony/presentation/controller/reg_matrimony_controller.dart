@@ -205,8 +205,8 @@ class RegMatrimonyController extends GetxController {
         }
         
         state.value = fetchedState;
-        cityCtrl.text = response.district; // Using district as major city
-        country.value = 'India'; // Assumed Indian via API
+        cityCtrl.text = "${response.district} , ${response.division}, ${response.name}"; // Using district as major city
+        country.value = response.country; // Assumed Indian via API
 
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       } else {

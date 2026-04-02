@@ -509,15 +509,15 @@ class RegisterPage extends GetWidget<RegisterController> {
                         initialDate: initialDate,
                         firstDate: firstDate,
                         lastDate: lastDate,
+                        initialEntryMode: DatePickerEntryMode.calendar, // 👈 important
                       );
 
                       if (pickedDate != null) {
                         controller.selectedBirthDate.value = pickedDate;
                         controller.ageCtrl.text =
-                        controller.ageCtrl.text =
-                        "${pickedDate.year}-"
-                            "${pickedDate.month.toString().padLeft(2, '0')}-"
-                            "${pickedDate.day.toString().padLeft(2, '0')}";
+                        "${pickedDate.day.toString().padLeft(2, '0')}/"
+                            "${pickedDate.month.toString().padLeft(2, '0')}/"
+                            "${pickedDate.year}";
                       }
                     },
                     iconData: CupertinoIcons.calendar,
@@ -667,7 +667,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                           textInputType: TextInputType.text,
                          // validator: (value) => FormValidator.emptycheck(value, "Destination"),
                           controller: controller.destinationCtrl,
-                          isRequired: true,
+                         // isRequired: true,
                         ),
                       ),
                     ],
