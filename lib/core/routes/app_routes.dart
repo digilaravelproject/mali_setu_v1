@@ -31,6 +31,7 @@ import '../../features/matrimony/binding/matrimony_chat_binding.dart';
 import '../../features/matrimony/presentation/page/matrimony_requests_screen.dart';
 import '../../features/matrimony/presentation/page/matrimony_members_screen.dart';
 import '../../features/matrimony/presentation/page/matrimony_chat_screen.dart';
+import '../../features/settings/page/contact_support.dart';
 
 import '../../features/Auth/login/binding/login_binding.dart';
 import '../../features/Auth/login/presentation/page/login_page.dart';
@@ -99,6 +100,7 @@ class AppRoutes {
   static const String transactionHistory = "/transactionHistory";
   static const String donationDetails = "/donationDetails";
   static const String volunteerSearch = "/volunteerSearch";
+  static const String contactSupport = "/contactSupport";
 }
 
 class AppPages {
@@ -362,6 +364,12 @@ class AppPages {
       name: AppRoutes.volunteerSearch,
       page: () => const VolunteerSearchPage(),
       binding: VolunteerBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.contactSupport,
+      page: () =>  ContactSupportPage(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

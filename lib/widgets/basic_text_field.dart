@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
@@ -25,6 +26,8 @@ class AppInputTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
   final FocusNode? focusNode;
+  final Widget? prefix;
+  final Widget? prefixIcon;
 
 
 
@@ -37,6 +40,8 @@ class AppInputTextField extends StatelessWidget {
   final Color? textColor;
   final VoidCallback? onOtherSelected;
   final bool isRequired;
+  final double topPadding;
+  final String? errorText;
 
   const AppInputTextField({
     super.key,
@@ -60,14 +65,18 @@ class AppInputTextField extends StatelessWidget {
     this.onFieldSubmitted,
     this.focusNode,
     this.suffixWidget,
+    this.prefix,
+    this.prefixIcon,
     this.readOnly,
     this.textColor,
     this.onOtherSelected,
     this.isRequired = false,
+    this.topPadding = 8,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
     this.onDropdownChanged,
+    this.errorText,
   }) : assert(
          isDropdown == false || dropdownItems != null,
          'dropdownItems must be provided when isDropdown is true',
@@ -83,7 +92,7 @@ class AppInputTextField extends StatelessWidget {
       spacing: 6,
       children: [
         if (showLabel) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: topPadding),
           Row(
             children: [
               Flexible(
@@ -119,7 +128,15 @@ class AppInputTextField extends StatelessWidget {
           autofillHints: hint,
           onTapOutside: (_) => FocusScope.of(context).unfocus(),
           autovalidateMode: AutovalidateMode.onUserInteraction,
-          validator: validator,
+          validator: validator ??
+              (isRequired
+                  ? (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Please enter ${label.toLowerCase()}";
+                      }
+                      return null;
+                    }
+                  : null),
           inputFormatters: isDropdown ? null : inputFormatters,
           onChanged: isDropdown ? null : onChanged,
           style: textColor != null ? TextStyle(color: textColor) : null,
@@ -132,8 +149,23 @@ class AppInputTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText ?? " Enter Your ${label[0].toUpperCase()}${label.substring(1).toLowerCase()}",
             hintStyle: context.textTheme.bodyMedium,
+            
+            // Show red border when errorText is present
+            enabledBorder: errorText != null && errorText!.isNotEmpty
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: Colors.red.shade400, width: 1.5),
+                  )
+                : theme.inputDecorationTheme.enabledBorder,
+            focusedBorder: errorText != null && errorText!.isNotEmpty
+                ? OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: Colors.red.shade400, width: 1.5),
+                  )
+                : theme.inputDecorationTheme.focusedBorder,
 
-            prefixIcon: iconData == null ? null : Icon(iconData, size: 20),
+            prefixIcon: prefixIcon ?? (iconData == null ? null : Icon(iconData, size: 20)),
+            prefix: prefix,
 
             suffixIcon: suffixWidget ??
                 (isDropdown
@@ -148,21 +180,16 @@ class AppInputTextField extends StatelessWidget {
                   style: IconButton.styleFrom(side: BorderSide.none),
                   icon: Icon(endIcon, color: theme.primaryColor),
                 )),
-
-            // suffixIcon: isDropdown
-            //     ? Icon(
-            //         Icons.keyboard_arrow_down_rounded,
-            //         color: theme.primaryColor,
-            //       )
-            //     : endIcon == null
-            //     ? null
-            //     : IconButton(
-            //         onPressed: onEndIconTap,
-            //         style: IconButton.styleFrom(side: BorderSide.none),
-            //         icon: Icon(endIcon, color: theme.primaryColor),
-            //       ),
           ),
         ),
+        if (errorText != null && errorText!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: Text(
+              errorText!,
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade700),
+            ),
+          ),
       ],
     );
   }
@@ -183,51 +210,94 @@ class AppInputTextField extends StatelessWidget {
       builder: (_) {
         final List<String> items = dropdownItems!;
         List<String> filteredItems = List.from(items);
+        final bool showSearch = items.length > 5;
 
-        return DraggableScrollableSheet(
-          initialChildSize: 0.7,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (context, scrollController) {
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: context.theme.scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  child: Column(
-                    children: [
-                      // Handle bar
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 12),
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            // Include keyboard padding to push content up when search is active
+            final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+            
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+              ),
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              decoration: BoxDecoration(
+                color: context.theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Handle bar
+                    Container(
+                      margin: const EdgeInsets.only(top: 12, bottom: 8),
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(5),
                       ),
-                      
-                      // Search Bar
+                    ),
+                    
+                    // Premium Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (label != null)
+                            Expanded(
+                              child: Text(
+                                "Select $label",
+                                style: context.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.5,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300, width: 1),
+                              ),
+                              child: const Icon(Icons.close, color: Colors.grey, size: 20),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+                    
+                    // Search Bar
+                    if (showSearch)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: TextField(
                           autofocus: false,
                           decoration: InputDecoration(
-                            hintText: "Search...",
-                            prefixIcon: const Icon(Icons.search, size: 20),
+                            hintText: "Search items...",
+                            hintStyle: TextStyle(color: Colors.grey[400]),
+                            prefixIcon: Icon(CupertinoIcons.search, size: 20, color: Colors.grey[400]),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[500]!),
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey[200]!),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[500]!),
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey[200]!),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                            fillColor: (Colors.grey[50] ?? Colors.white).withValues(alpha: 0.5),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: context.theme.primaryColor, width: 1.5),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            fillColor: const Color(0xFFF9F9F9),
                             filled: true,
                           ),
                           onChanged: (value) {
@@ -240,39 +310,34 @@ class AppInputTextField extends StatelessWidget {
                         ),
                       ),
 
-                      Expanded(
-                        child: filteredItems.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.search_off_rounded, size: 48, color: Colors.grey[300]),
-                                    const SizedBox(height: 12),
-                                    Text("No results found", style: TextStyle(color: Colors.grey[500])),
-                                  ],
-                                ),
-                              )
-                            : ListView.separated(
-                                controller: scrollController,
-                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                                itemCount: filteredItems.length,
-                                separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[100]),
-                                itemBuilder: (context, index) {
-                                  final item = filteredItems[index];
-                                  final isSelected = controller?.text == item;
-                                  
-                                  return ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    title: Text(
-                                      item,
-                                      style: context.textTheme.bodyLarge?.copyWith(
-                                        color: isSelected ? context.theme.primaryColor : null,
-                                        fontWeight: isSelected ? FontWeight.w600 : null,
-                                      ),
-                                    ),
-                                    trailing: isSelected 
-                                      ? Icon(Icons.check_circle, color: context.theme.primaryColor, size: 20)
-                                      : null,
+                    if (!showSearch) const SizedBox(height: 8),
+
+                    Flexible(
+                      child: filteredItems.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.all(40.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(CupertinoIcons.search, size: 54, color: Colors.grey[300]),
+                                  const SizedBox(height: 16),
+                                  Text("No results found", style: TextStyle(color: Colors.grey[500], fontSize: 16)),
+                                ],
+                              ),
+                            )
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                              itemCount: filteredItems.length,
+                              separatorBuilder: (context, index) => const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                              itemBuilder: (context, index) {
+                                final item = filteredItems[index];
+                                final isSelected = controller?.text == item;
+                                
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
                                     onTap: () {
                                       Navigator.pop(context);
                                       if (item == 'other'.tr && onOtherSelected != null) {
@@ -282,16 +347,36 @@ class AppInputTextField extends StatelessWidget {
                                         onDropdownChanged?.call(item);
                                       }
                                     },
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              item,
+                                              style: context.textTheme.titleMedium?.copyWith(
+                                                color: Colors.black87,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                          if (isSelected) 
+                                            Icon(Icons.radio_button_checked, color: context.theme.primaryColor, size: 24)
+                                          else
+                                            Icon(Icons.radio_button_unchecked, color: Colors.grey.shade400, size: 24),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
             );
-          },
+          }
         );
       },
     );

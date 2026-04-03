@@ -37,7 +37,7 @@ class DashboardPage extends GetWidget<DashboardController> {
         }
         return true; // No causes? Just let normal exit flow handle it
       },
-      extendBody: false,
+      extendBody: true,
       body: Obx(() => IndexedStack(
         index: controller.currentPage.value,
         children: controller.screenList,

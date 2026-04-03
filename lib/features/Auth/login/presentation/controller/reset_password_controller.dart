@@ -24,28 +24,18 @@ class ResetPasswordController extends GetxController {
   var resetEmail = ''.obs;
 
   ResetPasswordController({required this.resetPasswordUseCase});
-  // LoginDataSource dataSource;
-
-  // ResetPasswordController({required this.dataSource});
 
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
   var confPasswordController = TextEditingController();
   var otpController = TextEditingController();
 
-  // var isRemember = true.obs;
   var isPasswordVisible = true.obs;
-  //var selectedPhone = countries.where((p) => p.dialCode == "91").first.obs;
 
   var countryController = TextEditingController();
   var isLoading = false.obs;
   final formKey = GlobalKey<FormState>();
-  //
-  // @override
-  // void onInit() {
-  //   _initCountry();
-  //   super.onInit();
-  // }
+  final formKeyReset = GlobalKey<FormState>();
 
   @override
   void onInit() {
@@ -55,15 +45,12 @@ class ResetPasswordController extends GetxController {
     final args = Get.arguments;
     if (args != null && args['email'] != null) {
       emailController.text = args['email'];
+      resetEmail.value = args['email'];
     }
   }
 
-  @override
-  void didChangeDependencies(BuildContext context) {}
-
   Future<void> sendOtp() async {
     if (!formKey.currentState!.validate()) return;
-
     try {
       isLoading.value = true;
 
@@ -76,18 +63,8 @@ class ResetPasswordController extends GetxController {
       if (response.success == true) {
         resetEmail.value = emailController.text.trim();
 
-        // if (response?.user != null) {
-        //   await SharedPrefs.setString(
-        //     AppConstants.userDataPref,
-        //     jsonEncode(response.user!.toJson()),
-        //   );
-        // }
-
-        // Set Logged In
-        //await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
-
         CustomSnackBar.showSuccess(message: response.message ?? "OTP send successful");
-        Get.offAllNamed(
+        Get.toNamed(
           AppRoutes.resetPasswordScreen,
           arguments: {
             'email': resetEmail.value, // pass email to next screen
@@ -103,8 +80,30 @@ class ResetPasswordController extends GetxController {
     }
   }
 
+  Future<void> resendOtp() async {
+    try {
+      isLoading.value = true;
+
+      final reqModel = ReqResetPasswordModel(
+        email: emailController.text.trim(),
+      );
+
+      final response = await resetPasswordUseCase.sendOtp(reqModel);
+
+      if (response.success == true) {
+        CustomSnackBar.showSuccess(message: response.message ?? "OTP resent successful");
+      } else {
+        CustomSnackBar.showError(message: response.message ?? "OTP resend failed");
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> resetPassword() async {
-    if (!formKey.currentState!.validate()) return;
+    if (!formKeyReset.currentState!.validate()) return;
     try {
       isLoading.value = true;
 
@@ -119,7 +118,7 @@ class ResetPasswordController extends GetxController {
 
       if (success) {
         CustomSnackBar.showSuccess(message: "Password reset successful");
-        Get.offNamed(AppRoutes.login); // ya aapka login route
+        Get.offNamed(AppRoutes.login);
       }
     } catch (e) {
       CustomSnackBar.showError(message: e.toString());

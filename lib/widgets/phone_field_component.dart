@@ -315,45 +315,59 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Country Code selector
-        SizedBox(
-          width: 80,
-          child: GestureDetector(
-            onTap: () => _showCountryPicker(context),
-            child: AbsorbPointer(
-              child: AppInputTextField(
-                label: 'Code',
-                controller: countryCodeCtrl,
-                isRequired: widget.isRequired,
-                suffixWidget: const Icon(Icons.arrow_drop_down, size: 24),
+    final theme = Theme.of(context);
+    
+    return AppInputTextField(
+      label: 'mobile_number'.tr,
+      controller: phoneCtrl,
+      isRequired: widget.isRequired,
+      textInputType: TextInputType.phone,
+      topPadding: 0,
+      prefixIcon: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
+        child: IntrinsicWidth(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () => _showCountryPicker(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      countryCodeCtrl.text,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 20,
+                      color: Colors.black,
+                    ),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              Container(
+                height: 24,
+                width: 1,
+                color: theme.dividerColor.withValues(alpha: 0.5),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 12),
-        
-        // Phone Number field
-        Expanded(
-          child: AppInputTextField(
-            label: 'mobile_number'.tr,
-            controller: phoneCtrl,
-            isRequired: widget.isRequired,
-            textInputType: TextInputType.phone,
-            validator: (value) {
-              if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-                return 'Please enter phone number';
-              }
-              if (value != null && value.trim().isNotEmpty && value.trim().length < 10) {
-                return 'Phone number must be at least 10 digits';
-              }
-              return null;
-            },
-          ),
-        ),
-      ],
+      ),
+      validator: (value) {
+        if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+          return 'Please enter phone number';
+        }
+        if (value != null && value.trim().isNotEmpty && value.trim().length < 10) {
+          return 'Phone number must be at least 10 digits';
+        }
+        return null;
+      },
     );
   }
 

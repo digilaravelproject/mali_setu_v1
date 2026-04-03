@@ -2,7 +2,7 @@ class ApiConstants {
     ApiConstants._();
 
     static const String baseUrl = "https://greenyellow-grouse-707123.hostingersite.com";
-    static const String imageBaseUrl = "https://greenyellow-grouse-707123.hostingersite.com/storage/";
+    static const String imageBaseUrl = "$baseUrl/storage/";
     static const String apiBaseUrl = "$baseUrl/api/";
 
     static const String xApiKey = "X-API-KEY";
@@ -108,4 +108,8 @@ class ApiConstants {
     static const String getBlogDetail = "blogs"; // blogs/{id}
     static const String toggleBlogLike = "blogs"; // blogs/{id}/like
     static const String searchBlogs = "blogs/search";
+
+    // Legal URLs
+    static const String privacyPolicyUrl = "$baseUrl/privacy-policy";
+    static const String termsConditionsUrl = "$baseUrl/terms-condition";
 }
