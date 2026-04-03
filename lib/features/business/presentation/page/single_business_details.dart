@@ -17,8 +17,39 @@ import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 
-class BusinessDetailScreen extends GetView<BusinessController> {
+class BusinessDetailScreen extends StatefulWidget {
   const BusinessDetailScreen({Key? key}) : super(key: key);
+
+  @override
+  State<BusinessDetailScreen> createState() => _BusinessDetailScreenState();
+}
+
+class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
+  late final BusinessController controller;
+  final ScrollController _outerScrollController = ScrollController();
+  final RxBool _showTitle = false.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<BusinessController>();
+    _outerScrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    // Show title when scrolled past ~200px (roughly when header collapses)
+    final shouldShow = _outerScrollController.offset > 200;
+    if (shouldShow != _showTitle.value) {
+      _showTitle.value = shouldShow;
+    }
+  }
+
+  @override
+  void dispose() {
+    _outerScrollController.removeListener(_onScroll);
+    _outerScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +73,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
               final currentUser = authService.currentUser.value;
               final isOwner = currentUser?.id == business.userId;
               final topPadding = MediaQuery.of(context).padding.top;
-              final fixedHeight = isOwner ? 610.0 : 520.0;
+              final fixedHeight = isOwner ? 560.0 : 480.0;
 
               return NestedScrollView(
+              controller: _outerScrollController,
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
                   SliverOverlapAbsorber(
@@ -56,12 +88,12 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                       backgroundColor: context.theme.scaffoldBackgroundColor,
                       elevation: innerBoxIsScrolled ? 4 : 0,
                       shadowColor: Colors.black.withOpacity(0.05),
-                     // expandedHeight: isOwner ? 580 : 460,
+                    //  expandedHeight: isOwner ? 580 : 460,
                       expandedHeight: fixedHeight + topPadding,
                       forceElevated: innerBoxIsScrolled,
-                      title: AnimatedOpacity(
+                      title: Obx(() => AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
-                        opacity: innerBoxIsScrolled ? 1.0 : 0.0,
+                        opacity: _showTitle.value ? 1.0 : 0.0,
                         child: Text(
                           business.businessName ?? '',
                           style: context.textTheme.titleLarge?.copyWith(
@@ -72,7 +104,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
+                      )),
                       leading: InkWell(
                         onTap: () => Navigator.of(context).pop(),
                         child: Container(
@@ -345,9 +377,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildQuickActionButton(
-            Icons.call_rounded,
+           "assets/icons/mobile.png",
             'call'.tr,
             Colors.blue,
             context,
@@ -355,7 +388,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           ),
           const SizedBox(width: 24),
           _buildQuickActionButton(
-            Icons.mail_outline_rounded,
+            "assets/icons/gmail.png",
             'email'.tr,
             Colors.green,
             context,
@@ -363,7 +396,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           ),
           const SizedBox(width: 24),
           _buildQuickActionButton(
-            FontAwesomeIcons.whatsapp,
+            "assets/icons/whatsapp.png",
             'whatsapp'.tr,
             Colors.green,
             context,
@@ -375,7 +408,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   }
  
   Widget _buildQuickActionButton(
-    IconData icon,
+    String icon,
     String label,
     Color color,
     BuildContext context, {
@@ -388,15 +421,17 @@ class BusinessDetailScreen extends GetView<BusinessController> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: Colors.grey.withOpacity(0.14),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: Image.asset(
               icon,
-              color: color,
-              size: 24,
+             height: 28,
+             width: 28,
+             // color: color,
+              //size: 24,
             ),
           ),
           const SizedBox(height: 8),
@@ -665,276 +700,211 @@ class BusinessDetailScreen extends GetView<BusinessController> {
   }
  
   Widget _buildProductsTab(BuildContext context) {
-        if (controller.isDetailsLoading.isTrue) {
-             return _buildShimmerList(context);
-        }
-        if (controller.businessProducts.isEmpty) {
-            return Center(child: Text('no_products_found'.tr));
-        }
+    return Obx(() {
+      if (controller.isDetailsLoading.isTrue) {
+        return _buildShimmerList(context);
+      }
+      if (controller.businessProducts.isEmpty) {
         return CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
             SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final product = controller.businessProducts[index];
-                    return  Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 1,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: context.theme.dividerColor),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Product Image
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: context.theme.primaryColorLight,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: product.imagePath != null
-                                  ? ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.network(
-                                  product.imagePath!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (c, e, s) =>
-                                      Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
-                                ),
-                              )
-                                  : Icon(
-                                Icons.shopping_bag_outlined,
-                                color: context.theme.primaryColor,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-
-                            // Product Info
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Product Name
-                                  Text(
-                                    product.name ?? 'unknown_product'.tr,
-                                    style: context.textTheme.titleLarge,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-
-                                  const SizedBox(height: 4),
-
-                                  // Amount (conditionally)
-                                  if (product.cost != null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: context.theme.primaryColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '₹${product.cost}',
-                                        style: context.textTheme.bodyMedium?.copyWith(
-                                          color: context.theme.primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-
-                                  // Description (conditionally)
-                                  if (product.description != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 6),
-                                      child: Text(
-                                        product.description!,
-                                        style: context.textTheme.bodyMedium,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-
-                    /*  Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: context.theme.dividerColor),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                 Container(
-                                  width: 45,
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    color: context.theme.primaryColorLight,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: product.imagePath != null 
-                                     ? ClipRRect(
-                                         borderRadius: BorderRadius.circular(10),
-                                         child: Image.network(product.imagePath!, fit: BoxFit.cover, errorBuilder: (c,e,s) => Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor))
-                                       )
-                                     : Icon(
-                                    Icons.shopping_bag_outlined,
-                                    color: context.theme.primaryColor,
-                                  ),
-                                ),
-                                SizedBox(width: 10,),
-                                Expanded(
-                                    child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.name ?? 'Unknown Product',
-                                      style: context.textTheme.titleLarge,
-                                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      '₹${product.cost ?? '0.00'}',
-                                      style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                                    ),
-                                  ],)
-                                )
-                              ],
-                            ),
-                            if (product.description != null)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 10,top: 10),
-                              child: Text(product.description!, style: context.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis,),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );*/
-                  },
-                  childCount: controller.businessProducts.length,
-                ),
-              ),
+            SliverFillRemaining(
+              child: Center(child: Text('no_products_found'.tr)),
             ),
           ],
         );
+      }
+      return CustomScrollView(
+        physics: const ClampingScrollPhysics(),
+        slivers: [
+          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final product = controller.businessProducts[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 1,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: context.theme.dividerColor),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: context.theme.primaryColorLight,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: product.imagePath != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      product.imagePath!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (c, e, s) => Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
+                                    ),
+                                  )
+                                : Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.name ?? 'unknown_product'.tr,
+                                  style: context.textTheme.titleLarge,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                if (product.cost != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: context.theme.primaryColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      '₹${product.cost}',
+                                      style: context.textTheme.bodyMedium?.copyWith(
+                                        color: context.theme.primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                if (product.description != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: Text(
+                                      product.description!,
+                                      style: context.textTheme.bodyMedium,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                childCount: controller.businessProducts.length,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildServicesTab(BuildContext context) {
-        if (controller.isDetailsLoading.isTrue) {
-             return _buildShimmerList(context);
-        }
-        if (controller.businessServices.isEmpty) {
-            return Center(child: Text('no_services_found'.tr));
-        }
+    return Obx(() {
+      if (controller.isDetailsLoading.isTrue) {
+        return _buildShimmerList(context);
+      }
+      if (controller.businessServices.isEmpty) {
         return CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
             SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final service = controller.businessServices[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: context.theme.dividerColor),
-                      ),
-                      child:Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 45,
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    color: context.theme.primaryColorLight,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                   child: service.imagePath != null 
-                                     ? ClipRRect(
-                                         borderRadius: BorderRadius.circular(10),
-                                         child: Image.network(service.imagePath!, fit: BoxFit.cover, errorBuilder: (c,e,s) => Icon(Icons.medical_services, color: context.theme.primaryColor))
-                                       )
-                                  : Icon(
-                                    Icons.medical_services,
-                                    color: context.theme.primaryColor,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      service.name ?? 'unknown_service'.tr,
-                                      style: context.textTheme.titleLarge,
-                                       maxLines: 1, overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      '₹${service.cost ?? '0.00'}',
-                                      style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                                    ),
-                                  ],))
-                              ],
-                            ),
-                            if (service.description != null)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 10,top: 10),
-                              child: Text(service.description!,style: context.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis,),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                  childCount: controller.businessServices.length,
-                ),
-              ),
+            SliverFillRemaining(
+              child: Center(child: Text('no_services_found'.tr)),
             ),
           ],
         );
+      }
+      return CustomScrollView(
+        physics: const ClampingScrollPhysics(),
+        slivers: [
+          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final service = controller.businessServices[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: context.theme.dividerColor),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: context.theme.primaryColorLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: service.imagePath != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.network(service.imagePath!, fit: BoxFit.cover, errorBuilder: (c, e, s) => Icon(Icons.medical_services, color: context.theme.primaryColor)),
+                                      )
+                                    : Icon(Icons.medical_services, color: context.theme.primaryColor),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(service.name ?? 'unknown_service'.tr, style: context.textTheme.titleLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text('₹${service.cost ?? '0.00'}', style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (service.description != null)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10, top: 10),
+                              child: Text(service.description!, style: context.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                childCount: controller.businessServices.length,
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildJobsTab(BuildContext context) {
+    return Obx(() {
     final authService = Get.find<AuthService>();
     final currentUser = authService.currentUser.value;
     final business = controller.selectedBusiness.value ?? Get.arguments as Business;
-    
-    // Check if current user is the owner
     final isOwner = currentUser?.id == business.userId;
 
-    // If user is not logged in or doesn't match owner ID, hide section
-    // if (currentUser?.id != business.userId) {
-    //   return const SizedBox.shrink();
-    // }
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
       }
       
-      // If owner, show all jobs including pending. Otherwise, hide pending jobs
       final displayedJobs = isOwner 
           ? controller.businessJobs 
           : controller.businessJobs.where((job) => job.status != 'pending').toList();
@@ -946,17 +916,14 @@ class BusinessDetailScreen extends GetView<BusinessController> {
              SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
              SliverFillRemaining(
                child: Center(
-                 child: SingleChildScrollView(
-                   padding: const EdgeInsets.all(32.0),
-                   child: Column(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                       Icon(Icons.work_off_outlined, size: 64, color: context.theme.disabledColor),
-                       const SizedBox(height: 16),
-                       Text("No jobs posted yet", style: context.textTheme.titleMedium),
-                     ],
-                   ),
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     Icon(Icons.work_off_outlined, size: 64, color: context.theme.disabledColor),
+                     const SizedBox(height: 16),
+                     Text("No jobs posted yet", style: context.textTheme.titleMedium),
+                   ],
                  ),
                ),
              ),
@@ -969,10 +936,10 @@ class BusinessDetailScreen extends GetView<BusinessController> {
         slivers: [
           SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(right: 16,left: 16,top: 16,bottom: 50),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                if(!(currentUser?.id != business.userId))
+                if (isOwner)
                 Row(
                   children: [
                     Expanded(
@@ -980,9 +947,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                         title: "job_analytics".tr,
                         height: 40,
                         borderRadius: 12,
-                        onPressed: () {
-                          Get.toNamed(AppRoutes.jobAnalytics);
-                        },
+                        onPressed: () => Get.toNamed(AppRoutes.jobAnalytics),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -991,9 +956,7 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                         title: "applied_jobs".tr,
                         height: 40,
                         borderRadius: 12,
-                        onPressed: () {
-                          Get.toNamed(AppRoutes.appliedJobList);
-                        },
+                        onPressed: () => Get.toNamed(AppRoutes.appliedJobList),
                       ),
                     ),
                   ],
@@ -1015,16 +978,9 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           Row(
                             children: [
                               Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  color: context.theme.primaryColorLight,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(
-                                  Icons.work_outline,
-                                  color: context.theme.primaryColor,
-                                ),
+                                width: 45, height: 45,
+                                decoration: BoxDecoration(color: context.theme.primaryColorLight, borderRadius: BorderRadius.circular(12)),
+                                child: Icon(Icons.work_outline, color: context.theme.primaryColor),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -1034,110 +990,37 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(
-                                          child: Text(
-                                            job.title ?? 'no_title'.tr,
-                                            style: context.textTheme.titleLarge,
-                                          ),
-                                        ),
+                                        Expanded(child: Text(job.title ?? 'no_title'.tr, style: context.textTheme.titleLarge)),
                                         const SizedBox(width: 8),
                                         _buildJobStatusBadge(job, context),
                                       ],
                                     ),
-                                    Text(
-                                      job.salaryRange ?? 'salary_not_specified'.tr,
-                                      style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor),
-                                    ),
+                                    Text(job.salaryRange ?? 'salary_not_specified'.tr, style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor)),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 10, top: 10),
-                            child: Text(
-                              job.description ?? '',
-                              style: context.textTheme.bodyMedium,
-                            ),
+                            child: Text(job.description ?? '', style: context.textTheme.bodyMedium),
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Icon(Icons.location_on, size: 16, color: context.theme.primaryColor),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  job.location ?? 'unknown'.tr,
-                                  style: context.textTheme.titleSmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
+                          Row(children: [Icon(Icons.location_on, size: 16, color: context.theme.primaryColor), const SizedBox(width: 4), Expanded(child: Text(job.location ?? 'unknown'.tr, style: context.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis))]),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.business_rounded, size: 16, color: context.theme.primaryColor),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  job.jobType ?? 'not_specified'.tr,
-                                  style: context.textTheme.titleSmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
+                          Row(children: [Icon(Icons.business_rounded, size: 16, color: context.theme.primaryColor), const SizedBox(width: 4), Expanded(child: Text(job.jobType ?? 'not_specified'.tr, style: context.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis))]),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.alarm, size: 16, color: context.theme.primaryColor),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  job.employmentType ?? 'full_time'.tr,
-                                  style: context.textTheme.titleSmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.business_center, size: 16, color: context.theme.primaryColor),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  job.status?.toUpperCase() ?? 'PENDING',
-                                  style: context.textTheme.titleSmall?.copyWith(color: context.theme.primaryColor),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
+                          Row(children: [Icon(Icons.alarm, size: 16, color: context.theme.primaryColor), const SizedBox(width: 4), Expanded(child: Text(job.employmentType ?? 'full_time'.tr, style: context.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis))]),
                           const SizedBox(height: 10),
                           if (job.status == 'pending')
-                            CustomButton(
-                              title: "waiting_for_approval".tr,
-                              backgroundColor: Colors.orange,
-                              borderRadius: 12,
-                              height: 40,
-                              onPressed: () {},
-                            ),
+                            CustomButton(title: "waiting_for_approval".tr, backgroundColor: Colors.orange, borderRadius: 12, height: 40, onPressed: () {}),
                           const SizedBox(height: 10),
                           CustomButton(
                             backgroundColor: context.theme.primaryColor,
                             title: "view_details".tr,
                             borderRadius: 12,
                             height: 40,
-                            onPressed: () {
-                              Get.toNamed(AppRoutes.jobDetails, arguments: job);
-                            },
+                            onPressed: () => Get.toNamed(AppRoutes.jobDetails, arguments: job),
                           ),
                         ],
                       ),
@@ -1149,52 +1032,52 @@ class BusinessDetailScreen extends GetView<BusinessController> {
           ),
         ],
       );
+    });
   }
 
   Widget _buildBusinessInfoTab(Business business, BuildContext context) {
-    if (controller.isDetailsLoading.isTrue) {
-       return _buildShimmerInfo(context);
-    }
-    return CustomScrollView(
-      physics: const ClampingScrollPhysics(),
-      slivers: [
-        SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildInfoCard('business_details'.tr, [
-                _buildInfoRow(Icons.business, 'name'.tr, business.businessName ?? 'N/A', context),
-                _buildInfoRow(Icons.category, 'category'.tr, business.category?.name ?? 'N/A', context),
-                _buildInfoRow(Icons.verified, 'verification_status'.tr, (business.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: business.verificationStatus == 'approved'),
-                _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (business.verificationStatus ?? 'active').toTitleCase(), context),
-                _buildInfoRow(Icons.description, 'description'.tr, business.description ?? 'No description available', context, maxLines: 5),
-                _buildInfoRow(Icons.access_time_filled_rounded, 'business_hours'.tr, "${_formatTimeString(business.opening_time)} - ${_formatTimeString(business.closing_time)}", context),
-              ], context),
-              const SizedBox(height: 16),
-              _buildInfoCard('contact_info'.tr, [
-                _buildInfoRow(Icons.phone, 'phone'.tr, business.contactPhone ?? 'N/A', context),
-                _buildInfoRow(Icons.email, 'email'.tr, business.contactEmail ?? 'N/A', context),
-                _buildInfoRow(Icons.language, 'website'.tr, business.website ?? 'N/A', context),
-              ], context),
-              const SizedBox(height: 16),
-              _buildInfoCard('additional_information'.tr, [
-                _buildInfoRow(Icons.calendar_today, 'created_at'.tr, business.createdAt != null ? business.createdAt!.split('T')[0] : 'N/A', context),
-                 _buildInfoRow(Icons.update, 'last_updated'.tr, business.updatedAt != null ? business.updatedAt!.split('T')[0] : 'N/A', context),
-              ], context),
-              const SizedBox(height: 30),
-              const SizedBox(height: 16),
-              _buildInfoCard('additional_information'.tr, [
-                _buildInfoRow(Icons.shopping_bag_outlined, 'total_products'.tr, '${business.products?.length ?? 0}', context),
-                _buildInfoRow(Icons.design_services_outlined, 'total_services'.tr, '${business.services?.length ?? 0}', context),
-                _buildInfoRow(Icons.work_outline, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),
-              ], context),
-              const SizedBox(height: 20),
-            ]),
+    return Obx(() {
+      if (controller.isDetailsLoading.isTrue) {
+        return _buildShimmerInfo(context);
+      }
+      final b = controller.selectedBusiness.value ?? business;
+      return CustomScrollView(
+        physics: const ClampingScrollPhysics(),
+        slivers: [
+          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _buildInfoCard('business_details'.tr, [
+                  _buildInfoRow(Icons.business, 'name'.tr, b.businessName ?? 'N/A', context),
+                  _buildInfoRow(Icons.category, 'category'.tr, b.category?.name ?? 'N/A', context),
+                  _buildInfoRow(Icons.verified, 'verification_status'.tr, (b.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: b.verificationStatus == 'approved'),
+                  _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (b.verificationStatus ?? 'active').toTitleCase(), context),
+                  _buildInfoRow(Icons.description, 'description'.tr, b.description ?? 'No description available', context, maxLines: 5),
+                  _buildInfoRow(Icons.access_time_filled_rounded, 'business_hours'.tr, "${_formatTimeString(b.opening_time)} - ${_formatTimeString(b.closing_time)}", context),
+                ], context),
+                const SizedBox(height: 16),
+                _buildInfoCard('contact_info'.tr, [
+                  _buildInfoRow(Icons.phone, 'phone'.tr, b.contactPhone ?? 'N/A', context),
+                  _buildInfoRow(Icons.email, 'email'.tr, b.contactEmail ?? 'N/A', context),
+                  _buildInfoRow(Icons.language, 'website'.tr, b.website ?? 'N/A', context),
+                ], context),
+                const SizedBox(height: 16),
+                _buildInfoCard('additional_information'.tr, [
+                  _buildInfoRow(Icons.calendar_today, 'created_at'.tr, b.createdAt != null ? b.createdAt!.split('T')[0] : 'N/A', context),
+                  _buildInfoRow(Icons.update, 'last_updated'.tr, b.updatedAt != null ? b.updatedAt!.split('T')[0] : 'N/A', context),
+                  _buildInfoRow(Icons.shopping_bag_outlined, 'total_products'.tr, '${b.products?.length ?? 0}', context),
+                  _buildInfoRow(Icons.design_services_outlined, 'total_services'.tr, '${b.services?.length ?? 0}', context),
+                  _buildInfoRow(Icons.work_outline, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),
+                ], context),
+                const SizedBox(height: 20),
+              ]),
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 
   Widget _buildDetailPlaceholderIcon() {

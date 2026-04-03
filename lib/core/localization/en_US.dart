@@ -439,7 +439,7 @@ const Map<String, String> enUS = {
   'current_password': 'Current Password',
   'new_password': 'New Password',
   'password_guidelines': 'Password Guidelines',
-  'password_rule_length': 'At least 6 characters long',
+  'password_rule_length': 'At least 8 characters long',
   'password_rule_letters_numbers': 'Must contain letters and numbers',
   'password_rule_different': 'Different from current password',
   'password_rule_personal': 'Avoid using personal information',

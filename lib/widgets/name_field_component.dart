@@ -82,6 +82,14 @@ class NameFieldComponentState extends State<NameFieldComponent> {
     return null;
   }
 
+  /// Programmatically set name fields from a full name string
+  void setName(String fullName) {
+    final components = NameParser.parse(fullName);
+    titleCtrl.text = components.title ?? '';
+    firstNameCtrl.text = components.firstName ?? '';
+    lastNameCtrl.text = components.lastName ?? '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(

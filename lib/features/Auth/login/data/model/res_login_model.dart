@@ -127,6 +127,7 @@ class User {
   String? updatedAt;
   String? profileImage;
   bool? hasPayment;
+  bool? isMatrimony;
   String? paymentPurpose;
 
   User({
@@ -170,6 +171,7 @@ class User {
     this.updatedAt,
     this.profileImage,
     this.hasPayment,
+    this.isMatrimony,
     this.paymentPurpose,
   });
 
@@ -215,6 +217,7 @@ class User {
     // Handle both 'profile_image' and 'photo' fields
     profileImage = json['profile_image'] ?? json['photo'];
     hasPayment = json['has_payment'];
+    isMatrimony = json['is_matrimony'];
     paymentPurpose = json['payment_purpose'];
   }
 
@@ -260,6 +263,7 @@ class User {
     data['updated_at'] = updatedAt;
     data['profile_image'] = profileImage;
     data['has_payment'] = hasPayment;
+    data['is_matrimony'] = isMatrimony;
     data['payment_purpose'] = paymentPurpose;
     return data;
   }

@@ -26,7 +26,7 @@ class HomePage extends GetWidget<HomeController> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: Obx(() {
-        final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+        final hasMatrimony = Get.find<AuthService>().hasMatrimony();
 
         final user = authService.currentUser.value;
         return RefreshIndicator(
@@ -382,7 +382,7 @@ class HomePage extends GetWidget<HomeController> {
 
                           const SizedBox(height: 16),
 
-                          (!hasPayment)
+                          (!hasMatrimony)
                               ? _buildPromoCard(
                             context,
                             title: 'register_matrimony'.tr,
@@ -399,7 +399,7 @@ class HomePage extends GetWidget<HomeController> {
                             subtitle: 'find_soulmate'.tr,
                             icon: Icons.favorite_rounded,
                             buttonText: "Edit Profile",
-                            onTap: () => Get.toNamed(AppRoutes.regMatrimony),
+                            onTap: () => Get.toNamed(AppRoutes.regMatrimony, arguments: true),
                             color1: const Color(0xFFF48FB1),
                             color2: const Color(0xFFE91E63),
                           ),

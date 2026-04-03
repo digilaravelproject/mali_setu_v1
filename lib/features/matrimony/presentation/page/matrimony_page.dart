@@ -166,8 +166,12 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         ),
         body: Obx(() {
           final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
-          if (!hasPayment) {
+          final hasMatrimony = Get.find<AuthService>().hasMatrimony();
+          if (!hasMatrimony) {
             return _buildRestrictedView(context);
+          }
+          else if(!hasPayment){
+
           }
           try {
             if (controller.isLoading.value) {

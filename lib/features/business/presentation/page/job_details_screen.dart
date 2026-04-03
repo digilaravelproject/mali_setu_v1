@@ -364,7 +364,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             ),
           ],
         ),
-        bottomSheet: _buildBottomAction(context, hasApplied, job, isMyJob),
+        bottomSheet: _buildBottomAction(context, hasApplied, job, isMyJob)
       );
     });
   }
@@ -529,9 +529,8 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     );
   }
 
-  Widget _buildBottomAction(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
-    return SafeArea(
-      child: Container(
+  Widget _buildBottomAction1(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
+    return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: context.theme.scaffoldBackgroundColor,
@@ -539,8 +538,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
           ],
         ),
-        child: SafeArea(
-          child: Row(
+        child: Row(
             children: [
               Expanded(
                 child: ElevatedButton(
@@ -581,7 +579,61 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
               // ],
             ],
           ),
-        ),
+    );
+  }
+
+  Widget _buildBottomAction(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
+      decoration: BoxDecoration(
+        color: context.theme.scaffoldBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: isMyJob
+                  ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
+                  : (hasApplied
+                  ? null
+                  : () {
+                if (job.id != null) {
+                  Get.bottomSheet(
+                    JobApplyForm(jobId: job.id!),
+                    isScrollControlled: true,
+                  );
+                }
+              }),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                isMyJob ? Colors.orange : context.theme.primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              child: Text(
+                isMyJob
+                    ? 'view_appliers'.tr
+                    : (hasApplied ? 'applied'.tr : 'apply_now'.tr),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

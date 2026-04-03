@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
@@ -123,8 +124,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () {
                 Get.toNamed(AppRoutes.changePassword);
               },
-              backgroundColor: Colors.white,
-              textColor: context.theme.primaryColor,
+              backgroundColor: context.theme.primaryColor,
+              textColor: context.theme.cardColor,
             ),
 
             const SizedBox(height: 40),

@@ -8,6 +8,7 @@ import '../../data/model/connection_requests_response.dart';
 
 abstract class MatrimonyRepository {
   Future<MatrimonyResponse> createProfile(Map<String, dynamic> data);
+  Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data);
   Future<dynamic> getProfiles();
   Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters);
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);

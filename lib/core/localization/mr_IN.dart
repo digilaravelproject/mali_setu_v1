@@ -490,7 +490,7 @@ const Map<String, String> mrIN = {
 
   // Guidelines
   'password_guidelines': 'पासवर्ड मार्गदर्शक सूचना',
-  'password_rule_length': 'किमान ६ अक्षरे असावीत',
+  'password_rule_length': 'किमान ८ अक्षरे असावीत',
   'password_rule_letters_numbers': 'अक्षरे आणि अंक असणे आवश्यक आहे',
   'password_rule_different': 'सध्याच्या पासवर्डपेक्षा वेगळा असावा',
   'password_rule_personal': 'वैयक्तिक माहिती वापरणे टाळा',

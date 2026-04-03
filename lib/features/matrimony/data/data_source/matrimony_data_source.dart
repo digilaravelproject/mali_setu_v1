@@ -9,6 +9,7 @@ import '../model/matrimony_plan_model.dart';
 
 abstract class MatrimonyDataSource {
   Future<MatrimonyResponse> createProfile(Map<String, dynamic> data);
+  Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data);
   Future<dynamic> getProfiles();
   Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters);
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);
@@ -33,6 +34,12 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   @override
   Future<MatrimonyResponse> createProfile(Map<String, dynamic> data) async {
     final response = await apiClient.post(ApiConstants.matrimonyProfile, data: data);
+    return MatrimonyResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data) async {
+    final response = await apiClient.put(ApiConstants.matrimonyProfile, data: data);
     return MatrimonyResponse.fromJson(response.data);
   }
 

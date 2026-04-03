@@ -21,6 +21,10 @@ class RegMatrimonyController extends GetxController {
 
   final ScrollController scrollController = ScrollController();
 
+  /// Edit mode flag — set to true when opening from "Edit Profile"
+  final isEditMode = false.obs;
+  final isPreFilling = false.obs;
+
   /// NAME FIELD COMPONENT KEY
   final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
 
@@ -407,107 +411,85 @@ class RegMatrimonyController extends GetxController {
 
       // Construct Nested JSON
       final Map<String, dynamic> body = {
-        "age": calculateAge(), // 28
+        "age": calculateAge(),
         "height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text,
-        //"height": heightCtrl.text.isEmpty ? "0" : heightCtrl.text,
         "weight": weightCtrl.text.isEmpty ? "0" : weightCtrl.text,
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
         "personal_details": {
           "name": combinedName,
-          "dob": dobCtrl.text, // "1997-05-12"
+          "title": nameFieldKey.currentState?.titleCtrl.text ?? '',
+          "first_name": nameFieldKey.currentState?.firstNameCtrl.text ?? '',
+          "last_name": nameFieldKey.currentState?.lastNameCtrl.text ?? '',
+          "gender": gender.value,
+          "dob": dobCtrl.text,
           "annual_income": annualIncomeCtrl.text,
           "occupation": jobTitleCtrl.text,
           "profile_created_by": profileCreatedBy.value,
-          "hobbies": ["reading"], // Hardcoded for now
+          "hobbies": ["reading"],
           "language": language.value,
           "citizenship": citizenship.value,
           "employment_type": employmentType.value,
           "family_type": familyType.value,
           "marital_status": maritalStatus.value,
-          "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
+          "religion": [religion.value, casteCtrl.text],
           "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
           "dosh": dosh.value,
           "photos": base64Photos,
           "blood_group": bloodGroup.value,
           "refferal_name": ref_nameCtrl.text,
-
-            // "name": combinedName,
-            // "dob": dobCtrl.text, // "1997-05-12"
-            // "annual_income": annualIncomeCtrl.text,
-            // "occupation": jobTitleCtrl.text,
-            // "profile_created_by": profileCreatedBy.value,
-            // "hobbies": ["reading"], // Hardcoded for now
-            // "language": language.value,
-            // "citizenship": citizenship.value,
-            // "employment_type": employmentType.value,
-            // "family_type": familyType.value,
-            // "marital_status": maritalStatus.value,
-            // "religion": [religion.value, casteCtrl.text], // "Hindu", "General"
-            // "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
-            // "dosh": dosh.value,
-            // "photos": base64Photos,
-            // "blood_group": bloodGroup.value,
-            // "refferal_name": ref_nameCtrl.text,
-
         },
         "family_details": {
           "father": fatherOccupationCtrl.text,
           "mother": motherOccupationCtrl.text,
           "family_class": familyClass.value,
-          "family_value": familyValue.value
+          "family_value": familyValue.value,
         },
         "education_details": {
           "highest_qualification": education.value,
-          "college": collegeCtrl.text
+          "college": collegeCtrl.text,
         },
         "professional_details": {
           "job_title": jobTitleCtrl.text,
-          "company": companyCtrl.text
+          "company": companyCtrl.text,
         },
         "lifestyle_details": {
           "diet": diet.value,
           "smoking": smoking.value,
-          "drinking": drinking.value
+          "drinking": drinking.value,
         },
         "location_details": {
-
           "city": cityCtrl.text,
           "state": state.value,
           "country": country.value,
-          "pincode": pinCodeCtrl.text
-
-            // "city": cityCtrl.text,
-            // "state": state.value,
-            // "country": country.value,
-            // "pincode": pinCodeCtrl.text
-
         },
         "partner_preferences": {
           "age_range": "20-30",
           "education": "Any",
-          "location": "Any"
+          "location": "Any",
         },
         "privacy_settings": {
           "show_photos": "all",
-          "show_contact": "premium_only"
-        }
+          "show_contact": "premium_only",
+        },
       };
 
       print("Calling API with Body: $body");
 
-      final response = await _repository.createProfile(body);
+      final response = isEditMode.value
+          ? await _repository.updateProfile(body)
+          : await _repository.createProfile(body);
 
       Get.back(); // Close Loading
 
       if (response.success == true) {
+        Get.back(); // Close Registration Screen
+        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? "Profile Updated Successfully" : "Profile Created Successfully"));
 
-        Get.back(); // Close Registration Screen // Removed to show plans first
-        CustomSnackBar.showSuccess(message: response.message ?? "Profile Created Successfully");
-
-        // Fetch Plans and Show Dialog
-        await fetchAndShowPlans();
-
+        if (!isEditMode.value) {
+          // Only show plans for new registration
+          await fetchAndShowPlans();
+        }
       } else {
         String errorMsg = response.message ?? "Failed to create profile";
         if (response.errors != null && response.errors!.isNotEmpty) {
@@ -541,6 +523,135 @@ class RegMatrimonyController extends GetxController {
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
     pinCodeCtrl.addListener(_onPincodeChanged);
+
+    // If edit mode passed as argument, prefill
+    if (Get.arguments == true) {
+      isEditMode.value = true;
+      prefillFromApi();
+    }
+  }
+
+  /// Fetch existing profile and prefill all fields
+  Future<void> prefillFromApi() async {
+    try {
+      isPreFilling.value = true;
+      final raw = await _repository.getProfiles();
+      if (raw == null) return;
+
+      final data = raw is Map<String, dynamic> ? raw : null;
+      if (data == null || data['success'] != true) return;
+
+      final profile = data['data']?['profile'] as Map<String, dynamic>?;
+      if (profile == null) return;
+
+      // Top-level fields
+      heightCtrl.text = profile['height']?.toString() ?? '';
+      weightCtrl.text = profile['weight']?.toString() ?? '';
+      complexion.value = _safeValue(profile['complexion'], complexionList);
+      physicalStatus.value = _safeValue(profile['physical_status'], physicalStatusList);
+
+      // Personal details
+      final personal = profile['personal_details'] as Map<String, dynamic>? ?? {};
+      
+      // Name: set via NameFieldComponent after frame renders
+      final fullName = personal['name']?.toString() ?? '';
+      nameCtrl.text = fullName;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        nameFieldKey.currentState?.setName(fullName);
+      });
+
+      dobCtrl.text = personal['dob']?.toString() ?? '';
+      if (dobCtrl.text.isNotEmpty) {
+        try {
+          selectedDate = DateTime.parse(dobCtrl.text);
+          rxDob.value = dobCtrl.text;
+        } catch (_) {}
+      }
+      annualIncomeCtrl.text = personal['annual_income']?.toString() ?? '';
+      jobTitleCtrl.text = personal['occupation']?.toString() ?? '';
+      gender.value = _safeValue(personal['gender']?.toString(), genderList);
+      profileCreatedBy.value = _safeValue(personal['profile_created_by'], profileCreatedByList);
+      language.value = _safeValue(personal['language'], languageList);
+      citizenship.value = _safeValue(personal['citizenship'], citizenshipList);
+      employmentType.value = _safeValue(personal['employment_type'], employmentTypeList);
+      familyType.value = _safeValue(personal['family_type'], familyTypeList);
+      maritalStatus.value = _safeValue(personal['marital_status'], maritalStatusList);
+      // blood_group: API may return "A" but list has "A+","A-" etc — try exact match first, then prefix match
+      final rawBloodGroup = personal['blood_group']?.toString() ?? '';
+      bloodGroup.value = bloodGroupList.contains(rawBloodGroup)
+          ? rawBloodGroup
+          : bloodGroupList.firstWhere((b) => b.startsWith(rawBloodGroup), orElse: () => '');
+      ref_nameCtrl.text = personal['refferal_name']?.toString() ?? '';
+      dosh.value = _safeValue(personal['dosh'], doshList);
+
+      // Religion array: ["Mali","Phulmali"] → Mali = Caste (religion.value), Phulmali = Sub-Caste (casteCtrl.text)
+      final religionArr = personal['religion'];
+      if (religionArr is List && religionArr.isNotEmpty) {
+        religion.value = religionArr[0]?.toString() ?? '';       // Caste
+        if (religionArr.length > 1) {
+          casteCtrl.text = religionArr[1]?.toString() ?? '';     // Sub-Caste
+        }
+      }
+
+      // Star details array: [star, raasi, "manglik-yes/no"]
+      final starArr = personal['star_details'];
+      if (starArr is List) {
+        if (starArr.isNotEmpty) star.value = _safeValue(starArr[0]?.toString(), starList);
+        if (starArr.length > 1) raasi.value = _safeValue(starArr[1]?.toString(), raasiList);
+        if (starArr.length > 2) {
+          final manglikStr = starArr[2]?.toString() ?? '';
+          final manglikVal = manglikStr.replaceFirst('manglik-', '');
+          manglik.value = _safeValue(
+            manglikVal[0].toUpperCase() + manglikVal.substring(1),
+            manglikList,
+          );
+        }
+      }
+
+      // Family details
+      final family = profile['family_details'] as Map<String, dynamic>? ?? {};
+      fatherOccupationCtrl.text = family['father']?.toString() ?? '';
+      motherOccupationCtrl.text = family['mother']?.toString() ?? '';
+      familyClass.value = _safeValue(family['family_class'], familyClassList);
+      familyValue.value = _safeValue(family['family_value'], familyValueList);
+
+      // Education details
+      final edu = profile['education_details'] as Map<String, dynamic>? ?? {};
+      education.value = _safeValue(edu['highest_qualification'], educationList);
+      collegeCtrl.text = edu['college']?.toString() ?? '';
+
+      // Professional details
+      final prof = profile['professional_details'] as Map<String, dynamic>? ?? {};
+      jobTitleCtrl.text = prof['job_title']?.toString() ?? jobTitleCtrl.text;
+      companyCtrl.text = prof['company']?.toString() ?? '';
+
+      // Lifestyle details
+      final lifestyle = profile['lifestyle_details'] as Map<String, dynamic>? ?? {};
+      diet.value = _safeValue(lifestyle['diet'], dietList);
+      smoking.value = _safeValue(lifestyle['smoking'], smokingList);
+      drinking.value = _safeValue(lifestyle['drinking'], drinkingList);
+
+      // Location details
+      final location = profile['location_details'] as Map<String, dynamic>? ?? {};
+      cityCtrl.text = location['city']?.toString() ?? '';
+      final fetchedCountry = location['country']?.toString() ?? 'India';
+      onCountryChanged(fetchedCountry);
+      state.value = _safeValue(location['state']?.toString(), stateList.toList(), fallback: location['state']?.toString() ?? '');
+      if (state.value.isNotEmpty && !stateList.contains(state.value)) {
+        stateList.add(state.value);
+      }
+
+    } catch (e) {
+      debugPrint('prefillFromApi error: $e');
+    } finally {
+      isPreFilling.value = false;
+    }
+  }
+
+  /// Returns value if it exists in list, else empty string (or fallback)
+  String _safeValue(String? value, List<String> list, {String fallback = ''}) {
+    if (value == null || value.isEmpty) return fallback;
+    return list.contains(value) ? value : fallback;
   }
 
   void onCountryChanged(String countryName) {

@@ -121,7 +121,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                 context,
                 [
                   _SettingsItem(
-                    title: 'active_volunteer'.tr,
+                    title: 'volunteer'.tr,
                     icon: Icons.favorite_border_rounded,
                     onTap: () {
                       Get.toNamed(AppRoutes.volunteer);
@@ -175,7 +175,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     onTap: () async {
                       try {
                         await Share.share(
-                          'Check out this amazing app!\n\nDownload link: https://yourapp.com',
+                          'Check out this amazing app!\n\nDownload https://play.google.com/store/apps/details?id=com.mali.setu',
                           subject: 'Awesome App Recommendation',
                         );
                       } catch (e) {

@@ -165,7 +165,7 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
             // Recent Applications
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -173,13 +173,13 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
                       'recent_applications'.tr,
                       style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'view_all'.tr,
-                        style: context.textTheme.titleMedium?.copyWith(color: Colors.blue)
-                      ),
-                    ),
+                    // TextButton(
+                    //   onPressed: () {},
+                    //   child: Text(
+                    //     'view_all'.tr,
+                    //     style: context.textTheme.titleMedium?.copyWith(color: Colors.blue)
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

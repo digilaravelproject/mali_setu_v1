@@ -269,6 +269,12 @@ class AuthService extends GetxService {
     return user.hasPayment == true && user.paymentPurpose == purpose;
   }
 
+  bool hasMatrimony() {
+    final user = currentUser.value;
+    if (user == null) return false;
+    return user.isMatrimony == true;
+  }
+
 
 
   /// Update profile data

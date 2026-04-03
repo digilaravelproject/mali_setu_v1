@@ -21,10 +21,14 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           onPressed: Get.back,
           icon: Icon(AppAssets.backArrow),
         ),
-        title:  Text("register_matrimony".tr),
+        title: Obx(() => Text(
+          controller.isEditMode.value ? "Edit Matrimony Profile" : "register_matrimony".tr,
+        )),
       ),
       body: Obx(
-            () => Column(
+            () => Stack(
+          children: [
+            Column(
           children: [
             /// Progress Indicator
             _buildProgressIndicator(context),
@@ -46,6 +50,13 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
             ),
           ],
         ),
+            if (controller.isPreFilling.value)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        ),
       ),
       bottomNavigationBar: SafeArea(
         child: Obx(
@@ -62,7 +73,9 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   ),
                 Expanded(
                   child: CustomButton(
-                    title: controller.currentStep.value == 3 ? "register".tr : "next".tr,
+                    title: controller.currentStep.value == 3
+                        ? (controller.isEditMode.value ? "update".tr : "register".tr)
+                        : "next".tr,
                     onPressed: controller.currentStep.value == 3
                         ? controller.onRegister
                         : controller.nextStep,
