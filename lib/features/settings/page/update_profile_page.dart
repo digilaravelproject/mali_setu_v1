@@ -1,19 +1,19 @@
-import 'package:edu_cluezer/core/constent/api_constants.dart';
-import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
-import 'package:edu_cluezer/widgets/basic_text_field.dart';
-import 'package:edu_cluezer/widgets/name_field_component.dart';
-import 'package:edu_cluezer/widgets/phone_field_component.dart';
-import 'package:edu_cluezer/widgets/custom_buttons.dart';
-// import 'package:edu_cluezer/widgets/custom_scaffold.dart'; // Removed as we use standard Scaffold
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
-import 'package:edu_cluezer/widgets/custom_image_view.dart';
-import '../../../../common/widgets/option_selector.dart';
+import '../../../../core/constent/api_constants.dart';
 import '../../../../core/helper/form_validator.dart';
 import '../../../../core/utils/app_assets.dart';
-import '../../business/presentation/controller/create_job_controller.dart';
+import '../../../../widgets/basic_text_field.dart';
+import '../../../../widgets/name_field_component.dart';
+import '../../../../widgets/phone_field_component.dart';
+import '../../../../widgets/custom_buttons.dart';
+import '../../../../widgets/custom_scaffold.dart';
+import '../../../../widgets/custom_image_view.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import '../controller/profileController.dart';
 
 class UpdateProfilePage extends GetView<UpProfileController> {
@@ -21,82 +21,227 @@ class UpdateProfilePage extends GetView<UpProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        leading: GestureDetector(
-          onTap: Get.back,
-           child: Container(
-             margin: const EdgeInsets.all(8),
-             decoration: BoxDecoration(
-               color: Colors.white,
-               shape: BoxShape.circle,
-               border: Border.all(color: Colors.grey[200]!)
-             ),
-             child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Colors.black87),
-          ),
-        ),
-        title: Text(
-          "update_profile".tr,
-          style: context.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: Colors.black87,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.grey[50],
-        elevation: 0,
+    final theme = Theme.of(context);
+
+    // Dynamic top padding to handle status bar gracefully
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Image Section
-            _buildProfileImageSection(),
-            const SizedBox(height: 30),
+      child: CustomScaffold(
+        extendBodyBehindAppBar: true,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: topPadding + 10),
+                
+                // Back button - plain icon as previously requested
+                GestureDetector(
+                  onTap: () => Get.back(),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 24.0,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 0),
+                
+                // Header title
+                Center(
+                  child: Text(
+                    "update_profile".tr,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
 
-            // Personal Information
-            _buildSectionHeader(context, "personal_information".tr),
-            _buildPersonalInfoSection(context),
-            const SizedBox(height: 24),
+                // Profile Image Section
+                _buildProfileImageSection(context),
 
-            // Address Information
-            _buildSectionHeader(context, "address_information".tr),
-            _buildAddressInfoSection(context),
-            const SizedBox(height: 40),
+                const SizedBox(height: 10),
 
-            // Update Button
-            CustomButton(
-              title: "update_profile".tr,
-              onPressed: () => controller.updateProfile(),
-              height: 50,
-              borderRadius: 16,
+                // Personal Information Section
+                _buildFormSection(
+                  context,
+                  title: "personal_information".tr,
+                  icon: CupertinoIcons.person_circle_fill,
+                  children: [
+                    NameFieldComponent(
+                      key: controller.nameFieldKey,
+                      initialName: Get.find<AuthService>().currentUser.value?.name,
+                      isRequired: true,
+                    ),
+                    AppInputTextField(
+                      label: "email_address".tr,
+                      controller: controller.emailCtrl,
+                      enable: false,
+                      textInputType: TextInputType.emailAddress,
+                      iconData: CupertinoIcons.mail_solid,
+                      isRequired: true,
+                      topPadding: 0,
+                      validator: FormValidator.email,
+                    ),
+                    AppInputTextField(
+                      label: "age".tr,
+                      controller: controller.ageCtrl,
+                      textInputType: TextInputType.number,
+                      iconData: CupertinoIcons.calendar_today,
+                      isRequired: true,
+                      topPadding: 0,
+                      validator: (v) => FormValidator.emptycheck(v, "age".tr),
+                    ),
+                    PhoneFieldComponent(
+                      key: controller.phoneFieldKey,
+                      initialPhone: Get.find<AuthService>().currentUser.value?.phone,
+                      isRequired: true,
+                    ),
+                    AppInputTextField(
+                      label: "occupation".tr,
+                      controller: controller.occupationCtrl,
+                      textInputType: TextInputType.text,
+                      iconData: CupertinoIcons.briefcase_fill,
+                      isRequired: true,
+                      topPadding: 0,
+                      validator: (v) => FormValidator.emptycheck(v, "occupation".tr),
+                    ),
+                  ],
+                ),
+
+                // Address Details Section
+                _buildFormSection(
+                  context,
+                  title: "address_details".tr,
+                  icon: CupertinoIcons.location_circle_fill,
+                  children: [
+                    AppInputTextField(
+                      label: "address".tr,
+                      textInputType: TextInputType.streetAddress,
+                      controller: controller.streetAddressCtrl,
+                      iconData: CupertinoIcons.location_solid,
+                      isRequired: true,
+                      topPadding: 0,
+                      validator: (v) => FormValidator.emptycheck(v, "address".tr),
+                    ),
+                    TwoColumnRow(
+                      left: AppInputTextField(
+                        label: "nearby".tr,
+                        controller: controller.nearbyLocationCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: CupertinoIcons.placemark_fill,
+                        isRequired: true,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "nearby".tr),
+                      ),
+                      right: AppInputTextField(
+                        label: "road_number".tr,
+                        controller: controller.roadNumberCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: CupertinoIcons.number_square_fill,
+                        isRequired: true,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "road_number".tr),
+                      ),
+                    ),
+                    TwoColumnRow(
+                      left: AppInputTextField(
+                        label: "city".tr,
+                        controller: controller.cityCtrl,
+                        isRequired: true,
+                        isDropdown: true,
+                        dropdownItems: controller.cities,
+                        onDropdownChanged: (v) => controller.cityCtrl.text = v,
+                        iconData: CupertinoIcons.building_2_fill,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "city".tr),
+                      ),
+                      right: AppInputTextField(
+                        label: "state".tr,
+                        controller: controller.stateCtrl,
+                        isRequired: true,
+                        isDropdown: true,
+                        dropdownItems: controller.states,
+                        onDropdownChanged: (v) => controller.stateCtrl.text = v,
+                        iconData: CupertinoIcons.map_fill,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "state".tr),
+                      ),
+                    ),
+                    TwoColumnRow(
+                      left: AppInputTextField(
+                        label: "district".tr,
+                        controller: controller.districtCtrl,
+                        isRequired: true,
+                        isDropdown: true,
+                        dropdownItems: controller.districts,
+                        onDropdownChanged: (v) => controller.districtCtrl.text = v,
+                        iconData: CupertinoIcons.location_fill,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "district".tr),
+                      ),
+                      right: AppInputTextField(
+                        label: "pincode".tr,
+                        controller: controller.pincodeCtrl,
+                        textInputType: TextInputType.number,
+                        iconData: CupertinoIcons.number_square_fill,
+                        isRequired: true,
+                        topPadding: 0,
+                        validator: FormValidator.pincode,
+                      ),
+                    ),
+                    TwoColumnRow(
+                      left: AppInputTextField(
+                        label: "sector".tr,
+                        controller: controller.sectorCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: CupertinoIcons.building_2_fill,
+                        isRequired: true,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "sector".tr),
+                      ),
+                      right: AppInputTextField(
+                        label: "destination".tr,
+                        controller: controller.destinationCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: CupertinoIcons.location_solid,
+                        isRequired: true,
+                        topPadding: 0,
+                        validator: (v) => FormValidator.emptycheck(v, "destination".tr),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                Obx(() => CustomButton(
+                      title: "update_profile".tr,
+                      onPressed: () => controller.updateProfile(),
+                      isLoading: controller.isLoading.value,
+                    )),
+
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 40),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 16),
-      child: Text(
-        title,
-        style: context.textTheme.labelLarge?.copyWith(
-          color: Colors.grey[600],
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.2,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileImageSection() {
+  Widget _buildProfileImageSection(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         children: [
@@ -111,19 +256,19 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Get.theme.primaryColor.withOpacity(0.2),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.12),
                       width: 2,
                     ),
                   ),
                   child: Container(
-                    width: 110,
-                    height: 110,
+                    width: 90,
+                    height: 90,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Get.theme.primaryColor.withOpacity(0.1),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.08),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -135,7 +280,8 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                               profileImage,
                               fit: BoxFit.cover,
                             )
-                          : (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                          : (user?.profileImage != null &&
+                                  user!.profileImage!.isNotEmpty)
                               ? CustomImageView(
                                   url: user.profileImage!.startsWith('http')
                                       ? user.profileImage!
@@ -153,22 +299,22 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                 GestureDetector(
                   onTap: controller.showImagePickerOptions,
                   child: Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Get.theme.primaryColor,
+                      color: theme.colorScheme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
+                      border: Border.all(color: Colors.white, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: const Icon(
-                      Icons.camera_alt_rounded,
-                      size: 18,
+                      CupertinoIcons.camera_fill,
+                      size: 14,
                       color: Colors.white,
                     ),
                   ),
@@ -176,11 +322,12 @@ class UpdateProfilePage extends GetView<UpProfileController> {
               ],
             );
           }),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           Text(
             'tap_camera_update_photo'.tr,
-            style: Get.textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              fontSize: 12,
             ),
           ),
         ],
@@ -188,181 +335,104 @@ class UpdateProfilePage extends GetView<UpProfileController> {
     );
   }
 
-  Widget _buildPersonalInfoSection(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          NameFieldComponent(
-            key: controller.nameFieldKey,
-            initialName: Get.find<AuthService>().currentUser.value?.name,
-            isRequired: true,
-          ),
-          const SizedBox(height: 16),
-          AppInputTextField(
-            label: "age".tr,
-            controller: controller.ageCtrl,
-            textInputType: TextInputType.number,
-            iconData: Icons.cake_outlined,
-           // validator: FormValidator.age,
-          ),
-          const SizedBox(height: 16),
-          PhoneFieldComponent(
-            key: controller.phoneFieldKey,
-            initialPhone: Get.find<AuthService>().currentUser.value?.phone,
-            isRequired: true,
-          ),
-          const SizedBox(height: 16),
-          AppInputTextField(
-            label: "email_address".tr,
-            controller: controller.emailCtrl,
-            enable: false,
-            textInputType: TextInputType.emailAddress,
-            iconData: Icons.email_outlined,
-           // validator: FormValidator.email,
-          ),
-          const SizedBox(height: 16),
-          AppInputTextField(
-            label: "occupation".tr,
-            controller: controller.occupationCtrl,
-            textInputType: TextInputType.text,
-            iconData: Icons.work_outline_rounded,
-            // validator: (value) {
-            //   if (value == null || value.isEmpty) {
-            //     return 'Please enter occupation';
-            //   }
-            //   return null;
-            // },
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildFormSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+    bool isRequired = false,
+  }) {
+    final theme = Theme.of(context);
 
-  Widget _buildAddressInfoSection(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            spreadRadius: 0,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppInputTextField(
-            label: "street_address".tr,
-            controller: controller.streetAddressCtrl,
-            textInputType: TextInputType.streetAddress,
-            iconData: Icons.home_outlined,
-          ),
-          const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(
-                child: AppInputTextField(
-                  label: "nearby".tr,
-                  controller: controller.nearbyLocationCtrl,
-                  textInputType: TextInputType.text,
-                  iconData: Icons.location_searching_rounded,
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 10),
               Expanded(
-                child: AppInputTextField(
-                  label: "road_number".tr,
-                  controller: controller.roadNumberCtrl,
-                  textInputType: TextInputType.text,
-                  iconData: Icons.signpost_outlined,
+                child: RichText(
+                  text: TextSpan(
+                    text: title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                    ),
+                    children: isRequired
+                        ? [
+                            const TextSpan(
+                              text: ' *',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ]
+                        : [],
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: SingleDropdown(
-                  controller: controller.cityCtrl,
-                  label: "city".tr,
-                  items: controller.cities,
-                  icon: Icons.location_city_rounded,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: SingleDropdown(
-                  controller: controller.stateCtrl,
-                  label: "state".tr,
-                  items: controller.states,
-                  icon: Icons.map_outlined,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: SingleDropdown(
-                  controller: controller.districtCtrl,
-                  label: "district".tr,
-                  items: controller.districts,
-                  icon: Icons.terrain_rounded,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AppInputTextField(
-                  label: "pincode".tr,
-                  controller: controller.pincodeCtrl,
-                  textInputType: TextInputType.number,
-                  iconData: Icons.pin_drop_outlined,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: AppInputTextField(
-                  label: "sector".tr,
-                  controller: controller.sectorCtrl,
-                  textInputType: TextInputType.text,
-                  iconData: Icons.domain_rounded,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AppInputTextField(
-                  label: "destination".tr,
-                  controller: controller.destinationCtrl,
-                  textInputType: TextInputType.text,
-                  iconData: Icons.place_outlined,
-                ),
-              ),
-            ],
-          ),
+          const SizedBox(height: 6),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF1F1F1)),
+          const SizedBox(height: 10),
+          ...children,
         ],
       ),
     );
   }
 }
 
+class TwoColumnRow extends StatelessWidget {
+  final Widget left;
+  final Widget right;
+
+  const TwoColumnRow({
+    super.key,
+    required this.left,
+    required this.right,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 8),
+        Expanded(child: right),
+      ],
+    );
+  }
+}

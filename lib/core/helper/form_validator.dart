@@ -3,7 +3,7 @@ import 'package:edu_cluezer/core/helper/country_list_picker.dart';
 class FormValidator {
   static String? name(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Name is required";
+      return "Please enter your name";
     }
     if (value.trim().length < 3) {
       return "Name must be at least 3 characters";
@@ -16,7 +16,7 @@ class FormValidator {
 
   static String? jobTitle(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Job title is required";
+      return "Please enter your job title";
     }
     if (value.trim().length < 5) {
       return "Job title must be at least 5 characters";
@@ -29,10 +29,7 @@ class FormValidator {
 
   static String? jobDescription(String? value,String title) {
     if (value == null || value.trim().isEmpty) {
-      return "$title is required";
-    }
-    if (value.trim().length < 10) {
-      return "$title must be at least 10 characters";
+      return "Please enter $title";
     }
     // if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
     //   return "$title can only contain alphabets";
@@ -43,7 +40,7 @@ class FormValidator {
 
   static String? emptycheck(String? value,String title) {
     if (value == null || value.trim().isEmpty) {
-      return "$title is required";
+      return "Please enter $title";
     }
     // if (value.trim().length < 10) {
     //   return "$title must be at least 10 characters";
@@ -57,7 +54,7 @@ class FormValidator {
   // Pincode validation (assuming Indian 6-digit pincode)
   static String? pincode(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Pincode is required";
+      return "Please enter pincode";
     }
 
     String pin = value.trim();
@@ -73,7 +70,7 @@ class FormValidator {
 // Road/Street number validation
   static String? roadNumber(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Road/Street number is required";
+      return "Please enter road/street number";
     }
 
     String road = value.trim();
@@ -95,7 +92,7 @@ class FormValidator {
 
   static String? age(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Age is required";
+      return "Please enter age";
     }
 
     final age = int.tryParse(value.trim());
@@ -117,7 +114,7 @@ class FormValidator {
 
   static String? email(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Email is required";
+      return "Please enter email id";
     }
     if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$').hasMatch(value.trim())) {
       return "Enter a valid email";
@@ -127,7 +124,7 @@ class FormValidator {
 
   static String? walletName(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Wallet name is required";
+      return "Please enter wallet name";
     }
     // Allow letters, numbers, spaces, and underscores, min length 3
     if (!RegExp(r'^[a-zA-Z0-9 _]{3,30}$').hasMatch(value.trim())) {
@@ -138,7 +135,7 @@ class FormValidator {
 
   static String? password(String? value) {
     if (value == null || value.isEmpty) {
-      return "Password is required";
+      return "Please enter password";
     }
     if (value.length < 8) {
       return "Password must be at least 8 characters";
@@ -148,7 +145,7 @@ class FormValidator {
 
   static String? confirmPassword(String? value, String password) {
     if (value == null || value.isEmpty) {
-      return "Confirm Password is required";
+      return "Please confirm your password";
     }
     if (value != password) {
       return "Passwords do not match";
@@ -158,13 +155,51 @@ class FormValidator {
 
   static String? dob(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return "Date of Birth is required";
+      return "Please enter date of birth";
     }
-    // Simple date validation (dd/MM/yyyy or yyyy-MM-dd)
-    if (!RegExp(r'^\d{2}/\d{2}/\d{4}$').hasMatch(value.trim()) &&
-        !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value.trim())) {
-      return "Enter a valid date (dd/MM/yyyy or yyyy-MM-dd)";
+    
+    final val = value.trim();
+    int day, month, year;
+    
+    final ddMMyyyy = RegExp(r'^(\d{2})/(\d{2})/(\d{4})$');
+    Match? match = ddMMyyyy.firstMatch(val);
+    
+    if (match != null) {
+      day = int.parse(match.group(1)!);
+      month = int.parse(match.group(2)!);
+      year = int.parse(match.group(3)!);
+    } else {
+      final yyyyMMdd = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
+      match = yyyyMMdd.firstMatch(val);
+      if (match != null) {
+        year = int.parse(match.group(1)!);
+        month = int.parse(match.group(2)!);
+        day = int.parse(match.group(3)!);
+      } else {
+        return "Enter a valid date (DD/MM/YYYY)";
+      }
     }
+    
+    // Validate bounds
+    if (year < 1900 || year > DateTime.now().year) return "Enter a valid year";
+    if (month < 1 || month > 12) return "Enter a valid month (01-12)";
+    if (day < 1 || day > 31) return "Enter a valid day";
+    
+    final daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
+      daysInMonth[2] = 29;
+    }
+    
+    if (day > daysInMonth[month]) return "Enter a valid date";
+    
+    final parsedDate = DateTime(year, month, day);
+    final today = DateTime.now();
+    final minDate = DateTime(today.year - 18, today.month, today.day);
+    
+    if (parsedDate.isAfter(minDate)) {
+      return "You must be at least 18 years old";
+    }
+    
     return null;
   }
 
@@ -185,7 +220,7 @@ class FormValidator {
     const int maxLength = 10;
 
     if (value == null || value.trim().isEmpty) {
-      return "Mobile number is required";
+      return "Please enter mobile number";
     }
 
     String mobile = value.trim();

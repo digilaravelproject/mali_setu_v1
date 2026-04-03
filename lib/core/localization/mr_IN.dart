@@ -169,6 +169,7 @@ const Map<String, String> mrIN = {
   
   // Auth - Register Page
   'create_account': 'खाते तयार करा',
+  'fill_details_to_create_account': 'खाते तयार करण्यासाठी तपशील भरा',
   'personal_information': 'वैयक्तिक माहिती',
   'full_name': 'पूर्ण नाव',
   'title': 'पदवी',
@@ -188,6 +189,7 @@ const Map<String, String> mrIN = {
   'caste_certificate': 'जात प्रमाणपत्र',
   'tap_to_upload': 'जात प्रमाणपत्र अपलोड करण्यासाठी टॅप करा',
   'certificate_uploaded': 'जात प्रमाणपत्र अपलोड केले',
+  'caste_certificate_criteria': 'फाईल स्वरूप: .jpg, .jpeg, .png, .pdf | कमाल फाईल आकार: 5MB',
   'address_details': 'पत्ता तपशील',
   'address': 'पत्ता',
   'nearby_location': 'जवळचे स्थान',
@@ -207,6 +209,8 @@ const Map<String, String> mrIN = {
   'password': 'पासवर्ड',
   'confirm_password': 'पासवर्ड पुष्टी करा',
   'register_button': 'नोंदणी करा',
+  'already_have_account': 'आधीच खाते आहे? ',
+  'login_link': 'लॉगिन',
   
   // Dashboard - Home Page
   'welcome_back_comma': 'पुन्हा स्वागत आहे,',
@@ -592,6 +596,13 @@ const Map<String, String> mrIN = {
   "reset_password_btn": "पासवर्ड रीसेट करा",
   "didnt_receive_otp": "OTP प्राप्त झाला नाही का?",
   "resend_otp": "OTP पुन्हा पाठवा",
+  "otp_required": "OTP आवश्यक आहे",
+  "otp_invalid": "OTP किमान 4 अंकी असावा",
+  "confirm_password_required": "पासवर्डची पुष्टी करणे आवश्यक आहे",
+  "passwords_do_not_match": "पासवर्ड जुळत नाहीत",
+  "enter_your_otp": "तुमचा OTP प्रविष्ट करा",
+  "enter_your_password": "तुमचा पासवर्ड प्रविष्ट करा",
+  "enter_your_confirm_password": "तुमच्या पासवर्डची पुष्टी प्रविष्ट करा",
 
 
 

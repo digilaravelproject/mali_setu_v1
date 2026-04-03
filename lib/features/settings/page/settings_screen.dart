@@ -6,12 +6,15 @@ import 'package:edu_cluezer/features/business/presentation/page/business_page.da
 import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../widgets/custom_buttons.dart';
 import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
+import '../../../core/constent/api_constants.dart';
+import '../../../widgets/webview_page.dart';
 import '../../volunteer/pages/volunteer_page.dart';
 import 'change_language_page.dart';
 import 'contact_support.dart';
@@ -22,30 +25,35 @@ class SettingsScreen extends GetWidget<SettingsController> {
   @override
   Widget build(BuildContext context) {
     final authService = Get.find<AuthService>();
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50], // Light background for contrast
-      appBar: AppBar(
-        title: Text(
-          "profile & settings".tr,
-          style: context.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
-          ),
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.grey[50],
-        elevation: 0,
-        automaticallyImplyLeading: false,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.grey[50],
+        body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10),
+              SizedBox(height: topPadding + 16),
+              
+              // Custom Header instead of AppBar for full-screen feel
+              Text(
+                "profile & settings".tr,
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                ),
+              ),
+              
+              const SizedBox(height: 20),
               // User Profile Header
               _buildUserHeader(context, authService),
               const SizedBox(height: 30),
@@ -66,16 +74,6 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     icon: Icons.language_rounded,
                     onTap: () => Get.to(() => const ChangeLanguagePage()),
                   ),
-                  // _SettingsItem(
-                  //   title: 'user_approval'.tr,
-                  //   icon: Icons.verified_user_outlined,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
-                  // _SettingsItem(
-                  //   title: 'active_user'.tr,
-                  //   icon: CupertinoIcons.person_2,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
                   _SettingsItem(
                     title: 'transaction_history'.tr,
                     icon: CupertinoIcons.list_bullet_indent,
@@ -89,28 +87,12 @@ class SettingsScreen extends GetWidget<SettingsController> {
               _buildSettingsGroup(
                 context,
                 [
-                  // _SettingsItem(
-                  //   title: 'active_business'.tr,
-                  //   icon: Icons.business_rounded,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
-                  // _SettingsItem(
-                  //   title: 'business_approval'.tr,
-                  //   icon: Icons.verified_outlined,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
-                  // _SettingsItem(
-                  //   title: 'business_type'.tr,
-                  //   icon: Icons.list_alt_rounded,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
                   _SettingsItem(
                     title: 'saved_business'.tr,
                     icon: Icons.bookmark_border_rounded,
                     onTap: () {
                       Get.to(AllBusinessesScreen());
                     }
-                    //=> _showComingSoonDialog(context),
                   ),
                 ],
               ),
@@ -127,16 +109,6 @@ class SettingsScreen extends GetWidget<SettingsController> {
                       Get.toNamed(AppRoutes.volunteer);
                     },
                   ),
-                  // _SettingsItem(
-                  //   title: 'volunteer_approval'.tr,
-                  //   icon: Icons.verified_outlined,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
-                  // _SettingsItem(
-                  //   title: 'volunteer_excel_download'.tr,
-                  //   icon: Icons.download_for_offline_outlined,
-                  //   onTap: () => _showComingSoonDialog(context),
-                  // ),
                 ],
               ),
 
@@ -148,18 +120,23 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   _SettingsItem(
                     title: 'privacy_policy'.tr,
                     icon: Icons.privacy_tip_outlined,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () => Get.to(() => const WebViewPage(
+                          title: 'Privacy Policy',
+                          url: ApiConstants.privacyPolicyUrl,
+                        )),
                   ),
                   _SettingsItem(
                     title: 'terms & conditions'.tr,
                     icon: Icons.description_outlined,
-                    onTap: () => _showComingSoonDialog(context),
+                    onTap: () => Get.to(() => const WebViewPage(
+                          title: 'Terms & Conditions',
+                          url: ApiConstants.termsConditionsUrl,
+                        )),
                   ),
                   _SettingsItem(
                     title: 'contact_support'.tr,
                     icon: Icons.support_agent_rounded,
                     onTap: () => Get.to(ContactSupportPage())
-                        //_showComingSoonDialog(context),
                   ),
                 ],
               ),
@@ -232,7 +209,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                       title: "register_your_business".tr,
                       onPressed: () {
                         Get.toNamed(AppRoutes.regBusiness);
-                      }, // Add route if available
+                      },
                     ),
                   ],
                 ),
@@ -261,7 +238,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Version 1.0.0", // Dynamic version if possible
+                      "Version 1.0.0",
                       style: context.textTheme.bodySmall?.copyWith(
                         color: Colors.grey[400],
                       ),
@@ -508,7 +485,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   ),
                   child:  Text(
                     "got_it".tr,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

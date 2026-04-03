@@ -33,11 +33,11 @@ class AppLightTheme {
       ),
       surfaceTintColor: AppColors.lightAppBar,
       systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: AppColors.lightAppBar,
+        statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
-      titleTextStyle: TextStyle(
+      titleTextStyle: const TextStyle(
         color: AppColors.lightTextPrimary,
         fontSize: 16,
         fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class AppLightTheme {
       color: AppColors.lightCard,
       elevation: 1,
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8)),
         side: BorderSide(color: AppColors.lightBorder),
       ),
@@ -72,7 +72,7 @@ class AppLightTheme {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
         elevation: 4,
-        textStyle: TextStyle(
+        textStyle: const TextStyle(
           color: AppColors.white,
           fontSize: 13,
           fontWeight: FontWeight.bold,
@@ -90,7 +90,7 @@ class AppLightTheme {
         side: const BorderSide(color: AppColors.primary, width: 1.4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-        textStyle: TextStyle(
+        textStyle: const TextStyle(
           color: AppColors.primary,
           fontSize: 13,
           fontWeight: FontWeight.bold,
@@ -136,14 +136,13 @@ class AppLightTheme {
         borderSide: const BorderSide(color: AppColors.error),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-      hintStyle: TextStyle(color: AppColors.lightTextDisabled, fontSize: 12),
-      labelStyle: TextStyle(color: AppColors.lightTextSecondary),
+      hintStyle: const TextStyle(color: AppColors.lightTextDisabled, fontSize: 12),
+      labelStyle: const TextStyle(color: AppColors.lightTextSecondary),
     ),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
-        side: BorderSide(color: AppColors.lightDivider, width: 1),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        highlightColor: AppColors.primary.withValues(alpha: 0.4),
+        highlightColor: AppColors.primary.withOpacity(0.4),
       ),
     ),
     checkboxTheme: CheckboxThemeData(

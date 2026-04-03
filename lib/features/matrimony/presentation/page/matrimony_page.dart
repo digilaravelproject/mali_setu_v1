@@ -5,6 +5,7 @@ import 'package:edu_cluezer/packages/card_swiper/flutter_card_swiper.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'dart:ui';
 
@@ -21,150 +22,177 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final topPadding = MediaQuery.of(context).padding.top;
     
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          title: Text(
-            'discover'.tr,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: theme.primaryColor,
-              letterSpacing: 1.2,
-            ),
-          ),
-          leading: Obx(() {
-            final user = Get.find<AuthService>().currentUser.value;
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GestureDetector(
-                onTap: () {}, // Maybe profile settings?
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset:const Offset(0, 2)),
-                    ],
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: ClipOval(
-                    child: CustomImageView(
-                      url: user?.profileImage,
-                      imagePath: AppAssets.getAppLogo(),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }),
-          actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
-                icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800]),
-                tooltip: 'members'.tr,
-              ),
-            ),
-            GetBuilder<FilterController>(
-              builder: (filterCtrl) => Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(right: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () async {
-                        var result = await FilterBottomSheet.show();
-                        if (result != null) {
-                          controller.fetchProfiles(filters: result);
-                        }
-                      },
-                      icon: Icon(Icons.tune_rounded, color: Colors.grey[800]),
-                    ),
-                  ),
-                  if (filterCtrl.activeFilterCount > 0)
-                    Positioned(
-                      top: 4,
-                      right: 16,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: Text(
-                          "${filterCtrl.activeFilterCount}",
-                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          backgroundColor: Colors.grey[50],
+          body: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  expandedHeight: 140 + topPadding,
+                  toolbarHeight: 70 + topPadding,
+                  pinned: false,
+                  floating: true,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Padding(
+                      padding: EdgeInsets.only(top: topPadding),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            child: Row(
+                              children: [
+                                Obx(() {
+                                  final user = Get.find<AuthService>().currentUser.value;
+                                  return GestureDetector(
+                                    onTap: () {},
+                                    child: Container(
+                                      height: 44,
+                                      width: 44,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset:const Offset(0, 2)),
+                                        ],
+                                        border: Border.all(color: Colors.white, width: 2),
+                                      ),
+                                      child: ClipOval(
+                                        child: CustomImageView(
+                                          url: user?.profileImage,
+                                          imagePath: AppAssets.getAppLogo(),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                                const Spacer(),
+                                Text(
+                                  'discover'.tr,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: theme.primaryColor,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
+                                    icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
+                                    tooltip: 'members'.tr,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GetBuilder<FilterController>(
+                                  builder: (filterCtrl) => Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: IconButton(
+                                          onPressed: () async {
+                                            var result = await FilterBottomSheet.show();
+                                            if (result != null) {
+                                              controller.fetchProfiles(filters: result);
+                                            }
+                                          },
+                                          icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
+                                        ),
+                                      ),
+                                      if (filterCtrl.activeFilterCount > 0)
+                                        Positioned(
+                                          top: -2,
+                                          right: -2,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.redAccent,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.white, width: 1.5),
+                                            ),
+                                            child: Text(
+                                              "${filterCtrl.activeFilterCount}",
+                                              style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: TabBar(
+                              onTap: (index) {
+                                final filterCtrl = Get.find<FilterController>();
+                                if (index == 0) {
+                                  filterCtrl.recentlyCreated.value = 'all';
+                                } else {
+                                  filterCtrl.recentlyCreated.value = 'one_week';
+                                }
+                                filterCtrl.update();
+                                controller.currentIndex.value = 0;
+                                controller.fetchProfiles(filters: filterCtrl.getFilters());
+                              },
+                              dividerHeight: 0,
+                              indicator: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              labelColor: theme.primaryColor,
+                              unselectedLabelColor: Colors.grey[600],
+                              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              tabs: [
+                                Tab(text: 'all_matches'.tr),
+                                Tab(text: 'newly_joined'.tr),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                ],
-              ),
-            ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: TabBar(
-                onTap: (index) {
-                  final filterCtrl = Get.find<FilterController>();
-                  if (index == 0) {
-                    filterCtrl.recentlyCreated.value = 'all';
-                  } else {
-                    filterCtrl.recentlyCreated.value = 'one_week';
-                  }
-                  filterCtrl.update();
-                  // Reset current index when tab changes
-                  controller.currentIndex.value = 0;
-                  controller.fetchProfiles(filters: filterCtrl.getFilters());
-                },
-                dividerHeight: 0,
-                indicator: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  ),
                 ),
-                indicatorSize: TabBarIndicatorSize.tab,
-                labelColor: theme.primaryColor,
-                unselectedLabelColor: Colors.grey[600],
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                tabs: [
-                  Tab(text: 'all_matches'.tr),
-                  Tab(text: 'newly_joined'.tr),
-                ],
-              ),
-            ),
-          ),
-        ),
-        body: Obx(() {
+              ];
+            },
+            body: Obx(() {
           final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
           if (!hasPayment) {
             return _buildRestrictedView(context);
@@ -225,11 +253,13 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 ],
               ),
             );
-          }
-        }),
+            }
+          }),
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCardList(BuildContext context, List<UserProfile> list) {
     if (list.isEmpty) {

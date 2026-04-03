@@ -7,7 +7,7 @@ import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/helper/pincode_helper.dart';
@@ -197,19 +197,17 @@ class RegisterController extends GetxController {
     return null;
   }
 
-  /// PICK CASTE CERTIFICATE
   Future<void> pickCasteCertificate() async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-        maxWidth: 1200,
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
       );
 
-      if (image != null) {
-        // Check file size (max 5MB)
-        final file = File(image.path);
+      if (result != null && result.files.single.path != null) {
+        final filePath = result.files.single.path!;
+        final file = File(filePath);
+
         final fileSize = await file.length();
         const maxSize = 5 * 1024 * 1024; // 5MB
 
@@ -219,7 +217,7 @@ class RegisterController extends GetxController {
         }
 
         // Check file type
-        final extension = image.path.split('.').last.toLowerCase();
+        final extension = result.files.single.extension?.toLowerCase() ?? '';
         if (!['jpg', 'jpeg', 'png', 'pdf'].contains(extension)) {
           casteCertificateError.value =
               "Only JPG, PNG, and PDF files are allowed";
@@ -227,8 +225,8 @@ class RegisterController extends GetxController {
         }
 
         casteCertificateFile = file;
-        casteCertificatePath.value = image.path;
-        casteCertificateFileName.value = image.name;
+        casteCertificatePath.value = filePath;
+        casteCertificateFileName.value = result.files.single.name;
         casteCertificateError.value = ''; // Clear any previous error
 
         CustomSnackBar.showSuccess(
@@ -284,33 +282,18 @@ class RegisterController extends GetxController {
 
     print("call registration function ");
 
-    // Validate form
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-    
-    // Validate name field component
-    final nameValidation = nameFieldKey.currentState?.validate();
-    if (nameValidation != null) {
-      CustomSnackBar.showError(message: nameValidation);
-      return;
-    }
-    
-    // Validate phone field component
-    final phoneValidation = phoneFieldKey.currentState?.validate();
-    if (phoneValidation != null) {
-      CustomSnackBar.showError(message: phoneValidation);
-      return;
-    }
-
     // Validate caste certificate
-    if (!_validateCasteCertificate()) {
+    bool isCasteCertificateValid = _validateCasteCertificate();
+
+    // Validate form (trigerrs all inline validators)
+    bool isFormValid = formKey.currentState!.validate();
+
+    if (!isFormValid || !isCasteCertificateValid) {
       return;
     }
 
-    // Validate password confirmation
+    // Validate password confirmation (redundant if using inline validator but keeping as safety)
     if (passwordCtrl.text != confirmPasswordCtrl.text) {
-      CustomSnackBar.showError(message: "Passwords do not match");
       return;
     }
 

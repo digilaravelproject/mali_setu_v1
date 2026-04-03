@@ -174,14 +174,15 @@ const Map<String, String> enUS = {
 
   // Auth - Register Page
   'create_account': 'Create Account',
+  'fill_details_to_create_account': 'Fill in the details to create your account',
   'personal_information': 'Personal Information',
   'full_name': 'Full Name',
   'title': 'Title',
   'first_name': 'First Name',
   'last_name': 'Last Name',
-  'first_name_required': 'First name is required',
-  'last_name_required': 'Last name is required',
-  'title_required': 'Title required',
+  'first_name_required': 'Please enter first name',
+  'last_name_required': 'Please enter last name',
+  'title_required': 'Please select a title',
   'mr': 'Mr.',
   'mrs': 'Mrs.',
   'ms': 'Ms.',
@@ -193,6 +194,7 @@ const Map<String, String> enUS = {
   'caste_certificate': 'Caste Certificate',
   'tap_to_upload': 'Tap to upload caste certificate',
   'certificate_uploaded': 'Caste certificate uploaded',
+  'caste_certificate_criteria': 'File format: .jpg, .jpeg, .png, .pdf | Max file size: 5MB',
   'address_details': 'Address Details',
   'address': 'Address',
   'nearby_location': 'Nearby Location',
@@ -212,6 +214,8 @@ const Map<String, String> enUS = {
   'password': 'Password',
   'confirm_password': 'Confirm Password',
   'register_button': 'Register',
+  'already_have_account': 'Already have an account? ',
+  'login_link': 'Login',
 
   // Dashboard - Home Page
   'welcome_back_comma': 'Welcome Back,',
@@ -545,6 +549,13 @@ const Map<String, String> enUS = {
   "reset_password_btn": "Reset Password",
   "didnt_receive_otp": "Didn't receive OTP?",
   "resend_otp": "Resend OTP",
+  "otp_required": "OTP is required",
+  "otp_invalid": "OTP must be at least 4 digits",
+  "confirm_password_required": "Confirm password is required",
+  "passwords_do_not_match": "Passwords do not match",
+  "enter_your_otp": "Enter Your Otp",
+  "enter_your_password": "Enter Your Password",
+  "enter_your_confirm_password": "Enter Your Confirm password",
 
 
 

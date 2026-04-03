@@ -9,6 +9,8 @@ import 'package:get/get.dart';
 
 import '../../../../common/widgets/selection_tile.dart';
 import '../../../../core/utils/app_assets.dart';
+import '../../../../core/helper/date_input_formatter.dart';
+import '../../../../core/helper/form_validator.dart';
 
 class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
   const RegMatrimonyPage({super.key});
@@ -170,6 +172,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "profile_created_by".tr,
                   value: controller.profileCreatedBy.value,
                   icon: Icons.person_add_alt,
+                  isRequired: true,
+                  errorText: controller.errors['profileCreatedBy'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Created By", controller.profileCreatedByList, controller.profileCreatedBy.call),
                 )),
@@ -179,16 +183,26 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "gender".tr,
                   value: controller.gender.value,
                   icon: Icons.person_outline,
+                  isRequired: true,
+                  errorText: controller.errors['gender'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Gender", controller.genderList, controller.gender.call),
                 )),
                 const SizedBox(height: 12),
 
-                Obx(() => SelectionTile(
+                Obx(() => AppInputTextField(
                   label: "date_of_birth".tr,
-                  value: controller.rxDob.value,
-                  icon: Icons.calendar_today,
-                  onTap: () => controller.selectDate(context),
+                  controller: controller.dobCtrl,
+                  isRequired: true,
+                  topPadding: 0,
+                  hintText: "DD/MM/YYYY",
+                  errorText: controller.errors['dob'],
+                  validator: FormValidator.dob,
+                  inputFormatters: [DateInputFormatter()],
+                  prefixIcon: GestureDetector(
+                    onTap: () => controller.selectDate(context),
+                    child: const Icon(Icons.calendar_today, size: 20),
+                  ),
                 )),
                 const SizedBox(height: 12),
 
@@ -198,7 +212,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       child: AppInputTextField(
                         controller: controller.heightCtrl,
                         label: "height".tr,
-                        hintText: "5.6",
+                        hintText: "Enter height",
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -206,7 +220,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       child: AppInputTextField(
                         controller: controller.weightCtrl,
                         label: "weight".tr,
-                        hintText: "65",
+                        hintText: "Enter weight",
                       ),
                     ),
                   ],
@@ -297,6 +311,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "Caste", // Formerly Religion
                   value: controller.religion.value,
                   icon: Icons.group_work,
+                  isRequired: true,
+                  errorText: controller.errors['religion'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context,
                       "Select Caste",
@@ -306,28 +322,25 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 )),
                 const SizedBox(height: 12),
 
-                ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: controller.casteCtrl,
-                    builder: (context, value, child) {
-                      return SelectionTile(
-                        label: "Sub-Caste", // Formerly Caste
-                        value: value.text, // Using text controller value for display in tile
-                        icon: Icons.subdirectory_arrow_right,
-                        onTap: () {
-                          if (controller.casteList.isEmpty) {
-                            CustomSnackBar.showError(message: "Please select Caste first");
-                            return;
-                          }
-                          _showSingleSelectBottomSheet(
-                              context,
-                              "Select Sub-Caste",
-                              controller.subCasteList.map((e) => e.name ?? "").toList(),
-                              controller.onSubCasteSelected
-                          );
-                        },
-                      );
+                Obx(() => SelectionTile(
+                  label: "Sub-Caste", // Formerly Caste
+                  value: controller.casteCtrl.text, // Using controller text
+                  icon: Icons.subdirectory_arrow_right,
+                  isRequired: true,
+                  errorText: controller.errors['caste'],
+                  onTap: () {
+                    if (controller.casteList.isEmpty) {
+                      CustomSnackBar.showError(message: "Please select Caste first");
+                      return;
                     }
-                ),
+                    _showSingleSelectBottomSheet(
+                        context,
+                        "Select Sub-Caste",
+                        controller.subCasteList.map((e) => e.name ?? "").toList(),
+                        controller.onSubCasteSelected
+                    );
+                  },
+                )),
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(
@@ -539,6 +552,14 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Max size 2MB, Formats: JPG, PNG",
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: context.theme.primaryColor.withValues(alpha: 0.7),
+                                  fontSize: 10,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -571,6 +592,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "highest_qualification".tr,
                   value: controller.education.value,
                   icon: Icons.school_outlined,
+                  isRequired: true,
+                  errorText: controller.errors['education'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Highest Qualification", controller.educationList, controller.education.call),
                 )),
@@ -586,6 +609,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "employment_type".tr,
                   value: controller.employmentType.value,
                   icon: Icons.work_outline,
+                  isRequired: true,
+                  errorText: controller.errors['employmentType'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Employment Type", controller.employmentTypeList, controller.employmentType.call),
                 )),
@@ -668,6 +693,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "family_type".tr,
                   value: controller.familyType.value,
                   icon: Icons.family_restroom,
+                  isRequired: true,
+                  errorText: controller.errors['familyType'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Family Type", controller.familyTypeList, controller.familyType.call),
                 )),
@@ -736,6 +763,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 Obx(() => AppInputTextField(
                   controller: controller.pinCodeCtrl,
                   label: "pincode".tr,
+                  isRequired: true,
+                  validator: (val) => controller.errors['pincode'],
                   textInputType: TextInputType.number,
                   textInputAction: TextInputAction.done,
                   endIcon: controller.isFetchingPincode.value
@@ -777,6 +806,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "country".tr,
                   value: controller.country.value,
                   icon: Icons.public,
+                  isRequired: true,
+                  errorText: controller.errors['country'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Country", controller.countryList, controller.onCountryChanged),
                 )),
@@ -785,15 +816,19 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   label: "state".tr,
                   value: controller.state.value,
                   icon: Icons.map,
+                  isRequired: true,
+                  errorText: controller.errors['state'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "State", controller.stateList, controller.state.call),
                 )),
                 const SizedBox(height: 12),
-                AppInputTextField(
+                Obx(() => AppInputTextField(
                   controller: controller.cityCtrl,
                   label: "city".tr,
+                  isRequired: true,
+                  validator: (val) => controller.errors['city'],
                   textInputAction: TextInputAction.done,
-                ),
+                )),
               ],
             ),
           ),
@@ -844,56 +879,145 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: Get.height * 0.6,
-        decoration: BoxDecoration(
-          color: context.theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 4,
+      builder: (context) {
+        List<String> filteredItems = List.from(options);
+        final bool showSearch = options.length > 5;
+        
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+            
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.85,
+              ),
+              padding: EdgeInsets.only(bottom: bottomPadding),
               decoration: BoxDecoration(
-                color: context.theme.dividerColor,
-                borderRadius: BorderRadius.circular(2),
+                color: context.theme.scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: options.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final option = options[index];
-                  return ListTile(
-                    title: Text(
-                      option,
-                      style: context.textTheme.bodyLarge,
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Handle bar
+                    Container(
+                      margin: const EdgeInsets.only(top: 12, bottom: 8),
+                      width: 48,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
                     ),
-                    onTap: () {
-                      onSelected(option);
-                      Get.back();
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: context.theme.dividerColor.withValues(alpha: 0.1)),
+                    
+                    // Premium Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "Select $title",
+                              style: context.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300, width: 1),
+                              ),
+                              child: const Icon(Icons.close, color: Colors.grey, size: 20),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                },
+                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+                    
+                    // Search Bar
+                    if (showSearch)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: TextField(
+                          autofocus: false,
+                          decoration: InputDecoration(
+                            hintText: "Search $title...",
+                            hintStyle: TextStyle(color: Colors.grey[400]),
+                            prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[400]),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey[200]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey[200]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: context.theme.primaryColor, width: 1.5),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                            fillColor: const Color(0xFFF9F9F9),
+                            filled: true,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              filteredItems = options
+                                  .where((item) => item.toLowerCase().contains(value.toLowerCase()))
+                                  .toList();
+                            });
+                          },
+                        ),
+                      ),
+
+                    Flexible(
+                      child: filteredItems.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.all(40.0),
+                              child: Text("No results found"),
+                            )
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                              itemCount: filteredItems.length,
+                              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                              itemBuilder: (context, index) {
+                                final option = filteredItems[index];
+                                // We check if this option is selected using a simple string match
+                                // Note: For better accuracy, we could pass current value to this method
+                                
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  title: Text(
+                                    option,
+                                    style: context.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  trailing: const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+                                  onTap: () {
+                                    onSelected(option);
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

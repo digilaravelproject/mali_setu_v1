@@ -96,6 +96,7 @@ class RegMatrimonyController extends GetxController {
 
   // Steps
   final currentStep = 0.obs;
+  final errors = <String, String>{}.obs;
 
   /// --- Static Data Lists ---
   final List<String> profileCreatedByList = ['Self', 'Parent', 'Sibling', 'Relative', 'Friend'];
@@ -149,13 +150,32 @@ class RegMatrimonyController extends GetxController {
       );
 
       if (images.isNotEmpty) {
-        // Limit to max 5 photos for example
         int remainingSlots = 5 - selectedPhotos.length;
-        for (var i = 0; i < images.length && i < remainingSlots; i++) {
-          selectedPhotos.add(File(images[i].path));
+        int addedCount = 0;
+        List<String> failedFiles = [];
+
+        for (var i = 0; i < images.length && addedCount < remainingSlots; i++) {
+          final file = File(images[i].path);
+          final int sizeInBytes = await file.length();
+          final double sizeInMb = sizeInBytes / (1024 * 1024);
+          
+          // Check format
+          final String extension = images[i].path.split('.').last.toLowerCase();
+          final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+
+          if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
+            selectedPhotos.add(file);
+            addedCount++;
+          } else {
+            failedFiles.add(images[i].name);
+          }
         }
         
-        if (images.length > remainingSlots) {
+        if (failedFiles.isNotEmpty) {
+          CustomSnackBar.showError(
+            message: "Some files were skipped. Max size 2MB, Formats: JPG, PNG",
+          );
+        } else if (images.length > remainingSlots) {
           CustomSnackBar.showError(message: "You can only select up to 5 photos.");
         }
       }
@@ -181,6 +201,7 @@ class RegMatrimonyController extends GetxController {
         cityCtrl.clear();
       }
     }
+    errors.remove('pincode');
   }
 
   Future<void> _fetchAddressFromPincode(String pincode) async {
@@ -324,9 +345,12 @@ class RegMatrimonyController extends GetxController {
     );
     if (picked != null) {
       selectedDate = picked;
-      String formatted = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      String formatted = "${picked.day.toString().padLeft(2, '0')}/"
+          "${picked.month.toString().padLeft(2, '0')}/"
+          "${picked.year}";
       dobCtrl.text = formatted;
       rxDob.value = formatted;
+      errors.remove('dob');
     }
   }
 
@@ -341,14 +365,88 @@ class RegMatrimonyController extends GetxController {
   }
 
   void nextStep() {
-    if (currentStep.value < 3) {
-      currentStep.value++;
-      scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+    if (validateCurrentStep()) {
+      if (currentStep.value < 3) {
+        currentStep.value++;
+        scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    } else {
+      CustomSnackBar.showError(message: "Please fill all required fields");
     }
+  }
+
+  bool validateCurrentStep() {
+    errors.clear();
+    bool isValid = true;
+
+    if (currentStep.value == 0) {
+      // Step 1: Personal
+      final nameValidation = nameFieldKey.currentState?.validate();
+      if (nameValidation != null) {
+        errors['name'] = nameValidation;
+        isValid = false;
+      }
+      if (profileCreatedBy.value.isEmpty) {
+        errors['profileCreatedBy'] = "Please select profile creator";
+        isValid = false;
+      }
+      if (gender.value.isEmpty) {
+        errors['gender'] = "Please select gender";
+        isValid = false;
+      }
+      if (rxDob.value.isEmpty) {
+        errors['dob'] = "Please select date of birth";
+        isValid = false;
+      }
+    } else if (currentStep.value == 1) {
+      // Step 2: Religious
+      if (religion.value.isEmpty) {
+        errors['religion'] = "Please select caste";
+        isValid = false;
+      }
+      if (casteCtrl.text.isEmpty) {
+        errors['caste'] = "Please select sub-caste";
+        isValid = false;
+      }
+    } else if (currentStep.value == 2) {
+      // Step 3: Education & Career
+      if (education.value.isEmpty) {
+        errors['education'] = "Please select education";
+        isValid = false;
+      }
+      if (employmentType.value.isEmpty) {
+        errors['employmentType'] = "Please select employment type";
+        isValid = false;
+      }
+    } else if (currentStep.value == 3) {
+      // Step 4: Family & Location
+      if (familyType.value.isEmpty) {
+        errors['familyType'] = "Please select family type";
+        isValid = false;
+      }
+      if (pinCodeCtrl.text.isEmpty) {
+        errors['pincode'] = "Please enter pincode";
+        isValid = false;
+      }
+      if (country.value.isEmpty) {
+        errors['country'] = "Please select country";
+        isValid = false;
+      }
+      if (state.value.isEmpty) {
+        errors['state'] = "Please select state";
+        isValid = false;
+      }
+      if (cityCtrl.text.isEmpty) {
+        errors['city'] = "Please enter city";
+        isValid = false;
+      }
+    }
+
+    return isValid;
   }
 
   void previousStep() {
@@ -363,22 +461,10 @@ class RegMatrimonyController extends GetxController {
   }
 
   Future<void> onRegister() async {
-
-
-    //await fetchAndShowPlans();
-
-    // Validate name field component
-    final nameValidation = nameFieldKey.currentState?.validate();
-    if (nameValidation != null) {
-      CustomSnackBar.showError(message: nameValidation);
+    if (!validateCurrentStep()) {
+      CustomSnackBar.showError(message: "Please fill all required fields");
       return;
     }
-
-    // Basic Validation
-    // if (gender.value.isEmpty || dobCtrl.text.isEmpty) {
-    //   CustomSnackBar.showError(message: "Please fill required fields");
-    //   return;
-    // }
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
@@ -541,6 +627,26 @@ class RegMatrimonyController extends GetxController {
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
     pinCodeCtrl.addListener(_onPincodeChanged);
+
+    // Error clearing watchers
+    ever(profileCreatedBy, (_) => errors.remove('profileCreatedBy'));
+    ever(gender, (_) => errors.remove('gender'));
+    ever(religion, (_) => errors.remove('religion'));
+    ever(education, (_) => errors.remove('education'));
+    ever(employmentType, (_) => errors.remove('employmentType'));
+    ever(familyType, (_) => errors.remove('familyType'));
+    ever(country, (_) => errors.remove('country'));
+    ever(state, (_) => errors.remove('state'));
+
+    cityCtrl.addListener(() => errors.remove('city'));
+    
+    // DOB controller listener to sync with rxDob and clear error
+    dobCtrl.addListener(() {
+      rxDob.value = dobCtrl.text;
+      if (dobCtrl.text.isNotEmpty) {
+        errors.remove('dob');
+      }
+    });
   }
 
   void onCountryChanged(String countryName) {
@@ -590,6 +696,7 @@ class RegMatrimonyController extends GetxController {
 
   void onSubCasteSelected(String subCasteName) {
     casteCtrl.text = subCasteName; // Using casteCtrl to store Sub-caste Name
+    errors.remove('caste');
   }
 
   @override

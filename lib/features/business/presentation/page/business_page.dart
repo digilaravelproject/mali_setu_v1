@@ -4,6 +4,7 @@ import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
@@ -23,33 +24,51 @@ class BusinessScreen extends GetView<BusinessController> {
   @override
   Widget build(BuildContext context) {
     final theme = context.theme;
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: Obx(() {
+    final topPadding = MediaQuery.of(context).padding.top;
 
-        if (controller.isLoading.value && controller.businesses.isEmpty && controller.myBusiness.value == null) {
-          return _buildShimmerLoading(context);
-        }
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        backgroundColor: Colors.grey[50],
+        body: Obx(() {
 
-        return CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 70,
-              toolbarHeight: 70,
-              pinned: true,
-              backgroundColor: theme.scaffoldBackgroundColor,
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              title: Text(
-                'business_dashboard'.tr,
-                style: context.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black87,
+          if (controller.isLoading.value && controller.businesses.isEmpty && controller.myBusiness.value == null) {
+            return _buildShimmerLoading(context);
+          }
+
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 70 + topPadding,
+                toolbarHeight: 70 + topPadding,
+                pinned: false,
+                floating: true,
+                backgroundColor: theme.scaffoldBackgroundColor,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Padding(
+                    padding: EdgeInsets.only(top: topPadding, left: 16, right: 16),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'business_dashboard'.tr,
+                        style: context.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+                centerTitle: false,
               ),
-              centerTitle: false,
-            ),
             
             SliverToBoxAdapter(
               child: Padding(
@@ -372,10 +391,11 @@ class BusinessScreen extends GetView<BusinessController> {
                  : const SizedBox.shrink()
                
              ),
-             const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
-          ],
-        );
-      }),
+              const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
+            ],
+          );
+        }),
+      ),
     );
   }
 }
@@ -485,59 +505,8 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
 
                         ),
                       )
-                   /* child: TextField(
-                      onChanged: (value) {
-                        controller.onSearchChanged(value);
-                      },
-                      decoration: InputDecoration(
-                        hintText: "search_business_by_name".tr,
-                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                        suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                            ? InkWell(
-                          child: const Icon(Icons.clear, color: Colors.grey),
-                                onTap: () {
-                                  controller.searchText.value = "";
-                                  controller.fetchAllBusinesses(isRefresh: true);
-                                },
-                              )
-                            : const SizedBox.shrink()),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                      ),
-                    ),*/
                   ),
           ),
-               // ],
-             // ),
-
-               // const SizedBox(width: 12),
-                // GestureDetector(
-                //   onTap: () {
-                //     controller.isFilterVisible.value = !controller.isFilterVisible.value;
-                //   },
-                //   child: Obx(() => Container(
-                //     padding: const EdgeInsets.all(12),
-                //     decoration: BoxDecoration(
-                //       color: controller.isFilterVisible.value ? Get.theme.primaryColor : Colors.white,
-                //       borderRadius: BorderRadius.circular(12),
-                //       boxShadow: [
-                //         BoxShadow(
-                //           color: Colors.black.withOpacity(0.05),
-                //           blurRadius: 10,
-                //           offset: const Offset(0, 4),
-                //         ),
-                //       ],
-                //     ),
-                //     child: Icon(
-                //       Icons.tune_rounded,
-                //       color: controller.isFilterVisible.value ? Colors.white : Colors.grey[600],
-                //     ),
-                //   )),
-                // ),
-             // ],
-           // );
-         // ),
 
           // Advanced Filter Section
           Obx(() => AnimatedContainer(
@@ -638,52 +607,6 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                     }
                     return false;
                   },
-                  /*child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredList.length + (hasNext && controller.searchText.isEmpty ? 1 : 0),
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      // Show business card
-                      if (index < filteredList.length) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: BusinessListCard(business: filteredList[index]),
-                        );
-                      }
-                      
-                      // Show loading indicator at bottom (only if not searching)
-                      return isLoadMore
-                        ? Container(
-                            padding: const EdgeInsets.all(16),
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        : hasNext
-                          ? Container(
-                              padding: const EdgeInsets.all(16),
-                              child: Center(
-                                child: ElevatedButton(
-                                  onPressed: controller.loadMoreBusinesses,
-                                  child: Text("Load More (Page ${currentPg + 1})"),
-                                ),
-                              ),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.all(16),
-                              child: Center(
-                                child: Text(
-                                  "All businesses loaded",
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            );
-                    },
-                  ),*/
-
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     physics: const BouncingScrollPhysics(),

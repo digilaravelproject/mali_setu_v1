@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../../data/model/blog_model.dart';
 import '../controller/blog_controller.dart';
@@ -9,7 +9,6 @@ import 'full_video_screen.dart';
 
 class BlogDetailScreen extends StatelessWidget {
   final int blogId;
-
   const BlogDetailScreen({super.key, required this.blogId});
 
   @override
@@ -17,162 +16,145 @@ class BlogDetailScreen extends StatelessWidget {
     final controller = Get.find<BlogController>();
     final primaryColor = context.theme.primaryColor;
 
-    // Fetch detail on build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchBlogDetail(blogId);
     });
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Obx(() {
-        if (controller.isDetailLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF6F6F6),
+        body: Obx(() {
+          if (controller.isDetailLoading.value) {
+            return Center(child: CircularProgressIndicator(color: primaryColor));
+          }
 
-        final blog = controller.selectedBlog.value;
-        if (blog == null) {
-          return const Center(child: Text('Blog not found or error loading.'));
-        }
+          final blog = controller.selectedBlog.value;
+          if (blog == null) {
+            return const Center(child: Text('Blog not found.'));
+          }
 
-        final String title = blog.title ?? 'No Title';
-        final String author = blog.user?.name ?? 'Unknown Author';
-        final String date = blog.createdAt?.split('T')[0] ?? '';
-        final int likes = blog.likesCount ?? 0;
-        final List<String> tags = blog.tags ?? [];
-        final String description =
-            blog.description ?? 'No description available.';
-        final String avatarLetter = author.isNotEmpty
-            ? author[0].toUpperCase()
-            : 'A';
+          final String title = blog.title ?? 'No Title';
+          final String author = blog.user?.name ?? 'Unknown Author';
+          final String date = blog.createdAt?.split('T')[0] ?? '';
+          final List<String> tags = blog.tags ?? [];
+          final String description = blog.description ?? 'No description available.';
+          final String avatarLetter = author.isNotEmpty ? author[0].toUpperCase() : 'A';
 
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Top Media Section (Image or Video)
-              _buildMediaSection(context, blog, primaryColor, controller),
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Media
+                _buildMediaSection(context, blog, primaryColor, controller),
 
-              // ── Content Section
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 16,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Text(
-                      title,
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Colors.grey[900],
-                        height: 1.3,
+                // Content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Category chip
+                      if ((blog.blogType ?? '').isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            blog.blogType!,
+                            style: TextStyle(fontSize: 11, color: primaryColor, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      const SizedBox(height: 10),
+
+                      // Title
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                          color: Color(0xFF1A1A1A),
+                          height: 1.3,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      blog.blogType?? "",
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.grey[900],
-                        height: 1.3,
+                      const SizedBox(height: 14),
+
+                      // Author card
+                      _buildAuthorCard(context, primaryColor, avatarLetter, author, date, controller),
+                      const SizedBox(height: 16),
+
+                      // Tags
+                      if (tags.isNotEmpty) ...[
+                        _buildTags(primaryColor, tags),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Divider
+                      Divider(color: Colors.grey.shade200, thickness: 1),
+                      const SizedBox(height: 14),
+
+                      // Description
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          height: 1.75,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 28),
 
-                    const SizedBox(height: 14),
-
-                    // Author row
-                    _buildAuthorRow(
-                      context,
-                      primaryColor,
-                      avatarLetter,
-                      author,
-                      date,
-                      likes,
-                      controller,
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Tags
-                    _buildTags(primaryColor, tags),
-                    const SizedBox(height: 16),
-
-                    // Description
-                    _buildDescription(context, primaryColor, description),
-                    const SizedBox(height: 24),
-
-                    // Related Blogs
-                    _buildRelatedBlogs(context, primaryColor, controller),
-                    const SizedBox(height: 30),
-                  ],
+                      // Related Blogs
+                      _buildRelatedBlogs(context, primaryColor, controller),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      }),
+              ],
+            ),
+          );
+        }),
+      ),
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // MEDIA SECTION (IMAGE OR VIDEO)
-  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildMediaSection(
-      BuildContext context,
-      Blog blog,
-      Color primaryColor,
-      BlogController controller,
-      ) {
+      BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
     final hasImage = blog.mediaType == 'image';
     final mediaPath = blog.mediaPath;
-    final imageUrl = mediaPath != null
-        ? "${ApiConstants.imageBaseUrl}$mediaPath"
-        : null;
+    final imageUrl = mediaPath != null ? "${ApiConstants.imageBaseUrl}$mediaPath" : null;
 
     if (hasImage) {
       return Stack(
         children: [
           GestureDetector(
-            onTap: imageUrl != null ? () {
-              Get.to(() => FullImageScreen(imageUrl: imageUrl));
-            } : null,
+            onTap: imageUrl != null ? () => Get.to(() => FullImageScreen(imageUrl: imageUrl)) : null,
             child: Container(
               height: 280,
               width: double.infinity,
               color: Colors.grey[200],
               child: imageUrl != null
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          _buildDummyImage(primaryColor),
-                    )
-                  : _buildDummyImage(primaryColor),
+                  ? Image.network(imageUrl, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _dummyImage(primaryColor))
+                  : _dummyImage(primaryColor),
             ),
           ),
-          _buildTopBarActions(),
+          _buildTopBar(),
           if (imageUrl != null)
             Positioned(
               bottom: 12,
               right: 12,
               child: GestureDetector(
-                onTap: () {
-                  Get.to(() => FullImageScreen(imageUrl: imageUrl));
-                },
+                onTap: () => Get.to(() => FullImageScreen(imageUrl: imageUrl)),
                 child: Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.fullscreen_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.5), shape: BoxShape.circle),
+                  child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 20),
                 ),
               ),
             ),
@@ -180,65 +162,24 @@ class BlogDetailScreen extends StatelessWidget {
       );
     }
 
-    // Handle Video
     return _buildVideoPlayer(context, blog, primaryColor, controller);
   }
 
-  Widget _buildDummyImage(Color primaryColor) {
-    return Container(
-      color: Colors.grey[100],
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.image_outlined,
-                size: 80,
-                color: primaryColor,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Image not available',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopBarActions() {
+  Widget _buildTopBar() {
     return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
+      top: 0, left: 0, right: 0,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _videoIconButton(
-                Icons.arrow_back_ios_new_rounded,
-                    () => Get.back(),
-              ),
-              Row(
-                children: [
-                  // _videoIconButton(Icons.bookmark_border_rounded, () {}),
-                  // const SizedBox(width: 6),
-                  // _videoIconButton(Icons.share_outlined, () {}),
-                ],
+              GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  width: 36, height: 36,
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.45), shape: BoxShape.circle),
+                  child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+                ),
               ),
             ],
           ),
@@ -248,21 +189,17 @@ class BlogDetailScreen extends StatelessWidget {
   }
 
   Widget _buildVideoPlayer(
-      BuildContext context,
-      Blog blog,
-      Color primaryColor,
-      BlogController controller,
-      ) {
-    final String? imageUrl = blog.mediaPath != null ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}" : null;
-    
+      BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
+    final String? imageUrl = blog.mediaPath != null
+        ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}"
+        : null;
+
     return Stack(
       children: [
-        // Video frame / Thumbnail
         GestureDetector(
           onTap: () {
             if (blog.mediaPath != null) {
-              final videoUrl = "${ApiConstants.imageBaseUrl}${blog.mediaPath}";
-              Get.to(() => FullVideoScreen(videoUrl: videoUrl));
+              Get.to(() => FullVideoScreen(videoUrl: "${ApiConstants.imageBaseUrl}${blog.mediaPath}"));
             }
           },
           child: Container(
@@ -270,17 +207,11 @@ class BlogDetailScreen extends StatelessWidget {
             width: double.infinity,
             color: Colors.black,
             child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildDummyVideoThumbnail(primaryColor),
-                  )
-                : _buildDummyVideoThumbnail(primaryColor),
+                ? Image.network(imageUrl, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _dummyVideo())
+                : _dummyVideo(),
           ),
         ),
-
-        // Dark gradient overlay
         Container(
           height: 280,
           decoration: const BoxDecoration(
@@ -292,25 +223,15 @@ class BlogDetailScreen extends StatelessWidget {
             ),
           ),
         ),
-
-        _buildTopBarActions(),
-
-        // Play button center
+        _buildTopBar(),
         Positioned.fill(
           child: Center(
             child: Container(
-              width: 56,
-              height: 56,
+              width: 56, height: 56,
               decoration: BoxDecoration(
                 color: primaryColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.4), blurRadius: 12)],
               ),
               child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
             ),
@@ -320,188 +241,83 @@ class BlogDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDummyVideoThumbnail(Color primaryColor) {
-    return Container(
-      color: Colors.grey[900],
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.videocam_outlined,
-                size: 80,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Video not available',
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _videoIconButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration:  BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: Colors.white, size: 18),
-      ),
-    );
-  }
-
-  Widget _buildRelatedDummyImage(Color primaryColor) {
+  Widget _dummyImage(Color primaryColor) {
     return Container(
       color: Colors.grey[100],
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: primaryColor.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.image_outlined,
-            size: 30,
-            color: primaryColor,
-          ),
-        ),
+        child: Icon(Icons.image_outlined, size: 60, color: primaryColor.withOpacity(0.3)),
       ),
     );
   }
 
-  Widget _buildAuthorRow(
-      BuildContext context,
-      Color primaryColor,
-      String avatarLetter,
-      String author,
-      String date,
-      int likes,
-      BlogController controller,
-      ) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: primaryColor.withValues(alpha: 0.15),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              avatarLetter,
-              style: TextStyle(
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+  Widget _dummyVideo() {
+    return Container(
+      color: Colors.grey[100],
+      child: const Center(
+        child: Icon(Icons.image_outlined, size: 60, color: Color(0x4D9E9E9E)),
+      ),
+    );
+  }
+
+  Widget _buildAuthorCard(
+      BuildContext context, Color primaryColor, String avatarLetter, String author, String date, BlogController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38, height: 38,
+            decoration: BoxDecoration(color: primaryColor.withOpacity(0.12), shape: BoxShape.circle),
+            child: Center(
+              child: Text(
+                avatarLetter,
+                style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                author,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: Colors.grey[850],
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(author, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Color(0xFF1A1A1A))),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
+                    const SizedBox(width: 4),
+                    Text(date, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 3),
-
-              /*Row(
-                children: [
-                  Icon(Icons.calendar_today_outlined, size: 13, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
-                  Text(date, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                  const SizedBox(width: 14),
-                  GestureDetector(
-                    onTap: () => controller.toggleLike(controller.selectedBlog.value?.id ?? 0),
-                    child: Icon(
-                      controller.selectedBlog.value?.isLiked == true ? Icons.favorite : Icons.favorite_border,
-                      size: 16,
-                      color: controller.selectedBlog.value?.isLiked == true ? primaryColor : Colors.grey[500],
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text('${controller.selectedBlog.value?.likesCount ?? likes}', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                ],
-              ),*/
-              Row(
-                children: [
-                  // LEFT SIDE
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 13,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        date,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(), // pushes like to right
-                  // RIGHT SIDE (LIKE)
-                  GestureDetector(
-                    onTap: () => controller.toggleLike(
-                      controller.selectedBlog.value?.id ?? 0,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          controller.selectedBlog.value?.isLiked == true
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          size: 22, // 🔥 increased size
-                          color: controller.selectedBlog.value?.isLiked == true
-                              ? primaryColor
-                              : Colors.grey[500],
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${controller.selectedBlog.value?.likesCount ?? likes}',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+          Obx(() => GestureDetector(
+            onTap: () => controller.toggleLike(controller.selectedBlog.value?.id ?? 0),
+            child: Row(
+              children: [
+                Icon(
+                  controller.selectedBlog.value?.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded,
+                  size: 20,
+                  color: controller.selectedBlog.value?.isLiked == true ? primaryColor : Colors.grey[400],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${controller.selectedBlog.value?.likesCount ?? 0}',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                ),
+              ],
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -509,149 +325,108 @@ class BlogDetailScreen extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 6,
-      children: tags.map((tag) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: primaryColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: primaryColor.withValues(alpha: 0.15)),
-          ),
-          child: Text(
-            tag,
-            style: TextStyle(
-              fontSize: 13,
-              color: primaryColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildDescription(
-      BuildContext context,
-      Color primaryColor,
-      String description,
-      ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          description,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: Colors.grey[700],
-            height: 1.7,
-            fontSize: 14,
-          ),
+      children: tags.map((tag) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: primaryColor.withOpacity(0.2)),
         ),
-      ],
+        child: Text(
+          '#$tag',
+          style: TextStyle(fontSize: 12, color: primaryColor, fontWeight: FontWeight.w600),
+        ),
+      )).toList(),
     );
   }
 
-  Widget _buildRelatedBlogs(
-      BuildContext context,
-      Color primaryColor,
-      BlogController controller,
-      ) {
+  Widget _buildRelatedBlogs(BuildContext context, Color primaryColor, BlogController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Related Blogs',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: Colors.grey[850],
-          ),
+        Row(
+          children: [
+            Container(width: 3, height: 18, decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
+            const Text('Related Blogs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1A1A1A))),
+          ],
         ),
         const SizedBox(height: 12),
         controller.relatedBlogs.isEmpty
-            ? const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Center(
-            child: Text(
-              'No related data',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-        )
+            ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: Text('No related blogs', style: TextStyle(color: Colors.grey[400], fontSize: 13))),
+              )
             : SizedBox(
-          height: 160,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: controller.relatedBlogs.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final blog = controller.relatedBlogs[index];
-              return _buildRelatedCard(context, primaryColor, blog);
-            },
-          ),
-        ),
+                height: 165,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.relatedBlogs.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    return _buildRelatedCard(context, primaryColor, controller.relatedBlogs[index]);
+                  },
+                ),
+              ),
       ],
     );
   }
 
-  Widget _buildRelatedCard(
-      BuildContext context,
-      Color primaryColor,
-      Blog blog,
-      ) {
+  Widget _buildRelatedCard(BuildContext context, Color primaryColor, Blog blog) {
     final String? imageUrl = blog.mediaPath != null
         ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}"
         : null;
 
     return GestureDetector(
-      onTap: () {
-        Get.to(
-              () => BlogDetailScreen(blogId: blog.id ?? 0),
-          preventDuplicates: false,
-        );
-      },
-      child: SizedBox(
+      onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0), preventDuplicates: false),
+      child: Container(
         width: 140,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                height: 100,
-                width: 140,
-                color: Colors.grey[100],
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: SizedBox(
+                height: 95,
+                width: double.infinity,
                 child: imageUrl != null
-                    ? Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                  _buildRelatedDummyImage(primaryColor),
-                )
-                    : _buildRelatedDummyImage(primaryColor),
+                    ? Image.network(imageUrl, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.grey[100],
+                          child: Center(child: Icon(Icons.image_outlined, size: 28, color: primaryColor.withOpacity(0.3))),
+                        ))
+                    : Container(
+                        color: Colors.grey[100],
+                        child: Center(child: Icon(Icons.image_outlined, size: 28, color: primaryColor.withOpacity(0.3))),
+                      ),
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              blog.title ?? 'No Title',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[850],
-                height: 1.3,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    blog.title ?? 'No Title',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Icon(Icons.favorite, size: 12, color: primaryColor),
+                      const SizedBox(width: 3),
+                      Text('${blog.likesCount ?? 0}', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                    ],
+                  ),
+                ],
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.favorite, size: 13, color: primaryColor),
-                const SizedBox(width: 3),
-                Text(
-                  '${blog.likesCount ?? 0}',
-                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                ),
-              ],
             ),
           ],
         ),

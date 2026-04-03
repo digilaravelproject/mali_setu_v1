@@ -26,6 +26,7 @@ class NameFieldComponentState extends State<NameFieldComponent> {
   late TextEditingController titleCtrl;
   late TextEditingController firstNameCtrl;
   late TextEditingController lastNameCtrl;
+  final GlobalKey<FormState> nameFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -72,11 +73,12 @@ class NameFieldComponentState extends State<NameFieldComponent> {
   /// Validates that title and first name are not empty (if required)
   String? validate() {
     if (widget.isRequired) {
-      if (titleCtrl.text.trim().isEmpty) {
-        return 'Please select title';
-      }
-      if (firstNameCtrl.text.trim().isEmpty) {
-        return 'first_name_required'.tr;
+      final isFormValid = nameFormKey.currentState?.validate() ?? false;
+      if (!isFormValid) {
+        if (titleCtrl.text.trim().isEmpty) return 'Please select title';
+        if (firstNameCtrl.text.trim().isEmpty) return 'first_name_required'.tr;
+        if (lastNameCtrl.text.trim().isEmpty) return 'last_name_required'.tr;
+        return "Please fill name details";
       }
     }
     return null;
@@ -84,63 +86,74 @@ class NameFieldComponentState extends State<NameFieldComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title dropdown
-        AppInputTextField(
-          label: 'title'.tr,
-          controller: titleCtrl,
-          isRequired: widget.isRequired,
-          isDropdown: true,
-          validator: (value) {
-            if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-              return 'title_required'.tr;
-            }
-            return null;
-          },
-          dropdownItems: [
-            'mr'.tr,
-            'mrs'.tr,
-            'ms'.tr,
-            'dr'.tr,
-            'prof'.tr,
-          ],
-          onDropdownChanged: (value) {
-            titleCtrl.text = value;
-          },
-        ),
-        const SizedBox(height: 12),
-        
-        // First Name field
-        AppInputTextField(
-          label: 'first_name'.tr,
-          controller: firstNameCtrl,
-          isRequired: widget.isRequired,
-          textInputType: TextInputType.name,
-          validator: (value) {
-            if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-              return 'first_name_required'.tr;
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 12),
-        
-        // Last Name field
-        AppInputTextField(
-          label: 'last_name'.tr,
-          controller: lastNameCtrl,
-          isRequired: widget.isRequired,
-          textInputType: TextInputType.name,
-          validator: (value) {
-            if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-              return 'last_name_required'.tr;
-            }
-            return null;
-          },
-        ),
-      ],
+    return Form(
+      key: nameFormKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title dropdown
+          AppInputTextField(
+            label: 'title'.tr,
+            controller: titleCtrl,
+            isRequired: widget.isRequired,
+            isDropdown: true,
+            topPadding: 0,
+            validator: (value) {
+              if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+                return 'title_required'.tr;
+              }
+              return null;
+            },
+            dropdownItems: [
+              'mr'.tr,
+              'mrs'.tr,
+              'ms'.tr,
+              'dr'.tr,
+              'prof'.tr,
+            ],
+            onDropdownChanged: (value) {
+              titleCtrl.text = value;
+            },
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: AppInputTextField(
+                  label: 'first_name'.tr,
+                  controller: firstNameCtrl,
+                  isRequired: widget.isRequired,
+                  textInputType: TextInputType.name,
+                  topPadding: 0,
+                  validator: (value) {
+                    if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+                      return 'first_name_required'.tr;
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppInputTextField(
+                  label: 'last_name'.tr,
+                  controller: lastNameCtrl,
+                  isRequired: widget.isRequired,
+                  textInputType: TextInputType.name,
+                  topPadding: 0,
+                  validator: (value) {
+                    if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+                      return 'last_name_required'.tr;
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

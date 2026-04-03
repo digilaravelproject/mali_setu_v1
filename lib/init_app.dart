@@ -28,6 +28,7 @@ Future<void> initApp() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Initialize ApiClient as a singleton in GetX
   Get.put(ApiClient(), permanent: true);

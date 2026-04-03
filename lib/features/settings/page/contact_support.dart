@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactSupportPage extends StatelessWidget {
@@ -47,185 +48,205 @@ class ContactSupportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          "Support Center",
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      //  backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Gradient background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.pink.shade50,
-                  Colors.white,
-                  Colors.white,
-                ],
-              ),
-            ),
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.pink.shade50.withOpacity(0.5),
+              Colors.white,
+              Colors.white,
+            ],
           ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Hero header
-                  _buildHeroHeader(),
-                  const SizedBox(height: 32),
+        ),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Immersive AppBar
+            SliverAppBar(
+              expandedHeight: 0,
+              toolbarHeight: 56 + topPadding,
+              collapsedHeight: 56 + topPadding,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                style: IconButton.styleFrom(side: BorderSide.none),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87, size: 22),
+                onPressed: () => Navigator.pop(context),
+              ),
+              centerTitle: true,
+              title: const Text(
+                "Support Center",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Nunito-Bold',
+                ),
+              ),
+              floating: true,
+              pinned: false,
+            ),
 
-                  // Contact options heading
-                  const Text(
-                    "Choose your preferred way",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+            // Content
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hero header simplified and compact
+                    _buildHeroHeader(context),
+                    const SizedBox(height: 20),
 
-                  // Contact cards
-                  _buildContactCard(
-                    context,
-                    icon: Icons.chat_bubble_outline,
-                    title: "WhatsApp",
-                    description: "Chat instantly with our support team",
-                    color: Colors.green,
-                    onTap: () async {
-                      try {
-                        await _launchWhatsApp();
-                      } catch (e) {
-                        _showErrorSnackBar(context, "WhatsApp not available");
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildContactCard(
-                    context,
-                    icon: Icons.email_outlined,
-                    title: "Email",
-                    description: "Write to us and we'll reply soon",
-                    color: Colors.blue,
-                    onTap: () async {
-                      try {
-                        await _launchEmail();
-                      } catch (e) {
-                        _showErrorSnackBar(context, "Email app not found");
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildContactCard(
-                    context,
-                    icon: Icons.phone_outlined,
-                    title: "Call",
-                    description: "Speak directly to a support agent",
-                    color: AppColors.primary,
-                    onTap: () async {
-                      try {
-                        await _launchCall();
-                      } catch (e) {
-                        _showErrorSnackBar(context, "Phone dialer not available");
-                      }
-                    },
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Contact details box
-                  _buildContactDetailsBox(context),
-
-                  const SizedBox(height: 32),
-
-                  // Support Hours & Tips
-                  _buildSupportInfo(),
-
-                  const SizedBox(height: 24),
-                  Center(
-                    child: Text(
-                      "We're here to help! 💖",
+                    // Contact options heading
+                    const Text(
+                      "Choose your preferred way",
                       style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        fontFamily: 'Nunito-Bold',
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+                    const SizedBox(height: 12),
+
+                    // Contact cards with compact design
+                    _buildContactCard(
+                      context,
+                      icon: Icons.chat_bubble_rounded,
+                      title: "WhatsApp",
+                      description: "Chat instantly with our support team",
+                      color: const Color(0xFF25D366),
+                      onTap: () async {
+                        try {
+                          await _launchWhatsApp();
+                        } catch (e) {
+                          _showErrorSnackBar(context, "WhatsApp not available");
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildContactCard(
+                      context,
+                      icon: Icons.email_rounded,
+                      title: "Email",
+                      description: "Write to us and we'll reply soon",
+                      color: const Color(0xFF4285F4),
+                      onTap: () async {
+                        try {
+                          await _launchEmail();
+                        } catch (e) {
+                          _showErrorSnackBar(context, "Email app not found");
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildContactCard(
+                      context,
+                      icon: Icons.phone_rounded,
+                      title: "Call",
+                      description: "Speak directly to a support agent",
+                      color: const Color(0xFF8E24AA),
+                      onTap: () async {
+                        try {
+                          await _launchCall();
+                        } catch (e) {
+                          _showErrorSnackBar(context, "Phone dialer not available");
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+                    _buildContactDetailsBox(context),
+                    const SizedBox(height: 24),
+                    _buildSupportInfo(),
+                    const SizedBox(height: 30),
+                    
+                    Center(
+                      child: Column(
+                        children: [
+                          const Text(
+                            "We're here to help! 💖",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF8E24AA),
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Nunito-Bold',
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "A social initiative for the community",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  // Hero header widget
-  Widget _buildHeroHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.pink.shade100,
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
+  Widget _buildHeroHeader(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.pink.shade50,
+              color: const Color(0xFF8E24AA).withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.headset_mic,
-              size: 48,
-              color: AppColors.primary,
+            child: const Icon(
+              Icons.headset_mic_rounded,
+              size: 40,
+              color: Color(0xFF8E24AA),
             ),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            "How can we help?",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          "How can we help?",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontFamily: 'Nunito-Bold',
           ),
-          const SizedBox(height: 8),
-          Text(
-            "We're here to assist you 24/7",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          "Ready to assist you with any questions.",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+            height: 1.4,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  // Contact card widget
+  // Contact card widget - More premium card design
   Widget _buildContactCard(
       BuildContext context, {
         required IconData icon,
@@ -234,197 +255,207 @@ class ContactSupportPage extends StatelessWidget {
         required Color color,
         required VoidCallback onTap,
       }) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 22, color: color),
                 ),
-                child: Icon(icon, size: 28, color: color),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
+                      const SizedBox(height: 2),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 18,
-                color: Colors.grey.shade400,
-              ),
-            ],
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: Colors.grey.shade400,
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Contact details box with copy functionality
+  // Contact details box with copy functionality - Cleaned up
   Widget _buildContactDetailsBox(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Contact details",
+            "Quick Reference",
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          _buildInfoRow(context, Icons.phone_rounded, phoneNumber, "Number copied"),
+          const SizedBox(height: 16),
+          _buildInfoRow(context, Icons.email_rounded, email, "Email copied"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, IconData icon, String value, String snackText) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: AppColors.primary),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 15, color: Colors.black87, fontWeight: FontWeight.w500),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Clipboard.setData(ClipboardData(text: value));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(snackText),
+                duration: const Duration(seconds: 1),
+                backgroundColor: AppColors.primary,
+                behavior: SnackBarBehavior.floating,
+                width: 200,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            );
+          },
+          child: Icon(Icons.copy_rounded, size: 18, color: Colors.grey.shade400),
+        ),
+      ],
+    );
+  }
+
+  // Support hours & tips - Enhanced aesthetic
+  Widget _buildSupportInfo() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.pink.shade50),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.pink.withOpacity(0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
             children: [
-              Icon(Icons.phone, size: 20, color: AppColors.primary,),
-              const SizedBox(width: 12),
+              Icon(Icons.access_time_filled_rounded, color: AppColors.primary, size: 20),
+              const SizedBox(width: 10),
               Text(
-                phoneNumber,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Number copied to clipboard"),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
-                child: Icon(Icons.copy, size: 20, color: AppColors.primary,),
+                "Support Availability",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Icons.email, size: 20, color:AppColors.primary,),
-              const SizedBox(width: 12),
-              Text(
-                email,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Email copied to clipboard"),
-                      duration: Duration(seconds: 1),
+          _buildInfoBullet("WhatsApp & Email", "Active 24/7"),
+          _buildInfoBullet("Phone Lines", "9:00 AM – 9:00 PM (IST)"),
+          _buildInfoBullet("Prioritized Support", "Community-led initiative"),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.lightbulb_rounded, color: Colors.orange.shade700, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    "Include your account details for faster resolution.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade900,
+                      fontWeight: FontWeight.w500,
                     ),
-                  );
-                },
-                child: Icon(Icons.copy, size: 20, color: AppColors.primary,),
-              ),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  // FAQ Section with common questions
-
-  // Single FAQ item
-
-  // Support hours & tips
-  Widget _buildSupportInfo() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.pink.shade50, Colors.pink.shade100],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildInfoBullet(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Icon(Icons.access_time, color: AppColors.primaryDark, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                "Support Hours",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            "• WhatsApp & Email: 24/7\n• Phone Support: 9:00 AM – 9:00 PM (IST)\n• Emergency assistance available 24/7",
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.primaryDark,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Icons.lightbulb_outline, color:AppColors.primaryDark, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                "Pro Tip",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "For faster resolution, please include your account email and a brief description of the issue when contacting us.",
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.primaryDark,
-              height: 1.4,
-            ),
-          ),
+          Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+          Text(value, style: const TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w600)),
         ],
       ),
     );

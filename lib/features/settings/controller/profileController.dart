@@ -10,88 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-/*class UpProfileController extends GetxController {
-  /// Text Controllers
-  /// Text Controllers
-  final countryCtrl = TextEditingController();
-  final stateCtrl = TextEditingController();
-  final cityCtrl = TextEditingController();
-  final birthTimeCtrl = TextEditingController();
-  final citizenshipCtrl = TextEditingController();
-  final educationCtrl = TextEditingController();
-  final employmentCtrl = TextEditingController();
-  final motherTongueCtrl = TextEditingController();
-  final familyTypeCtrl = TextEditingController();
-  final drinkingCtrl = TextEditingController();
-  final smokingCtrl = TextEditingController();
-  final religionCtrl = TextEditingController();
-  final casteCtrl = TextEditingController();
-  final starCtrl = TextEditingController();
-  final rashiCtrl = TextEditingController();
-  final manglikCtrl = TextEditingController();
-
-  /// Rx Option Selectors
-  final gender = ''.obs;
-  final physicalStatus = ''.obs;
-  final maritalStatus = ''.obs;
-  final eatingHabit = ''.obs;
-  final dosh = ''.obs;
-
-  /// Dropdown Data
-  final countries = ["India", "UK", "USA"];
-  final states = ["UP", "Delhi", "Bihar"];
-  final cities = ["Lucknow", "Kanpur"];
-  final educations = ["Graduate", "Post Graduate"];
-  final employmentTypes = ["Private", "Government", "Business"];
-  final languages = ["Hindi", "English"];
-  final familyTypes = ["Joint", "Nuclear"];
-  final religions = ["Hindu", "Muslim", "Christian"];
-  final castes = ["General", "OBC", "SC", "ST"];
-  final stars = ["Ashwini", "Bharani"];
-  final rashis = ["Mesh", "Vrishabh"];
-
-  final maritalStatuses = [
-    'Never Married',
-    'Awaiting Divorce',
-    'Divorced',
-    'Widowed',
-  ];
-
-  final eatingHabits = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian'];
-
-  void onRegister() {
-    // Validate & Submit
-  }
-
-  @override
-  void onClose() {
-    for (final c in [
-      countryCtrl,
-      stateCtrl,
-      cityCtrl,
-      birthTimeCtrl,
-      citizenshipCtrl,
-      educationCtrl,
-      employmentCtrl,
-      motherTongueCtrl,
-      familyTypeCtrl,
-      drinkingCtrl,
-      smokingCtrl,
-      religionCtrl,
-      casteCtrl,
-      starCtrl,
-      rashiCtrl,
-      manglikCtrl,
-    ]) {
-      c.dispose();
-    }
-    super.onClose();
-  }
-}*/
-
-
-
-
 class UpProfileController extends GetxController {
   // NAME FIELD COMPONENT KEY
   final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
@@ -99,6 +17,9 @@ class UpProfileController extends GetxController {
   // PHONE FIELD COMPONENT KEY
   final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
   
+  // Form Key for UI validation
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   // Personal Information Controllers
   final fullNameCtrl = TextEditingController();
   final ageCtrl = TextEditingController();
@@ -120,6 +41,9 @@ class UpProfileController extends GetxController {
   // Profile Image
   final profileImage = Rxn<File>();
   final isUploadingImage = false.obs;
+  
+  // Loading state
+  final isLoading = false.obs;
 
   // Dropdown Data
   final cities = ["Lucknow", "Kanpur", "Delhi", "Mumbai", "Bangalore"];
@@ -161,8 +85,6 @@ class UpProfileController extends GetxController {
 
       if (image != null) {
         profileImage.value = File(image.path);
-        // Here you can upload to server
-        // await uploadProfileImage(File(image.path));
       }
     } catch (e) {
         CustomSnackBar.showError(
@@ -183,8 +105,6 @@ class UpProfileController extends GetxController {
 
       if (image != null) {
         profileImage.value = File(image.path);
-        // Here you can upload to server
-        // await uploadProfileImage(File(image.path));
       }
     } catch (e) {
         CustomSnackBar.showError(
@@ -196,9 +116,9 @@ class UpProfileController extends GetxController {
   void showImagePickerOptions() {
     Get.bottomSheet(
       Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.only(
+          borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -254,14 +174,19 @@ class UpProfileController extends GetxController {
 
   // Update Profile
   Future<void> updateProfile() async {
-    // Validate name field component
+    // 1. Form Key Validation (Asterisk fields)
+    if (!(formKey.currentState?.validate() ?? false)) {
+        return;
+    }
+
+    // 2. Validate name field component
     final nameValidation = nameFieldKey.currentState?.validate();
     if (nameValidation != null) {
       CustomSnackBar.showError(message: nameValidation);
       return;
     }
     
-    // Validate phone field component
+    // 3. Validate phone field component
     final phoneValidation = phoneFieldKey.currentState?.validate();
     if (phoneValidation != null) {
       CustomSnackBar.showError(message: phoneValidation);
@@ -274,13 +199,7 @@ class UpProfileController extends GetxController {
     }
 
     try {
-      // Show loading
-      Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
-        barrierDismissible: false,
-      );
+      isLoading.value = true;
 
       // Get combined name from NameFieldComponent
       final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
@@ -317,17 +236,11 @@ class UpProfileController extends GetxController {
       // Call API via AuthService
       final response = await Get.find<AuthService>().updateProfile(updateData);
 
-      Get.back(); // Close loading
-
       if (response.success) {
         debugPrint("✅ Profile updated successfully");
-        debugPrint("📸 Current profile image: ${Get.find<AuthService>().currentUser.value?.profileImage}");
         
         // Refresh user data from AuthService to get updated profile image
-        final refreshResponse = await Get.find<AuthService>().refreshProfile();
-        
-        debugPrint("🔄 Refresh response success: ${refreshResponse.success}");
-        debugPrint("📸 After refresh profile image: ${Get.find<AuthService>().currentUser.value?.profileImage}");
+        await Get.find<AuthService>().refreshProfile();
         
         // Clear the local selected image so it shows server image
         profileImage.value = null;
@@ -342,10 +255,11 @@ class UpProfileController extends GetxController {
         );
       }
     } catch (e) {
-      Get.back(); // Close loading if open
       CustomSnackBar.showError(
         message: 'An unexpected error occurred: ${e.toString()}',
       );
+    } finally {
+      isLoading.value = false;
     }
   }
 
