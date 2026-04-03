@@ -36,28 +36,31 @@ class BusinessDetailScreen extends GetView<BusinessController> {
         children: [
           DefaultTabController(
             length: 4,
-            child: NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: Obx(() {
-                    final business = controller.selectedBusiness.value ?? argBusiness;
-                    final authService = Get.find<AuthService>();
-                    final currentUser = authService.currentUser.value;
-                    final isOwner = currentUser?.id == business.userId;
-                    
-                    return SliverAppBar(
+            child: Obx(() {
+              final business = controller.selectedBusiness.value ?? argBusiness;
+              final authService = Get.find<AuthService>();
+              final currentUser = authService.currentUser.value;
+              final isOwner = currentUser?.id == business.userId;
+              final topPadding = MediaQuery.of(context).padding.top;
+              final fixedHeight = isOwner ? 610.0 : 520.0;
+
+              return NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverOverlapAbsorber(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    sliver: SliverAppBar(
                       floating: false,
                       pinned: true,
                       centerTitle: false,
                       backgroundColor: context.theme.scaffoldBackgroundColor,
                       elevation: innerBoxIsScrolled ? 4 : 0,
                       shadowColor: Colors.black.withOpacity(0.05),
-                      expandedHeight: isOwner ? 600 : 480,
+                     // expandedHeight: isOwner ? 580 : 460,
+                      expandedHeight: fixedHeight + topPadding,
                       forceElevated: innerBoxIsScrolled,
                       title: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 300),
+                        duration: const Duration(milliseconds: 200),
                         opacity: innerBoxIsScrolled ? 1.0 : 0.0,
                         child: Text(
                           business.businessName ?? '',
@@ -66,6 +69,8 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                             fontSize: 18,
                             color: Colors.black87,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       leading: InkWell(
@@ -90,17 +95,24 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                         ),
                       ),
                       flexibleSpace: FlexibleSpaceBar(
-                        background: Column(
-                          children: [
-                            SizedBox(height: MediaQuery.of(context).padding.top + 48),
-                            _buildBusinessHeader(business, context),
-                            const SizedBox(height: 16),
-                            _buildQuickActions(business, context),
-                            const SizedBox(height: 20),
-                            _buildStatsRow(business, context),
-                            const SizedBox(height: 20),
-                            _buildManageSection(context),
-                          ],
+                        collapseMode: CollapseMode.pin,
+                        background: OverflowBox(
+                          alignment: Alignment.topCenter,
+                          maxHeight: double.infinity,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(height: MediaQuery.of(context).padding.top + 48),
+                              _buildBusinessHeader(business, context),
+                              const SizedBox(height: 16),
+                              _buildQuickActions(business, context),
+                              const SizedBox(height: 20),
+                              _buildStatsRow(business, context),
+                              const SizedBox(height: 20),
+                              _buildManageSection(context),
+                              const SizedBox(height: 8),
+                            ],
+                          ),
                         ),
                       ),
                       bottom: PreferredSize(
@@ -135,32 +147,28 @@ class BusinessDetailScreen extends GetView<BusinessController> {
                           ),
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
+                ];
+              },
+              body: Padding(
+                padding: const EdgeInsets.only(bottom: 70),
+                child: TabBarView(
+                  children: [
+                    Builder(builder: (context) => _buildProductsTab(context)),
+                    Builder(builder: (context) => _buildServicesTab(context)),
+                    Builder(builder: (context) => _buildJobsTab(context)),
+                    Builder(builder: (context) => _buildBusinessInfoTab(business, context)),
+                  ],
                 ),
-              ];
-            },
-            body: Padding(
-              padding: const EdgeInsets.only(bottom: 70),
-              child: TabBarView(
-                children: [
-                  Builder(builder: (context) => _buildProductsTab(context)),
-                  Builder(builder: (context) => _buildServicesTab(context)),
-                  Builder(builder: (context) => _buildJobsTab(context)),
-                  Builder(builder: (context) {
-                     final business = controller.selectedBusiness.value ?? argBusiness;
-                     return _buildBusinessInfoTab(business, context);
-                  }),
-                ],
               ),
-            ),
-          ),
+            );
+            }),
           ),
           Obx(() {
             final business = controller.selectedBusiness.value ?? argBusiness;
             return _buildBottomActionBar(business, context);
           }),
-         // _buildBottomActionBar(business,context),
         ],
       ),
     );
@@ -431,15 +439,14 @@ class BusinessDetailScreen extends GetView<BusinessController> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.shopping_bag_outlined, context),
+          Expanded(child: _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.shopping_bag_outlined, context)),
           _buildVerticalDivider(context),
-          _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, context),
+          Expanded(child: _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, context)),
           _buildVerticalDivider(context),
-          _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, context),
-          _buildVerticalDivider(context),
-          _buildStatItem('value'.tr, '0', Icons.currency_rupee, context),
+          Expanded(child: _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, context)),
+          // _buildVerticalDivider(context),
+          // Expanded(child: _buildStatItem('value'.tr, '0', Icons.currency_rupee, context)),
         ],
       ),
     );
@@ -455,15 +462,23 @@ class BusinessDetailScreen extends GetView<BusinessController> {
  
   Widget _buildStatItem(String label, String value, IconData icon, BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: context.iconColor, size: 22),
         const SizedBox(height: 8),
         Text(
-            value,
-            style: context.textTheme.titleMedium
+          value,
+          style: context.textTheme.titleMedium,
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
-        Text(label, style: context.textTheme.bodyMedium),
+        Text(
+          label,
+          style: context.textTheme.bodySmall,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
@@ -1275,61 +1290,81 @@ class BusinessDetailScreen extends GetView<BusinessController> {
     );
   }
   Widget _buildShimmerList(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                   Container(
-                     width: 60, height: 60,
-                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                   ),
-                   const SizedBox(width: 10),
-                   Expanded(child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       Container(height: 14, width: 150, color: Colors.white),
-                       const SizedBox(height: 8),
-                       Container(height: 12, width: 100, color: Colors.white),
-                       const SizedBox(height: 8),
-                        Container(height: 10, width: double.infinity, color: Colors.white),
-                     ],
-                   ))
-                ],
-              ),
+    return CustomScrollView(
+      physics: const ClampingScrollPhysics(),
+      slivers: [
+        SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 60, height: 60,
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(height: 14, width: 150, color: Colors.white),
+                              const SizedBox(height: 8),
+                              Container(height: 12, width: 100, color: Colors.white),
+                              const SizedBox(height: 8),
+                              Container(height: 10, width: double.infinity, color: Colors.white),
+                            ],
+                          ))
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+              childCount: 6,
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
   Widget _buildShimmerInfo(BuildContext context) {
-     return SingleChildScrollView(
-       padding: const EdgeInsets.all(16),
-       child: Shimmer.fromColors(
-          baseColor: Colors.purple.shade900.withOpacity(0.1),
-          highlightColor: Colors.purple.shade900.withOpacity(0.05),
-          child: Column(
-             crossAxisAlignment: CrossAxisAlignment.start,
-             children: [
-               Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
-               const SizedBox(height: 16),
-               Container(height: 150, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
-             ],
+    return CustomScrollView(
+      physics: const ClampingScrollPhysics(),
+      slivers: [
+        SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              Shimmer.fromColors(
+                baseColor: Colors.purple.shade900.withOpacity(0.1),
+                highlightColor: Colors.purple.shade900.withOpacity(0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                    const SizedBox(height: 16),
+                    Container(height: 150, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                  ],
+                ),
+              ),
+            ]),
           ),
-       ),
-     );
+        ),
+      ],
+    );
   }
 
   Widget _buildJobStatusBadge(Job job, BuildContext context) {

@@ -320,7 +320,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       children: [
         // Country Code selector
         SizedBox(
-          width: 110,
+          width: 80,
           child: GestureDetector(
             onTap: () => _showCountryPicker(context),
             child: AbsorbPointer(
@@ -528,3 +528,4 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
     );
   }
 }
+

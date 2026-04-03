@@ -479,7 +479,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     label: "date_of_birth".tr,
                     textInputType: TextInputType.none,
                     controller: controller.ageCtrl,
-                    isRequired: true,
+                    //isRequired: true,
                   /*  validator: (value) {
                       // if (controller.selectedBirthDate.value == null) {
                       //   return "Please select your date of birth";

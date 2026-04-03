@@ -200,7 +200,7 @@ class RegBusinessController extends GetxController {
       final response = await PincodeHelper.fetchAddressFromPincode(pincode);
 
       if (response != null) {
-        cityCtrl.text = response.division; // Or response.city if available
+        cityCtrl.text = response.division;
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
         countryCtrl.text = "India";

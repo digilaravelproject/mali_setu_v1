@@ -130,7 +130,7 @@ class AppInputTextField extends StatelessWidget {
 
 
           decoration: InputDecoration(
-            hintText: hintText ?? " ${label.toLowerCase()}",
+            hintText: hintText ?? " Enter Your ${label[0].toUpperCase()}${label.substring(1).toLowerCase()}",
             hintStyle: context.textTheme.bodyMedium,
 
             prefixIcon: iconData == null ? null : Icon(iconData, size: 20),

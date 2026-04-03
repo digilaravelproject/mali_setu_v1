@@ -180,6 +180,8 @@ const Map<String, String> enUS = {
   'first_name': 'First Name',
   'last_name': 'Last Name',
   'first_name_required': 'First name is required',
+  'last_name_required': 'Last name is required',
+  'title_required': 'Title required',
   'mr': 'Mr.',
   'mrs': 'Mrs.',
   'ms': 'Ms.',

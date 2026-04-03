@@ -175,6 +175,8 @@ const Map<String, String> mrIN = {
   'first_name': 'पहिले नाव',
   'last_name': 'आडनाव',
   'first_name_required': 'पहिले नाव आवश्यक आहे',
+  'last_name_required': 'आडनाव आवश्यक आहे',
+  'title_required': 'पदवी आवश्यक आहे',
   'mr': 'श्री.',
   'mrs': 'श्रीमती.',
   'ms': 'सुश्री.',

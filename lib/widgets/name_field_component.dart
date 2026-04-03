@@ -93,10 +93,16 @@ class NameFieldComponentState extends State<NameFieldComponent> {
           controller: titleCtrl,
           isRequired: widget.isRequired,
           isDropdown: true,
+          validator: (value) {
+            if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+              return 'title_required'.tr;
+            }
+            return null;
+          },
           dropdownItems: [
-            // 'mr'.tr,
-            // 'mrs'.tr,
-            // 'ms'.tr,
+            'mr'.tr,
+            'mrs'.tr,
+            'ms'.tr,
             'dr'.tr,
             'prof'.tr,
           ],
@@ -125,7 +131,14 @@ class NameFieldComponentState extends State<NameFieldComponent> {
         AppInputTextField(
           label: 'last_name'.tr,
           controller: lastNameCtrl,
+          isRequired: widget.isRequired,
           textInputType: TextInputType.name,
+          validator: (value) {
+            if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+              return 'last_name_required'.tr;
+            }
+            return null;
+          },
         ),
       ],
     );
