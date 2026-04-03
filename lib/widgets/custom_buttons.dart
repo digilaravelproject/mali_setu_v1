@@ -64,14 +64,14 @@ class CustomButton extends StatelessWidget {
                 spacing: 8,
                 children: [
 
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: textColor ?? context.theme.colorScheme.onPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  // Text(
+                  //   title,
+                  //   style: TextStyle(
+                  //     color: textColor ?? context.theme.colorScheme.onPrimary,
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.w600,
+                  //   ),
+                  // ),
                   //if (icon != null) ...[
 
                   if (leading != null) ...[
@@ -98,7 +98,7 @@ class CustomButton extends StatelessWidget {
                     ),
                   ),
                 ],
-            );
+              );
             }
           },
         ),
@@ -161,37 +161,37 @@ class CustomOutlinedButton extends StatelessWidget {
         ),
         child: isLoading
             ? SizedBox.square(
-                dimension: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: effectiveColor,
-                ),
-              )
+          dimension: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: effectiveColor,
+          ),
+        )
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  if (leading != null) ...[
-                    leading!,
-                  ] else if (icon != null) ...[
-                    Icon(icon, color: effectiveColor, size: 18),
-                  ],
-                  Flexible(
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: effectiveColor,
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          spacing: 8,
+          children: [
+            if (leading != null) ...[
+              leading!,
+            ] else if (icon != null) ...[
+              Icon(icon, color: effectiveColor, size: 18),
+            ],
+            Flexible(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: effectiveColor,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
+            ),
+          ],
+        ),
       ),
     );
   }

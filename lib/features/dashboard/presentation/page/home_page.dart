@@ -322,7 +322,7 @@ class HomePage extends GetWidget<HomeController> {
                               );
                             }),
 
-                            const SizedBox(height: 20),
+                            //const SizedBox(height: 20),
                             _buildPromoCard(
                               context,
                               title: 'register_your_business'.tr,

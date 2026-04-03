@@ -357,7 +357,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, MatrimonyProfile profile) {
+  Widget _buildBottomBar1(BuildContext context, MatrimonyProfile profile) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -429,6 +429,83 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
             }),
           ),
         ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildBottomBar(BuildContext context, MatrimonyProfile profile) {
+    return SafeArea(
+      top: false, // only care about bottom
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Obx(() {
+                final status = profile.connectionStatus?.toLowerCase();
+                String buttonText = "send_connection_request".tr;
+                Color buttonColor = Colors.purple;
+                VoidCallback? onPressed = controller.sendRequest;
+
+                if (status == "pending") {
+                  buttonText = "request_sent".tr;
+                  buttonColor = Colors.grey;
+                  onPressed = null;
+                } else if (status == "accepted") {
+                  buttonText = "start_chat".tr;
+                  buttonColor = Colors.green;
+                  onPressed = () {
+                    Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                      'conversation_id': null,
+                      'other_user_id': profile.user?.id,
+                    });
+                  };
+                }
+
+                return ElevatedButton(
+                  onPressed: controller.isLoading.value ? null : onPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: buttonColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : Text(
+                    buttonText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
