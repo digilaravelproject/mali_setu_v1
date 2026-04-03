@@ -62,7 +62,6 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   video_player: ^2.9.2
   google_fonts: ^6.2.1
-  webview_flutter: ^4.13.1
 
 
 
@@ -111,6 +110,9 @@ flutter:
   assets:
     - assets/fonts/
     - assets/icons/
+    - assets/icons/gmail.png
+    - assets/icons/mobile.png
+    - assets/icons/whatsapp.png
     - assets/images/
     - assets/images/app_logo_en.png
     - assets/images/app_logo_mr.png

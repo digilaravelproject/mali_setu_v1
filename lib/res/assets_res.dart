@@ -8,6 +8,9 @@ class AssetsRes {
 
   static const String PROJECT_NAME = 'edu_cluezer';
   static const String PROJECT_VERSION = '1.0.0+1';
+  static const String GMAIL = 'assets/icons/gmail.png';
+  static const String MOBILE = 'assets/icons/mobile.png';
+  static const String WHATSAPP = 'assets/icons/whatsapp.png';
   static const String APP_LOGO_EN = 'assets/images/app_logo_en.png';
   static const String APP_LOGO_MR = 'assets/images/app_logo_mr.png';
   static const String PERSON_IMAGES = 'assets/images/person_images.png';
