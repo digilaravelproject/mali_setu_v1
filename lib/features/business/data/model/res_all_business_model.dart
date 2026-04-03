@@ -157,6 +157,7 @@ class Business {
   String? taluka;
   String? city;
   String? pincode;
+  String? country;
   User? user;
   Category? category;
   List<Product>? products;
@@ -188,6 +189,7 @@ class Business {
     this.taluka,
     this.city,
     this.pincode,
+    this.country,
     this.user,
     this.category,
     this.products,
@@ -221,6 +223,7 @@ class Business {
       taluka: json['taluka'],
       city: json['city'],
       pincode: json['pincode'],
+      country: json['country'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       category: json['category'] != null ? Category.fromJson(json['category']) : null,
       products: json['products'] != null

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/core/helper/form_validator.dart';
 
 class CreateJobController extends GetxController {
   final CreateJobUseCase createJobUseCase;
@@ -78,6 +79,9 @@ class CreateJobController extends GetxController {
       benefitsCtrl.clear();
     }
   }
+  
+  /// Validation Errors
+  final errors = <String, String>{}.obs;
 
   /// Add from popular list
   void addPopularBenefit(String benefit) {
@@ -112,15 +116,40 @@ class CreateJobController extends GetxController {
     selectedSkills.remove(skill);
   }
 
-  Future<void> selectDate(BuildContext context, TextEditingController controller) async {
+  /// Convert DD/MM/YYYY → YYYY-MM-DD for API submission
+  String _toApiDate(String ddmmyyyy) {
+    final parts = ddmmyyyy.split('/');
+    if (parts.length == 3 && parts[2].length == 4) {
+      return '${parts[2]}-${parts[1]}-${parts[0]}';
+    }
+    return ddmmyyyy; // fallback: return as-is
+  }
+
+  /// Convert YYYY-MM-DD → DD/MM/YYYY for display
+  String _fromApiDate(String yyyymmdd) {
+    final parts = yyyymmdd.split('-');
+    if (parts.length == 3) {
+      return '${parts[2]}/${parts[1]}/${parts[0]}';
+    }
+    return yyyymmdd;
+  }
+
+  Future<void> selectDate(BuildContext context, TextEditingController ctrl) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      fieldHintText: 'dd/mm/yyyy',
+      fieldLabelText: 'Date (DD/MM/YYYY)',
+      errorFormatText: 'Enter valid date',
+      errorInvalidText: 'Date out of range',
     );
     if (picked != null) {
-      controller.text = picked.toString().split(' ').first;
+      ctrl.text =
+          "${picked.day.toString().padLeft(2, '0')}/"
+          "${picked.month.toString().padLeft(2, '0')}/"
+          "${picked.year}";
     }
   }
 
@@ -217,6 +246,19 @@ class CreateJobController extends GetxController {
     
     // Listen to category changes
     categoryCtrl.addListener(_onCategoryChanged);
+
+    // Reactive error clearing
+    titleCtrl.addListener(() => errors.remove('title'));
+    descriptionCtrl.addListener(() => errors.remove('description'));
+    requirementsCtrl.addListener(() => errors.remove('requirements'));
+    salaryRangeCtrl.addListener(() => errors.remove('salary'));
+    locationCtrl.addListener(() => errors.remove('location'));
+    deadlineCtrl.addListener(() => errors.remove('deadline'));
+    expiryCtrl.addListener(() => errors.remove('expiry'));
+    jobTypeCtrl.addListener(() => errors.remove('jobType'));
+    experienceCtrl.addListener(() => errors.remove('experience'));
+    employmentCtrl.addListener(() => errors.remove('employment'));
+    categoryCtrl.addListener(() => errors.remove('category'));
   }
 
   void _onCategoryChanged() {
@@ -290,8 +332,12 @@ class CreateJobController extends GetxController {
     employmentCtrl.text = (job.employmentType ?? '').replaceAll('-', ' ').toTitleCase();
     categoryCtrl.text = job.category ?? '';
     
-    deadlineCtrl.text = job.applicationDeadline != null ? job.applicationDeadline!.split('T').first : '';
-    expiryCtrl.text = job.expiresAt != null ? job.expiresAt!.split('T').first : '';
+    deadlineCtrl.text = job.applicationDeadline != null
+        ? _fromApiDate(job.applicationDeadline!.split('T').first)
+        : '';
+    expiryCtrl.text = job.expiresAt != null
+        ? _fromApiDate(job.expiresAt!.split('T').first)
+        : '';
 
     selectedBenefits.assignAll(job.benefits ?? []);
     selectedSkills.assignAll(job.skillsRequired ?? []);
@@ -352,58 +398,46 @@ class CreateJobController extends GetxController {
     debugPrint("🏢 Using business ID: $businessId");
 
     // Comprehensive Validation
+    errors.clear();
+    
     if (titleCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_job_title');
-      return;
+      errors['title'] = 'please_enter_job_title'.tr;
     }
-    
     if (descriptionCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_job_description');
-      return;
+      errors['description'] = 'please_enter_job_description'.tr;
     }
-    
     if (requirementsCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_enter_requirements');
-      return;
+      errors['requirements'] = 'please_enter_requirements'.tr;
     }
-    
     if (salaryRangeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'salary_required');
-      return;
+      errors['salary'] = 'salary_required'.tr;
     }
-    
     if (jobTypeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_job_type');
-      return;
+      errors['jobType'] = 'please_select_job_type'.tr;
     }
-    
     if (locationCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'location_required');
-      return;
+      errors['location'] = 'location_required'.tr;
     }
-    
     if (experienceCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_experience_level');
-      return;
+      errors['experience'] = 'please_select_experience_level'.tr;
     }
-    
     if (employmentCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_employment_type');
-      return;
+      errors['employment'] = 'please_select_employment_type'.tr;
     }
-    
     if (categoryCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'please_select_job_category');
-      return;
+      errors['category'] = 'please_select_job_category'.tr;
+    }
+    final deadlineError = FormValidator.date(deadlineCtrl.text.trim(), 'application_deadline'.tr);
+    if (deadlineError != null) {
+      errors['deadline'] = deadlineError;
     }
     
-    if (deadlineCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'deadline_required');
-      return;
+    final expiryError = FormValidator.date(expiryCtrl.text.trim(), 'job_expiry_date'.tr);
+    if (expiryError != null) {
+      errors['expiry'] = expiryError;
     }
-    
-    if (expiryCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: 'expiry_required');
+
+    if (errors.isNotEmpty) {
       return;
     }
 
@@ -420,8 +454,8 @@ class CreateJobController extends GetxController {
       "category": categoryCtrl.text.trim(),
       "skills_required": selectedSkills,
       "benefits": selectedBenefits,
-      "application_deadline": deadlineCtrl.text.trim(),
-      "expires_at": expiryCtrl.text.trim()
+      "application_deadline": _toApiDate(deadlineCtrl.text.trim()),
+      "expires_at": _toApiDate(expiryCtrl.text.trim())
     };
 
     try {

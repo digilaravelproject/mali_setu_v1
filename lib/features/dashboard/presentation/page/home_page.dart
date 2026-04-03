@@ -296,6 +296,7 @@ class HomePage extends GetWidget<HomeController> {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 12),
                             Obx(() {
                               if (controller.isLoadingCategories.value) {
                                 return const Center(child: CircularProgressIndicator());
@@ -309,12 +310,13 @@ class HomePage extends GetWidget<HomeController> {
                               return GridView.builder(
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
+                                padding: EdgeInsets.zero,
                                 itemCount: displayList.length,
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 4,
                                   crossAxisSpacing: 16,
                                   mainAxisSpacing: 12,
-                                  childAspectRatio: 0.80,
+                                  childAspectRatio: 0.78,
                                 ),
                                 itemBuilder: (_, index) {
                                   return _buildCategoryItem(context, displayList[index]);
@@ -322,7 +324,7 @@ class HomePage extends GetWidget<HomeController> {
                               );
                             }),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 48),
                             _buildPromoCard(
                               context,
                               title: 'register_your_business'.tr,
@@ -384,11 +386,11 @@ class HomePage extends GetWidget<HomeController> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Theme.of(context).primaryColor.withOpacity(0.08),
-            ),
+            padding: const EdgeInsets.all(8),
+            // decoration: BoxDecoration(
+            //   shape: BoxShape.circle,
+            //   color: Theme.of(context).primaryColor.withOpacity(0.08),
+            // ),
             child: CustomImageView(
               height: 32,
               width: 32,

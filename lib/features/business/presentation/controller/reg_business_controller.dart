@@ -16,6 +16,7 @@ import 'package:edu_cluezer/features/business/presentation/page/business_subscri
 import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_details_usecase.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 import 'package:intl/intl.dart';
 
@@ -24,11 +25,15 @@ import '../../../../core/helper/pincode_helper.dart';
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
+  final GetBusinessDetailsUseCase getBusinessDetailsUseCase;
   final BusinessRepository _repository = Get.find<BusinessRepository>();
   final PaymentRepository _paymentRepository = Get.find<PaymentRepository>();
   final RazorpayController _razorpayController = Get.find<RazorpayController>();
 
-  RegBusinessController({required this.getBusinessCategoriesUseCase});
+  RegBusinessController({
+    required this.getBusinessCategoriesUseCase,
+    required this.getBusinessDetailsUseCase,
+  });
 
   /// PHONE FIELD COMPONENT KEY
   final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
@@ -50,6 +55,7 @@ class RegBusinessController extends GetxController {
   final talukaCtrl = TextEditingController();
   
   final isFetchingPincode = false.obs;
+  final isDetailsLoading = false.obs;
 
   TextEditingController openingTimeCtrl = TextEditingController();
   TextEditingController closingTimeCtrl = TextEditingController();
@@ -92,75 +98,27 @@ class RegBusinessController extends GetxController {
   // For custom category registration
   final isRegisteringCategory = false.obs;
   final customCategoryCtrl = TextEditingController();
+  
+  // Flag to prevent auto-fetch on init
+  bool _ignorePincodeChange = false;
+
+  /// Validation Errors
+  final errors = <String, String>{}.obs;
 
   @override
   void onInit() {
     super.onInit();
     
     // Check for arguments (Edit Mode)
-    if (Get.arguments != null && Get.arguments is Business) {
-      isEditMode = true;
-      final Business business = Get.arguments;
-      businessId = business.id;
-      editingCategoryId = business.categoryId; // Store for async lookup
-      
-      bNameCtrl.text = business.businessName ?? "";
-      
-      // Handle Business Type
-      String type = (business.businessType ?? "").toLowerCase();
-      if (type == "product") {
-         bTypeCtrl.text = "Product";
-      } else if (type == "service") {
-         bTypeCtrl.text = "Service";
-      } else {
-         bTypeCtrl.text = (business.businessType ?? "").toTitleCase();
-      }
-
-      // Handle Business Type
-      // String type = (business.businessType ?? "").toLowerCase();
-      // if (type.contains("proprietary")) {
-      //   bTypeCtrl.text = "Proprietary / Partnership";
-      // } else if (type.contains("private")) {
-      //   bTypeCtrl.text = "Private Ltd";
-      // } else if (type.contains("public")) {
-      //   bTypeCtrl.text = "Public Ltd";
-      // } else {
-      //   bTypeCtrl.text = (business.businessType ?? "").toTitleCase();
-      // }
-
-
-      bDescCtrl.text = business.description ?? "";
-      phoneCtrl.text = business.contactPhone ?? "";
-      emailCtrl.text = business.contactEmail ?? "";
-      websiteCtrl.text = business.website ?? "";
-      // openingTimeCtrl.text = business.opening_time ?? "";
-      // closingTimeCtrl.text = business.closing_time ?? "";
-
-
-      if (business.opening_time != null && business.opening_time!.isNotEmpty) {
-        DateTime openTime = DateTime.parse("2000-01-01 ${business.opening_time!}");
-        openingTime = TimeOfDay.fromDateTime(openTime);
-        openingTimeCtrl.text = DateFormat.jm().format(openTime); // Use jm() for AM/PM
-      }
-
-      if (business.closing_time != null && business.closing_time!.isNotEmpty) {
-        DateTime closeTime = DateTime.parse("2000-01-01 ${business.closing_time!}");
-        closingTime = TimeOfDay.fromDateTime(closeTime);
-        closingTimeCtrl.text = DateFormat.jm().format(closeTime); // Use jm() for AM/PM
-      }
-
-      // Handle Category (Fallback if needed, main logic in fetchCategories)
-      if (business.category != null) {
-          bCategoryCtrl.text = business.category!.name ?? "";
-      }
-
-      // Handle Existing Photo
-      if (business.photo != null && business.photo!.isNotEmpty) {
-        // Prepend base URL if it's not already a full URL
-        final photoUrl = business.photo!.startsWith('http') 
-            ? business.photo! 
-            : ApiConstants.imageBaseUrl + business.photo!;
-        existingImages.add(photoUrl);
+    if (Get.arguments != null) {
+      if (Get.arguments is Business) {
+        final Business business = Get.arguments;
+        _populateForm(business); // Initial fast population
+        if (business.id != null) {
+          fetchBusinessDetails(business.id!); // Refresh with full details
+        }
+      } else if (Get.arguments is int) {
+        fetchBusinessDetails(Get.arguments);
       }
     } else {
       // Auto-fill website with https:// for new registrations
@@ -170,9 +128,35 @@ class RegBusinessController extends GetxController {
     pinCodeCtrl.addListener(_onPincodeChanged);
 
     _imagePickerHelper = ImagePickerHelper(
-      onImagePicked: (files, flags) {
+      onImagePicked: (files, flags) async {
         if (files != null && files.isNotEmpty) {
-          selectedImages.addAll(files);
+          List<File> validFiles = [];
+          List<String> failedFiles = [];
+
+          for (var file in files) {
+            final int sizeInBytes = await file.length();
+            final double sizeInMb = sizeInBytes / (1024 * 1024);
+            
+            final String extension = file.path.split('.').last.toLowerCase();
+            final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+
+            if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
+              validFiles.add(file);
+            } else {
+              failedFiles.add(file.path.split('/').last);
+            }
+          }
+
+          if (validFiles.isNotEmpty) {
+            selectedImages.addAll(validFiles);
+            errors.remove('photos');
+          }
+
+          if (failedFiles.isNotEmpty) {
+            CustomSnackBar.showError(
+              message: "Some files were skipped. Max size 2MB, Formats: JPG, PNG",
+            );
+          }
         }
       },
     );
@@ -185,9 +169,32 @@ class RegBusinessController extends GetxController {
     
     // Listen to category changes
     bCategoryCtrl.addListener(_onCategoryChanged);
+
+    // Reactive error clearing
+    ever(errors, (_) {}); // Force refresh
+    bNameCtrl.addListener(() => errors.remove('businessName'));
+    bTypeCtrl.addListener(() => errors.remove('businessType'));
+    bCategoryCtrl.addListener(() => errors.remove('businessCategory'));
+    bDescCtrl.addListener(() => errors.remove('description'));
+    openingTimeCtrl.addListener(() => errors.remove('openingTime'));
+    closingTimeCtrl.addListener(() => errors.remove('closingTime'));
+    pinCodeCtrl.addListener(() => errors.remove('pincode'));
+    cityCtrl.addListener(() => errors.remove('city'));
+    districtCtrl.addListener(() => errors.remove('district'));
+    stateCtrl.addListener(() => errors.remove('state'));
+    countryCtrl.addListener(() => errors.remove('country'));
+    phoneCtrl.addListener(() => errors.remove('phone'));
+    emailCtrl.addListener(() => errors.remove('email'));
+    selectedImages.listen((_) => errors.remove('photos'));
+    
+    // Add small delay to end of setup to ensure all listeners have settled
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _ignorePincodeChange = false;
+    });
   }
 
   void _onPincodeChanged() {
+    if (_ignorePincodeChange) return;
     final pincode = pinCodeCtrl.text.trim();
     if (pincode.length == 6 && int.tryParse(pincode) != null) {
       _fetchAddressFromPincode(pincode);
@@ -431,67 +438,55 @@ class RegBusinessController extends GetxController {
     existingImages.removeAt(index);
   }
 
-  Future<void> onRegister() async {
-    // Comprehensive Validation
-    if (bNameCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please enter business name");
-      return;
-    }
-    if (bTypeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please select business type");
-      return;
-    }
+  bool validateBusinessFields() {
+    errors.clear();
+
+    if (bNameCtrl.text.trim().isEmpty) errors['businessName'] = "Please enter business name";
+    if (bTypeCtrl.text.trim().isEmpty) errors['businessType'] = "Please select business type";
     if (bCategoryCtrl.text.trim().isEmpty || bCategoryCtrl.text == "Select Category") {
-      CustomSnackBar.showError(message: "Please select business category");
-      return;
+      errors['businessCategory'] = "Please select business category";
     }
-    if (bDescCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please enter business description");
-      return;
-    }
-    if (openingTimeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please select opening time");
-      return;
-    }
-    if (closingTimeCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please select closing time");
-      return;
-    }
+    if (bDescCtrl.text.trim().isEmpty) errors['description'] = "Please enter business description";
+    if (openingTimeCtrl.text.trim().isEmpty) errors['openingTime'] = "Please select opening time";
+    if (closingTimeCtrl.text.trim().isEmpty) errors['closingTime'] = "Please select closing time";
+    
+    // Location
+    if (pinCodeCtrl.text.trim().isEmpty) errors['pincode'] = "Please enter pincode";
+    else if (pinCodeCtrl.text.trim().length != 6) errors['pincode'] = "Invalid pincode";
+    
+    if (cityCtrl.text.trim().isEmpty) errors['city'] = "Please enter city";
+    if (districtCtrl.text.trim().isEmpty) errors['district'] = "Please enter district";
+    if (stateCtrl.text.trim().isEmpty) errors['state'] = "Please enter state";
+    if (countryCtrl.text.trim().isEmpty) errors['country'] = "Please enter country";
+
+    // Contact
     if (phoneCtrl.text.trim().isEmpty) {
-      // Validate phone field component
-      final phoneValidation = phoneFieldKey.currentState?.validate();
-      if (phoneValidation != null) {
-        CustomSnackBar.showError(message: phoneValidation);
-        return;
-      }
+      errors['phone'] = "Please enter phone number";
+    } else if (phoneCtrl.text.trim().length < 10) {
+      errors['phone'] = "Phone number must be at least 10 digits";
     }
+    
     if (emailCtrl.text.trim().isEmpty) {
-      CustomSnackBar.showError(message: "Please enter email address");
-      return;
+      errors['email'] = "Please enter email address";
+    } else if (!GetUtils.isEmail(emailCtrl.text.trim())) {
+      errors['email'] = "Please enter a valid email";
     }
-     String website = websiteCtrl.text.trim();
-    // if (website.isEmpty || website == "https://") {
-    //   CustomSnackBar.showError(message: "Please enter website");
-    //   return;
-    // }
 
-    // Basic URL validation: must contain at least one dot and some characters after https://
-    // if (!website.contains(".") || website.length < 12) { // https://a.co is 12 chars
-    //   CustomSnackBar.showError(message: "Please enter a valid website URL");
-    //   return;
-    // }
-
-    // Check for images in new registration
+    // Photos
     if (!isEditMode && selectedImages.isEmpty) {
-      CustomSnackBar.showError(message: "Please add at least one business photo");
-      return;
+      errors['photos'] = "Please add at least one business photo";
+    } else if (isEditMode && existingImages.isEmpty && selectedImages.isEmpty) {
+      errors['photos'] = "Please add at least one business photo";
     }
 
-    // Check for images in edit mode (must have at least one image - either existing or new)
-    if (isEditMode && existingImages.isEmpty && selectedImages.isEmpty) {
-      CustomSnackBar.showError(message: "Please add at least one business photo");
-      return;
+    if (errors.isNotEmpty) {
+      return false;
     }
+    return true;
+  }
+
+  Future<void> onRegister() async {
+    if (!validateBusinessFields()) return;
 
     try {
       // Get IDs from maps
@@ -517,7 +512,16 @@ class RegBusinessController extends GetxController {
         "city": cityCtrl.text,
         "pincode": pinCodeCtrl.text,
         "opening_time": openingTime == null ? "" : "${openingTime!.hour.toString().padLeft(2, '0')}:${openingTime!.minute.toString().padLeft(2, '0')}",
-        "closing_time": closingTime == null ? "" : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}"
+        "closing_time": closingTime == null ? "" : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}",
+        // Adding nested location details as a fallback for Laravel/Matrimony-style endpoints
+        "location_details": {
+          "state": stateCtrl.text,
+          "district": districtCtrl.text,
+          "taluka": talukaCtrl.text,
+          "city": cityCtrl.text,
+          "pincode": pinCodeCtrl.text,
+          "country": countryCtrl.text,
+        }
       };
       print("registerbusiness : " + body.toString());
 
@@ -549,6 +553,7 @@ class RegBusinessController extends GetxController {
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           final data = response.data;
+          debugPrint("[RegBusinessController] Update Response: ${jsonEncode(data)}");
           if (data['success'] == true) {
             // Refresh list if controller exists
             if (Get.isRegistered<BusinessController>()) {
@@ -694,6 +699,111 @@ class RegBusinessController extends GetxController {
       if (Get.isDialogOpen ?? false) Get.back();
       print("Error initiating payment: $e");
       CustomSnackBar.showError(message: "Payment initialization failed: $e");
+    }
+  }
+
+  void _populateForm(Business business) {
+    debugPrint("[RegBusinessController] Populating form for: ${business.businessName}");
+    isEditMode = true;
+    businessId = business.id;
+    editingCategoryId = business.categoryId; // Store for async lookup in fetchCategories
+    
+    _ignorePincodeChange = true;
+    bNameCtrl.text = business.businessName ?? "";
+
+    // Handle Business Type
+    // The API might return the display name or the ID.
+    // Try to match the display name from the map if it's there
+    String? type = business.businessType;
+    if (type != null) {
+      if (type.toLowerCase() == "product") {
+        bTypeCtrl.text = "Product";
+      } else if (type.toLowerCase() == "service") {
+        bTypeCtrl.text = "Service";
+      } else {
+        // Direct set if it matches our list (e.g. "Proprietary /Partnership - LLP")
+        bTypeCtrl.text = type;
+      }
+    }
+
+    bDescCtrl.text = business.description ?? "";
+    phoneCtrl.text = business.contactPhone ?? "";
+    emailCtrl.text = business.contactEmail ?? "";
+    websiteCtrl.text = business.website ?? "";
+
+    // Pre-fill location fields
+    pinCodeCtrl.text = business.pincode ?? "";
+    cityCtrl.text = business.city ?? "";
+    districtCtrl.text = business.district ?? "";
+    talukaCtrl.text = business.taluka ?? "";
+    stateCtrl.text = business.state ?? "";
+    countryCtrl.text = business.country ?? "India";
+
+    // Handle Time (Supports HH:mm:ss from API)
+    if (business.opening_time != null && business.opening_time!.isNotEmpty) {
+      try {
+        // Use HH:mm:ss to match your provided JSON "09:00:00"
+        String timeStr = business.opening_time!;
+        DateTime openTime;
+        if (timeStr.split(':').length == 3) {
+          openTime = DateFormat("HH:mm:ss").parse(timeStr);
+        } else {
+          openTime = DateFormat("HH:mm").parse(timeStr);
+        }
+        openingTime = TimeOfDay.fromDateTime(openTime);
+        openingTimeCtrl.text = DateFormat.jm().format(openTime);
+      } catch (e) {
+        debugPrint("Error parsing opening time ($business.opening_time): $e");
+      }
+    }
+
+    if (business.closing_time != null && business.closing_time!.isNotEmpty) {
+      try {
+        String timeStr = business.closing_time!;
+        DateTime closeTime;
+        if (timeStr.split(':').length == 3) {
+          closeTime = DateFormat("HH:mm:ss").parse(timeStr);
+        } else {
+          closeTime = DateFormat("HH:mm").parse(timeStr);
+        }
+        closingTime = TimeOfDay.fromDateTime(closeTime);
+        closingTimeCtrl.text = DateFormat.jm().format(closeTime);
+      } catch (e) {
+        debugPrint("Error parsing closing time ($business.closing_time): $e");
+      }
+    }
+
+    // Handle Category
+    if (business.category != null) {
+      bCategoryCtrl.text = business.category!.name ?? "";
+    }
+
+    // Handle Existing Photo
+    if (business.photo != null && business.photo!.isNotEmpty) {
+      final photoUrl = business.photo!.startsWith('http') 
+          ? business.photo! 
+          : ApiConstants.imageBaseUrl + business.photo!;
+      existingImages.clear();
+      existingImages.add(photoUrl);
+    }
+
+    // Reset ignore flag after UI has updated
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _ignorePincodeChange = false;
+    });
+  }
+
+  Future<void> fetchBusinessDetails(int id) async {
+    try {
+      isDetailsLoading.value = true;
+      final business = await getBusinessDetailsUseCase(id);
+      if (business != null) {
+        _populateForm(business);
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: "Failed to load business details: $e");
+    } finally {
+      isDetailsLoading.value = false;
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/helper/country_list_picker.dart';
+import 'package:get/get.dart';
 
 class FormValidator {
   static String? name(String? value) {
@@ -154,52 +155,58 @@ class FormValidator {
   }
 
   static String? dob(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Please enter date of birth";
+    final error = date(value, "date_of_birth".tr);
+    if (error != null) return error;
+
+    final val = value!.trim();
+    int day, month, year;
+    final parts = val.split('/');
+    day = int.parse(parts[0]);
+    month = int.parse(parts[1]);
+    year = int.parse(parts[2]);
+
+    final parsedDate = DateTime(year, month, day);
+    final today = DateTime.now();
+    final minDate = DateTime(today.year - 18, today.month, today.day);
+
+    if (parsedDate.isAfter(minDate)) {
+      return "You must be at least 18 years old";
     }
-    
+
+    return null;
+  }
+
+  static String? date(String? value, String title) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter $title";
+    }
+
     final val = value.trim();
     int day, month, year;
-    
+
     final ddMMyyyy = RegExp(r'^(\d{2})/(\d{2})/(\d{4})$');
     Match? match = ddMMyyyy.firstMatch(val);
-    
+
     if (match != null) {
       day = int.parse(match.group(1)!);
       month = int.parse(match.group(2)!);
       year = int.parse(match.group(3)!);
     } else {
-      final yyyyMMdd = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
-      match = yyyyMMdd.firstMatch(val);
-      if (match != null) {
-        year = int.parse(match.group(1)!);
-        month = int.parse(match.group(2)!);
-        day = int.parse(match.group(3)!);
-      } else {
-        return "Enter a valid date (DD/MM/YYYY)";
-      }
+      return "Enter a valid date (DD/MM/YYYY)";
     }
-    
+
     // Validate bounds
-    if (year < 1900 || year > DateTime.now().year) return "Enter a valid year";
+    if (year < 1900 || year > 2100) return "Enter a valid year";
     if (month < 1 || month > 12) return "Enter a valid month (01-12)";
     if (day < 1 || day > 31) return "Enter a valid day";
-    
+
     final daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
       daysInMonth[2] = 29;
     }
-    
+
     if (day > daysInMonth[month]) return "Enter a valid date";
-    
-    final parsedDate = DateTime(year, month, day);
-    final today = DateTime.now();
-    final minDate = DateTime(today.year - 18, today.month, today.day);
-    
-    if (parsedDate.isAfter(minDate)) {
-      return "You must be at least 18 years old";
-    }
-    
+
     return null;
   }
 

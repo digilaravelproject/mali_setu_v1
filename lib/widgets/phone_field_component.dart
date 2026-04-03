@@ -20,12 +20,14 @@ class PhoneFieldComponent extends StatefulWidget {
   final String? initialPhone;
   final bool isRequired;
   final ValueChanged<String>? onChanged;
+  final String? errorText;
 
   const PhoneFieldComponent({
     super.key,
     this.initialPhone,
     this.isRequired = false,
     this.onChanged,
+    this.errorText,
   });
 
   @override
@@ -323,6 +325,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       isRequired: widget.isRequired,
       textInputType: TextInputType.phone,
       topPadding: 0,
+      errorText: widget.errorText,
       prefixIcon: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
         child: IntrinsicWidth(

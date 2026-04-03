@@ -64,14 +64,14 @@ class CustomButton extends StatelessWidget {
                 spacing: 8,
                 children: [
 
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: textColor ?? context.theme.colorScheme.onPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  // Text(
+                  //   title,
+                  //   style: TextStyle(
+                  //     color: textColor ?? context.theme.colorScheme.onPrimary,
+                  //     fontSize: 14,
+                  //     fontWeight: FontWeight.w600,
+                  //   ),
+                  // ),
                   //if (icon != null) ...[
 
                   if (leading != null) ...[

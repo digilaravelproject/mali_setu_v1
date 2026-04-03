@@ -44,6 +44,7 @@ class BusinessBinding extends Bindings {
 
     Get.lazyPut<RegBusinessController>(() => RegBusinessController(
       getBusinessCategoriesUseCase: Get.find<GetBusinessCategoriesUseCase>(),
+      getBusinessDetailsUseCase: Get.find<GetBusinessDetailsUseCase>(),
     ), fenix: true);
 
     Get.lazyPut<BusinessDataSource>(() => BusinessDataSourceImpl(apiClient: Get.find()), fenix: true);

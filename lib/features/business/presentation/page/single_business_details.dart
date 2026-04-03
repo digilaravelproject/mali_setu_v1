@@ -73,7 +73,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               final currentUser = authService.currentUser.value;
               final isOwner = currentUser?.id == business.userId;
               final topPadding = MediaQuery.of(context).padding.top;
-              final fixedHeight = isOwner ? 560.0 : 480.0;
+              final fixedHeight = 480.0;
 
               return NestedScrollView(
               controller: _outerScrollController,
@@ -83,7 +83,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                     sliver: SliverAppBar(
                       floating: false,
-                      pinned: true,
+                      pinned: false,
                       centerTitle: false,
                       backgroundColor: context.theme.scaffoldBackgroundColor,
                       elevation: innerBoxIsScrolled ? 4 : 0,
@@ -95,7 +95,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                         duration: const Duration(milliseconds: 200),
                         opacity: _showTitle.value ? 1.0 : 0.0,
                         child: Text(
-                          business.businessName ?? '',
+                          business.businessName?.toTitleCase() ?? '',
                           style: context.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
@@ -105,27 +105,45 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       )),
-                      leading: InkWell(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                           margin: const EdgeInsets.all(8),
-                           decoration: BoxDecoration(
-                             color: Colors.white,
-                             shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 5,
-                                )
-                              ]
-                           ),
-                           child: const Icon(
-                             Icons.arrow_back_ios_new,
-                             color: Colors.black87,
-                             size: 18,
-                           ),
-                        ),
+                      leading: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
+                      actions: [
+                        if (isOwner)
+                          PopupMenuButton<String>(
+                            offset: const Offset(0, 48),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
+                            onSelected: (value) {
+                              if (value == 'add_product') {
+                                Get.toNamed(AppRoutes.addProduct, arguments: business.id);
+                              } else if (value == 'add_service') {
+                                Get.toNamed(AppRoutes.addService, arguments: business.id);
+                              } else if (value == 'create_job') {
+                                if (Get.isRegistered<CreateJobController>()) {
+                                  Get.find<CreateJobController>().clearFields();
+                                }
+                                Get.toNamed(AppRoutes.createJob);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'add_product',
+                                child: Row(children: [Icon(Icons.add_box_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_product'.tr)]),
+                              ),
+                              PopupMenuItem(
+                                value: 'add_service',
+                                child: Row(children: [Icon(Icons.add_circle_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_service'.tr)]),
+                              ),
+                              PopupMenuItem(
+                                value: 'create_job',
+                                child: Row(children: [Icon(Icons.work_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('create_job'.tr)]),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 4),
+                      ],
                       flexibleSpace: FlexibleSpaceBar(
                         collapseMode: CollapseMode.pin,
                         background: OverflowBox(
@@ -136,13 +154,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                             children: [
                               SizedBox(height: MediaQuery.of(context).padding.top + 48),
                               _buildBusinessHeader(business, context),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 20),
                               _buildQuickActions(business, context),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 12),
                               _buildStatsRow(business, context),
-                              const SizedBox(height: 20),
-                              _buildManageSection(context),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
@@ -220,7 +236,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      business.businessName ?? 'unnamed_business'.tr,
+                      business.businessName?.toTitleCase() ?? 'unnamed_business'.tr,
                       style: context.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 24,
@@ -282,69 +298,60 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+                    _buildHeaderIconLabel(Icons.category_outlined, business.category?.name?.toTitleCase() ?? 'category'.tr, context),
+                    const SizedBox(height: 6),
+                    _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
                   ],
                 ),
               ),
               const SizedBox(width: 16),
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1.5),
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: business.photo != null
-                      ? Image.network(
-                    ApiConstants.imageBaseUrl+ business.photo!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
-                        )
-                      : _buildDetailPlaceholderIcon(),
-                ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: business.photo != null
+                          ? Image.network(
+                        ApiConstants.imageBaseUrl+ business.photo!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
+                            )
+                          : _buildDetailPlaceholderIcon(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      (business.verificationStatus ?? 'active').toTitleCase(),
+                      style: TextStyle(
+                        color: business.verificationStatus == 'active' ? Colors.green[800] : Colors.grey[800],
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 16,
-            runSpacing: 10,
-            children: [
-              _buildHeaderIconLabel(Icons.category_outlined, business.category?.name ?? 'category'.tr, context),
-             // _buildHeaderIconLabel(Icons.directions_walk, '6 min • 500 mts', context),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
           const SizedBox(height: 12),
           Row(
             children: [
               _buildTimingHighlight(business, context),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  (business.verificationStatus ?? 'active').toTitleCase(),
-                  style: TextStyle(
-                    color: business.verificationStatus == 'active' ? Colors.green[800] : Colors.grey[800],
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
             ],
           ),
         ],
@@ -375,71 +382,80 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   Widget _buildQuickActions(Business business, BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: context.theme.dividerColor.withOpacity(0.02),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.theme.dividerColor.withOpacity(0.2)),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildQuickActionButton(
-           "assets/icons/mobile.png",
-            'call'.tr,
-            Colors.blue,
-            context,
-            onTap: () => controller.launchPhone(business.user!.phone.toString()),
+          Expanded(
+            child: _buildQuickActionItem(
+              icon: Icons.phone_outlined,
+              label: 'call'.tr,
+              color: Colors.blue,
+              onTap: () => controller.launchPhone(business.user!.phone.toString()),
+            ),
           ),
-          const SizedBox(width: 24),
-          _buildQuickActionButton(
-            "assets/icons/gmail.png",
-            'email'.tr,
-            Colors.green,
-            context,
-            onTap: () => controller.launchEmail(business.user!.email.toString()),
+          _buildVerticalDivider(context, height: 30),
+          Expanded(
+            child: _buildQuickActionItem(
+              icon: Icons.email_outlined,
+              label: 'email'.tr,
+              color: Colors.red.shade400,
+              onTap: () => controller.launchEmail(business.user!.email.toString()),
+            ),
           ),
-          const SizedBox(width: 24),
-          _buildQuickActionButton(
-            "assets/icons/whatsapp.png",
-            'whatsapp'.tr,
-            Colors.green,
-            context,
-            onTap: () => controller.launchWhatsApp(business.user!.phone.toString()),
+          _buildVerticalDivider(context, height: 30),
+          Expanded(
+            child: _buildQuickActionItem(
+              icon: FontAwesomeIcons.whatsapp,
+              label: 'whatsapp'.tr,
+              color: Colors.green,
+              onTap: () => controller.launchWhatsApp(business.user!.phone.toString()),
+            ),
           ),
         ],
       ),
     );
   }
  
-  Widget _buildQuickActionButton(
-    String icon,
-    String label,
-    Color color,
-    BuildContext context, {
+  Widget _buildQuickActionItem({
+    required IconData icon,
+    required String label,
+    required Color color,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-             padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.14),
-              borderRadius: BorderRadius.circular(12),
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: Image.asset(
-              icon,
-             height: 28,
-             width: 28,
-             // color: color,
-              //size: 24,
-            ),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: context.textTheme.labelLarge?.copyWith(
+            style: const TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 13,
+              fontSize: 12,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -462,54 +478,67 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: context.theme.cardColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.theme.dividerColor.withOpacity(0.5)),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          ),
+          )
         ],
       ),
       child: Row(
         children: [
-          Expanded(child: _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.shopping_bag_outlined, context)),
+          Expanded(child: _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.shopping_bag_outlined, Colors.orange, context)),
           _buildVerticalDivider(context),
-          Expanded(child: _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, context)),
+          Expanded(child: _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, Colors.blue, context)),
           _buildVerticalDivider(context),
-          Expanded(child: _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, context)),
-          // _buildVerticalDivider(context),
-          // Expanded(child: _buildStatItem('value'.tr, '0', Icons.currency_rupee, context)),
+          Expanded(child: _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, Colors.green, context)),
         ],
       ),
     );
   }
 
-  Widget _buildVerticalDivider(BuildContext context) {
+  Widget _buildVerticalDivider(BuildContext context, {double height = 32}) {
     return Container(
-      height: 32,
+      height: height,
       width: 1,
-      color: context.theme.dividerColor.withOpacity(0.5),
+      color: context.theme.dividerColor.withOpacity(0.3),
     );
   }
  
-  Widget _buildStatItem(String label, String value, IconData icon, BuildContext context) {
+  Widget _buildStatItem(String label, String value, IconData icon, Color color, BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: context.iconColor, size: 22),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
         const SizedBox(height: 8),
         Text(
           value,
-          style: context.textTheme.titleMedium,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           label,
-          style: context.textTheme.bodySmall,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.black54,
+          ),
           textAlign: TextAlign.center,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -614,8 +643,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: context.theme.hoverColor,
+        color: Colors.grey.withOpacity(0.04), // Soft flat tint
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1300,55 +1330,82 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     }
   }
 
+  bool _isOpen(String? open, String? close) {
+    if (open == null || close == null || open.isEmpty || close.isEmpty) return false;
+    try {
+      final now = DateTime.now();
+      final openParts = open.split(':');
+      final closeParts = close.split(':');
+      
+      final nowMin = now.hour * 60 + now.minute;
+      final openMin = int.parse(openParts[0]) * 60 + int.parse(openParts[1]);
+      final closeMin = int.parse(closeParts[0]) * 60 + int.parse(closeParts[1]);
+
+      if (closeMin < openMin) {
+        // Closes past midnight (e.g. 10 PM to 2 AM)
+        return nowMin >= openMin || nowMin <= closeMin;
+      }
+      return nowMin >= openMin && nowMin <= closeMin;
+    } catch(e) {
+      return false; 
+    }
+  }
+
   Widget _buildTimingHighlight(Business business, BuildContext context) {
     final openTime = _formatTimeString(business.opening_time);
     final closeTime = _formatTimeString(business.closing_time);
+    final bool isOpen = _isOpen(business.opening_time, business.closing_time);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: context.theme.primaryColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: context.theme.primaryColor.withOpacity(0.2),
-          width: 1,
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: context.theme.primaryColor.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: context.theme.primaryColor.withOpacity(0.2),
+            width: 1,
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.access_time_filled_rounded,
-            size: 16,
-            color: context.theme.primaryColor,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            "$openTime - $closeTime",
-            style: context.textTheme.bodyMedium?.copyWith(
+        child: Row(
+          children: [
+            Icon(
+              Icons.access_time_filled_rounded,
+              size: 16,
               color: context.theme.primaryColor,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 4,
-            height: 4,
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                "$openTime - $closeTime",
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.theme.primaryColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            "Open",
-            style: context.textTheme.bodySmall?.copyWith(
-              color: Colors.green[700],
-              fontWeight: FontWeight.w600,
+            const SizedBox(width: 8),
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: isOpen ? Colors.green : Colors.red,
+                shape: BoxShape.circle,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Text(
+              isOpen ? "Open" : "Closed",
+              style: context.textTheme.bodySmall?.copyWith(
+                color: isOpen ? Colors.green[700] : Colors.red[700],
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

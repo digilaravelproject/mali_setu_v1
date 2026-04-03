@@ -28,6 +28,9 @@ class AddProductController extends GetxController {
   final int maxImages = 5;
   
   late int businessId;
+  
+  /// Validation Errors
+  final errors = <String, String>{}.obs;
 
   @override
   void onInit() {
@@ -38,6 +41,11 @@ class AddProductController extends GetxController {
       Get.back();
       // Get.snackbar("Error", "Business ID missing");
     }
+
+    // Reactive error clearing
+    nameController.addListener(() => errors.remove('name'));
+    descriptionController.addListener(() => errors.remove('description'));
+    priceController.addListener(() => errors.remove('price'));
   }
 
   @override
@@ -46,6 +54,34 @@ class AddProductController extends GetxController {
     descriptionController.dispose();
     priceController.dispose();
     super.onClose();
+  }
+
+  Future<void> pickMultipleImages() async {
+    try {
+      final List<XFile> images = await _picker.pickMultiImage(
+        imageQuality: 85,
+        maxWidth: 1080,
+        maxHeight: 1080,
+      );
+
+      if (images.isNotEmpty) {
+        for (var image in images) {
+          if (selectedImages.length < maxImages) {
+            selectedImages.add(File(image.path));
+          } else {
+            CustomSnackBar.showWarning(
+              message: 'You can only upload maximum $maxImages images',
+            );
+            break;
+          }
+        }
+        errors.remove('image');
+      }
+    } catch (e) {
+      CustomSnackBar.showError(
+        message: 'Error picking images: $e',
+      );
+    }
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -66,6 +102,7 @@ class AddProductController extends GetxController {
 
       if (image != null) {
         selectedImages.add(File(image.path));
+        errors.remove('image');
       }
     } catch (e) {
       CustomSnackBar.showError(
@@ -79,8 +116,25 @@ class AddProductController extends GetxController {
   }
 
   Future<void> createProduct() async {
-    if (!formKey.currentState!.validate()) {
-      return;
+    // Manual Reactive Validation
+    errors.clear();
+    
+    if (nameController.text.trim().isEmpty) {
+      errors['name'] = 'please_enter_product_name'.tr;
+    }
+    if (descriptionController.text.trim().isEmpty) {
+      errors['description'] = 'please_enter_product_description'.tr;
+    }
+    if (priceController.text.trim().isEmpty) {
+      errors['price'] = 'please_enter_product_price'.tr;
+    }
+    
+    if (selectedImages.isEmpty) {
+      errors['image'] = 'please_select_at_least_one_image'.tr;
+    }
+
+    if (errors.isNotEmpty) {
+       return;
     }
 
     isLoading.value = true;
@@ -145,7 +199,7 @@ class AddProductScreen extends StatelessWidget {
                   label: 'gallery'.tr,
                   onTap: () {
                     Navigator.pop(context);
-                    controller.pickImage(ImageSource.gallery);
+                    controller.pickMultipleImages();
                   },
                 ),
               ],
@@ -210,10 +264,34 @@ class AddProductScreen extends StatelessWidget {
               // Image Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    'product_images'.tr,
-                    style: context.textTheme.titleMedium,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'product_images'.tr,
+                              style: context.textTheme.titleMedium,
+                            ),
+                            const TextSpan(
+                              text: ' *',
+                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'image_upload_hint'.tr,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[600],
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                   Obx(() => Text(
                     '${controller.selectedImages.length}/${controller.maxImages}',
@@ -232,7 +310,10 @@ class AddProductScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.theme.dividerColor, width: 1),
+                    border: Border.all(
+                      color: controller.errors['image'] != null ? Colors.red : context.theme.dividerColor, 
+                      width: controller.errors['image'] != null ? 1.5 : 1,
+                    ),
                   ),
                   child: controller.selectedImages.isEmpty
                       ? Column(
@@ -320,32 +401,54 @@ class AddProductScreen extends StatelessWidget {
                   ),
                 ),
               )),
-              const SizedBox(height: 10),
+              const SizedBox(height: 4),
+              Obx(() => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (controller.errors['image'] != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          controller.errors['image']!,
+                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                  ],
+                ),
+              )),
+              // const SizedBox(height: 10),
 
-              AppInputTextField(
+              Obx(() => AppInputTextField(
                 label: "product_name".tr,
+                isRequired: true,
                 textInputType: TextInputType.text,
                 controller: controller.nameController,
                 hint: const [AutofillHints.name],
                 validator: FormValidator.name,
-              ),
-              const SizedBox(height: 8),
+                errorText: controller.errors['name'],
+              )),
+              // const SizedBox(height: 8),
 
-              AppInputTextField(
+              Obx(() => AppInputTextField(
                 label: "product_description".tr,
+                isRequired: true,
                 textInputType: TextInputType.text,
                 controller: controller.descriptionController,
                 hint: const [AutofillHints.name],
                 maxLines: 4,
                 validator: FormValidator.name,
-              ),
-              const SizedBox(height: 8),
-              AppInputTextField(
+                errorText: controller.errors['description'],
+              )),
+              // const SizedBox(height: 8),
+              Obx(() => AppInputTextField(
                 label: "product_price".tr,
+                isRequired: true,
                 textInputType: TextInputType.number,
                 controller: controller.priceController,
-              ),
-
+                errorText: controller.errors['price'],
+              )),
               // Product Name
               // const Text(
               //   'Product Name',

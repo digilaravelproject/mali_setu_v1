@@ -877,7 +877,18 @@ const Map<String, String> mrIN = {
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका",
   'search_volunteers' : "स्वयंसेवक शोधा",
+
+  // Product & Service validation messages
+  'image_upload_hint': 'फाईल स्वरूप: .jpg, .jpeg, .png | कमाल फाईल आकार: 2MB',
+  'please_select_at_least_one_image': 'कृपया किमान एक प्रतिमा निवडा',
+  'please_enter_product_name': 'कृपया उत्पादनाचे नाव प्रविष्ट करा',
+  'please_enter_product_description': 'कृपया उत्पादनाचे वर्णन प्रविष्ट करा',
+  'please_enter_product_price': 'कृपया उत्पादनाची किंमत प्रविष्ट करा',
+  'please_enter_service_name': 'कृपया सेवेचे नाव प्रविष्ट करा',
+  'please_enter_service_description': 'कृपया सेवेचे वर्णन प्रविष्ट करा',
+  'please_enter_service_price': 'कृपया सेवेची किंमत प्रविष्ट करा',
 };
+
 
 
 

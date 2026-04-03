@@ -409,6 +409,7 @@ class SingleDropdown extends StatelessWidget {
   final String? hint;
   final List<String> items;
   final bool isRequired;
+  final String? errorText;
 
   const SingleDropdown({
     super.key,
@@ -420,6 +421,7 @@ class SingleDropdown extends StatelessWidget {
     this.icon,
     this.hint,
     this.isRequired = false,
+    this.errorText,
   });
 
   @override
@@ -432,6 +434,7 @@ class SingleDropdown extends StatelessWidget {
       dropdownItems: items,
       iconData: prefixIcon != null ? prefixIcon : null, // prefix icon
       endIcon: suffixIcon != null ? suffixIcon : null,
+      errorText: errorText,
     );
   }
 }

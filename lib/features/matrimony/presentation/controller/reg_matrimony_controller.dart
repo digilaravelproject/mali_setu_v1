@@ -378,8 +378,6 @@ class RegMatrimonyController extends GetxController {
           curve: Curves.easeInOut,
         );
       }
-    } else {
-      CustomSnackBar.showError(message: "Please fill all required fields");
     }
   }
 
@@ -466,7 +464,6 @@ class RegMatrimonyController extends GetxController {
 
   Future<void> onRegister() async {
     if (!validateCurrentStep()) {
-      CustomSnackBar.showError(message: "Please fill all required fields");
       return;
     }
     try {

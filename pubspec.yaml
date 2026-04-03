@@ -111,6 +111,9 @@ flutter:
   assets:
     - assets/fonts/
     - assets/icons/
+    - assets/icons/gmail.png
+    - assets/icons/mobile.png
+    - assets/icons/whatsapp.png
     - assets/images/
     - assets/images/app_logo_en.png
     - assets/images/app_logo_mr.png

@@ -582,28 +582,27 @@ const Map<String, String> enUS = {
   'product_images': 'Product Images',
   'tap_to_add_images': 'Tap to add product images',
   'camera_or_gallery': 'Camera or Gallery',
+
+  'image_upload_hint': 'File format: .jpg, .jpeg, .png | Max file size: 2MB',
+  'please_select_at_least_one_image': 'Please select at least one image',
   'product_name': 'Product Name',
   'product_description': 'Product Description',
   'product_price': 'Product Price',
   'create_product': 'Create Product',
   'creating': 'Creating...',
-
-
-
-
+  'please_enter_product_name': 'Please enter product name',
+  'please_enter_product_description': 'Please enter product description',
+  'please_enter_product_price': 'Please enter product price',
   'upload_images': 'Upload Images',
   'add': 'Add',
   'service_name': 'Service Name',
   'service_description': 'Service Description',
   'service_price': 'Service Price',
   'create_service': 'Create Service',
+  'please_enter_service_name': 'Please enter service name',
+  'please_enter_service_description': 'Please enter service description',
+  'please_enter_service_price': 'Please enter service price',
 
-
-  'my_applications': 'My Applications',
-  'unknown_position': 'Unknown Position',
-  'unknown_business': 'Unknown Business',
-  'approved': 'approved',
-  'declined': 'declined',
   'na': 'N/A',
   'explore_jobs': 'Explore jobs and start applying!',
   'go_back': 'Go Back',

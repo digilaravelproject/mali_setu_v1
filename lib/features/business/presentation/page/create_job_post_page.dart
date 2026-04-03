@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import 'package:edu_cluezer/common/widgets/option_selector.dart';
 import 'package:edu_cluezer/core/helper/form_validator.dart';
+import 'package:edu_cluezer/core/helper/date_input_formatter.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 
@@ -36,19 +37,21 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               style: context.textTheme.labelMedium,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             SectionTitle('basic_information'.tr),
 
-            AppInputTextField(
+            Obx(() => AppInputTextField(
               label: 'job_title'.tr,
               isRequired: true,
               hintText: 'job_title_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.titleCtrl,
               validator: FormValidator.jobTitle,
-            ),
+              errorText: controller.errors['title'],
+            )),
+            // const SizedBox(height: 8),
 
-            AppInputTextField(
+            Obx(() => AppInputTextField(
               label: 'job_description'.tr,
               isRequired: true,
               hintText: 'job_description_hint'.tr,
@@ -57,9 +60,11 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               maxLines: 4,
               validator: (value) =>
                   FormValidator.jobDescription(value, 'job_description'.tr),
-            ),
+              errorText: controller.errors['description'],
+            )),
+            // const SizedBox(height: 8),
 
-            AppInputTextField(
+            Obx(() => AppInputTextField(
               label: 'requirements'.tr,
               isRequired: true,
               hintText: 'requirements_hint'.tr,
@@ -68,88 +73,93 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               maxLines: 4,
               validator: (value) =>
                   FormValidator.jobDescription(value, 'requirements'.tr),
-            ),
-
-            const SizedBox(height: 16),
+              errorText: controller.errors['requirements'],
+            )),
+            const SizedBox(height: 12),
 
             SectionTitle('job_details'.tr),
-            AppInputTextField(
+
+            Obx(() => AppInputTextField(
               label: 'salary_range'.tr,
               isRequired: true,
               hintText: 'salary_range_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.salaryRangeCtrl,
               validator: (v) => v!.isEmpty ? 'salary_required'.tr : null,
-            ),
-            SingleDropdown(
+              errorText: controller.errors['salary'],
+            )),
+            // const SizedBox(height: 8),
+            Obx(() => SingleDropdown(
               controller: controller.jobTypeCtrl,
               label: 'job_type'.tr,
               isRequired: true,
               items: controller.getJobTypes(),
-            ),
-            AppInputTextField(
+              errorText: controller.errors['jobType'],
+            )),
+            // const SizedBox(height: 8),
+            Obx(() => AppInputTextField(
               label: 'location'.tr,
               isRequired: true,
               hintText: 'location_hint'.tr,
               textInputType: TextInputType.text,
               controller: controller.locationCtrl,
               validator: (v) => v!.isEmpty ? 'location_required'.tr : null,
-            ),
-            SingleDropdown(
+              errorText: controller.errors['location'],
+            )),
+            // const SizedBox(height: 8),
+            Obx(() => SingleDropdown(
               controller: controller.experienceCtrl,
               label: 'experience_level'.tr,
               isRequired: true,
               items: controller.getExperienceLevels(),
-            ),
-            SingleDropdown(
+              errorText: controller.errors['experience'],
+            )),
+            // const SizedBox(height: 8),
+            Obx(() => SingleDropdown(
               controller: controller.employmentCtrl,
               label: 'employment_type'.tr,
               isRequired: true,
               items: controller.getEmploymentTypes(),
-            ),
-            SingleDropdown(
+              errorText: controller.errors['employment'],
+            )),
+            // const SizedBox(height: 8),
+            Obx(() => SingleDropdown(
               controller: controller.categoryCtrl,
               label: 'job_category'.tr,
               isRequired: true,
               items: controller.getCategories(),
               onOtherSelected: () => _showCustomCategoryDialog(context),
-            ),
-
-            const SizedBox(height: 16),
-            
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.selectDate(context, controller.deadlineCtrl),
-                    child: AbsorbPointer(
-                      child: AppInputTextField(
-                        label: 'application_deadline'.tr,
-                        isRequired: true,
-                        hintText: 'deadline_hint'.tr,
-                        controller: controller.deadlineCtrl,
-                        validator: (v) => v!.isEmpty ? 'deadline_required'.tr : null,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => controller.selectDate(context, controller.expiryCtrl),
-                    child: AbsorbPointer(
-                      child: AppInputTextField(
-                        label: 'job_expiry_date'.tr,
-                        isRequired: true,
-                        hintText: 'deadline_hint'.tr,
-                        controller: controller.expiryCtrl,
-                        validator: (v) => v!.isEmpty ? 'expiry_required'.tr : null,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              errorText: controller.errors['category'],
+            )),
+            // const SizedBox(height: 8),
+            Obx(() => AppInputTextField(
+              label: 'application_deadline'.tr,
+              isRequired: true,
+              hintText: 'DD/MM/YYYY',
+              controller: controller.deadlineCtrl,
+              textInputType: TextInputType.datetime,
+              inputFormatters: [DateInputFormatter()],
+              prefixIcon: GestureDetector(
+                onTap: () => controller.selectDate(context, controller.deadlineCtrl),
+                child: const Icon(Icons.calendar_today_rounded, size: 20),
+              ),
+              validator: (v) => FormValidator.date(v, 'application_deadline'.tr),
+              errorText: controller.errors['deadline'],
+            )),
+            Obx(() => AppInputTextField(
+              label: 'job_expiry_date'.tr,
+              isRequired: true,
+              hintText: 'DD/MM/YYYY',
+              controller: controller.expiryCtrl,
+              textInputType: TextInputType.datetime,
+              inputFormatters: [DateInputFormatter()],
+              prefixIcon: GestureDetector(
+                onTap: () => controller.selectDate(context, controller.expiryCtrl),
+                child: const Icon(Icons.calendar_today_rounded, size: 20),
+              ),
+              validator: (v) => FormValidator.date(v, 'job_expiry_date'.tr),
+              errorText: controller.errors['expiry'],
+            )),
 
             const SizedBox(height: 16),
 
@@ -429,6 +439,7 @@ class SingleDropdown extends StatelessWidget {
   final List<String> items;
   final bool isRequired;
   final VoidCallback? onOtherSelected;
+  final String? errorText;
 
   const SingleDropdown({
     super.key,
@@ -438,6 +449,7 @@ class SingleDropdown extends StatelessWidget {
     this.hint,
     this.isRequired = false,
     this.onOtherSelected,
+    this.errorText,
   });
 
   @override
@@ -449,6 +461,7 @@ class SingleDropdown extends StatelessWidget {
       isDropdown: true,
       dropdownItems: items,
       onOtherSelected: onOtherSelected,
+      errorText: errorText,
       validator: (v) => (v == null || v.isEmpty) ? "${label ?? 'no_label'.tr} ${'field_required'.tr}" : null,
     );
   }

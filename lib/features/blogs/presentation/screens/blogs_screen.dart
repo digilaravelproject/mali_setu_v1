@@ -78,7 +78,7 @@ class BlogsScreen extends StatelessWidget {
               Obx(() {
                 if (controller.isLoading.value && controller.blogs.isEmpty) {
                   return SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 20),
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => _buildShimmerCard(),
@@ -95,7 +95,7 @@ class BlogsScreen extends StatelessWidget {
                 }
 
                 return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 20),
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 100),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {

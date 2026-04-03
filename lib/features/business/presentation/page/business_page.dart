@@ -41,9 +41,11 @@ class BusinessScreen extends GetView<BusinessController> {
             return _buildShimmerLoading(context);
           }
 
-          return CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
+          return RefreshIndicator(
+            onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              slivers: [
               SliverAppBar(
                 expandedHeight: 70 + topPadding,
                 toolbarHeight: 70 + topPadding,
@@ -391,8 +393,9 @@ class BusinessScreen extends GetView<BusinessController> {
                  : const SizedBox.shrink()
                
              ),
-              const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
+              const SliverPadding(padding: EdgeInsets.only(bottom: 120)),
             ],
+          ),
           );
         }),
       ),

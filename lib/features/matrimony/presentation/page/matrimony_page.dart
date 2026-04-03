@@ -36,11 +36,12 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           extendBodyBehindAppBar: true,
           backgroundColor: Colors.grey[50],
           body: NestedScrollView(
+            physics: const NeverScrollableScrollPhysics(),
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
-                  expandedHeight: 140 + topPadding,
-                  toolbarHeight: 70 + topPadding,
+                  expandedHeight: 120 + topPadding,
+                  toolbarHeight: 60 + topPadding,
                   pinned: false,
                   floating: true,
                   backgroundColor: Colors.white.withOpacity(0.9),
