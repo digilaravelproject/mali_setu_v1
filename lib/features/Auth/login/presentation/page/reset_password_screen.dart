@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/helper/form_validator.dart';
+import '../../../../../core/utils/app_assets.dart';
 import '../../../../../widgets/basic_text_field.dart';
 import '../../../../../widgets/custom_buttons.dart';
+import '../../../../../widgets/custom_image_view.dart';
 import '../controller/reset_password_controller.dart';
 
 class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
@@ -53,19 +55,21 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
                   // Header section
                   Text(
                     'reset_password'.tr,
-                    style: theme.textTheme.headlineLarge?.copyWith(
+                    style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w700,
+                      fontSize: 24,
                     ),
                   ),
-                  const SizedBox(height: 12.0),
+                  const SizedBox(height: 8.0),
                   Text(
                     'enter_email_otp'.tr,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      height: 1.5,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      height: 1.4,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
 
-                  const SizedBox(height: 38.0),
+                  const SizedBox(height: 24.0),
 
                   Form(
                     key: controller.formKey,
@@ -80,16 +84,14 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
                           validator: FormValidator.email,
                         ),
 
-                        const SizedBox(height: 32.0),
+                        const SizedBox(height: 24.0),
 
                         // Submit button
-                        CustomButton(
-                          borderRadius: 12,
+                        Obx(() => CustomButton(
                           title: "send_otp".tr,
-                          // isLoading: controller.isLoading.value,
                           onPressed: controller.sendOtp,
-                          // controller.performLogin,
-                        ),
+                          isLoading: controller.isLoading.value,
+                        )),
                       ],
                     ),
                   ),
@@ -99,51 +101,8 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController>{
 
                   const SizedBox(height: 24.0),
 
-                  // Helper text
-                  Center(
-                    child: Text(
-                      'email_link_info'.tr,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                      ),
-                    ),
-                  ),
 
                   const Spacer(),
-
-                  // Footer/Decoration
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 40.0, top: 20.0),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 60.0,
-                            height: 4.0,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(2.0),
-                            ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          RichText(
-                            text: TextSpan(
-                              text: 'need_help'.tr,
-                              style: const TextStyle(color: Colors.grey),
-                              children: [
-                                TextSpan(
-                                  text: 'contact_support'.tr,
-                                  style: TextStyle(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -198,22 +157,32 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                     ),
                   ),
 
-                  // Header section
-                  Text(
-                    'create_new_password'.tr,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12.0),
-                  Text(
-                    'enter_otp_email'.tr,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      height: 1.5,
-                    ),
-                  ),
-
-                  const SizedBox(height: 30.0),
+            // const SizedBox(height: 50),
+            // Center(
+            //   child: CustomImageView(
+            //     imagePath: AppAssets.getAppLogo(),
+            //     height: 100,
+            //     width: 100,
+            //   ),
+            // ),
+            // const SizedBox(height: 32),
+            // Header section
+            Text(
+              'create_new_password'.tr,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 24,
+              ),
+            ),
+            const SizedBox(height: 12.0),
+            Text(
+              'enter_otp_email'.tr,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                height: 1.4,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 20.0),
 
                  Form(
                    key: controller.formKey,
@@ -230,8 +199,6 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                          //maxLength: 6,
                        ),
 
-                       const SizedBox(height: 16.0),
-
                        // New Password Field
                        Obx(
                              ()=>AppInputTextField(
@@ -246,10 +213,9 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                                : Icons.visibility_off,
                            onEndIconTap: () => controller.isPasswordVisible.toggle(),
                            validator: FormValidator.password,
+                           topPadding: 0,
                          ),
                        ),
-
-                       const SizedBox(height: 16.0),
 
                        // Confirm Password Field
                        Obx(
@@ -265,15 +231,15 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                                : Icons.visibility_off,
                            onEndIconTap: () => controller.isPasswordVisible.toggle(),
                            validator: FormValidator.password,
+                           topPadding: 0,
                          ),
                        ),
 
                        const SizedBox(height: 32.0),
 
                        // Submit button
-                       CustomButton(
-                           borderRadius: 12,
-                           title: "reset_password_btn".tr,
+                        CustomButton(
+                            title: "reset_password_btn".tr,
                            // isLoading: controller.isLoading.value,
                            onPressed: () {
                              controller.resetPassword();
@@ -295,18 +261,23 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                           color: Colors.grey.shade600,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Get.back();
-                        },
-                        child: Text(
-                          "resend_otp".tr,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                       const SizedBox(width: 5.0),
+                      Obx(() => GestureDetector(
+                        onTap: controller.isLoading.value ? null : controller.resendOtp,
+                        child: controller.isLoading.value
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(
+                                "resend_otp".tr,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      )),
                     ],
                   ),
 
@@ -320,30 +291,6 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                         children: [
 
                           const SizedBox(height: 20.0),
-                          Container(
-                            width: 60.0,
-                            height: 4.0,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(2.0),
-                            ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          RichText(
-                            text: TextSpan(
-                              text: 'need_help'.tr,
-                              style: TextStyle(color: Colors.grey.shade600),
-                              children: [
-                                TextSpan(
-                                  text: 'contact_support'.tr,
-                                  style: TextStyle(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     ),

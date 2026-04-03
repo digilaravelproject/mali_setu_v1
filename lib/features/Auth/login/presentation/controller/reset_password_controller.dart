@@ -76,16 +76,6 @@ class ResetPasswordController extends GetxController {
       if (response.success == true) {
         resetEmail.value = emailController.text.trim();
 
-        // if (response?.user != null) {
-        //   await SharedPrefs.setString(
-        //     AppConstants.userDataPref,
-        //     jsonEncode(response.user!.toJson()),
-        //   );
-        // }
-
-        // Set Logged In
-        //await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
-
         CustomSnackBar.showSuccess(message: response.message ?? "OTP send successful");
         Get.offAllNamed(
           AppRoutes.resetPasswordScreen,
@@ -95,6 +85,28 @@ class ResetPasswordController extends GetxController {
         );
       } else {
         CustomSnackBar.showError(message: response.message ?? "OTP send failed");
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> resendOtp() async {
+    try {
+      isLoading.value = true;
+
+      final reqModel = ReqResetPasswordModel(
+        email: emailController.text.trim(),
+      );
+
+      final response = await resetPasswordUseCase.sendOtp(reqModel);
+
+      if (response.success == true) {
+        CustomSnackBar.showSuccess(message: response.message ?? "OTP resent successful");
+      } else {
+        CustomSnackBar.showError(message: response.message ?? "OTP resend failed");
       }
     } catch (e) {
       CustomSnackBar.showError(message: e.toString());

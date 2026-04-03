@@ -786,7 +786,6 @@ class RegisterPage extends GetWidget<RegisterController> {
               CustomButton(
                 onPressed: controller.onRegister,
                 title: "create_account".tr,
-                height: 50,
               ),
               SizedBox(height: context.mediaQueryPadding.bottom + 16),
             ],

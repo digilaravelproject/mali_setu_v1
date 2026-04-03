@@ -11,6 +11,8 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final double? width;
   final IconData? icon;
+  final Widget? leading;
+  final double fontSize;
 
   const CustomButton({
     super.key,
@@ -18,11 +20,13 @@ class CustomButton extends StatelessWidget {
     required this.onPressed,
     this.backgroundColor,
     this.textColor,
-    this.height = 50,
-    this.borderRadius = 25,
+    this.height = 46, // Slightly more compact
+    this.borderRadius = 12, // More squared consistent look
     this.isLoading = false,
     this.width,
     this.icon,
+    this.leading,
+    this.fontSize = 15, // Standardized size
   });
 
   @override
@@ -34,8 +38,8 @@ class CustomButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(
-            vertical: isLoading ? 0 : 12,
-            horizontal: 12,
+            vertical: isLoading ? 0 : 8,
+            horizontal: 16,
           ),
           backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
           shape: RoundedRectangleBorder(
@@ -47,28 +51,40 @@ class CustomButton extends StatelessWidget {
           builder: (_) {
             if (isLoading) {
               return SizedBox.square(
-                dimension: 24,
-                child: const CircularProgressIndicator(strokeWidth: 2.5),
+                dimension: 20,
+                child: const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
               );
             } else {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 spacing: 8,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: textColor ?? context.theme.colorScheme.onPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (icon != null) ...[
+                  if (leading != null) ...[
+                    leading!,
+                  ] else if (icon != null) ...[
                     Icon(
                       icon,
+                      size: 18,
                       color: textColor ?? context.theme.colorScheme.onPrimary,
                     ),
                   ],
+                  Flexible(
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: textColor ?? context.theme.colorScheme.onPrimary,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ],
               );
             }
@@ -89,7 +105,9 @@ class CustomOutlinedButton extends StatelessWidget {
   final bool isLoading;
   final double? width;
   final IconData? icon;
+  final Widget? leading;
   final double borderWidth;
+  final double fontSize;
 
   const CustomOutlinedButton({
     super.key,
@@ -97,12 +115,14 @@ class CustomOutlinedButton extends StatelessWidget {
     required this.onPressed,
     this.borderColor,
     this.textColor,
-    this.height = 50,
-    this.borderRadius = 25,
+    this.height = 46,
+    this.borderRadius = 12,
     this.isLoading = false,
     this.width,
     this.icon,
-    this.borderWidth = 1.5,
+    this.leading,
+    this.borderWidth = 1.2,
+    this.fontSize = 15,
   });
 
   @override
@@ -116,8 +136,8 @@ class CustomOutlinedButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
           padding: EdgeInsets.symmetric(
-            vertical: isLoading ? 0 : 12,
-            horizontal: 12,
+            vertical: isLoading ? 0 : 8,
+            horizontal: 16,
           ),
           side: BorderSide(
             color: borderColor ?? effectiveColor,
@@ -129,29 +149,74 @@ class CustomOutlinedButton extends StatelessWidget {
         ),
         child: isLoading
             ? SizedBox.square(
-                dimension: 30,
+                dimension: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                  strokeWidth: 2,
                   color: effectiveColor,
                 ),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: effectiveColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                  if (leading != null) ...[
+                    leading!,
+                  ] else if (icon != null) ...[
+                    Icon(icon, color: effectiveColor, size: 18),
+                  ],
+                  Flexible(
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: effectiveColor,
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  if (icon != null) ...[
-                    const SizedBox(width: 8),
-                    Icon(icon, color: effectiveColor, size: 20),
-                  ],
                 ],
               ),
+      ),
+    );
+  }
+}
+
+class CustomTextButton extends StatelessWidget {
+  final String title;
+  final VoidCallback? onPressed;
+  final Color? textColor;
+  final double fontSize;
+  final FontWeight fontWeight;
+
+  const CustomTextButton({
+    super.key,
+    required this.title,
+    required this.onPressed,
+    this.textColor,
+    this.fontSize = 14,
+    this.fontWeight = FontWeight.w600,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: Size(0, 0),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: textColor ?? Theme.of(context).primaryColor,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+        ),
       ),
     );
   }

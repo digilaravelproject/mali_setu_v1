@@ -37,6 +37,7 @@ class AppInputTextField extends StatelessWidget {
   final Color? textColor;
   final VoidCallback? onOtherSelected;
   final bool isRequired;
+  final double topPadding;
 
   const AppInputTextField({
     super.key,
@@ -64,6 +65,7 @@ class AppInputTextField extends StatelessWidget {
     this.textColor,
     this.onOtherSelected,
     this.isRequired = false,
+    this.topPadding = 8,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
@@ -83,7 +85,7 @@ class AppInputTextField extends StatelessWidget {
       spacing: 6,
       children: [
         if (showLabel) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: topPadding),
           Row(
             children: [
               Flexible(

@@ -47,12 +47,12 @@ class AppColors {
   /// LIGHT MODE – Harmonized From Primary Color
   /// =================================================
 
-  static const Color lightBackground = Color(0xFFFFFAFD);
+  static const Color lightBackground = Color(0xFFFFFFFF);
 
   /// Slight pink tint
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFFFFFFF);
-  static const Color lightAppBar = Color(0xFFFFE4F0);
+  static const Color lightAppBar = Color(0xFFFFFFFF);
 
   static const Color lightTextPrimary = Color(0xFF1E1E1E);
   static const Color lightTextSecondary = Color(0xFF616161);

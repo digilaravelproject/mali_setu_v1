@@ -24,38 +24,39 @@ class LoginPage extends GetWidget<LoginController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 48),
+            const SizedBox(height: 50),
             // Logo at the top - centered (language-based)
             Center(
               child: CustomImageView(
                 imagePath: AppAssets.getAppLogo(),
-                height: 80,
-                width: 80,
+                height: 100,
+                width: 100,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Center(
               child: Column(
                 children: [
                   Text(
                     'welcome_back'.tr,
-                    style: context.textTheme.headlineLarge?.copyWith(
+                    style: context.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: 24,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Text(
                     'login_to_continue'.tr,
-                    style: context.textTheme.bodyLarge?.copyWith(
+                    style: context.textTheme.bodyMedium?.copyWith(
                       color: context.theme.colorScheme.onSurface.withValues(
-                        alpha: 0.7,
+                        alpha: 0.6,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Form(
               key: controller.formKey,
               child: Column(
@@ -68,7 +69,6 @@ class LoginPage extends GetWidget<LoginController> {
                     hint: const [AutofillHints.email],
                     validator: FormValidator.email,
                   ),
-                  const SizedBox(height: 16),
                   Obx(
                     () => AppInputTextField(
                       label: 'password_label'.tr,
@@ -82,6 +82,7 @@ class LoginPage extends GetWidget<LoginController> {
                           : Icons.visibility_off,
                       onEndIconTap: () => controller.isPasswordVisible.toggle(),
                       validator: FormValidator.password,
+                      topPadding: 0,
                     ),
                   ),
                   Row(
@@ -104,14 +105,13 @@ class LoginPage extends GetWidget<LoginController> {
                           ),
                         ],
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Get.toNamed(AppRoutes.emailPasswordReset);
-                        },
-                        child: Text('forget_password'.tr),
+                      CustomTextButton(
+                        title: 'forget_password'.tr,
+                        fontSize: 13,
+                        onPressed: () => Get.toNamed(AppRoutes.emailPasswordReset),
                       ),
                     ],
-                  ).marginSymmetric(vertical: 12),
+                  ).marginSymmetric(vertical: 8),
                   Obx(
                     () => CustomButton(
                       title: 'login_button'.tr,
@@ -124,13 +124,13 @@ class LoginPage extends GetWidget<LoginController> {
             ),
 
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Row(
                 children: [
                   Expanded(
                     child: Divider(
                       color: context.theme.colorScheme.outline.withValues(
-                        alpha: 0.3,
+                        alpha: 0.2,
                       ),
                     ),
                   ),
@@ -140,7 +140,7 @@ class LoginPage extends GetWidget<LoginController> {
                       'or'.tr,
                       style: context.textTheme.bodySmall?.copyWith(
                         color: context.theme.colorScheme.onSurface.withValues(
-                          alpha: 0.5,
+                          alpha: 0.4,
                         ),
                       ),
                     ),
@@ -148,7 +148,7 @@ class LoginPage extends GetWidget<LoginController> {
                   Expanded(
                     child: Divider(
                       color: context.theme.colorScheme.outline.withValues(
-                        alpha: 0.3,
+                        alpha: 0.2,
                       ),
                     ),
                   ),
@@ -156,30 +156,17 @@ class LoginPage extends GetWidget<LoginController> {
               ),
             ),
 
-            // Social Login Buttons
-            GestureDetector(
-              onTap: controller.googleSignIn,
-              child: Container(
-                decoration: AppDecorations.cardDecoration(context),
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 12,
-                  children: [
-                    CustomImageView(
-                      svgPath: AppAssets.icGoogle,
-                      width: 24,
-                      height: 24,
-                    ),
-                    Text(
-                      'sign_in_with_google'.tr,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+            // Social Login Button
+            CustomOutlinedButton(
+              title: 'sign_in_with_google'.tr,
+              leading: const CustomImageView(
+                svgPath: AppAssets.icGoogle,
+                height: 20,
+                width: 20,
               ),
+              onPressed: controller.googleSignIn,
+              textColor: context.theme.colorScheme.onSurface,
+              borderColor: context.theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
 
             Center(
@@ -192,19 +179,15 @@ class LoginPage extends GetWidget<LoginController> {
                       'dont_have_account'.tr,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.theme.colorScheme.onSurface.withValues(
-                          alpha: 0.7,
+                          alpha: 0.6,
                         ),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => Get.toNamed(AppRoutes.register),
-                      child: Text(
-                        'register'.tr,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    const SizedBox(width: 4),
+                    CustomTextButton(
+                      title: 'register'.tr,
+                      onPressed: () => Get.toNamed(AppRoutes.register),
+                      textColor: context.theme.colorScheme.primary,
                     ),
                   ],
                 ),
