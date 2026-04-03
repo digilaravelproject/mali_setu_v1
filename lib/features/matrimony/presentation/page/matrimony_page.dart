@@ -11,6 +11,7 @@ import 'dart:ui';
 
 import '../../../blogs/presentation/screens/full_image_screen.dart';
 import '../controller/matrimony_controller.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import '../../data/model/search_matrimony_response.dart';
@@ -195,18 +196,18 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             },
             body: Obx(() {
           final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+          print("hasPayment: $hasPayment");
           final hasMatrimony = Get.find<AuthService>().hasMatrimony();
           if (!hasMatrimony) {
             return _buildRestrictedView(context);
           }
           else if(!hasPayment){
-
+            return _buildPymentRestrictedView(context);
           }
           try {
             if (controller.isLoading.value) {
               return Center(child: CircularProgressIndicator(color: theme.primaryColor));
             }
-            
             if (controller.profiles.isEmpty) {
               return Center(
                 child: Column(
@@ -226,7 +227,6 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 ),
               );
             }
-
             return TabBarView(
               physics: const NeverScrollableScrollPhysics(),
               children: [
@@ -864,6 +864,73 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       ),
     );
   }
+
+
+
+  Widget _buildPymentRestrictedView(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.lock_person_rounded,
+                size: 80,
+                color: theme.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Access Restricted",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "First Purchase membership for matrimony",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  final regCtrl = Get.find<RegMatrimonyController>();
+                  regCtrl.fetchAndShowPlans();
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "Purchase Now",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
 
   UserProfile _mapToUserProfile(dynamic data) {

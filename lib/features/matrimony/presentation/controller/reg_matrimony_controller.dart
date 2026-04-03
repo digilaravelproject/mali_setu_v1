@@ -28,6 +28,14 @@ class RegMatrimonyController extends GetxController {
   /// NAME FIELD COMPONENT KEY
   final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
 
+  /// Incremented to force NameFieldComponent rebuild when prefill data arrives
+  final nameWidgetKey = 0.obs;
+
+  /// --- Name sub-controllers (mirrored from NameFieldComponent for reliable API access) ---
+  final titleCtrl = TextEditingController();
+  final firstNameCtrl = TextEditingController();
+  final lastNameCtrl = TextEditingController();
+
   /// --- Text Controllers ---
   final nameCtrl = TextEditingController();
   final dobCtrl = TextEditingController(); // Used for display
@@ -469,8 +477,20 @@ class RegMatrimonyController extends GetxController {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
-      // Get combined name from NameFieldComponent
-      final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
+      // Sync name from widget state if available (user may have typed after prefill)
+      final widgetState = nameFieldKey.currentState;
+      if (widgetState != null) {
+        titleCtrl.text = widgetState.titleCtrl.text;
+        firstNameCtrl.text = widgetState.firstNameCtrl.text;
+        lastNameCtrl.text = widgetState.lastNameCtrl.text;
+      }
+
+      // Get name parts directly from controller's own TextEditingControllers
+      final titleText = titleCtrl.text.trim();
+      final firstNameText = firstNameCtrl.text.trim();
+      final lastNameText = lastNameCtrl.text.trim();
+      final combinedName = [titleText, firstNameText, lastNameText]
+          .where((s) => s.isNotEmpty).join(' ');
       
       // Convert images to base64
       List<String> base64Photos = [];
@@ -500,10 +520,9 @@ class RegMatrimonyController extends GetxController {
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
         "personal_details": {
-          "name": combinedName,
-          "title": nameFieldKey.currentState?.titleCtrl.text ?? '',
-          "first_name": nameFieldKey.currentState?.firstNameCtrl.text ?? '',
-          "last_name": nameFieldKey.currentState?.lastNameCtrl.text ?? '',
+          "title": titleText,
+          "first_name": firstNameText,
+          "last_name": lastNameText,
           "gender": gender.value,
           "dob": dobCtrl.text,
           "annual_income": annualIncomeCtrl.text,
@@ -545,6 +564,7 @@ class RegMatrimonyController extends GetxController {
           "city": cityCtrl.text,
           "state": state.value,
           "country": country.value,
+          "pincode": pinCodeCtrl.text,
         },
         "partner_preferences": {
           "age_range": "20-30",
@@ -637,12 +657,32 @@ class RegMatrimonyController extends GetxController {
       // Personal details
       final personal = profile['personal_details'] as Map<String, dynamic>? ?? {};
       
-      // Name: set via NameFieldComponent after frame renders
+      // Name: set controller's own fields + sync to NameFieldComponent
+      final apiTitle = personal['title']?.toString() ?? '';
+      final apiFirstName = personal['first_name']?.toString() ?? '';
+      final apiLastName = personal['last_name']?.toString() ?? '';
       final fullName = personal['name']?.toString() ?? '';
+
+      // Set controller's own controllers (used in API body)
+      if (apiFirstName.isNotEmpty) {
+        titleCtrl.text = apiTitle;
+        firstNameCtrl.text = apiFirstName;
+        lastNameCtrl.text = apiLastName;
+      } else if (fullName.isNotEmpty) {
+        final parts = fullName.trim().split(RegExp(r'\s+'));
+        if (parts.length >= 3) {
+          titleCtrl.text = parts[0];
+          lastNameCtrl.text = parts.last;
+          firstNameCtrl.text = parts.sublist(1, parts.length - 1).join(' ');
+        } else if (parts.length == 2) {
+          firstNameCtrl.text = parts[0];
+          lastNameCtrl.text = parts[1];
+        } else {
+          firstNameCtrl.text = fullName;
+        }
+      }
       nameCtrl.text = fullName;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        nameFieldKey.currentState?.setName(fullName);
-      });
+      // nameWidgetKey increment not needed — external controllers are shared directly
 
       dobCtrl.text = personal['dob']?.toString() ?? '';
       if (dobCtrl.text.isNotEmpty) {
@@ -653,11 +693,19 @@ class RegMatrimonyController extends GetxController {
       }
       annualIncomeCtrl.text = personal['annual_income']?.toString() ?? '';
       jobTitleCtrl.text = personal['occupation']?.toString() ?? '';
-      gender.value = _safeValue(personal['gender']?.toString(), genderList);
+      gender.value = _safeValue(
+        (personal['gender']?.toString() ?? '').capitalizeFirst ?? '',
+        genderList,
+      );
       profileCreatedBy.value = _safeValue(personal['profile_created_by'], profileCreatedByList);
       language.value = _safeValue(personal['language'], languageList);
       citizenship.value = _safeValue(personal['citizenship'], citizenshipList);
-      employmentType.value = _safeValue(personal['employment_type'], employmentTypeList);
+      // employment_type: do case-insensitive match
+      final rawEmpType = personal['employment_type']?.toString() ?? '';
+      employmentType.value = employmentTypeList.firstWhere(
+        (e) => e.toLowerCase() == rawEmpType.toLowerCase(),
+        orElse: () => _safeValue(rawEmpType, employmentTypeList),
+      );
       familyType.value = _safeValue(personal['family_type'], familyTypeList);
       maritalStatus.value = _safeValue(personal['marital_status'], maritalStatusList);
       // blood_group: API may return "A" but list has "A+","A-" etc — try exact match first, then prefix match
@@ -696,8 +744,16 @@ class RegMatrimonyController extends GetxController {
       final family = profile['family_details'] as Map<String, dynamic>? ?? {};
       fatherOccupationCtrl.text = family['father']?.toString() ?? '';
       motherOccupationCtrl.text = family['mother']?.toString() ?? '';
-      familyClass.value = _safeValue(family['family_class'], familyClassList);
-      familyValue.value = _safeValue(family['family_value'], familyValueList);
+      final rawFamilyClass = family['family_class']?.toString() ?? '';
+      familyClass.value = familyClassList.firstWhere(
+        (e) => e.toLowerCase() == rawFamilyClass.toLowerCase(),
+        orElse: () => '',
+      );
+      final rawFamilyValue = family['family_value']?.toString() ?? '';
+      familyValue.value = familyValueList.firstWhere(
+        (e) => e.toLowerCase() == rawFamilyValue.toLowerCase(),
+        orElse: () => '',
+      );
 
       // Education details
       final edu = profile['education_details'] as Map<String, dynamic>? ?? {};
@@ -712,12 +768,24 @@ class RegMatrimonyController extends GetxController {
       // Lifestyle details
       final lifestyle = profile['lifestyle_details'] as Map<String, dynamic>? ?? {};
       diet.value = _safeValue(lifestyle['diet'], dietList);
-      smoking.value = _safeValue(lifestyle['smoking'], smokingList);
-      drinking.value = _safeValue(lifestyle['drinking'], drinkingList);
+      final rawSmoking = lifestyle['smoking']?.toString() ?? '';
+      smoking.value = smokingList.firstWhere(
+        (e) => e.toLowerCase() == rawSmoking.toLowerCase(),
+        orElse: () => smokingList.firstWhere(
+          (e) => rawSmoking.toLowerCase().contains(e.toLowerCase()),
+          orElse: () => '',
+        ),
+      );
+      final rawDrinking = lifestyle['drinking']?.toString() ?? '';
+      drinking.value = drinkingList.firstWhere(
+        (e) => e.toLowerCase() == rawDrinking.toLowerCase(),
+        orElse: () => '',
+      );
 
       // Location details
       final location = profile['location_details'] as Map<String, dynamic>? ?? {};
       cityCtrl.text = location['city']?.toString() ?? '';
+      pinCodeCtrl.text = location['pincode']?.toString() ?? '';
       final fetchedCountry = location['country']?.toString() ?? 'India';
       onCountryChanged(fetchedCountry);
       state.value = _safeValue(location['state']?.toString(), stateList.toList(), fallback: location['state']?.toString() ?? '');
@@ -810,6 +878,9 @@ class RegMatrimonyController extends GetxController {
 
   @override
   void onClose() {
+    titleCtrl.dispose();
+    firstNameCtrl.dispose();
+    lastNameCtrl.dispose();
     nameCtrl.dispose();
     dobCtrl.dispose();
     heightCtrl.dispose();

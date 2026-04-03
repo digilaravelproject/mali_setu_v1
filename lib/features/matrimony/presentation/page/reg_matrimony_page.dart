@@ -175,10 +175,17 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
             padding: const EdgeInsets.only(left: 16,right: 16,bottom: 16),
             child: Column(
               children: [
-                NameFieldComponent(
-                  key: controller.nameFieldKey,
-                  isRequired: true,
-                ),
+                Obx(() {
+                  final _ = controller.nameWidgetKey.value;
+                  return NameFieldComponent(
+                    key: controller.nameFieldKey,
+                    externalTitleCtrl: controller.titleCtrl,
+                    externalFirstNameCtrl: controller.firstNameCtrl,
+                    externalLastNameCtrl: controller.lastNameCtrl,
+                    isRequired: true,
+                    onChanged: (_) {},
+                  );
+                }),
                 const SizedBox(height: 12),
 
                 Obx(() => SelectionTile(

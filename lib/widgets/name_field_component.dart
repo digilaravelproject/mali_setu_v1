@@ -10,12 +10,19 @@ class NameFieldComponent extends StatefulWidget {
   final String? initialName;
   final bool isRequired;
   final ValueChanged<String>? onChanged;
+  // Optional external controllers — if provided, widget uses these instead of creating its own
+  final TextEditingController? externalTitleCtrl;
+  final TextEditingController? externalFirstNameCtrl;
+  final TextEditingController? externalLastNameCtrl;
 
   const NameFieldComponent({
     super.key,
     this.initialName,
     this.isRequired = false,
     this.onChanged,
+    this.externalTitleCtrl,
+    this.externalFirstNameCtrl,
+    this.externalLastNameCtrl,
   });
 
   @override
@@ -26,22 +33,29 @@ class NameFieldComponentState extends State<NameFieldComponent> {
   late TextEditingController titleCtrl;
   late TextEditingController firstNameCtrl;
   late TextEditingController lastNameCtrl;
+  bool _usingExternalControllers = false;
   final GlobalKey<FormState> nameFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    
-    // Parse initial name if provided
-    final components = widget.initialName != null && widget.initialName!.isNotEmpty
-        ? NameParser.parse(widget.initialName!)
-        : const NameComponents();
 
-    titleCtrl = TextEditingController(text: components.title);
-    firstNameCtrl = TextEditingController(text: components.firstName);
-    lastNameCtrl = TextEditingController(text: components.lastName);
+    if (widget.externalTitleCtrl != null) {
+      // Use external controllers — don't create or dispose them
+      _usingExternalControllers = true;
+      titleCtrl = widget.externalTitleCtrl!;
+      firstNameCtrl = widget.externalFirstNameCtrl!;
+      lastNameCtrl = widget.externalLastNameCtrl!;
+    } else {
+      // Create own controllers from initialName
+      final components = widget.initialName != null && widget.initialName!.isNotEmpty
+          ? NameParser.parse(widget.initialName!)
+          : const NameComponents();
+      titleCtrl = TextEditingController(text: components.title);
+      firstNameCtrl = TextEditingController(text: components.firstName);
+      lastNameCtrl = TextEditingController(text: components.lastName);
+    }
 
-    // Add listeners to notify parent of changes
     titleCtrl.addListener(_notifyChange);
     firstNameCtrl.addListener(_notifyChange);
     lastNameCtrl.addListener(_notifyChange);
@@ -55,9 +69,14 @@ class NameFieldComponentState extends State<NameFieldComponent> {
 
   @override
   void dispose() {
-    titleCtrl.dispose();
-    firstNameCtrl.dispose();
-    lastNameCtrl.dispose();
+    titleCtrl.removeListener(_notifyChange);
+    firstNameCtrl.removeListener(_notifyChange);
+    lastNameCtrl.removeListener(_notifyChange);
+    if (!_usingExternalControllers) {
+      titleCtrl.dispose();
+      firstNameCtrl.dispose();
+      lastNameCtrl.dispose();
+    }
     super.dispose();
   }
 
