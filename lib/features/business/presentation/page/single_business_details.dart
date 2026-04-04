@@ -464,41 +464,44 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
  
   Widget _buildStatsRow(Business business, BuildContext context) {
-    // Check if current user is the owner
-    final authService = Get.find<AuthService>();
-    final currentUser = authService.currentUser.value;
-    final isOwner = currentUser?.id == business.userId;
-    
-    // If owner, show all jobs count. Otherwise, hide pending jobs from count
-    final jobCount = isOwner 
-        ? controller.businessJobs.length 
-        : controller.businessJobs.where((j) => j.status != 'pending').length;
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(child: _buildStatItem('products'.tr, '${business.products?.length ?? 0}', Icons.shopping_bag_outlined, Colors.orange, context)),
-          _buildVerticalDivider(context),
-          Expanded(child: _buildStatItem('services'.tr, '${business.services?.length ?? 0}', Icons.design_services_outlined, Colors.blue, context)),
-          _buildVerticalDivider(context),
-          Expanded(child: _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, Colors.green, context)),
-        ],
-      ),
-    );
+    return Obx(() {
+      // Check if current user is the owner
+      final authService = Get.find<AuthService>();
+      final currentUser = authService.currentUser.value;
+      final b = controller.selectedBusiness.value ?? business;
+      final isOwner = currentUser?.id == b.userId;
+      
+      // If owner, show all jobs count. Otherwise, hide pending jobs from count
+      final jobCount = isOwner 
+          ? controller.businessJobs.length 
+          : controller.businessJobs.where((j) => j.status != 'pending').length;
+      
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(child: _buildStatItem('products'.tr, '${controller.businessProducts.length}', Icons.shopping_bag_outlined, Colors.orange, context)),
+            _buildVerticalDivider(context),
+            Expanded(child: _buildStatItem('services'.tr, '${controller.businessServices.length}', Icons.design_services_outlined, Colors.blue, context)),
+            _buildVerticalDivider(context),
+            Expanded(child: _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, Colors.green, context)),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildVerticalDivider(BuildContext context, {double height = 32}) {

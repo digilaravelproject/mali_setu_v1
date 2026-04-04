@@ -83,7 +83,10 @@ class LoginController extends GetxController {
 
   Future<void> googleSignIn() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      // Force sign out to ensure account selector shows up every time
+      await googleSignIn.signOut();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) return; // User canceled the sign-in
 
       // We have the googleUser, now call our backend API

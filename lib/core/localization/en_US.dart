@@ -884,8 +884,8 @@ const Map<String, String> enUS = {
   'taluka' : "Taluka",
   'clear_all' : "Clear All",
   'search_volunteers' : "Search Volunteers",
-
-
+  'unknown_position' : "Unknown Position",
+  'unknown_business' : "Unknown Business",
 };
 
 

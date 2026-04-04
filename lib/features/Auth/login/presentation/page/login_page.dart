@@ -68,6 +68,7 @@ class LoginPage extends GetWidget<LoginController> {
                     controller: controller.emailController,
                     hint: const [AutofillHints.email],
                     validator: FormValidator.email,
+                    isRequired: true,
                   ),
                   Obx(
                     () => AppInputTextField(
@@ -83,6 +84,7 @@ class LoginPage extends GetWidget<LoginController> {
                       onEndIconTap: () => controller.isPasswordVisible.toggle(),
                       validator: FormValidator.password,
                       topPadding: 0,
+                      isRequired: true,
                     ),
                   ),
                   Row(

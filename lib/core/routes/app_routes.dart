@@ -293,7 +293,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.appliedJobList,
       page: () => AppliedJobsScreen(),
-     // binding: VolunteerBinding(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
