@@ -875,7 +875,7 @@ const Map<String, String> enUS = {
   'blogs' : "Blogs",
   'contribute' : "Contribute",
   'whatsapp' : "Whatsapp",
-  'invalid_pincode' : "Invalid Pincode",
+  'invalid_pincode' : "No Match",
   'location_information' : "Location Information",
   'taluka' : "Taluka",
   'clear_all' : "Clear All",

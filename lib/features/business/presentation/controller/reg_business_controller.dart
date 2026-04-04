@@ -210,7 +210,9 @@ class RegBusinessController extends GetxController {
         cityCtrl.text = response.division;
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
-        countryCtrl.text = "India";
+        _ignorePincodeChange = true;
+        countryCtrl.text = response.country;
+        _ignorePincodeChange = false;
         talukaCtrl.text = response.name;
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       }
@@ -452,7 +454,7 @@ class RegBusinessController extends GetxController {
     
     // Location
     if (pinCodeCtrl.text.trim().isEmpty) errors['pincode'] = "Please enter pincode";
-    else if (pinCodeCtrl.text.trim().length != 6) errors['pincode'] = "Invalid pincode";
+    else if (pinCodeCtrl.text.trim().length < 5 || pinCodeCtrl.text.trim().length > 10) errors['pincode'] = "No Match";
     
     if (cityCtrl.text.trim().isEmpty) errors['city'] = "Please enter city";
     if (districtCtrl.text.trim().isEmpty) errors['district'] = "Please enter district";

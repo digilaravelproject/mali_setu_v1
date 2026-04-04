@@ -873,7 +873,7 @@ const Map<String, String> mrIN = {
   'contribute' : "योगदान द्या",
   'clear_all' : "सर्व हटवा",
   'whatsapp' : "व्हॉट्सअ‍ॅप",
-  'invalid_pincode' : "अयोग्य पिनकोड",
+  'invalid_pincode' : "निकाल सापडला नाही",
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका",
   'search_volunteers' : "स्वयंसेवक शोधा",

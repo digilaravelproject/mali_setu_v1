@@ -71,7 +71,7 @@ class AppInputTextField extends StatelessWidget {
     this.textColor,
     this.onOtherSelected,
     this.isRequired = false,
-    this.topPadding = 8,
+    this.topPadding = 2,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
