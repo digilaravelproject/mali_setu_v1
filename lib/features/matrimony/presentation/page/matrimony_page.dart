@@ -28,9 +28,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
     print("hasPayment: $hasPayment");
     final hasMatrimony = Get.find<AuthService>().hasMatrimony();
-    
-  //  return AnnotatedRegion<SystemUiOverlayStyle>(
-    
+
+    //  return AnnotatedRegion<SystemUiOverlayStyle>(
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -257,7 +257,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                 ],
                               ),
                             ),
-                         /* Container(
+                          /* Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
@@ -306,76 +306,76 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               ];
             },
             body: Obx(() {
-          final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
-          final hasMatrimony = Get.find<AuthService>().hasMatrimony();
+              final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+              final hasMatrimony = Get.find<AuthService>().hasMatrimony();
 
-          if (!hasMatrimony) {
-            return _buildRestrictedView(context);
-          }
-          else if(!hasPayment){
-            return _buildPymentRestrictedView(context);
-          }
-          try {
-            if (controller.isLoading.value) {
-              return Center(child: CircularProgressIndicator(color: theme.primaryColor));
-            }
-            if (controller.profiles.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              if (!hasMatrimony) {
+                return _buildRestrictedView(context);
+              }
+              else if(!hasPayment){
+                return _buildPymentRestrictedView(context);
+              }
+              try {
+                if (controller.isLoading.value) {
+                  return Center(child: CircularProgressIndicator(color: theme.primaryColor));
+                }
+                if (controller.profiles.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'no_matches_found'.tr,
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
-                    Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'no_matches_found'.tr,
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+                    _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
                   ],
-                ),
-              );
-            }
-            return TabBarView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
-                _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
-              ],
-            );
-          } catch (e) {
-            print("Error in matrimony page body: $e");
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'error_loading_profiles'.tr,
-                    style: TextStyle(
-                      color: Colors.red[500],
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                );
+              } catch (e) {
+                print("Error in matrimony page body: $e");
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'error_loading_profiles'.tr,
+                        style: TextStyle(
+                          color: Colors.red[500],
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => controller.fetchProfiles(),
+                        child: Text('retry'.tr),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => controller.fetchProfiles(),
-                    child: Text('retry'.tr),
-                  ),
-                ],
-              ),
-            );
-            }
-          }),
+                );
+              }
+            }),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildCardList(BuildContext context, List<UserProfile> list) {
     if (list.isEmpty) {
@@ -450,21 +450,21 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               children: [
                 // Reject Button
                 if (!isConnected)
-                _buildActionButton(
-                  onTap: () {
-                    try {
-                      final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
-                      controller.rejectRequest(currentProfileId);
-                      controller.swiperController.swipe(CardSwiperDirection.left);
-                    } catch (e) {
-                      print("Error rejecting request: $e");
-                    }
-                  },
-                  icon: Icons.close_rounded,
-                  color: Colors.redAccent,
-                  size: 30,
-                  elevation: 5,
-                )
+                  _buildActionButton(
+                    onTap: () {
+                      try {
+                        final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
+                        controller.rejectRequest(currentProfileId);
+                        controller.swiperController.swipe(CardSwiperDirection.left);
+                      } catch (e) {
+                        print("Error rejecting request: $e");
+                      }
+                    },
+                    icon: Icons.close_rounded,
+                    color: Colors.redAccent,
+                    size: 30,
+                    elevation: 5,
+                  )
                 else
                   const SizedBox(width: 56), // Placeholder to maintain spacing
 
@@ -631,8 +631,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                             ),
                           ),
                         ),
-                         if (user.isOnline)
-                           Container(
+                        if (user.isOnline)
+                          Container(
                             width: 12,
                             height: 12,
                             decoration: BoxDecoration(
@@ -640,7 +640,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
-                           ),
+                          ),
                       ],
                     ),
 
@@ -797,8 +797,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: currentIdx.value == index 
-                        ? Colors.white 
+                    color: currentIdx.value == index
+                        ? Colors.white
                         : Colors.white.withOpacity(0.4),
                   ),
                 );
@@ -1048,35 +1048,35 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     try {
       // If it's already a UserProfile (e.g. from local tests), return it
       if (data is UserProfile) return data;
-      
+
       if (data is MatrimonyProfile) {
-         return UserProfile(
-            id: data.id,
-            name: data.personalDetails?.name ?? 'no_name'.tr,
-            age: data.age ?? 0,
-            location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
-            occupation: data.professionalDetails?.jobTitle ?? data.personalDetails?.occupation ?? 'professional'.tr,
-            images: (data.personalDetails?.photos != null)
-                ? data.personalDetails!.photos!.map((e) => "${ApiConstants.imageBaseUrl}$e").toList()
-                : [],
-            imageUrl: (data.personalDetails?.photos != null && data.personalDetails!.photos!.isNotEmpty) 
-                ? "${ApiConstants.imageBaseUrl}${data.personalDetails!.photos![0]}" 
-                : null,
-            distance: 0.0, // Backend might need to provide this
-            isNew: data.createdAt != null && DateTime.now().difference(DateTime.parse(data.createdAt!)).inDays < 7,
-            isOnline: false,
-            interests: data.personalDetails?.hobbies ?? [],
-            connectionStatus: data.connectionStatus,
-         );
+        return UserProfile(
+          id: data.id,
+          name: data.personalDetails?.name ?? 'no_name'.tr,
+          age: data.age ?? 0,
+          location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
+          occupation: data.professionalDetails?.jobTitle ?? data.personalDetails?.occupation ?? 'professional'.tr,
+          images: (data.personalDetails?.photos != null)
+              ? data.personalDetails!.photos!.map((e) => "${ApiConstants.imageBaseUrl}$e").toList()
+              : [],
+          imageUrl: (data.personalDetails?.photos != null && data.personalDetails!.photos!.isNotEmpty)
+              ? "${ApiConstants.imageBaseUrl}${data.personalDetails!.photos![0]}"
+              : null,
+          distance: 0.0, // Backend might need to provide this
+          isNew: data.createdAt != null && DateTime.now().difference(DateTime.parse(data.createdAt!)).inDays < 7,
+          isOnline: false,
+          interests: data.personalDetails?.hobbies ?? [],
+          connectionStatus: data.connectionStatus,
+        );
       }
 
       // Fallback/Legacy Mapping
       final personal = data['personal_details'] ?? {};
       final location = data['location_details'] ?? {};
-      final List<String> legacyPhotos = personal['photos'] != null 
+      final List<String> legacyPhotos = personal['photos'] != null
           ? List<String>.from(personal['photos']).map((e) => "${ApiConstants.imageBaseUrl}$e").toList()
           : (data['image'] != null ? ["${ApiConstants.imageBaseUrl}${data['image']}"] : []);
-      
+
       return UserProfile(
         id: data['id'],
         name: personal['name'] ?? data['name'] ?? 'no_name'.tr,
