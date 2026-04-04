@@ -222,6 +222,7 @@ const Map<String, String> enUS = {
   // Dashboard - Home Page
   'welcome_back_comma': 'Welcome Back,',
   'search_here': 'Search here...',
+  'search_your_business': 'Search Your Business',
   'categories': 'Categories',
   'view_all': 'View All',
   'register_your_business': 'Register your Business',

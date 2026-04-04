@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -207,30 +208,17 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
                       ],
                     ),
                   ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 45,
-                  child: ElevatedButton(
-                    onPressed: selectedPlan == null
-                        ? null
-                        : () {
-                            HapticFeedback.mediumImpact();
-                            Get.back(result: selectedPlan);
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Get.theme.primaryColor,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade200,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      "Subscription",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                CustomButton(
+                  title: "Subscription",
+                  onPressed: selectedPlan == null
+                      ? null
+                      : () {
+                          HapticFeedback.mediumImpact();
+                          Get.back(result: selectedPlan);
+                        },
+                  fontSize: 18,
+                  borderRadius: 25,
+                  height: 48,
                 ),
               ],
             ),

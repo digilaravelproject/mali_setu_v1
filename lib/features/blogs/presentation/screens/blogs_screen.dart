@@ -123,43 +123,41 @@ class BlogsScreen extends StatelessWidget {
       highlightColor: Colors.grey.shade100,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image placeholder
-            Container(
-              height: 170,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(height: 14, width: 200, color: Colors.white),
+                  Container(height: 16, width: double.infinity, color: Colors.white),
                   const SizedBox(height: 8),
-                  Container(height: 11, width: 130, color: Colors.white),
-                  const SizedBox(height: 8),
-                  Container(height: 11, width: double.infinity, color: Colors.white),
-                  const SizedBox(height: 4),
-                  Container(height: 11, width: 160, color: Colors.white),
-                  const SizedBox(height: 10),
+                  Container(height: 16, width: 150, color: Colors.white),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
-                      Container(height: 11, width: 60, color: Colors.white),
-                      const Spacer(),
-                      Container(height: 11, width: 70, color: Colors.white),
+                      Container(height: 10, width: 80, color: Colors.white),
+                      const SizedBox(width: 10),
+                      Container(height: 10, width: 60, color: Colors.white),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  Container(height: 10, width: 100, color: Colors.white),
                 ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
           ],
@@ -282,87 +280,87 @@ class BlogsScreen extends StatelessWidget {
       onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0)),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 3))],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-              child: SizedBox(
-                height: 170,
-                width: double.infinity,
-                child: imageUrl != null
-                    ? Image.network(imageUrl, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false))
-                    : _blogPlaceholder(primaryColor, isVideo: false),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     blog.title ?? 'No Title',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1A1A1A)),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Color(0xFF1A1A1A),
+                      height: 1.3,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.person_outline_rounded, size: 13, color: Colors.grey[400]),
-                      const SizedBox(width: 3),
-                      Text(blog.user?.name ?? 'Unknown', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                      const SizedBox(width: 10),
-                      Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[400]),
-                      const SizedBox(width: 3),
-                      Text(blog.createdAt?.split('T')[0] ?? '', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                      Icon(Icons.person_outline_rounded, size: 12, color: Colors.grey[400]),
+                      const SizedBox(width: 4),
+                      Flexible(child: Text(blog.user?.name ?? 'Unknown', style: TextStyle(fontSize: 10, color: Colors.grey[500]), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      const SizedBox(width: 8),
+                      Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
+                      const SizedBox(width: 4),
+                      Text(blog.createdAt?.split('T')[0] ?? '', style: TextStyle(fontSize: 10, color: Colors.grey[500])),
                     ],
                   ),
                   if (blog.description != null && blog.description!.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(blog.description!, style: TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.4), maxLines: 2, overflow: TextOverflow.ellipsis),
-                  ],
-                  if (blog.tags != null && blog.tags!.isNotEmpty) ...[
                     const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 5, runSpacing: 4,
-                      children: blog.tags!.map((tag) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(color: primaryColor.withOpacity(0.08), borderRadius: BorderRadius.circular(20)),
-                        child: Text('#$tag', style: TextStyle(fontSize: 10, color: primaryColor, fontWeight: FontWeight.w600)),
-                      )).toList(),
+                    Text(
+                      blog.description!,
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600], height: 1.4),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       GestureDetector(
                         onTap: () => controller.toggleLike(blog.id ?? 0),
                         child: Row(
                           children: [
-                            Icon(blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded, size: 16, color: blog.isLiked == true ? primaryColor : Colors.grey[400]),
+                            Icon(
+                              blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded,
+                              size: 14,
+                              color: blog.isLiked == true ? primaryColor : Colors.grey[400],
+                            ),
                             const SizedBox(width: 4),
-                            Text('${blog.likesCount ?? 0} likes', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                            Text('${blog.likesCount ?? 0}', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
                           ],
                         ),
                       ),
                       const Spacer(),
-                      Row(
-                        children: [
-                          Text('Read More', style: TextStyle(fontSize: 12, color: primaryColor, fontWeight: FontWeight.w700)),
-                          const SizedBox(width: 3),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 11, color: primaryColor),
-                        ],
-                      ),
+                      Text('Read More', style: TextStyle(fontSize: 11, color: primaryColor, fontWeight: FontWeight.w700)),
+                      const SizedBox(width: 2),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 9, color: primaryColor),
                     ],
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                height: 90,
+                width: 90,
+                child: imageUrl != null
+                    ? Image.network(imageUrl, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false))
+                    : _blogPlaceholder(primaryColor, isVideo: false),
               ),
             ),
           ],
@@ -380,26 +378,82 @@ class BlogsScreen extends StatelessWidget {
       onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0)),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 3))],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    blog.title ?? 'No Title',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Color(0xFF1A1A1A),
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.person_outline_rounded, size: 12, color: Colors.grey[400]),
+                      const SizedBox(width: 4),
+                      Flexible(child: Text(blog.user?.name ?? 'Unknown', style: TextStyle(fontSize: 10, color: Colors.grey[500]), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      const SizedBox(width: 12),
+                      Icon(Icons.calendar_today_outlined, size: 11, color: Colors.grey[400]),
+                      const SizedBox(width: 4),
+                      Text(blog.createdAt?.split('T')[0] ?? '', style: TextStyle(fontSize: 10, color: Colors.grey[500])),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => controller.toggleLike(blog.id ?? 0),
+                        child: Row(
+                          children: [
+                            Icon(
+                              blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded,
+                              size: 14,
+                              color: blog.isLiked == true ? primaryColor : Colors.grey[400],
+                            ),
+                            const SizedBox(width: 4),
+                            Text('${blog.likesCount ?? 0}', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                          ],
+                        ),
+                      ),
+                      const Spacer(),
+                      Text('Watch Now', style: TextStyle(fontSize: 11, color: primaryColor, fontWeight: FontWeight.w700)),
+                      const SizedBox(width: 2),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 9, color: primaryColor),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+              borderRadius: BorderRadius.circular(10),
               child: Stack(
                 children: [
                   SizedBox(
-                    height: 170, width: double.infinity,
+                    height: 90,
+                    width: 90,
                     child: imageUrl != null
                         ? VideoThumbnailWidget(
                             key: ValueKey(imageUrl),
                             videoUrl: imageUrl,
-                            height: 170,
-                            width: double.infinity,
+                            height: 90,
+                            width: 90,
                             placeholder: _blogPlaceholder(primaryColor, isVideo: true),
                           )
                         : _blogPlaceholder(primaryColor, isVideo: true),
@@ -407,60 +461,13 @@ class BlogsScreen extends StatelessWidget {
                   Positioned.fill(
                     child: Center(
                       child: Container(
-                        width: 48, height: 48,
-                        decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.4), blurRadius: 12)]),
-                        child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle),
+                        child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
                       ),
                     ),
                   ),
-                  Positioned(bottom: 8, right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(16)),
-                      child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                        Icon(Icons.play_arrow_rounded, color: Colors.white, size: 12),
-                        SizedBox(width: 2),
-                        Text('Video', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600)),
-                      ]),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(blog.title ?? 'No Title', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1A1A1A)), maxLines: 2, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 6),
-                  Row(children: [
-                    Icon(Icons.person_outline_rounded, size: 13, color: Colors.grey[400]),
-                    const SizedBox(width: 3),
-                    Text(blog.user?.name ?? 'Unknown', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                    const SizedBox(width: 10),
-                    Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[400]),
-                    const SizedBox(width: 3),
-                    Text(blog.createdAt?.split('T')[0] ?? '', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                  ]),
-                  const SizedBox(height: 10),
-                  Row(children: [
-                    GestureDetector(
-                      onTap: () => controller.toggleLike(blog.id ?? 0),
-                      child: Row(children: [
-                        Icon(blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded, size: 16, color: blog.isLiked == true ? primaryColor : Colors.grey[400]),
-                        const SizedBox(width: 4),
-                        Text('${blog.likesCount ?? 0} likes', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                      ]),
-                    ),
-                    const Spacer(),
-                    Row(children: [
-                      Text('Watch Now', style: TextStyle(fontSize: 12, color: primaryColor, fontWeight: FontWeight.w700)),
-                      const SizedBox(width: 3),
-                      Icon(Icons.arrow_forward_ios_rounded, size: 11, color: primaryColor),
-                    ]),
-                  ]),
                 ],
               ),
             ),

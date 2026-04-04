@@ -24,7 +24,7 @@ class LoginController extends GetxController {
   var passwordController = TextEditingController();
 
   var isRemember = true.obs;
-  var isPasswordVisible = true.obs;
+  var isPasswordVisible = false.obs;
   var isLoading = false.obs;
   
   final formKey = GlobalKey<FormState>();
@@ -32,6 +32,21 @@ class LoginController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadSavedCredentials();
+    
+    // Immediately save preference when toggled
+    ever(isRemember, (bool value) {
+      SharedPrefs.setBool(AppConstants.isRememberPref, value);
+    });
+  }
+
+  void _loadSavedCredentials() {
+    bool isRememberMe = SharedPrefs.getBool(AppConstants.isRememberPref) ?? false;
+    isRemember.value = isRememberMe;
+    if (isRememberMe) {
+      emailController.text = SharedPrefs.getString(AppConstants.savedEmailPref) ?? "";
+      passwordController.text = SharedPrefs.getString(AppConstants.savedPasswordPref) ?? "";
+    }
   }
 
   Future<void> performLogin() async {
@@ -67,6 +82,17 @@ class LoginController extends GetxController {
 
         // Set Logged In
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
+
+        // Handle Remember Me logic
+        if (isRemember.value) {
+          await SharedPrefs.setBool(AppConstants.isRememberPref, true);
+          await SharedPrefs.setString(AppConstants.savedEmailPref, emailController.text.trim());
+          await SharedPrefs.setString(AppConstants.savedPasswordPref, passwordController.text);
+        } else {
+          await SharedPrefs.setBool(AppConstants.isRememberPref, false);
+          await SharedPrefs.remove(AppConstants.savedEmailPref);
+          await SharedPrefs.remove(AppConstants.savedPasswordPref);
+        }
 
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         Get.offAllNamed(AppRoutes.dashboard);

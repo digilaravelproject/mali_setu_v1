@@ -1030,7 +1030,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  final regCtrl = Get.find<RegMatrimonyController>();
+                  final regCtrl = Get.isRegistered<RegMatrimonyController>()
+                      ? Get.find<RegMatrimonyController>()
+                      : Get.put(RegMatrimonyController());
                   regCtrl.fetchAndShowPlans();
                 },
                 style: ElevatedButton.styleFrom(

@@ -129,6 +129,7 @@ class User {
   bool? hasPayment;
   bool? isMatrimony;
   String? paymentPurpose;
+  String? matrimonyApprovalStatus; // 🆕 ADDED
 
   User({
     this.id,
@@ -173,6 +174,7 @@ class User {
     this.hasPayment,
     this.isMatrimony,
     this.paymentPurpose,
+    this.matrimonyApprovalStatus,
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -219,6 +221,7 @@ class User {
     hasPayment = json['has_payment'];
     isMatrimony = json['is_matrimony'];
     paymentPurpose = json['payment_purpose'];
+    matrimonyApprovalStatus = json['matrimony_approval_status'];
   }
 
   Map<String, dynamic> toJson() {
@@ -265,6 +268,7 @@ class User {
     data['has_payment'] = hasPayment;
     data['is_matrimony'] = isMatrimony;
     data['payment_purpose'] = paymentPurpose;
+    data['matrimony_approval_status'] = matrimonyApprovalStatus;
     return data;
   }
 }

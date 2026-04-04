@@ -164,8 +164,8 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                       hint: ["enter_your_password".tr],
                       isObscure: !controller.isPasswordVisible.value,
                       endIcon: controller.isPasswordVisible.value
-                          ? Icons.remove_red_eye_rounded
-                          : Icons.visibility_off,
+                          ? Icons.visibility_off
+                          : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isPasswordVisible.toggle(),
                       validator: FormValidator.password,
                       topPadding: 0,
@@ -183,8 +183,8 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                       hint: ["enter_your_confirm_password".tr],
                       isObscure: !controller.isPasswordVisible.value,
                       endIcon: controller.isPasswordVisible.value
-                          ? Icons.remove_red_eye_rounded
-                          : Icons.visibility_off,
+                          ? Icons.visibility_off
+                          : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isPasswordVisible.toggle(),
                       validator: (value) {
                         if (value == null || value.isEmpty) {

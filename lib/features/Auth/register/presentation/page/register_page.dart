@@ -314,8 +314,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                       iconData: CupertinoIcons.lock_fill,
                       validator: FormValidator.password,
                       endIcon: controller.isPasswordValue.value
-                          ? Icons.remove_red_eye_rounded
-                          : Icons.visibility_off,
+                          ? Icons.visibility_off
+                          : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isPasswordValue.toggle(),
                       topPadding: 0,
                     ),
@@ -328,8 +328,8 @@ class RegisterPage extends GetWidget<RegisterController> {
                       isObscure: !controller.isCnfPasswordValue.value,
                       iconData: CupertinoIcons.lock_fill,
                       endIcon: controller.isCnfPasswordValue.value
-                          ? Icons.remove_red_eye_rounded
-                          : Icons.visibility_off,
+                          ? Icons.visibility_off
+                          : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isCnfPasswordValue.toggle(),
                       topPadding: 0,
                       validator: (value) {

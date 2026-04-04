@@ -5,6 +5,7 @@ import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_plan_model.dart';
@@ -12,6 +13,7 @@ import '../../../../core/helper/pincode_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
+import '../../../../features/Auth/service/auth_service.dart';
 import '../page/matrimony_subscription_plan.dart';
 
 class RegMatrimonyController extends GetxController {
@@ -109,6 +111,7 @@ class RegMatrimonyController extends GetxController {
   // Steps
   final currentStep = 0.obs;
   final errors = <String, String>{}.obs;
+  final approvalStatus = ''.obs; // 🆕 ADDED
 
   /// --- Static Data Lists ---
   final List<String> profileCreatedByList = ['Self', 'Parent', 'Sibling', 'Relative', 'Friend'];
@@ -362,10 +365,27 @@ class RegMatrimonyController extends GetxController {
   }
 
   int calculateAge() {
-    if (selectedDate == null) return 0;
+    DateTime? birthDate = selectedDate;
+    
+    // If selectedDate is null, try parsing from the text controller
+    if (birthDate == null && dobCtrl.text.isNotEmpty) {
+      try {
+        birthDate = DateFormat('dd/MM/yyyy').parse(dobCtrl.text);
+      } catch (e) {
+        // Fallback for different format or error
+        try {
+          birthDate = DateTime.parse(dobCtrl.text);
+        } catch (_) {
+          return 0;
+        }
+      }
+    }
+
+    if (birthDate == null) return 0;
+    
     final now = DateTime.now();
-    int age = now.year - selectedDate!.year;
-    if (now.month < selectedDate!.month || (now.month == selectedDate!.month && now.day < selectedDate!.day)) {
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
       age--;
     }
     return age;
@@ -405,6 +425,9 @@ class RegMatrimonyController extends GetxController {
       }
       if (rxDob.value.isEmpty) {
         errors['dob'] = "Please select date of birth";
+        isValid = false;
+      } else if (calculateAge() < 18) {
+        errors['dob'] = "Age must be at least 18 years";
         isValid = false;
       }
     } else if (currentStep.value == 1) {
@@ -584,6 +607,13 @@ class RegMatrimonyController extends GetxController {
       Get.back(); // Close Loading
 
       if (response.success == true) {
+        // Refresh User Profile to ensure Home/Matrimony tabs reflect registration status
+        try {
+          await Get.find<AuthService>().refreshProfile();
+        } catch (e) {
+          debugPrint("Note: Post-registration profile refresh failed: $e");
+        }
+
         Get.back(); // Close Registration Screen
         CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? "Profile Updated Successfully" : "Profile Created Successfully"));
 
@@ -620,16 +650,38 @@ class RegMatrimonyController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    print("DEBUG_MATRIMONY: onInit with arguments: ${Get.arguments}");
     fetchCasts();
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
     pinCodeCtrl.addListener(_onPincodeChanged);
 
+    // Register watchers for error clearing (moved from unreachable block)
+    ever(profileCreatedBy, (_) => errors.remove('profileCreatedBy'));
+    ever(gender, (_) => errors.remove('gender'));
+    ever(religion, (_) => errors.remove('religion'));
+    ever(education, (_) => errors.remove('education'));
+    ever(employmentType, (_) => errors.remove('employmentType'));
+    ever(familyType, (_) => errors.remove('familyType'));
+    ever(country, (_) => errors.remove('country'));
+    ever(state, (_) => errors.remove('state'));
+
+    cityCtrl.addListener(() => errors.remove('city'));
+
+    // DOB controller listener to sync with rxDob and clear error
+    dobCtrl.addListener(() {
+      rxDob.value = dobCtrl.text;
+      if (dobCtrl.text.isNotEmpty) {
+        errors.remove('dob');
+      }
+    });
 
     // If edit mode passed as argument, prefill
     if (Get.arguments == true) {
       isEditMode.value = true;
       prefillFromApi();
+    } else {
+      isEditMode.value = false;
     }
   }
 
@@ -637,20 +689,33 @@ class RegMatrimonyController extends GetxController {
   Future<void> prefillFromApi() async {
     try {
       isPreFilling.value = true;
+      print("DEBUG_MATRIMONY: Starting prefillFromApi");
       final raw = await _repository.getProfiles();
-      if (raw == null) return;
+      print("DEBUG_MATRIMONY: API response received: $raw");
+      
+      if (raw == null) {
+        print("DEBUG_MATRIMONY: API returned null");
+        return;
+      }
 
       final data = raw is Map<String, dynamic> ? raw : null;
-      if (data == null || data['success'] != true) return;
+      if (data == null || data['success'] != true) {
+        print("DEBUG_MATRIMONY: API success false or bad data structure");
+        return;
+      }
 
       final profile = data['data']?['profile'] as Map<String, dynamic>?;
-      if (profile == null) return;
+      if (profile == null) {
+        print("DEBUG_MATRIMONY: No profile data found in response");
+        return;
+      }
 
       // Top-level fields
       heightCtrl.text = profile['height']?.toString() ?? '';
       weightCtrl.text = profile['weight']?.toString() ?? '';
       complexion.value = _safeValue(profile['complexion'], complexionList);
       physicalStatus.value = _safeValue(profile['physical_status'], physicalStatusList);
+      approvalStatus.value = profile['approval_status']?.toString() ?? ''; // 🆕 ADDED
 
       // Personal details
       final personal = profile['personal_details'] as Map<String, dynamic>? ?? {};
@@ -827,26 +892,6 @@ class RegMatrimonyController extends GetxController {
   String _safeValue(String? value, List<String> list, {String fallback = ''}) {
     if (value == null || value.isEmpty) return fallback;
     return list.contains(value) ? value : fallback;
-    // Error clearing watchers
-    ever(profileCreatedBy, (_) => errors.remove('profileCreatedBy'));
-    ever(gender, (_) => errors.remove('gender'));
-    ever(religion, (_) => errors.remove('religion'));
-    ever(education, (_) => errors.remove('education'));
-    ever(employmentType, (_) => errors.remove('employmentType'));
-    ever(familyType, (_) => errors.remove('familyType'));
-    ever(country, (_) => errors.remove('country'));
-    ever(state, (_) => errors.remove('state'));
-
-    cityCtrl.addListener(() => errors.remove('city'));
-    
-    // DOB controller listener to sync with rxDob and clear error
-    dobCtrl.addListener(() {
-      rxDob.value = dobCtrl.text;
-      if (dobCtrl.text.isNotEmpty) {
-        errors.remove('dob');
-      }
-    });
-
   }
 
   void onCountryChanged(String countryName) {
