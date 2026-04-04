@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/constent/app_constants.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -779,7 +780,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: Image.network(
-                                      product.imagePath!,
+                                      ApiConstants.imageBaseUrl+product.imagePath!,
                                       fit: BoxFit.cover,
                                       errorBuilder: (c, e, s) => Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
                                     ),
@@ -890,7 +891,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 child: service.imagePath != null
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(service.imagePath!, fit: BoxFit.cover, errorBuilder: (c, e, s) => Icon(Icons.medical_services, color: context.theme.primaryColor)),
+                                        child: Image.network(ApiConstants.imageBaseUrl+service.imagePath!, fit: BoxFit.cover, errorBuilder: (c, e, s) => Icon(Icons.medical_services, color: context.theme.primaryColor)),
                                       )
                                     : Icon(Icons.medical_services, color: context.theme.primaryColor),
                               ),

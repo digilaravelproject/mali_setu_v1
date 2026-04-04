@@ -1,36 +1,24 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:edu_cluezer/core/helper/form_validator.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
-
-
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
-
-// Controller
 class AddProductController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
 
-  final RxList<File> selectedImages = <File>[].obs;
+  final Rx<File?> selectedImage = Rx<File?>(null);
   final ImagePicker _picker = ImagePicker();
   final RxBool isLoading = false.obs;
-  final int maxImages = 5;
-  
-  late int businessId;
-  
-  /// Validation Errors
   final errors = <String, String>{}.obs;
+  late int businessId;
 
   @override
   void onInit() {
@@ -39,10 +27,7 @@ class AddProductController extends GetxController {
       businessId = Get.arguments as int;
     } else {
       Get.back();
-      // Get.snackbar("Error", "Business ID missing");
     }
-
-    // Reactive error clearing
     nameController.addListener(() => errors.remove('name'));
     descriptionController.addListener(() => errors.remove('description'));
     priceController.addListener(() => errors.remove('price'));
@@ -56,152 +41,63 @@ class AddProductController extends GetxController {
     super.onClose();
   }
 
-  Future<void> pickMultipleImages() async {
-    try {
-      final List<XFile> images = await _picker.pickMultiImage(
-        imageQuality: 85,
-        maxWidth: 1080,
-        maxHeight: 1080,
-      );
-
-      if (images.isNotEmpty) {
-        for (var image in images) {
-          if (selectedImages.length < maxImages) {
-            selectedImages.add(File(image.path));
-          } else {
-            CustomSnackBar.showWarning(
-              message: 'You can only upload maximum $maxImages images',
-            );
-            break;
-          }
-        }
-        errors.remove('image');
-      }
-    } catch (e) {
-      CustomSnackBar.showError(
-        message: 'Error picking images: $e',
-      );
-    }
-  }
-
   Future<void> pickImage(ImageSource source) async {
-    if (selectedImages.length >= maxImages) {
-      CustomSnackBar.showWarning(
-        message: 'You can only upload maximum $maxImages images',
-      );
-      return;
-    }
-
     try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1080,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
+      final XFile? image = await _picker.pickImage(source: source, maxWidth: 1080, maxHeight: 1080, imageQuality: 85);
       if (image != null) {
-        selectedImages.add(File(image.path));
+        selectedImage.value = File(image.path);
         errors.remove('image');
       }
     } catch (e) {
-      CustomSnackBar.showError(
-        message: 'Error picking image: $e',
-      );
+      CustomSnackBar.showError(message: 'Error picking image: $e');
     }
   }
 
-  void removeImage(int index) {
-    selectedImages.removeAt(index);
-  }
+  void removeImage() => selectedImage.value = null;
 
   Future<void> createProduct() async {
-    // Manual Reactive Validation
     errors.clear();
-    
-    if (nameController.text.trim().isEmpty) {
-      errors['name'] = 'please_enter_product_name'.tr;
-    }
-    if (descriptionController.text.trim().isEmpty) {
-      errors['description'] = 'please_enter_product_description'.tr;
-    }
-    if (priceController.text.trim().isEmpty) {
-      errors['price'] = 'please_enter_product_price'.tr;
-    }
-    
-    if (selectedImages.isEmpty) {
-      errors['image'] = 'please_select_at_least_one_image'.tr;
-    }
-
-    if (errors.isNotEmpty) {
-       return;
-    }
+    if (nameController.text.trim().isEmpty) errors['name'] = 'please_enter_product_name'.tr;
+    if (descriptionController.text.trim().isEmpty) errors['description'] = 'please_enter_product_description'.tr;
+    if (priceController.text.trim().isEmpty) errors['price'] = 'please_enter_product_price'.tr;
+    if (selectedImage.value == null) errors['image'] = 'please_select_image'.tr;
+    if (errors.isNotEmpty) return;
 
     isLoading.value = true;
-
     final data = {
       'business_id': businessId,
       'name': nameController.text.trim(),
       'description': descriptionController.text.trim(),
       'cost': priceController.text.trim(),
     };
-
-    final businessController = Get.find<BusinessController>();
-    final success = await businessController.addProduct(data, selectedImages);
-
+    final success = await Get.find<BusinessController>().addProduct(data, [selectedImage.value!]);
     isLoading.value = false;
-
     if (success) {
       Get.back();
-      CustomSnackBar.showSuccess(
-        message: 'Product created successfully!',
-      );
+      CustomSnackBar.showSuccess(message: 'Product created successfully!');
     }
   }
 }
 
-// Stateless Screen
 class AddProductScreen extends StatelessWidget {
   const AddProductScreen({Key? key}) : super(key: key);
 
   void _showImageSourceDialog(BuildContext context, AddProductController controller) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'select_image_source'.tr,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Text('select_image_source'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildImageSourceOption(
-                  icon: Icons.camera_alt,
-                  label: 'camera'.tr,
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.pickImage(ImageSource.camera);
-                  },
-                ),
-                _buildImageSourceOption(
-                  icon: Icons.photo_library,
-                  label: 'gallery'.tr,
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.pickMultipleImages();
-                  },
-                ),
+                _buildOption(Icons.camera_alt, 'camera'.tr, () { Navigator.pop(context); controller.pickImage(ImageSource.camera); }),
+                _buildOption(Icons.photo_library, 'gallery'.tr, () { Navigator.pop(context); controller.pickImage(ImageSource.gallery); }),
               ],
             ),
             const SizedBox(height: 10),
@@ -211,33 +107,14 @@ class AddProductScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSourceOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildOption(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 40, color: Colors.black87),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
+        child: Column(children: [Icon(icon, size: 40, color: Colors.black87), const SizedBox(height: 8), Text(label)]),
       ),
     );
   }
@@ -245,432 +122,62 @@ class AddProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AddProductController());
-
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
-        ),
+        leading: IconButton(onPressed: Get.back, icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor)),
         title: Text("add_product".tr, style: context.textTheme.titleMedium),
       ),
-      body: Form(
-        key: controller.formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'product_images'.tr,
-                              style: context.textTheme.titleMedium,
-                            ),
-                            const TextSpan(
-                              text: ' *',
-                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'image_upload_hint'.tr,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('product_image'.tr, style: context.textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Obx(() => GestureDetector(
+              onTap: () => _showImageSourceDialog(context, controller),
+              child: Container(
+                height: 160,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: controller.errors['image'] != null ? Colors.red : context.theme.dividerColor,
+                    width: controller.errors['image'] != null ? 1.5 : 1,
                   ),
-                  Obx(() => Text(
-                    '${controller.selectedImages.length}/${controller.maxImages}',
-                    style: context.textTheme.bodySmall,
-                  )),
-                ],
+                ),
+                child: controller.selectedImage.value != null
+                    ? Stack(children: [
+                        ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(controller.selectedImage.value!, width: double.infinity, height: double.infinity, fit: BoxFit.cover)),
+                        Positioned(top: 8, right: 8, child: GestureDetector(
+                          onTap: controller.removeImage,
+                          child: Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), child: const Icon(Icons.close, color: Colors.white, size: 18)),
+                        )),
+                      ])
+                    : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Icon(Icons.add_photo_alternate_outlined, size: 50, color: context.theme.focusColor),
+                        const SizedBox(height: 8),
+                        Text('tap_to_add_images'.tr, style: context.textTheme.bodyLarge),
+                        Text('camera_or_gallery'.tr, style: context.textTheme.bodySmall),
+                      ]),
               ),
-              const SizedBox(height: 12),
-              Obx(() => GestureDetector(
-                onTap: controller.selectedImages.length < controller.maxImages
-                    ? () => _showImageSourceDialog(context, controller)
-                    : null,
-                child: Container(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(minHeight: 150),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: controller.errors['image'] != null ? Colors.red : context.theme.dividerColor, 
-                      width: controller.errors['image'] != null ? 1.5 : 1,
-                    ),
-                  ),
-                  child: controller.selectedImages.isEmpty
-                      ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 60,
-                        color: context.theme.focusColor,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'tap_to_add_images'.tr,
-                        style: context.textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'camera_or_gallery'.tr,
-                        style: context.textTheme.bodySmall,
-                      ),
-                    ],
-                  )
-                      : Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      ...List.generate(
-                        controller.selectedImages.length,
-                            (index) => Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                controller.selectedImages[index],
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Positioned(
-                              top: -8,
-                              right: -8,
-                              child: GestureDetector(
-                                onTap: () => controller.removeImage(index),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (controller.selectedImages.length < controller.maxImages)
-                        GestureDetector(
-                          onTap: () => _showImageSourceDialog(context, controller),
-                          child: Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: context.theme.hoverColor,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: context.theme.dividerColor,
-                                width: 1,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.add,
-                              size: 40,
-                              color: context.theme.focusColor,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              )),
-              const SizedBox(height: 4),
-              Obx(() => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (controller.errors['image'] != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          controller.errors['image']!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
-                        ),
-                      ),
-                  ],
-                ),
-              )),
-              // const SizedBox(height: 10),
-
-              Obx(() => AppInputTextField(
-                label: "product_name".tr,
-                isRequired: true,
-                textInputType: TextInputType.text,
-                controller: controller.nameController,
-                hint: const [AutofillHints.name],
-                validator: FormValidator.name,
-                errorText: controller.errors['name'],
-              )),
-              // const SizedBox(height: 8),
-
-              Obx(() => AppInputTextField(
-                label: "product_description".tr,
-                isRequired: true,
-                textInputType: TextInputType.text,
-                controller: controller.descriptionController,
-                hint: const [AutofillHints.name],
-                maxLines: 4,
-                validator: FormValidator.name,
-                errorText: controller.errors['description'],
-              )),
-              // const SizedBox(height: 8),
-              Obx(() => AppInputTextField(
-                label: "product_price".tr,
-                isRequired: true,
-                textInputType: TextInputType.number,
-                controller: controller.priceController,
-                errorText: controller.errors['price'],
-              )),
-              // Product Name
-              // const Text(
-              //   'Product Name',
-              //   style: TextStyle(
-              //     fontSize: 16,
-              //     fontWeight: FontWeight.w600,
-              //     color: Colors.black87,
-              //   ),
-              // ),
-              // const SizedBox(height: 8),
-              // TextFormField(
-              //   controller: controller.nameController,
-              //   decoration: InputDecoration(
-              //     hintText: 'Enter product name',
-              //     hintStyle: TextStyle(color: Colors.grey[400]),
-              //     filled: true,
-              //     fillColor: Colors.grey[50],
-              //     border: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: BorderSide(color: Colors.grey[300]!),
-              //     ),
-              //     enabledBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: BorderSide(color: Colors.grey[300]!),
-              //     ),
-              //     focusedBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: const BorderSide(color: Colors.blue, width: 2),
-              //     ),
-              //     errorBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: const BorderSide(color: Colors.red),
-              //     ),
-              //     contentPadding: const EdgeInsets.symmetric(
-              //       horizontal: 16,
-              //       vertical: 16,
-              //     ),
-              //   ),
-              //   validator: (value) {
-              //     if (value == null || value.trim().isEmpty) {
-              //       return 'Please enter product name';
-              //     }
-              //     if (value.trim().length < 3) {
-              //       return 'Name must be at least 3 characters';
-              //     }
-              //     return null;
-              //   },
-              // ),
-              //
-              //
-              // // Product Description
-              // const Text(
-              //   'Product Description',
-              //   style: TextStyle(
-              //     fontSize: 16,
-              //     fontWeight: FontWeight.w600,
-              //     color: Colors.black87,
-              //   ),
-              // ),
-              // const SizedBox(height: 8),
-              // TextFormField(
-              //   controller: controller.descriptionController,
-              //   maxLines: 5,
-              //   decoration: InputDecoration(
-              //     hintText: 'Enter product description',
-              //     hintStyle: TextStyle(color: Colors.grey[400]),
-              //     filled: true,
-              //     fillColor: Colors.grey[50],
-              //     border: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: BorderSide(color: Colors.grey[300]!),
-              //     ),
-              //     enabledBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: BorderSide(color: Colors.grey[300]!),
-              //     ),
-              //     focusedBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: const BorderSide(color: Colors.blue, width: 2),
-              //     ),
-              //     errorBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: const BorderSide(color: Colors.red),
-              //     ),
-              //     contentPadding: const EdgeInsets.symmetric(
-              //       horizontal: 16,
-              //       vertical: 16,
-              //     ),
-              //   ),
-              //   validator: (value) {
-              //     if (value == null || value.trim().isEmpty) {
-              //       return 'Please enter product description';
-              //     }
-              //     if (value.trim().length < 10) {
-              //       return 'Description must be at least 10 characters';
-              //     }
-              //     return null;
-              //   },
-              // ),
-              // const SizedBox(height: 24),
-              //
-              // // Product Price
-              // const Text(
-              //   'Product Price',
-              //   style: TextStyle(
-              //     fontSize: 16,
-              //     fontWeight: FontWeight.w600,
-              //     color: Colors.black87,
-              //   ),
-              // ),
-              // const SizedBox(height: 8),
-              // TextFormField(
-              //   controller: controller.priceController,
-              //   keyboardType: TextInputType.number,
-              //   inputFormatters: [
-              //     FilteringTextInputFormatter.digitsOnly,
-              //   ],
-              //   decoration: InputDecoration(
-              //     hintText: 'Enter product price',
-              //     hintStyle: TextStyle(color: Colors.grey[400]),
-              //     prefixIcon: const Padding(
-              //       padding: EdgeInsets.only(left: 16, right: 8),
-              //       child: Text(
-              //         '₹',
-              //         style: TextStyle(
-              //           fontSize: 18,
-              //           fontWeight: FontWeight.w600,
-              //           color: Colors.black87,
-              //         ),
-              //       ),
-              //     ),
-              //     prefixIconConstraints: const BoxConstraints(minWidth: 0),
-              //     filled: true,
-              //     fillColor: Colors.grey[50],
-              //     border: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: BorderSide(color: Colors.grey[300]!),
-              //     ),
-              //     enabledBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: BorderSide(color: Colors.grey[300]!),
-              //     ),
-              //     focusedBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: const BorderSide(color: Colors.blue, width: 2),
-              //     ),
-              //     errorBorder: OutlineInputBorder(
-              //       borderRadius: BorderRadius.circular(12),
-              //       borderSide: const BorderSide(color: Colors.red),
-              //     ),
-              //     contentPadding: const EdgeInsets.symmetric(
-              //       horizontal: 16,
-              //       vertical: 16,
-              //     ),
-              //   ),
-              //   validator: (value) {
-              //     if (value == null || value.trim().isEmpty) {
-              //       return 'Please enter product price';
-              //     }
-              //     final price = int.tryParse(value);
-              //     if (price == null || price <= 0) {
-              //       return 'Please enter a valid price';
-              //     }
-              //     return null;
-              //   },
-              // ),
-              // const SizedBox(height: 40),
-
-              // Create Product Button
-
-              SizedBox(height: 30,),
-
-
-              Obx(() => CustomButton(
-                onPressed: controller.isLoading.value ? null : controller.createProduct,
-                title: controller.isLoading.value ? "creating".tr : "create_product".tr,
-              )),
-
-              // Obx(() => SizedBox(
-              //   width: double.infinity,
-              //   height: 54,
-              //   child: ElevatedButton(
-              //     onPressed: controller.isLoading.value ? null : controller.createProduct,
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: Colors.blue,
-              //       foregroundColor: Colors.white,
-              //       elevation: 0,
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //       ),
-              //       disabledBackgroundColor: Colors.grey[300],
-              //     ),
-              //     child: controller.isLoading.value
-              //         ? const SizedBox(
-              //       height: 24,
-              //       width: 24,
-              //       child: CircularProgressIndicator(
-              //         strokeWidth: 2.5,
-              //         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              //       ),
-              //     )
-              //         : const Text(
-              //       'Create Product',
-              //       style: TextStyle(
-              //         fontSize: 16,
-              //         fontWeight: FontWeight.w600,
-              //       ),
-              //     ),
-              //   ),
-              // )),
-              const SizedBox(height: 20),
-            ],
-          ),
+            )),
+            Obx(() => controller.errors['image'] != null
+                ? Padding(padding: const EdgeInsets.only(top: 4, left: 4), child: Text(controller.errors['image']!, style: const TextStyle(color: Colors.red, fontSize: 12)))
+                : const SizedBox.shrink()),
+            const SizedBox(height: 8),
+            Obx(() => AppInputTextField(label: "product_name".tr, isRequired: true, textInputType: TextInputType.text, controller: controller.nameController, errorText: controller.errors['name'])),
+            Obx(() => AppInputTextField(label: "product_description".tr, isRequired: true, textInputType: TextInputType.text, controller: controller.descriptionController, maxLines: 4, errorText: controller.errors['description'])),
+            Obx(() => AppInputTextField(label: "product_price".tr, isRequired: true, textInputType: TextInputType.number, controller: controller.priceController, errorText: controller.errors['price'])),
+            const SizedBox(height: 24),
+            Obx(() => CustomButton(
+              onPressed: controller.isLoading.value ? null : controller.createProduct,
+              title: controller.isLoading.value ? "creating".tr : "create_product".tr,
+            )),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
-      // bottomNavigationBar: BottomAppBar(
-      //   padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      //   child: CustomButton(
-      //     title: "Register",
-      //     onPressed: controller.createProduct,
-      //   ),
-      // ),
     );
   }
 }
