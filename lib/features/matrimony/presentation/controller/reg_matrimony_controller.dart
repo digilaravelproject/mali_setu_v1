@@ -207,12 +207,7 @@ class RegMatrimonyController extends GetxController {
     // Only fetch if pincode is exactly 6 digits
     if (pincode.length == 6 && int.tryParse(pincode) != null) {
       _fetchAddressFromPincode(pincode);
-    } else {
-      if (pincode.length < 6) {
-        state.value = '';
-        cityCtrl.clear();
-      }
-    }
+    } 
     errors.remove('pincode');
   }
 
@@ -440,6 +435,9 @@ class RegMatrimonyController extends GetxController {
       }
       if (pinCodeCtrl.text.isEmpty) {
         errors['pincode'] = "Please enter pincode";
+        isValid = false;
+      } else if (pinCodeCtrl.text.trim().length < 5 || pinCodeCtrl.text.trim().length > 10) {
+        errors['pincode'] = "No Match";
         isValid = false;
       }
       if (country.value.isEmpty) {

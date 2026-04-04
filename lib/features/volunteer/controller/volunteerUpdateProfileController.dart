@@ -23,6 +23,7 @@ class VoluntProfileUpdateController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxBool isEdit = false.obs;
+  final RxMap<String, String?> errors = <String, String?>{}.obs;
 
   @override
   void onInit() {
@@ -33,6 +34,20 @@ class VoluntProfileUpdateController extends GetxController {
       isEdit.value = true;
       _prefillData();
     }
+
+    // Add listeners to clear errors
+    bioCtrl.addListener(() => errors.remove('bio'));
+    locationCtrl.addListener(() => errors.remove('location'));
+    experienceCtrl.addListener(() => errors.remove('experience'));
+    availabilityCtrl.addListener(() => errors.remove('availability'));
+    
+    // Clear list errors when items are added
+    ever(selectedSkills, (List<String> list) {
+      if (list.isNotEmpty) errors.remove('skills');
+    });
+    ever(selectedInterests, (List<String> list) {
+      if (list.isNotEmpty) errors.remove('interests');
+    });
   }
 
   void _prefillData() {
@@ -131,11 +146,7 @@ class VoluntProfileUpdateController extends GetxController {
 
   Future<void> onSaveProfile() async {
     // Validate all fields
-    final validationError = _validateProfile();
-    if (validationError != null) {
-      CustomSnackBar.showError(message: validationError);
-      return;
-    }
+    if (!_validateFields()) return;
 
     isLoading.value = true;
     update();
@@ -176,51 +187,49 @@ class VoluntProfileUpdateController extends GetxController {
     }
   }
 
-  /// Validate all profile fields
-  String? _validateProfile() {
+  /// Validate all profile fields and populate error map
+  bool _validateFields() {
+    errors.clear();
+
     // Bio validation
     if (bioCtrl.text.trim().isEmpty) {
-      return "Bio is required";
-    }
-    if (bioCtrl.text.trim().length < 10) {
-      return "Bio must be at least 10 characters";
-    }
-    if (bioCtrl.text.trim().length > 500) {
-      return "Bio cannot exceed 500 characters";
+      errors['bio'] = "Bio is required";
+    } else if (bioCtrl.text.trim().length < 10) {
+      errors['bio'] = "Bio must be at least 10 characters";
+    } else if (bioCtrl.text.trim().length > 500) {
+      errors['bio'] = "Bio cannot exceed 500 characters";
     }
 
     // Location validation
     if (locationCtrl.text.trim().isEmpty) {
-      return "Location is required";
+      errors['location'] = "Location is required";
     }
 
     // Experience validation
     if (experienceCtrl.text.trim().isEmpty) {
-      return "Experience level is required";
+      errors['experience'] = "Experience level is required";
     }
 
     // Availability validation
     if (availabilityCtrl.text.trim().isEmpty) {
-      return "Availability is required";
+      errors['availability'] = "Availability is required";
     }
 
     // Skills validation
     if (selectedSkills.isEmpty) {
-      return "Please add at least one skill";
-    }
-    if (selectedSkills.length > 10) {
-      return "You can add maximum 10 skills";
+      errors['skills'] = "Please add at least one skill";
+    } else if (selectedSkills.length > 10) {
+      errors['skills'] = "Maximum 10 skills allowed";
     }
 
     // Interests validation
     if (selectedInterests.isEmpty) {
-      return "Please add at least one interest";
-    }
-    if (selectedInterests.length > 10) {
-      return "You can add maximum 10 interests";
+      errors['interests'] = "Please add at least one interest";
+    } else if (selectedInterests.length > 10) {
+      errors['interests'] = "Maximum 10 interests allowed";
     }
 
-    return null; // All validations passed
+    return errors.isEmpty;
   }
 
   @override

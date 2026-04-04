@@ -71,7 +71,7 @@ class AppInputTextField extends StatelessWidget {
     this.textColor,
     this.onOtherSelected,
     this.isRequired = false,
-    this.topPadding = 8,
+    this.topPadding = 2,
     /// Dropdown
     this.isDropdown = false,
     this.dropdownItems,
@@ -243,7 +243,7 @@ class AppInputTextField extends StatelessWidget {
                           if (label != null)
                             Expanded(
                               child: Text(
-                                "Select $label",
+                                "${'select'.tr} $label",
                                 style: context.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.5,

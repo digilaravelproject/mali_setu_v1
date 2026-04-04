@@ -179,7 +179,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                       : null,
                   validator: (value) {
                     if (value == null || value.isEmpty) return 'enter_pincode'.tr;
-                    if (value.length != 6) return 'invalid_pincode'.tr;
+                    if (value.length < 5 || value.length > 10) return 'invalid_pincode'.tr;
                     return null;
                   },
                 ),

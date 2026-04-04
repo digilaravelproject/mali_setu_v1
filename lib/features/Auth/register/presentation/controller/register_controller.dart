@@ -105,13 +105,6 @@ class RegisterController extends GetxController {
     // Only fetch if pincode is exactly 6 digits
     if (pincode.length == 6 && int.tryParse(pincode) != null) {
       _fetchAddressFromPincode(pincode);
-    } else {
-      // Clear fields if pincode is invalid or incomplete
-      if (pincode.length < 6) {
-        stateCtrl.clear();
-        districtCtrl.clear();
-        cityCtrl.clear();
-      }
     }
   }
 

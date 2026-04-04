@@ -54,75 +54,57 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                 icon: Icons.person_outline,
                 colorScheme: colorScheme,
                 children: [
-                   AppInputTextField(
+                   Obx(() => AppInputTextField(
                     controller: controller.bioCtrl,
                     label: "bio".tr,
                     hintText: "bio_hint".tr,
                     maxLines: 4,
                     textInputType: TextInputType.multiline,
                     isRequired: true,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Bio is required";
-                      }
-                      if (value.trim().length < 10) {
-                        return "Bio must be at least 10 characters";
-                      }
-                      if (value.trim().length > 500) {
-                        return "Bio cannot exceed 500 characters";
-                      }
-                      return null;
-                    },
-                  ),
+                    topPadding: 0,
+                    errorText: controller.errors['bio'],
+                  )),
                   const SizedBox(height: 16),
-                  AppInputTextField(
+                  Obx(() => AppInputTextField(
                     controller: controller.locationCtrl,
                     label: "location".tr,
                     hintText: "location_hint".tr,
                     textInputType: TextInputType.text,
                     isRequired: true,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Location is required";
-                      }
-                      return null;
-                    },
-                  ),
+                    topPadding: 0,
+                    errorText: controller.errors['location'],
+                  )),
                   const SizedBox(height: 16),
-                  SingleDropdown(
+                  Obx(() => SingleDropdown(
                     controller: controller.experienceCtrl,
                     label: "experience_level".tr,
+                    hint: "level_hint".tr,
                     items: controller.expLevels,
                     isRequired: true,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Experience level is required";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  SingleDropdown(
+                    topPadding: 0,
+                    errorText: controller.errors['experience'],
+                  )),
+                  const SizedBox(height: 8),
+                  Obx(() => SingleDropdown(
                     controller: controller.availabilityCtrl,
                     label: "availability".tr,
+                    hint: "availability_hint".tr,
                     items: controller.availabilities,
                     isRequired: true,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Availability is required";
-                      }
-                      return null;
-                    },
-                  ),
+                    topPadding: 0,
+                    errorText: controller.errors['availability'],
+                  )),
                 ],
               ),
 
               const SizedBox(height: 16),
 
               // 2. Skills Section
-              _buildSectionCard(
+              Obx(() => _buildSectionCard(
                 title: "skills".tr,
                 icon: Icons.star_outline,
+                isRequired: true,
+                errorText: controller.errors['skills'],
                 colorScheme: colorScheme,
                 children: [
                   Row(
@@ -156,7 +138,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   const SizedBox(height: 16),
                   
                   // Selected Skills
-                  Obx(() => controller.selectedSkills.isNotEmpty ? Column(
+                  controller.selectedSkills.isNotEmpty ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -185,12 +167,12 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                       ),
                       const Divider(height: 24),
                     ],
-                  ) : const SizedBox.shrink()),
+                  ) : const SizedBox.shrink(),
 
                    // Popular Skills
                   Text("popular_skills".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                   const SizedBox(height: 8),
-                  Obx(() => Wrap(
+                  Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: controller.popularSkills.map((skill) => 
@@ -215,16 +197,18 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                         },
                       )
                     ).toList(),
-                  )),
+                  ),
                 ],
-              ),
+              )),
 
               const SizedBox(height: 16),
 
               // 3. Interests Section
-              _buildSectionCard(
+              Obx(() => _buildSectionCard(
                 title: "interests".tr,
                 icon: Icons.favorite_outline,
+                isRequired: true,
+                errorText: controller.errors['interests'],
                 colorScheme: colorScheme,
                 children: [
                    Row(
@@ -246,7 +230,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: colorScheme.primary,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(Icons.add, color: Colors.white),
@@ -258,7 +242,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   const SizedBox(height: 16),
                   
                   // Selected Interests
-                  Obx(() => controller.selectedInterests.isNotEmpty ? Column(
+                  controller.selectedInterests.isNotEmpty ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -274,25 +258,25 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                         runSpacing: 8,
                         children: controller.selectedInterests.map((interest) => 
                           Chip(
-                            label: Text(interest, style: const TextStyle(color: Colors.green, fontSize: 12)),
-                            backgroundColor: Colors.green.withOpacity(0.1),
+                            label: Text(interest, style: TextStyle(color: colorScheme.primary, fontSize: 12)),
+                            backgroundColor: colorScheme.primary.withOpacity(0.1),
                              shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
-                                side: BorderSide(color: Colors.green.withOpacity(0.2))
+                                side: BorderSide(color: colorScheme.primary.withOpacity(0.2))
                               ),
-                            deleteIcon: const Icon(Icons.close, size: 16, color: Colors.green),
+                            deleteIcon: Icon(Icons.close, size: 16, color: colorScheme.primary),
                             onDeleted: () => controller.removeInterest(interest),
                           )
                         ).toList(),
                       ),
                       const Divider(height: 24),
                     ],
-                  ) : const SizedBox.shrink()),
+                  ) : const SizedBox.shrink(),
 
                    // Popular Interests
                   Text("popular_interests".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
                   const SizedBox(height: 8),
-                  Obx(() => Wrap(
+                  Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: controller.popularInterests.map((interest) => 
@@ -303,7 +287,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                           fontSize: 12,
                         ),
                         selected: controller.selectedInterests.contains(interest),
-                        selectedColor: Colors.green,
+                        selectedColor: colorScheme.primary,
                         checkmarkColor: Colors.white,
                         backgroundColor: Colors.grey[100],
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -317,9 +301,9 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                         },
                       )
                     ).toList(),
-                  )),
+                  ),
                 ],
-              ),
+              )),
               const SizedBox(height: 30),
             ],
           ),
@@ -349,6 +333,8 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
     required IconData icon,
     required ColorScheme colorScheme,
     required List<Widget> children,
+    bool isRequired = false,
+    String? errorText,
   }) {
     return Container(
       width: double.infinity,
@@ -359,6 +345,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
         ],
+        border: errorText != null ? Border.all(color: Colors.red.shade200, width: 1) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,10 +355,20 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
               Icon(icon, size: 20, color: Colors.grey[700]),
               const SizedBox(width: 8),
               Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              if (isRequired)
+                const Text(" *", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
           const Divider(height: 24),
           ...children,
+          if (errorText != null)
+             Padding(
+               padding: const EdgeInsets.only(top: 8.0),
+               child: Text(
+                 errorText,
+                 style: TextStyle(color: Colors.red.shade400, fontSize: 12),
+               ),
+             ),
         ],
       ),
     );
@@ -385,7 +382,8 @@ class SingleDropdown extends StatelessWidget {
   final String? hint;
   final List<String> items;
   final bool isRequired;
-  final String? Function(String?)? validator;
+  final String? errorText;
+  final double? topPadding;
 
   const SingleDropdown({
     super.key,
@@ -394,7 +392,8 @@ class SingleDropdown extends StatelessWidget {
     this.label,
     this.hint,
     this.isRequired = false,
-    this.validator,
+    this.errorText,
+    this.topPadding,
   });
 
   @override
@@ -405,7 +404,8 @@ class SingleDropdown extends StatelessWidget {
       isDropdown: true,
       dropdownItems: items,
       isRequired: isRequired,
-      validator: validator,
+      errorText: errorText,
+      topPadding: topPadding ?? 2,
     );
   }
 }

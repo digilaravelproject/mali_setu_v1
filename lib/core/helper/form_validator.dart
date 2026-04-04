@@ -52,7 +52,7 @@ class FormValidator {
     return null;
   }
 
-  // Pincode validation (assuming Indian 6-digit pincode)
+  // Pincode validation (allows 5 to 10 characters for international support)
   static String? pincode(String? value) {
     if (value == null || value.trim().isEmpty) {
       return "Please enter pincode";
@@ -60,9 +60,9 @@ class FormValidator {
 
     String pin = value.trim();
 
-    // Must be exactly 6 digits
-    if (!RegExp(r'^\d{6}$').hasMatch(pin)) {
-      return "Enter a valid 6-digit pincode";
+    // Relaxed validation: 5 to 10 characters (digits or common zip formats)
+    if (pin.length < 5 || pin.length > 10) {
+      return "No Match";
     }
 
     return null;
