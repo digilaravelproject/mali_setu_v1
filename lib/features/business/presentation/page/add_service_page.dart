@@ -1,24 +1,14 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:get/get_utils/src/extensions/context_extensions.dart';
+import 'package:get/get.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:edu_cluezer/core/helper/form_validator.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
-/*class AddServiceController extends GetxController {
+class AddServiceController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -27,325 +17,8 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
   final Rx<File?> selectedImage = Rx<File?>(null);
   final ImagePicker _picker = ImagePicker();
   final RxBool isLoading = false.obs;
-
-  @override
-  void onClose() {
-    nameController.dispose();
-    descriptionController.dispose();
-    priceController.dispose();
-    super.onClose();
-  }
-
-  Future<void> pickImage(ImageSource source) async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1080,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        selectedImage.value = File(image.path);
-      }
-    } catch (e) {
-      CustomSnackBar.showError(
-        message: 'Error picking image: $e',
-      );
-    }
-  }
-
-  void removeImage() {
-    selectedImage.value = null;
-  }
-
-  Future<void> createProduct() async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (selectedImage.value == null) {
-      CustomSnackBar.showError(
-        message: 'Please select a product image',
-      );
-      return;
-    }
-
-    isLoading.value = true;
-
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    isLoading.value = false;
-
-    // Show success message
-    CustomSnackBar.showSuccess(
-      message: 'Product created successfully!',
-    );
-
-    // Clear form
-    nameController.clear();
-    descriptionController.clear();
-    priceController.clear();
-    selectedImage.value = null;
-  }
-}
-
-// Stateless Screen
-class AddServiceScreen extends StatelessWidget {
-  const AddServiceScreen({Key? key}) : super(key: key);
-
-  void _showImageSourceDialog(BuildContext context, AddServiceController controller) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Select Image Source',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildImageSourceOption(
-                  icon: Icons.camera_alt,
-                  label: 'Camera',
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.pickImage(ImageSource.camera);
-                  },
-                ),
-                _buildImageSourceOption(
-                  icon: Icons.photo_library,
-                  label: 'Gallery',
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.pickMultipleImages();
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildImageSourceOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 40, color: Colors.black87),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(AddServiceController());
-
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
-        ),
-        title: Text("Add Service", style: context.textTheme.titleMedium),
-      ),
-      body: Form(
-        key: controller.formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Section
-              Text(
-                'Product Image',
-                style: context.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 12),
-              Obx(() => GestureDetector(
-                onTap: () => _showImageSourceDialog(context, controller),
-                child: Container(
-                  height: 150,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    //   color: context.theme.hoverColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.theme.dividerColor, width: 1),
-                  ),
-                  child: controller.selectedImage.value != null
-                      ? Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          controller.selectedImage.value!,
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: controller.removeImage,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                      : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 60,
-                        color:context.theme.focusColor,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                          'Tap to add product image',
-                          style:context.textTheme.bodyLarge
-
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                          'Camera or Gallery',
-                          style:context.textTheme.bodySmall
-
-                      ),
-                    ],
-                  ),
-                ),
-              )),
-              const SizedBox(height: 10),
-
-              AppInputTextField(
-                label: "Product Name ",
-                // iconData: CupertinoIcons.mail_solid,
-                textInputType: TextInputType.text,
-                //controller: controller.mobileController,
-                hint: const [AutofillHints.name],
-                validator: FormValidator.name,
-              ),
-              const SizedBox(height: 8),
-
-              AppInputTextField(
-                label: "Product Description",
-                // iconData: CupertinoIcons.mail_solid,
-                textInputType: TextInputType.text,
-                //controller: controller.mobileController,
-                hint: const [AutofillHints.name],
-                maxLines: 4,
-                validator: FormValidator.name,
-              ),
-              const SizedBox(height: 8),
-              AppInputTextField(
-                label: "Product Price",
-                // iconData: CupertinoIcons.mail_solid,
-                textInputType: TextInputType.number,
-                //controller: controller.mobileController,
-                //hint: const [AutofillHints.n],
-                validator:(value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter product price';
-                  }
-                  final price = int.tryParse(value);
-                  if (price == null || price <= 0) {
-                    return 'Please enter a valid price';
-                  }
-                  return null;
-                },
-              ),
-
-
-
-              SizedBox(height: 30,),
-
-
-              CustomButton(onPressed: controller.createProduct, title: "Create Product"),
-
-
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-
-    );
-  }
-}*/
-
-
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import 'package:get/get.dart';
-
-// Controller
-class AddServiceController extends GetxController {
-  final formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final priceController = TextEditingController();
-
-  final RxList<File> selectedImages = <File>[].obs;
-  final ImagePicker _picker = ImagePicker();
-  final RxBool isLoading = false.obs;
-  final int maxImages = 5;
-
-  late int businessId;
-  
-  /// Validation Errors
   final errors = <String, String>{}.obs;
+  late int businessId;
 
   @override
   void onInit() {
@@ -354,10 +27,7 @@ class AddServiceController extends GetxController {
       businessId = Get.arguments as int;
     } else {
       Get.back();
-      // Get.snackbar("Error", "Business ID missing");
     }
-
-    // Reactive error clearing
     nameController.addListener(() => errors.remove('name'));
     descriptionController.addListener(() => errors.remove('description'));
     priceController.addListener(() => errors.remove('price'));
@@ -371,163 +41,63 @@ class AddServiceController extends GetxController {
     super.onClose();
   }
 
-  Future<void> pickMultipleImages() async {
-    try {
-      final List<XFile> images = await _picker.pickMultiImage(
-        imageQuality: 85,
-        maxWidth: 1080,
-        maxHeight: 1080,
-      );
-
-      if (images.isNotEmpty) {
-        for (var image in images) {
-          if (selectedImages.length < maxImages) {
-            selectedImages.add(File(image.path));
-          } else {
-            CustomSnackBar.showWarning(
-              message: 'You can only upload maximum $maxImages images',
-            );
-            break;
-          }
-        }
-        errors.remove('image');
-      }
-    } catch (e) {
-      CustomSnackBar.showError(
-        message: 'Error picking images: $e',
-      );
-    }
-  }
-
   Future<void> pickImage(ImageSource source) async {
-    if (selectedImages.length >= maxImages) {
-      CustomSnackBar.showWarning(
-        message: 'You can only upload maximum $maxImages images',
-      );
-      return;
-    }
-
     try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1080,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-
+      final XFile? image = await _picker.pickImage(source: source, maxWidth: 1080, maxHeight: 1080, imageQuality: 85);
       if (image != null) {
-        selectedImages.add(File(image.path));
+        selectedImage.value = File(image.path);
         errors.remove('image');
       }
     } catch (e) {
-      CustomSnackBar.showWarning(
-        message: 'Error picking image: $e',
-      );
+      CustomSnackBar.showError(message: 'Error picking image: $e');
     }
   }
 
-  void removeImage(int index) {
-    selectedImages.removeAt(index);
-  }
+  void removeImage() => selectedImage.value = null;
 
-  Future<void> createProduct() async { // Kept name createProduct as per original file, but logic is addService
-    // Manual Reactive Validation
+  Future<void> createProduct() async {
     errors.clear();
-
-    if (nameController.text.trim().isEmpty) {
-      errors['name'] = 'please_enter_service_name'.tr;
-    }
-    if (descriptionController.text.trim().isEmpty) {
-      errors['description'] = 'please_enter_service_description'.tr;
-    }
-    if (priceController.text.trim().isEmpty) {
-      errors['price'] = 'please_enter_service_price'.tr;
-    }
-    
-    if (selectedImages.isEmpty) {
-      errors['image'] = 'please_select_at_least_one_image'.tr;
-    }
-
-    if (errors.isNotEmpty) {
-      return;
-    }
-
-    /*if (selectedImages.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select at least one product image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }*/
+    if (nameController.text.trim().isEmpty) errors['name'] = 'please_enter_service_name'.tr;
+    if (descriptionController.text.trim().isEmpty) errors['description'] = 'please_enter_service_description'.tr;
+    if (priceController.text.trim().isEmpty) errors['price'] = 'please_enter_service_price'.tr;
+    if (selectedImage.value == null) errors['image'] = 'please_select_image'.tr;
+    if (errors.isNotEmpty) return;
 
     isLoading.value = true;
-
     final data = {
       'business_id': businessId,
       'name': nameController.text.trim(),
       'description': descriptionController.text.trim(),
       'cost': priceController.text.trim(),
     };
-
-    final businessController = Get.find<BusinessController>();
-    final success = await businessController.addService(data, selectedImages);
-
+    final success = await Get.find<BusinessController>().addService(data, [selectedImage.value!]);
     isLoading.value = false;
-
     if (success) {
       Get.back();
-      CustomSnackBar.showSuccess(
-        message: 'Service created successfully!',
-      );
+      CustomSnackBar.showSuccess(message: 'Service created successfully!');
     }
   }
 }
 
-// Stateless Screen
 class AddServiceScreen extends StatelessWidget {
   const AddServiceScreen({Key? key}) : super(key: key);
 
   void _showImageSourceDialog(BuildContext context, AddServiceController controller) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'select_image_source'.tr,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Text('select_image_source'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildImageSourceOption(
-                  icon: Icons.camera_alt,
-                  label: 'camera'.tr,
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.pickImage(ImageSource.camera);
-                  },
-                ),
-                _buildImageSourceOption(
-                  icon: Icons.photo_library,
-                  label: 'gallery'.tr,
-                  onTap: () {
-                    Navigator.pop(context);
-                    controller.pickMultipleImages();
-                  },
-                ),
+                _buildOption(Icons.camera_alt, 'camera'.tr, () { Navigator.pop(context); controller.pickImage(ImageSource.camera); }),
+                _buildOption(Icons.photo_library, 'gallery'.tr, () { Navigator.pop(context); controller.pickImage(ImageSource.gallery); }),
               ],
             ),
             const SizedBox(height: 10),
@@ -537,33 +107,14 @@ class AddServiceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSourceOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildOption(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 40, color: Colors.black87),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
+        child: Column(children: [Icon(icon, size: 40, color: Colors.black87), const SizedBox(height: 8), Text(label)]),
       ),
     );
   }
@@ -571,238 +122,60 @@ class AddServiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AddServiceController());
-
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
-        ),
+        leading: IconButton(onPressed: Get.back, icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor)),
         title: Text("add_service".tr, style: context.textTheme.titleMedium),
       ),
-      body: Form(
-        key: controller.formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: 'upload_images'.tr,
-                              style: context.textTheme.titleMedium,
-                            ),
-                            const TextSpan(
-                              text: ' *',
-                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'image_upload_hint'.tr,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('service_image'.tr, style: context.textTheme.titleMedium),
+            const SizedBox(height: 12),
+            Obx(() => GestureDetector(
+              onTap: () => _showImageSourceDialog(context, controller),
+              child: Container(
+                height: 160,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: controller.errors['image'] != null ? Colors.red : context.theme.dividerColor,
+                    width: controller.errors['image'] != null ? 1.5 : 1,
                   ),
-                  Obx(() => Text(
-                    '${controller.selectedImages.length}/${controller.maxImages}',
-                    style: context.textTheme.bodySmall,
-                  )),
-                ],
+                ),
+                child: controller.selectedImage.value != null
+                    ? Stack(children: [
+                        ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(controller.selectedImage.value!, width: double.infinity, height: double.infinity, fit: BoxFit.cover)),
+                        Positioned(top: 8, right: 8, child: GestureDetector(
+                          onTap: controller.removeImage,
+                          child: Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), child: const Icon(Icons.close, color: Colors.white, size: 18)),
+                        )),
+                      ])
+                    : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Icon(Icons.add_photo_alternate_outlined, size: 50, color: context.theme.focusColor),
+                        const SizedBox(height: 8),
+                        Text('tap_to_add_images'.tr, style: context.textTheme.bodyLarge),
+                        Text('camera_or_gallery'.tr, style: context.textTheme.bodySmall),
+                      ]),
               ),
-              const SizedBox(height: 12),
-              Obx(() => GestureDetector(
-                onTap: controller.selectedImages.length < controller.maxImages
-                    ? () => _showImageSourceDialog(context, controller)
-                    : null,
-                child: Container(
-                  width: double.infinity,
-                  constraints: const BoxConstraints(minHeight: 150),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: controller.errors['image'] != null ? Colors.red : context.theme.dividerColor, 
-                      width: controller.errors['image'] != null ? 1.5 : 1,
-                    ),
-                  ),
-                  child: controller.selectedImages.isEmpty
-                      ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_photo_alternate_outlined,
-                        size: 60,
-                        color: context.theme.focusColor,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'tap_to_add_images'.tr,
-                        style: context.textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'camera_or_gallery'.tr,
-                        style: context.textTheme.bodySmall,
-                      ),
-                    ],
-                  )
-                      : Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      // Display selected images
-                      ...List.generate(
-                        controller.selectedImages.length,
-                            (index) => Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(
-                                controller.selectedImages[index],
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Positioned(
-                              top: -6,
-                              right: -6,
-                              child: GestureDetector(
-                                onTap: () => controller.removeImage(index),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Add more button
-                      if (controller.selectedImages.length < controller.maxImages)
-                        GestureDetector(
-                          onTap: () => _showImageSourceDialog(context, controller),
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: context.theme.hoverColor,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: context.theme.dividerColor,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add,
-                                  size: 30,
-                                  color: context.theme.focusColor,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'add'.tr,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: context.theme.focusColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              )),
-              const SizedBox(height: 4),
-              Obx(() => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (controller.errors['image'] != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          controller.errors['image']!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
-                        ),
-                      ),
-                  ],
-                ),
-              )),
-
-              // const SizedBox(height: 10),
-
-              Obx(() => AppInputTextField(
-                label: "service_name".tr,
-                isRequired: true,
-                textInputType: TextInputType.text,
-                controller: controller.nameController,
-                hint: const [AutofillHints.name],
-                validator: FormValidator.name,
-                errorText: controller.errors['name'],
-              )),
-              // const SizedBox(height: 8),
-
-              Obx(() => AppInputTextField(
-                label: "service_description".tr,
-                isRequired: true,
-                textInputType: TextInputType.text,
-                controller: controller.descriptionController,
-                hint: const [AutofillHints.name],
-                maxLines: 4,
-                validator: FormValidator.name,
-                errorText: controller.errors['description'],
-              )),
-              // const SizedBox(height: 8),
-
-              Obx(() => AppInputTextField(
-                label: "service_price".tr,
-                isRequired: true,
-                textInputType: TextInputType.number,
-                controller: controller.priceController,
-                errorText: controller.errors['price'],
-              )),
-
-              const SizedBox(height: 20),
-
-              Obx(() => CustomButton(
-                onPressed: controller.isLoading.value ? null : controller.createProduct,
-                title: controller.isLoading.value ? "creating".tr : "create_service".tr,
-              )),
-
-              const SizedBox(height: 20),
-            ],
-          ),
+            )),
+            Obx(() => controller.errors['image'] != null
+                ? Padding(padding: const EdgeInsets.only(top: 4, left: 4), child: Text(controller.errors['image']!, style: const TextStyle(color: Colors.red, fontSize: 12)))
+                : const SizedBox.shrink()),
+            const SizedBox(height: 8),
+            Obx(() => AppInputTextField(label: "service_name".tr, isRequired: true, textInputType: TextInputType.text, controller: controller.nameController, errorText: controller.errors['name'])),
+            Obx(() => AppInputTextField(label: "service_description".tr, isRequired: true, textInputType: TextInputType.text, controller: controller.descriptionController, maxLines: 4, errorText: controller.errors['description'])),
+            Obx(() => AppInputTextField(label: "service_price".tr, isRequired: true, textInputType: TextInputType.number, controller: controller.priceController, errorText: controller.errors['price'])),
+            const SizedBox(height: 24),
+            Obx(() => CustomButton(
+              onPressed: controller.isLoading.value ? null : controller.createProduct,
+              title: controller.isLoading.value ? "creating".tr : "create_service".tr,
+            )),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );

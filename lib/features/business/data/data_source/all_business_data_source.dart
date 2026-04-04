@@ -84,35 +84,31 @@ class BusinessDataSourceImpl implements BusinessDataSource {
 
   @override
   Future<BusinessResponse> addProduct(Map<String, dynamic> data, List<File> images) async {
-    List<String> base64Images = [];
-    for (var image in images) {
-      List<int> imageBytes = await image.readAsBytes();
-      String base64Image = base64Encode(imageBytes);
-      base64Images.add(base64Image);
-    }
-    
-    // Create a mutable copy of data
-    final Map<String, dynamic> requestData = Map<String, dynamic>.from(data);
-    requestData['image'] = base64Images; // Sending array of strings
-
-    final response = await apiClient.post(ApiConstants.addBusinessProduct, data: requestData);
+    final formData = FormData.fromMap({
+      ...data.map((k, v) => MapEntry(k, v.toString())),
+      if (images.isNotEmpty)
+        'image': await MultipartFile.fromFile(
+          images.first.path,
+          filename: images.first.path.split('/').last,
+          contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
+        ),
+    });
+    final response = await apiClient.post(ApiConstants.addBusinessProduct, data: formData);
     return BusinessResponse.fromJson(response.data);
   }
 
   @override
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images) async {
-    List<String> base64Images = [];
-    for (var image in images) {
-      List<int> imageBytes = await image.readAsBytes();
-      String base64Image = base64Encode(imageBytes);
-      base64Images.add(base64Image);
-    }
-
-    // Create a mutable copy of data
-    final Map<String, dynamic> requestData = Map<String, dynamic>.from(data);
-    requestData['image'] = base64Images; // Sending array of strings
-
-    final response = await apiClient.post(ApiConstants.addBusinessService, data: requestData);
+    final formData = FormData.fromMap({
+      ...data.map((k, v) => MapEntry(k, v.toString())),
+      if (images.isNotEmpty)
+        'image': await MultipartFile.fromFile(
+          images.first.path,
+          filename: images.first.path.split('/').last,
+          contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
+        ),
+    });
+    final response = await apiClient.post(ApiConstants.addBusinessService, data: formData);
     return BusinessResponse.fromJson(response.data);
   }
 
