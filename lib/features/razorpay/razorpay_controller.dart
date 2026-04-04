@@ -1,4 +1,4 @@
-
+import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:get/get.dart';
@@ -66,14 +66,14 @@ class RazorpayController extends GetxController {
     var options = {
       'key': key ?? 'rzp_test_S9yXFuXcf0S6Ll',
       'amount': amount * 100,
-      'name': name,
+      'name': AppConstants.appName,
       'description': description,
       'prefill': {
         'contact': mobile,
         'email': email,
       },
       'theme': {
-        'color': '#2E7D32',
+        'color': '#C62D86',
       }
     };
 

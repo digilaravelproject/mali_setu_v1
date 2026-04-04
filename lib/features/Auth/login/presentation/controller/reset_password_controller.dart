@@ -30,7 +30,7 @@ class ResetPasswordController extends GetxController {
   var confPasswordController = TextEditingController();
   var otpController = TextEditingController();
 
-  var isPasswordVisible = true.obs;
+  var isPasswordVisible = false.obs;
 
   var countryController = TextEditingController();
   var isLoading = false.obs;

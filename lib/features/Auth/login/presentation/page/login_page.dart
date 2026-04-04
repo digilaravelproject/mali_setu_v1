@@ -68,6 +68,7 @@ class LoginPage extends GetWidget<LoginController> {
                     controller: controller.emailController,
                     hint: const [AutofillHints.email],
                     validator: FormValidator.email,
+                    isRequired: true,
                   ),
                   Obx(
                     () => AppInputTextField(
@@ -78,11 +79,12 @@ class LoginPage extends GetWidget<LoginController> {
                       hint: const [AutofillHints.password],
                       isObscure: !controller.isPasswordVisible.value,
                       endIcon: controller.isPasswordVisible.value
-                          ? Icons.remove_red_eye_rounded
-                          : Icons.visibility_off,
+                          ? Icons.visibility_off
+                          : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isPasswordVisible.toggle(),
                       validator: FormValidator.password,
                       topPadding: 0,
+                      isRequired: true,
                     ),
                   ),
                   Row(

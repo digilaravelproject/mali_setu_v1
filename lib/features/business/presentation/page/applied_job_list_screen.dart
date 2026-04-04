@@ -30,7 +30,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
           icon: Icon(Icons.arrow_back_ios_new, color: context.textTheme.bodyLarge?.color),
         ),
         title: Text(
-          "my_applications".tr,
+          "applied_jobs".tr,
           style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -122,7 +122,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildInfoItem(Icons.location_on_outlined, job?.location ?? "N/A"),
+                  _buildInfoItem(Icons.location_on_outlined, job?.location ?? "na".tr),
                   const SizedBox(width: 16),
                   _buildInfoItem(Icons.calendar_today_outlined, _formatDate(application.appliedAt)),
                 ],
@@ -130,9 +130,9 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                   _buildInfoItem(Icons.work_outline, job?.jobType ?? "N/A"),
+                   _buildInfoItem(Icons.work_outline, job?.jobType ?? "na".tr),
                    const SizedBox(width: 16),
-                   _buildInfoItem(Icons.payments_outlined, job?.salaryRange ?? "N/A"),
+                   _buildInfoItem(Icons.payments_outlined, job?.salaryRange ?? "na".tr),
                 ],
               ),
             ],
@@ -164,7 +164,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        status.capitalizeFirst!,
+        status.toLowerCase().tr,
         style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
       ),
     );
@@ -190,7 +190,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
   }
 
   String _formatDate(String? dateStr) {
-    if (dateStr == null) return "N/A";
+    if (dateStr == null) return "na".tr;
     try {
       final date = DateTime.parse(dateStr);
       return DateFormat('MMM dd, yyyy').format(date);

@@ -19,6 +19,9 @@ class AppConstants {
   static const String isLoggedInPref = "is_logged_in";
   static const String isCompanyLoginPref = "is_company_login";
   static const String languagePref = "language";
+  static const String isRememberPref = "is_remember";
+  static const String savedEmailPref = "saved_email";
+  static const String savedPasswordPref = "saved_password";
   static const String themePref = "theme_mode";
 
   // User Type

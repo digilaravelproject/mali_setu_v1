@@ -218,6 +218,7 @@ const Map<String, String> mrIN = {
   // Dashboard - Home Page
   'welcome_back_comma': 'पुन्हा स्वागत आहे,',
   'search_here': 'येथे शोधा...',
+  'search_your_business': 'तुमचा व्यवसाय शोधा',
   'categories': 'श्रेणी',
   'view_all': 'सर्व पहा',
   'register_your_business': 'तुमचा व्यवसाय नोंदवा',

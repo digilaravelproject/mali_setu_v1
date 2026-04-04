@@ -20,139 +20,144 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
         final businesses = controller.myBusinesses;
 
 
-        return CustomScrollView(
-          slivers: [
-            // App Bar
-            SliverAppBar(
-              elevation: 2,
-              pinned: true,
-              centerTitle: false,
-              title: Text(
-                'my_businesses'.tr,
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 22,
-                ),
-              ),
-              leading: InkWell(
-                onTap: () => Get.back(),
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: context.iconColor,
-                  size: 18,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () => Get.toNamed(AppRoutes.jobAnalytics),
-                  icon: const Icon(Icons.analytics_outlined),
-                  tooltip: 'job_analytics'.tr,
-                ),
-              ],
-            ),
-
-            // Promotion Card
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [context.theme.primaryColorLight, context.theme.primaryColorLight],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+        return RefreshIndicator(
+          onRefresh: () => controller.fetchMyBusinesses(),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // App Bar
+              SliverAppBar(
+                elevation: 2,
+                pinned: true,
+                centerTitle: false,
+                title: Text(
+                  'my_businesses'.tr,
+                  style: context.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: context.theme.primaryColor.withOpacity(0.4),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.rocket_launch,
-                                color: context.theme.cardColor,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                "expand_network".tr,
-                                style: context.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
+                ),
+                leading: InkWell(
+                  onTap: () => Get.back(),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: context.iconColor,
+                    size: 18,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    onPressed: () => Get.toNamed(AppRoutes.jobAnalytics),
+                    icon: const Icon(Icons.analytics_outlined),
+                    tooltip: 'job_analytics'.tr,
+                  ),
+                ],
+              ),
+  
+              // Promotion Card
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [context.theme.primaryColorLight, context.theme.primaryColorLight],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: context.theme.primaryColor.withOpacity(0.4),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.rocket_launch,
+                                  color: context.theme.cardColor,
+                                  size: 24,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          "add_another_business".tr,
-                          style: context.textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: 16),
-                        CustomButton(
-                          title: "add_new_business".tr,
-                          height: 40,
-                          borderRadius: 12,
-                          onPressed: () {
-                            Get.toNamed(AppRoutes.regBusiness);
-                          },
-                        ),
-                      ],
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  "expand_network".tr,
+                                  style: context.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "add_another_business".tr,
+                            style: context.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 16),
+                          CustomButton(
+                            title: "add_new_business".tr,
+                            height: 40,
+                            borderRadius: 12,
+                            onPressed: () {
+                              Get.toNamed(AppRoutes.regBusiness);
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-
-            // Business Count
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "my_businesses".tr,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+  
+              // Business Count
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "my_businesses".tr,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-
-            // Business List
-            if (businesses.isEmpty)
-              SliverFillRemaining(
-                child: Center(
-                  child: Text("no_businesses_found".tr),
+  
+              // Business List
+              if (businesses.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text("no_businesses_found".tr),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildBusinessCard(businesses[index], context: context),
+                    childCount: businesses.length,
+                  ),
                 ),
-              )
-            else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => _buildBusinessCard(businesses[index], context: context),
-                  childCount: businesses.length,
-                ),
+  
+              // Bottom Padding
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 30),
               ),
-
-            // Bottom Padding
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 30),
-            ),
-          ],
+            ],
+          ),
         );
       }),
     );

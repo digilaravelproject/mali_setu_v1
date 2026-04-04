@@ -244,6 +244,24 @@ class AuthService extends GetxService {
         final user = User.fromJson(userData);
         
         currentUser.value = user;
+
+        // Fetch Matrimony status if applicable
+        if (user.isMatrimony == true) {
+          try {
+            final matResponse = await _apiClient.get(ApiConstants.matrimonyProfile);
+            if (matResponse.statusCode == 200) {
+              final matData = matResponse.data['data']?['profile'] ?? matResponse.data['profile'] ?? matResponse.data['data'];
+              if (matData != null && (matData['approval_status'] != null || matData['status'] != null)) {
+                user.matrimonyApprovalStatus = (matData['approval_status'] ?? matData['status']).toString();
+                currentUser.value = user; // Refresh observable
+                currentUser.refresh();
+              }
+            }
+          } catch (e) {
+            debugPrint("Error fetching matrimony status: $e");
+          }
+        }
+
         await SharedPrefs.setString(
           AppConstants.userDataPref,
           jsonEncode(user.toJson()),

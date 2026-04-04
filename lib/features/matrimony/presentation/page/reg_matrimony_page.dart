@@ -43,6 +43,70 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    /// Status Badge (Visible in Edit Mode)
+                    Obx(() {
+                      if (!controller.isEditMode.value || controller.approvalStatus.value.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      
+                      Color getStatusColor(String status) {
+                        switch (status.toLowerCase().trim()) {
+                          case 'approved':
+                          case 'active':
+                            return Colors.green;
+                          case 'pending':
+                            return Colors.orange;
+                          case 'rejected':
+                          case 'inactive':
+                            return Colors.red;
+                          default:
+                            return Colors.grey;
+                        }
+                      }
+
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: getStatusColor(controller.approvalStatus.value).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: getStatusColor(controller.approvalStatus.value).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              color: getStatusColor(controller.approvalStatus.value),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Profile Status",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                Text(
+                                  controller.approvalStatus.value.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: getStatusColor(controller.approvalStatus.value),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                     if (controller.currentStep.value == 0) _buildPersonalStep(context),
                     if (controller.currentStep.value == 1) _buildReligiousStep(context),
                     if (controller.currentStep.value == 2) _buildEducationCareerStep(context),
