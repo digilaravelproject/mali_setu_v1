@@ -225,11 +225,13 @@ class UpdateProfilePage extends GetView<UpProfileController> {
 
                 const SizedBox(height: 16),
 
-                Obx(() => CustomButton(
-                      title: "update_profile".tr,
-                      onPressed: () => controller.updateProfile(),
-                      isLoading: controller.isLoading.value,
-                    )),
+                Obx(() => SafeArea(
+                  child: CustomButton(
+                        title: "update_profile".tr,
+                        onPressed: () => controller.updateProfile(),
+                        isLoading: controller.isLoading.value,
+                      ),
+                )),
 
                 const SizedBox(height: 20),
               ],

@@ -24,6 +24,12 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
+
+    final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+    print("hasPayment: $hasPayment");
+    final hasMatrimony = Get.find<AuthService>().hasMatrimony();
+    
+  //  return AnnotatedRegion<SystemUiOverlayStyle>(
     
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -91,62 +97,167 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                     letterSpacing: 1.2,
                                   ),
                                 ),
+
                                 const Spacer(),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    shape: BoxShape.circle,
+                                const Spacer(),
+
+                                if (hasMatrimony && hasPayment) ...[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
+                                      icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
+                                      tooltip: 'members'.tr,
+                                    ),
                                   ),
-                                  child: IconButton(
-                                    onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
-                                    icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
-                                    tooltip: 'members'.tr,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                GetBuilder<FilterController>(
-                                  builder: (filterCtrl) => Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: IconButton(
-                                          onPressed: () async {
-                                            var result = await FilterBottomSheet.show();
-                                            if (result != null) {
-                                              controller.fetchProfiles(filters: result);
-                                            }
-                                          },
-                                          icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
-                                        ),
-                                      ),
-                                      if (filterCtrl.activeFilterCount > 0)
-                                        Positioned(
-                                          top: -2,
-                                          right: -2,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.redAccent,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(color: Colors.white, width: 1.5),
-                                            ),
-                                            child: Text(
-                                              "${filterCtrl.activeFilterCount}",
-                                              style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                                            ),
+                                  const SizedBox(width: 8),
+
+                                  GetBuilder<FilterController>(
+                                    builder: (filterCtrl) => Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: IconButton(
+                                            onPressed: () async {
+                                              var result = await FilterBottomSheet.show();
+                                              if (result != null) {
+                                                controller.fetchProfiles(filters: result);
+                                              }
+                                            },
+                                            icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
                                           ),
                                         ),
-                                    ],
+                                        if (filterCtrl.activeFilterCount > 0)
+                                          Positioned(
+                                            top: -2,
+                                            right: -2,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: BoxDecoration(
+                                                color: Colors.redAccent,
+                                                shape: BoxShape.circle,
+                                                border: Border.all(color: Colors.white, width: 1.5),
+                                              ),
+                                              child: Text(
+                                                "${filterCtrl.activeFilterCount}",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                ]
+                                // Container(
+                                //   decoration: BoxDecoration(
+                                //     color: Colors.grey[100],
+                                //     shape: BoxShape.circle,
+                                //   ),
+                                //   child: IconButton(
+                                //     onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
+                                //     icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
+                                //     tooltip: 'members'.tr,
+                                //   ),
+                                // ),
+                                // const SizedBox(width: 8),
+                                // GetBuilder<FilterController>(
+                                //   builder: (filterCtrl) => Stack(
+                                //     clipBehavior: Clip.none,
+                                //     children: [
+                                //       Container(
+                                //         decoration: BoxDecoration(
+                                //           color: Colors.grey[100],
+                                //           shape: BoxShape.circle,
+                                //         ),
+                                //         child: IconButton(
+                                //           onPressed: () async {
+                                //             var result = await FilterBottomSheet.show();
+                                //             if (result != null) {
+                                //               controller.fetchProfiles(filters: result);
+                                //             }
+                                //           },
+                                //           icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
+                                //         ),
+                                //       ),
+                                //       if (filterCtrl.activeFilterCount > 0)
+                                //         Positioned(
+                                //           top: -2,
+                                //           right: -2,
+                                //           child: Container(
+                                //             padding: const EdgeInsets.all(4),
+                                //             decoration: BoxDecoration(
+                                //               color: Colors.redAccent,
+                                //               shape: BoxShape.circle,
+                                //               border: Border.all(color: Colors.white, width: 1.5),
+                                //             ),
+                                //             child: Text(
+                                //               "${filterCtrl.activeFilterCount}",
+                                //               style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                //             ),
+                                //           ),
+                                //         ),
+                                //     ],
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),
-                          Container(
+
+
+                          if (hasMatrimony && hasPayment)
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: TabBar(
+                                onTap: (index) {
+                                  final filterCtrl = Get.find<FilterController>();
+                                  if (index == 0) {
+                                    filterCtrl.recentlyCreated.value = 'all';
+                                  } else {
+                                    filterCtrl.recentlyCreated.value = 'one_week';
+                                  }
+                                  filterCtrl.update();
+                                  controller.currentIndex.value = 0;
+                                  controller.fetchProfiles(filters: filterCtrl.getFilters());
+                                },
+                                dividerHeight: 0,
+                                indicator: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(24),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                indicatorSize: TabBarIndicatorSize.tab,
+                                labelColor: theme.primaryColor,
+                                unselectedLabelColor: Colors.grey[600],
+                                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                tabs: [
+                                  Tab(text: 'all_matches'.tr),
+                                  Tab(text: 'newly_joined'.tr),
+                                ],
+                              ),
+                            ),
+                         /* Container(
                             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
@@ -186,7 +297,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                 Tab(text: 'newly_joined'.tr),
                               ],
                             ),
-                          ),
+                          ),*/
                         ],
                       ),
                     ),
@@ -196,8 +307,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             },
             body: Obx(() {
           final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
-          print("hasPayment: $hasPayment");
           final hasMatrimony = Get.find<AuthService>().hasMatrimony();
+
           if (!hasMatrimony) {
             return _buildRestrictedView(context);
           }

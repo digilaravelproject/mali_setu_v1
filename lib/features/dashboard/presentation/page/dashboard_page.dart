@@ -42,9 +42,10 @@ class DashboardPage extends GetWidget<DashboardController> {
         index: controller.currentPage.value,
         children: controller.screenList,
       )),
-      bottomNavigationBar: SafeArea(
-        child: BottomAppBar(
-          padding: EdgeInsets.zero,
+      bottomNavigationBar: BottomAppBar(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).padding.bottom,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -55,7 +56,6 @@ class DashboardPage extends GetWidget<DashboardController> {
             }).toList(),
           ),
         ),
-      ),
     );
   }
 
@@ -82,8 +82,8 @@ class DashboardPage extends GetWidget<DashboardController> {
                   return Transform.scale(
                     scale: 1.0 + (value * 0.1),
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: isSelected
                             ? e.selectedColor
@@ -93,20 +93,20 @@ class DashboardPage extends GetWidget<DashboardController> {
                       child: Icon(
                         isSelected ? (e.selectedIcon ?? e.icon) : e.icon,
                         color: isSelected ? Colors.white : e.unselectedColor,
-                        size: 20,
+                        size: 16,
                       ),
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 e.title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: isSelected ? e.selectedColor : e.unselectedColor,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: 11,
+                  fontSize: 10,
                   letterSpacing: 0.2,
                 ),
               ),

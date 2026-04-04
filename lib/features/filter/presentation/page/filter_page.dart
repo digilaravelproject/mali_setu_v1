@@ -560,7 +560,46 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         ),
 
         // Footer Actions (Apply Button)
-        Container(
+
+        SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: widget.controller.applyFilters,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.theme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'apply_filters'.tr,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+
+      /*  Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -593,7 +632,7 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
               ),
             ),
           ),
-        ),
+        ),*/
       ],
     );
   }
