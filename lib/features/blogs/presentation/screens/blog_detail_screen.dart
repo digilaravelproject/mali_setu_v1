@@ -5,7 +5,9 @@ import '../../../../core/constent/api_constants.dart';
 import '../../data/model/blog_model.dart';
 import '../controller/blog_controller.dart';
 import 'full_image_screen.dart';
-import 'full_video_screen.dart';
+import 'package:edu_cluezer/features/blogs/presentation/screens/full_video_screen.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
 class BlogDetailScreen extends StatelessWidget {
   final int blogId;
@@ -194,51 +196,33 @@ class BlogDetailScreen extends StatelessWidget {
         ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}"
         : null;
 
-    return Stack(
-      children: [
-        GestureDetector(
-          onTap: () {
-            if (blog.mediaPath != null) {
-              Get.to(() => FullVideoScreen(videoUrl: "${ApiConstants.imageBaseUrl}${blog.mediaPath}"));
-            }
-          },
-          child: Container(
+    return Obx(() {
+      final bool isInitialized = controller.isVideoInitialized.value;
+      final chewieController = controller.chewieController.value;
+
+      return Stack(
+        children: [
+          // ── Video Content
+          Container(
             height: 280,
             width: double.infinity,
             color: Colors.black,
-            child: imageUrl != null
-                ? Image.network(imageUrl, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _dummyVideo())
-                : _dummyVideo(),
+            child: isInitialized && chewieController != null
+                ? Chewie(controller: chewieController)
+                : (imageUrl != null
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _dummyVideo(),
+                      )
+                    : _dummyVideo()),
           ),
-        ),
-        Container(
-          height: 280,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0x88000000), Color(0x00000000), Color(0x88000000)],
-              stops: [0.0, 0.5, 1.0],
-            ),
-          ),
-        ),
-        _buildTopBar(),
-        Positioned.fill(
-          child: Center(
-            child: Container(
-              width: 56, height: 56,
-              decoration: BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.4), blurRadius: 12)],
-              ),
-              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
-            ),
-          ),
-        ),
-      ],
-    );
+
+          // ── Top Bar (Back button) - Only show if not full screen (Chewie handles its own full screen)
+          _buildTopBar(),
+        ],
+      );
+    });
   }
 
   Widget _dummyImage(Color primaryColor) {

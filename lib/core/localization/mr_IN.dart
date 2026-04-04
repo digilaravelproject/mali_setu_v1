@@ -513,7 +513,7 @@ const Map<String, String> mrIN = {
   'interests': 'स्वारस्ये',
   'bio': 'बायो',
   'bio_hint': 'आपल्या विषयी सांगा...',
-  'location_hint': 'उदा., पुणे, महाराष्ट्र',
+  'location_hint': 'तुमचे स्थान प्रविष्ट करा',
   'level_hint': 'उदा., मध्यम',
   'availability_hint': 'उदा., शनिवार-रविवार',
   'availability': 'उपलब्धता',

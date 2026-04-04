@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -154,7 +155,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               textInputType: TextInputType.datetime,
               inputFormatters: [DateInputFormatter()],
               prefixIcon: GestureDetector(
-                onTap: () => controller.selectDate(context, controller.expiryCtrl),
+              onTap: () => controller.selectDate(context, controller.expiryCtrl),
                 child: const Icon(Icons.calendar_today_rounded, size: 20),
               ),
               validator: (v) => FormValidator.date(v, 'job_expiry_date'.tr),
@@ -354,14 +355,33 @@ class CreateJobPage extends GetWidget<CreateJobController> {
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: BottomAppBar(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          child: Obx(() => CustomButton(
-            title: controller.isEditMode.value ? 'update_job'.tr : 'post_job_now'.tr,
-            isLoading: controller.isLoading.value,
-            onPressed: controller.onRegister,
-          )),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+          border: const Border(
+            top: BorderSide(
+              color: AppColors.lightBorder,
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: BottomAppBar(
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            child: Obx(() => CustomButton(
+              title: controller.isEditMode.value ? 'update_job'.tr : 'post_job_now'.tr,
+              isLoading: controller.isLoading.value,
+              onPressed: controller.onRegister,
+            )),
+          ),
         ),
       ),
     );

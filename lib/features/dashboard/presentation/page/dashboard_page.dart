@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/btm_nav_model.dart';
 import 'package:edu_cluezer/features/dashboard/presentation/controller/dashboard_controller.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
@@ -42,7 +43,25 @@ class DashboardPage extends GetWidget<DashboardController> {
         index: controller.currentPage.value,
         children: controller.screenList,
       )),
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+          border: const Border(
+            top: BorderSide(
+              color: AppColors.lightBorder,
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: BottomAppBar(
+          elevation: 0,
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).padding.bottom,
           ),
@@ -56,6 +75,7 @@ class DashboardPage extends GetWidget<DashboardController> {
             }).toList(),
           ),
         ),
+      ),
     );
   }
 

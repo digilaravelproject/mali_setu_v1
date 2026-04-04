@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import '../../../../core/constent/api_constants.dart';
@@ -35,6 +36,7 @@ class BlogController extends GetxController {
 
   // Video State for detail screen
   final Rxn<VideoPlayerController> detailVideoController = Rxn<VideoPlayerController>();
+  final Rxn<ChewieController> chewieController = Rxn<ChewieController>();
   final RxBool isVideoInitialized = false.obs;
 
   @override
@@ -187,18 +189,32 @@ class BlogController extends GetxController {
     final blog = selectedBlog.value;
     if (blog != null && blog.mediaType == 'video' && blog.mediaPath != null) {
       final videoUrl = "${ApiConstants.imageBaseUrl}${blog.mediaPath}";
-      final controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
-      detailVideoController.value = controller;
+      final videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+      detailVideoController.value = videoPlayerController;
       
-      controller.initialize().then((_) {
+      videoPlayerController.initialize().then((_) {
+        chewieController.value = ChewieController(
+          videoPlayerController: videoPlayerController,
+          autoPlay: false,
+          looping: true,
+          aspectRatio: videoPlayerController.value.aspectRatio,
+          errorBuilder: (context, errorMessage) {
+            return Center(
+              child: Text(
+                errorMessage,
+                style: const TextStyle(color: Colors.white),
+              ),
+            );
+          },
+        );
         isVideoInitialized.value = true;
-        controller.play();
-        controller.setLooping(true);
       });
     }
   }
 
   void _disposeVideo() {
+    chewieController.value?.dispose();
+    chewieController.value = null;
     detailVideoController.value?.dispose();
     detailVideoController.value = null;
     isVideoInitialized.value = false;
