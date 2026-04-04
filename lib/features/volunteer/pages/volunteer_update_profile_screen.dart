@@ -78,6 +78,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   Obx(() => SingleDropdown(
                     controller: controller.experienceCtrl,
                     label: "experience_level".tr,
+                    hint: "level_hint".tr,
                     items: controller.expLevels,
                     isRequired: true,
                     topPadding: 0,
@@ -87,6 +88,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                   Obx(() => SingleDropdown(
                     controller: controller.availabilityCtrl,
                     label: "availability".tr,
+                    hint: "availability_hint".tr,
                     items: controller.availabilities,
                     isRequired: true,
                     topPadding: 0,

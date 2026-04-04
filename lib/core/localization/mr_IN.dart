@@ -30,6 +30,9 @@ const Map<String, String> mrIN = {
   'error': 'त्रुटी',
   'success': 'यशस्वी',
   'welcome': 'स्वागत आहे',
+  'continue_step': 'सुरू ठेवा',
+  'select': 'निवडा',
+  'level': 'पातळी',
 
   // Filter Screen
   'filters': 'फिल्टर',
@@ -511,6 +514,8 @@ const Map<String, String> mrIN = {
   'bio': 'बायो',
   'bio_hint': 'आपल्या विषयी सांगा...',
   'location_hint': 'उदा., पुणे, महाराष्ट्र',
+  'level_hint': 'उदा., मध्यम',
+  'availability_hint': 'उदा., शनिवार-रविवार',
   'availability': 'उपलब्धता',
   'add_skill': 'कौशल्य जोडा',
   'skill_hint': 'उदा. शिक्षण',

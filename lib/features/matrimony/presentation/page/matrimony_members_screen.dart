@@ -80,14 +80,37 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
   }
 
   Widget _buildMemberCard(MatrimonyConversation conversation) {
-    final currentUserId = Get.find<AuthService>().currentUser.value?.id;
-    final user = conversation.user1Id == currentUserId ? conversation.user1 : conversation.user2;
+    final currentUser = Get.find<AuthService>().currentUser.value;
+    final currentUserId = currentUser?.id;
     
-    // Correct mapping from MatrimonyProfile
-    final name = user?.personalDetails?.name ?? "Matrimony Member";
-    final profession = user?.professionalDetails?.jobTitle ?? user?.personalDetails?.occupation ?? "Member";
-    final location = user?.locationDetails?.city ?? "Unknown Location";
-    print("name : "+name+" profession :"+profession+"  location :"+location);
+    // Pick the user who is NOT the current user
+    var userProfile = (conversation.user1Id == currentUserId) 
+        ? conversation.user2 
+        : conversation.user1;
+        
+    // Safety fallback: If identification fails or one is null, pick the non-null one
+    if (userProfile == null) {
+      userProfile = conversation.user2 ?? conversation.user1;
+    }
+
+    // Data Extraction with multiple fallbacks
+    // 1. Name
+    final name = userProfile?.personalDetails?.name ?? 
+                 userProfile?.user?.name ?? 
+                 "Matrimony Member";
+                 
+    // 2. Profession
+    final profession = userProfile?.professionalDetails?.jobTitle ?? 
+                       userProfile?.personalDetails?.occupation ?? 
+                       userProfile?.user?.occupation ?? 
+                       "Member";
+                       
+    // 3. Location
+    final location = userProfile?.locationDetails?.city ?? 
+                     userProfile?.user?.city ?? 
+                     "Unknown Location";
+    
+    print("MEMBER CARD DEBUG: uid=$currentUserId c.u1=${conversation.user1Id} c.u2=${conversation.user2Id} selected_name=$name");
 
     print("conversation.user1 : ${conversation.user1}");
     print("conversation.user2 : ${conversation.user2}");
@@ -97,8 +120,8 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
 
     // Correct image logic
     String? imageUrl;
-    if (user?.personalDetails?.photos != null && user!.personalDetails!.photos!.isNotEmpty) {
-       imageUrl = ApiConstants.imageBaseUrl + user.personalDetails!.photos![0];
+    if (userProfile?.personalDetails?.photos != null && userProfile!.personalDetails!.photos!.isNotEmpty) {
+       imageUrl = ApiConstants.imageBaseUrl + userProfile.personalDetails!.photos![0];
     }
     
     // Fallback widget
@@ -167,11 +190,11 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
           ),
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
-            onPressed: () {
+             onPressed: () {
                Get.toNamed(AppRoutes.matrimonyChat, arguments: {
                  'conversation_id': conversation.id, 
-                 'other_user_id': user?.userId, // userId from MatrimonyProfile
-                 'user_name': user?.personalDetails?.name.toString(), // userId from MatrimonyProfile
+                 'other_user_id': userProfile?.userId ?? userProfile?.user?.id, 
+                 'user_name': name,
                });
             },
           ),

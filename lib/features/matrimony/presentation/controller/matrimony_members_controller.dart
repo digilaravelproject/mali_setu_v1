@@ -40,10 +40,32 @@ class MatrimonyMembersController extends GetxController {
       filteredMembers.value = members;
     } else {
       final currentUserId = _authService.currentUser.value?.id;
+      final lowercaseQuery = query.toLowerCase();
+
       filteredMembers.value = members.where((m) {
-        final user = m.user1Id == currentUserId ? m.user2 : m.user1;
-        final name = (user?.personalDetails?.name ?? "").toLowerCase();
-        return name.contains(query.toLowerCase());
+        // Pick the partner profile (same logic as UI)
+        var userProfile = (m.user1Id == currentUserId) ? m.user2 : m.user1;
+        if (userProfile == null) {
+          userProfile = m.user2 ?? m.user1;
+        }
+
+        // Searchable fields with fallbacks
+        final name = (userProfile?.personalDetails?.name ?? 
+                     userProfile?.user?.name ?? 
+                     "").toLowerCase();
+                     
+        final profession = (userProfile?.professionalDetails?.jobTitle ?? 
+                           userProfile?.personalDetails?.occupation ?? 
+                           userProfile?.user?.occupation ?? 
+                           "").toLowerCase();
+                           
+        final location = (userProfile?.locationDetails?.city ?? 
+                         userProfile?.user?.city ?? 
+                         "").toLowerCase();
+        
+        return name.contains(lowercaseQuery) || 
+               profession.contains(lowercaseQuery) || 
+               location.contains(lowercaseQuery);
       }).toList();
     }
   }
