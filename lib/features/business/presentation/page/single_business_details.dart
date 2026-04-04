@@ -26,6 +26,7 @@ class BusinessDetailScreen extends StatefulWidget {
 
 class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   late final BusinessController controller;
+  late final Business argBusiness;
   final ScrollController _outerScrollController = ScrollController();
   final RxBool _showTitle = false.obs;
 
@@ -33,6 +34,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   void initState() {
     super.initState();
     controller = Get.find<BusinessController>();
+    // Store argBusiness once — safe from route argument changes on back navigation
+    final args = Get.arguments;
+    argBusiness = args is Business ? args : controller.selectedBusiness.value!;
     _outerScrollController.addListener(_onScroll);
   }
 
@@ -53,9 +57,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Initial fetch
-    final argBusiness = Get.arguments as Business;
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (argBusiness.id != null) {
         controller.fetchBusinessDetails(argBusiness.id!);
@@ -555,7 +556,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     // Determine if the current user is the owner
     final authService = Get.find<AuthService>();
     final currentUser = authService.currentUser.value;
-    final business = controller.selectedBusiness.value ?? Get.arguments as Business;
+    final business = controller.selectedBusiness.value ?? argBusiness;
     
     // If user is not logged in or doesn't match owner ID, hide section
     if (currentUser?.id != business.userId) {
@@ -928,7 +929,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     return Obx(() {
     final authService = Get.find<AuthService>();
     final currentUser = authService.currentUser.value;
-    final business = controller.selectedBusiness.value ?? Get.arguments as Business;
+    final business = controller.selectedBusiness.value ?? argBusiness;
     final isOwner = currentUser?.id == business.userId;
 
       if (controller.isDetailsLoading.isTrue) {
