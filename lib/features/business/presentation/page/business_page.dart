@@ -419,27 +419,23 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(
-          icon:  Icon(Icons.arrow_back_ios_new_rounded,color: Get.iconColor,),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: Get.iconColor),
           onPressed: () {
             controller.searchText.value = ""; // Clear search on back
             Get.back();
           },
         ),
         elevation: 0,
-        //backgroundColor: context.theme.primaryColor,
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: false,
         titleSpacing: 0, 
-        title:
-        //Obx(() =>
-            Text(
+        title: Text(
           "all_businesses".tr,
           style: context.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 20,
-           // color: Colors.white
-         // ),
-        )),
+          ),
+        ),
         actions: [
           Obx(() => controller.hasNextPage.value 
             ? IconButton(
@@ -459,56 +455,70 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
       ),
       body: Column(
         children: [
-          // Search Bar & Filter Toggle
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            // child: Row(
-            //   children: [
-            //     Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                      child: TextField(
-                        onChanged: (value) {
-                          controller.onSearchChanged(value);
-                        },
-                        decoration: InputDecoration(
-                          hintText: "Search by name, category, or location...",
-                          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                          prefixIcon: Obx(() => controller.isSearching.value
-                              ? Container(
-                            padding: const EdgeInsets.all(12),
-                            child: const SizedBox(
-                              width: 10,
-                              height: 10,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                              : const Icon(Icons.search, color: Colors.grey)),
-                          suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
-                              ? InkWell(
-                            child: const Icon(Icons.clear, color: Colors.grey),
-                            onTap: () {
-                              controller.searchText.value = "";
-                              controller.fetchAllBusinesses(isRefresh: true);
-                            },
-                          )
-                              : const SizedBox.shrink()),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 15),
-
-                        ),
+          // Search Bar
+          Container(
+            height: 50,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.black.withOpacity(0.8), width: 1),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(width: 12),
+                Obx(() => controller.isSearching.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
+                    : const Icon(Icons.search, color: Colors.black54, size: 20)),
+                Expanded(
+                  child: TextField(
+                    onChanged: (value) {
+                      controller.onSearchChanged(value);
+                    },
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      hintText: "search_your_business".tr,
+                      hintStyle: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
+                              onPressed: () {
+                                controller.searchText.value = "";
+                                controller.fetchAllBusinesses(isRefresh: true);
+                              },
+                            )
+                          : const SizedBox.shrink()),
+                    ),
                   ),
+                ),
+                Container(
+                  width: 1,
+                  height: 20,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  color: Colors.black.withOpacity(0.15),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Icon(Icons.mic, color: Get.theme.primaryColor, size: 22),
+                ),
+              ],
+            ),
           ),
 
           // Advanced Filter Section
@@ -571,8 +581,6 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
               : const SizedBox.shrink(),
           )),
           
-          
-          
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value && controller.businesses.isEmpty) {
@@ -604,7 +612,6 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                 onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
-                    // Load more when user scrolls to 80% of the list, only if not searching
                     if (controller.searchText.isEmpty && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent * 0.8) {
                       controller.loadMoreBusinesses();
                     }
@@ -616,7 +623,6 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                     itemCount: filteredList.length +
                         ((hasNext && controller.searchText.isEmpty) ? 1 : 0),
                     itemBuilder: (context, index) {
-                      /// 🔹 Normal list items
                       if (index < filteredList.length) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
@@ -626,7 +632,6 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                         );
                       }
 
-                      /// 🔹 Bottom loader / load more / end text
                       if (isLoadMore) {
                         return const Padding(
                           padding: EdgeInsets.all(16),
@@ -654,7 +659,6 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                         );
                       }
 
-                      /// 🔹 End message
                       return Padding(
                         padding: const EdgeInsets.all(16),
                         child: Center(

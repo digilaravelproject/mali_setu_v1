@@ -64,6 +64,8 @@ dependencies:
   chewie: ^1.10.0
   google_fonts: ^6.2.1
   webview_flutter: ^4.13.1
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
 
 
 dev_dependencies:
