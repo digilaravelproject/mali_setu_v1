@@ -76,15 +76,35 @@ class HomePage extends GetWidget<HomeController> {
                                   fit: BoxFit.contain,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  "Mali Setu",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                    color: theme.primaryColor,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
+                                 Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   mainAxisSize: MainAxisSize.min,
+                                   children: [
+                                     Text(
+                                       "Mali Setu",
+                                       style: TextStyle(
+                                         fontSize: 18,
+                                         fontWeight: FontWeight.w900,
+                                         color: theme.primaryColor,
+                                         letterSpacing: -0.5,
+                                       ),
+                                     ),
+                                     Obx(() => Row(
+                                       children: [
+                                         Icon(Icons.location_on, size: 10, color: Colors.grey[600]),
+                                         const SizedBox(width: 2),
+                                         Text(
+                                           controller.currentLocation.value,
+                                           style: TextStyle(
+                                             fontSize: 10,
+                                             color: Colors.grey[600],
+                                             fontWeight: FontWeight.w500,
+                                           ),
+                                         ),
+                                       ],
+                                     )),
+                                   ],
+                                 ),
                               ],
                             ),
                             const Spacer(),
@@ -142,7 +162,7 @@ class HomePage extends GetWidget<HomeController> {
                         borderRadius: BorderRadius.circular(12),
                         onTap: () => Get.to(() => const AllBusinessesScreen()),
                         child: Container(
-                          margin: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                          margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           height: 50,
                           decoration: BoxDecoration(
@@ -182,7 +202,7 @@ class HomePage extends GetWidget<HomeController> {
                         if (controller.isLoadingBanners.value) {
                           return Container(
                             height: 130,
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                             child: const ShimmerLoading.rounded(height: 130),
                           );
                         }
@@ -191,7 +211,7 @@ class HomePage extends GetWidget<HomeController> {
                         }
                         return Container(
                           height: 130,
-                          margin: const EdgeInsets.only(top: 12, bottom: 8),
+                          margin: const EdgeInsets.only(top: 4, bottom: 8),
                           decoration: BoxDecoration(borderRadius: BorderRadius.circular(0), boxShadow: [
                             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
                           ]),
@@ -251,8 +271,8 @@ class HomePage extends GetWidget<HomeController> {
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 4,
                                   crossAxisSpacing: 16,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 0.78,
+                                  mainAxisSpacing: 4,
+                                  childAspectRatio: 0.85,
                                 ),
                                 itemBuilder: (context, index) {
                                   if (showViewAll && index == 11) {
@@ -341,7 +361,7 @@ class HomePage extends GetWidget<HomeController> {
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 2),
           Text(
             _capitalizeText(category.name ?? ""),
             textAlign: TextAlign.center,
@@ -601,8 +621,8 @@ class HomePage extends GetWidget<HomeController> {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
                 crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.80,
+                mainAxisSpacing: 4,
+                childAspectRatio: 0.85,
               ),
               itemBuilder: (_, index) {
                 return _buildCategoryItem(context, controller.categories[index]);
@@ -623,8 +643,8 @@ class HomePage extends GetWidget<HomeController> {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
         crossAxisSpacing: 16,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.78,
+        mainAxisSpacing: 4,
+        childAspectRatio: 0.85,
       ),
       itemBuilder: (context, index) {
         return Column(

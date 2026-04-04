@@ -43,6 +43,12 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Mali Setu needs your location to show relevant services and businesses near you.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Mali Setu needs your location to show relevant services and businesses near you.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Mali Setu needs your location to show relevant services and businesses near you.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>

@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import '../../../../core/utils/location_helper.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -15,7 +16,7 @@ import '../../domain/usecase/get_banners_usecase.dart';
 import '../../data/model/banner_model.dart';
 import '../../../business/domain/repository/all_business_repository.dart';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController with WidgetsBindingObserver {
   final RxInt currentIndex = 0.obs;
   final RxString lastSwipeDirection = ''.obs;
   final RxBool isRefreshSelected = false.obs;
@@ -34,6 +35,9 @@ class HomeController extends GetxController {
   final RxList<Category> categories = <Category>[].obs;
   final RxBool isLoadingCategories = false.obs;
 
+  // Location
+  final RxString currentLocation = "Detecting...".obs;
+
   HomeController({
     required this.getBusinessCategoriesUseCase,
     required this.getBannersUseCase,
@@ -42,12 +46,38 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     if (Get.isRegistered<AuthService>()) {
       Get.find<AuthService>().refreshProfile();
     }
 
+    updateLocation();
     fetchCategories();
     fetchBanners();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Re-fetch location when app comes to foreground (e.g. back from settings)
+      updateLocation();
+    }
+  }
+
+  Future<void> updateLocation() async {
+    try {
+      final location = await LocationHelper.getCurrentLocation();
+      currentLocation.value = location;
+    } catch (e) {
+      currentLocation.value = "Location Error";
+      print("Location error: $e");
+    }
   }
 
 
@@ -57,6 +87,7 @@ class HomeController extends GetxController {
       isLoadingCategories.value = true;
 
       await Future.wait([
+        updateLocation(),
         fetchBanners(),
         fetchCategories(),
       ]);
