@@ -887,6 +887,8 @@ const Map<String, String> enUS = {
   'search_volunteers' : "Search Volunteers",
   'unknown_position' : "Unknown Position",
   'unknown_business' : "Unknown Business",
+  "please_enter_cover_letter": "Please enter your cover letter",
+  "please_upload_resume": "Please upload your resume"
 };
 
 

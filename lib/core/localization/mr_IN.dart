@@ -893,6 +893,8 @@ const Map<String, String> mrIN = {
   'please_enter_service_name': 'कृपया सेवेचे नाव प्रविष्ट करा',
   'please_enter_service_description': 'कृपया सेवेचे वर्णन प्रविष्ट करा',
   'please_enter_service_price': 'कृपया सेवेची किंमत प्रविष्ट करा',
+  "please_enter_cover_letter": "कृपया आपले कव्हर लेटर प्रविष्ट करा",
+  "please_upload_resume": "कृपया आपला रिझ्युमे अपलोड करा"
 };
 
 
