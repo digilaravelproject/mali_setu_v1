@@ -7,6 +7,7 @@ import '../controller/blog_controller.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_detail_screen.dart';
 import 'create_blogs.dart';
+import '../widgets/video_thumbnail_widget.dart';
 import '../../../Auth/service/auth_service.dart';
 
 class BlogsScreen extends StatelessWidget {
@@ -394,8 +395,13 @@ class BlogsScreen extends StatelessWidget {
                   SizedBox(
                     height: 170, width: double.infinity,
                     child: imageUrl != null
-                        ? Image.network(imageUrl, fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: true))
+                        ? VideoThumbnailWidget(
+                            key: ValueKey(imageUrl),
+                            videoUrl: imageUrl,
+                            height: 170,
+                            width: double.infinity,
+                            placeholder: _blogPlaceholder(primaryColor, isVideo: true),
+                          )
                         : _blogPlaceholder(primaryColor, isVideo: true),
                   ),
                   Positioned.fill(

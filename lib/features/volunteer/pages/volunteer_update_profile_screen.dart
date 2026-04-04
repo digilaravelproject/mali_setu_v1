@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
@@ -315,8 +316,18 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
             ],
+            border: const Border(
+              top: BorderSide(
+                color: AppColors.lightBorder,
+                width: 0.5,
+              ),
+            ),
           ),
           child: Obx(() => CustomButton(
                 isLoading: controller.isLoading.value,

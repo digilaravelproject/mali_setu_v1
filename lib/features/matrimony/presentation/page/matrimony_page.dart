@@ -31,6 +31,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     
   //  return AnnotatedRegion<SystemUiOverlayStyle>(
     
+    final isRestricted = !hasMatrimony || !hasPayment;
+    
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -41,13 +43,13 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         length: 2,
         child: Scaffold(
           extendBodyBehindAppBar: true,
-          backgroundColor: Colors.grey[50],
+          // backgroundColor: Colors.grey[50],
           body: NestedScrollView(
             physics: const NeverScrollableScrollPhysics(),
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
-                  expandedHeight: 120 + topPadding,
+                  expandedHeight: (isRestricted ? 60 : 120) + topPadding,
                   toolbarHeight: 60 + topPadding,
                   pinned: false,
                   floating: true,
@@ -921,8 +923,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            const SizedBox(height: 40), // More compact spacing from top bar
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -984,8 +987,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            const SizedBox(height: 40), // More compact spacing from top bar
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(

@@ -47,8 +47,8 @@ class BusinessScreen extends GetView<BusinessController> {
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               slivers: [
               SliverAppBar(
-                expandedHeight: 70 + topPadding,
-                toolbarHeight: 70 + topPadding,
+                expandedHeight: 50 + topPadding,
+                toolbarHeight: 50 + topPadding,
                 pinned: false,
                 floating: true,
                 backgroundColor: theme.scaffoldBackgroundColor,
@@ -74,7 +74,7 @@ class BusinessScreen extends GetView<BusinessController> {
             
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -484,7 +484,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                         decoration: InputDecoration(
                           hintText: "Search by name, category, or location...",
                           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-                          prefixIcon: Obx(() => controller.isLoading.value
+                          prefixIcon: Obx(() => controller.isSearching.value
                               ? Container(
                             padding: const EdgeInsets.all(12),
                             child: const SizedBox(

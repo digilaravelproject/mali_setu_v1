@@ -101,6 +101,7 @@ class BusinessController extends GetxController {
   var myApplications = <JobApplication>[].obs;
   var selectedJobApplications = <JobApplication>[].obs;
   
+  var isSearching = false.obs;
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
   var applicationLoadingStates = <int, String?>{}.obs;
@@ -164,15 +165,20 @@ class BusinessController extends GetxController {
 
 
   Future<void> fetchAllBusinesses({bool isRefresh = false}) async {
-    isLoading.value = true;
+    final searchQuery = searchText.value.trim();
+    if (searchQuery.isNotEmpty) {
+      isSearching.value = true;
+    } else {
+      isLoading.value = true;
+    }
+    
     try {
-      if (isRefresh && searchText.value.isEmpty) {
+      if (isRefresh && searchQuery.isEmpty) {
         currentPage.value = 1;
         businesses.clear();
       }
 
       // Determine which API to use: specialized search (POST) or general list (GET)
-      final searchQuery = searchText.value.trim();
       BusinessPaginationResult response;
 
       if (searchQuery.isNotEmpty) {
@@ -197,11 +203,15 @@ class BusinessController extends GetxController {
       
     } catch (e) {
       print('Error fetching all businesses: $e');
+    } finally {
+      isLoading.value = false;
+      isSearching.value = false;
     }
   }
 
   Future<void> searchBusinessWithFilters() async {
     try {
+      isSearching.value = true;
       isLoading.value = true;
       
       // Combine filters into a single search query or handle specifically if API supports it
@@ -234,6 +244,7 @@ class BusinessController extends GetxController {
       CustomSnackBar.showError(message: "Search failed: ${e.toString()}");
     } finally {
       isLoading.value = false;
+      isSearching.value = false;
     }
   }
 

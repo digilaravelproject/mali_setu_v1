@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
@@ -60,30 +61,49 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           ],
         ),
       ),
-      bottomNavigationBar: SafeArea(
-        child: Obx(
-              () => BottomAppBar(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              children: [
-                if (controller.currentStep.value > 0)
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+          border: const Border(
+            top: BorderSide(
+              color: AppColors.lightBorder,
+              width: 0.5,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: Obx(
+                () => BottomAppBar(
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Row(
+                children: [
+                  if (controller.currentStep.value > 0)
+                    Expanded(
+                      child: CustomOutlinedButton(
+                        title: "back".tr,
+                        onPressed: controller.previousStep,
+                      ).marginOnly(right: 8),
+                    ),
                   Expanded(
-                    child: CustomOutlinedButton(
-                      title: "back".tr,
-                      onPressed: controller.previousStep,
-                    ).marginOnly(right: 8),
+                    child: CustomButton(
+                      title: controller.currentStep.value == 3
+                          ? (controller.isEditMode.value ? "update".tr : "register".tr)
+                          : "next".tr,
+                      onPressed: controller.currentStep.value == 3
+                          ? controller.onRegister
+                          : controller.nextStep,
+                    ),
                   ),
-                Expanded(
-                  child: CustomButton(
-                    title: controller.currentStep.value == 3
-                        ? (controller.isEditMode.value ? "update".tr : "register".tr)
-                        : "next".tr,
-                    onPressed: controller.currentStep.value == 3
-                        ? controller.onRegister
-                        : controller.nextStep,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
