@@ -285,10 +285,18 @@ class RegisterController extends GetxController {
     // Validate caste certificate
     bool isCasteCertificateValid = _validateCasteCertificate();
 
-    // Validate form (trigerrs all inline validators)
+    // Validate name fields (inner Form - triggers visual error display)
+    final nameValidationError = nameFieldKey.currentState?.validate();
+    final isNameValid = nameValidationError == null;
+
+    // Validate phone field (triggers visual error display)
+    final phoneValidationError = phoneFieldKey.currentState?.validate();
+    final isPhoneValid = phoneValidationError == null;
+
+    // Validate form (triggers all inline validators for other fields)
     bool isFormValid = formKey.currentState!.validate();
 
-    if (!isFormValid || !isCasteCertificateValid) {
+    if (!isFormValid || !isNameValid || !isPhoneValid || !isCasteCertificateValid) {
       return;
     }
 

@@ -687,9 +687,32 @@ class RegMatrimonyController extends GetxController {
       dobCtrl.text = personal['dob']?.toString() ?? '';
       if (dobCtrl.text.isNotEmpty) {
         try {
-          selectedDate = DateTime.parse(dobCtrl.text);
+          final dobStr = dobCtrl.text.trim();
+          // Handle both DD/MM/YYYY and YYYY-MM-DD formats
+          if (dobStr.contains('/')) {
+            // DD/MM/YYYY format
+            final parts = dobStr.split('/');
+            if (parts.length == 3) {
+              final day = int.tryParse(parts[0]) ?? 1;
+              final month = int.tryParse(parts[1]) ?? 1;
+              final year = int.tryParse(parts[2]) ?? 2000;
+              selectedDate = DateTime(year, month, day);
+            }
+          } else {
+            // YYYY-MM-DD format
+            selectedDate = DateTime.parse(dobStr);
+            // Reformat to DD/MM/YYYY for display
+            final d = selectedDate!;
+            dobCtrl.text = "${d.day.toString().padLeft(2, '0')}/"
+                "${d.month.toString().padLeft(2, '0')}/"
+                "${d.year}";
+          }
+          // Always set rxDob so validation passes
           rxDob.value = dobCtrl.text;
-        } catch (_) {}
+        } catch (_) {
+          // If parsing still fails, at least set rxDob from raw text so it's not empty
+          rxDob.value = dobCtrl.text;
+        }
       }
       annualIncomeCtrl.text = personal['annual_income']?.toString() ?? '';
       jobTitleCtrl.text = personal['occupation']?.toString() ?? '';
@@ -733,10 +756,12 @@ class RegMatrimonyController extends GetxController {
         if (starArr.length > 2) {
           final manglikStr = starArr[2]?.toString() ?? '';
           final manglikVal = manglikStr.replaceFirst('manglik-', '');
-          manglik.value = _safeValue(
-            manglikVal[0].toUpperCase() + manglikVal.substring(1),
-            manglikList,
-          );
+          if (manglikVal.isNotEmpty) {
+            manglik.value = _safeValue(
+              manglikVal[0].toUpperCase() + manglikVal.substring(1),
+              manglikList,
+            );
+          }
         }
       }
 

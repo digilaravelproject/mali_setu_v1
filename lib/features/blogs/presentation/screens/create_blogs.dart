@@ -31,50 +31,37 @@ class CreateBlogScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           // _buildSectionHeader(context, "Title"),
-            AppInputTextField(
+            Obx(() => AppInputTextField(
                controller: controller.titleCtrl,
-               label: "Enter blog title",
-            ),
-            const SizedBox(height: 20),
-
-            _buildSectionHeader(context, "Blog Type"),
-            Obx(() => GestureDetector(
-              onTap: () => _showTypeSelection(context, controller),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      controller.blogType.value.isEmpty ? "Select Blog Type" : controller.blogType.value,
-                      style: TextStyle(
-                        color: controller.blogType.value.isEmpty ? Colors.grey[500] : Colors.black87,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                  ],
-                ),
-              ),
+               label: "Blog Title",
+               isRequired: true,
+               topPadding: 0,
+               errorText: controller.errors['title'],
             )),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
 
-           // _buildSectionHeader(context, "Description"),
-            AppInputTextField(
+            Obx(() => AppInputTextField(
+               controller: controller.blogTypeCtrl,
+               label: "Blog Type",
+               isRequired: true,
+               isDropdown: true,
+               topPadding: 0,
+               dropdownItems: controller.blogTypesList,
+               errorText: controller.errors['type'],
+            )),
+            const SizedBox(height: 8),
+
+            Obx(() => AppInputTextField(
                controller: controller.descriptionCtrl,
-               label: "Enter blog description",
+               label: "Blog Description",
+               isRequired: true,
+               topPadding: 0,
+               errorText: controller.errors['description'],
                maxLines: 4,
-            ),
-            const SizedBox(height: 20),
+            )),
+            const SizedBox(height: 8),
 
-
-            _buildSectionHeader(context, "Tags"),
+            _buildSectionHeader(context, "Tags", isRequired: true),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -101,46 +88,92 @@ class CreateBlogScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Obx(() => Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: controller.tags
-                      .map((tag) => Chip(
-                            label: Text(
-                              tag,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            backgroundColor: primaryColor.withValues(alpha: 0.1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(color: primaryColor.withValues(alpha: 0.3)),
-                            ),
-                            deleteIcon: Icon(Icons.close, size: 14, color: primaryColor),
-                            onDeleted: () => controller.removeTag(tag),
-                          ))
-                      .toList(),
-                )),
-            const SizedBox(height: 20),
+            // const SizedBox(height: 8),
+            Obx(() => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: controller.tags
+                          .map((tag) => Chip(
+                                label: Text(
+                                  tag,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                backgroundColor: primaryColor.withValues(alpha: 0.1),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(color: primaryColor.withValues(alpha: 0.3)),
+                                ),
+                                deleteIcon: Icon(Icons.close, size: 14, color: primaryColor),
+                                onDeleted: () => controller.removeTag(tag),
+                              ))
+                          .toList(),
+                    ),
+                if (controller.errors.containsKey('tags'))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, left: 16),
+                    child: Text(
+                      controller.errors['tags']!,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: Colors.red.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            )),
+            const SizedBox(height: 16),
 
-            _buildSectionHeader(context, "Media (Image)"),
-            Obx(() => controller.selectedImage.value != null
+            _buildSectionHeader(context, "Media (Image/Video)"),
+            Obx(() => controller.selectedFile.value != null
                 ? Stack(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          controller.selectedImage.value!,
-                          width: double.infinity,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        ),
+                        child: controller.mediaType.value == 'video'
+                            ? Container(
+                                width: double.infinity,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  color: Colors.black87,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.videocam_rounded, size: 64, color: Colors.white),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      "Video selected",
+                                      style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                                      child: Text(
+                                        controller.selectedFile.value!.path.split('/').last,
+                                        style: context.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Image.file(
+                                controller.selectedFile.value!,
+                                width: double.infinity,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                       Positioned(
                         top: 8,
                         right: 8,
                         child: GestureDetector(
-                          onTap: controller.removeImage,
+                          onTap: controller.removeMedia,
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: const BoxDecoration(
@@ -154,7 +187,7 @@ class CreateBlogScreen extends StatelessWidget {
                     ],
                   )
                 : GestureDetector(
-                    onTap: controller.pickImage,
+                    onTap: () => _showMediaPicker(context, controller),
                     child: Container(
                       width: double.infinity,
                       height: 150,
@@ -169,12 +202,20 @@ class CreateBlogScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_photo_alternate_rounded, size: 48, color: primaryColor),
-                          const SizedBox(height: 8),
+                          Icon(Icons.perm_media_rounded, size: 48, color: primaryColor),
+                          const SizedBox(height: 12),
                           Text(
-                             "Tap to upload an image",
+                             "Tap to upload media",
                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600),
-                          )
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Image (Max 2MB) | Video (Max 10MB)',
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: context.theme.hintColor.withValues(alpha: 0.7),
+                              fontSize: 10,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -213,45 +254,105 @@ class CreateBlogScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String text) {
+  Widget _buildSectionHeader(BuildContext context, String text, {bool isRequired = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, left: 4),
-      child: Text(
-        text,
-        style: context.textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: Colors.grey[800],
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: context.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          if (isRequired)
+            Text(
+              ' *',
+              style: context.textTheme.titleSmall?.copyWith(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  void _showTypeSelection(BuildContext context, CreateBlogController controller) {
+  void _showMediaPicker(BuildContext context, CreateBlogController controller) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Select Blog Type",
-                style: context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ...controller.blogTypesList.map((type) => ListTile(
-                    title: Text(type),
-                  //  trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
-                    onTap: () {
-                      controller.blogType.value = type;
-                      Get.back();
-                    },
-                  )),
-            ],
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Upload Media",
+                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.back();
+                          controller.pickImage();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(Icons.image_rounded, size: 36, color: context.theme.primaryColor),
+                              const SizedBox(height: 8),
+                              const Text("Image", style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text("Max 2MB", style: context.textTheme.bodySmall),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.back();
+                          controller.pickVideo();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(Icons.videocam_rounded, size: 36, color: context.theme.primaryColor),
+                              const SizedBox(height: 8),
+                              const Text("Video", style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text("Max 10MB", style: context.textTheme.bodySmall),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

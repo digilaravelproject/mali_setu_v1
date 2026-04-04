@@ -184,6 +184,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     externalLastNameCtrl: controller.lastNameCtrl,
                     isRequired: true,
                     onChanged: (_) {},
+                    titleItems: const ['Ms.', 'Dr.', 'Prof.'],
                   );
                 }),
                 const SizedBox(height: 12),

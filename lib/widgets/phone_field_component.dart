@@ -307,11 +307,15 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
   /// Validates that phone number is not empty (if required)
   String? validate() {
     if (widget.isRequired && phoneCtrl.text.trim().isEmpty) {
+      if (mounted) setState(() {});
       return 'Please enter phone number';
     }
     if (phoneCtrl.text.trim().isNotEmpty && phoneCtrl.text.trim().length < 10) {
+      if (mounted) setState(() {});
       return 'Phone number must be at least 10 digits';
     }
+    // Clear display state if valid
+    if (mounted) setState(() {});
     return null;
   }
 

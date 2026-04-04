@@ -223,7 +223,6 @@ class RegisterPage extends GetWidget<RegisterController> {
                     right: AppInputTextField(
                       label: "road_number".tr,
                       controller: controller.roadNumberCtrl,
-                      isRequired: true,
                       topPadding: 0,
                     ),
                   ),
@@ -231,13 +230,11 @@ class RegisterPage extends GetWidget<RegisterController> {
                     left: AppInputTextField(
                       label: "sector".tr,
                       controller: controller.sectorCtrl,
-                      isRequired: true,
                       topPadding: 0,
                     ),
                     right: AppInputTextField(
                       label: "destination".tr,
                       controller: controller.destinationCtrl,
-                      isRequired: true,
                       topPadding: 0,
                     ),
                   ),

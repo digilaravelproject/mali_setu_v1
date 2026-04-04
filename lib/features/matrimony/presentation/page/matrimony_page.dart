@@ -322,7 +322,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
         // ACTION BUTTONS
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+          padding: const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 80),
           child: Obx(() {
             // Check if profiles exist and index is valid
             if (controller.profiles.isEmpty || controller.currentIndex.value >= controller.profiles.length) {

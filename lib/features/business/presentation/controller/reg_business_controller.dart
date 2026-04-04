@@ -459,11 +459,12 @@ class RegBusinessController extends GetxController {
     if (stateCtrl.text.trim().isEmpty) errors['state'] = "Please enter state";
     if (countryCtrl.text.trim().isEmpty) errors['country'] = "Please enter country";
 
-    // Contact
-    if (phoneCtrl.text.trim().isEmpty) {
-      errors['phone'] = "Please enter phone number";
-    } else if (phoneCtrl.text.trim().length < 10) {
-      errors['phone'] = "Phone number must be at least 10 digits";
+    // Contact - Use component validation for consistency
+    final phoneValidationError = phoneFieldKey.currentState?.validate();
+    if (phoneValidationError != null) {
+      errors['phone'] = phoneValidationError;
+    } else {
+      errors.remove('phone');
     }
     
     if (emailCtrl.text.trim().isEmpty) {
@@ -504,7 +505,7 @@ class RegBusinessController extends GetxController {
         "description": bDescCtrl.text,
         "contact_phone": combinedPhone,
         "contact_email": emailCtrl.text,
-        "website": websiteCtrl.text,
+        "website": (websiteCtrl.text.trim() == "https://" || websiteCtrl.text.trim().isEmpty) ? "" : websiteCtrl.text.trim(),
         "country": countryCtrl.text,
         "state": stateCtrl.text,
         "district": districtCtrl.text,

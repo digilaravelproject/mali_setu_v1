@@ -246,7 +246,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 120),
             ],
           ),
         ),

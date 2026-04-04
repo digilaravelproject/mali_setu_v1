@@ -14,6 +14,8 @@ class NameFieldComponent extends StatefulWidget {
   final TextEditingController? externalTitleCtrl;
   final TextEditingController? externalFirstNameCtrl;
   final TextEditingController? externalLastNameCtrl;
+  // Optional custom title list — defaults to full list if not provided
+  final List<String>? titleItems;
 
   const NameFieldComponent({
     super.key,
@@ -23,6 +25,7 @@ class NameFieldComponent extends StatefulWidget {
     this.externalTitleCtrl,
     this.externalFirstNameCtrl,
     this.externalLastNameCtrl,
+    this.titleItems,
   });
 
   @override
@@ -90,16 +93,23 @@ class NameFieldComponentState extends State<NameFieldComponent> {
   }
 
   /// Validates that title and first name are not empty (if required)
+  /// Also triggers the inner Form to display inline error messages.
   String? validate() {
     if (widget.isRequired) {
+      // This triggers the visual error display on each field
       final isFormValid = nameFormKey.currentState?.validate() ?? false;
       if (!isFormValid) {
+        // Trigger rebuild to sync error display
+        if (mounted) setState(() {});
+
         if (titleCtrl.text.trim().isEmpty) return 'Please select title';
         if (firstNameCtrl.text.trim().isEmpty) return 'first_name_required'.tr;
         if (lastNameCtrl.text.trim().isEmpty) return 'last_name_required'.tr;
         return "Please fill name details";
       }
     }
+    // Clear display state if valid
+    if (mounted) setState(() {});
     return null;
   }
 
@@ -132,7 +142,7 @@ class NameFieldComponentState extends State<NameFieldComponent> {
               }
               return null;
             },
-            dropdownItems: [
+            dropdownItems: widget.titleItems ?? [
               'mr'.tr,
               'mrs'.tr,
               'ms'.tr,

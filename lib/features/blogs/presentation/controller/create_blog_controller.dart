@@ -9,15 +9,29 @@ import '../../../../widgets/custom_snack_bar.dart';
 
 class CreateBlogController extends GetxController {
   final BlogRepository _repository = BlogRepository();
+  final ImagePicker _picker = ImagePicker();
   
   final titleCtrl = TextEditingController();
   final descriptionCtrl = TextEditingController();
   final tagInputCtrl = TextEditingController(); 
+  final blogTypeCtrl = TextEditingController();
   
   final blogType = ''.obs;
   final RxList<String> tags = <String>[].obs;
-  final Rxn<File> selectedImage = Rxn<File>();
+  final Rxn<File> selectedFile = Rxn<File>();
+  final mediaType = RxnString(); // 'image' or 'video'
   final isSubmitting = false.obs;
+  final errors = <String, String>{}.obs;
+  
+  @override
+  void onInit() {
+    super.onInit();
+    titleCtrl.addListener(() => errors.remove('title'));
+    descriptionCtrl.addListener(() => errors.remove('description'));
+    blogTypeCtrl.addListener(() => errors.remove('type'));
+    blogType.listen((_) => errors.remove('type'));
+    tags.listen((_) => errors.remove('tags'));
+  }
   
   final List<String> blogTypesList = [
     "Investment Guidance",
@@ -38,15 +52,61 @@ class CreateBlogController extends GetxController {
       );
 
       if (image != null) {
-        selectedImage.value = File(image.path);
+        final file = File(image.path);
+        final int sizeInBytes = await file.length();
+        final double sizeInMb = sizeInBytes / (1024 * 1024);
+        
+        final String extension = image.path.split('.').last.toLowerCase();
+        final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+
+        if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
+          selectedFile.value = file;
+          mediaType.value = 'image';
+          errors.remove('photos'); 
+        } else {
+          CustomSnackBar.showError(
+            message: "Max size 2MB, Formats: JPG, PNG",
+          );
+        }
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
   }
 
-  void removeImage() {
-    selectedImage.value = null;
+  Future<void> pickVideo() async {
+    try {
+      final XFile? video = await _picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
+
+      if (video != null) {
+        final file = File(video.path);
+        final int sizeInBytes = await file.length();
+        final double sizeInMb = sizeInBytes / (1024 * 1024);
+        
+        final String extension = video.path.split('.').last.toLowerCase();
+        final List<String> allowedExtensions = ['mp4', 'mov', 'avi'];
+
+        if (sizeInMb <= 10 && allowedExtensions.contains(extension)) {
+          selectedFile.value = file;
+          mediaType.value = 'video';
+          errors.remove('photos');
+        } else {
+          CustomSnackBar.showError(
+            message: "Max size 10MB, Formats: MP4, MOV",
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint("Error picking video: $e");
+    }
+  }
+
+  void removeMedia() {
+    selectedFile.value = null;
+    mediaType.value = null;
   }
 
   void addTag() {
@@ -64,35 +124,41 @@ class CreateBlogController extends GetxController {
   Future<void> createBlog() async {
     final title = titleCtrl.text.trim();
     final description = descriptionCtrl.text.trim();
-    final type = blogType.value;
+    final type = blogTypeCtrl.text.trim();
+
+    errors.clear();
 
     if (title.isEmpty) {
-        CustomSnackBar.showError(message: "Please enter blog title");
-        return;
+        errors['title'] = "Please enter blog title";
     }
     if (type.isEmpty) {
-        CustomSnackBar.showError(message: "Please select a blog type");
-        return;
+        errors['type'] = "Please select a blog type";
     }
     if (description.isEmpty) {
-        CustomSnackBar.showError(message: "Please enter blog description");
-        return;
+        errors['description'] = "Please enter blog description";
     }
     if (tags.isEmpty) {
-        CustomSnackBar.showError(message: "Please add at least one tag");
-        return;
+        errors['tags'] = "Please add at least one tag";
     }
+
+    if (errors.isNotEmpty) return;
 
     try {
       isSubmitting.value = true;
       debugPrint("Starting blog creation process for: $title");
       
       String? base64Media; 
-      if (selectedImage.value != null) {
-        final bytes = await selectedImage.value!.readAsBytes();
+      if (selectedFile.value != null) {
+        final bytes = await selectedFile.value!.readAsBytes();
         final base64String = base64Encode(bytes);
-        final ext = selectedImage.value!.path.split('.').last.toLowerCase();
-        final mimeType = (ext == 'png') ? 'image/png' : 'image/jpeg';
+        final ext = selectedFile.value!.path.split('.').last.toLowerCase();
+        
+        String mimeType = 'image/jpeg';
+        if (ext == 'png') mimeType = 'image/png';
+        if (ext == 'mp4') mimeType = 'video/mp4';
+        if (ext == 'mov') mimeType = 'video/quicktime';
+        if (ext == 'avi') mimeType = 'video/x-msvideo';
+
         base64Media = 'data:$mimeType;base64,$base64String';
       }
 
@@ -150,6 +216,7 @@ class CreateBlogController extends GetxController {
     titleCtrl.dispose();
     descriptionCtrl.dispose();
     tagInputCtrl.dispose();
+    blogTypeCtrl.dispose();
     super.onClose();
   }
 }

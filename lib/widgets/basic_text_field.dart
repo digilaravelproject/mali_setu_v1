@@ -149,6 +149,7 @@ class AppInputTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText ?? " Enter Your ${label[0].toUpperCase()}${label.substring(1).toLowerCase()}",
             hintStyle: context.textTheme.bodyMedium,
+            errorText: errorText,
             
             // Show red border when errorText is present
             enabledBorder: errorText != null && errorText!.isNotEmpty
@@ -182,14 +183,6 @@ class AppInputTextField extends StatelessWidget {
                 )),
           ),
         ),
-        if (errorText != null && errorText!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
-            child: Text(
-              errorText!,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red.shade700),
-            ),
-          ),
       ],
     );
   }

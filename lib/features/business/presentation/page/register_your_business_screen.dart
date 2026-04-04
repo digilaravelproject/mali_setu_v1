@@ -257,6 +257,9 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   isRequired: true,
                   initialPhone: controller.phoneCtrl.text,
                   errorText: controller.errors['phone'],
+                  onChanged: (val) {
+                    controller.errors.remove('phone');
+                  },
                 ),
                 AppInputTextField(
                   label: 'email'.tr,

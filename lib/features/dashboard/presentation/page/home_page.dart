@@ -361,7 +361,7 @@ class HomePage extends GetWidget<HomeController> {
                               color2: const Color(0xFFE91E63),
                             ),
 
-                            const SizedBox(height: 80),
+                            const SizedBox(height: 120),
                           ],
                         ),
                       ),
