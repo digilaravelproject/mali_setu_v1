@@ -50,15 +50,16 @@ class _JobApplyFormState extends State<JobApplyForm> {
   }
 
   void _submit() async {
-    if (_coverLetterController.text.isEmpty) {
-      CustomSnackBar.showError(message: "Please enter a cover letter");
+    if (_coverLetterController.text.trim().isEmpty) {
+      CustomSnackBar.showError(message: "please_enter_cover_letter".tr);
+      return;
+    }
+    if (_resumeFile == null) {
+      CustomSnackBar.showError(message: "please_upload_resume".tr);
       return;
     }
 
-    if (_resumeFile == null) {
-      CustomSnackBar.showError(message: "Please upload a resume");
-      return;
-    }
+    _isLoading.value = true;
 
     final data = {
       'job_posting_id': widget.jobId,
@@ -67,11 +68,30 @@ class _JobApplyFormState extends State<JobApplyForm> {
       'resume': _resumeFile,
     };
 
-    Get.back(); // Close bottom sheet immediately as per user request
-    await _controller.applyJob(data);
+    final success = await _controller.applyJob(data);
+    _isLoading.value = false;
+
+    if (success == true) {
+      Get.back();
+    }
   }
 
+  final _isLoading = false.obs;
+
   void _nextStep() {
+    // Validate current step before proceeding
+    if (_currentStep == 0) {
+      if (_coverLetterController.text.trim().isEmpty) {
+        CustomSnackBar.showError(message: "please_enter_cover_letter".tr);
+        return;
+      }
+    } else if (_currentStep == 1) {
+      if (_resumeFile == null) {
+        CustomSnackBar.showError(message: "please_upload_resume".tr);
+        return;
+      }
+    }
+
     if (_currentStep < 2) {
       setState(() => _currentStep++);
     } else {
@@ -139,11 +159,11 @@ class _JobApplyFormState extends State<JobApplyForm> {
                   const SizedBox(height: 30),
 
                   // Actions
-                  Row(
+                  Obx(() => Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _prevStep,
+                          onPressed: _isLoading.value ? null : _prevStep,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             side: BorderSide(color: context.theme.primaryColor),
@@ -155,7 +175,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _nextStep,
+                          onPressed: _isLoading.value ? null : _nextStep,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.theme.primaryColor,
                             foregroundColor: Colors.white,
@@ -163,11 +183,13 @@ class _JobApplyFormState extends State<JobApplyForm> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: Text(_currentStep == 2 ? "submit".tr : "continue".tr),
+                          child: _isLoading.value
+                              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : Text(_currentStep == 2 ? "submit".tr : "continue".tr),
                         ),
                       ),
                     ],
-                  ),
+                  )),
                 ],
               ),
             ),

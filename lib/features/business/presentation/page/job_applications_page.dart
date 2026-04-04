@@ -278,37 +278,41 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
             ],
           ),
           const SizedBox(height: 16),
-          // Action Buttons: Review, Accept, Reject
+          // Action Buttons based on status
           Obx(() {
             final loadingStatus = controller.applicationLoadingStates[application.id];
             final isAppLoading = loadingStatus != null;
-            
-            return Row(
-              children: [
-                // Review Button
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: (status == 'reviewed' || isAppLoading) 
-                      ? null 
-                      : () => _handleStatusUpdate(application, 'reviewed'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
-                      side: const BorderSide(color: Colors.blue),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    child: (loadingStatus == 'reviewed') 
+
+            // accepted or rejected — show only status badge, no buttons
+            if (status == 'accepted' || status == 'rejected') {
+              return const SizedBox.shrink();
+            }
+
+            // pending — show only Review button
+            if (status == 'pending') {
+              return SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: isAppLoading ? null : () => _handleStatusUpdate(application, 'reviewed'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    side: const BorderSide(color: Colors.blue),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: (loadingStatus == 'reviewed')
                       ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.blue))
                       : Text('review'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
                 ),
-                const SizedBox(width: 8),
-                // Reject Button
+              );
+            }
+
+            // reviewed — show Accept and Reject buttons
+            return Row(
+              children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: (status == 'rejected' || isAppLoading) 
-                      ? null 
-                      : () => _handleStatusUpdate(application, 'rejected'),
+                    onPressed: isAppLoading ? null : () => _handleStatusUpdate(application, 'rejected'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.redAccent,
                       side: const BorderSide(color: Colors.redAccent),
@@ -316,17 +320,14 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     child: (loadingStatus == 'rejected')
-                      ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.redAccent))
-                      : Text('reject'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.redAccent))
+                        : Text('reject'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Accept Button
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: (status == 'accepted' || isAppLoading) 
-                      ? null 
-                      : () => _handleStatusUpdate(application, 'accepted'),
+                    onPressed: isAppLoading ? null : () => _handleStatusUpdate(application, 'accepted'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -335,8 +336,8 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                       elevation: 0,
                     ),
                     child: (loadingStatus == 'accepted')
-                      ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : Text('accept'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ? const SizedBox(height: 15, width: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : Text('accept'.tr, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
