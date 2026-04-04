@@ -62,9 +62,9 @@ class DashboardPage extends GetWidget<DashboardController> {
         ),
         child: BottomAppBar(
           elevation: 0,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
+          // padding: EdgeInsets.only(
+          //   bottom: MediaQuery.of(context).padding.bottom,
+          // ),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
