@@ -25,15 +25,6 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     final theme = Theme.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
 
-    final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
-    print("hasPayment: $hasPayment");
-    final hasMatrimony = Get.find<AuthService>().hasMatrimony();
-
-
-    
-    final isRestricted = !hasMatrimony || !hasPayment;
-    
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -49,26 +40,31 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             physics: const NeverScrollableScrollPhysics(),
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
-                SliverAppBar(
-                  expandedHeight: (isRestricted ? 60 : 120) + topPadding,
-                  toolbarHeight: 60 + topPadding,
-                  pinned: false,
-                  floating: true,
-                  backgroundColor: Colors.white.withOpacity(0.9),
-                  elevation: 0,
-                  automaticallyImplyLeading: false,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: Padding(
-                      padding: EdgeInsets.only(top: topPadding),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                            child: Row(
-                              children: [
-                                Obx(() {
-                                  final user = Get.find<AuthService>().currentUser.value;
-                                  return GestureDetector(
+                Obx(() {
+                  final authService = Get.find<AuthService>();
+                  final currentUser = authService.currentUser.value;
+                  final hasPayment = authService.hasPaymentForMatrimony();
+                  final hasMatrimony = authService.hasMatrimony();
+                  final isRestricted = !hasMatrimony || !hasPayment;
+
+                  return SliverAppBar(
+                    expandedHeight: (isRestricted ? 60 : 120) + topPadding,
+                    toolbarHeight: 60 + topPadding,
+                    pinned: false,
+                    floating: true,
+                    backgroundColor: Colors.white.withOpacity(0.9),
+                    elevation: 0,
+                    automaticallyImplyLeading: false,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Padding(
+                        padding: EdgeInsets.only(top: topPadding),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
                                     onTap: () {},
                                     child: Container(
                                       height: 44,
@@ -82,235 +78,142 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                       ),
                                       child: ClipOval(
                                         child: CustomImageView(
-                                          url: user?.profileImage,
+                                          url: currentUser?.profileImage,
                                           imagePath: AppAssets.getAppLogo(),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
                                     ),
-                                  );
-                                }),
-                                const Spacer(),
-                                Text(
-                                  'discover'.tr,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w800,
-                                    color: theme.primaryColor,
-                                    letterSpacing: 1.2,
                                   ),
-                                ),
-
-                                const Spacer(),
-                                const Spacer(),
-
-                                if (hasMatrimony && hasPayment) ...[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: IconButton(
-                                      onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
-                                      icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
-                                      tooltip: 'members'.tr,
+                                  const Spacer(),
+                                  Text(
+                                    'discover'.tr,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      color: theme.primaryColor,
+                                      letterSpacing: 1.2,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const Spacer(),
+                                  const Spacer(),
 
-                                  GetBuilder<FilterController>(
-                                    builder: (filterCtrl) => Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[100],
-                                            shape: BoxShape.circle,
+                                  if (hasMatrimony && hasPayment) ...[
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[100],
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: IconButton(
+                                        onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
+                                        icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
+                                        tooltip: 'members'.tr,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+
+                                    GetBuilder<FilterController>(
+                                      builder: (filterCtrl) => Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[100],
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: IconButton(
+                                              onPressed: () async {
+                                                var result = await FilterBottomSheet.show();
+                                                if (result != null) {
+                                                  controller.fetchProfiles(filters: result);
+                                                }
+                                              },
+                                              icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
+                                            ),
                                           ),
-                                          child: IconButton(
-                                            onPressed: () async {
-                                              var result = await FilterBottomSheet.show();
-                                              if (result != null) {
-                                                controller.fetchProfiles(filters: result);
-                                              }
-                                            },
-                                            icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
-                                          ),
-                                        ),
-                                        if (filterCtrl.activeFilterCount > 0)
-                                          Positioned(
-                                            top: -2,
-                                            right: -2,
-                                            child: Container(
-                                              padding: const EdgeInsets.all(4),
-                                              decoration: BoxDecoration(
-                                                color: Colors.redAccent,
-                                                shape: BoxShape.circle,
-                                                border: Border.all(color: Colors.white, width: 1.5),
-                                              ),
-                                              child: Text(
-                                                "${filterCtrl.activeFilterCount}",
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 8,
-                                                  fontWeight: FontWeight.bold,
+                                          if (filterCtrl.activeFilterCount > 0)
+                                            Positioned(
+                                              top: -2,
+                                              right: -2,
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.redAccent,
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: Colors.white, width: 1.5),
+                                                ),
+                                                child: Text(
+                                                  "${filterCtrl.activeFilterCount}",
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 8,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ]
-                                // Container(
-                                //   decoration: BoxDecoration(
-                                //     color: Colors.grey[100],
-                                //     shape: BoxShape.circle,
-                                //   ),
-                                //   child: IconButton(
-                                //     onPressed: () => Get.toNamed(AppRoutes.matrimonyMembers),
-                                //     icon: Icon(Icons.people_alt_rounded, color: Colors.grey[800], size: 20),
-                                //     tooltip: 'members'.tr,
-                                //   ),
-                                // ),
-                                // const SizedBox(width: 8),
-                                // GetBuilder<FilterController>(
-                                //   builder: (filterCtrl) => Stack(
-                                //     clipBehavior: Clip.none,
-                                //     children: [
-                                //       Container(
-                                //         decoration: BoxDecoration(
-                                //           color: Colors.grey[100],
-                                //           shape: BoxShape.circle,
-                                //         ),
-                                //         child: IconButton(
-                                //           onPressed: () async {
-                                //             var result = await FilterBottomSheet.show();
-                                //             if (result != null) {
-                                //               controller.fetchProfiles(filters: result);
-                                //             }
-                                //           },
-                                //           icon: Icon(Icons.tune_rounded, color: Colors.grey[800], size: 20),
-                                //         ),
-                                //       ),
-                                //       if (filterCtrl.activeFilterCount > 0)
-                                //         Positioned(
-                                //           top: -2,
-                                //           right: -2,
-                                //           child: Container(
-                                //             padding: const EdgeInsets.all(4),
-                                //             decoration: BoxDecoration(
-                                //               color: Colors.redAccent,
-                                //               shape: BoxShape.circle,
-                                //               border: Border.all(color: Colors.white, width: 1.5),
-                                //             ),
-                                //             child: Text(
-                                //               "${filterCtrl.activeFilterCount}",
-                                //               style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                                //             ),
-                                //           ),
-                                //         ),
-                                //     ],
-                                //   ),
-                                // ),
-                              ],
-                            ),
-                          ),
-
-
-                          if (hasMatrimony && hasPayment)
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(30),
+                                  ]
+                                ],
                               ),
-                              child: TabBar(
-                                onTap: (index) {
-                                  final filterCtrl = Get.find<FilterController>();
-                                  if (index == 0) {
-                                    filterCtrl.recentlyCreated.value = 'all';
-                                  } else {
-                                    filterCtrl.recentlyCreated.value = 'one_week';
-                                  }
-                                  filterCtrl.update();
-                                  controller.currentIndex.value = 0;
-                                  controller.fetchProfiles(filters: filterCtrl.getFilters());
-                                },
-                                dividerHeight: 0,
-                                indicator: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
+                            ),
+                            if (hasMatrimony && hasPayment)
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                child: TabBar(
+                                  onTap: (index) {
+                                    final filterCtrl = Get.find<FilterController>();
+                                    if (index == 0) {
+                                      filterCtrl.recentlyCreated.value = 'all';
+                                    } else {
+                                      filterCtrl.recentlyCreated.value = 'one_week';
+                                    }
+                                    filterCtrl.update();
+                                    controller.currentIndex.value = 0;
+                                    controller.fetchProfiles(filters: filterCtrl.getFilters());
+                                  },
+                                  dividerHeight: 0,
+                                  indicator: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  indicatorSize: TabBarIndicatorSize.tab,
+                                  labelColor: theme.primaryColor,
+                                  unselectedLabelColor: Colors.grey[600],
+                                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  tabs: [
+                                    Tab(text: 'all_matches'.tr),
+                                    Tab(text: 'newly_joined'.tr),
                                   ],
                                 ),
-                                indicatorSize: TabBarIndicatorSize.tab,
-                                labelColor: theme.primaryColor,
-                                unselectedLabelColor: Colors.grey[600],
-                                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                tabs: [
-                                  Tab(text: 'all_matches'.tr),
-                                  Tab(text: 'newly_joined'.tr),
-                                ],
                               ),
-                            ),
-                          /* Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[200],
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: TabBar(
-                              onTap: (index) {
-                                final filterCtrl = Get.find<FilterController>();
-                                if (index == 0) {
-                                  filterCtrl.recentlyCreated.value = 'all';
-                                } else {
-                                  filterCtrl.recentlyCreated.value = 'one_week';
-                                }
-                                filterCtrl.update();
-                                controller.currentIndex.value = 0;
-                                controller.fetchProfiles(filters: filterCtrl.getFilters());
-                              },
-                              dividerHeight: 0,
-                              indicator: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(24),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              labelColor: theme.primaryColor,
-                              unselectedLabelColor: Colors.grey[600],
-                              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                              tabs: [
-                                Tab(text: 'all_matches'.tr),
-                                Tab(text: 'newly_joined'.tr),
-                              ],
-                            ),
-                          ),*/
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ];
             },
             body: Obx(() {
-             // final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
-             // final hasMatrimony = Get.find<AuthService>().hasMatrimony();
+              final authService = Get.find<AuthService>();
+              final currentUser = authService.currentUser.value;
+              final hasPayment = authService.hasPaymentForMatrimony();
+              final hasMatrimony = authService.hasMatrimony();
 
               if (!hasMatrimony) {
                 return _buildRestrictedView(context);
