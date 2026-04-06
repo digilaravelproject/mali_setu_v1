@@ -75,7 +75,7 @@ class MatrimonyDetailsController extends GetxController {
     isLoading.value = true;
     try {
       final data = {
-        "receiver_id": profile.value!.id.toString(),
+        "receiver_id": profile.value!.userId.toString(),
         "message": "Hello, I would like to connect with you!"
       };
       final response = await _repository.sendConnectionRequest(data);

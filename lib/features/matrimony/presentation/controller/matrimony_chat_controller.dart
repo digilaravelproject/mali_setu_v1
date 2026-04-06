@@ -27,6 +27,9 @@ class MatrimonyChatController extends GetxController {
     otherUserId = Get.arguments['other_user_id'];
     userName = Get.arguments['user_name'];
 
+
+    print("conversationId : $conversationId  otherUserId: $otherUserId userName: $userName");
+
     if (conversationId != null) {
       fetchMessages();
     } else if (otherUserId != null) {

@@ -464,7 +464,8 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   buttonText = "request_sent".tr;
                   buttonColor = Colors.grey;
                   onPressed = null;
-                } else if (status == "accepted") {
+                } else
+                  if (status == "accepted") {
                   buttonText = "start_chat".tr;
                   buttonColor = Colors.green;
                   onPressed = () {

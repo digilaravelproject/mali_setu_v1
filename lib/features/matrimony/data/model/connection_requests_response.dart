@@ -97,7 +97,23 @@ class ConnectionRequest {
 
         return User(
           id: data['user_id'] ?? data['id'],
-          name: personal['name'] ?? "Unknown",
+         // name: personal['name'] ?? "Unknown",
+          name: [
+            personal['title'],
+            personal['first_name'],
+            personal['last_name']
+          ]
+              .where((e) => e != null && e.toString().trim().isNotEmpty)
+              .join(' ')
+              .isNotEmpty
+              ? [
+            personal['title'],
+            personal['first_name'],
+            personal['last_name']
+          ]
+              .where((e) => e != null && e.toString().trim().isNotEmpty)
+              .join(' ')
+              : '',
           age: data['age'],
           occupation: personal['occupation'] ?? professional?['job_title'],
           city: location?['city'],

@@ -30,10 +30,6 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     final hasMatrimony = Get.find<AuthService>().hasMatrimony();
 
 
-    //  return AnnotatedRegion<SystemUiOverlayStyle>(
-
-    
-  //  return AnnotatedRegion<SystemUiOverlayStyle>(
     
     final isRestricted = !hasMatrimony || !hasPayment;
     
@@ -313,8 +309,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               ];
             },
             body: Obx(() {
-              final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
-              final hasMatrimony = Get.find<AuthService>().hasMatrimony();
+             // final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
+             // final hasMatrimony = Get.find<AuthService>().hasMatrimony();
 
               if (!hasMatrimony) {
                 return _buildRestrictedView(context);
@@ -413,10 +409,10 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       children: [
         Expanded(
           flex: 8,
-          child: SafeArea(
+          //child: SafeArea(
             child: CardSwiper(
               controller: controller.swiperController,
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
               duration: const Duration(milliseconds: 400),
               onSwipe: (previousIndex, currentIndex, direction) {
                 if (currentIndex != null) {
@@ -435,7 +431,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               cardsCount: list.length,
               numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
             ),
-          ),
+          //),
         ),
 
         // ACTION BUTTONS
@@ -475,14 +471,49 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   else
                     const SizedBox(width: 56),
 
+
+                  /*if(isAccepted && currentProfile.conversationId!=null)
+
                   _buildActionButton(
                     onTap: isAccepted
-                        ? () => Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                              'conversation_id': null,
-                              'other_user_id': currentProfile.user?.id,
-                            })
+                        ? () {
+                      Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                              // 'conversation_id': null,
+                              // 'other_user_id': currentProfile.user?.id,
+
+                      'conversation_id': currentProfile.conversationId,
+                      'other_user_id': currentProfile.userId,
+                      'user_name': currentProfile.personalDetails?.name.toString(),
+                            });}
                         : () => Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentProfile.id}),
                     icon: isAccepted ? Icons.chat_bubble_rounded : Icons.info_rounded,
+                    color: Colors.blueAccent,
+                    size: 24,
+                    elevation: 3,
+                    isSmall: true,
+                  ),*/
+
+
+
+                  _buildActionButton(
+                    onTap: (isAccepted && currentProfile.conversationId != null)
+                        ? () {
+                      Get.toNamed(
+                        AppRoutes.matrimonyChat,
+                        arguments: {
+                          'conversation_id': currentProfile.conversationId,
+                          'other_user_id': currentProfile.userId,
+                          'user_name': currentProfile.personalDetails?.name.toString(),
+                        },
+                      );
+                    }
+                        : () => Get.toNamed(
+                      AppRoutes.matrimonyProfileScreen,
+                      arguments: {'id': currentProfile.id},
+                    ),
+                    icon: (isAccepted && currentProfile.conversationId != null)
+                        ? Icons.chat_bubble_rounded
+                        : Icons.info_rounded,
                     color: Colors.blueAccent,
                     size: 24,
                     elevation: 3,

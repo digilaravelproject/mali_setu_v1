@@ -904,7 +904,10 @@ const Map<String, String> mrIN = {
 
   "plan_purchased": "योजना खरेदी केली आहे",
   "valid_for": "यासाठी वैध",
+  "no_sent_request": "कोणतीही विनंती पाठवलेली नाही",
   "plan_expired": "योजना कालबाह्य झाली आहे",
+  "product_image": "उत्पादनाचे चित्र",
+  "service_image": "सेवेचे चित्र",
   "plan_not_purchased": "योजना खरेदी केलेली नाही",
   "purchase_plan_to_activate": "सक्रिय करण्यासाठी योजना खरेदी करा",
   "register_business_to_search": "शोधण्यासाठी तुमचा व्यवसाय नोंदणी करा",

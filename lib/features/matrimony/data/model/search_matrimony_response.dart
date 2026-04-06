@@ -378,6 +378,7 @@ class SearchMatrimonyData {
 
 class MatrimonyProfile {
   int? id;
+  int? conversationId;
   int? userId;
   int? age;
   String? height;
@@ -400,6 +401,7 @@ class MatrimonyProfile {
 
   MatrimonyProfile({
     this.id,
+    this.conversationId,
     this.userId,
     this.age,
     this.height,
@@ -424,6 +426,7 @@ class MatrimonyProfile {
   factory MatrimonyProfile.fromJson(Map<String, dynamic> json) {
     return MatrimonyProfile(
       id: json['id'],
+      conversationId: json['conversation_id'],
       userId: json['user_id'],
       age: json['age'],
       height: json['height']?.toString(),
@@ -503,7 +506,23 @@ class PersonalDetails {
 
   factory PersonalDetails.fromJson(Map<String, dynamic> json) {
     return PersonalDetails(
-      name: json['name']?.toString(),
+     // name: json['name']?.toString(),
+      name: [
+        json['title'],
+        json['first_name'],
+        json['last_name']
+      ]
+          .where((e) => e != null && e.toString().trim().isNotEmpty)
+          .join(' ')
+          .isNotEmpty
+          ? [
+        json['title'],
+        json['first_name'],
+        json['last_name']
+      ]
+          .where((e) => e != null && e.toString().trim().isNotEmpty)
+          .join(' ')
+          : '',
       dob: json['dob']?.toString(),
       annualIncome: json['annual_income']?.toString(),
       occupation: json['occupation']?.toString(),
