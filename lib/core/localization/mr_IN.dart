@@ -27,6 +27,8 @@ const Map<String, String> mrIN = {
   'search': 'शोधा',
   'filter': 'फिल्टर',
   'loading': 'लोड होत आहे...',
+  'listening': 'ऐकत आहे...',
+  'speak_to_search_business': 'व्यवसाय शोधण्यासाठी बोला',
   'error': 'त्रुटी',
   'success': 'यशस्वी',
   'welcome': 'स्वागत आहे',

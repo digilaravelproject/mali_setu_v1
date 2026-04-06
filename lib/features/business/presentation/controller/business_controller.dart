@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -102,6 +103,9 @@ class BusinessController extends GetxController {
   var myApplications = <JobApplication>[].obs;
   var selectedJobApplications = <JobApplication>[].obs;
   
+  final SpeechToText _speechToText = SpeechToText();
+  var isListening = false.obs;
+  
   var isSearching = false.obs;
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
@@ -109,6 +113,7 @@ class BusinessController extends GetxController {
 
   // Search logic
   var searchText = "".obs;
+  final searchController = TextEditingController();
   Timer? _searchDebounce;
 
   // Filter logic
@@ -140,6 +145,180 @@ class BusinessController extends GetxController {
     });
   }
 
+  void onSearchCleared() {
+    searchText.value = "";
+    searchController.clear();
+    fetchAllBusinesses(isRefresh: true);
+  }
+
+  void startListening() async {
+    if (!_authService.hasBusiness()) {
+      _showBusinessRegisterDialog();
+      return;
+    }
+    if (!_authService.hasPaymentForBusiness()) {
+      _showBusinessPaymentDialog();
+      return;
+    }
+
+    _showVoiceSearchBottomSheet();
+
+    bool available = await _speechToText.initialize(
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          isListening.value = false;
+        }
+      },
+      onError: (errorNotification) {
+        isListening.value = false;
+        CustomSnackBar.showError(message: "Error: ${errorNotification.errorMsg}");
+      },
+    );
+
+    if (available) {
+      isListening.value = true;
+      _speechToText.listen(
+        onResult: (result) {
+          searchController.text = result.recognizedWords;
+          searchText.value = result.recognizedWords;
+          if (result.finalResult) {
+            isListening.value = false;
+            if (Get.isBottomSheetOpen ?? false) Get.back();
+            fetchAllBusinesses(isRefresh: true);
+          }
+        },
+      );
+    } else {
+      CustomSnackBar.showError(message: "Speech recognition is not available");
+    }
+  }
+
+  void stopListening() async {
+    await _speechToText.stop();
+    isListening.value = false;
+    if (Get.isBottomSheetOpen ?? false) Get.back();
+  }
+
+  void _showVoiceSearchBottomSheet() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            Text(
+              "listening".tr,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "speak_to_search_business".tr, // Add to translation or use default
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            
+            const SizedBox(height: 40),
+            
+            // Pulsing Mic Animation
+            Obx(() => TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 500),
+              tween: Tween(begin: 1.0, end: isListening.value ? 1.2 : 1.0),
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Get.theme.primaryColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Get.theme.primaryColor.withOpacity(0.2),
+                        width: 4,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.mic,
+                      size: 40,
+                      color: Get.theme.primaryColor,
+                    ),
+                  ),
+                );
+              },
+            )),
+            
+            const SizedBox(height: 40),
+            
+            // Recognized Text
+            Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                searchText.value.isEmpty ? "..." : searchText.value,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            )),
+            
+            const SizedBox(height: 32),
+            
+            // Cancel Button
+            TextButton(
+              onPressed: () => stopListening(),
+              child: Text(
+                "cancel".tr,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isDismissible: true,
+      enableDrag: true,
+      isScrollControlled: true,
+    ).then((_) {
+      if (isListening.value) {
+        stopListening();
+      }
+    });
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -149,6 +328,7 @@ class BusinessController extends GetxController {
   @override
   void onClose() {
     _searchDebounce?.cancel();
+    searchController.dispose();
     super.onClose();
   }
 

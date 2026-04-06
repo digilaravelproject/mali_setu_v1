@@ -25,6 +25,8 @@ const Map<String, String> enUS = {
   'search': 'Search',
   'filter': 'Filter',
   'loading': 'Loading...',
+  'listening': 'Listening...',
+  'speak_to_search_business': 'Speak to search business',
   'error': 'Error',
   'success': 'Success',
   'welcome': 'Welcome',
