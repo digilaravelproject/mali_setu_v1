@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/network/multipart.dart';
 import '../model/matrimony_response.dart';
 import '../model/matrimony_chat_response.dart';
 import '../model/search_matrimony_response.dart';
@@ -19,6 +20,7 @@ abstract class MatrimonyDataSource {
   Future<MatrimonyConversationResponse> getConversations();
   Future<MatrimonyMessagesResponse> getMessages(int conversationId);
   Future<dynamic> sendMessage(Map<String, dynamic> data);
+  Future<dynamic> sendMessageWithFile(Map<String, String> body, List<MultipartBody> multipartBody);
   Future<dynamic> removeConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectedUsers();
   Future<CastResponse> getCasts();
@@ -94,6 +96,17 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   @override
   Future<dynamic> sendMessage(Map<String, dynamic> data) async {
     final response = await apiClient.post(ApiConstants.matrimonySendMessage, data: data);
+    return response.data;
+  }
+
+  @override
+  Future<dynamic> sendMessageWithFile(Map<String, String> body, List<MultipartBody> multipartBody) async {
+    final response = await apiClient.postMultipartData(
+      ApiConstants.matrimonySendMessage,
+      body,
+      multipartBody,
+      [],
+    );
     return response.data;
   }
 

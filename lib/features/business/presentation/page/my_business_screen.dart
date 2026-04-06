@@ -383,9 +383,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
       onSelected: (value) {
         switch (value) {
           case 'view':
-            final isPending = business.verificationStatus?.toLowerCase() != 'approved';
-            if (isPending) {
+            final isBussinessPending = business.verificationStatus?.toLowerCase() != 'approved';
+            final isPlanActive = business.subscriptionStatus?.toLowerCase() == 'active';
+            if (isBussinessPending && !isPlanActive) {
               _showPurchasePlanDialog(context, business);
+            } else if(isBussinessPending && isPlanActive) {
+              _showPlanPurchasedBussinessPendingDialog(context, business);
             } else {
               Get.toNamed(AppRoutes.businessDetails, arguments: business);
             }
@@ -754,5 +757,70 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
     } catch (e) {
       return '';
     }
+  }
+
+  void _showPlanPurchasedBussinessPendingDialog(BuildContext context, Business business) {
+    final theme = Theme.of(context);
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.history_toggle_off_rounded, 
+                  size: 48, 
+                  color: Colors.amber
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'waiting_for_approval'.tr,
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Your plan is active! However, your business is still under review by our team. We\'ll notify you once it\'s approved.',
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'got_it'.tr, 
+                    style: const TextStyle(fontWeight: FontWeight.bold)
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

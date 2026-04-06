@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../../../../widgets/custom_image_view.dart';
 import '../../../Auth/service/auth_service.dart';
@@ -50,52 +51,16 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
         onPressed: () => Get.back(),
       ),
-      title: Obx(() {
-        final conv = controller.conversation.value;
-        final currentUserId = Get.find<AuthService>().currentUser.value?.id;
-        final otherUser = conv?.user1Id == currentUserId ? conv?.user2 : conv?.user1;
-       // final name = nameByOtherUserId() ?? otherUser?.status ?? "Chat";
-        final name = controller.userName;
-            //otherUser?.personalDetails?.name ?? "Chat";
-      //  final imageUrl = otherUser?. != null ? ApiConstants.imageBaseUrl + otherUser!.profileImage! : null;
-
-        return Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: SizedBox(
-                width: 36,
-                height: 36,
-              //   child: CustomImageView(
-              //     url: imageUrl,
-              //     fit: BoxFit.cover,
-              //     placeHolder: (context, url) => Container(
-              //       color: Colors.purple.withOpacity(0.1),
-              //       child: const Icon(Icons.person, color: Colors.purple, size: 20),
-              //     ),
-              //   ),
-               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                   name.toString(),
-                    style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  // const Text(
-                  //   "Online",
-                  //   style: TextStyle(color: Colors.green, fontSize: 12),
-                  // ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
+      title: Text(
+        controller.userName ?? "Chat",
+        style: const TextStyle(
+          color: Colors.black, 
+          fontSize: 18, 
+          fontWeight: FontWeight.bold
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+      // centerTitle: true,
       // actions: [
       //   IconButton(icon: const Icon(Icons.videocam_outlined, color: Colors.purple), onPressed: () {}),
       //   IconButton(icon: const Icon(Icons.call_outlined, color: Colors.purple), onPressed: () {}),
@@ -117,111 +82,293 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: EdgeInsets.only(
-              bottom: 4,
-              top: 4,
-              left: isMe ? 60 : 0,
-              right: isMe ? 0 : 60,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: isMe ? Colors.purple : Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(20),
-                topRight: const Radius.circular(20),
-                bottomLeft: Radius.circular(isMe ? 20 : 0),
-                bottomRight: Radius.circular(isMe ? 0 : 20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: Get.width * 0.85,
+                minWidth: message.messageType == 'image' ? 0 : 60,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
+              margin: EdgeInsets.only(
+                left: isMe ? 40 : 12,
+                right: isMe ? 12 : 40,
+              ),
+              decoration: message.messageType == 'image' 
+                ? null // No decoration for pure images
+                : BoxDecoration(
+                    color: isMe ? const Color(0xFF8E24AA) : Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isMe ? 16 : 4),
+                      bottomRight: Radius.circular(isMe ? 4 : 16),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Column(
+                  crossAxisAlignment: message.messageType == 'image' 
+                      ? CrossAxisAlignment.stretch 
+                      : CrossAxisAlignment.start,
+                  children: [
+                    if (message.messageType == 'image' && message.attachmentPath != null)
+                      GestureDetector(
+                        onTap: () => Get.to(() => Scaffold(
+                          backgroundColor: Colors.black,
+                          appBar: AppBar(
+                            backgroundColor: Colors.black,
+                            elevation: 0,
+                            leading: IconButton(
+                              icon: const Icon(Icons.close, color: Colors.white),
+                              onPressed: () => Get.back(),
+                            ),
+                          ),
+                          body: Center(
+                            child: InteractiveViewer(
+                              minScale: 0.5,
+                              maxScale: 4.0,
+                              child: CustomImageView(
+                                url: ApiConstants.imageBaseUrl + message.attachmentPath!,
+                                fit: BoxFit.contain,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                          ),
+                        )),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey[200]!, width: 0.5),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: CustomImageView(
+                              url: ApiConstants.imageBaseUrl + message.attachmentPath!,
+                              fit: BoxFit.cover,
+                              height: 250,
+                              width: double.infinity,
+                              placeHolder: (context, url) => Container(
+                                height: 250,
+                                color: Colors.grey[100],
+                                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (message.messageText != null && message.messageText!.isNotEmpty && message.messageText != "image")
+                      Container(
+                        width: message.messageType == 'image' ? double.infinity : null,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: message.messageType == 'image' 
+                          ? BoxDecoration(
+                              color: isMe ? const Color(0xFF8E24AA) : Colors.white,
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
+                              ),
+                            )
+                          : null,
+                        child: Text(
+                          message.messageText!,
+                          style: TextStyle(
+                            color: isMe ? Colors.white : Colors.black87,
+                            fontSize: 15,
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
-            child: Text(
-              message.messageText ?? "",
-              style: TextStyle(
-                color: isMe ? Colors.white : Colors.black87,
-                fontSize: 15,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              time,
-              style: TextStyle(color: Colors.grey[500], fontSize: 10),
+            Padding(
+              padding: EdgeInsets.only(
+                left: isMe ? 0 : 16,
+                right: isMe ? 16 : 0,
+                top: 4,
+              ),
+              child: Text(
+                time,
+                style: TextStyle(color: Colors.grey[500], fontSize: 10),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
-            offset: const Offset(0, -5),
+            offset: const Offset(0, -2),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Container(
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => _showAttachmentSheet(),
+            child: Container(
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: Colors.purple.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: IconButton(
-                icon: const Icon(Icons.add, color: Colors.purple),
-                onPressed: () {},
-              ),
+              child: const Icon(Icons.add_rounded, color: Colors.purple, size: 22),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: controller.messageController,
+              cursorColor: Colors.purple,
+              style: const TextStyle(fontSize: 15),
+              decoration: InputDecoration(
+                hintText: "type_message".tr,
+                hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                fillColor: const Color(0xFFF5F5F7),
+                filled: true,
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
                 ),
-                child: TextField(
-                  controller: controller.messageController,
-                  decoration:  InputDecoration(
-                    hintText: "type_message".tr,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  ),
-                  maxLines: null,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none,
                 ),
               ),
+              maxLines: 4,
+              minLines: 1,
             ),
-            const SizedBox(width: 12),
-            Container(
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () {
+              if (!controller.isLoading.value) {
+                controller.sendMessage();
+              }
+            },
+            child: Obx(() => Container(
+              padding: const EdgeInsets.all(12),
               decoration: const BoxDecoration(
                 color: Colors.purple,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purpleAccent,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white, size: 20),
-                onPressed: controller.sendMessage,
-              ),
+              child: controller.isLoading.value
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+            )),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAttachmentSheet() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Select Attachment",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAttachmentOption(
+                  icon: Icons.camera_alt,
+                  label: "Camera",
+                  onTap: () {
+                    Get.back();
+                    controller.pickImage(ImageSource.camera);
+                  },
+                ),
+                _buildAttachmentOption(
+                  icon: Icons.photo_library,
+                  label: "Gallery",
+                  onTap: () {
+                    Get.back();
+                    controller.pickMultipleImages();
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAttachmentOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.purple.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.purple, size: 30),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 14)),
+        ],
       ),
     );
   }

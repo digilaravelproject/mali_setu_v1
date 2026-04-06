@@ -1,6 +1,7 @@
 import '../../data/data_source/matrimony_data_source.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../domain/repository/matrimony_repository.dart';
+import 'package:edu_cluezer/core/network/multipart.dart';
 import '../../data/model/matrimony_plan_model.dart';
 
 import '../../data/model/search_matrimony_response.dart';
@@ -66,6 +67,11 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   @override
   Future<dynamic> sendMessage(Map<String, dynamic> data) async {
     return await dataSource.sendMessage(data);
+  }
+
+  @override
+  Future<dynamic> sendMessageWithFile(Map<String, String> body, List<MultipartBody> multipartBody) async {
+    return await dataSource.sendMessageWithFile(body, multipartBody);
   }
 
   @override

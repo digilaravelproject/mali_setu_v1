@@ -1,6 +1,10 @@
+import 'dart:io';
+import 'package:edu_cluezer/core/network/multipart.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/page/matrimony_attachment_preview_screen.dart';
 import '../../../Auth/service/auth_service.dart';
 import '../../data/model/matrimony_chat_response.dart';
 import '../../domain/repository/matrimony_repository.dart';
@@ -15,6 +19,10 @@ class MatrimonyChatController extends GetxController {
   
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();
+  final ImagePicker _picker = ImagePicker();
+  final RxList<File> selectedFiles = <File>[].obs;
+  final RxInt currentPreviewIndex = 0.obs;
+  final PageController previewPageController = PageController();
 
   int? conversationId;
   int? otherUserId;
@@ -80,43 +88,123 @@ class MatrimonyChatController extends GetxController {
 
   Future<void> sendMessage() async {
     final text = messageController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty && selectedFiles.isEmpty) return;
 
-    // Optional: Optimistic UI update
-    // final tempMsg = MatrimonyMessage(
-    //   messageText: text,
-    //   senderId: _authService.currentUser.value?.id,
-    //   createdAt: DateTime.now().toIso8601String(),
-    // );
-    // messages.insert(0, tempMsg);
-
+    isLoading.value = true;
     try {
-      final Map<String, dynamic> data = {
-        "message_text": text,
-        "message_type": "text",
-        "attachment": ""
-      };
+      if (selectedFiles.isNotEmpty) {
+        // Send each image as a separate message
+        for (int i = 0; i < selectedFiles.length; i++) {
+          final file = selectedFiles[i];
+          final Map<String, String> body = {
+            // Attach the text caption to the first image ONLY
+            "message_text": (i == 0 && text.isNotEmpty) ? text : "image",
+            "message_type": "image",
+          };
 
-      if (conversationId != null) {
-        data["conversation_id"] = conversationId.toString();
-      } else if (otherUserId != null) {
-        // Assume backend creates conversation if id is missing but receiver is provided
-        // Or specific endpoint for direct message
-        data["receiver_id"] = otherUserId.toString();
-      }
+          if (conversationId != null) {
+            body["conversation_id"] = conversationId.toString();
+          } else if (otherUserId != null) {
+            body["receiver_id"] = otherUserId.toString();
+          }
 
-      final response = await _repository.sendMessage(data);
-      if (response['success'] == true) {
-        messageController.clear();
-        if (conversationId == null && response['data'] != null) {
-             final newMsg = MatrimonyMessage.fromJson(response['data']['message']);
-             conversationId = newMsg.conversationId;
+          final List<MultipartBody> multipartBody = [
+            MultipartBody(key: "attachment", file: file),
+          ];
+
+          final response = await _repository.sendMessageWithFile(body, multipartBody);
+          if (response['success'] == true) {
+            if (conversationId == null && response['data'] != null) {
+              final newMsg = MatrimonyMessage.fromJson(response['data']['message']);
+              conversationId = newMsg.conversationId;
+            }
+          } else {
+            // Handle specific failure if needed
+          }
         }
-        fetchMessages(); // Refresh to get the latest state from server
+        _handleSendMessageSuccess(null); // Clear everything
+      } else {
+        // Send text only
+        final Map<String, dynamic> data = {
+          "message_text": text,
+          "message_type": "text",
+          "attachment": ""
+        };
+
+        if (conversationId != null) {
+          data["conversation_id"] = conversationId.toString();
+        } else if (otherUserId != null) {
+          data["receiver_id"] = otherUserId.toString();
+        }
+
+        final response = await _repository.sendMessage(data);
+        if (response['success'] == true) {
+          _handleSendMessageSuccess(response);
+        }
       }
     } catch (e) {
       CustomSnackBar.showError(message: "Failed to send message: $e");
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  void _handleSendMessageSuccess(dynamic response) {
+    messageController.clear();
+    selectedFiles.clear();
+    if (response != null && conversationId == null && response['data'] != null) {
+      final newMsg = MatrimonyMessage.fromJson(response['data']['message']);
+      conversationId = newMsg.conversationId;
+    }
+    fetchMessages();
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(source: source, imageQuality: 70);
+      if (image != null) {
+        selectedFiles.add(File(image.path));
+        currentPreviewIndex.value = selectedFiles.length - 1;
+        _navigateToPreview();
+        // If already in preview, jump to last page
+        if (previewPageController.hasClients) {
+          previewPageController.jumpToPage(selectedFiles.length - 1);
+        }
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: "Failed to pick image: $e");
+    }
+  }
+
+  Future<void> pickMultipleImages() async {
+    try {
+      final List<XFile> images = await _picker.pickMultiImage(imageQuality: 70);
+      if (images.isNotEmpty) {
+        selectedFiles.addAll(images.map((img) => File(img.path)));
+        currentPreviewIndex.value = 0;
+        _navigateToPreview();
+        // If already in preview, jump to first page or stay
+        if (previewPageController.hasClients) {
+          previewPageController.jumpToPage(0);
+        }
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: "Failed to pick images: $e");
+    }
+  }
+
+  void _navigateToPreview() {
+    if (selectedFiles.isNotEmpty) {
+      Get.to(() => const MatrimonyAttachmentPreviewScreen());
+    }
+  }
+
+  void removeFile(int index) {
+    selectedFiles.removeAt(index);
+  }
+
+  void clearSelectedFiles() {
+    selectedFiles.clear();
   }
 
   void _scrollToBottom() {
@@ -135,6 +223,7 @@ class MatrimonyChatController extends GetxController {
   void onClose() {
     messageController.dispose();
     scrollController.dispose();
+    previewPageController.dispose();
     super.onClose();
   }
 }

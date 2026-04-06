@@ -1,5 +1,6 @@
 import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_chat_response.dart';
+import 'package:edu_cluezer/core/network/multipart.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../data/model/matrimony_plan_model.dart';
 
@@ -18,6 +19,7 @@ abstract class MatrimonyRepository {
   Future<MatrimonyConversationResponse> getConversations();
   Future<MatrimonyMessagesResponse> getMessages(int conversationId);
   Future<dynamic> sendMessage(Map<String, dynamic> data);
+  Future<dynamic> sendMessageWithFile(Map<String, String> body, List<MultipartBody> multipartBody);
   Future<dynamic> removeConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectedUsers();
   Future<CastResponse> getCasts();

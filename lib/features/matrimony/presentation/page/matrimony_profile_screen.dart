@@ -178,11 +178,15 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                     children: [
                       const Icon(Icons.location_on, size: 16, color: Colors.white70),
                       const SizedBox(width: 4),
-                      Text(
-                        "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
+                      Expanded(
+                        child: Text(
+                          "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
