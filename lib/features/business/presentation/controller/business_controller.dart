@@ -7,6 +7,9 @@ import 'package:dio/dio.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:edu_cluezer/core/helper/local_notification_helper.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:edu_cluezer/core/helper/location_helper.dart';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -365,9 +368,19 @@ class BusinessController extends GetxController {
       BusinessPaginationResult response;
 
       if (searchQuery.isNotEmpty) {
-        response = await searchBusinessUseCase(searchQuery);
+        final location = await LocationHelper.getCurrentLocation();
+        response = await searchBusinessUseCase(
+          searchQuery,
+          lat: location?['latitude'],
+          long: location?['longitude'],
+        );
       } else {
-        response = await getAllBusinessesUseCase(page: currentPage.value);
+        final location = await LocationHelper.getCurrentLocation();
+        response = await getAllBusinessesUseCase(
+          page: currentPage.value,
+          lat: location?['latitude'],
+          long: location?['longitude'],
+        );
       }
 
       if (isRefresh || searchQuery.isNotEmpty) {
@@ -413,7 +426,12 @@ class BusinessController extends GetxController {
       }
       
       final query = activeFilters.join(" ");
-      final response = await searchBusinessUseCase(query);
+      final location = await LocationHelper.getCurrentLocation();
+      final response = await searchBusinessUseCase(
+        query,
+        lat: location?['latitude'],
+        long: location?['longitude'],
+      );
       
       businesses.value = response.businesses;
       currentPage.value = response.currentPage;
@@ -448,16 +466,22 @@ class BusinessController extends GetxController {
       
       print("DEBUG_PAGINATION: Loading page ${currentPage.value}");
       
-      // Pass search text to API
-    //  final searchQuery = searchText.value.trim().isEmpty ? null : searchText.value.trim();
-   //   final response = await getAllBusinessesUseCase(page: currentPage.value, search: searchQuery);
       final searchQuery = searchText.value.trim();
+      final location = await LocationHelper.getCurrentLocation();
       BusinessPaginationResult response;
 
       if (searchQuery.isNotEmpty) {
-        response = await searchBusinessUseCase(searchQuery);
+        response = await searchBusinessUseCase(
+          searchQuery,
+          lat: location?['latitude'],
+          long: location?['longitude'],
+        );
       } else {
-        response = await getAllBusinessesUseCase(page: currentPage.value);
+        response = await getAllBusinessesUseCase(
+          page: currentPage.value,
+          lat: location?['latitude'],
+          long: location?['longitude'],
+        );
       }
 
       businesses.addAll(response.businesses);
@@ -821,6 +845,11 @@ class BusinessController extends GetxController {
           CustomSnackBar.showError(message: "Storage permission denied. Enable from settings.");
           return;
         }
+        
+        // Request notification permission for Android 13+
+        if (await Permission.notification.isDenied) {
+          await Permission.notification.request();
+        }
       }
 
       Directory? downloadsDir;
@@ -859,7 +888,30 @@ class BusinessController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      await Dio().download(url, savePath);
+      int notificationId = fileName.hashCode;
+      await Dio().download(
+        url, 
+        savePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            int progress = ((received / total) * 100).toInt();
+            LocalNotificationHelper.showDownloadNotification(
+              id: notificationId,
+              title: "Downloading $fileName",
+              body: "$progress%",
+              progress: progress,
+            );
+          }
+        },
+      );
+
+      // Show success notification
+      await LocalNotificationHelper.showDownloadCompleteNotification(
+        id: notificationId,
+        title: "Download Complete",
+        body: fileName,
+        filePath: savePath,
+      );
 
       // Show success snackbar with "Open" action
       Get.snackbar(
@@ -871,9 +923,13 @@ class BusinessController extends GetxController {
         duration: const Duration(seconds: 6),
         snackPosition: SnackPosition.BOTTOM,
         mainButton: TextButton(
-          onPressed: () {
+          onPressed: () async {
             Get.back(); // close snackbar
-            launchUrl(Uri.parse('file://$savePath'), mode: LaunchMode.externalApplication);
+            try {
+              await OpenFilex.open(savePath);
+            } catch (e) {
+              launchUrl(Uri.parse('file://$savePath'), mode: LaunchMode.externalApplication);
+            }
           },
           child: Text('open'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),

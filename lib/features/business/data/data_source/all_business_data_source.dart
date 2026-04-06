@@ -11,7 +11,7 @@ import 'package:edu_cluezer/features/business/data/model/business_plan_model.dar
 
 
 abstract class BusinessDataSource {
-  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search});
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search, double? lat, double? long});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);
@@ -21,8 +21,8 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
   Future<CategoryResponse> getBusinessCategories({int page = 1});
-  Future<CategoryResponse> getCategoryDetails(int id);
-  Future<BusinessResponse> searchBusiness(String query);
+  Future<CategoryResponse> getCategoryDetails(int id, {double? lat, double? long});
+  Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long});
   
   // Job Methods
   Future<BusinessResponse> createJob(Map<String, dynamic> data);
@@ -45,11 +45,13 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   BusinessDataSourceImpl({required this.apiClient});
 
   @override
-  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search}) async {
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search, double? lat, double? long}) async {
     final Map<String, dynamic> queryParams = {'page': page};
     if (search != null && search.isNotEmpty) {
       queryParams['search'] = search;
     }
+    if (lat != null) queryParams['latitude'] = lat;
+    if (long != null) queryParams['longitude'] = long;
     
     final response = await apiClient.get(
       ApiConstants.allBusiness,
@@ -133,8 +135,15 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   }
 
   @override
-  Future<CategoryResponse> getCategoryDetails(int id) async {
-    final response = await apiClient.get('${ApiConstants.getCategoryDetails}/$id');
+  Future<CategoryResponse> getCategoryDetails(int id, {double? lat, double? long}) async {
+    final Map<String, dynamic> queryParams = {};
+    if (lat != null) queryParams['latitude'] = lat;
+    if (long != null) queryParams['longitude'] = long;
+
+    final response = await apiClient.get(
+      '${ApiConstants.getCategoryDetails}/$id',
+      queryParameters: queryParams,
+    );
     return CategoryResponse.fromJson(response.data);
   }
 
@@ -249,10 +258,14 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   }
 
   @override
-  Future<BusinessResponse> searchBusiness(String query) async {
+  Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long}) async {
     final response = await apiClient.post(
       ApiConstants.searchBusiness,
-      data: {'search': query},
+      data: {
+        'search': query,
+        if (lat != null) 'latitude': lat,
+        if (long != null) 'longitude': long,
+      },
     );
     return BusinessResponse.fromJson(response.data);
   }

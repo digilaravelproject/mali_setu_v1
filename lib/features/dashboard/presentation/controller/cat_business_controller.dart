@@ -6,6 +6,7 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import '../../data/model/res_category_business_model.dart' hide Category;
 import '../../domain/usecase/category_business_usecase.dart';
+import '../../../../core/helper/location_helper.dart';
 
 class CatBusinessController extends GetxController {
   final GetBusinessByCategoryUseCase useCase;
@@ -38,7 +39,19 @@ class CatBusinessController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      final res = await useCase(categoryId);
+      
+      final location = await LocationHelper.getCurrentLocation();
+      if (location != null) {
+        print("DEBUG_CAT_BIZ: Lat: ${location['latitude']}, Long: ${location['longitude']}");
+      } else {
+        print("DEBUG_CAT_BIZ: Location is null");
+      }
+
+      final res = await useCase(
+        categoryId,
+        lat: location?['latitude'],
+        long: location?['longitude'],
+      );
 
       if (res.success == true && res.businesses != null) {
         // Clear previous data

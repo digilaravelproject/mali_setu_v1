@@ -7,8 +7,8 @@ class SearchBusinessUseCase {
 
   SearchBusinessUseCase({required this.repository});
 
-  Future<BusinessPaginationResult> call(String query) async {
-    final response = await repository.searchBusiness(query);
+  Future<BusinessPaginationResult> call(String query, {double? lat, double? long}) async {
+    final response = await repository.searchBusiness(query, lat: lat, long: long);
     
     final businesses = response.data?.data ?? [];
     final currentPage = response.data?.currentPage ?? 1;
