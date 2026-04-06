@@ -4,7 +4,7 @@ import '../../data/model/business_plan_model.dart';
 
 
 abstract class BusinessRepository {
-  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search});
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search, double? lat, double? long});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
   Future<BusinessResponse> getBusinessProducts(int businessId);
@@ -14,8 +14,8 @@ abstract class BusinessRepository {
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
   Future<List<Category>> getBusinessCategories();
-  Future<Category?> getCategoryDetails(int id);
-  Future<BusinessResponse> searchBusiness(String query);
+  Future<Category?> getCategoryDetails(int id, {double? lat, double? long});
+  Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long});
   
   // Job Methods
   Future<BusinessResponse> createJob(Map<String, dynamic> data);

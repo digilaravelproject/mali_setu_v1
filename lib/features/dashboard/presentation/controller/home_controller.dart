@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import '../../../../core/utils/location_helper.dart';
+import 'package:edu_cluezer/core/helper/location_helper.dart' as coord_helper;
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -127,10 +128,22 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   Future<void> onCategoryTap(int categoryId) async {
     try {
-      Get.dialog(Center(child: CircularProgressIndicator()), barrierDismissible: false);
+      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       
       final repository = Get.find<BusinessRepository>();
-      final categoryDetails = await repository.getCategoryDetails(categoryId);
+      final location = await coord_helper.LocationHelper.getCurrentLocation();
+      
+      if (location == null) {
+        print("DEBUG_LOCATION: Location returned null in onCategoryTap");
+      } else {
+        print("DEBUG_LOCATION: Lat: ${location['latitude']}, Long: ${location['longitude']}");
+      }
+
+      final categoryDetails = await repository.getCategoryDetails(
+        categoryId,
+        lat: location?['latitude'],
+        long: location?['longitude'],
+      );
       
       Get.back(); // Close loading dialog
 

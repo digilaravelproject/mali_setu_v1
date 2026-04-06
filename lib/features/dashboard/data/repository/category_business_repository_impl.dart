@@ -8,7 +8,7 @@ class CatBusinessRepositoryImpl implements CatBusinessRepository {
   CatBusinessRepositoryImpl({required this.dataSource});
 
   @override
-  Future<ResBusinessCategoryModel> getBusinessByCategory(int categoryId) {
-    return dataSource.getBusinessByCategory(categoryId);
+  Future<ResBusinessCategoryModel> getBusinessByCategory(int categoryId, {double? lat, double? long}) {
+    return dataSource.getBusinessByCategory(categoryId, lat: lat, long: long);
   }
 }

@@ -11,8 +11,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   BusinessRepositoryImpl({required this.dataSource});
 
   @override
-  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search}) {
-    return dataSource.getAllBusinesses(page: page, search: search);
+  Future<BusinessResponse> getAllBusinesses({int page = 1, String? search, double? lat, double? long}) {
+    return dataSource.getAllBusinesses(page: page, search: search, lat: lat, long: long);
   }
 
   @override
@@ -86,8 +86,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   }
 
   @override
-  Future<Category?> getCategoryDetails(int id) async {
-    final response = await dataSource.getCategoryDetails(id);
+  Future<Category?> getCategoryDetails(int id, {double? lat, double? long}) async {
+    final response = await dataSource.getCategoryDetails(id, lat: lat, long: long);
     if (response.success == true && response.data != null) {
       return response.data!.singleCategory; // Assuming singleCategory is populated
     }
@@ -155,7 +155,7 @@ class BusinessRepositoryImpl implements BusinessRepository {
   }
 
   @override
-  Future<BusinessResponse> searchBusiness(String query) {
-    return dataSource.searchBusiness(query);
+  Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long}) {
+    return dataSource.searchBusiness(query, lat: lat, long: long);
   }
 }

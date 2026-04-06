@@ -49,6 +49,10 @@
 	<string>Mali Setu needs your location to show relevant services and businesses near you.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Mali Setu needs your location to show relevant services and businesses near you.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Mali Setu needs microphone access for voice search.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Mali Setu needs speech recognition access for voice search.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 </dict>

@@ -411,7 +411,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
   Widget build(BuildContext context) {
     // Clear search text when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.searchText.value = "";
+      controller.onSearchCleared();
     });
     
     return Scaffold(
@@ -421,8 +421,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Get.iconColor),
           onPressed: () {
-            controller.searchText.value = "";
-            controller.fetchAllBusinesses(isRefresh: true);
+            controller.onSearchCleared();
             Get.back();
           },
         ),
@@ -479,6 +478,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                     : const Icon(Icons.search, color: Colors.black54, size: 20)),
                 Expanded(
                   child: TextField(
+                    controller: controller.searchController,
                     onChanged: (value) {
                       controller.onSearchChanged(value);
                     },
@@ -499,10 +499,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                       suffixIcon: Obx(() => controller.searchText.value.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
-                              onPressed: () {
-                                controller.searchText.value = "";
-                                controller.fetchAllBusinesses(isRefresh: true);
-                              },
+                              onPressed: controller.onSearchCleared,
                             )
                           : const SizedBox.shrink()),
                     ),
@@ -514,10 +511,19 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   color: Colors.black.withOpacity(0.15),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: Icon(Icons.mic, color: Get.theme.primaryColor, size: 22),
-                ),
+                Obx(() => GestureDetector(
+                  onTap: controller.isListening.value 
+                      ? controller.stopListening 
+                      : controller.startListening,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: Icon(
+                      controller.isListening.value ? Icons.mic : Icons.mic_none,
+                      color: controller.isListening.value ? Colors.red : Get.theme.primaryColor,
+                      size: 22,
+                    ),
+                  ),
+                )),
               ],
             ),
           ),

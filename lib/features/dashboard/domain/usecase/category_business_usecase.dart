@@ -6,7 +6,7 @@ class GetBusinessByCategoryUseCase {
 
   GetBusinessByCategoryUseCase({required this.repository});
 
-  Future<ResBusinessCategoryModel> call(int categoryId) {
-    return repository.getBusinessByCategory(categoryId);
+  Future<ResBusinessCategoryModel> call(int categoryId, {double? lat, double? long}) {
+    return repository.getBusinessByCategory(categoryId, lat: lat, long: long);
   }
 }
