@@ -57,7 +57,20 @@ class MatrimonyDetailsController extends GetxController {
     try {
       final response = await _repository.getProfileDetails(id);
       if (response.success == true && response.data?.profile != null) {
-        profile.value = response.data!.profile;
+        final fetchedProfile = response.data!.profile!;
+        final String? argStatus = Get.arguments?['connection_status'];
+        
+        // If API says not_connected but we have a more specific status from navigation, prefer it.
+        if ((fetchedProfile.connectionStatus == null || 
+             fetchedProfile.connectionStatus == 'not_connected' || 
+             fetchedProfile.connectionStatus == 'no_connected') && 
+            argStatus != null && 
+            argStatus != 'not_connected' && 
+            argStatus != 'no_connected') {
+          fetchedProfile.connectionStatus = argStatus;
+        }
+        
+        profile.value = fetchedProfile;
         _startAutoScroll();
       } else {
         CustomSnackBar.showError(message: "Failed to fetch profile details");

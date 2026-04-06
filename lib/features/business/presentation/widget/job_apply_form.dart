@@ -72,7 +72,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
     _isLoading.value = false;
 
     if (success == true) {
-      Get.back();
+      if (context.mounted) Navigator.pop(context);
     }
   }
 

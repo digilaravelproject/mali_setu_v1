@@ -199,11 +199,13 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
           if (!isSent && status.toLowerCase() == "pending")
              Padding(
                padding: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
-               child: Row(
+               child: Obx(() => Row(
                  children: [
                    Expanded(
                      child: OutlinedButton(
-                       onPressed: () => controller.respondToRequest(request.id!, "rejected"),
+                       onPressed: controller.isLoading.value 
+                           ? null 
+                           : () => controller.respondToRequest(request.id!, "rejected"),
                        style: OutlinedButton.styleFrom(
                          foregroundColor: Colors.red,
                          side: const BorderSide(color: Colors.red, width: 1.5),
@@ -216,7 +218,9 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
                    const SizedBox(width: 12),
                    Expanded(
                      child: ElevatedButton(
-                       onPressed: () => controller.respondToRequest(request.id!, "accepted"),
+                       onPressed: controller.isLoading.value 
+                           ? null 
+                           : () => controller.respondToRequest(request.id!, "accepted"),
                        style: ElevatedButton.styleFrom(
                          backgroundColor: Colors.green,
                          foregroundColor: Colors.white,
@@ -228,7 +232,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
                      ),
                    ),
                  ],
-               ),
+               )),
              )
           else
             const SizedBox(height: 4),

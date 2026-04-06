@@ -112,6 +112,7 @@ class BusinessController extends GetxController {
   var isSearching = false.obs;
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
+  var voiceSearchError = "".obs;
   var applicationLoadingStates = <int, String?>{}.obs;
 
   // Search logic
@@ -164,35 +165,56 @@ class BusinessController extends GetxController {
       return;
     }
 
+    voiceSearchError.value = "";
     _showVoiceSearchBottomSheet();
 
     bool available = await _speechToText.initialize(
       onStatus: (status) {
         if (status == 'done' || status == 'notListening') {
           isListening.value = false;
+          // Fallback: If engine stopped but sheet is still open and we have words, search and close
+          if (searchText.value.isNotEmpty) {
+             if (Get.isBottomSheetOpen ?? false) {
+                Get.back();
+             } else if (Navigator.canPop(Get.context!)) {
+                Navigator.pop(Get.context!);
+             }
+             fetchAllBusinesses(isRefresh: true);
+          }
         }
       },
       onError: (errorNotification) {
         isListening.value = false;
-        CustomSnackBar.showError(message: "Error: ${errorNotification.errorMsg}");
+        if (errorNotification.errorMsg == "error_no_match") {
+          voiceSearchError.value = "We didn't catch that. Please try again.";
+        } else {
+          voiceSearchError.value = errorNotification.errorMsg;
+        }
       },
     );
 
     if (available) {
       isListening.value = true;
+      voiceSearchError.value = "";
       _speechToText.listen(
         onResult: (result) {
           searchController.text = result.recognizedWords;
           searchText.value = result.recognizedWords;
+          
           if (result.finalResult) {
             isListening.value = false;
-            if (Get.isBottomSheetOpen ?? false) Get.back();
+            // Immediate close for better feel
+            if (Get.isBottomSheetOpen ?? false) {
+               Get.back();
+            } else if (Navigator.canPop(Get.context!)) {
+               Navigator.pop(Get.context!);
+            }
             fetchAllBusinesses(isRefresh: true);
           }
         },
       );
     } else {
-      CustomSnackBar.showError(message: "Speech recognition is not available");
+      voiceSearchError.value = "Speech recognition is not available";
     }
   }
 
@@ -205,95 +227,181 @@ class BusinessController extends GetxController {
   void _showVoiceSearchBottomSheet() {
     Get.bottomSheet(
       Container(
+        width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+            topLeft: Radius.circular(35),
+            topRight: Radius.circular(35),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 20,
+              offset: Offset(0, -5),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Handle bar
             Container(
-              width: 40,
-              height: 4,
+              width: 50,
+              height: 5,
               margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
             
-            Text(
-              "listening".tr,
+            Obx(() => Text(
+              isListening.value ? "Listening..." : (voiceSearchError.isNotEmpty ? "Something went wrong" : "Thinking..."),
               style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: Colors.black,
+                letterSpacing: -0.5,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "speak_to_search_business".tr, // Add to translation or use default
+            )),
+            const SizedBox(height: 12),
+            Obx(() => Text(
+              voiceSearchError.isNotEmpty 
+                  ? voiceSearchError.value 
+                  : "Speak now to find businesses nearby",
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+                fontSize: 15,
+                color: voiceSearchError.isNotEmpty ? Colors.red[400] : Colors.grey[600],
+                height: 1.4,
               ),
-            ),
+            )),
             
-            const SizedBox(height: 40),
+            const SizedBox(height: 48),
             
             // Pulsing Mic Animation
-            Obx(() => TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 500),
-              tween: Tween(begin: 1.0, end: isListening.value ? 1.2 : 1.0),
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
+            Obx(() => Stack(
+              alignment: Alignment.center,
+              children: [
+                if (isListening.value)
+                  ...List.generate(3, (index) => TweenAnimationBuilder<double>(
+                    duration: Duration(milliseconds: 1000 + (index * 500)),
+                    tween: Tween(begin: 1.0, end: 1.8),
+                    curve: Curves.easeOutQuart,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Get.theme.primaryColor.withOpacity(0.25 * (2.0 - value)),
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  )),
+                GestureDetector(
+                  onTap: () {
+                    if (!isListening.value) startListening();
+                  },
                   child: Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
-                      color: Get.theme.primaryColor.withOpacity(0.1),
+                      color: isListening.value ? Get.theme.primaryColor : (voiceSearchError.isNotEmpty ? Colors.red[50] : Colors.grey[50]),
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Get.theme.primaryColor.withOpacity(0.2),
-                        width: 4,
-                      ),
+                      boxShadow: [
+                        if (isListening.value)
+                          BoxShadow(
+                            color: Get.theme.primaryColor.withOpacity(0.3),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                      ],
                     ),
                     child: Icon(
-                      Icons.mic,
-                      size: 40,
-                      color: Get.theme.primaryColor,
+                      isListening.value ? Icons.mic : (voiceSearchError.isNotEmpty ? Icons.replay_rounded : Icons.mic_none),
+                      size: 42,
+                      color: isListening.value ? Colors.white : (voiceSearchError.isNotEmpty ? Colors.red : Colors.grey[400]),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+            
+            const SizedBox(height: 48),
+            
+            // Recognized Text or Error Action
+            Obx(() {
+              if (voiceSearchError.isNotEmpty) {
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => startListening(),
+                    icon: const Icon(Icons.refresh_rounded, size: 20),
+                    label: const Text("Try Again", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Get.theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                   ),
                 );
-              },
-            )),
-            
-            const SizedBox(height: 40),
-            
-            // Recognized Text
-            Obx(() => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                searchText.value.isEmpty ? "..." : searchText.value,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  fontStyle: FontStyle.italic,
+              }
+              
+              if (!isListening.value && searchText.value.isNotEmpty) {
+                 return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (Get.isBottomSheetOpen ?? false) {
+                         Get.back();
+                      } else if (Navigator.canPop(Get.context!)) {
+                         Navigator.pop(Get.context!);
+                      }
+                      fetchAllBusinesses(isRefresh: true);
+                    },
+                    icon: const Icon(Icons.search_rounded, size: 20),
+                    label: const Text("Search Now", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                );
+              }
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey[100]!),
                 ),
-              ),
-            )),
+                child: Text(
+                  searchText.value.isEmpty ? "..." : searchText.value,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              );
+            }),
             
             const SizedBox(height: 32),
             
@@ -301,11 +409,11 @@ class BusinessController extends GetxController {
             TextButton(
               onPressed: () => stopListening(),
               child: Text(
-                "cancel".tr,
-                style: const TextStyle(
+                "Cancel",
+                style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -315,6 +423,7 @@ class BusinessController extends GetxController {
       isDismissible: true,
       enableDrag: true,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     ).then((_) {
       if (isListening.value) {
         stopListening();
@@ -364,24 +473,18 @@ class BusinessController extends GetxController {
         businesses.clear();
       }
 
-      // Determine which API to use: specialized search (POST) or general list (GET)
+      // Determine which API to use: specialized search (POST - broken 405) or general list (GET - stable)
       BusinessPaginationResult response;
 
-      if (searchQuery.isNotEmpty) {
-        final location = await LocationHelper.getCurrentLocation();
-        response = await searchBusinessUseCase(
-          searchQuery,
-          lat: location?['latitude'],
-          long: location?['longitude'],
-        );
-      } else {
-        final location = await LocationHelper.getCurrentLocation();
-        response = await getAllBusinessesUseCase(
-          page: currentPage.value,
-          lat: location?['latitude'],
-          long: location?['longitude'],
-        );
-      }
+      final location = await LocationHelper.getCurrentLocation();
+      
+      // Use getAllBusinessesUseCase for both list and search to avoid 405 in POST search/search_business
+      response = await getAllBusinessesUseCase(
+        page: currentPage.value,
+        search: searchQuery.isNotEmpty ? searchQuery : null,
+        lat: location?['latitude'],
+        long: location?['longitude'],
+      );
 
       if (isRefresh || searchQuery.isNotEmpty) {
         businesses.value = response.businesses;

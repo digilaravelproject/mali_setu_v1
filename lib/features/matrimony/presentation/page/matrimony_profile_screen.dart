@@ -458,24 +458,26 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
           children: [
             Expanded(
               flex: 2,
-              child: Obx(() {
+                child: Obx(() {
                 final status = profile.connectionStatus?.toLowerCase();
                 String buttonText = "send_connection_request".tr;
                 Color buttonColor = Colors.purple;
                 VoidCallback? onPressed = controller.sendRequest;
 
                 if (status == "pending") {
-                  buttonText = "request_sent".tr;
+                  buttonText = "already_sent".tr; // User requested "allready sent"
+                  if (buttonText == "already_sent") buttonText = "Already Sent"; // Fallback if translation missing
                   buttonColor = Colors.grey;
                   onPressed = null;
-                } else
-                  if (status == "accepted") {
-                  buttonText = "start_chat".tr;
+                } else if (status == "accepted" || status == "connected") {
+                  buttonText = "message".tr;
+                  if (buttonText == "message") buttonText = "Message"; 
                   buttonColor = Colors.green;
                   onPressed = () {
                     Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                      'conversation_id': null,
-                      'other_user_id': profile.user?.id,
+                      'conversation_id': profile.conversationId,
+                      'other_user_id': profile.userId,
+                      'user_name': profile.personalDetails?.name,
                     });
                   };
                 }
@@ -488,6 +490,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    elevation: 0,
                   ),
                   child: controller.isLoading.value
                       ? const SizedBox(

@@ -34,18 +34,22 @@ class MatrimonyRequestsController extends GetxController {
   }
 
   Future<void> respondToRequest(int requestId, String status) async {
+    if (isLoading.value) return; 
+
     try {
+      isLoading.value = true;
       final data = {
         "status": status.toLowerCase(),
         "response_message": "NA"
       };
       
       final response = await _repository.respondToConnectionRequest(requestId, data);
-      if (response['success'] == true) {
+      
+      if (response is Map && response['success'] == true) {
         CustomSnackBar.showSuccess(message: response['message'] ?? "Request $status successfully");
         
         // Refresh the local requests list
-        fetchRequests(); 
+        await fetchRequests(); 
         
         // Proactively refresh other relevant controllers if they are active
         if (Get.isRegistered<MatrimonyMembersController>()) {
@@ -55,10 +59,16 @@ class MatrimonyRequestsController extends GetxController {
           Get.find<MatrimonyController>().fetchProfiles();
         }
       } else {
-        CustomSnackBar.showError(message: response['message'] ?? "Failed to update request");
+        String message = "Failed to update request";
+        if (response is Map && response['message'] != null) {
+          message = response['message'];
+        }
+        CustomSnackBar.showError(message: message);
       }
     } catch (e) {
       CustomSnackBar.showError(message: "Something went wrong: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 }

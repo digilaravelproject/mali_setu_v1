@@ -412,7 +412,10 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                     }
                         : () => Get.toNamed(
                       AppRoutes.matrimonyProfileScreen,
-                      arguments: {'id': currentProfile.id},
+                      arguments: {
+                        'id': currentProfile.id,
+                        'connection_status': currentProfile.connectionStatus,
+                      },
                     ),
                     icon: (isAccepted && currentProfile.conversationId != null)
                         ? Icons.chat_bubble_rounded
@@ -481,7 +484,10 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     return GestureDetector(
       onTap: (){
         try {
-          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': user.id});
+          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {
+            'id': user.id,
+            'connection_status': user.connectionStatus,
+          });
         } catch (e) {
           print("Error navigating to profile: $e");
           CustomSnackBar.showError(message: 'Error opening profile');
@@ -536,7 +542,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                             context,
                             child: Text(
                               'new'.tr,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 10,
                                 color: Colors.white,
@@ -606,19 +612,36 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
                     // LOCATION
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        const Icon(Icons.location_on_outlined, color: Colors.white70, size: 16),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            user.location,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on_outlined, color: Colors.white70, size: 16),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      user.location,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
+                        if (user.connectionStatus != null &&
+                            user.connectionStatus!.toLowerCase() != 'not_connected' &&
+                            user.connectionStatus!.toLowerCase() != 'no_connected' && 
+                             user.connectionStatus!.toLowerCase().isNotEmpty)
+                          _buildStatusBadge(user.connectionStatus!),
                       ],
                     ),
                   ],
@@ -814,6 +837,32 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color color = Colors.orange;
+    String label = status.toUpperCase();
+
+    if (status.toLowerCase() == 'accepted') {
+      color = Colors.green;
+    } else if (status.toLowerCase() == 'rejected' || status.toLowerCase() == 'declined') {
+      color = Colors.red;
+    } else if (status.toLowerCase() == 'pending') {
+      color = Colors.amber[700]!;
+    }
+
+    return _buildGlassChip(
+      Get.context!,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontWeight: FontWeight.w900,
+          fontSize: 9,
+          color: Colors.white,
+        ),
+      ),
+      color: color,
     );
   }
 
