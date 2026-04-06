@@ -367,6 +367,8 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       business.website!,
                     ),
                   ],
+                  const SizedBox(height: 12),
+                  _buildSubscriptionBadge(context, business),
                 ],
               ),
             ),
@@ -500,6 +502,65 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionBadge(BuildContext context, Business business) {
+    final isActive = business.subscriptionStatus?.toLowerCase() == 'active';
+    final expiresAt = business.subscriptionExpiresAt;
+
+    String label;
+    String sublabel;
+    Color color;
+    IconData icon;
+
+    if (isActive && expiresAt != null) {
+      try {
+        final expiry = DateTime.parse(expiresAt);
+        final daysLeft = expiry.difference(DateTime.now()).inDays;
+        label = 'plan_purchased'.tr;
+        sublabel = daysLeft > 0
+            ? '${'valid_for'.tr} $daysLeft ${'days'.tr}'
+            : 'plan_expired'.tr;
+        color = daysLeft > 30 ? Colors.green : Colors.orange;
+        icon = Icons.verified_rounded;
+      } catch (_) {
+        label = 'plan_purchased'.tr;
+        sublabel = '';
+        color = Colors.green;
+        icon = Icons.verified_rounded;
+      }
+    } else {
+      label = 'plan_not_purchased'.tr;
+      sublabel = 'purchase_plan_to_activate'.tr;
+      color = Colors.grey;
+      icon = Icons.lock_outline_rounded;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+                if (sublabel.isNotEmpty)
+                  Text(sublabel, style: TextStyle(fontSize: 11, color: color.withOpacity(0.8))),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

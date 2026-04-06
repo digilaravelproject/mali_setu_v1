@@ -899,6 +899,12 @@ const Map<String, String> mrIN = {
   "plan_required": "योजना आवश्यक आहे",
   "purchase_business_plan_to_search": "शोधण्यासाठी व्यवसाय योजना खरेदी करा",
   "purchase_now": "आत्ताच खरेदी करा",
+
+  "plan_purchased": "योजना खरेदी केली आहे",
+  "valid_for": "यासाठी वैध",
+  "plan_expired": "योजना कालबाह्य झाली आहे",
+  "plan_not_purchased": "योजना खरेदी केलेली नाही",
+  "purchase_plan_to_activate": "सक्रिय करण्यासाठी योजना खरेदी करा",
   "register_business_to_search": "शोधण्यासाठी तुमचा व्यवसाय नोंदणी करा",
   "purchase_plan_to_approve_business": "तुमचा व्यवसाय मंजूर करण्यासाठी योजना खरेदी करा",
 };

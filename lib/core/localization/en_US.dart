@@ -893,6 +893,11 @@ const Map<String, String> enUS = {
   "plan_required": "Plan Required",
   "purchase_business_plan_to_search": "Purchase a business plan to search",
   "purchase_now": "Purchase Now",
+  "plan_purchased": "Plan Purchased",
+  "valid_for": "Plan Purchased",
+  "plan_expired": "Plan Expired",
+  "plan_not_purchased": "Plan Not Purchased",
+  "purchase_plan_to_activate": "Purchase a plan to activate",
   "register_business_to_search": "Register your business to search",
   "purchase_plan_to_approve_business": "Purchase a plan to approve your business",
 };

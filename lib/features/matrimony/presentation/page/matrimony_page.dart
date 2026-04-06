@@ -412,10 +412,11 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     return Column(
       children: [
         Expanded(
+          flex: 8,
           child: SafeArea(
             child: CardSwiper(
               controller: controller.swiperController,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
               duration: const Duration(milliseconds: 400),
               onSwipe: (previousIndex, currentIndex, direction) {
                 if (currentIndex != null) {
@@ -436,83 +437,80 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
 
         // ACTION BUTTONS
-        Padding(
-          padding: const EdgeInsets.only(left: 40, right: 40, top: 20, bottom: 80),
-          child: Obx(() {
-            // Check if profiles exist and index is valid
-            if (controller.profiles.isEmpty || controller.currentIndex.value >= controller.profiles.length) {
-              return const SizedBox.shrink();
-            }
+        Obx(() {
+          if (controller.profiles.isEmpty || controller.currentIndex.value >= controller.profiles.length) {
+            return const SizedBox(height: 72);
+          }
 
-            final currentProfile = controller.profiles[controller.currentIndex.value];
-            final status = currentProfile.connectionStatus?.toLowerCase();
-            final isAccepted = status == "accepted";
-            final isConnected = status != "not_connected";
+          final currentProfile = controller.profiles[controller.currentIndex.value];
+          final status = currentProfile.connectionStatus?.toLowerCase();
+          final isAccepted = status == "accepted";
+          final isConnected = status != "not_connected";
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Reject Button
-                if (!isConnected)
+          return SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (!isConnected)
+                    _buildActionButton(
+                      onTap: () {
+                        try {
+                          final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
+                          controller.rejectRequest(currentProfileId);
+                          controller.swiperController.swipe(CardSwiperDirection.left);
+                        } catch (e) {
+                          print("Error rejecting request: $e");
+                        }
+                      },
+                      icon: Icons.close_rounded,
+                      color: Colors.redAccent,
+                      size: 30,
+                      elevation: 5,
+                    )
+                  else
+                    const SizedBox(width: 56),
+
                   _buildActionButton(
-                    onTap: () {
-                      try {
-                        final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
-                        controller.rejectRequest(currentProfileId);
-                        controller.swiperController.swipe(CardSwiperDirection.left);
-                      } catch (e) {
-                        print("Error rejecting request: $e");
-                      }
-                    },
-                    icon: Icons.close_rounded,
-                    color: Colors.redAccent,
-                    size: 30,
-                    elevation: 5,
-                  )
-                else
-                  const SizedBox(width: 56), // Placeholder to maintain spacing
+                    onTap: isAccepted
+                        ? () => Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                              'conversation_id': null,
+                              'other_user_id': currentProfile.user?.id,
+                            })
+                        : () => Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentProfile.id}),
+                    icon: isAccepted ? Icons.chat_bubble_rounded : Icons.info_rounded,
+                    color: Colors.blueAccent,
+                    size: 24,
+                    elevation: 3,
+                    isSmall: true,
+                  ),
 
-
-                // Super Like / Chat (Middle)
-                _buildActionButton(
-                  onTap: isAccepted ? () => Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                    'conversation_id': null,
-                    'other_user_id': currentProfile.user?.id,
-                  }) : () {
-                    Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentProfile.id});
-                  },
-                  icon: isAccepted ? Icons.chat_bubble_rounded : Icons.info_rounded,
-                  color: Colors.blueAccent,
-                  size: 24,
-                  elevation: 3,
-                  isSmall: true,
-                ),
-
-                // Connect Button
-                if (!isConnected)
-                  _buildActionButton(
-                    onTap: () {
-                      try {
-                        controller.sendConnectionRequest(currentProfile.userId);
-                        controller.swiperController.swipe(CardSwiperDirection.right);
-                      } catch (e) {
-                        print("Error sending connection request: $e");
-                      }
-                    },
-                    icon: Icons.check,
-                    color: Colors.green,
-                    size: 32,
-                    elevation: 5,
-                  )
-                else
-                  const SizedBox(width: 56), // Placeholder to maintain spacing
-              ],
-            );
-          }),
-        ),
+                  if (!isConnected)
+                    _buildActionButton(
+                      onTap: () {
+                        try {
+                          controller.sendConnectionRequest(currentProfile.userId);
+                          controller.swiperController.swipe(CardSwiperDirection.right);
+                        } catch (e) {
+                          print("Error sending connection request: $e");
+                        }
+                      },
+                      icon: Icons.check,
+                      color: Colors.green,
+                      size: 32,
+                      elevation: 5,
+                    )
+                  else
+                    const SizedBox(width: 56),
+                ],
+              ),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -1090,7 +1088,24 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
       return UserProfile(
         id: data['id'],
-        name: personal['name'] ?? data['name'] ?? 'no_name'.tr,
+      //  name: personal[''] ?? data['name'] ?? 'no_name'.tr,
+        name: [
+          personal['title'],
+          personal['first_name'],
+          personal['last_name']
+        ]
+            .where((e) => e != null && e.toString().trim().isNotEmpty)
+            .join(' ')
+            .isNotEmpty
+            ? [
+          personal['title'],
+          personal['first_name'],
+          personal['last_name']
+        ]
+            .where((e) => e != null && e.toString().trim().isNotEmpty)
+            .join(' ')
+            : 'no_name'.tr,
+
         age: int.tryParse(personal['age']?.toString() ?? data['age']?.toString() ?? "0") ?? 0,
         location: "${location['city'] ?? ''}, ${location['state'] ?? ''}",
         occupation: personal['occupation'] ?? 'professional'.tr,
