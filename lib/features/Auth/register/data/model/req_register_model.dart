@@ -22,6 +22,8 @@ class ReqRegisterModel {
   String? company_name;
   String? dept_name;
   String? designation;
+  double? latitude;
+  double? longitude;
 
   ReqRegisterModel(
       {this.name,
@@ -47,6 +49,8 @@ class ReqRegisterModel {
       this.company_name,
       this.dept_name,
       this.designation,
+      this.latitude,
+      this.longitude,
       });
 
   ReqRegisterModel.fromJson(Map<String, dynamic> json) {
@@ -100,6 +104,8 @@ class ReqRegisterModel {
     data['company_name'] = company_name;
     data['dept_name'] = dept_name;
     data['designation'] = designation;
+    if (latitude != null) data['latitude'] = latitude;
+    if (longitude != null) data['longitude'] = longitude;
     return data;
   }
 }

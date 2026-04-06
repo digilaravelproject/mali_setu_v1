@@ -421,7 +421,8 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: Get.iconColor),
           onPressed: () {
-            controller.searchText.value = ""; // Clear search on back
+            controller.searchText.value = "";
+            controller.fetchAllBusinesses(isRefresh: true);
             Get.back();
           },
         ),
@@ -593,17 +594,26 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
               final currentPg = controller.currentPage.value;
 
               if (filteredList.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off_rounded, size: 64, color: Colors.grey[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        "no_businesses_found".tr,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                return RefreshIndicator(
+                  onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 400,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off_rounded, size: 64, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              "no_businesses_found".tr,
+                              style: TextStyle(color: Colors.grey[600], fontSize: 16, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                 );
               }

@@ -884,11 +884,17 @@ const Map<String, String> enUS = {
   'location_information' : "Location Information",
   'taluka' : "Taluka",
   'clear_all' : "Clear All",
+  'enter_pincode' : "Enter Pincode",
   'search_volunteers' : "Search Volunteers",
   'unknown_position' : "Unknown Position",
   'unknown_business' : "Unknown Business",
   "please_enter_cover_letter": "Please enter your cover letter",
-  "please_upload_resume": "Please upload your resume"
+  "please_upload_resume": "Please upload your resume",
+  "plan_required": "Plan Required",
+  "purchase_business_plan_to_search": "Purchase a business plan to search",
+  "purchase_now": "Purchase Now",
+  "register_business_to_search": "Register your business to search",
+  "purchase_plan_to_approve_business": "Purchase a plan to approve your business",
 };
 
 

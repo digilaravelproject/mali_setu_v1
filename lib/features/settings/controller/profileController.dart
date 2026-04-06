@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
+import 'package:edu_cluezer/core/helper/location_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -207,6 +208,9 @@ class UpProfileController extends GetxController {
       // Get combined phone from PhoneFieldComponent
       final combinedPhone = phoneFieldKey.currentState?.getCombinedPhone() ?? '';
 
+      // Fetch current location
+      final location = await LocationHelper.getCurrentLocation();
+
       // Prepare data
       final Map<String, dynamic> updateData = {
         'name': combinedName,
@@ -224,6 +228,8 @@ class UpProfileController extends GetxController {
         'pincode': pincodeCtrl.text,
         'sector': sectorCtrl.text,
         'destination': destinationCtrl.text,
+        if (location != null) 'latitude': location['latitude'],
+        if (location != null) 'longitude': location['longitude'],
       };
 
       // Add profile image as base64 if selected

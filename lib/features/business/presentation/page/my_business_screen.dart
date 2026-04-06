@@ -5,6 +5,8 @@ import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
 import '../../../../core/constent/api_constants.dart';
 
@@ -379,7 +381,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
       onSelected: (value) {
         switch (value) {
           case 'view':
-            Get.toNamed(AppRoutes.businessDetails, arguments: business);
+            final isPending = business.verificationStatus?.toLowerCase() != 'approved';
+            if (isPending) {
+              _showPurchasePlanDialog(context, business);
+            } else {
+              Get.toNamed(AppRoutes.businessDetails, arguments: business);
+            }
             break;
           case 'edit':
             Get.toNamed(AppRoutes.regBusiness, arguments: business);
@@ -514,6 +521,77 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showPurchasePlanDialog(BuildContext context, Business business) {
+    final theme = Theme.of(context);
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.verified_outlined, size: 48, color: theme.primaryColor),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'plan_required'.tr,
+                style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'purchase_plan_to_approve_business'.tr,
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Get.back();
+                        final regCtrl = Get.find<RegBusinessController>();
+                        // Pass business type so correct plans are shown
+                        await regCtrl.fetchAndShowBusinessPlansForType(
+                          business.businessType ?? '',
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: Text('purchase_now'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

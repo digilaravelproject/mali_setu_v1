@@ -36,7 +36,7 @@ class HomePage extends GetWidget<HomeController> {
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.white,
         body: Obx(() {
-          final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+          final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
           final hasMatrimony = Get.find<AuthService>().hasMatrimony();
           final user = authService.currentUser.value;
 

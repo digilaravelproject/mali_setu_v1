@@ -34,6 +34,38 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SectionTitle('business_information'.tr),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AppInputTextField(
+                        label: 'opening_time'.tr,
+                        isRequired: true,
+                        controller: controller.openingTimeCtrl,
+                        textInputType: TextInputType.none,
+                        iconData: Icons.access_time,
+                        readOnly: true,
+                        onTap: () => _selectTime(context, controller.openingTimeCtrl, true),
+                        errorText: controller.errors['openingTime'],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppInputTextField(
+                        label: 'closing_time'.tr,
+                        isRequired: true,
+                        controller: controller.closingTimeCtrl,
+                        textInputType: TextInputType.none,
+                        iconData: Icons.access_time,
+                        readOnly: true,
+                        onTap: () => _selectTime(context, controller.closingTimeCtrl, false),
+                        errorText: controller.errors['closingTime'],
+                      ),
+                    ),
+                  ],
+                ),
+               // const SizedBox(height: 20),
+
                 AppInputTextField(
                   label: 'business_name'.tr,
                   isRequired: true,
@@ -122,41 +154,22 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   errorText: controller.errors['description'],
                 ),
 
+
+
+               // const SizedBox(height: 20),
+
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: AppInputTextField(
-                        label: 'opening_time'.tr,
-                        isRequired: true,
-                        controller: controller.openingTimeCtrl,
-                        textInputType: TextInputType.none,
-                        iconData: Icons.access_time,
-                        readOnly: true,
-                        onTap: () => _selectTime(context, controller.openingTimeCtrl, true),
-                        errorText: controller.errors['openingTime'],
+                    SectionTitle('business_photos'.tr),
+                    Text(
+                      ' *',
+                      style: context.theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.red,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppInputTextField(
-                        label: 'closing_time'.tr,
-                        isRequired: true,
-                        controller: controller.closingTimeCtrl,
-                        textInputType: TextInputType.none,
-                        iconData: Icons.access_time,
-                        readOnly: true,
-                        onTap: () => _selectTime(context, controller.closingTimeCtrl, false),
-                        errorText: controller.errors['closingTime'],
-                      ),
-                    ),
-                  ],
+                      ]
                 ),
-
-                const SizedBox(height: 20),
-
-                SectionTitle('business_photos'.tr),
-                const SizedBox(height: 8),
+               // const SizedBox(height: 8),
                 _buildPhotoGrid(context),
                 const SizedBox(height: 24),
 
@@ -190,24 +203,24 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     Expanded(
                       child: AppInputTextField(
                         label: 'city'.tr,
-                        isRequired: true,
+                      //  isRequired: true,
                         controller: controller.cityCtrl,
                         textInputType: TextInputType.text,
                         iconData: Icons.location_city_rounded,
-                        validator: FormValidator.name,
-                        errorText: controller.errors['city'],
+                        //validator: FormValidator.name,
+                       // errorText: controller.errors['city'],
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: AppInputTextField(
                         label: 'district'.tr,
-                        isRequired: true,
+                       // isRequired: true,
                         controller: controller.districtCtrl,
                         textInputType: TextInputType.text,
                         iconData: Icons.map_outlined,
-                        validator: FormValidator.name,
-                        errorText: controller.errors['district'],
+                     //   validator: FormValidator.name,
+                      //  errorText: controller.errors['district'],
                       ),
                     ),
                   ],
@@ -219,12 +232,12 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     Expanded(
                       child: AppInputTextField(
                         label: 'state'.tr,
-                        isRequired: true,
+                       // isRequired: true,
                         controller: controller.stateCtrl,
                         textInputType: TextInputType.text,
                         iconData: Icons.landscape_rounded,
-                        validator: FormValidator.name,
-                        errorText: controller.errors['state'],
+                       // validator: FormValidator.name,
+                      //  errorText: controller.errors['state'],
                       ),
                     ),
                     const SizedBox(width: 12),

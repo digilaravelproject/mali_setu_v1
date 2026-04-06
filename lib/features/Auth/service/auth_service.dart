@@ -281,16 +281,38 @@ class AuthService extends GetxService {
   }
 
   /// Check if user has paid for a specific feature
-  bool hasPaymentFor(String purpose) {
+  // bool hasPaymentFor(String purpose) {
+  //   final user = currentUser.value;
+  //   if (user == null) return false;
+  //   return user.hasPayment == true && user.paymentPurpose == purpose;
+  // }
+
+
+  bool hasPaymentForMatrimony() {
     final user = currentUser.value;
     if (user == null) return false;
-    return user.hasPayment == true && user.paymentPurpose == purpose;
+    return user.hasMatrimonyPayment == true;
   }
+
+
+  bool hasPaymentForBusiness() {
+    final user = currentUser.value;
+    if (user == null) return false;
+    return user.hasBusinessPayment == true;
+  }
+
 
   bool hasMatrimony() {
     final user = currentUser.value;
     if (user == null) return false;
     return user.isMatrimony == true;
+  }
+
+
+  bool hasBusiness() {
+    final user = currentUser.value;
+    if (user == null) return false;
+    return user.isBusiness == true;
   }
 
 

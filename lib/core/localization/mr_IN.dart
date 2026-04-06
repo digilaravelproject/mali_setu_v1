@@ -882,6 +882,7 @@ const Map<String, String> mrIN = {
   'invalid_pincode' : "निकाल सापडला नाही",
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका",
+  'enter_pincode' : "पिनकोड टाका",
   'search_volunteers' : "स्वयंसेवक शोधा",
 
   // Product & Service validation messages
@@ -894,7 +895,12 @@ const Map<String, String> mrIN = {
   'please_enter_service_description': 'कृपया सेवेचे वर्णन प्रविष्ट करा',
   'please_enter_service_price': 'कृपया सेवेची किंमत प्रविष्ट करा',
   "please_enter_cover_letter": "कृपया आपले कव्हर लेटर प्रविष्ट करा",
-  "please_upload_resume": "कृपया आपला रिझ्युमे अपलोड करा"
+  "please_upload_resume": "कृपया आपला रिझ्युमे अपलोड करा",
+  "plan_required": "योजना आवश्यक आहे",
+  "purchase_business_plan_to_search": "शोधण्यासाठी व्यवसाय योजना खरेदी करा",
+  "purchase_now": "आत्ताच खरेदी करा",
+  "register_business_to_search": "शोधण्यासाठी तुमचा व्यवसाय नोंदणी करा",
+  "purchase_plan_to_approve_business": "तुमचा व्यवसाय मंजूर करण्यासाठी योजना खरेदी करा",
 };
 
 

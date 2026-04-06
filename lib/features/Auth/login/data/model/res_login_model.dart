@@ -126,9 +126,11 @@ class User {
   String? createdAt;
   String? updatedAt;
   String? profileImage;
-  bool? hasPayment;
+  bool? hasMatrimonyPayment;
+  bool? hasBusinessPayment;
   bool? isMatrimony;
-  String? paymentPurpose;
+  bool? isBusiness;
+
   String? matrimonyApprovalStatus; // 🆕 ADDED
 
   User({
@@ -171,9 +173,10 @@ class User {
     this.createdAt,
     this.updatedAt,
     this.profileImage,
-    this.hasPayment,
+    this.hasMatrimonyPayment,
+    this.hasBusinessPayment,
     this.isMatrimony,
-    this.paymentPurpose,
+    this.isBusiness,
     this.matrimonyApprovalStatus,
   });
 
@@ -218,9 +221,10 @@ class User {
     updatedAt = json['updated_at'];
     // Handle both 'profile_image' and 'photo' fields
     profileImage = json['profile_image'] ?? json['photo'];
-    hasPayment = json['has_payment'];
+    hasBusinessPayment = json['has_business_payment'];
+    hasMatrimonyPayment = json['has_matrimony_payment'];
     isMatrimony = json['is_matrimony'];
-    paymentPurpose = json['payment_purpose'];
+    isBusiness = json['is_business'];
     matrimonyApprovalStatus = json['matrimony_approval_status'];
   }
 
@@ -265,9 +269,10 @@ class User {
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     data['profile_image'] = profileImage;
-    data['has_payment'] = hasPayment;
+    data['is_business'] = isBusiness;
     data['is_matrimony'] = isMatrimony;
-    data['payment_purpose'] = paymentPurpose;
+    data['has_business_payment'] = hasBusinessPayment;
+    data['has_matrimony_payment'] = hasMatrimonyPayment;
     data['matrimony_approval_status'] = matrimonyApprovalStatus;
     return data;
   }

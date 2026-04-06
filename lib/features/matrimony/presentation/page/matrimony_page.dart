@@ -25,7 +25,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     final theme = Theme.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
 
-    final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+    final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
     print("hasPayment: $hasPayment");
     final hasMatrimony = Get.find<AuthService>().hasMatrimony();
 
@@ -313,7 +313,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               ];
             },
             body: Obx(() {
-              final hasPayment = Get.find<AuthService>().hasPaymentFor('matrimony_profile');
+              final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
               final hasMatrimony = Get.find<AuthService>().hasMatrimony();
 
               if (!hasMatrimony) {

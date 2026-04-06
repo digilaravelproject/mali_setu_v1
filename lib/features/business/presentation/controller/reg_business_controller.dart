@@ -21,6 +21,7 @@ import 'package:edu_cluezer/features/business/data/model/business_plan_model.dar
 import 'package:intl/intl.dart';
 
 import '../../../../core/helper/pincode_helper.dart';
+import '../../../../core/helper/location_helper.dart';
 
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
@@ -528,6 +529,13 @@ class RegBusinessController extends GetxController {
       };
       print("registerbusiness : " + body.toString());
 
+      // Fetch current location
+      final location = await LocationHelper.getCurrentLocation();
+      if (location != null) {
+        body['latitude'] = location['latitude'];
+        body['longitude'] = location['longitude'];
+      }
+
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
@@ -625,6 +633,10 @@ class RegBusinessController extends GetxController {
   }
 
   Future<void> fetchAndShowBusinessPlans() async {
+    await fetchAndShowBusinessPlansForType(bTypeCtrl.text);
+  }
+
+  Future<void> fetchAndShowBusinessPlansForType(String businessType) async {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()),
           barrierDismissible: false);
@@ -632,15 +644,10 @@ class RegBusinessController extends GetxController {
       Get.back(); // Close Loading
 
       if (response.success == true && response.data?.plans != null) {
-        // Filter plans by company type
-        final selectedType = typeIdMap[bTypeCtrl.text] ?? bTypeCtrl.text;
+        final targetType = businessType.toLowerCase();
         
-        // Match logic: filter plans where company_type matches selectedType
         final filteredPlans = response.data!.plans!.where((plan) {
           final planType = plan.companyType?.toLowerCase() ?? "";
-          final targetType = bTypeCtrl.text.toLowerCase();
-          
-          // Flexible matching
           return planType.contains(targetType) || targetType.contains(planType);
         }).toList();
 
@@ -655,15 +662,16 @@ class RegBusinessController extends GetxController {
           await initiateBusinessPayment(selectedPlan);
         }
         
-        // Close Registration Screen
-        Get.back(); 
+        // Only close registration screen if called from registration flow
+        if (bTypeCtrl.text.isNotEmpty) {
+          Get.back();
+        }
 
       } else {
-        Get.back(); // Close Registration Screen if no plans
+        Get.back();
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
-      Get.back(); // Close Registration Screen
       print("Error fetching business plans: $e");
     }
   }

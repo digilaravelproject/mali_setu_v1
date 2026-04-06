@@ -11,6 +11,7 @@ import 'package:file_picker/file_picker.dart';
 
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/helper/pincode_helper.dart';
+import '../../../../../core/helper/location_helper.dart';
 import '../../data/model/req_register_model.dart';
 import '../../domain/usecase/register_usecase.dart';
 
@@ -320,15 +321,16 @@ class RegisterController extends GetxController {
       // Get combined phone from PhoneFieldComponent
       final combinedPhone = phoneFieldKey.currentState?.getCombinedPhone() ?? '';
 
+      // Fetch current location
+      final location = await LocationHelper.getCurrentLocation();
+
       final reqModel = ReqRegisterModel(
         name: combinedName,
         email: emailCtrl.text.trim(),
-        dob: ageCtrl.text.trim() ,
+        dob: ageCtrl.text.trim(),
         phone: combinedPhone,
         occupation: occupationCtrl.text.trim(),
-        reffralCode: referralCtrl.text.trim().isEmpty
-            ? null
-            : referralCtrl.text.trim(),
+        reffralCode: referralCtrl.text.trim().isEmpty ? null : referralCtrl.text.trim(),
         address: addressCtrl.text.trim(),
         nearbyLocation: nearbyLocationCtrl.text.trim(),
         pincode: pinCodeCtrl.text.trim(),
@@ -345,7 +347,9 @@ class RegisterController extends GetxController {
         termCondition: true,
         company_name: companynameCtrl.text.trim(),
         dept_name: deptCtrl.text.trim(),
-        designation: designationCtrl.text.trim()
+        designation: designationCtrl.text.trim(),
+        latitude: location?['latitude'],
+        longitude: location?['longitude'],
       );
 
       final response = await registerUseCase(reqModel);

@@ -30,6 +30,7 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_my_applications
 import 'package:edu_cluezer/features/business/domain/usecase/get_job_applications_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_application_status_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/search_business_usecase.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 
 import '../../../../core/routes/app_routes.dart';
 
@@ -123,15 +124,17 @@ class BusinessController extends GetxController {
   
   // Search with debounce
   void onSearchChanged(String query) {
-    if (!_authService.hasPaymentFor('business_registration')) {
+    // Check registration first, then payment
+    if (!_authService.hasBusiness()) {
+      _showBusinessRegisterDialog();
+      return;
+    }
+    if (!_authService.hasPaymentForBusiness()) {
       _showBusinessPaymentDialog();
       return;
     }
     searchText.value = query;
-    // Cancel previous timer
     _searchDebounce?.cancel();
-    
-    // Start new timer - wait 500ms after user stops typing
     _searchDebounce = Timer(const Duration(milliseconds: 500), () {
       fetchAllBusinesses(isRefresh: true);
     });
@@ -631,83 +634,174 @@ class BusinessController extends GetxController {
 
   Future<void> downloadResume(String url, String fileName) async {
     try {
-      // Basic permission check - for Android 10+ scoped storage/mediastore is different, 
-      // but for simple downloads folder standard dio write is often used with permission.
-      // Or use path_provider to get app docs dir.
-      // Since user wants "download", they likely expect it in Downloads folder.
-      
-      // Checking permission
-      var status = await Permission.storage.status;
-      if (!status.isGranted) {
-        status = await Permission.storage.request();
-      }
-
-      // If denied, we might still be able to write to app specific dirs, but for public download:
-      if (status.isDenied) {
-        // Try anyway or show error? On newer Android, explicit storage perm might not be needed for some paths.
-        // Proceeding with attempt or showing error.
-        // CustomSnackBar.showError(message: "Storage permission denied");
-        // return;
+      // Permission check
+      if (Platform.isAndroid) {
+        final status = await Permission.storage.request();
+        if (status.isPermanentlyDenied) {
+          CustomSnackBar.showError(message: "Storage permission denied. Enable from settings.");
+          return;
+        }
       }
 
       Directory? downloadsDir;
       if (Platform.isAndroid) {
         downloadsDir = Directory('/storage/emulated/0/Download');
       } else if (Platform.isIOS) {
-        downloadsDir = await getApplicationDocumentsDirectory(); // iOS doesn't have public downloads easily accessible
+        downloadsDir = await getApplicationDocumentsDirectory();
       } else {
         downloadsDir = await getDownloadsDirectory();
       }
 
       if (downloadsDir == null) {
-         CustomSnackBar.showError(message: "Could not find downloads directory");
-         return;
+        CustomSnackBar.showError(message: "Could not find downloads directory");
+        return;
       }
 
+      // Ensure unique filename
       String savePath = "${downloadsDir.path}/$fileName";
-      
-      // Ensure unique name
       int count = 1;
       while (File(savePath).existsSync()) {
-        final nameWithoutExt = fileName.split('.').first;
-        final ext = fileName.split('.').last;
+        final parts = fileName.split('.');
+        final ext = parts.last;
+        final nameWithoutExt = parts.sublist(0, parts.length - 1).join('.');
         savePath = "${downloadsDir.path}/${nameWithoutExt}_$count.$ext";
         count++;
       }
 
-      CustomSnackBar.showInfo(message: "Downloading...");
-      
+      // Show downloading snackbar
+      Get.snackbar(
+        'downloading'.tr,
+        fileName,
+        icon: const Icon(Icons.download_rounded, color: Colors.white),
+        backgroundColor: Colors.blueGrey[700],
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        snackPosition: SnackPosition.BOTTOM,
+      );
+
       await Dio().download(url, savePath);
-      
-      CustomSnackBar.showSuccess(message: "Downloaded to $savePath");
-      
+
+      // Show success snackbar with "Open" action
+      Get.snackbar(
+        'download_complete'.tr,
+        fileName,
+        icon: const Icon(Icons.check_circle_rounded, color: Colors.white),
+        backgroundColor: Colors.green[700],
+        colorText: Colors.white,
+        duration: const Duration(seconds: 6),
+        snackPosition: SnackPosition.BOTTOM,
+        mainButton: TextButton(
+          onPressed: () {
+            Get.back(); // close snackbar
+            launchUrl(Uri.parse('file://$savePath'), mode: LaunchMode.externalApplication);
+          },
+          child: Text('open'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
+      );
     } catch (e) {
       CustomSnackBar.showError(message: "Download failed: $e");
-    } finally {
-       filterCityCtrl.dispose();
-       filterStateCtrl.dispose();
-       filterTalukaCtrl.dispose();
-       filterDistrictCtrl.dispose();
     }
   }
+  void _showBusinessRegisterDialog() {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Get.theme.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.store_outlined, size: 48, color: Get.theme.primaryColor),
+              ),
+              const SizedBox(height: 20),
+              Text('register_your_business'.tr, style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800), textAlign: TextAlign.center),
+              const SizedBox(height: 10),
+              Text('register_business_to_search'.tr, style: Get.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]), textAlign: TextAlign.center),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        Get.toNamed(AppRoutes.regBusiness);
+                      },
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+                      child: Text('register_now'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showBusinessPaymentDialog() {
     Get.dialog(
-      AlertDialog(
-        title: const Text("Access Denied"),
-        content: const Text("Register business and pay"),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("OK"),
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Get.theme.primaryColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.lock_person_rounded, size: 48, color: Get.theme.primaryColor),
+              ),
+              const SizedBox(height: 20),
+              Text('plan_required'.tr, style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800), textAlign: TextAlign.center),
+              const SizedBox(height: 10),
+              Text('purchase_business_plan_to_search'.tr, style: Get.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]), textAlign: TextAlign.center),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Get.back();
+                        if (Get.isRegistered<RegBusinessController>()) {
+                          await Get.find<RegBusinessController>().fetchAndShowBusinessPlans();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+                      child: Text('purchase_now'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              Get.toNamed(AppRoutes.regBusiness); // Redirect to registration
-            },
-            child: const Text("Register Now"),
-          ),
-        ],
+        ),
       ),
     );
   }
