@@ -70,10 +70,6 @@ class _JobApplyFormState extends State<JobApplyForm> {
 
     final success = await _controller.applyJob(data);
     _isLoading.value = false;
-
-    if (success == true) {
-      Get.back();
-    }
   }
 
   final _isLoading = false.obs;

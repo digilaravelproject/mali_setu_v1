@@ -261,6 +261,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                     topPadding: 0,
                   ),
                   AppInputTextField(
+                    label: "occupation".tr,
+                    controller: controller.occupationCtrl,
+                    isRequired: true,
+                    iconData: CupertinoIcons.briefcase_fill,
+                    validator: (v) => FormValidator.emptycheck(v, "occupation".tr),
+                    topPadding: 0,
+                  ),
+                  AppInputTextField(
                     label: "company_name".tr,
                     controller: controller.companynameCtrl,
                     iconData: CupertinoIcons.building_2_fill,
@@ -273,19 +281,11 @@ class RegisterPage extends GetWidget<RegisterController> {
                     topPadding: 0,
                   ),
                   AppInputTextField(
-                    label: "occupation".tr,
-                    controller: controller.occupationCtrl,
-                    isRequired: true,
-                    iconData: CupertinoIcons.briefcase_fill,
-                    validator: (v) => FormValidator.emptycheck(v, "occupation".tr),
-                    topPadding: 0,
-                  ),
-                  AppInputTextField(
                     label: "designation".tr,
                     controller: controller.designationCtrl,
-                    isRequired: true,
+                   // isRequired: true,
                     iconData: CupertinoIcons.briefcase_fill,
-                    validator: (v) => FormValidator.emptycheck(v, "designation".tr),
+                   // validator: (v) => FormValidator.emptycheck(v, "designation".tr),
                     topPadding: 0,
                   ),
                   AppInputTextField(

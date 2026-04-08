@@ -133,14 +133,14 @@ class BusinessController extends GetxController {
   // Search with debounce
   void onSearchChanged(String query) {
     // Check registration first, then payment
-    if (!_authService.hasBusiness()) {
-      _showBusinessRegisterDialog();
-      return;
-    }
-    if (!_authService.hasPaymentForBusiness()) {
-      _showBusinessPaymentDialog();
-      return;
-    }
+    // if (!_authService.hasBusiness()) {
+    //   _showBusinessRegisterDialog();
+    //   return;
+    // }
+    // if (!_authService.hasPaymentForBusiness()) {
+    //   _showBusinessPaymentDialog();
+    //   return;
+    // }
     searchText.value = query;
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 500), () {
@@ -712,6 +712,11 @@ class BusinessController extends GetxController {
     try {
       isLoading.value = true;
       final response = await applyJobUseCase(data);
+      
+      if (Get.isBottomSheetOpen == true) {
+        Get.back();
+      }
+
       if (response.success == true) {
         CustomSnackBar.showSuccess(message: response.message ?? "Applied successfully");
         // Refresh job details to update hasApplied status
@@ -746,7 +751,22 @@ class BusinessController extends GetxController {
         return false;
       }
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      if (Get.isBottomSheetOpen == true) {
+        Get.back();
+      }
+      
+      String errorMessage = "Failed to apply";
+      if (e is DioException && e.response?.data != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map) {
+          errorMessage = errorData['message'] ?? errorMessage;
+        } else {
+          errorMessage = e.response!.data.toString();
+        }
+      } else {
+        errorMessage = e.toString();
+      }
+      CustomSnackBar.showError(message: errorMessage);
       return false;
     } finally {
       isLoading.value = false;

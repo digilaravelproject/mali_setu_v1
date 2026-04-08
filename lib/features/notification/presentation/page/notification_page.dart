@@ -149,7 +149,7 @@ class NotificationPage extends GetView<NotificationController> {
   }) {
     // Determine data from map
     final data = notification.data ?? {};
-    final title = notification.type ?? 'notification'.tr;
+    final title = notification.title ?? 'notification'.tr;
     final message = notification.message ?? 'new_notification_message'.tr;
     final isRead = notification.readAt != null;
     
@@ -158,7 +158,7 @@ class NotificationPage extends GetView<NotificationController> {
     Color iconColor = Colors.blue;
     
     // Example logic based on hypothetical types (adjust as needed)
-    final type = notification.type ?? '';
+    final type = notification.title ?? '';
     if (type.contains('Order')) {
       icon = Icons.shopping_bag_outlined;
       iconColor = Colors.green;
@@ -168,6 +168,24 @@ class NotificationPage extends GetView<NotificationController> {
     } else if (type.contains('Alert')) {
       icon = Icons.warning_amber_rounded;
       iconColor = Colors.red;
+    } else if (type.contains('Matrimony')) {
+      icon = Icons.favorite_border; // heart icon
+      iconColor = Colors.pink;
+    } else if (type.contains('Job')) {
+      icon = Icons.work_outline;
+      iconColor = Colors.blue;
+    } else if (type.contains('Business')) {
+      icon = Icons.business_center_outlined;
+      iconColor = Colors.teal;
+    } else if (type.contains('Connections')) {
+      icon = Icons.people_outline;
+      iconColor = Colors.orange;
+    } else if (type.contains('Service')) {
+      icon = Icons.build_outlined;
+      iconColor = Colors.brown;
+    } else if (type.contains('Product')) {
+      icon = Icons.inventory_2_outlined;
+      iconColor = Colors.deepPurple;
     }
 
     // Format Date

@@ -88,7 +88,7 @@ class SplashPage extends GetWidget<InitController> {
                     builder: (context, scale, child) {
                       return Transform.scale(scale: scale, child: child);
                     },
-                    onEnd: controller.startNavigate,
+                    //onEnd: controller.startNavigate,
                     child: SizedBox.square(
                       dimension: 25,
                       child: CircularProgressIndicator(

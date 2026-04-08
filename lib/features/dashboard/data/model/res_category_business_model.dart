@@ -30,6 +30,7 @@ class ResBusinessCategoryModel {
 class CatBusiness {
   int? id;
   int? userId;
+  int? KMfromuser;
   String? businessName;
   String? businessType;
   int? categoryId;
@@ -48,6 +49,7 @@ class CatBusiness {
   CatBusiness({
     this.id,
     this.userId,
+    this.KMfromuser,
     this.businessName,
     this.businessType,
     this.categoryId,
@@ -67,6 +69,7 @@ class CatBusiness {
   CatBusiness.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     userId = json['user_id'];
+    KMfromuser = json['KMfromuser'];
     businessName = json['business_name'];
     businessType = json['business_type'];
     categoryId = json['category_id'];
@@ -96,6 +99,7 @@ class CatBusiness {
     final data = <String, dynamic>{};
     data['id'] = id;
     data['user_id'] = userId;
+    data['KMfromuser'] = KMfromuser;
     data['business_name'] = businessName;
     data['business_type'] = businessType;
     data['category_id'] = categoryId;

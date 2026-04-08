@@ -164,7 +164,7 @@ const Map<String, String> enUS = {
   'one_month': 'One Month',
 
   // Auth - Login Page
-  'welcome_back': 'Welcome Back',
+  'welcome_back': 'Welcome to Mali Setu',
   'login_to_continue': 'Login to continue your journey',
   'email_label': 'Email',
   'password_label': 'Password',
@@ -900,6 +900,7 @@ const Map<String, String> enUS = {
   "plan_expired": "Plan Expired",
   "product_image": "Product Image",
   "service_image": "Service Image",
+  "start_chat": "Start Chat",
   "no_sent_request": "No Sent Request",
   "plan_not_purchased": "Plan Not Purchased",
   "purchase_plan_to_activate": "Purchase a plan to activate",
