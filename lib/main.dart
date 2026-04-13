@@ -34,21 +34,34 @@ class MyApp extends StatelessWidget {
     // Get the LanguageController to use saved locale
     final languageController = Get.find<LanguageController>();
     
-    // return ScreenCaptureProtector(
-    return GetMaterialApp(
-      // child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: AppConstants.appName,
-        translations: Languages(),
-        locale: languageController.currentLocale.value,
-        fallbackLocale: const Locale('en', 'US'),
-        theme: AppLightTheme.lightTheme,
-        darkTheme: AppLightTheme.lightTheme,
-        // darkTheme: AppDarkTheme.darkTheme,
-        scaffoldMessengerKey: rootScaffoldMessengerKey,
-        getPages: AppPages.getPages,
-        initialRoute: AppRoutes.splash,
-      // ),
+    // return GetMaterialApp(
+    //     debugShowCheckedModeBanner: false,
+    //     title: AppConstants.appName,
+    //     translations: Languages(),
+    //     locale: languageController.currentLocale.value,
+    //     fallbackLocale: const Locale('en', 'US'),
+    //     theme: AppLightTheme.lightTheme,
+    //     darkTheme: AppLightTheme.lightTheme,
+    //     // darkTheme: AppDarkTheme.darkTheme,
+    //     scaffoldMessengerKey: rootScaffoldMessengerKey,
+    //     getPages: AppPages.getPages,
+    //     initialRoute: AppRoutes.splash,
+    // );
+
+    return ScreenCaptureProtector(
+      child: GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: AppConstants.appName,
+      translations: Languages(),
+      locale: languageController.currentLocale.value,
+      fallbackLocale: const Locale('en', 'US'),
+      theme: AppLightTheme.lightTheme,
+      darkTheme: AppLightTheme.lightTheme,
+      // darkTheme: AppDarkTheme.darkTheme,
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
+      getPages: AppPages.getPages,
+      initialRoute: AppRoutes.splash,
+      ),
     );
   }
 }
