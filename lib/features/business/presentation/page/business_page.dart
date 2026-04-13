@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/constent/app_constants.dart';
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/business/presentation/page/single_business_details.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
@@ -903,8 +904,13 @@ class BusinessListCard extends StatelessWidget {
                           ],
                         ),
                       
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
+
+                      Text("${(business.KMfromuser ?? 0).toStringAsFixed(2)} Km ",style: TextStyle(color: AppColors.black,fontWeight: FontWeight.bold),),
+                      const SizedBox(height: 5),
+
                       Container(height: 1, color: Colors.grey[100]),
+
                       const SizedBox(height: 10),
                       
                       Row(

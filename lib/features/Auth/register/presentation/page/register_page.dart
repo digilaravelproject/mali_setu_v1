@@ -154,6 +154,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                 title: "caste_certificate".tr,
                 icon: CupertinoIcons.doc_plaintext,
                 isRequired: true,
+                titleSize: 12,
                 children: [
                   Obx(() => _buildCasteCertificateUpload(context)),
                 ],
@@ -261,6 +262,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                     topPadding: 0,
                   ),
                   AppInputTextField(
+                    label: "occupation".tr,
+                    controller: controller.occupationCtrl,
+                    isRequired: true,
+                    iconData: CupertinoIcons.briefcase_fill,
+                    validator: (v) => FormValidator.emptycheck(v, "occupation".tr),
+                    topPadding: 0,
+                  ),
+                  AppInputTextField(
                     label: "company_name".tr,
                     controller: controller.companynameCtrl,
                     iconData: CupertinoIcons.building_2_fill,
@@ -273,27 +282,19 @@ class RegisterPage extends GetWidget<RegisterController> {
                     topPadding: 0,
                   ),
                   AppInputTextField(
-                    label: "occupation".tr,
-                    controller: controller.occupationCtrl,
-                    isRequired: true,
-                    iconData: CupertinoIcons.briefcase_fill,
-                    validator: (v) => FormValidator.emptycheck(v, "occupation".tr),
-                    topPadding: 0,
-                  ),
-                  AppInputTextField(
                     label: "designation".tr,
                     controller: controller.designationCtrl,
-                    isRequired: true,
+                   // isRequired: true,
                     iconData: CupertinoIcons.briefcase_fill,
-                    validator: (v) => FormValidator.emptycheck(v, "designation".tr),
+                   // validator: (v) => FormValidator.emptycheck(v, "designation".tr),
                     topPadding: 0,
                   ),
-                  AppInputTextField(
-                    label: "referral_code".tr,
-                    controller: controller.referralCtrl,
-                    iconData: CupertinoIcons.tag_fill,
-                    topPadding: 0,
-                  ),
+                  // AppInputTextField(
+                  //   label: "referral_code".tr,
+                  //   controller: controller.referralCtrl,
+                  //   iconData: CupertinoIcons.tag_fill,
+                  //   topPadding: 0,
+                  // ),
                 ],
               ),
 
@@ -385,7 +386,7 @@ class RegisterPage extends GetWidget<RegisterController> {
     );
   }
 
-  Widget _buildFormSection(
+ /* Widget _buildFormSection(
     BuildContext context, {
     required String title,
     required IconData icon,
@@ -447,6 +448,90 @@ class RegisterPage extends GetWidget<RegisterController> {
                               style: TextStyle(color: Colors.red),
                             ),
                           ]
+                        : [],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF1F1F1)),
+          const SizedBox(height: 16),
+          ...children,
+        ],
+      ),
+    );
+  }*/
+
+
+  Widget _buildFormSection(
+      BuildContext context, {
+        required String title,
+        required IconData icon,
+        required List<Widget> children,
+        bool isRequired = false,
+
+        // 👇 new optional params
+        double? titleSize,
+        FontWeight? titleWeight,
+      }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 15,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    text: title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      // 👇 default same rahega
+                      fontSize: titleSize ?? theme.textTheme.titleMedium?.fontSize,
+                      fontWeight: titleWeight ?? FontWeight.w800,
+                      letterSpacing: -0.2,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                    ),
+                    children: isRequired
+                        ? const [
+                      TextSpan(
+                        text: ' *',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ]
                         : [],
                   ),
                 ),

@@ -149,6 +149,7 @@ class Business {
   String? subscriptionStatus;
   String? subscriptionExpiresAt;
   int? jobPostingLimit;
+  int? KMfromuser;
   String? createdAt;
   String? updatedAt;
   String? status;
@@ -181,6 +182,7 @@ class Business {
     this.subscriptionStatus,
     this.subscriptionExpiresAt,
     this.jobPostingLimit,
+    this.KMfromuser,
     this.createdAt,
     this.updatedAt,
     this.status,
@@ -215,6 +217,7 @@ class Business {
       subscriptionStatus: json['subscription_status'],
       subscriptionExpiresAt: json['subscription_expires_at'],
       jobPostingLimit: _asInt(json['job_posting_limit']),
+      KMfromuser: _asInt(json['KMfromuser']),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       status: json['status'],

@@ -6,6 +6,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:flutter/cupertino.dart';
 
 import '../../../../core/helper/string_extensions.dart';
+import '../../../../core/styles/app_colors.dart';
 import '../../../business/presentation/page/business_page.dart';
 import '../../../business/presentation/page/single_business_details.dart';
 import '../../../../core/routes/app_routes.dart';
@@ -439,11 +440,24 @@ class BusinessListCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
-                      const SizedBox(height: 12),
-                      Container(height: 1, color: Colors.grey[100]),
+
                       const SizedBox(height: 10),
+                      Text(
+                        "${(business.KMfromuser ?? 0).toStringAsFixed(2)} Km",
+                        style: TextStyle(
+                          color: AppColors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
                       
+
+                      Container(height: 1, color: Colors.grey[100]),
+
+
+                      //const SizedBox(height: 5),
+                     // Text("${business.KMfromuser} Km ",style: TextStyle(color: AppColors.black,fontWeight: FontWeight.bold),),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                            _buildStatItem(

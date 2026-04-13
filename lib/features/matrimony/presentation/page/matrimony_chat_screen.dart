@@ -77,7 +77,7 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
   Widget _buildMessageBubble(MatrimonyMessage message) {
     final bool isMe = message.senderId == Get.find<AuthService>().currentUser.value?.id;
     final time = message.createdAt != null 
-        ? DateFormat('hh:mm a').format(DateTime.parse(message.createdAt!))
+        ? DateFormat('hh:mm a').format(DateTime.parse(message.createdAt!).toLocal())
         : "";
 
     return Align(

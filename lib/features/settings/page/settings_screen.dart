@@ -98,19 +98,19 @@ class SettingsScreen extends GetWidget<SettingsController> {
               // ),
 
               // Volunteer Section
-              _buildSectionHeader(context, 'volunteer'.tr),
-              _buildSettingsGroup(
-                context,
-                [
-                  _SettingsItem(
-                    title: 'active_volunteer'.tr,
-                    icon: Icons.favorite_border_rounded,
-                    onTap: () {
-                      Get.toNamed(AppRoutes.volunteer);
-                    },
-                  ),
-                ],
-              ),
+              // _buildSectionHeader(context, 'volunteer'.tr),
+              // _buildSettingsGroup(
+              //   context,
+              //   [
+              //     _SettingsItem(
+              //       title: 'active_volunteer'.tr,
+              //       icon: Icons.favorite_border_rounded,
+              //       onTap: () {
+              //         Get.toNamed(AppRoutes.volunteer);
+              //       },
+              //     ),
+              //   ],
+              // ),
 
               // Legal Section
               _buildSectionHeader(context, 'legal'.tr),

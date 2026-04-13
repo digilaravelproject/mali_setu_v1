@@ -82,12 +82,12 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
   Widget _buildMemberCard(MatrimonyConversation conversation) {
     final currentUser = Get.find<AuthService>().currentUser.value;
     final currentUserId = currentUser?.id;
-    
+
     // Pick the user who is NOT the current user
-    var userProfile = (conversation.user1Id == currentUserId) 
-        ? conversation.user2 
+    var userProfile = (conversation.user1Id == currentUserId)
+        ? conversation.user2
         : conversation.user1;
-        
+
     // Safety fallback: If identification fails or one is null, pick the non-null one
     if (userProfile == null) {
       userProfile = conversation.user2 ?? conversation.user1;
@@ -95,21 +95,21 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
 
     // Data Extraction with multiple fallbacks
     // 1. Name
-    final name = userProfile?.personalDetails?.name ?? 
-                 userProfile?.user?.name ?? 
-                 "Matrimony Member";
-                 
+    final name = userProfile?.personalDetails?.name ??
+        userProfile?.user?.name ??
+        "Matrimony Member";
+
     // 2. Profession
-    final profession = userProfile?.professionalDetails?.jobTitle ?? 
-                       userProfile?.personalDetails?.occupation ?? 
-                       userProfile?.user?.occupation ?? 
-                       "Member";
-                       
+    final profession = userProfile?.professionalDetails?.jobTitle ??
+        userProfile?.personalDetails?.occupation ??
+        userProfile?.user?.occupation ??
+        "Member";
+
     // 3. Location
-    final location = userProfile?.locationDetails?.city ?? 
-                     userProfile?.user?.city ?? 
-                     "Unknown Location";
-    
+    final location = userProfile?.locationDetails?.city ??
+        userProfile?.user?.city ??
+        "Unknown Location";
+
     print("MEMBER CARD DEBUG: uid=$currentUserId c.u1=${conversation.user1Id} c.u2=${conversation.user2Id} selected_name=$name");
 
     print("conversation.user1 : ${conversation.user1}");
@@ -121,9 +121,9 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
     // Correct image logic
     String? imageUrl;
     if (userProfile?.personalDetails?.photos != null && userProfile!.personalDetails!.photos!.isNotEmpty) {
-       imageUrl = ApiConstants.imageBaseUrl + userProfile.personalDetails!.photos![0];
+      imageUrl = ApiConstants.imageBaseUrl + userProfile.personalDetails!.photos![0];
     }
-    
+
     // Fallback widget
     Widget buildPlaceholder() {
       return Container(
@@ -135,70 +135,79 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+          'conversation_id': conversation.id,
+          'other_user_id': userProfile?.userId ?? userProfile?.user?.id,
+          'user_name': name,
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: imageUrl != null
-                  ? CustomImageView(
-                      url: imageUrl,
-                      fit: BoxFit.cover,
-                      placeHolder: (context, url) => buildPlaceholder(),
-                      errorWidget: (context, url, error) => buildPlaceholder(),
-                    )
-                  : buildPlaceholder(),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: imageUrl != null
+                    ? CustomImageView(
+                  url: imageUrl,
+                  fit: BoxFit.cover,
+                  placeHolder: (context, url) => buildPlaceholder(),
+                  errorWidget: (context, url, error) => buildPlaceholder(),
+                )
+                    : buildPlaceholder(),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                const SizedBox(height: 4),
-                Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
-                    const SizedBox(width: 2),
-                    Expanded(child: Text(location, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey[400], fontSize: 12))),
-                  ],
-                ),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                  const SizedBox(height: 4),
+                  Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
+                      const SizedBox(width: 2),
+                      Text(location, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
-             onPressed: () {
-               Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                 'conversation_id': conversation.id, 
-                 'other_user_id': userProfile?.userId ?? userProfile?.user?.id, 
-                 'user_name': name,
-               });
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
+              onPressed: () {
+                Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                  'conversation_id': conversation.id,
+                  'other_user_id': userProfile?.userId ?? userProfile?.user?.id,
+                  'user_name': name,
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

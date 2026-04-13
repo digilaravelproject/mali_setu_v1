@@ -287,11 +287,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: Icons.work_outline,
         ),
         const SizedBox(height: 16),
-        _buildInfoRow(
-          label: 'referral_code'.tr,
-          value: userData['referralCode']!,
-          icon: Icons.confirmation_number_outlined,
-        ),
+        // _buildInfoRow(
+        //   label: 'referral_code'.tr,
+        //   value: userData['referralCode']!,
+        //   icon: Icons.confirmation_number_outlined,
+        // ),
       ],
     );
   }

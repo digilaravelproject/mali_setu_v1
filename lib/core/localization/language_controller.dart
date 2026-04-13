@@ -30,6 +30,10 @@ class LanguageController extends GetxController {
           currentLocale.value = const Locale('mr', 'IN');
           Get.updateLocale(const Locale('mr', 'IN'));
           print("DEBUG_LANGUAGE: ✅ Loaded Marathi language");
+        } else if (languageCode == 'hi') {
+          currentLocale.value = const Locale('hi', 'IN');
+          Get.updateLocale(const Locale('hi', 'IN'));
+          print("DEBUG_LANGUAGE: ✅ Loaded Hindi language");
         } else {
           currentLocale.value = const Locale('en', 'US');
           Get.updateLocale(const Locale('en', 'US'));
@@ -62,6 +66,9 @@ class LanguageController extends GetxController {
       if (languageCode == 'mr') {
         newLocale = const Locale('mr', 'IN');
         print("DEBUG_LANGUAGE: Setting locale to Marathi (mr_IN)");
+      } else if (languageCode == 'hi') {
+        newLocale = const Locale('hi', 'IN');
+        print("DEBUG_LANGUAGE: Setting locale to Hindi (hi_IN)");
       } else {
         newLocale = const Locale('en', 'US');
         print("DEBUG_LANGUAGE: Setting locale to English (en_US)");
@@ -100,8 +107,13 @@ class LanguageController extends GetxController {
   /// Check if current language is Marathi
   bool get isMarathi => currentLanguageCode == 'mr';
   
+  /// Check if current language is Hindi
+  bool get isHindi => currentLanguageCode == 'hi';
+  
   /// Get current language name
   String get currentLanguageName {
-    return isMarathi ? 'मराठी' : 'English';
+    if (isMarathi) return 'मराठी';
+    if (isHindi) return 'हिंदी';
+    return 'English';
   }
 }

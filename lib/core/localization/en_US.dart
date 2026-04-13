@@ -164,7 +164,7 @@ const Map<String, String> enUS = {
   'one_month': 'One Month',
 
   // Auth - Login Page
-  'welcome_back': 'Welcome Back',
+  'welcome_back': 'Welcome to Mali Setu',
   'login_to_continue': 'Login to continue your journey',
   'email_label': 'Email',
   'password_label': 'Password',
@@ -195,7 +195,7 @@ const Map<String, String> enUS = {
   'email_id': 'Email ID',
   'date_of_birth': 'Date of Birth',
   'mobile_number': 'Mobile Number',
-  'caste_certificate': 'Caste Certificate',
+  'caste_certificate': "Caste Certificate / Other Proof / Father's Caste",
   'tap_to_upload': 'Tap to upload caste certificate',
   'certificate_uploaded': 'Caste certificate uploaded',
   'caste_certificate_criteria': 'File format: .jpg, .jpeg, .png, .pdf | Max file size: 5MB',
@@ -900,6 +900,7 @@ const Map<String, String> enUS = {
   "plan_expired": "Plan Expired",
   "product_image": "Product Image",
   "service_image": "Service Image",
+  "start_chat": "Start Chat",
   "no_sent_request": "No Sent Request",
   "plan_not_purchased": "Plan Not Purchased",
   "purchase_plan_to_activate": "Purchase a plan to activate",

@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
 class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
   const MatrimonyProfileScreen({super.key});
@@ -141,9 +142,9 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                         child: Text(
                           '${profile.personalDetails?.name ?? 'Unknown'}, ${profile.age ?? ''}',
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       if (profile.status == 'active')
@@ -170,23 +171,19 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   Text(
                     profile.professionalDetails?.jobTitle ?? 'designation_not_added'.tr,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
+                      color: Colors.white.withOpacity(0.9),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.location_on, size: 16, color: Colors.white70),
                       const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      Text(
+                        "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -316,9 +313,9 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
             ],
           ),
@@ -407,10 +404,10 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 isActionable = true;
                 buttonColor = Colors.green;
                 onPressed = () {
-                   Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                     'conversation_id': null,
-                     'other_user_id': profile.user?.id,
-                   });
+                  Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                    'conversation_id': null,
+                    'other_user_id': profile.user?.id,
+                  });
                 };
               }
 
@@ -424,10 +421,10 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 ),
                 child: controller.isLoading.value
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                )
                     : Text(buttonText, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               );
             }),
@@ -458,26 +455,50 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
           children: [
             Expanded(
               flex: 2,
-                child: Obx(() {
+              child: Obx(() {
+                final authService = Get.find<AuthService>();
+                final currentUser = authService.currentUser.value;
+                final isOwnProfile = profile.user?.id == currentUser?.id || profile.userId == currentUser?.id;
+
+                if (isOwnProfile) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.regMatrimony, arguments: true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Edit Profile",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
+                }
+
                 final status = profile.connectionStatus?.toLowerCase();
                 String buttonText = "send_connection_request".tr;
                 Color buttonColor = Colors.purple;
                 VoidCallback? onPressed = controller.sendRequest;
 
                 if (status == "pending") {
-                  buttonText = "already_sent".tr; // User requested "allready sent"
-                  if (buttonText == "already_sent") buttonText = "Already Sent"; // Fallback if translation missing
+                  buttonText = "request_sent".tr;
                   buttonColor = Colors.grey;
                   onPressed = null;
-                } else if (status == "accepted" || status == "connected") {
-                  buttonText = "message".tr;
-                  if (buttonText == "message") buttonText = "Message"; 
+                } else if (status == "accepted") {
+                  buttonText = "start_chat".tr;
                   buttonColor = Colors.green;
                   onPressed = () {
                     Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                      'conversation_id': profile.conversationId,
-                      'other_user_id': profile.userId,
-                      'user_name': profile.personalDetails?.name,
+                      'conversation_id': null,
+                      'other_user_id': profile.user?.id ?? profile.userId,
                     });
                   };
                 }
@@ -490,7 +511,6 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 0,
                   ),
                   child: controller.isLoading.value
                       ? const SizedBox(

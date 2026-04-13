@@ -160,7 +160,7 @@ const Map<String, String> mrIN = {
 
   
   // Auth - Login Page
-  'welcome_back': 'पुन्हा स्वागत आहे',
+  'welcome_back': 'माळी सेतूमध्ये आपले स्वागत आहे',
   'login_to_continue': 'तुमचा प्रवास सुरू ठेवण्यासाठी लॉगिन करा',
   'email_label': 'ईमेल',
   'password_label': 'पासवर्ड',
@@ -191,7 +191,7 @@ const Map<String, String> mrIN = {
   'email_id': 'ईमेल आयडी',
   'date_of_birth': 'जन्मतारीख',
   'mobile_number': 'मोबाइल नंबर',
-  'caste_certificate': 'जात प्रमाणपत्र',
+  'caste_certificate': "जात प्रमाणपत्र / इतर पुरावा / वडिलांची जात",
   'tap_to_upload': 'जात प्रमाणपत्र अपलोड करण्यासाठी टॅप करा',
   'certificate_uploaded': 'जात प्रमाणपत्र अपलोड केले',
   'caste_certificate_criteria': 'फाईल स्वरूप: .jpg, .jpeg, .png, .pdf | कमाल फाईल आकार: 5MB',
@@ -908,6 +908,7 @@ const Map<String, String> mrIN = {
   "plan_expired": "योजना कालबाह्य झाली आहे",
   "product_image": "उत्पादनाचे चित्र",
   "service_image": "सेवेचे चित्र",
+  "start_chat": "चॅट सुरू करा",
   "plan_not_purchased": "योजना खरेदी केलेली नाही",
   "purchase_plan_to_activate": "सक्रिय करण्यासाठी योजना खरेदी करा",
   "register_business_to_search": "शोधण्यासाठी तुमचा व्यवसाय नोंदणी करा",

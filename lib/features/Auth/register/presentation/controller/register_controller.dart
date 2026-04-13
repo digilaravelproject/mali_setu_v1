@@ -324,10 +324,21 @@ class RegisterController extends GetxController {
       // Fetch current location
       final location = await LocationHelper.getCurrentLocation();
 
+      int? calculatedAge;
+      if (selectedBirthDate.value != null) {
+        final currentDate = DateTime.now();
+        calculatedAge = currentDate.year - selectedBirthDate.value!.year;
+        if (currentDate.month < selectedBirthDate.value!.month ||
+            (currentDate.month == selectedBirthDate.value!.month && currentDate.day < selectedBirthDate.value!.day)) {
+          calculatedAge--;
+        }
+      }
+
       final reqModel = ReqRegisterModel(
         name: combinedName,
         email: emailCtrl.text.trim(),
         dob: ageCtrl.text.trim(),
+        age: calculatedAge,
         phone: combinedPhone,
         occupation: occupationCtrl.text.trim(),
         reffralCode: referralCtrl.text.trim().isEmpty ? null : referralCtrl.text.trim(),

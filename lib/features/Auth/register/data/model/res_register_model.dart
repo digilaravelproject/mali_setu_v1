@@ -167,7 +167,9 @@ class User {
     name = json['name'];
     email = json['email'];
     phone = json['phone'];
-    age = json['age'];
+    if (json['age'] != null) {
+      age = int.tryParse(json['age'].toString());
+    }
     occupation = json['occupation'];
     reffralCode = json['reffral_code'];
     address = json['address'];

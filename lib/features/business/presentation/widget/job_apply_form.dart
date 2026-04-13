@@ -36,7 +36,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
         List<int> bytes = await file.readAsBytes();
         String base64String = base64Encode(bytes);
         String extension = result.files.single.extension?.toLowerCase() ?? '';
-        
+
         setState(() {
           _resumeFile = file;
           _resumeBase64 = base64String;
@@ -70,10 +70,6 @@ class _JobApplyFormState extends State<JobApplyForm> {
 
     final success = await _controller.applyJob(data);
     _isLoading.value = false;
-
-    if (success == true) {
-      if (context.mounted) Navigator.pop(context);
-    }
   }
 
   final _isLoading = false.obs;
@@ -117,9 +113,9 @@ class _JobApplyFormState extends State<JobApplyForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-           const SizedBox(height: 12),
-           // Handle bar
-           Container(
+          const SizedBox(height: 12),
+          // Handle bar
+          Container(
             width: 40,
             height: 4,
             decoration: BoxDecoration(
@@ -127,7 +123,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Header (Fixed at top)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -155,7 +151,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
 
                   // Current Step Content
                   _buildCurrentStepContent(),
-                  
+
                   const SizedBox(height: 30),
 
                   // Actions
@@ -232,12 +228,12 @@ class _JobApplyFormState extends State<JobApplyForm> {
             child: isCompleted
                 ? const Icon(Icons.check, size: 16, color: Colors.white)
                 : Text(
-                    "${step + 1}",
-                    style: TextStyle(
-                      color: isActive ? Colors.white : Colors.grey[600],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              "${step + 1}",
+              style: TextStyle(
+                color: isActive ? Colors.white : Colors.grey[600],
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -405,7 +401,7 @@ class _JobApplyFormState extends State<JobApplyForm> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    _resumeExtension?.toUpperCase() ?? "FILE", 
+                    _resumeExtension?.toUpperCase() ?? "FILE",
                     style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
                   ),
                 ],

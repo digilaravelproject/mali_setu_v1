@@ -2,6 +2,7 @@ class ReqRegisterModel {
   String? name;
   String? email;
   String? dob;
+  int? age;
   String? phone;
   String? occupation;
   String? reffralCode;
@@ -29,6 +30,7 @@ class ReqRegisterModel {
       {this.name,
       this.email,
       this.dob,
+      this.age,
       this.phone,
       this.occupation,
       this.reffralCode,
@@ -57,6 +59,9 @@ class ReqRegisterModel {
     name = json['name'];
     email = json['email'];
     dob = json['dob'];
+    if (json['age'] != null) {
+      age = int.tryParse(json['age'].toString());
+    }
     phone = json['phone'];
     occupation = json['occupation'];
     reffralCode = json['reffral_code'];
@@ -84,6 +89,7 @@ class ReqRegisterModel {
     data['name'] = name;
     data['email'] = email;
     data['dob'] = dob;
+    data['age'] = age;
     data['phone'] = phone;
     data['occupation'] = occupation;
     data['reffral_code'] = reffralCode;
