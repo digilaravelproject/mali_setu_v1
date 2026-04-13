@@ -65,7 +65,11 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                               child: Row(
                                 children: [
                                   GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      if (currentUser?.id != null) {
+                                        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
+                                      }
+                                    },
                                     child: Container(
                                       height: 44,
                                       width: 44,

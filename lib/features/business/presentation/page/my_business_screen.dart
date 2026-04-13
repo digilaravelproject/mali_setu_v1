@@ -169,210 +169,227 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
     final bool isApproved = business.verificationStatus?.toLowerCase() == 'approved';
     final String statusText = business.verificationStatus?.toTitleCase() ?? 'Pending';
     final Color statusColor = isApproved ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
+    final isPending = business.verificationStatus?.toLowerCase() != 'approved';
+    final hasSubscription = business.subscriptionStatus?.toLowerCase() == 'active';
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Column(
-          children: [
-            // Header: Image, Info, and 3-Dot Menu
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Business Image
-                  Hero(
-                    tag: 'business_image_${business.id}',
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: (business.photo != null)
-                            ? Image.network(
-                                ApiConstants.imageBaseUrl + business.photo!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
-                              )
-                            : _buildPlaceholderIcon(),
+
+
+    return GestureDetector(
+      onTap: (){
+        if (isPending) {
+          if (hasSubscription) {
+            _showWaitingForApprovalDialog(context);
+          } else {
+            _showPurchasePlanDialog(context, business);
+          }
+        } else {
+          Get.toNamed(AppRoutes.businessDetails, arguments: business);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        decoration: BoxDecoration(
+          color: context.theme.cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            children: [
+              // Header: Image, Info, and 3-Dot Menu
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Business Image
+                    Hero(
+                      tag: 'business_image_${business.id}',
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: (business.photo != null)
+                              ? Image.network(
+                                  ApiConstants.imageBaseUrl + business.photo!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),
+                                )
+                              : _buildPlaceholderIcon(),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 18),
+                    const SizedBox(width: 18),
 
-                  // Business Info & Actions
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Title & Category
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    business.businessName?.toTitleCase() ?? 'unnamed_business'.tr,
-                                    style: context.textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 18,
-                                      letterSpacing: -0.5,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: context.theme.dividerColor.withOpacity(0.05),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      business.category?.name?.toTitleCase() ?? 'category'.tr,
-                                      style: context.textTheme.bodySmall?.copyWith(
-                                        color: context.textTheme.bodySmall?.color?.withOpacity(0.7),
-                                        fontWeight: FontWeight.w600,
+                    // Business Info & Actions
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Title & Category
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      business.businessName?.toTitleCase() ?? 'unnamed_business'.tr,
+                                      style: context.textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 18,
+                                        letterSpacing: -0.5,
                                       ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: context.theme.dividerColor.withOpacity(0.05),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        business.category?.name?.toTitleCase() ?? 'category'.tr,
+                                        style: context.textTheme.bodySmall?.copyWith(
+                                          color: context.textTheme.bodySmall?.color?.withOpacity(0.7),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // 3-Dot Menu Button
+                              _buildCardPopupMenu(context, business),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Status & Time
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  statusText,
+                                  style: context.textTheme.labelSmall?.copyWith(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Icon(Icons.access_time, size: 14, color: Colors.grey.shade500),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    business.createdAt != null ? _calculateTimeAgo(business.createdAt!) : '',
+                                    style: context.textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey.shade500,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                            
-                            // 3-Dot Menu Button
-                            _buildCardPopupMenu(context, business),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 12),
-                        
-                        // Status & Time
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                statusText,
-                                style: context.textTheme.labelSmall?.copyWith(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Icon(Icons.access_time, size: 14, color: Colors.grey.shade500),
-                                const SizedBox(width: 4),
-                                Text(
-                                  business.createdAt != null ? _calculateTimeAgo(business.createdAt!) : '',
-                                  style: context.textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey.shade500,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            // Horizontal Metric Pills
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                children: [
-                  _buildMetricPill(
-                    context: context,
-                    icon: Icons.inventory_2_outlined,
-                    label: 'products'.tr,
-                    value: '${business.products?.length ?? 0}',
-                    color: const Color(0xFF3B82F6),
-                  ),
-                  const SizedBox(width: 12),
-                  _buildMetricPill(
-                    context: context,
-                    icon: Icons.auto_awesome_outlined,
-                    label: 'services'.tr,
-                    value: '${business.services?.length ?? 0}',
-                    color: const Color(0xFF8B5CF6),
-                  ),
-                ],
+              // Horizontal Metric Pills
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Row(
+                  children: [
+                    _buildMetricPill(
+                      context: context,
+                      icon: Icons.inventory_2_outlined,
+                      label: 'products'.tr,
+                      value: '${business.products?.length ?? 0}',
+                      color: const Color(0xFF3B82F6),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildMetricPill(
+                      context: context,
+                      icon: Icons.auto_awesome_outlined,
+                      label: 'services'.tr,
+                      value: '${business.services?.length ?? 0}',
+                      color: const Color(0xFF8B5CF6),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 18),
+              const SizedBox(height: 18),
 
-            // Subtle Contact Section
-            Container(
-              margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: context.theme.dividerColor.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  _buildContactItem(
-                    context,
-                    Icons.phone_iphone_outlined,
-                    business.contactPhone ?? 'N/A',
-                  ),
-                  const SizedBox(height: 10),
-                  _buildContactItem(
-                    context,
-                    Icons.alternate_email_outlined,
-                    business.contactEmail ?? 'N/A',
-                  ),
-                  if (business.website != null && business.website!.isNotEmpty) ...[
+              // Subtle Contact Section
+              Container(
+                margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: context.theme.dividerColor.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    _buildContactItem(
+                      context,
+                      Icons.phone_iphone_outlined,
+                      business.contactPhone ?? 'N/A',
+                    ),
                     const SizedBox(height: 10),
                     _buildContactItem(
                       context,
-                      Icons.public_outlined,
-                      business.website!,
+                      Icons.alternate_email_outlined,
+                      business.contactEmail ?? 'N/A',
                     ),
+                    if (business.website != null && business.website!.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      _buildContactItem(
+                        context,
+                        Icons.public_outlined,
+                        business.website!,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    _buildSubscriptionBadge(context, business),
                   ],
-                  const SizedBox(height: 12),
-                  _buildSubscriptionBadge(context, business),
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -384,8 +401,14 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
         switch (value) {
           case 'view':
             final isPending = business.verificationStatus?.toLowerCase() != 'approved';
+            final hasSubscription = business.subscriptionStatus?.toLowerCase() == 'active';
+            
             if (isPending) {
-              _showPurchasePlanDialog(context, business);
+              if (hasSubscription) {
+                _showWaitingForApprovalDialog(context);
+              } else {
+                _showPurchasePlanDialog(context, business);
+              }
             } else {
               Get.toNamed(AppRoutes.businessDetails, arguments: business);
             }
@@ -648,6 +671,55 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                     ),
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showWaitingForApprovalDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.hourglass_empty_rounded, size: 48, color: Colors.orange),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Waiting for Approval',
+                style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Your plan has been purchased successfully. Please wait a little while for the admin to approve your business.',
+                textAlign: TextAlign.center,
+                style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Get.back(),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
               ),
             ],
           ),

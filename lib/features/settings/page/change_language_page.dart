@@ -54,6 +54,19 @@ class ChangeLanguagePage extends GetView<LanguageController> {
             
             const SizedBox(height: 16),
             
+            // Hindi Option
+            Obx(() => _buildLanguageTile(
+              context: context,
+              languageCode: 'hi',
+              languageName: 'Hindi',
+              nativeName: 'हिंदी',
+              flag: '🇮🇳',
+              isSelected: controller.tempLanguageCode.value == 'hi',
+              onTap: () => controller.tempLanguageCode.value = 'hi',
+            )),
+            
+            const SizedBox(height: 16),
+            
             // Marathi Option
             Obx(() => _buildLanguageTile(
               context: context,

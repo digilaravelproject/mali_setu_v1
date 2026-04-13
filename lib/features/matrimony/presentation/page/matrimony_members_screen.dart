@@ -135,70 +135,79 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () {
+      Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+        'conversation_id': conversation.id,
+        'other_user_id': userProfile?.userId ?? userProfile?.user?.id,
+        'user_name': name,
+      });
+    },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: imageUrl != null
-                  ? CustomImageView(
-                      url: imageUrl,
-                      fit: BoxFit.cover,
-                      placeHolder: (context, url) => buildPlaceholder(),
-                      errorWidget: (context, url, error) => buildPlaceholder(),
-                    )
-                  : buildPlaceholder(),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: imageUrl != null
+                    ? CustomImageView(
+                        url: imageUrl,
+                        fit: BoxFit.cover,
+                        placeHolder: (context, url) => buildPlaceholder(),
+                        errorWidget: (context, url, error) => buildPlaceholder(),
+                      )
+                    : buildPlaceholder(),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                const SizedBox(height: 4),
-                Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
-                    const SizedBox(width: 2),
-                    Text(location, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-                  ],
-                ),
-              ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                  const SizedBox(height: 4),
+                  Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
+                      const SizedBox(width: 2),
+                      Text(location, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
-             onPressed: () {
-               Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                 'conversation_id': conversation.id, 
-                 'other_user_id': userProfile?.userId ?? userProfile?.user?.id, 
-                 'user_name': name,
-               });
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
+               onPressed: () {
+                 Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                   'conversation_id': conversation.id,
+                   'other_user_id': userProfile?.userId ?? userProfile?.user?.id,
+                   'user_name': name,
+                 });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

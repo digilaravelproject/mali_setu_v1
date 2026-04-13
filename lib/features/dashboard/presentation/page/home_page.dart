@@ -586,50 +586,94 @@ class HomePage extends GetWidget<HomeController> {
   }
 
   Widget _buildAllCategoriesSheet(BuildContext context) {
+    String searchQuery = '';
     return Container(
-      height: Get.height * 0.7,
+      height: Get.height * 0.85,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2) ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: StatefulBuilder(
+        builder: (context, setState) {
+          final filteredCategories = controller.categories.where((category) {
+            final catName = category.name?.toLowerCase() ?? '';
+            return catName.contains(searchQuery.toLowerCase());
+          }).toList();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "all_categories".tr,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2) ),
+                ),
               ),
-              IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "all_categories".tr,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.close)),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search Category...',
+                  prefixIcon: const Icon(CupertinoIcons.search, color: Colors.black54, size: 20),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: filteredCategories.isEmpty
+                    ? Center(
+                        child: Text(
+                          "No categories found",
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      )
+                    : GridView.builder(
+                        itemCount: filteredCategories.length,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: 0.85,
+                        ),
+                        itemBuilder: (_, index) {
+                          return _buildCategoryItem(context, filteredCategories[index]);
+                        },
+                      ),
+              ),
             ],
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: GridView.builder(
-              itemCount: controller.categories.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 4,
-                childAspectRatio: 0.85,
-              ),
-              itemBuilder: (_, index) {
-                return _buildCategoryItem(context, controller.categories[index]);
-              },
-            ),
-          ),
-        ],
+          );
+        }
       ),
     );
   }

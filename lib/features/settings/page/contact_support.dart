@@ -9,7 +9,7 @@ class ContactSupportPage extends StatelessWidget {
 
   // Contact methods
   Future<void> _launchWhatsApp() async {
-    final url = Uri.parse("https://wa.me/$phoneNumber");
+    final url = Uri.parse("https://wa.me/+91$phoneNumber");
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {

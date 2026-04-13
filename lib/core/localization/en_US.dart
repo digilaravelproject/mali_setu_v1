@@ -195,7 +195,7 @@ const Map<String, String> enUS = {
   'email_id': 'Email ID',
   'date_of_birth': 'Date of Birth',
   'mobile_number': 'Mobile Number',
-  'caste_certificate': 'Caste Certificate',
+  'caste_certificate': "Caste Certificate / Other Proof / Father's Caste",
   'tap_to_upload': 'Tap to upload caste certificate',
   'certificate_uploaded': 'Caste certificate uploaded',
   'caste_certificate_criteria': 'File format: .jpg, .jpeg, .png, .pdf | Max file size: 5MB',

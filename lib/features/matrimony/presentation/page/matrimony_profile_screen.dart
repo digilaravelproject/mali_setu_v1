@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
 class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
   const MatrimonyProfileScreen({super.key});
@@ -455,6 +456,33 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
             Expanded(
               flex: 2,
               child: Obx(() {
+                final authService = Get.find<AuthService>();
+                final currentUser = authService.currentUser.value;
+                final isOwnProfile = profile.user?.id == currentUser?.id || profile.userId == currentUser?.id;
+
+                if (isOwnProfile) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Get.toNamed(AppRoutes.regMatrimony, arguments: true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Edit Profile",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
+                }
+
                 final status = profile.connectionStatus?.toLowerCase();
                 String buttonText = "send_connection_request".tr;
                 Color buttonColor = Colors.purple;
@@ -464,14 +492,13 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   buttonText = "request_sent".tr;
                   buttonColor = Colors.grey;
                   onPressed = null;
-                } else
-                  if (status == "accepted") {
+                } else if (status == "accepted") {
                   buttonText = "start_chat".tr;
                   buttonColor = Colors.green;
                   onPressed = () {
                     Get.toNamed(AppRoutes.matrimonyChat, arguments: {
                       'conversation_id': null,
-                      'other_user_id': profile.user?.id,
+                      'other_user_id': profile.user?.id ?? profile.userId,
                     });
                   };
                 }
@@ -487,21 +514,21 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   ),
                   child: controller.isLoading.value
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : Text(
-                    buttonText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                          buttonText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                 );
               }),
             ),

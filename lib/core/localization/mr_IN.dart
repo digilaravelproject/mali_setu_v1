@@ -191,7 +191,7 @@ const Map<String, String> mrIN = {
   'email_id': 'ईमेल आयडी',
   'date_of_birth': 'जन्मतारीख',
   'mobile_number': 'मोबाइल नंबर',
-  'caste_certificate': 'जात प्रमाणपत्र',
+  'caste_certificate': "जात प्रमाणपत्र / इतर पुरावा / वडिलांची जात",
   'tap_to_upload': 'जात प्रमाणपत्र अपलोड करण्यासाठी टॅप करा',
   'certificate_uploaded': 'जात प्रमाणपत्र अपलोड केले',
   'caste_certificate_criteria': 'फाईल स्वरूप: .jpg, .jpeg, .png, .pdf | कमाल फाईल आकार: 5MB',
