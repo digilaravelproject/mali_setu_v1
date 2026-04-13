@@ -542,45 +542,34 @@ const Map<String, String> hiIN = {
   'no_business_found': 'इस श्रेणी में कोई व्यवसाय नहीं मिला।',
   'location_na': 'स्थान उपलब्ध नहीं',
 
-
-
-
-  "reset_password": "Reset Password",
-  "enter_email_otp": "Enter your email address and we'll send you OTP to reset your password.",
-  "send_otp": "Send Otp",
-  "email_link_info": "We'll email you a link to reset your password",
-  "need_help": "Need help?",
-  "enter_otp_email": "Enter OTP received on your email and set your new password",
+  "reset_password": "पासवर्ड रीसेट करें",
+  "enter_email_otp": "अपना ईमेल पता दर्ज करें, हम आपको पासवर्ड रीसेट करने के लिए OTP भेजेंगे।",
+  "send_otp": "OTP भेजें",
+  "email_link_info": "हम आपको पासवर्ड रीसेट करने के लिए ईमेल भेजेंगे",
+  "need_help": "मदद चाहिए?",
+  "enter_otp_email": "अपने ईमेल पर प्राप्त OTP दर्ज करें और नया पासवर्ड सेट करें",
   "otp": "OTP",
-  "enter_6_digit_otp": "Enter 6-digit OTP",
-  "reset_password_btn": "Reset Password",
-  "didnt_receive_otp": "Didn't receive OTP?",
-  "resend_otp": "Resend OTP",
-  "otp_required": "OTP is required",
-  "otp_invalid": "OTP must be at least 4 digits",
-  "confirm_password_required": "Confirm password is required",
-  "passwords_do_not_match": "Passwords do not match",
-  "enter_your_otp": "Enter Your Otp",
-  "enter_your_password": "Enter Your Password",
-  "enter_your_confirm_password": "Enter Your Confirm password",
+  "enter_6_digit_otp": "6 अंकों का OTP दर्ज करें",
+  "reset_password_btn": "पासवर्ड रीसेट करें",
+  "didnt_receive_otp": "OTP प्राप्त नहीं हुआ?",
+  "resend_otp": "OTP फिर से भेजें",
+  "otp_required": "OTP आवश्यक है",
+  "otp_invalid": "OTP कम से कम 4 अंकों का होना चाहिए",
+  "confirm_password_required": "पासवर्ड की पुष्टि आवश्यक है",
+  "passwords_do_not_match": "पासवर्ड मेल नहीं खाते",
+  "enter_your_otp": "अपना OTP दर्ज करें",
+  "enter_your_password": "अपना पासवर्ड दर्ज करें",
+  "enter_your_confirm_password": "अपना पुष्टि पासवर्ड दर्ज करें",
 
+  "verify_your_number": "अपना नंबर सत्यापित करें",
+  "enter_otp_mobile": "अपने मोबाइल नंबर पर भेजा गया\n6 अंकों का कोड दर्ज करें",
+  "didnt_receive_code": "कोड प्राप्त नहीं हुआ?",
+  "resend_in": "{countdown} सेकंड में फिर से भेजें",
+  "verify_continue": "सत्यापित करें और जारी रखें",
 
-
-  "verify_your_number": "Verify Your Number",
-  "enter_otp_mobile": "Enter the 6-digit code sent to\n your mobile number",
-  "didnt_receive_code": "Didn't receive code?",
-  "resend_in": "Resend in {countdown}s",
-  "verify_continue": "VERIFY & CONTINUE",
-
-
-
-
-
-
-  "upload_caste_certificate": "Upload Caste Certificate",
-  "referral_code_optional": "Referral Code (Optional)",
-  "referral_code_note": "* Referral code is optional",
-
+  "upload_caste_certificate": "जाति प्रमाण पत्र अपलोड करें",
+  "referral_code_optional": "रेफरल कोड (वैकल्पिक)",
+  "referral_code_note": "* रेफरल कोड वैकल्पिक है",
 
 
 
@@ -642,79 +631,76 @@ const Map<String, String> hiIN = {
   'family_lifestyle': 'परिवार और जीवनशैली',
   'family_lifestyle_sub': 'पारिवारिक पृष्ठभूमि और आदतें',
   'family_class': 'पारिवारिक वर्ग',
-  'father_occupation': "Father's Occupation" ,
-  'mother_occupation': "Mother Occupation" ,
-  'diet': "Diet" ,
-  'smoking': "Smoking" ,
-  'drinking': "Drinking" ,
-  'apply_for_job': "Apply for Job" ,
 
 
+  'father_occupation': "पिता का व्यवसाय",
+  'mother_occupation': "माता का व्यवसाय",
+  'diet': "आहार",
+  'smoking': "धूम्रपान",
+  'drinking': "शराब सेवन",
+  'apply_for_job': "नौकरी के लिए आवेदन करें",
 
-  'salary_range'  : 'Salary Range'  ,
-  "job_category" : "Job Category",
-  "application_deadline"  : "Application Deadline",
-  "job_expiry_date" : "Job Expiry Date",
-  "skills_required" :"Skills Required ",
+  'salary_range': 'वेतन सीमा',
+  "job_category": "नौकरी श्रेणी",
+  "application_deadline": "आवेदन की अंतिम तिथि",
+  "job_expiry_date": "नौकरी समाप्ति तिथि",
+  "skills_required": "आवश्यक कौशल",
 
-
-  // Create Job Post Page
-  "update_job_posting": "Update Job Posting",
-  "create_job_posting": "Create Job Posting",
-  "edit_job_details": "Edit Job Details",
-  "update_job_info": "Update the information for your job posting",
-  "fill_job_details": "Fill in the details to create your job posting",
-  "job_title_hint": "Job title",
-  "job_description_hint": "Describe the role, responsibility",
-  "requirements_hint": "List the required skills, qualifications",
-  "salary_range_hint": "₹5,000 - ₹50,000 per month",
-  "salary_required": "Salary range is required",
-  "location_required": "Location is required",
+// Create Job Post Page
+  "update_job_posting": "नौकरी पोस्ट अपडेट करें",
+  "create_job_posting": "नौकरी पोस्ट बनाएं",
+  "edit_job_details": "नौकरी विवरण संपादित करें",
+  "update_job_info": "अपनी नौकरी पोस्ट की जानकारी अपडेट करें",
+  "fill_job_details": "नौकरी पोस्ट बनाने के लिए विवरण भरें",
+  "job_title_hint": "नौकरी का शीर्षक",
+  "job_description_hint": "भूमिका और जिम्मेदारियाँ बताएं",
+  "requirements_hint": "आवश्यक कौशल और योग्यता लिखें",
+  "salary_range_hint": "₹5,000 - ₹50,000 प्रति माह",
+  "salary_required": "वेतन सीमा आवश्यक है",
+  "location_required": "स्थान आवश्यक है",
   "deadline_hint": "YYYY-MM-DD",
-  "deadline_required": "Deadline is required",
-  "expiry_required": "Expiry date is required",
-  "benefits_perks": "Benefits & Perks",
-  "add_benefit": "Add Benefit",
-  "benefit_hint": "e.g., Health insurance",
-  "quick_add_benefits": "Quick Add Benefits:",
-  "selected_benefits": "Selected Benefits:",
-  "quick_add_skills": "Quick Add Skills:",
-  "update_job": "Update Job",
-  "post_job_now": "Post Job Now",
-  "field_required": "is required",
+  "deadline_required": "अंतिम तिथि आवश्यक है",
+  "expiry_required": "समाप्ति तिथि आवश्यक है",
+  "benefits_perks": "लाभ और सुविधाएँ",
+  "add_benefit": "लाभ जोड़ें",
+  "benefit_hint": "उदा., स्वास्थ्य बीमा",
+  "quick_add_benefits": "त्वरित लाभ जोड़ें:",
+  "selected_benefits": "चयनित लाभ:",
+  "quick_add_skills": "त्वरित कौशल जोड़ें:",
+  "update_job": "नौकरी अपडेट करें",
+  "post_job_now": "अभी नौकरी पोस्ट करें",
+  "field_required": "आवश्यक है",
 
-  // Job Types
+// Experience Levels
+  "mid": "मध्यम",
+  "expert": "विशेषज्ञ",
 
-  // Experience Levels
-  "mid": "Mid",
-  "expert": "Expert",
+// Employment Types
+  "freelance": "फ्रीलांस",
 
-  // Employment Types
-  "freelance": "Freelance",
+// Job Categories
+  "software_development": "सॉफ्टवेयर डेवलपमेंट",
+  "marketing": "मार्केटिंग",
+  "sales": "बिक्री",
+  "design": "डिज़ाइन",
+  "finance": "वित्त",
+  "human_resources": "मानव संसाधन",
+  "other": "अन्य",
+  "enter_job_category": "नौकरी श्रेणी दर्ज करें",
+  "job_category_hint": "उदा., कंसल्टिंग, हेल्थकेयर",
 
-  // Job Categories
-  "software_development": "Software Development",
-  "marketing": "Marketing",
-  "sales": "Sales",
-  "design": "Design",
-  "finance": "Finance",
-  "human_resources": "Human Resources",
-  "other": "Other",
-  "enter_job_category": "Enter Job Category",
-  "job_category_hint": "e.g., Consulting, Healthcare",
+// Popular Benefits
+  "health_insurance": "स्वास्थ्य बीमा",
+  "flexible_working_hours": "लचीले कार्य घंटे",
+  "paid_time_off": "सवेतन अवकाश",
+  "remote_work_options": "रिमोट कार्य विकल्प",
+  "professional_development": "व्यावसायिक विकास",
+  "stock_options": "स्टॉक विकल्प",
+  "performance_bonus": "प्रदर्शन बोनस",
+  "gym_membership": "जिम सदस्यता",
+  "free_meals": "मुफ्त भोजन",
 
-  // Popular Benefits
-  "health_insurance": "Health insurance",
-  "flexible_working_hours": "Flexible working hours",
-  "paid_time_off": "Paid time off",
-  "remote_work_options": "Remote work options",
-  "professional_development": "Professional development",
-  "stock_options": "Stock options",
-  "performance_bonus": "Performance Bonus",
-  "gym_membership": "Gym Membership",
-  "free_meals": "Free Meals",
-
-  // Popular Skills
+// Popular Skills
   "php": "PHP",
   "laravel": "Laravel",
   "mysql": "MySQL",
@@ -726,16 +712,14 @@ const Map<String, String> hiIN = {
   "java": "Java",
   "python": "Python",
   "nodejs": "Node.js",
-  "ui_ux_design": "UI/UX Design",
+  "ui_ux_design": "UI/UX डिज़ाइन",
 
-  // Messages
-  "register_business_first": "Please Register/Select a Business first",
-  "business_verification_required": "Your business must be verified to post jobs. Please contact admin.",
-  "job_created_success": "Job posting created successfully",
-  "job_updated_success": "Job posting updated successfully",
-  "job_save_failed": "Failed to save job posting",
-
-
+// Messages
+  "register_business_first": "कृपया पहले व्यवसाय रजिस्टर/चुनें",
+  "business_verification_required": "नौकरी पोस्ट करने के लिए आपका व्यवसाय सत्यापित होना चाहिए। कृपया एडमिन से संपर्क करें।",
+  "job_created_success": "नौकरी सफलतापूर्वक बनाई गई",
+  "job_updated_success": "नौकरी सफलतापूर्वक अपडेट की गई",
+  "job_save_failed": "नौकरी सेव करने में विफल",
 
 
   'job_analysis_dashboard': 'नौकरी विश्लेषण डैशबोर्ड',
@@ -834,9 +818,10 @@ const Map<String, String> hiIN = {
   'request_sent': 'अनुरोध भेजा गया',
 
 
-  'father' : 'Father',
-  'mother' : 'Mother',
-  'search_members' : 'Search Member',
+
+  'father': 'पिता',
+  'mother': 'माता',
+  'search_members': 'सदस्य खोजें',
 
   // Business Registration Validation Messages
   'please_enter_business_name': 'कृपया व्यवसाय का नाम दर्ज करें',

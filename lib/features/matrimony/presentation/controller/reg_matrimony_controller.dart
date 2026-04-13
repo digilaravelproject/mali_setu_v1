@@ -697,11 +697,11 @@ class RegMatrimonyController extends GetxController {
   }
 
   /// Fetch existing profile and prefill all fields
-  Future<void> prefillFromApi(int userId) async {
+  Future<void> prefillFromApi() async {
     try {
       isPreFilling.value = true;
       print("DEBUG_MATRIMONY: Starting prefillFromApi");
-      final raw = await _repository.getProfileDetails(userId);
+      final raw = await _repository.getProfiles();
       print("DEBUG_MATRIMONY: API response received: $raw");
       
       if (raw == null) {
