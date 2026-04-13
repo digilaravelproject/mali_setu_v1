@@ -881,11 +881,12 @@ const Map<String, String> hiIN = {
 
 
   'blogs': 'ब्लॉग्स',
+  "middle_name": "मध्य नाम",
   'contribute': 'योगदान करें',
   'whatsapp': 'व्हाट्सऐप',
   'invalid_pincode': 'कोई मिलान नहीं',
   'location_information': 'स्थान जानकारी',
-  'taluka': 'तालुका',
+  'taluka': 'तालुका / गांव',
   'clear_all': 'सभी साफ करें',
   'enter_pincode': 'पिन कोड दर्ज करें',
   'search_volunteers': 'स्वयंसेवक खोजें',

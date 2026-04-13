@@ -878,12 +878,13 @@ const Map<String, String> mrIN = {
 
 
   'blogs' : "ब्लॉग्स",
+  "middle_name": "मधले नाव",
   'contribute' : "योगदान द्या",
   'clear_all' : "सर्व हटवा",
   'whatsapp' : "व्हॉट्सअ‍ॅप",
   'invalid_pincode' : "निकाल सापडला नाही",
   'location_information' : "स्थान माहिती",
-  'taluka' : "तालुका",
+  'taluka' : "तालुका / गांव",
   'enter_pincode' : "पिनकोड टाका",
   'search_volunteers' : "स्वयंसेवक शोधा",
 
