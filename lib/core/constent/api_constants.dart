@@ -44,7 +44,8 @@ class ApiConstants {
 
 
     // Matrimony Api
-    static const String matrimonyProfile = "matrimony/profile_user_id";
+    static const String GetMatrimonyProfile = "matrimony/profile_user_id";
+    static const String matrimonyProfile = "matrimony/profile";
     static const String searchMatrimony = "search/matrimony";
     static const String connectionRequest = "matrimony/connection-request";
     static const String connectionRequests = "matrimony/connection-requests";

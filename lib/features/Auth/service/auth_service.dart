@@ -246,9 +246,9 @@ class AuthService extends GetxService {
         currentUser.value = user;
 
         // Fetch Matrimony status if applicable
-        if (user.isMatrimony == true) {
+        if (user.isMatrimony == true && user.id != null) {
           try {
-            final matResponse = await _apiClient.get(ApiConstants.matrimonyProfile);
+            final matResponse = await _apiClient.get("${ApiConstants.GetMatrimonyProfile}/${user.id}");
             if (matResponse.statusCode == 200) {
               final matData = matResponse.data['data']?['profile'] ?? matResponse.data['profile'] ?? matResponse.data['data'];
               if (matData != null && (matData['approval_status'] != null || matData['status'] != null)) {

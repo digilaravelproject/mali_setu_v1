@@ -11,7 +11,7 @@ import '../model/matrimony_plan_model.dart';
 abstract class MatrimonyDataSource {
   Future<MatrimonyResponse> createProfile(Map<String, dynamic> data);
   Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data);
-  Future<dynamic> getProfiles();
+  Future<dynamic> getProfiles(int id);
   Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters);
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);
   Future<dynamic> sendConnectionRequest(Map<String, dynamic> data);
@@ -46,8 +46,8 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   }
 
   @override
-  Future<dynamic> getProfiles() async {
-    final response = await apiClient.get(ApiConstants.matrimonyProfile);
+  Future<dynamic> getProfiles(int id) async {
+    final response = await apiClient.get("${ApiConstants.GetMatrimonyProfile}/$id");
     return response.data;
   }
 
@@ -59,7 +59,7 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
 
   @override
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id) async {
-    final response = await apiClient.get("${ApiConstants.matrimonyProfile}/$id");
+    final response = await apiClient.get("${ApiConstants.GetMatrimonyProfile}/$id");
     return MatrimonyProfileDetailResponse.fromJson(response.data);
   }
 

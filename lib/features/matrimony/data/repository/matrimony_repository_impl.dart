@@ -25,8 +25,8 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   }
 
   @override
-  Future<dynamic> getProfiles() async {
-    return await dataSource.getProfiles();
+  Future<dynamic> getProfiles(int id) async {
+    return await dataSource.getProfiles(id);
   }
 
   @override
