@@ -8,6 +8,7 @@ import 'core/localization/languages.dart';
 import 'core/localization/language_controller.dart';
 import 'core/storage/shared_prefs.dart';
 import 'core/helper/local_notification_helper.dart';
+import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
 import 'init_app.dart';
 
 Future<void> main() async {
@@ -33,18 +34,21 @@ class MyApp extends StatelessWidget {
     // Get the LanguageController to use saved locale
     final languageController = Get.find<LanguageController>();
     
+    // return ScreenCaptureProtector(
     return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: AppConstants.appName,
-      translations: Languages(),
-      locale: languageController.currentLocale.value,
-      fallbackLocale: const Locale('en', 'US'),
-      theme: AppLightTheme.lightTheme,
-      darkTheme: AppLightTheme.lightTheme,
-      // darkTheme: AppDarkTheme.darkTheme,
-      scaffoldMessengerKey: rootScaffoldMessengerKey,
-      getPages: AppPages.getPages,
-      initialRoute: AppRoutes.splash,
+      // child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: AppConstants.appName,
+        translations: Languages(),
+        locale: languageController.currentLocale.value,
+        fallbackLocale: const Locale('en', 'US'),
+        theme: AppLightTheme.lightTheme,
+        darkTheme: AppLightTheme.lightTheme,
+        // darkTheme: AppDarkTheme.darkTheme,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
+        getPages: AppPages.getPages,
+        initialRoute: AppRoutes.splash,
+      // ),
     );
   }
 }

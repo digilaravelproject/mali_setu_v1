@@ -6,13 +6,15 @@ import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
 
 class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
   const MatrimonyProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScreenCaptureProtector(
+      child: Scaffold(
       backgroundColor: Colors.grey[100],
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -42,8 +44,9 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
           ],
         );
       }),
-    );
-  }
+    ),
+  );
+}
 
   SliverAppBar _buildProfileHeader(BuildContext context, MatrimonyProfile profile) {
     final images = profile.personalDetails?.photos ?? [];
@@ -179,11 +182,14 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                     children: [
                       const Icon(Icons.location_on, size: 16, color: Colors.white70),
                       const SizedBox(width: 4),
-                      Text(
-                        "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
+                      Expanded(
+                        child: Text(
+                          "${profile.locationDetails?.city ?? ''}, ${profile.locationDetails?.state ?? ''}",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

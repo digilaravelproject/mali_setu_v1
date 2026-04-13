@@ -69,6 +69,7 @@ dependencies:
   geolocator: ^14.0.2
   geocoding: ^4.0.0
   open_filex: ^4.7.0
+  screen_protector: ^1.1.0
 
 
 dev_dependencies:
