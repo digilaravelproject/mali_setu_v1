@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
     //     initialRoute: AppRoutes.splash,
     // );
 
+
     /// with screen capture protector
     return ScreenCaptureProtector(
       child: GetMaterialApp(
