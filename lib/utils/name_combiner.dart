@@ -20,6 +20,9 @@ class NameCombiner {
     if (components.firstName.trim().isNotEmpty) {
       parts.add(components.firstName.trim());
     }
+    if (components.middleName.trim().isNotEmpty) {
+      parts.add(components.middleName.trim());
+    }
     if (components.lastName.trim().isNotEmpty) {
       parts.add(components.lastName.trim());
     }

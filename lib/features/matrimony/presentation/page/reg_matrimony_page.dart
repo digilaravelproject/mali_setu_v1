@@ -265,6 +265,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     key: controller.nameFieldKey,
                     externalTitleCtrl: controller.titleCtrl,
                     externalFirstNameCtrl: controller.firstNameCtrl,
+                    externalMiddleNameCtrl: controller.middleNameCtrl,
                     externalLastNameCtrl: controller.lastNameCtrl,
                     isRequired: true,
                     onChanged: (_) {},

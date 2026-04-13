@@ -185,23 +185,25 @@ class User {
 
     googleId = json['google_id']; // 🆕
 
-    name = json['name'];
-   //  name = [
-   //    json['title'],
-   //    json['first_name'],
-   //    json['last_name']
-   //  ]
-   //      .where((e) => e != null && e.toString().trim().isNotEmpty)
-   //      .join(' ')
-   //      .isNotEmpty
-   //      ? [
-   //    json['title'],
-   //    json['first_name'],
-   //    json['last_name']
-   //  ]
-   //      .where((e) => e != null && e.toString().trim().isNotEmpty)
-   //      .join(' ')
-   //      : '';
+    name = json['name'] ??
+        ([
+          json['title'],
+          json['first_name'],
+          json['middle_name'],
+          json['last_name']
+        ]
+            .where((e) => e != null && e.toString().trim().isNotEmpty)
+            .join(' ')
+            .isNotEmpty
+            ? [
+          json['title'],
+          json['first_name'],
+          json['middle_name'],
+          json['last_name']
+        ]
+            .where((e) => e != null && e.toString().trim().isNotEmpty)
+            .join(' ')
+            : '');
 
     email = json['email'];
 

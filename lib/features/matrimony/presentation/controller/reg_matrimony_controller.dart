@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../models/name_components.dart';
+import '../../../../utils/name_parser.dart';
 import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_plan_model.dart';
 import '../../../../core/helper/pincode_helper.dart';
@@ -36,6 +38,7 @@ class RegMatrimonyController extends GetxController {
   /// --- Name sub-controllers (mirrored from NameFieldComponent for reliable API access) ---
   final titleCtrl = TextEditingController();
   final firstNameCtrl = TextEditingController();
+  final middleNameCtrl = TextEditingController();
   final lastNameCtrl = TextEditingController();
 
   /// --- Text Controllers ---
@@ -503,14 +506,16 @@ class RegMatrimonyController extends GetxController {
       if (widgetState != null) {
         titleCtrl.text = widgetState.titleCtrl.text;
         firstNameCtrl.text = widgetState.firstNameCtrl.text;
+        middleNameCtrl.text = widgetState.middleNameCtrl.text;
         lastNameCtrl.text = widgetState.lastNameCtrl.text;
       }
 
       // Get name parts directly from controller's own TextEditingControllers
       final titleText = titleCtrl.text.trim();
       final firstNameText = firstNameCtrl.text.trim();
+      final middleNameText = middleNameCtrl.text.trim();
       final lastNameText = lastNameCtrl.text.trim();
-      final combinedName = [titleText, firstNameText, lastNameText]
+      final combinedName = [titleText, firstNameText, middleNameText, lastNameText]
           .where((s) => s.isNotEmpty).join(' ');
       
       // Convert images to base64
@@ -543,6 +548,7 @@ class RegMatrimonyController extends GetxController {
         "personal_details": {
           "title": titleText,
           "first_name": firstNameText,
+          "middle_name": middleNameText,
           "last_name": lastNameText,
           "gender": gender.value,
           "dob": dobCtrl.text,
@@ -727,22 +733,17 @@ class RegMatrimonyController extends GetxController {
       final fullName = personal['name']?.toString() ?? '';
 
       // Set controller's own controllers (used in API body)
-      if (apiFirstName.isNotEmpty) {
-        titleCtrl.text = apiTitle;
-        firstNameCtrl.text = apiFirstName;
-        lastNameCtrl.text = apiLastName;
+      if (personal['first_name'] != null || personal['middle_name'] != null) {
+        titleCtrl.text = personal['title']?.toString() ?? '';
+        firstNameCtrl.text = personal['first_name']?.toString() ?? '';
+        middleNameCtrl.text = personal['middle_name']?.toString() ?? '';
+        lastNameCtrl.text = personal['last_name']?.toString() ?? '';
       } else if (fullName.isNotEmpty) {
-        final parts = fullName.trim().split(RegExp(r'\s+'));
-        if (parts.length >= 3) {
-          titleCtrl.text = parts[0];
-          lastNameCtrl.text = parts.last;
-          firstNameCtrl.text = parts.sublist(1, parts.length - 1).join(' ');
-        } else if (parts.length == 2) {
-          firstNameCtrl.text = parts[0];
-          lastNameCtrl.text = parts[1];
-        } else {
-          firstNameCtrl.text = fullName;
-        }
+        final components = NameParser.parse(fullName);
+        titleCtrl.text = components.title;
+        firstNameCtrl.text = components.firstName;
+        middleNameCtrl.text = components.middleName;
+        lastNameCtrl.text = components.lastName;
       }
       nameCtrl.text = fullName;
       // nameWidgetKey increment not needed — external controllers are shared directly

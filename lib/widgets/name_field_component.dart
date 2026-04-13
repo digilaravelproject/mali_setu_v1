@@ -13,6 +13,7 @@ class NameFieldComponent extends StatefulWidget {
   // Optional external controllers — if provided, widget uses these instead of creating its own
   final TextEditingController? externalTitleCtrl;
   final TextEditingController? externalFirstNameCtrl;
+  final TextEditingController? externalMiddleNameCtrl;
   final TextEditingController? externalLastNameCtrl;
   // Optional custom title list — defaults to full list if not provided
   final List<String>? titleItems;
@@ -24,6 +25,7 @@ class NameFieldComponent extends StatefulWidget {
     this.onChanged,
     this.externalTitleCtrl,
     this.externalFirstNameCtrl,
+    this.externalMiddleNameCtrl,
     this.externalLastNameCtrl,
     this.titleItems,
   });
@@ -35,6 +37,7 @@ class NameFieldComponent extends StatefulWidget {
 class NameFieldComponentState extends State<NameFieldComponent> {
   late TextEditingController titleCtrl;
   late TextEditingController firstNameCtrl;
+  late TextEditingController middleNameCtrl;
   late TextEditingController lastNameCtrl;
   bool _usingExternalControllers = false;
   final GlobalKey<FormState> nameFormKey = GlobalKey<FormState>();
@@ -48,6 +51,7 @@ class NameFieldComponentState extends State<NameFieldComponent> {
       _usingExternalControllers = true;
       titleCtrl = widget.externalTitleCtrl!;
       firstNameCtrl = widget.externalFirstNameCtrl!;
+      middleNameCtrl = widget.externalMiddleNameCtrl ?? TextEditingController(); // Middle name might still be optional externally
       lastNameCtrl = widget.externalLastNameCtrl!;
     } else {
       // Create own controllers from initialName
@@ -56,11 +60,13 @@ class NameFieldComponentState extends State<NameFieldComponent> {
           : const NameComponents();
       titleCtrl = TextEditingController(text: components.title);
       firstNameCtrl = TextEditingController(text: components.firstName);
+      middleNameCtrl = TextEditingController(text: components.middleName);
       lastNameCtrl = TextEditingController(text: components.lastName);
     }
 
     titleCtrl.addListener(_notifyChange);
     firstNameCtrl.addListener(_notifyChange);
+    middleNameCtrl.addListener(_notifyChange);
     lastNameCtrl.addListener(_notifyChange);
   }
 
@@ -74,10 +80,12 @@ class NameFieldComponentState extends State<NameFieldComponent> {
   void dispose() {
     titleCtrl.removeListener(_notifyChange);
     firstNameCtrl.removeListener(_notifyChange);
+    middleNameCtrl.removeListener(_notifyChange);
     lastNameCtrl.removeListener(_notifyChange);
     if (!_usingExternalControllers) {
       titleCtrl.dispose();
       firstNameCtrl.dispose();
+      middleNameCtrl.dispose();
       lastNameCtrl.dispose();
     }
     super.dispose();
@@ -88,6 +96,7 @@ class NameFieldComponentState extends State<NameFieldComponent> {
     return NameCombiner.combine(NameComponents(
       title: titleCtrl.text,
       firstName: firstNameCtrl.text,
+      middleName: middleNameCtrl.text,
       lastName: lastNameCtrl.text,
     ));
   }
@@ -116,9 +125,10 @@ class NameFieldComponentState extends State<NameFieldComponent> {
   /// Programmatically set name fields from a full name string
   void setName(String fullName) {
     final components = NameParser.parse(fullName);
-    titleCtrl.text = components.title ?? '';
-    firstNameCtrl.text = components.firstName ?? '';
-    lastNameCtrl.text = components.lastName ?? '';
+    titleCtrl.text = components.title;
+    firstNameCtrl.text = components.firstName;
+    middleNameCtrl.text = components.middleName;
+    lastNameCtrl.text = components.lastName;
   }
 
   @override
@@ -183,16 +193,10 @@ class NameFieldComponentState extends State<NameFieldComponent> {
               Expanded(
                 child: AppInputTextField(
                   label: 'middle_name'.tr,
-                  controller: firstNameCtrl,
-                  isRequired: widget.isRequired,
+                  controller: middleNameCtrl,
+                  isRequired: false, // middle name is optional
                   textInputType: TextInputType.name,
                   topPadding: 0,
-                  validator: (value) {
-                    if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-                      return 'first_name_required'.tr;
-                    }
-                    return null;
-                  },
                 ),
               ),
               const SizedBox(width: 12),

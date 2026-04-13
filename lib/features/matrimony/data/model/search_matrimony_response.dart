@@ -510,6 +510,7 @@ class PersonalDetails {
       name: [
         json['title'],
         json['first_name'],
+        json['middle_name'],
         json['last_name']
       ]
           .where((e) => e != null && e.toString().trim().isNotEmpty)
@@ -518,6 +519,7 @@ class PersonalDetails {
           ? [
         json['title'],
         json['first_name'],
+        json['middle_name'],
         json['last_name']
       ]
           .where((e) => e != null && e.toString().trim().isNotEmpty)

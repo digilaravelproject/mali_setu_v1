@@ -67,13 +67,23 @@ class NameParser {
       );
     }
 
-    // Last word is lastName, everything else is firstName
+    if (nameWords.length == 2) {
+      return NameComponents(
+        title: title,
+        firstName: nameWords[0],
+        lastName: nameWords[1],
+      );
+    }
+
+    // 3 or more words
+    final firstName = nameWords.first;
     final lastName = nameWords.last;
-    final firstName = nameWords.sublist(0, nameWords.length - 1).join(' ');
+    final middleName = nameWords.sublist(1, nameWords.length - 1).join(' ');
 
     return NameComponents(
       title: title,
       firstName: firstName,
+      middleName: middleName,
       lastName: lastName,
     );
   }
