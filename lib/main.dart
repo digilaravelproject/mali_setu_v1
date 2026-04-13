@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
     // Get the LanguageController to use saved locale
     final languageController = Get.find<LanguageController>();
     
+    /// without screen capture protector
     // return GetMaterialApp(
     //     debugShowCheckedModeBanner: false,
     //     title: AppConstants.appName,
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
     //     initialRoute: AppRoutes.splash,
     // );
 
+    /// with screen capture protector
     return ScreenCaptureProtector(
       child: GetMaterialApp(
       debugShowCheckedModeBanner: false,
