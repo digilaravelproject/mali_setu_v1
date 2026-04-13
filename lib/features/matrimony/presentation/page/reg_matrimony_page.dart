@@ -890,23 +890,20 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   )
                       : null,
                 )),
-                // const SizedBox(height: 12),
-                // Obx(() => SelectionTile(
-                //         ? null
-                //         : Icons.location_on,
-                //   suffixWidget: controller.isFetchingPincode.value
-                //         ? const Padding(
-                //       padding: EdgeInsets.all(12.0),
-                //       child: SizedBox(
-                //         width: 20,
-                //         height: 20,
-                //         child: CircularProgressIndicator(
-                //           strokeWidth: 2,
-                //         ),
-                //       ),
-                //     )
-                //         : null,
-                // )),
+                const SizedBox(height: 12),
+                AppInputTextField(
+                  controller: controller.addressCtrl,
+                  label: "address".tr,
+                  textInputType: TextInputType.streetAddress,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 12),
+                AppInputTextField(
+                  controller: controller.talukaCtrl,
+                  label: "taluka".tr,
+                  textInputType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                ),
                 const SizedBox(height: 12),
                  Obx(() => SelectionTile(
                   label: "country".tr,

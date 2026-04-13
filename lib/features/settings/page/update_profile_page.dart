@@ -134,7 +134,26 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                       topPadding: 0,
                       validator: (v) => FormValidator.emptycheck(v, "address".tr),
                     ),
-                    TwoColumnRow(
+                    AppInputTextField(
+                      label: "pincode".tr,
+                      controller: controller.pincodeCtrl,
+                      textInputType: TextInputType.number,
+                      iconData: CupertinoIcons.number_square_fill,
+                      isRequired: true,
+                      topPadding: 0,
+                      validator: FormValidator.pincode,
+                      suffixWidget: Obx(() => controller.isFetchingPincode.value
+                          ? const Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : const SizedBox.shrink()),
+                    ),
+                  /*  TwoColumnRow(
                       left: AppInputTextField(
                         label: "nearby".tr,
                         controller: controller.nearbyLocationCtrl,
@@ -153,7 +172,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                         topPadding: 0,
                         validator: (v) => FormValidator.emptycheck(v, "road_number".tr),
                       ),
-                    ),
+                    ),*/
                     TwoColumnRow(
                       left: AppInputTextField(
                         label: "city".tr,
@@ -180,7 +199,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                     ),
                     TwoColumnRow(
                       left: AppInputTextField(
-                        label: "district".tr,
+                        label: "country".tr,
                         controller: controller.districtCtrl,
                         isRequired: true,
                         isDropdown: true,
@@ -191,16 +210,16 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                         validator: (v) => FormValidator.emptycheck(v, "district".tr),
                       ),
                       right: AppInputTextField(
-                        label: "pincode".tr,
-                        controller: controller.pincodeCtrl,
-                        textInputType: TextInputType.number,
-                        iconData: CupertinoIcons.number_square_fill,
+                        label: "taluka".tr,
+                        controller: controller.destinationCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: CupertinoIcons.location_solid,
                         isRequired: true,
                         topPadding: 0,
-                        validator: FormValidator.pincode,
+                        validator: (v) => FormValidator.emptycheck(v, "destination".tr),
                       ),
                     ),
-                    TwoColumnRow(
+                   /* TwoColumnRow(
                       left: AppInputTextField(
                         label: "sector".tr,
                         controller: controller.sectorCtrl,
@@ -211,7 +230,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                         validator: (v) => FormValidator.emptycheck(v, "sector".tr),
                       ),
                       right: AppInputTextField(
-                        label: "destination".tr,
+                        label: "taluka".tr,
                         controller: controller.destinationCtrl,
                         textInputType: TextInputType.text,
                         iconData: CupertinoIcons.location_solid,
@@ -219,7 +238,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                         topPadding: 0,
                         validator: (v) => FormValidator.emptycheck(v, "destination".tr),
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
 

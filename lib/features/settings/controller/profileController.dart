@@ -6,6 +6,7 @@ import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart';
+import 'package:edu_cluezer/core/helper/pincode_helper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -45,6 +46,7 @@ class UpProfileController extends GetxController {
   
   // Loading state
   final isLoading = false.obs;
+  final isFetchingPincode = false.obs;
 
   // Dropdown Data
   final cities = ["Lucknow", "Kanpur", "Delhi", "Mumbai", "Bangalore"];
@@ -272,11 +274,43 @@ class UpProfileController extends GetxController {
   @override
   void onInit() {
     loadUserData();
+    pincodeCtrl.addListener(_onPincodeChanged);
     super.onInit();
+  }
+
+  void _onPincodeChanged() {
+    final pincode = pincodeCtrl.text.trim();
+    if (pincode.length == 6 && int.tryParse(pincode) != null) {
+      _fetchAddressFromPincode(pincode);
+    }
+  }
+
+  Future<void> _fetchAddressFromPincode(String pincode) async {
+    try {
+      isFetchingPincode.value = true;
+      final response = await PincodeHelper.fetchAddressFromPincode(pincode);
+
+      if (response != null) {
+        cityCtrl.text = response.division;
+        stateCtrl.text = response.state;
+        districtCtrl.text = response.district;
+        destinationCtrl.text = response.name; // Taluka
+        CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+      } else {
+        CustomSnackBar.showError(message: "Invalid pincode or no data found");
+      }
+    } catch (e) {
+      print("Error fetching pincode info: $e");
+    } finally {
+      isFetchingPincode.value = false;
+    }
   }
 
   @override
   void onClose() {
+    // Remove pincode listener
+    pincodeCtrl.removeListener(_onPincodeChanged);
+    
     // Dispose all controllers
     final controllers = [
       fullNameCtrl, ageCtrl, phoneNumberCtrl, occupationCtrl, emailCtrl,

@@ -48,6 +48,7 @@ class RegBusinessController extends GetxController {
   final emailCtrl = TextEditingController();
   //final websiteCtrl = TextEditingController();
   final websiteCtrl = TextEditingController(text: "https://");
+  final addressCtrl = TextEditingController();
   final pinCodeCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
   final stateCtrl = TextEditingController();
@@ -179,6 +180,7 @@ class RegBusinessController extends GetxController {
     bDescCtrl.addListener(() => errors.remove('description'));
     openingTimeCtrl.addListener(() => errors.remove('openingTime'));
     closingTimeCtrl.addListener(() => errors.remove('closingTime'));
+    addressCtrl.addListener(() => errors.remove('address'));
     pinCodeCtrl.addListener(() => errors.remove('pincode'));
     cityCtrl.addListener(() => errors.remove('city'));
     districtCtrl.addListener(() => errors.remove('district'));
@@ -454,6 +456,7 @@ class RegBusinessController extends GetxController {
     if (closingTimeCtrl.text.trim().isEmpty) errors['closingTime'] = "Please select closing time";
     
     // Location
+    if (addressCtrl.text.trim().isEmpty) errors['address'] = "Please enter address";
     if (pinCodeCtrl.text.trim().isEmpty) errors['pincode'] = "Please enter pincode";
     else if (pinCodeCtrl.text.trim().length < 5 || pinCodeCtrl.text.trim().length > 10) errors['pincode'] = "No Match";
     
@@ -509,6 +512,7 @@ class RegBusinessController extends GetxController {
         "contact_phone": combinedPhone,
         "contact_email": emailCtrl.text,
         "website": (websiteCtrl.text.trim() == "https://" || websiteCtrl.text.trim().isEmpty) ? "" : websiteCtrl.text.trim(),
+        "address": addressCtrl.text.trim(),
         "country": countryCtrl.text,
         "state": stateCtrl.text,
         "district": districtCtrl.text,
@@ -519,6 +523,7 @@ class RegBusinessController extends GetxController {
         "closing_time": closingTime == null ? "" : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}",
         // Adding nested location details as a fallback for Laravel/Matrimony-style endpoints
         "location_details": {
+          "address": addressCtrl.text.trim(),
           "state": stateCtrl.text,
           "district": districtCtrl.text,
           "taluka": talukaCtrl.text,
@@ -743,6 +748,7 @@ class RegBusinessController extends GetxController {
     websiteCtrl.text = business.website ?? "";
 
     // Pre-fill location fields
+    addressCtrl.text = business.address ?? "";
     pinCodeCtrl.text = business.pincode ?? "";
     cityCtrl.text = business.city ?? "";
     districtCtrl.text = business.district ?? "";
@@ -828,6 +834,7 @@ class RegBusinessController extends GetxController {
     phoneCtrl.dispose();
     emailCtrl.dispose();
     websiteCtrl.dispose();
+    addressCtrl.dispose();
     pinCodeCtrl.dispose();
     cityCtrl.dispose();
     stateCtrl.dispose();

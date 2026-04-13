@@ -159,6 +159,7 @@ class Business {
   String? city;
   String? pincode;
   String? country;
+  String? address;
   User? user;
   Category? category;
   List<Product>? products;
@@ -192,6 +193,7 @@ class Business {
     this.city,
     this.pincode,
     this.country,
+    this.address,
     this.user,
     this.category,
     this.products,
@@ -223,6 +225,7 @@ class Business {
       status: json['status'],
       state: json['state'],
       district: json['district'],
+      address: json['address'],
       taluka: json['taluka'],
       city: json['city'],
       pincode: json['pincode'],

@@ -417,7 +417,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                         : () => Get.toNamed(
                       AppRoutes.matrimonyProfileScreen,
                       arguments: {
-                        'id': currentProfile.id,
+                        'id': currentProfile.userId,
                         'connection_status': currentProfile.connectionStatus,
                       },
                     ),
@@ -489,7 +489,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       onTap: (){
         try {
           Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {
-            'id': user.id,
+            'id': controller.profiles[controller.currentIndex.value].userId,
             'connection_status': user.connectionStatus,
           });
         } catch (e) {

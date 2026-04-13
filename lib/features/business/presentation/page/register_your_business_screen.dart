@@ -197,6 +197,15 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   },
                 ),
 
+                AppInputTextField(
+                  label: 'address'.tr,
+                  isRequired: true,
+                  controller: controller.addressCtrl,
+                  textInputType: TextInputType.streetAddress,
+                  iconData: Icons.location_on_outlined,
+                  errorText: controller.errors['address'],
+                ),
+
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

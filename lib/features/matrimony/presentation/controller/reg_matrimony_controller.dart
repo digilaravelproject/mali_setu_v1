@@ -54,6 +54,8 @@ class RegMatrimonyController extends GetxController {
   final motherOccupationCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
   final pinCodeCtrl = TextEditingController();
+  final talukaCtrl = TextEditingController();
+  final addressCtrl = TextEditingController();
   final bloodGroupCtrl = TextEditingController();
   final ref_nameCtrl = TextEditingController();
 
@@ -240,6 +242,7 @@ class RegMatrimonyController extends GetxController {
         
         state.value = fetchedState;
         cityCtrl.text = "${response.district} , ${response.division}, ${response.name}"; // Using district as major city
+        talukaCtrl.text = response.name; // Taluka from pincode API
         country.value = response.country; // Assumed Indian via API
 
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
@@ -592,6 +595,8 @@ class RegMatrimonyController extends GetxController {
           "state": state.value,
           "country": country.value,
           "pincode": pinCodeCtrl.text,
+          "taluka": talukaCtrl.text,
+          "address": addressCtrl.text,
         },
         "partner_preferences": {
           "age_range": "20-30",
@@ -692,11 +697,11 @@ class RegMatrimonyController extends GetxController {
   }
 
   /// Fetch existing profile and prefill all fields
-  Future<void> prefillFromApi() async {
+  Future<void> prefillFromApi(int userId) async {
     try {
       isPreFilling.value = true;
       print("DEBUG_MATRIMONY: Starting prefillFromApi");
-      final raw = await _repository.getProfiles();
+      final raw = await _repository.getProfileDetails(userId);
       print("DEBUG_MATRIMONY: API response received: $raw");
       
       if (raw == null) {
@@ -875,6 +880,8 @@ class RegMatrimonyController extends GetxController {
       final location = profile['location_details'] as Map<String, dynamic>? ?? {};
       cityCtrl.text = location['city']?.toString() ?? '';
       pinCodeCtrl.text = location['pincode']?.toString() ?? '';
+      talukaCtrl.text = location['taluka']?.toString() ?? '';
+      addressCtrl.text = location['address']?.toString() ?? '';
       final fetchedCountry = location['country']?.toString() ?? 'India';
       onCountryChanged(fetchedCountry);
       state.value = _safeValue(location['state']?.toString(), stateList.toList(), fallback: location['state']?.toString() ?? '');
@@ -963,6 +970,8 @@ class RegMatrimonyController extends GetxController {
     cityCtrl.dispose();
     pinCodeCtrl.removeListener(_onPincodeChanged);
     pinCodeCtrl.dispose();
+    talukaCtrl.dispose();
+    addressCtrl.dispose();
     casteCtrl.dispose();
     subCasteCtrl.dispose();
     super.onClose();
