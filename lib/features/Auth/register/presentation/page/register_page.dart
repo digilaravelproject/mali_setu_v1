@@ -178,16 +178,16 @@ class RegisterPage extends GetWidget<RegisterController> {
                     isRequired: true,
                     topPadding: 0,
                   ),
-                  AppInputTextField(
-                    label: "nearby_location".tr,
-                    textInputType: TextInputType.text,
-                    controller: controller.nearbyLocationCtrl,
-                    validator: (value) =>
-                        FormValidator.emptycheck(value, "nearby_location".tr),
-                    iconData: CupertinoIcons.placemark_fill,
-                    isRequired: true,
-                    topPadding: 0,
-                  ),
+                  // AppInputTextField(
+                  //   label: "nearby_location".tr,
+                  //   textInputType: TextInputType.text,
+                  //   controller: controller.nearbyLocationCtrl,
+                  //   validator: (value) =>
+                  //       FormValidator.emptycheck(value, "nearby_location".tr),
+                  //   iconData: CupertinoIcons.placemark_fill,
+                  //   isRequired: true,
+                  //   topPadding: 0,
+                  // ),
                   AppInputTextField(
                     label: "pin_code".tr,
                     textInputType: TextInputType.number,
@@ -206,7 +206,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       topPadding: 0,
                     ),
                     right: AppInputTextField(
-                      label: "district".tr,
+                      label: "city".tr,
                       controller: controller.districtCtrl,
                       isRequired: true,
                       readOnly: false,
@@ -222,23 +222,24 @@ class RegisterPage extends GetWidget<RegisterController> {
                       topPadding: 0,
                     ),
                     right: AppInputTextField(
-                      label: "road_number".tr,
-                      controller: controller.roadNumberCtrl,
-                      topPadding: 0,
-                    ),
-                  ),
-                  TwoColumnRow(
-                    left: AppInputTextField(
-                      label: "sector".tr,
-                      controller: controller.sectorCtrl,
-                      topPadding: 0,
-                    ),
-                    right: AppInputTextField(
-                      label: "destination".tr,
+                      label: "taluka".tr,
                       controller: controller.destinationCtrl,
                       topPadding: 0,
                     ),
+
                   ),
+                  // TwoColumnRow(
+                  //   left: AppInputTextField(
+                  //     label: "sector".tr,
+                  //     controller: controller.sectorCtrl,
+                  //     topPadding: 0,
+                  //   ),
+                  //   right: AppInputTextField(
+                  //     label: "road_number".tr,
+                  //     controller: controller.roadNumberCtrl,
+                  //     topPadding: 0,
+                  //   ),
+                  // ),
                 ],
               ),
 

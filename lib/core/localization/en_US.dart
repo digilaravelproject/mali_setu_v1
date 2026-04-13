@@ -130,6 +130,7 @@ const Map<String, String> enUS = {
   'citizenship': 'Citizenship',
   'state': 'State',
   'city': 'City',
+  "middle_name" : "Middle Name",
 
   // Lifestyle Filters
   'eggetarian': 'Eggetarian',
@@ -884,7 +885,7 @@ const Map<String, String> enUS = {
   'whatsapp' : "Whatsapp",
   'invalid_pincode' : "No Match",
   'location_information' : "Location Information",
-  'taluka' : "Taluka",
+  'taluka' : "Taluka / Village",
   'clear_all' : "Clear All",
   'enter_pincode' : "Enter Pincode",
   'search_volunteers' : "Search Volunteers",

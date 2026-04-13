@@ -130,35 +130,59 @@ class NameFieldComponentState extends State<NameFieldComponent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title dropdown
-          AppInputTextField(
-            label: 'title'.tr,
-            controller: titleCtrl,
-            isRequired: widget.isRequired,
-            isDropdown: true,
-            topPadding: 0,
-            validator: (value) {
-              if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-                return 'title_required'.tr;
-              }
-              return null;
-            },
-            dropdownItems: widget.titleItems ?? [
-              'mr'.tr,
-              'mrs'.tr,
-              'ms'.tr,
-              'dr'.tr,
-              'prof'.tr,
+
+          Row(
+            children: [
+              Expanded(
+                child:  AppInputTextField(
+                  label: 'title'.tr,
+                  controller: titleCtrl,
+                  isRequired: widget.isRequired,
+                  isDropdown: true,
+                  topPadding: 0,
+                  validator: (value) {
+                    if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+                      return 'title_required'.tr;
+                    }
+                    return null;
+                  },
+                  dropdownItems: widget.titleItems ?? [
+                    'mr'.tr,
+                    'mrs'.tr,
+                    'ms'.tr,
+                    'dr'.tr,
+                    'prof'.tr,
+                  ],
+                  onDropdownChanged: (value) {
+                    titleCtrl.text = value;
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppInputTextField(
+                  label: 'first_name'.tr,
+                  controller: firstNameCtrl,
+                  isRequired: widget.isRequired,
+                  textInputType: TextInputType.name,
+                  topPadding: 0,
+                  validator: (value) {
+                    if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+                      return 'first_name_required'.tr;
+                    }
+                    return null;
+                  },
+                ),
+              ),
             ],
-            onDropdownChanged: (value) {
-              titleCtrl.text = value;
-            },
           ),
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: AppInputTextField(
-                  label: 'first_name'.tr,
+                  label: 'middle_name'.tr,
                   controller: firstNameCtrl,
                   isRequired: widget.isRequired,
                   textInputType: TextInputType.name,
