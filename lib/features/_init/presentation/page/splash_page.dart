@@ -3,7 +3,6 @@ import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/features/_init/presentation/controller/init_controller.dart';
 import 'package:edu_cluezer/packages/background/animated_background.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
-import 'package:edu_cluezer/widgets/text_3d.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -67,14 +66,13 @@ class SplashPage extends GetWidget<InitController> {
                         ),
                       );
                     },
-                    child: ThreeDText(
-                      text: "Mali Setu",
-                      textStyle: context.textTheme.titleSmall!.copyWith(
+                    child: Text(
+                      "Mali Setu",
+                      style: context.textTheme.titleSmall!.copyWith(
                         color: context.theme.primaryColor,
                         fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                      depth: 10,
-                      style: ThreeDStyle.standard,
                     ),
                   ),
 
@@ -88,7 +86,7 @@ class SplashPage extends GetWidget<InitController> {
                     builder: (context, scale, child) {
                       return Transform.scale(scale: scale, child: child);
                     },
-                    //onEnd: controller.startNavigate,
+                    onEnd: controller.startNavigate,
                     child: SizedBox.square(
                       dimension: 25,
                       child: CircularProgressIndicator(
