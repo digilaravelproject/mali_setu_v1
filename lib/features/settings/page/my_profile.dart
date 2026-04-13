@@ -324,6 +324,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isFullWidth: true,
         ),
         const SizedBox(height: 16),
+        _buildInfoRow(
+          label: 'taluka'.tr,
+          value: userData['destination']!,
+          icon: Icons.home_outlined,
+          isFullWidth: true,
+        ),
+        const SizedBox(height: 16),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
