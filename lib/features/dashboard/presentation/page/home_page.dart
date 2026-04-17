@@ -23,6 +23,8 @@ class HomePage extends GetWidget<HomeController> {
   @override
   Widget build(BuildContext context) {
     final authService = Get.find<AuthService>();
+    final currentUser = authService.currentUser.value;
+   // final authService = Get.find<AuthService>();
     final theme = Theme.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
 
@@ -311,11 +313,17 @@ class HomePage extends GetWidget<HomeController> {
                             )
                                 : _buildPromoCard(
                               context,
-                              title: 'register_matrimony'.tr,
+                              title: 'view_profile'.tr,
                               subtitle: 'find_soulmate'.tr,
                               icon: Icons.favorite_rounded,
-                              buttonText: "Edit Profile",
-                              onTap: () => Get.toNamed(AppRoutes.regMatrimony, arguments: true),
+                              buttonText: "view_profile".tr,
+                              onTap: () {
+
+                                if (currentUser?.id != null) {
+                                  Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
+                                }
+                              },
+                             // onTap: () => Get.toNamed(AppRoutes.regMatrimony, arguments: true),
                               color1: const Color(0xFFF48FB1),
                               color2: const Color(0xFFE91E63),
                               statusText: user?.matrimonyApprovalStatus ?? "Pending",

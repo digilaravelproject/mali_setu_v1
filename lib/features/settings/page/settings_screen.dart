@@ -79,6 +79,11 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     icon: CupertinoIcons.list_bullet_indent,
                     onTap: () => Get.toNamed(AppRoutes.transactionHistory),
                   ),
+                  _SettingsItem(
+                    title: 'applied_jobs'.tr,
+                    icon: CupertinoIcons.collections_solid,
+                    onTap: () => Get.toNamed(AppRoutes.appliedJobList),
+                  ),
                 ],
               ),
 
@@ -120,16 +125,16 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   _SettingsItem(
                     title: 'privacy_policy'.tr,
                     icon: Icons.privacy_tip_outlined,
-                    onTap: () => Get.to(() => const WebViewPage(
-                      title: 'Privacy Policy',
+                    onTap: () => Get.to(() =>  WebViewPage(
+                      title: 'privacy_policy'.tr,
                       url: ApiConstants.privacyPolicyUrl,
                     )),
                   ),
                   _SettingsItem(
                     title: 'terms & conditions'.tr,
                     icon: Icons.description_outlined,
-                    onTap: () => Get.to(() => const WebViewPage(
-                      title: 'Terms & Conditions',
+                    onTap: () => Get.to(() =>  WebViewPage(
+                      title: 'terms & conditions'.tr,
                       url: ApiConstants.termsConditionsUrl,
                     )),
                   ),

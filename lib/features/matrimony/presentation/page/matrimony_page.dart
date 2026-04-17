@@ -317,27 +317,27 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         Expanded(
           flex: 8,
           //child: SafeArea(
-            child: CardSwiper(
-              controller: controller.swiperController,
-              padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
-              duration: const Duration(milliseconds: 400),
-              onSwipe: (previousIndex, currentIndex, direction) {
-                if (currentIndex != null) {
-                  controller.currentIndex.value = currentIndex;
-                }
-                return true;
-              },
-              cardBuilder: (context, index, dx, dy) {
-                try {
-                  return _buildUserCard(context, list[index]);
-                } catch (e) {
-                  print("Error building card at index $index: $e");
-                  return _buildErrorCard(context);
-                }
-              },
-              cardsCount: list.length,
-              numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
-            ),
+          child: CardSwiper(
+            controller: controller.swiperController,
+            padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
+            duration: const Duration(milliseconds: 400),
+            onSwipe: (previousIndex, currentIndex, direction) {
+              if (currentIndex != null) {
+                controller.currentIndex.value = currentIndex;
+              }
+              return true;
+            },
+            cardBuilder: (context, index, dx, dy) {
+              try {
+                return _buildUserCard(context, list[index]);
+              } catch (e) {
+                print("Error building card at index $index: $e");
+                return _buildErrorCard(context);
+              }
+            },
+            cardsCount: list.length,
+            numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
+          ),
           //),
         ),
 
@@ -643,8 +643,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                         ),
                         if (user.connectionStatus != null &&
                             user.connectionStatus!.toLowerCase() != 'not_connected' &&
-                            user.connectionStatus!.toLowerCase() != 'no_connected' && 
-                             user.connectionStatus!.toLowerCase().isNotEmpty)
+                            user.connectionStatus!.toLowerCase() != 'no_connected' &&
+                            user.connectionStatus!.toLowerCase().isNotEmpty)
                           _buildStatusBadge(user.connectionStatus!),
                       ],
                     ),
@@ -1075,7 +1075,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
       return UserProfile(
         id: data['id'],
-      //  name: personal[''] ?? data['name'] ?? 'no_name'.tr,
+        //  name: personal[''] ?? data['name'] ?? 'no_name'.tr,
         name: [
           personal['title'],
           personal['first_name'],

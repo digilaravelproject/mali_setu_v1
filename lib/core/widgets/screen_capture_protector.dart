@@ -17,6 +17,7 @@ class ScreenCaptureProtector extends StatefulWidget {
   State<ScreenCaptureProtector> createState() => _ScreenCaptureProtectorState();
 }
 
+/*
 class _ScreenCaptureProtectorState extends State<ScreenCaptureProtector> {
   @override
   void initState() {
@@ -34,6 +35,49 @@ class _ScreenCaptureProtectorState extends State<ScreenCaptureProtector> {
     // Prevents screenshots and screen recording on Android and iOS
     await ScreenProtector.preventScreenshotOn();
     // Specific for screen recording detection/prevention on iOS
+    await ScreenProtector.protectDataLeakageWithBlur();
+  }
+
+  Future<void> _disableProtection() async {
+    await ScreenProtector.preventScreenshotOff();
+    await ScreenProtector.protectDataLeakageWithBlurOff();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+*/
+
+
+class _ScreenCaptureProtectorState extends State<ScreenCaptureProtector>
+    with WidgetsBindingObserver {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _enableProtection();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _disableProtection();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Jab app foreground me aaye to protection dubara enable ho
+    if (state == AppLifecycleState.resumed) {
+      _enableProtection();
+    }
+  }
+
+  Future<void> _enableProtection() async {
+    await ScreenProtector.preventScreenshotOn();
     await ScreenProtector.protectDataLeakageWithBlur();
   }
 

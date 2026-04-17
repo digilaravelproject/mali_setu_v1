@@ -958,10 +958,6 @@ class BusinessListCard extends StatelessWidget {
 }
 
 
-
-
-
-
 /*class BusinessDetailScreen extends StatefulWidget {
   const BusinessDetailScreen({Key? key}) : super(key: key);
 

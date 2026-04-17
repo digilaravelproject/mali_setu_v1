@@ -55,7 +55,7 @@ class BlogsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Blogs',
+                            'blogs'.tr,
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -213,7 +213,7 @@ class BlogsScreen extends StatelessWidget {
               controller: controller.searchTextController,
               onChanged: (value) => controller.searchBlogs(value),
               decoration: InputDecoration(
-                hintText: 'Search blogs...',
+                hintText: 'search_blogs'.tr,
                 hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,

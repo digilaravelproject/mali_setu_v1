@@ -336,8 +336,8 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
             ),
           ),
         ),
-        title: const Text(
-          "Transaction History",
+        title:  Text(
+          "transaction_history".tr,
           style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 22,
@@ -415,8 +415,8 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            "No Transactions Yet",
+           Text(
+            "no_transcation".tr,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
@@ -424,9 +424,9 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 12),
+           SizedBox(height: 12),
           Text(
-            "Your payment history will appear here\nonce you make your first transaction",
+            "no_transcation_msg".tr,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -608,7 +608,7 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
     IconData icon;
     Color backgroundColor;
 
-    if (status == 'success') {
+    if (status == 'completed') {
       color = const Color(0xFF00BFA6);
       label = "Completed";
       icon = Icons.check_circle_rounded;

@@ -1,6 +1,7 @@
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactSupportPage extends StatelessWidget {
@@ -81,8 +82,8 @@ class ContactSupportPage extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
               ),
               centerTitle: true,
-              title: const Text(
-                "Support Center",
+              title: Text(
+                "support_center".tr,
                 style: TextStyle(
                   color: Colors.black87,
                   fontSize: 18,
@@ -106,8 +107,8 @@ class ContactSupportPage extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Contact options heading
-                    const Text(
-                      "Choose your preferred way",
+                     Text(
+                      "choose_preferred_way".tr,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -121,8 +122,8 @@ class ContactSupportPage extends StatelessWidget {
                     _buildContactCard(
                       context,
                       icon: Icons.chat_bubble_rounded,
-                      title: "WhatsApp",
-                      description: "Chat instantly with our support team",
+                      title: "whatsapp".tr,
+                      description: "chat_whatsapp".tr,
                       color: const Color(0xFF25D366),
                       onTap: () async {
                         try {
@@ -136,8 +137,8 @@ class ContactSupportPage extends StatelessWidget {
                     _buildContactCard(
                       context,
                       icon: Icons.email_rounded,
-                      title: "Email",
-                      description: "Write to us and we'll reply soon",
+                      title: "email".tr,
+                      description: "email_support".tr,
                       color: const Color(0xFF4285F4),
                       onTap: () async {
                         try {
@@ -151,8 +152,8 @@ class ContactSupportPage extends StatelessWidget {
                     _buildContactCard(
                       context,
                       icon: Icons.phone_rounded,
-                      title: "Call",
-                      description: "Speak directly to a support agent",
+                      title: "call_now".tr,
+                      description: "call_support".tr,
                       color: const Color(0xFF8E24AA),
                       onTap: () async {
                         try {
@@ -172,8 +173,8 @@ class ContactSupportPage extends StatelessWidget {
                     Center(
                       child: Column(
                         children: [
-                          const Text(
-                            "We're here to help! 💖",
+                           Text(
+                            "we_here_help".tr,
                             style: TextStyle(
                               fontSize: 14,
                               color: Color(0xFF8E24AA),
@@ -183,7 +184,7 @@ class ContactSupportPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "A social initiative for the community",
+                            "community_initiative".tr,
                             style: TextStyle(
                               fontSize: 11,
                               color: Colors.grey.shade500,
@@ -222,8 +223,8 @@ class ContactSupportPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          "How can we help?",
+         Text(
+          "how_can_we_help".tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 20,
@@ -234,7 +235,7 @@ class ContactSupportPage extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          "Ready to assist you with any questions.",
+          "ready_assist".tr,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -334,8 +335,8 @@ class ContactSupportPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Quick Reference",
+           Text(
+            "quick_reference".tr,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -406,7 +407,7 @@ class ContactSupportPage extends StatelessWidget {
               Icon(Icons.access_time_filled_rounded, color: AppColors.primary, size: 20),
               const SizedBox(width: 10),
               Text(
-                "Support Availability",
+                "support_availability".tr,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -416,9 +417,9 @@ class ContactSupportPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildInfoBullet("WhatsApp & Email", "Active 24/7"),
-          _buildInfoBullet("Phone Lines", "9:00 AM – 9:00 PM (IST)"),
-          _buildInfoBullet("Prioritized Support", "Community-led initiative"),
+          _buildInfoBullet("whatsapp_email".tr, "active_24_7".tr),
+          _buildInfoBullet("phone_lines", "phone_hours".tr),
+          _buildInfoBullet("prioritized_support".tr, "Community-led initiative"),
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(12),
@@ -432,7 +433,7 @@ class ContactSupportPage extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    "Include your account details for faster resolution.",
+                    "include_details_tip".tr,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange.shade900,

@@ -220,7 +220,7 @@ const Map<String, String> mrIN = {
   // Dashboard - Home Page
   'welcome_back_comma': 'पुन्हा स्वागत आहे,',
   'search_here': 'येथे शोधा...',
-  'search_your_business': 'तुमचा व्यवसाय शोधा',
+  'search_your_business': 'व्यवसाय शोधा',
   'categories': 'श्रेणी',
   'view_all': 'सर्व पहा',
   'register_your_business': 'तुमचा व्यवसाय नोंदवा',
@@ -914,6 +914,34 @@ const Map<String, String> mrIN = {
   "purchase_plan_to_activate": "सक्रिय करण्यासाठी योजना खरेदी करा",
   "register_business_to_search": "शोधण्यासाठी तुमचा व्यवसाय नोंदणी करा",
   "purchase_plan_to_approve_business": "तुमचा व्यवसाय मंजूर करण्यासाठी योजना खरेदी करा",
+
+
+
+  "no_transcation_msg": "तुमचा पेमेंट इतिहास येथे दिसेल\nपहिली व्यवहार केल्यानंतर",
+  "support_center": "सपोर्ट सेंटर",
+  "how_can_we_help": "आम्ही तुम्हाला कशी मदत करू शकतो?",
+  "ready_assist": "तुमच्या सर्व प्रश्नांसाठी आम्ही मदतीस तयार आहोत.",
+  "quick_reference": "त्वरित संदर्भ",
+  "support_availability": "सपोर्ट उपलब्धता",
+  "whatsapp_email": "व्हॉट्सअ‍ॅप आणि ईमेल",
+  "choose_preferred_way": "तुमचा पसंतीचा मार्ग निवडा",
+  "chat_whatsapp": "आमच्या सपोर्ट टीमशी लगेच चॅट करा",
+  "email_support": "आम्हाला ईमेल करा, आम्ही लवकर उत्तर देऊ",
+  "call_support": "थेट सपोर्ट एजंटशी बोला",
+  "we_here_help": "आम्ही तुमच्या मदतीसाठी येथे आहोत! 💖",
+  "community_initiative": "समुदायासाठी एक सामाजिक उपक्रम",
+  "active_24_7": "24/7 सक्रिय",
+  "phone_hours": "सकाळी 9:00 – रात्री 9:00 (IST)",
+  "priority_support": "समुदाय आधारित उपक्रम",
+  "include_details_tip": "जलद मदतीसाठी तुमचे खाते तपशील द्या",
+  "no_transcation": "अजून कोणतेही व्यवहार नाहीत",
+  "prioritized_support": "प्राधान्य दिलेली मदत",
+  "phone_lines": "फोन लाईन्स",
+  "search_blogs": "ब्लॉग शोधा...",
+  "address_info": "पत्ता माहिती",
+  "edit_matrimony_profile": "मॅट्रिमोनी प्रोफाइल संपादित करा",
+  "subcaste": "उप-जात"
+
 };
 
 

@@ -173,12 +173,8 @@ class BusinessController extends GetxController {
         if (status == 'done' || status == 'notListening') {
           isListening.value = false;
           // Fallback: If engine stopped but sheet is still open and we have words, search and close
-          if (searchText.value.isNotEmpty) {
-             if (Get.isBottomSheetOpen ?? false) {
-                Get.back();
-             } else if (Navigator.canPop(Get.context!)) {
-                Navigator.pop(Get.context!);
-             }
+          if (searchText.value.isNotEmpty && (Get.isBottomSheetOpen ?? false)) {
+             Get.back();
              fetchAllBusinesses(isRefresh: true);
           }
         }
@@ -203,11 +199,9 @@ class BusinessController extends GetxController {
           
           if (result.finalResult) {
             isListening.value = false;
-            // Immediate close for better feel
+            // Only close bottom sheet if it's actually open
             if (Get.isBottomSheetOpen ?? false) {
                Get.back();
-            } else if (Navigator.canPop(Get.context!)) {
-               Navigator.pop(Get.context!);
             }
             fetchAllBusinesses(isRefresh: true);
           }
@@ -221,7 +215,7 @@ class BusinessController extends GetxController {
   void stopListening() async {
     await _speechToText.stop();
     isListening.value = false;
-    if (Get.isBottomSheetOpen ?? false) Get.back();
+    // Don't call Get.back() here - let the bottom sheet's .then() handle it
   }
 
   void _showVoiceSearchBottomSheet() {
@@ -258,7 +252,7 @@ class BusinessController extends GetxController {
             ),
             
             Obx(() => Text(
-              isListening.value ? "Listening..." : (voiceSearchError.isNotEmpty ? "Something went wrong" : "Thinking..."),
+              isListening.value ? "listening".tr : (voiceSearchError.isNotEmpty ? "something_went_wrong".tr : "Thinking..."),
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
@@ -270,7 +264,7 @@ class BusinessController extends GetxController {
             Obx(() => Text(
               voiceSearchError.isNotEmpty 
                   ? voiceSearchError.value 
-                  : "Speak now to find businesses nearby",
+                  : "speak_to_search_business".tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -345,7 +339,7 @@ class BusinessController extends GetxController {
                   child: ElevatedButton.icon(
                     onPressed: () => startListening(),
                     icon: const Icon(Icons.refresh_rounded, size: 20),
-                    label: const Text("Try Again", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    label:  Text("try_again".tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Get.theme.primaryColor,
                       foregroundColor: Colors.white,
@@ -362,15 +356,14 @@ class BusinessController extends GetxController {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
+                      // Only close bottom sheet, don't use Navigator.pop
                       if (Get.isBottomSheetOpen ?? false) {
                          Get.back();
-                      } else if (Navigator.canPop(Get.context!)) {
-                         Navigator.pop(Get.context!);
                       }
                       fetchAllBusinesses(isRefresh: true);
                     },
                     icon: const Icon(Icons.search_rounded, size: 20),
-                    label: const Text("Search Now", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    label:  Text("search_here".tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -407,9 +400,15 @@ class BusinessController extends GetxController {
             
             // Cancel Button
             TextButton(
-              onPressed: () => stopListening(),
+              onPressed: () {
+                _speechToText.stop();
+                isListening.value = false;
+                if (Get.isBottomSheetOpen ?? false) {
+                  Get.back();
+                }
+              },
               child: Text(
-                "Cancel",
+                "cancel".tr,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[400],
@@ -425,8 +424,11 @@ class BusinessController extends GetxController {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
     ).then((_) {
+      // Just stop the speech recognition if still listening
+      // Don't call stopListening() as it might trigger another Get.back()
       if (isListening.value) {
-        stopListening();
+        _speechToText.stop();
+        isListening.value = false;
       }
     });
   }

@@ -35,23 +35,23 @@ class MyApp extends StatelessWidget {
     final languageController = Get.find<LanguageController>();
     
     /// without screen capture protector
-    // return GetMaterialApp(
-    //     debugShowCheckedModeBanner: false,
-    //     title: AppConstants.appName,
-    //     translations: Languages(),
-    //     locale: languageController.currentLocale.value,
-    //     fallbackLocale: const Locale('en', 'US'),
-    //     theme: AppLightTheme.lightTheme,
-    //     darkTheme: AppLightTheme.lightTheme,
-    //     // darkTheme: AppDarkTheme.darkTheme,
-    //     scaffoldMessengerKey: rootScaffoldMessengerKey,
-    //     getPages: AppPages.getPages,
-    //     initialRoute: AppRoutes.splash,
-    // );
+    return GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: AppConstants.appName,
+        translations: Languages(),
+        locale: languageController.currentLocale.value,
+        fallbackLocale: const Locale('en', 'US'),
+        theme: AppLightTheme.lightTheme,
+        darkTheme: AppLightTheme.lightTheme,
+        // darkTheme: AppDarkTheme.darkTheme,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
+        getPages: AppPages.getPages,
+        initialRoute: AppRoutes.splash,
+    );
 
 
     /// with screen capture protector
-    return ScreenCaptureProtector(
+   /* return ScreenCaptureProtector(
       child: GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: AppConstants.appName,
@@ -65,6 +65,6 @@ class MyApp extends StatelessWidget {
       getPages: AppPages.getPages,
       initialRoute: AppRoutes.splash,
       ),
-    );
+    );*/
   }
 }

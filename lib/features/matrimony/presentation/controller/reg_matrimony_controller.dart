@@ -96,7 +96,7 @@ class RegMatrimonyController extends GetxController {
   // Location
   final country = 'India'.obs;
   final state = ''.obs;
-  
+
   // Pincode
   final isFetchingPincode = false.obs;
 
@@ -159,7 +159,7 @@ class RegMatrimonyController extends GetxController {
 
 
   /// --- Methods ---
-  
+
   /// Pick Multiple Photos
   Future<void> pickPhotos() async {
     try {
@@ -178,7 +178,7 @@ class RegMatrimonyController extends GetxController {
           final file = File(images[i].path);
           final int sizeInBytes = await file.length();
           final double sizeInMb = sizeInBytes / (1024 * 1024);
-          
+
           // Check format
           final String extension = images[i].path.split('.').last.toLowerCase();
           final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
@@ -190,7 +190,7 @@ class RegMatrimonyController extends GetxController {
             failedFiles.add(images[i].name);
           }
         }
-        
+
         if (failedFiles.isNotEmpty) {
           CustomSnackBar.showError(
             message: "Some files were skipped. Max size 2MB, Formats: JPG, PNG",
@@ -215,7 +215,7 @@ class RegMatrimonyController extends GetxController {
     // Only fetch if pincode is exactly 6 digits
     if (pincode.length == 6 && int.tryParse(pincode) != null) {
       _fetchAddressFromPincode(pincode);
-    } 
+    }
     errors.remove('pincode');
   }
 
@@ -237,9 +237,9 @@ class RegMatrimonyController extends GetxController {
         // Find existing state or add it
         final fetchedState = response.state;
         if (!stateList.contains(fetchedState)) {
-           stateList.add(fetchedState);
+          stateList.add(fetchedState);
         }
-        
+
         state.value = fetchedState;
         cityCtrl.text = "${response.district} , ${response.division}, ${response.name}"; // Using district as major city
         talukaCtrl.text = response.name; // Taluka from pincode API
@@ -372,7 +372,7 @@ class RegMatrimonyController extends GetxController {
 
   int calculateAge() {
     DateTime? birthDate = selectedDate;
-    
+
     // If selectedDate is null, try parsing from the text controller
     if (birthDate == null && dobCtrl.text.isNotEmpty) {
       try {
@@ -388,7 +388,7 @@ class RegMatrimonyController extends GetxController {
     }
 
     if (birthDate == null) return 0;
-    
+
     final now = DateTime.now();
     int age = now.year - birthDate.year;
     if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
@@ -520,7 +520,7 @@ class RegMatrimonyController extends GetxController {
       final lastNameText = lastNameCtrl.text.trim();
       final combinedName = [titleText, firstNameText, middleNameText, lastNameText]
           .where((s) => s.isNotEmpty).join(' ');
-      
+
       // Convert images to base64
       List<String> base64Photos = [];
       for (var file in selectedPhotos) {
@@ -701,7 +701,7 @@ class RegMatrimonyController extends GetxController {
     try {
       isPreFilling.value = true;
       print("DEBUG_MATRIMONY: Starting prefillFromApi");
-      
+
       final user = Get.find<AuthService>().currentUser.value;
       if (user == null || user.id == null) {
         print("DEBUG_MATRIMONY: No user ID found for prefill");
@@ -710,7 +710,7 @@ class RegMatrimonyController extends GetxController {
 
       final raw = await _repository.getProfiles(user.id!);
       print("DEBUG_MATRIMONY: API response received: $raw");
-      
+
       if (raw == null) {
         print("DEBUG_MATRIMONY: API returned null");
         return;
@@ -737,7 +737,7 @@ class RegMatrimonyController extends GetxController {
 
       // Personal details
       final personal = profile['personal_details'] as Map<String, dynamic>? ?? {};
-      
+
       // Name: set controller's own fields + sync to NameFieldComponent
       final apiTitle = personal['title']?.toString() ?? '';
       final apiFirstName = personal['first_name']?.toString() ?? '';
@@ -802,7 +802,7 @@ class RegMatrimonyController extends GetxController {
       // employment_type: do case-insensitive match
       final rawEmpType = personal['employment_type']?.toString() ?? '';
       employmentType.value = employmentTypeList.firstWhere(
-        (e) => e.toLowerCase() == rawEmpType.toLowerCase(),
+            (e) => e.toLowerCase() == rawEmpType.toLowerCase(),
         orElse: () => _safeValue(rawEmpType, employmentTypeList),
       );
       familyType.value = _safeValue(personal['family_type'], familyTypeList);
@@ -847,12 +847,12 @@ class RegMatrimonyController extends GetxController {
       motherOccupationCtrl.text = family['mother']?.toString() ?? '';
       final rawFamilyClass = family['family_class']?.toString() ?? '';
       familyClass.value = familyClassList.firstWhere(
-        (e) => e.toLowerCase() == rawFamilyClass.toLowerCase(),
+            (e) => e.toLowerCase() == rawFamilyClass.toLowerCase(),
         orElse: () => '',
       );
       final rawFamilyValue = family['family_value']?.toString() ?? '';
       familyValue.value = familyValueList.firstWhere(
-        (e) => e.toLowerCase() == rawFamilyValue.toLowerCase(),
+            (e) => e.toLowerCase() == rawFamilyValue.toLowerCase(),
         orElse: () => '',
       );
 
@@ -871,15 +871,15 @@ class RegMatrimonyController extends GetxController {
       diet.value = _safeValue(lifestyle['diet'], dietList);
       final rawSmoking = lifestyle['smoking']?.toString() ?? '';
       smoking.value = smokingList.firstWhere(
-        (e) => e.toLowerCase() == rawSmoking.toLowerCase(),
+            (e) => e.toLowerCase() == rawSmoking.toLowerCase(),
         orElse: () => smokingList.firstWhere(
-          (e) => rawSmoking.toLowerCase().contains(e.toLowerCase()),
+              (e) => rawSmoking.toLowerCase().contains(e.toLowerCase()),
           orElse: () => '',
         ),
       );
       final rawDrinking = lifestyle['drinking']?.toString() ?? '';
       drinking.value = drinkingList.firstWhere(
-        (e) => e.toLowerCase() == rawDrinking.toLowerCase(),
+            (e) => e.toLowerCase() == rawDrinking.toLowerCase(),
         orElse: () => '',
       );
 

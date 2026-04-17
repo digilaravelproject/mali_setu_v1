@@ -84,7 +84,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               label: 'salary_range'.tr,
               isRequired: true,
               hintText: 'salary_range_hint'.tr,
-              textInputType: TextInputType.text,
+              textInputType: TextInputType.number,
               controller: controller.salaryRangeCtrl,
               validator: (v) => v!.isEmpty ? 'salary_required'.tr : null,
               errorText: controller.errors['salary'],

@@ -59,6 +59,11 @@ class CreateJobController extends GetxController {
 
   final skillsCtrl = TextEditingController();
   final RxList<String> selectedSkills = <String>[].obs;
+
+
+  late int businessId;
+
+
   
   static const List<String> POPULAR_SKILLS = [
     'PHP', 'Laravel', 'MySQL', 'REST API', 'Flutter', 'Dart', 'Android', 
@@ -232,9 +237,16 @@ class CreateJobController extends GetxController {
 
   final isLoading = false.obs;
 
+
+
   @override
   void onInit() {
     super.onInit();
+    if (Get.arguments != null) {
+      businessId = Get.arguments as int;
+    } else {
+      Get.back();
+    }
     
     // Auto-select business if coming from business detail page
     final businessController = Get.find<BusinessController>();
@@ -388,12 +400,12 @@ class CreateJobController extends GetxController {
 
   Future<void> onRegister() async {
     // Use selected business ID or fallback to current business
-    final businessId = selectedBusinessId.value ?? Get.find<BusinessController>().myBusiness.value?.id;
+   // final businessId = selectedBusinessId.value ?? Get.find<BusinessController>().myBusiness.value?.id;
     
-    if (businessId == null) {
-      CustomSnackBar.showError(message: 'register_business_first');
-      return;
-    }
+    // if (businessId == null) {
+    //   CustomSnackBar.showError(message: 'register_business_first');
+    //   return;
+    // }
 
     debugPrint("🏢 Using business ID: $businessId");
 

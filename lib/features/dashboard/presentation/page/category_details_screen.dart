@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/res_category_business_model.dart' hide Category, User;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -302,9 +304,12 @@ class BusinessListCard extends StatelessWidget {
     final theme = Theme.of(context);
     
     String address = [
-      business.user?.city,
-      business.user?.address,
-    ].where((e) => e != null && e.isNotEmpty).join(", ");
+      business.state,
+      business.district,
+      business.city,
+      business.pincode,
+    ] .where((e) => e != null && e.trim().isNotEmpty)
+        .join(", ");
 
     return Container(
       decoration: BoxDecoration(
@@ -370,11 +375,12 @@ class BusinessListCard extends StatelessWidget {
                     border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
                   ),
                   child: Center(
-                    child: Icon(
-                      Icons.store_rounded,
-                      size: 30,
-                      color: theme.primaryColor,
-                    ),
+                    child: Image.network(ApiConstants.imageBaseUrl + (business.photo ?? ""),)
+                    // Icon(
+                    //   Icons.store_rounded,
+                    //   size: 30,
+                    //   color: theme.primaryColor,
+                    // ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -428,6 +434,7 @@ class BusinessListCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
+                             // "vibfkgbgfkbgbg",
                               address.isNotEmpty ? address : "location_na".tr,
                               style: TextStyle(
                                 fontSize: 13,

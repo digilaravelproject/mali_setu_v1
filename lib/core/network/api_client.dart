@@ -43,14 +43,14 @@ class ApiClient {
         } else {
           print("DEBUG_TOKEN: NO TOKEN - Skipping Authorization header");
         }
-        
+
         // Add Default API Key
         options.headers[ApiConstants.xApiKey] = ApiConstants.xApiValue;
 
         if (language != null && language.isNotEmpty) {
           options.headers["language"] = language;
         }
-        
+
         // Add Accept header to tell server we expect JSON
         options.headers["Accept"] = "application/json";
 
@@ -322,7 +322,7 @@ class ApiClient {
             File file = File(multipart.file!.path);
             String fileName = basename(file.path);
             String ext = extension(fileName).toLowerCase().replaceAll('.', '');
-            
+
             // Map extension to media type
             MediaType mediaType;
             if (ext == 'png') {

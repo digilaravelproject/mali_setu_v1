@@ -1,6 +1,7 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -75,7 +76,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               final currentUser = authService.currentUser.value;
               final isOwner = currentUser?.id == business.userId;
               final topPadding = MediaQuery.of(context).padding.top;
-              final fixedHeight = 480.0;
+              final fixedHeight = 500.0;
 
               return NestedScrollView(
               controller: _outerScrollController,
@@ -123,10 +124,12 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                               } else if (value == 'add_service') {
                                 Get.toNamed(AppRoutes.addService, arguments: business.id);
                               } else if (value == 'create_job') {
-                                if (Get.isRegistered<CreateJobController>()) {
-                                  Get.find<CreateJobController>().clearFields();
-                                }
-                                Get.toNamed(AppRoutes.createJob);
+                                // if (Get.isRegistered<CreateJobController>()) {
+                                //   Get.find<CreateJobController>().clearFields();
+                                // }
+                                Get.toNamed(AppRoutes.createJob,arguments: business.id );
+                              } else if (value == 'job_analytics') {
+                                Get.toNamed(AppRoutes.jobAnalytics);
                               }
                             },
                             itemBuilder: (context) => [
@@ -141,6 +144,10 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                               PopupMenuItem(
                                 value: 'create_job',
                                 child: Row(children: [Icon(Icons.work_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('create_job'.tr)]),
+                              ),
+                              PopupMenuItem(
+                                value: 'job_analytics',
+                                child: Row(children: [Icon(Icons.analytics_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('job_analytics'.tr)]),
                               ),
                             ],
                           ),
@@ -304,6 +311,16 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     _buildHeaderIconLabel(Icons.category_outlined, business.category?.name?.toTitleCase() ?? 'category'.tr, context),
                     const SizedBox(height: 6),
                     _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
+                    const SizedBox(height: 6),
+                    _buildHeaderIconLabel(Icons.location_on_outlined, business.state.toString()+', '+business.city.toString()+', '+business.pincode.toString(), context),
+                   // const SizedBox(height: 6),
+                    // Row(
+                    //   children: [
+                    //     Text("distance : ",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
+                    //     Text("${business.KMfromuser}",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
+                    //   ],
+                    // ),
+                  //  _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
                   ],
                 ),
               ),
@@ -633,9 +650,19 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                       if (Get.isRegistered<CreateJobController>()) {
                         Get.find<CreateJobController>().clearFields();
                       }
-                      Get.toNamed(AppRoutes.createJob);
+                      Get.toNamed(AppRoutes.createJob,arguments: business.id);
                     },
                     child: _buildActionButton('create_job'.tr, Icons.work_outline, context)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    Get.toNamed(AppRoutes.jobAnalytics);
+                  },
+                  child: _buildActionButton('job_analytics'.tr, Icons.analytics_outlined, context),
+                ),
               ),
             ],
           ),
@@ -977,7 +1004,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 if (isOwner)
                 Row(
                   children: [
-                    Expanded(
+                   /* Expanded(
                       child: CustomButton(
                         title: "job_analytics".tr,
                         height: 40,
@@ -993,7 +1020,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                         borderRadius: 12,
                         onPressed: () => Get.toNamed(AppRoutes.appliedJobList),
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -1099,9 +1126,20 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   _buildInfoRow(Icons.language, 'website'.tr, b.website ?? 'N/A', context),
                 ], context),
                 const SizedBox(height: 16),
+                _buildInfoCard('address_info'.tr, [
+                  // business.state,
+                  // business.district,
+                  // business.city,
+                  // business.pincode,
+                  _buildInfoRow(Icons.location_city, 'state'.tr, b.state ?? 'N/A', context),
+                  _buildInfoRow(Icons.location_city, 'district'.tr, b.district ?? 'N/A', context),
+                  _buildInfoRow(Icons.location_on_outlined, 'city'.tr, b.city ?? 'N/A', context),
+                  _buildInfoRow(Icons.pin, 'pincode'.tr, b.pincode ?? 'N/A', context),
+                ], context),
+                const SizedBox(height: 16),
                 _buildInfoCard('additional_information'.tr, [
-                  _buildInfoRow(Icons.calendar_today, 'created_at'.tr, b.createdAt != null ? b.createdAt!.split('T')[0] : 'N/A', context),
-                  _buildInfoRow(Icons.update, 'last_updated'.tr, b.updatedAt != null ? b.updatedAt!.split('T')[0] : 'N/A', context),
+                //  _buildInfoRow(Icons.calendar_today, 'created_at'.tr, b.createdAt != null ? b.createdAt!.split('T')[0] : 'N/A', context),
+                //  _buildInfoRow(Icons.update, 'last_updated'.tr, b.updatedAt != null ? b.updatedAt!.split('T')[0] : 'N/A', context),
                   _buildInfoRow(Icons.shopping_bag_outlined, 'total_products'.tr, '${b.products?.length ?? 0}', context),
                   _buildInfoRow(Icons.design_services_outlined, 'total_services'.tr, '${b.services?.length ?? 0}', context),
                   _buildInfoRow(Icons.work_outline, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),

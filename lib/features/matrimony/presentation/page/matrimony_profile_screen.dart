@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/matrimony/data/model/search_matrimony_response.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_details_controller.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
@@ -216,9 +217,9 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 icon: Icons.person_outline,
                 children: [
                   _buildInfoRow('marital_status'.tr, profile.personalDetails?.maritalStatus ?? '-'),
-                  _buildInfoRow('Religion', (profile.personalDetails?.religion ?? []).join(", ")),
-                  _buildInfoRow('Caste', "General"), // Example: Add caste field if available
-                  _buildInfoRow('Height', profile.height ?? '-'),
+                  _buildInfoRow('religion'.tr, (profile.personalDetails?.religion ?? []).join(", ")),
+                //  _buildInfoRow('Caste', "General"), // Example: Add caste field if available
+                  _buildInfoRow('height'.tr, profile.height ?? '-'),
                   _buildInfoRow('weight'.tr, profile.weight ?? '-'),
                   _buildInfoRow('complexion'.tr, profile.complexion ?? '-'),
                 ],
@@ -229,9 +230,9 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 title: 'professional_details'.tr,
                 icon: Icons.work_outline,
                 children: [
-                  _buildInfoRow('Occupation', profile.personalDetails?.occupation ?? '-'),
-                  _buildInfoRow('Employer', profile.professionalDetails?.company ?? '-'), // Added Company
-                  _buildInfoRow('Annual Income', "₹ ${profile.personalDetails?.annualIncome ?? '-'}"),
+                  _buildInfoRow('occupation'.tr, profile.personalDetails?.occupation ?? '-'),
+                  _buildInfoRow('company_name'.tr, profile.professionalDetails?.company ?? '-'), // Added Company
+                  _buildInfoRow('annual_income'.tr, " ${profile.personalDetails?.annualIncome ?? '-'} Lac"),
                 ],
               ),
               const SizedBox(height: 16),
@@ -240,8 +241,8 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 title: 'education'.tr,
                 icon: Icons.school_outlined,
                 children: [
-                  _buildInfoRow('Highest Degree', profile.educationDetails?.highestQualification ?? '-'),
-                  _buildInfoRow('College / University', profile.educationDetails?.college ?? '-'), // Added College
+                  _buildInfoRow('highest_qualification'.tr, profile.educationDetails?.highestQualification ?? '-'),
+                  _buildInfoRow('college'.tr, profile.educationDetails?.college ?? '-'), // Added College
                 ],
               ),
               const SizedBox(height: 16),
@@ -253,8 +254,8 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   _buildInfoRow('father'.tr, profile.familyDetails?.father ?? '-'),
                   _buildInfoRow('mother'.tr, profile.familyDetails?.mother ?? '-'),
                   _buildInfoRow('family_type'.tr, profile.personalDetails?.familyType ?? '-'),
-                  _buildInfoRow('Family Value', profile.familyDetails?.familyValue ?? '-'),
-                  _buildInfoRow('Family Status', profile.familyDetails?.familyClass ?? '-'), // Added Family Class
+                  _buildInfoRow('family_value'.tr, profile.familyDetails?.familyValue ?? '-'),
+                  _buildInfoRow('family_class'.tr, profile.familyDetails?.familyClass ?? '-'), // Added Family Class
                 ],
               ),
               const SizedBox(height: 16),
@@ -276,8 +277,8 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                   icon: Icons.favorite_border,
                   children: [
                     _buildInfoRow('Age Range', profile.partnerPreferences?.ageRange ?? '-'),
-                    _buildInfoRow('Education', profile.partnerPreferences?.education ?? '-'),
-                    _buildInfoRow('Location', profile.partnerPreferences?.location ?? '-'),
+                    _buildInfoRow('education_career'.tr, profile.partnerPreferences?.education ?? '-'),
+                  //  _buildInfoRow('Location', profile.partnerPreferences?.location ?? '-'),
                   ],
                 ),
             ],
@@ -472,14 +473,14 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                       Get.toNamed(AppRoutes.regMatrimony, arguments: true);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      "Edit Profile",
+                    child: Text(
+                      "edit_profile".tr,
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

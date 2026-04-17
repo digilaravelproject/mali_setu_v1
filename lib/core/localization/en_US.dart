@@ -225,7 +225,7 @@ const Map<String, String> enUS = {
   // Dashboard - Home Page
   'welcome_back_comma': 'Welcome Back,',
   'search_here': 'Search here...',
-  'search_your_business': 'Search Your Business',
+  'search_your_business': 'Search Business',
   'categories': 'Categories',
   'view_all': 'View All',
   'register_your_business': 'Register your Business',
@@ -631,6 +631,7 @@ const Map<String, String> enUS = {
   'religious_horoscope_sub': 'Your Astrological Details',
   'religion': 'Religion',
   'caste': 'Caste',
+  'subcaste': 'Sub-Caste',
   'star': 'Star',
   'raasi': 'Raasi',
   'dosh': 'Dosh',
@@ -907,6 +908,36 @@ const Map<String, String> enUS = {
   "purchase_plan_to_activate": "Purchase a plan to activate",
   "register_business_to_search": "Register your business to search",
   "purchase_plan_to_approve_business": "Purchase a plan to approve your business",
+
+
+  "no_transcation": "No Transactions Yet",
+    "no_transcation_msg": "Your payment history will appear here\nonce you make your first transaction",
+    "support_center": "Support Center",
+    "how_can_we_help": "How can we help?",
+    "ready_assist": "Ready to assist you with any questions.",
+    "quick_reference": "Quick Reference",
+    "support_availability": "Support Availability",
+    "whatsapp_email": "WhatsApp & Email",
+    "choose_preferred_way": "Choose your preferred way",
+    "chat_whatsapp": "Chat instantly with our support team",
+    "email_support": "Write to us and we'll reply soon",
+    "call_support": "Speak directly to a support agent",
+    "we_here_help": "We're here to help! 💖",
+    "community_initiative": "A social initiative for the community",
+    "active_24_7": "Active 24/7",
+    "phone_hours": "9:00 AM – 9:00 PM (IST)",
+    "phone_lines": "Phone Lines",
+    "priority_support": "Community-led initiative",
+    "include_details_tip": "Include your account details for faster resolution",
+   "prioritized_support": "Prioritized Support",
+
+   "search_blogs": "Search blogs...",
+   "address_info": "Address Info",
+  "edit_matrimony_profile": "Edit Matrimony Profile",
+
+  // "start_chat": "Start Chat",
+  // "start_chat": "Start Chat",
+
 };
 
 

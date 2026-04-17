@@ -83,7 +83,7 @@ const Map<String, String> hiIN = {
   'cm': 'सेमी',
   'physical_status': 'शारीरिक स्थिति',
   'normal': 'सामान्य',
-  'doesnt_matter': "Doesn't Matter",
+  'doesnt_matter': "कोई फर्क नहीं पड़ता",
   'physically_challenged': 'शारीरिक रूप से अक्षम',
 
   // Professional Details Filters
@@ -107,7 +107,7 @@ const Map<String, String> hiIN = {
   'profiles_with_horoscope': 'कुंडली वाले प्रोफाइल',
   'matches_with_horoscope': 'जिन्होंने कुंडली जोड़ी है',
   'manglik': 'मांगलिक',
-  'dont_know': "Don't Know",
+  'dont_know': "पता नहीं",
   'yes': 'हां',
   'no': 'नहीं',
 
@@ -144,7 +144,7 @@ const Map<String, String> hiIN = {
   // Profile Type Filters
   'profile_with_photo': 'फोटो के साथ प्रोफाइल',
   'matches_with_photos': 'जिन्होंने फोटो जोड़ी है',
-  'dont_show_profile': "Don't Show Profile",
+  'dont_show_profile': "प्रोफ़ाइल न दिखाएँ",
   'ignored': 'अनदेखा किया',
   'profiles_ignored': 'आपने जिन प्रोफाइल को अनदेखा किया',
   'shortlisted': 'शॉर्टलिस्ट किया',
@@ -195,7 +195,7 @@ const Map<String, String> hiIN = {
   'email_id': 'ईमेल आईडी',
   'date_of_birth': 'जन्म तिथि',
   'mobile_number': 'मोबाइल नंबर',
-  'caste_certificate': "Caste Certificate / Other Proof / Father's Caste",
+  'caste_certificate': "जाति प्रमाण पत्र / अन्य प्रमाण / पिता की जाति",
   'tap_to_upload': 'जाति प्रमाण पत्र अपलोड करने के लिए टैप करें',
   'certificate_uploaded': 'जाति प्रमाण पत्र अपलोड किया गया',
   'caste_certificate_criteria': 'फ़ाइल प्रारूप: .jpg, .jpeg, .png, .pdf | अधिकतम फ़ाइल आकार: 5MB',
@@ -213,7 +213,7 @@ const Map<String, String> hiIN = {
   'user_type': 'उपयोगकर्ता प्रकार',
   'designation': 'पदनाम',
   'referral_code': 'रेफरल कोड (वैकल्पिक)',
-  'referral_optional': '* Referral code is optional',
+  'referral_optional': '* रेफरल कोड वैकल्पिक है',
   'security': 'सुरक्षा',
   'password': 'पासवर्ड',
   'confirm_password': 'पासवर्ड की पुष्टि करें',
@@ -224,7 +224,7 @@ const Map<String, String> hiIN = {
   // Dashboard - Home Page
   'welcome_back_comma': 'वापसी पर स्वागत है,',
   'search_here': 'यहां खोजें...',
-  'search_your_business': 'अपना व्यवसाय खोजें',
+  'search_your_business': 'व्यवसाय खोजें',
   'categories': 'श्रेणियां',
   'view_all': 'सभी देखें',
   'register_your_business': 'अपना व्यवसाय पंजीकृत करें',
@@ -244,7 +244,7 @@ const Map<String, String> hiIN = {
   'register_now': 'अभी पंजीकरण करें',
   'featured_businesses': 'विशेष व्यवसाय',
   'showing_first_10': 'पहले 10 व्यवसाय दिखा रहे हैं। सभी देखने के लिए \'सभी देखें\' पर टैप करें',
-  'businesses_available': 'businesses available.',
+  'businesses_available': 'व्यवसाय उपलब्ध हैं।',
   'all_businesses': 'सभी व्यवसाय',
   'pagination_info': 'पृष्ठांकन जानकारी',
   'page_of': 'पृष्ठ',
@@ -469,7 +469,7 @@ const Map<String, String> hiIN = {
   'availability_hint': 'e.g., Weekends',
   'availability': 'उपलब्धता',
   'add_skill': 'कौशल जोड़ें',
-  'skill_hint': 'e.g. Teaching',
+  'skill_hint': 'जैसे: शिक्षण',
   'selected_skills': 'चयनित कौशल',
   'popular_skills': 'लोकप्रिय कौशल',
   'add_interest': 'रुचि जोड़ें',
@@ -800,9 +800,9 @@ const Map<String, String> hiIN = {
 
   'blood_group': 'रक्त समूह',
   'referral_name': 'रेफरल नाम',
-  'enter_custom_category' : 'Custom Category ',
-  'transaction_history' : 'Transaction History',
-  'call_now' : 'Call Now',
+  'enter_custom_category': 'कस्टम श्रेणी',
+  'transaction_history': 'लेन-देन इतिहास',
+  'call_now': 'अभी कॉल करें',
   'image_load_failed': 'छवि लोड विफल',
   'error_loading_profile': 'प्रोफाइल लोड करने में त्रुटि',
   'error_loading_profiles': 'प्रोफाइल लोड करने में त्रुटि',
@@ -893,6 +893,39 @@ const Map<String, String> hiIN = {
   'purchase_plan_to_activate': 'सक्रिय करने के लिए प्लान खरीदें',
   'register_business_to_search': 'खोज के लिए अपना व्यवसाय रजिस्टर करें',
   'purchase_plan_to_approve_business': 'अपने व्यवसाय को अप्रूव कराने के लिए प्लान खरीदें',
+
+
+
+
+    "no_transcation_msg": "आपका भुगतान इतिहास यहाँ दिखाई देगा\nजैसे ही आप पहली ट्रांजैक्शन करेंगे",
+    "support_center": "सपोर्ट सेंटर",
+    "how_can_we_help": "हम आपकी कैसे मदद कर सकते हैं?",
+    "ready_assist": "हम आपके सभी प्रश्नों में मदद के लिए तैयार हैं।",
+    "quick_reference": "त्वरित संदर्भ",
+    "support_availability": "सपोर्ट उपलब्धता",
+    "whatsapp_email": "व्हाट्सएप और ईमेल",
+    "choose_preferred_way": "अपनी पसंद का तरीका चुनें",
+    "chat_whatsapp": "हमारी सपोर्ट टीम से तुरंत चैट करें",
+    "email_support": "हमें ईमेल करें, हम जल्द जवाब देंगे",
+    "call_support": "सीधे सपोर्ट एजेंट से बात करें",
+    "we_here_help": "हम आपकी मदद के लिए यहाँ हैं! 💖",
+    "community_initiative": "समुदाय के लिए एक सामाजिक पहल",
+    "active_24_7": "24/7 सक्रिय",
+    "phone_hours": "सुबह 9:00 – रात 9:00 (IST)",
+    "priority_support": "समुदाय आधारित पहल",
+    "include_details_tip": "तेज़ समाधान के लिए अपना अकाउंट विवरण जोड़ें",
+  "no_transcation": "अभी कोई लेन-देन नहीं है",
+  "prioritized_support": "प्राथमिकता प्राप्त सहायता",
+  "phone_lines": "फोन सेवा",
+  "search_blogs": "ब्लॉग खोजें...",
+  "address_info": "पता जानकारी",
+  "edit_matrimony_profile": "मैट्रिमोनी प्रोफाइल संपादित करें",
+  "subcaste": "उप-जाति"
+
+
+
+
+
 
 
 };
