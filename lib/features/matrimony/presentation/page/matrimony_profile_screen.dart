@@ -14,8 +14,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenCaptureProtector(
-      child: Scaffold(
+    return Scaffold(
       backgroundColor: Colors.grey[100],
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -45,8 +44,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
           ],
         );
       }),
-    ),
-  );
+    );
 }
 
   SliverAppBar _buildProfileHeader(BuildContext context, MatrimonyProfile profile) {
@@ -502,10 +500,11 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 } else if (status == "accepted") {
                   buttonText = "start_chat".tr;
                   buttonColor = Colors.green;
-                  onPressed = () {
+                    onPressed = () {
                     Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                      'conversation_id': null,
+                      'conversation_id': profile.conversationId,
                       'other_user_id': profile.user?.id ?? profile.userId,
+                      'user_name': profile.personalDetails?.name?.toString() ?? '',
                     });
                   };
                 }

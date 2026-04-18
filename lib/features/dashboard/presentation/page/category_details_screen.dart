@@ -24,252 +24,257 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 180,
-            pinned: true,
-            backgroundColor: theme.primaryColor,
-            elevation: 0,
-            leading: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-                onPressed: () => Get.back(),
-              ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(
-                category.name?.toTitleCase() ?? "",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+      body: RefreshIndicator(
+        onRefresh: () => controller.fetchBusinesses(category.id!),
+        color: theme.primaryColor,
+        backgroundColor: Colors.white,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 180,
+              pinned: true,
+              backgroundColor: theme.primaryColor,
+              elevation: 0,
+              leading: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                  onPressed: () => Get.back(),
                 ),
               ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      theme.primaryColor,
-                      theme.primaryColor.withOpacity(0.8),
-                    ],
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: true,
+                title: Text(
+                  category.name?.toTitleCase() ?? "",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: -30,
-                      top: -30,
-                      child: TweenAnimationBuilder(
-                        duration: const Duration(seconds: 3),
-                        tween: Tween<double>(begin: 0, end: 1),
-                        builder: (context, double value, child) {
-                          return Transform.rotate(
-                            angle: value * 6.28,
-                            child: child,
-                          );
-                        },
-                        child: Container(
-                          width: 150,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                        ),
-                      ),
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        theme.primaryColor,
+                        theme.primaryColor.withOpacity(0.8),
+                      ],
                     ),
-                    Positioned(
-                      left: -50,
-                      bottom: -50,
-                      child: Container(
-                        width: 180,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.05),
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 40),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -30,
+                        top: -30,
                         child: TweenAnimationBuilder(
-                          duration: const Duration(milliseconds: 800),
+                          duration: const Duration(seconds: 3),
                           tween: Tween<double>(begin: 0, end: 1),
                           builder: (context, double value, child) {
-                            return Transform.scale(
-                              scale: value,
-                              child: Opacity(
-                                opacity: value,
-                                child: child,
-                              ),
+                            return Transform.rotate(
+                              angle: value * 6.28,
+                              child: child,
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.all(20),
+                            width: 150,
+                            height: 150,
                             decoration: BoxDecoration(
-                              color: Colors.white,
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              _getCategoryIcon(category.name),
-                              size: 50,
-                              color: theme.primaryColor,
+                              color: Colors.white.withOpacity(0.1),
                             ),
                           ),
                         ),
                       ),
+                      Positioned(
+                        left: -50,
+                        bottom: -50,
+                        child: Container(
+                          width: 180,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.05),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 40),
+                          child: TweenAnimationBuilder(
+                            duration: const Duration(milliseconds: 800),
+                            tween: Tween<double>(begin: 0, end: 1),
+                            builder: (context, double value, child) {
+                              return Transform.scale(
+                                scale: value,
+                                child: Opacity(
+                                  opacity: value,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                _getCategoryIcon(category.name),
+                                size: 50,
+                                color: theme.primaryColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (category.isActive == false)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                           color: Colors.red.withOpacity(0.1),
+                           borderRadius: BorderRadius.circular(12),
+                           border: Border.all(color: Colors.red.withOpacity(0.3))
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.red, size: 20),
+                            const SizedBox(width: 8),
+                             Expanded(
+                              child: Text(
+                                "category_inactive".tr,
+                                style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    
+                    Row(
+                      children: [
+                        Container(
+                          height: 20, 
+                          width: 4, 
+                          decoration: BoxDecoration(
+                            color: theme.primaryColor,
+                            borderRadius: BorderRadius.circular(2)
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "related_businesses".tr,
+                          style: context.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 16),
+                    
+                    // Search Bar
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: TextField(
+                        controller: controller.searchController,
+                        onChanged: (value) => controller.searchBusinesses(value),
+                        decoration: InputDecoration(
+                          hintText: 'Search by name, location...',
+                          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                          prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[500], size: 22),
+                          suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
+                              ? GestureDetector(
+                                  onTap: () => controller.clearSearch(),
+                                  child: Icon(Icons.clear_rounded, color: Colors.grey[500], size: 20),
+                                )
+                              : const SizedBox.shrink()),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
+                        ),
+                        style: const TextStyle(color: Colors.black87, fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (category.isActive == false)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                         color: Colors.red.withOpacity(0.1),
-                         borderRadius: BorderRadius.circular(12),
-                         border: Border.all(color: Colors.red.withOpacity(0.3))
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.info_outline, color: Colors.red, size: 20),
-                          const SizedBox(width: 8),
-                           Expanded(
-                            child: Text(
-                              "category_inactive".tr,
-                              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  
-                  Row(
-                    children: [
-                      Container(
-                        height: 20, 
-                        width: 4, 
-                        decoration: BoxDecoration(
-                          color: theme.primaryColor,
-                          borderRadius: BorderRadius.circular(2)
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "related_businesses".tr,
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
+            
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  // Search Bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: TextField(
-                      controller: controller.searchController,
-                      onChanged: (value) => controller.searchBusinesses(value),
-                      decoration: InputDecoration(
-                        hintText: 'Search by name, location...',
-                        hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                        prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[500], size: 22),
-                        suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () => controller.clearSearch(),
-                                child: Icon(Icons.clear_rounded, color: Colors.grey[500], size: 20),
-                              )
-                            : const SizedBox.shrink()),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
-                      ),
-                      style: const TextStyle(color: Colors.black87, fontSize: 14),
+                );
+              }
+  
+              if (controller.filteredBusinesses.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      children: [
+                        Icon(Icons.store_mall_directory_outlined, size: 60, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text(
+                          controller.searchQuery.value.isNotEmpty 
+                              ? "No businesses found for your search"
+                              : "no_business_found".tr,
+                          style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-          ),
-          
-          Obx(() {
-            if (controller.isLoading.value) {
-              return const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+  
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      child: BusinessListCard(business: controller.filteredBusinesses[index]),
+                    );
+                  },
+                  childCount: controller.filteredBusinesses.length,
                 ),
               );
-            }
-
-            if (controller.filteredBusinesses.isEmpty) {
-              return SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    children: [
-                      Icon(Icons.store_mall_directory_outlined, size: 60, color: Colors.grey[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        controller.searchQuery.value.isNotEmpty 
-                            ? "No businesses found for your search"
-                            : "no_business_found".tr,
-                        style: TextStyle(color: Colors.grey[500], fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            return SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: BusinessListCard(business: controller.filteredBusinesses[index]),
-                  );
-                },
-                childCount: controller.filteredBusinesses.length,
-              ),
-            );
-          }),
-          
-          const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
-        ],
+            }),
+            
+            const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
+          ],
+        ),
       ),
     );
   }

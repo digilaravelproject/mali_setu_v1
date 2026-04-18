@@ -17,6 +17,8 @@ import 'dart:convert';
 import 'dart:io';
 import '../../../../features/Auth/service/auth_service.dart';
 import '../page/matrimony_subscription_plan.dart';
+import 'matrimony_details_controller.dart';
+import 'matrimony_controller.dart';
 
 class RegMatrimonyController extends GetxController {
   final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
@@ -102,6 +104,7 @@ class RegMatrimonyController extends GetxController {
 
   // Photos
   final RxList<File> selectedPhotos = <File>[].obs;
+  final RxList<String> existingPhotos = <String>[].obs;
 
   // Pincode
   // final isFetchingPincode = false.obs;
@@ -170,7 +173,7 @@ class RegMatrimonyController extends GetxController {
       );
 
       if (images.isNotEmpty) {
-        int remainingSlots = 5 - selectedPhotos.length;
+        int remainingSlots = 5 - (selectedPhotos.length + existingPhotos.length);
         int addedCount = 0;
         List<String> failedFiles = [];
 
@@ -206,6 +209,10 @@ class RegMatrimonyController extends GetxController {
 
   void removePhoto(int index) {
     selectedPhotos.removeAt(index);
+  }
+
+  void removeExistingPhoto(int index) {
+    existingPhotos.removeAt(index);
   }
 
   /// Handle pincode changes for auto-fill
@@ -567,7 +574,7 @@ class RegMatrimonyController extends GetxController {
           "religion": [religion.value, casteCtrl.text],
           "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
           "dosh": dosh.value,
-          "photos": base64Photos,
+          "photos": [...existingPhotos, ...base64Photos],
           "blood_group": bloodGroup.value,
           "refferal_name": ref_nameCtrl.text,
         },
@@ -623,6 +630,18 @@ class RegMatrimonyController extends GetxController {
           await Get.find<AuthService>().refreshProfile();
         } catch (e) {
           debugPrint("Note: Post-registration profile refresh failed: $e");
+        }
+
+        // 🆕 NEW: Refresh Matrimony-specific controllers to show updated data immediately
+        try {
+          if (Get.isRegistered<MatrimonyDetailsController>()) {
+            Get.find<MatrimonyDetailsController>().refreshData();
+          }
+          if (Get.isRegistered<MatrimonyController>()) {
+            Get.find<MatrimonyController>().fetchProfiles(isSilent: true);
+          }
+        } catch (e) {
+          debugPrint("Note: Matrimony controllers refresh failed: $e");
         }
 
         Get.back(); // Close Registration Screen
@@ -894,6 +913,12 @@ class RegMatrimonyController extends GetxController {
       state.value = _safeValue(location['state']?.toString(), stateList.toList(), fallback: location['state']?.toString() ?? '');
       if (state.value.isNotEmpty && !stateList.contains(state.value)) {
         stateList.add(state.value);
+      }
+
+      // Photos
+      final photos = personal['photos'];
+      if (photos is List) {
+        existingPhotos.assignAll(photos.map((e) => e.toString()).toList());
       }
 
     } catch (e) {

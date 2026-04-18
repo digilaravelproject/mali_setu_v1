@@ -419,6 +419,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                       arguments: {
                         'id': currentProfile.userId,
                         'connection_status': currentProfile.connectionStatus,
+                        'conversation_id': currentProfile.conversationId,
                       },
                     ),
                     icon: (isAccepted && currentProfile.conversationId != null)

@@ -190,7 +190,14 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
                     children: [
                       Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
                       const SizedBox(width: 2),
-                      Text(location, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
                     ],
                   ),
                 ],

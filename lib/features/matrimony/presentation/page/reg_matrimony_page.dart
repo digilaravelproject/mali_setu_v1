@@ -12,6 +12,7 @@ import '../../../../common/widgets/selection_tile.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/helper/date_input_formatter.dart';
 import '../../../../core/helper/form_validator.dart';
+import '../../../../core/constent/api_constants.dart';
 
 class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
   const RegMatrimonyPage({super.key});
@@ -487,189 +488,162 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 // Photos Section
                 _buildSectionHeader("Photos (Up to 5)"),
-                Obx(() => controller.selectedPhotos.isNotEmpty
-                    ? SizedBox(
-                  //   height: 100,
-                  //   child: ListView.separated(
-                  //     scrollDirection: Axis.horizontal,
-                  //     itemCount: controller.selectedPhotos.length < 5
-                  //         ? controller.selectedPhotos.length + 1
-                  //         : 5,
-                  //     separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  //     itemBuilder: (context, index) {
-                  //       if (index == controller.selectedPhotos.length) {
-                  //         return GestureDetector(
-                  //           onTap: controller.pickPhotos,
-                  //           child: Container(
-                  //             width: 100,
-                  //             decoration: BoxDecoration(
-                  //               color: context.theme.primaryColor.withValues(alpha: 0.1),
-                  //               borderRadius: BorderRadius.circular(12),
-                  //               border: Border.all(
-                  //                 color: context.theme.primaryColor.withValues(alpha: 0.3),
-                  //               ),
-                  //             ),
-                  //             child: Icon(Icons.add_a_photo,
-                  //                 color: context.theme.primaryColor),
-                  //           ),
-                  //         );
-                  //       }
-                  //       return Stack(
-                  //         children: [
-                  //           ClipRRect(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //             child: Image.file(
-                  //               controller.selectedPhotos[index],
-                  //               width: 100,
-                  //               height: 100,
-                  //               fit: BoxFit.cover,
-                  //             ),
-                  //           ),
-                  //           Positioned(
-                  //             top: 4,
-                  //             right: 4,
-                  //             child: GestureDetector(
-                  //               onTap: () => controller.removePhoto(index),
-                  //               child: Container(
-                  //                 padding: const EdgeInsets.all(4),
-                  //                 decoration: const BoxDecoration(
-                  //                   color: Colors.red,
-                  //                   shape: BoxShape.circle,
-                  //                 ),
-                  //                 child: const Icon(Icons.close,
-                  //                     size: 14, color: Colors.white),
-                  //               ),
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       );
-                  //     },
-                  //   ),
-                  // )
-                  //     : GestureDetector(
-                  //   onTap: controller.pickPhotos,
-                  //   child: Container(
-                  //     width: double.infinity,
-                  //     padding: const EdgeInsets.symmetric(vertical: 24),
-                  //     decoration: BoxDecoration(
-                  //       color: context.theme.primaryColor.withValues(alpha: 0.05),
-                  //       borderRadius: BorderRadius.circular(12),
-                  //       border: Border.all(
-                  //         color: context.theme.primaryColor.withValues(alpha: 0.3),
-                  //         width: 1.5,
-                  //       ),
-                  //     ),
-                  //     child: Column(
-                  //       children: [
-                  //         Icon(Icons.add_photo_alternate_outlined,
-                  //             size: 40, color: context.theme.primaryColor),
-                  //         const SizedBox(height: 8),
-                  //         Text(
-                  //           "Tap to upload photos",
-                  //           style: context.textTheme.bodyMedium?.copyWith(
-                  //             color: context.theme.primaryColor,
-                  //             fontWeight: FontWeight.w600,
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // )),
+                Obx(() {
+                  final totalExisting = controller.existingPhotos.length;
+                  final totalSelected = controller.selectedPhotos.length;
+                  final totalPhotos = totalExisting + totalSelected;
 
-                  height: 100,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: controller.selectedPhotos.length < 5
-                        ? controller.selectedPhotos.length + 1
-                        : 5,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      if (index == controller.selectedPhotos.length) {
-                        return GestureDetector(
-                          onTap: controller.pickPhotos,
-                          child: Container(
-                            width: 100,
-                            decoration: BoxDecoration(
-                              color: context.theme.primaryColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: context.theme.primaryColor.withValues(alpha: 0.3),
+                  if (totalPhotos == 0) {
+                    return GestureDetector(
+                      onTap: controller.pickPhotos,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        decoration: BoxDecoration(
+                          color: context.theme.primaryColor.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: context.theme.primaryColor.withValues(alpha: 0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.add_photo_alternate_outlined,
+                                size: 40, color: context.theme.primaryColor),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Tap to upload photos",
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: context.theme.primaryColor,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: Icon(Icons.add_a_photo,
-                                color: context.theme.primaryColor),
-                          ),
-                        );
-                      }
-                      return Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              controller.selectedPhotos[index],
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Positioned(
-                            top: 4,
-                            right: 4,
-                            child: GestureDetector(
-                              onTap: () => controller.removePhoto(index),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.close,
-                                    size: 14, color: Colors.white),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Max size 2MB, Formats: JPG, PNG",
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.theme.primaryColor.withValues(alpha: 0.7),
+                                fontSize: 10,
                               ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                )
-                    : GestureDetector(
-                  onTap: controller.pickPhotos,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 24),
-                    decoration: BoxDecoration(
-                      color: context.theme.primaryColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: context.theme.primaryColor.withValues(alpha: 0.3),
-                        width: 1.5,
+                          ],
+                        ),
                       ),
+                    );
+                  }
+
+                  return SizedBox(
+                    height: 100,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: totalPhotos < 5 ? totalPhotos + 1 : 5,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        // "Add Photo" button at the end
+                        if (index == totalPhotos) {
+                          return GestureDetector(
+                            onTap: controller.pickPhotos,
+                            child: Container(
+                              width: 100,
+                              decoration: BoxDecoration(
+                                color: context.theme.primaryColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: context.theme.primaryColor.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Icon(Icons.add_a_photo, color: context.theme.primaryColor),
+                            ),
+                          );
+                        }
+
+                        // Display existing (network) photos first
+                        if (index < totalExisting) {
+                          final photoUrl = controller.existingPhotos[index];
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  ApiConstants.imageBaseUrl + photoUrl,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (ctx, err, stack) => Container(
+                                    width: 100,
+                                    height: 100,
+                                    color: Colors.grey[200],
+                                    child: const Icon(Icons.error_outline, color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => controller.removeExistingPhoto(index),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.delete_outline, size: 14, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              // Badge indicating "Server Photo"
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text("Saved", style: TextStyle(color: Colors.white, fontSize: 8)),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+
+                        // Display newly selected (local file) photos
+                        final localIndex = index - totalExisting;
+                        return Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                controller.selectedPhotos[localIndex],
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              top: 4,
+                              right: 4,
+                              child: GestureDetector(
+                                onTap: () => controller.removePhoto(localIndex),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    child: Column(
-                      children: [
-                        Icon(Icons.add_photo_alternate_outlined,
-                            size: 40, color: context.theme.primaryColor),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Tap to upload photos",
-                          style: context.textTheme.bodyMedium?.copyWith(
-                            color: context.theme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Max size 2MB, Formats: JPG, PNG",
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.theme.primaryColor.withValues(alpha: 0.7),
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
+                  );
+                }),
               ],
             ),
           ),

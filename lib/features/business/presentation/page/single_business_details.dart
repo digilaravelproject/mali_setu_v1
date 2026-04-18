@@ -78,145 +78,150 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               final topPadding = MediaQuery.of(context).padding.top;
               final fixedHeight = 500.0;
 
-              return NestedScrollView(
-              controller: _outerScrollController,
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverOverlapAbsorber(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                    sliver: SliverAppBar(
-                      floating: false,
-                      pinned: false,
-                      centerTitle: false,
-                      backgroundColor: context.theme.scaffoldBackgroundColor,
-                      elevation: innerBoxIsScrolled ? 4 : 0,
-                      shadowColor: Colors.black.withOpacity(0.05),
-                    //  expandedHeight: isOwner ? 580 : 460,
-                      expandedHeight: fixedHeight + topPadding,
-                      forceElevated: innerBoxIsScrolled,
-                      title: Obx(() => AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        opacity: _showTitle.value ? 1.0 : 0.0,
-                        child: Text(
-                          business.businessName?.toTitleCase() ?? '',
-                          style: context.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
-                            color: Colors.black87,
+              return RefreshIndicator(
+                onRefresh: () => controller.fetchBusinessDetails(argBusiness.id!, isRefresh: true),
+                color: context.theme.primaryColor,
+                backgroundColor: context.theme.scaffoldBackgroundColor,
+                child: NestedScrollView(
+                controller: _outerScrollController,
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    SliverOverlapAbsorber(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                      sliver: SliverAppBar(
+                        floating: false,
+                        pinned: false,
+                        centerTitle: false,
+                        backgroundColor: context.theme.scaffoldBackgroundColor,
+                        elevation: innerBoxIsScrolled ? 4 : 0,
+                        shadowColor: Colors.black.withOpacity(0.05),
+                      //  expandedHeight: isOwner ? 580 : 460,
+                        expandedHeight: fixedHeight + topPadding,
+                        forceElevated: innerBoxIsScrolled,
+                        title: Obx(() => AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: _showTitle.value ? 1.0 : 0.0,
+                          child: Text(
+                            business.businessName?.toTitleCase() ?? '',
+                            style: context.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        )),
+                        leading: IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+                          onPressed: () => Navigator.of(context).pop(),
                         ),
-                      )),
-                      leading: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                      actions: [
-                        if (isOwner)
-                          PopupMenuButton<String>(
-                            offset: const Offset(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
-                            onSelected: (value) {
-                              if (value == 'add_product') {
-                                Get.toNamed(AppRoutes.addProduct, arguments: business.id);
-                              } else if (value == 'add_service') {
-                                Get.toNamed(AppRoutes.addService, arguments: business.id);
-                              } else if (value == 'create_job') {
-                                // if (Get.isRegistered<CreateJobController>()) {
-                                //   Get.find<CreateJobController>().clearFields();
-                                // }
-                                Get.toNamed(AppRoutes.createJob,arguments: business.id );
-                              } else if (value == 'job_analytics') {
-                                Get.toNamed(AppRoutes.jobAnalytics);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'add_product',
-                                child: Row(children: [Icon(Icons.add_box_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_product'.tr)]),
-                              ),
-                              PopupMenuItem(
-                                value: 'add_service',
-                                child: Row(children: [Icon(Icons.add_circle_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_service'.tr)]),
-                              ),
-                              PopupMenuItem(
-                                value: 'create_job',
-                                child: Row(children: [Icon(Icons.work_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('create_job'.tr)]),
-                              ),
-                              PopupMenuItem(
-                                value: 'job_analytics',
-                                child: Row(children: [Icon(Icons.analytics_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('job_analytics'.tr)]),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 4),
-                      ],
-                      flexibleSpace: FlexibleSpaceBar(
-                        collapseMode: CollapseMode.pin,
-                        background: OverflowBox(
-                          alignment: Alignment.topCenter,
-                          maxHeight: double.infinity,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(height: MediaQuery.of(context).padding.top + 48),
-                              _buildBusinessHeader(business, context),
-                              const SizedBox(height: 20),
-                              _buildQuickActions(business, context),
-                              const SizedBox(height: 12),
-                              _buildStatsRow(business, context),
-                              const SizedBox(height: 16),
-                            ],
+                        actions: [
+                          if (isOwner)
+                            PopupMenuButton<String>(
+                              offset: const Offset(0, 48),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
+                              onSelected: (value) {
+                                if (value == 'add_product') {
+                                  Get.toNamed(AppRoutes.addProduct, arguments: business.id);
+                                } else if (value == 'add_service') {
+                                  Get.toNamed(AppRoutes.addService, arguments: business.id);
+                                } else if (value == 'create_job') {
+                                  // if (Get.isRegistered<CreateJobController>()) {
+                                  //   Get.find<CreateJobController>().clearFields();
+                                  // }
+                                  Get.toNamed(AppRoutes.createJob,arguments: business.id );
+                                } else if (value == 'job_analytics') {
+                                  Get.toNamed(AppRoutes.jobAnalytics);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  value: 'add_product',
+                                  child: Row(children: [Icon(Icons.add_box_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_product'.tr)]),
+                                ),
+                                PopupMenuItem(
+                                  value: 'add_service',
+                                  child: Row(children: [Icon(Icons.add_circle_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_service'.tr)]),
+                                ),
+                                PopupMenuItem(
+                                  value: 'create_job',
+                                  child: Row(children: [Icon(Icons.work_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('create_job'.tr)]),
+                                ),
+                                PopupMenuItem(
+                                  value: 'job_analytics',
+                                  child: Row(children: [Icon(Icons.analytics_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('job_analytics'.tr)]),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 4),
+                        ],
+                        flexibleSpace: FlexibleSpaceBar(
+                          collapseMode: CollapseMode.pin,
+                          background: OverflowBox(
+                            alignment: Alignment.topCenter,
+                            maxHeight: double.infinity,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(height: MediaQuery.of(context).padding.top + 48),
+                                _buildBusinessHeader(business, context),
+                                const SizedBox(height: 20),
+                                _buildQuickActions(business, context),
+                                const SizedBox(height: 12),
+                                _buildStatsRow(business, context),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      bottom: PreferredSize(
-                        preferredSize: const Size.fromHeight(48),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: context.theme.cardColor,
-                            border: Border(
-                              bottom: BorderSide(color: context.theme.dividerColor, width: 0.5),
+                        bottom: PreferredSize(
+                          preferredSize: const Size.fromHeight(48),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: context.theme.cardColor,
+                              border: Border(
+                                bottom: BorderSide(color: context.theme.dividerColor, width: 0.5),
+                              ),
                             ),
-                          ),
-                          child: TabBar(
-                            labelColor: context.theme.primaryColor,
-                            unselectedLabelColor: Colors.grey[600],
-                            indicatorColor: context.theme.primaryColor,
-                            indicatorWeight: 2,
-                            dividerColor: Colors.transparent,
-                            labelStyle: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                            child: TabBar(
+                              labelColor: context.theme.primaryColor,
+                              unselectedLabelColor: Colors.grey[600],
+                              indicatorColor: context.theme.primaryColor,
+                              indicatorWeight: 2,
+                              dividerColor: Colors.transparent,
+                              labelStyle: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                              unselectedLabelStyle: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                              tabs: [
+                                Tab(text: 'products'.tr),
+                                Tab(text: 'services'.tr),
+                                Tab(text: 'jobs'.tr),
+                                Tab(text: 'info'.tr),
+                              ],
                             ),
-                            unselectedLabelStyle: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                            ),
-                            tabs: [
-                              Tab(text: 'products'.tr),
-                              Tab(text: 'services'.tr),
-                              Tab(text: 'jobs'.tr),
-                              Tab(text: 'info'.tr),
-                            ],
                           ),
                         ),
                       ),
                     ),
+                  ];
+                },
+                body: Padding(
+                  padding: const EdgeInsets.only(bottom: 70),
+                  child: TabBarView(
+                    children: [
+                      Builder(builder: (context) => _buildProductsTab(context)),
+                      Builder(builder: (context) => _buildServicesTab(context)),
+                      Builder(builder: (context) => _buildJobsTab(context)),
+                      Builder(builder: (context) => _buildBusinessInfoTab(business, context)),
+                    ],
                   ),
-                ];
-              },
-              body: Padding(
-                padding: const EdgeInsets.only(bottom: 70),
-                child: TabBarView(
-                  children: [
-                    Builder(builder: (context) => _buildProductsTab(context)),
-                    Builder(builder: (context) => _buildServicesTab(context)),
-                    Builder(builder: (context) => _buildJobsTab(context)),
-                    Builder(builder: (context) => _buildBusinessInfoTab(business, context)),
-                  ],
                 ),
               ),
             );

@@ -641,13 +641,15 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> fetchBusinessDetails(int id) async {
+  Future<void> fetchBusinessDetails(int id, {bool isRefresh = false}) async {
     try {
-      isDetailsLoading.value = true;
-      selectedBusiness.value = null;
-      businessProducts.clear();
-      businessServices.clear();
-      businessJobs.clear();
+      if (!isRefresh) {
+        isDetailsLoading.value = true;
+        selectedBusiness.value = null;
+        businessProducts.clear();
+        businessServices.clear();
+        businessJobs.clear();
+      }
 
       final business = await getBusinessDetailsUseCase(id);
       selectedBusiness.value = business;

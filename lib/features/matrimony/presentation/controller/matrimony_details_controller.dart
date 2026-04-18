@@ -12,6 +12,7 @@ class MatrimonyDetailsController extends GetxController {
   RxBool isLoading = false.obs;
   Rx<MatrimonyProfile?> profile = Rx<MatrimonyProfile?>(null);
   RxInt currentImageIndex = 0.obs;
+  Rx<int?> conversationId = Rx<int?>(null);
 
   PageController? pageController;
   Timer? _timer;
@@ -21,6 +22,7 @@ class MatrimonyDetailsController extends GetxController {
     super.onInit();
     pageController = PageController();
     final id = Get.arguments['id'];
+    conversationId.value = Get.arguments['conversation_id'];
     if (id != null) {
       fetchProfileDetails(id);
     }
@@ -52,6 +54,17 @@ class MatrimonyDetailsController extends GetxController {
     });
   }
 
+  Future<void> refreshData() async {
+    if (profile.value?.userId != null) {
+      await fetchProfileDetails(profile.value!.userId!);
+    } else {
+      final id = Get.arguments['id'];
+      if (id != null) {
+        await fetchProfileDetails(id);
+      }
+    }
+  }
+
   Future<void> fetchProfileDetails(int id) async {
     isLoading.value = true;
     try {
@@ -70,6 +83,14 @@ class MatrimonyDetailsController extends GetxController {
           fetchedProfile.connectionStatus = argStatus;
         }
         
+        // Use conversation ID from arguments if not present in profile data
+        if (fetchedProfile.conversationId == null && conversationId.value != null) {
+          fetchedProfile.conversationId = conversationId.value;
+        }
+        
+        // Update local conversationId obs as well
+        conversationId.value = fetchedProfile.conversationId;
+
         profile.value = fetchedProfile;
         _startAutoScroll();
       } else {
