@@ -146,8 +146,7 @@ class FormValidator {
 
 
 
-/*
-  static String? password(String? value) {
+  static String? strictPassword(String? value) {
     if (value == null || value.isEmpty) {
       return "Please enter password";
     }
@@ -157,20 +156,19 @@ class FormValidator {
     }
 
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return "Password must contain at least 1 uppercase letter";
+      return "password_uppercase_required".tr;
     }
 
     if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return "Password must contain at least 1 number";
+      return "password_number_required".tr;
     }
 
     if (!RegExp(r'[!@#\$&*~_+\-=\[\]{};:"\\|,.<>?]').hasMatch(value)) {
-      return "Password must contain at least 1 special character";
+      return "password_special_required".tr;
     }
 
-  return null;
-}
-*/
+    return null;
+  }
 
 
 

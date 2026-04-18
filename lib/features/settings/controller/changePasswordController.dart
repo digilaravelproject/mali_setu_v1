@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:edu_cluezer/core/helper/form_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,21 +38,14 @@ class ChangePasswordController extends GetxController {
   }
 
   String? validateNewPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter new password';
-    }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
+    final error = FormValidator.strictPassword(value);
+    if (error != null) {
+      return error;
     }
 
     // Check if new password is same as current
     if (value == currentPasswordController.text) {
       return 'New password must be different from current password';
-    }
-
-    // Password strength validation (optional)
-    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$').hasMatch(value)) {
-      return 'Password must contain letters and numbers';
     }
 
     return null;

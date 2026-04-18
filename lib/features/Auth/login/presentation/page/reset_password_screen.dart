@@ -167,7 +167,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
                           ? Icons.visibility_off
                           : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isPasswordVisible.toggle(),
-                      validator: FormValidator.password,
+                      validator: FormValidator.strictPassword,
                       topPadding: 0,
                       isRequired: true,
                     ),

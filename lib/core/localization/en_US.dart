@@ -955,18 +955,10 @@ const Map<String, String> enUS = {
   "error_speech_timeout": "Speech timeout error",
   "business_hours": "Hours",
 
-
-
-
-
-  // "start_chat": "Start Chat",
-  // "start_chat": "Start Chat",
-
+  "password_uppercase_required": "Password must contain at least 1 uppercase letter",
+  "password_number_required": "Password must contain at least 1 number",
+  "password_special_required": "Password must contain at least 1 special character",
 };
-
-
-
-
 
 
 
