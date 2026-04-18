@@ -440,7 +440,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     
     // Added a small delay to ensure token and navigation state are fully settled, 
     // especially during the first login transition.
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       fetchData();
     });
   }
@@ -491,7 +491,6 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       if (isRefresh && searchQuery.isEmpty) {
         currentPage.value = 1;
-        businesses.clear();
       }
 
       // Determine which API to use: specialized search (POST - broken 405) or general list (GET - stable)

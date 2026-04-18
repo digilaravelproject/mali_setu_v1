@@ -117,26 +117,31 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                         actions: [
-                          if (isOwner)
-                            PopupMenuButton<String>(
-                              offset: const Offset(0, 48),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
-                              onSelected: (value) {
-                                if (value == 'add_product') {
-                                  Get.toNamed(AppRoutes.addProduct, arguments: business.id);
-                                } else if (value == 'add_service') {
-                                  Get.toNamed(AppRoutes.addService, arguments: business.id);
-                                } else if (value == 'create_job') {
-                                  // if (Get.isRegistered<CreateJobController>()) {
-                                  //   Get.find<CreateJobController>().clearFields();
-                                  // }
-                                  Get.toNamed(AppRoutes.createJob,arguments: business.id );
-                                } else if (value == 'job_analytics') {
-                                  Get.toNamed(AppRoutes.jobAnalytics);
+                          PopupMenuButton<String>(
+                            offset: const Offset(0, 48),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
+                            onSelected: (value) {
+                              if (value == 'refresh') {
+                                if (argBusiness.id != null) {
+                                  controller.fetchBusinessDetails(argBusiness.id!, isRefresh: true);
                                 }
-                              },
-                              itemBuilder: (context) => [
+                              } else if (value == 'add_product') {
+                                Get.toNamed(AppRoutes.addProduct, arguments: business.id);
+                              } else if (value == 'add_service') {
+                                Get.toNamed(AppRoutes.addService, arguments: business.id);
+                              } else if (value == 'create_job') {
+                                Get.toNamed(AppRoutes.createJob, arguments: business.id );
+                              } else if (value == 'job_analytics') {
+                                Get.toNamed(AppRoutes.jobAnalytics);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'refresh',
+                                child: Row(children: [Icon(Icons.refresh, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('refresh'.tr)]),
+                              ),
+                              if (isOwner) ...[
                                 PopupMenuItem(
                                   value: 'add_product',
                                   child: Row(children: [Icon(Icons.add_box_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_product'.tr)]),
@@ -154,8 +159,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   child: Row(children: [Icon(Icons.analytics_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('job_analytics'.tr)]),
                                 ),
                               ],
-                            ),
-                            const SizedBox(width: 4),
+                            ],
+                          ),
+                          const SizedBox(width: 4),
                         ],
                         flexibleSpace: FlexibleSpaceBar(
                           collapseMode: CollapseMode.pin,

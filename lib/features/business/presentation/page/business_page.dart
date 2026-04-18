@@ -38,6 +38,7 @@ class BusinessScreen extends GetView<BusinessController> {
         backgroundColor: Colors.grey[50],
         body: Obx(() {
 
+          // Show global shimmer only on very first load when everything is null
           if (controller.isLoading.value && controller.businesses.isEmpty && controller.myBusiness.value == null) {
             return _buildShimmerLoading(context);
           }
@@ -350,17 +351,29 @@ class BusinessScreen extends GetView<BusinessController> {
                 ),
               ),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                 (context, index) {
-                   return Padding(
-                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                     child: BusinessListCard(business: controller.businesses[index]),
-                   );
-                 },
-                 childCount: controller.businesses.length > 10 ? 10 : controller.businesses.length,
+            // Business List or Shimmer
+            if (controller.isLoading.value && controller.businesses.isEmpty)
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ShimmerLoading.rounded(height: 100),
+                  ),
+                  childCount: 5,
+                ),
+              )
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                   (context, index) {
+                     return Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                       child: BusinessListCard(business: controller.businesses[index]),
+                     );
+                   },
+                   childCount: controller.businesses.length > 10 ? 10 : controller.businesses.length,
+                 ),
                ),
-             ),
              // Show pagination info if there are more businesses
              SliverToBoxAdapter(
                child: controller.businesses.length > 10 || controller.hasNextPage.value
