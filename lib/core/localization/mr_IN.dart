@@ -940,7 +940,10 @@ const Map<String, String> mrIN = {
   "search_blogs": "ब्लॉग शोधा...",
   "address_info": "पत्ता माहिती",
   "edit_matrimony_profile": "मॅट्रिमोनी प्रोफाइल संपादित करा",
-  "subcaste": "उप-जात"
+  "subcaste": "उप-जात",
+  "designation_not_added": "पदनाम जोडलेले नाही",
+  "error_speech_timeout": "भाषण कालबाह्यता त्रुटी",
+  "business_hours": "कामाचे तास"
 
 };
 

@@ -81,7 +81,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   ),
                   _SettingsItem(
                     title: 'applied_jobs'.tr,
-                    icon: CupertinoIcons.collections_solid,
+                    icon: CupertinoIcons.bag,
                     onTap: () => Get.toNamed(AppRoutes.appliedJobList),
                   ),
                 ],

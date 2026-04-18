@@ -95,7 +95,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                         backgroundColor: context.theme.scaffoldBackgroundColor,
                         elevation: innerBoxIsScrolled ? 4 : 0,
                         shadowColor: Colors.black.withOpacity(0.05),
-                      //  expandedHeight: isOwner ? 580 : 460,
+                    //    expandedHeight: isOwner ? 580 : 460,
                         expandedHeight: fixedHeight + topPadding,
                         forceElevated: innerBoxIsScrolled,
                         title: Obx(() => AnimatedOpacity(
@@ -116,6 +116,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
+
                         actions: [
                           PopupMenuButton<String>(
                             offset: const Offset(0, 48),

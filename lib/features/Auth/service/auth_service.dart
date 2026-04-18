@@ -243,6 +243,9 @@ class AuthService extends GetxService {
         final userData = data['user'] ?? data['data']?['user'] ?? data['data'] ?? data;
         final user = User.fromJson(userData);
         
+      //  currentUser.value = user;
+        currentUser.value = null;
+        currentUser.refresh();
         currentUser.value = user;
 
         // Fetch Matrimony status if applicable
@@ -253,8 +256,11 @@ class AuthService extends GetxService {
               final matData = matResponse.data['data']?['profile'] ?? matResponse.data['profile'] ?? matResponse.data['data'];
               if (matData != null && (matData['approval_status'] != null || matData['status'] != null)) {
                 user.matrimonyApprovalStatus = (matData['approval_status'] ?? matData['status']).toString();
-                currentUser.value = user; // Refresh observable
+                // currentUser.value = user; // Refresh observable
+                // currentUser.refresh();
+                currentUser.value = null;
                 currentUser.refresh();
+                currentUser.value = user;
               }
             }
           } catch (e) {

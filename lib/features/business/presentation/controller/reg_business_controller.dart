@@ -101,6 +101,9 @@ class RegBusinessController extends GetxController {
   final isRegisteringCategory = false.obs;
   final customCategoryCtrl = TextEditingController();
   
+  // For business registration loading
+  final isRegistering = false.obs;
+  
   // Flag to prevent auto-fetch on init
   bool _ignorePincodeChange = false;
 
@@ -494,8 +497,13 @@ class RegBusinessController extends GetxController {
 
   Future<void> onRegister() async {
     if (!validateBusinessFields()) return;
+    
+    // Prevent double submission
+    if (isRegistering.value) return;
 
     try {
+      isRegistering.value = true;
+      
       // Get IDs from maps
       final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
       final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1;
@@ -541,11 +549,6 @@ class RegBusinessController extends GetxController {
         body['longitude'] = location['longitude'];
       }
 
-      Get.dialog(
-        const Center(child: CircularProgressIndicator()),
-        barrierDismissible: false,
-      );
-
       if (isEditMode && businessId != null) {
         // Convert images to base64
         List<String> base64Images = [];
@@ -564,8 +567,6 @@ class RegBusinessController extends GetxController {
           "${ApiConstants.updateBusinessServices}/$businessId",
           data: body,
         );
-
-        Get.back(); // Close Loading
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           final data = response.data;
@@ -608,8 +609,6 @@ class RegBusinessController extends GetxController {
         data: body,
       );
 
-      Get.back(); // Close Loading
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data['success'] == true) {
@@ -631,9 +630,10 @@ class RegBusinessController extends GetxController {
             message: data['message'] ?? "Something went wrong");
       }
     } catch (e) {
-      if (Get.isDialogOpen ?? false) Get.back(); // Close Loading if open
       CustomSnackBar.showError(
           message: "An unexpected error occurred: ${e.toString()}");
+    } finally {
+      isRegistering.value = false;
     }
   }
 

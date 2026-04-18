@@ -303,10 +303,13 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
 
                 const SizedBox(height: 30),
 
-                CustomButton(
-                  title: controller.isEditMode ? 'update_business'.tr : 'register_business'.tr,
-                  onPressed: controller.onRegister,
-                ),
+                Obx(() => CustomButton(
+                  title: controller.isRegistering.value 
+                    ? 'please_wait'.tr 
+                    : (controller.isEditMode ? 'update_business'.tr : 'register_business'.tr),
+                  onPressed: controller.isRegistering.value ? null : controller.onRegister,
+                  isLoading: controller.isRegistering.value,
+                )),
 
                 const SizedBox(height: 40),
               ],

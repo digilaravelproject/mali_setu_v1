@@ -318,7 +318,6 @@ class HomePage extends GetWidget<HomeController> {
                               icon: Icons.favorite_rounded,
                               buttonText: "view_profile".tr,
                               onTap: () {
-
                                 if (currentUser?.id != null) {
                                   Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
                                 }
@@ -327,6 +326,7 @@ class HomePage extends GetWidget<HomeController> {
                               color1: const Color(0xFFF48FB1),
                               color2: const Color(0xFFE91E63),
                               statusText: user?.matrimonyApprovalStatus ?? "Pending",
+
                             ),
 
                             const SizedBox(height: 120),

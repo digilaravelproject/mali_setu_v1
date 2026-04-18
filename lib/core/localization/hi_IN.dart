@@ -920,7 +920,11 @@ const Map<String, String> hiIN = {
   "search_blogs": "ब्लॉग खोजें...",
   "address_info": "पता जानकारी",
   "edit_matrimony_profile": "मैट्रिमोनी प्रोफाइल संपादित करें",
-  "subcaste": "उप-जाति"
+  "subcaste": "उप-जाति",
+  "designation_not_added": "पदनाम जोड़ा नहीं गया",
+  "error_speech_timeout": "भाषण समय समाप्ति त्रुटि",
+  "business_hours": "कार्य समय",
+
 
 
 

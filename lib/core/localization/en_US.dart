@@ -934,6 +934,13 @@ const Map<String, String> enUS = {
    "search_blogs": "Search blogs...",
    "address_info": "Address Info",
   "edit_matrimony_profile": "Edit Matrimony Profile",
+  "designation_not_added": "Designation Not Added",
+  "error_speech_timeout": "Speech timeout error",
+  "business_hours": "Hours",
+
+
+
+
 
   // "start_chat": "Start Chat",
   // "start_chat": "Start Chat",
