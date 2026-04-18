@@ -13,6 +13,7 @@ import '../../../../../widgets/phone_field_component.dart';
 import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_scaffold.dart';
 import '../../../../../widgets/custom_image_view.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../controller/register_controller.dart';
 
 class RegisterPage extends GetWidget<RegisterController> {
@@ -622,13 +623,24 @@ class RegisterPage extends GetWidget<RegisterController> {
                                     color: Colors.red,
                                   )
                                 else
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.file(
-                                      File(controller.casteCertificatePath.value),
-                                      height: 120,
-                                      width: 120,
-                                      fit: BoxFit.cover,
+                                  GestureDetector(
+                                    onTap: () {
+                                      Get.to(() => FullScreenImageViewer(
+                                        imageFile: File(controller.casteCertificatePath.value),
+                                        tag: 'caste_certificate',
+                                      ));
+                                    },
+                                    child: Hero(
+                                      tag: 'caste_certificate',
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          File(controller.casteCertificatePath.value),
+                                          height: 120,
+                                          width: 120,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 Positioned(

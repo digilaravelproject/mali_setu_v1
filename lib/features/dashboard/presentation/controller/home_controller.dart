@@ -3,19 +3,18 @@ import '../../../../core/utils/location_helper.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart' as coord_helper;
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/routes/app_routes.dart';
-
-import '../../../../packages/card_swiper/src/controller/card_swiper_controller.dart';
-import '../../../../packages/card_swiper/src/direction/card_swiper_direction.dart';
-import '../../../../packages/card_swiper/src/direction/card_swiper_direction.dart';
-import '../../../Auth/service/auth_service.dart';
-import '../../data/model/user_profile_data.dart';
-import '../../../business/data/model/res_all_business_model.dart';
-import '../../../business/domain/usecase/get_business_categories_usecase.dart';
-import '../../../business/domain/repository/all_business_repository.dart';
-import '../../domain/usecase/get_banners_usecase.dart';
-import '../../data/model/banner_model.dart';
-import '../../../business/domain/repository/all_business_repository.dart';
+import 'dart:async';
+import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/packages/card_swiper/src/controller/card_swiper_controller.dart';
+import 'package:edu_cluezer/packages/card_swiper/src/direction/card_swiper_direction.dart';
+import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/features/dashboard/data/model/user_profile_data.dart';
+import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
+import 'package:edu_cluezer/features/dashboard/domain/usecase/get_banners_usecase.dart';
+import 'package:edu_cluezer/features/dashboard/data/model/banner_model.dart';
+import 'package:edu_cluezer/features/notification/presentation/controller/notification_controller.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final RxInt currentIndex = 0.obs;
@@ -87,11 +86,21 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       isLoadingBanners.value = true;
       isLoadingCategories.value = true;
 
-      await Future.wait([
+      final List<Future<dynamic>> futures = [
         updateLocation(),
         fetchBanners(),
         fetchCategories(),
-      ]);
+      ];
+
+      if (Get.isRegistered<AuthService>()) {
+        futures.add(Get.find<AuthService>().refreshProfile());
+      }
+
+      if (Get.isRegistered<NotificationController>()) {
+        futures.add(Get.find<NotificationController>().loadUnreadCount());
+      }
+
+      await Future.wait(futures);
     } catch (e) {
       print("Refresh error: $e");
     } finally {

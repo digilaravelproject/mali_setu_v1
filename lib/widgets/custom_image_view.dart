@@ -409,17 +409,7 @@ class _ZoomableImageState extends State<_ZoomableImage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        leading: IconButton(
-          onPressed: Get.back,
-          style: IconButton.styleFrom(side: BorderSide.none),
-          icon: Icon(AppAssets.backArrow, color: Colors.white),
-        ),
-      ),
-      body: Center(
+    return Center(
         child: GestureDetector(
           onDoubleTapDown: (details) => _tapDownDetails = details,
           onDoubleTap: _handleDoubleTap,
@@ -447,9 +437,8 @@ class _ZoomableImageState extends State<_ZoomableImage> {
             ),
           ),
         )
-      )
     );
-      }
+  }
   }
 
 //   Widget _buildImage() {

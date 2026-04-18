@@ -48,21 +48,21 @@ class _DonationBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            "Spread Some Kindness",
-            style: TextStyle(
+          Text(
+            "spread_kindness".tr,
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              "Your subscription also helps us support these causes. Would you like to contribute more?",
+              "donation_prompt_description".tr,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ),
           const SizedBox(height: 24),
@@ -80,8 +80,8 @@ class _DonationBottomSheet extends StatelessWidget {
               Get.back();
               if (onClose != null) onClose!();
             },
-            child: const Text("Not right now",
-                style: TextStyle(color: Colors.grey)),
+            child: Text("not_right_now".tr,
+                style: const TextStyle(color: Colors.grey)),
           ),
         ],
       ),
@@ -119,18 +119,18 @@ class _DonationBottomSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    cause.title ?? "Cause",
+                    cause.title ?? "cause".tr,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    cause.organization ?? "Organization",
+                    cause.organization ?? "organization".tr,
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Goal: ₹${cause.targetAmount}",
+                    "${"goal".tr}: ₹${cause.targetAmount}",
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,

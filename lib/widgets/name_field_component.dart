@@ -17,6 +17,7 @@ class NameFieldComponent extends StatefulWidget {
   final TextEditingController? externalLastNameCtrl;
   // Optional custom title list — defaults to full list if not provided
   final List<String>? titleItems;
+  final bool showTitle;
 
   const NameFieldComponent({
     super.key,
@@ -28,6 +29,7 @@ class NameFieldComponent extends StatefulWidget {
     this.externalMiddleNameCtrl,
     this.externalLastNameCtrl,
     this.titleItems,
+    this.showTitle = true,
   });
 
   @override
@@ -111,7 +113,7 @@ class NameFieldComponentState extends State<NameFieldComponent> {
         // Trigger rebuild to sync error display
         if (mounted) setState(() {});
 
-        if (titleCtrl.text.trim().isEmpty) return 'Please select title';
+        if (widget.showTitle && titleCtrl.text.trim().isEmpty) return 'Please select title';
         if (firstNameCtrl.text.trim().isEmpty) return 'first_name_required'.tr;
         if (lastNameCtrl.text.trim().isEmpty) return 'last_name_required'.tr;
         return "Please fill name details";
@@ -143,32 +145,34 @@ class NameFieldComponentState extends State<NameFieldComponent> {
 
           Row(
             children: [
-              Expanded(
-                child:  AppInputTextField(
-                  label: 'title'.tr,
-                  controller: titleCtrl,
-                  isRequired: widget.isRequired,
-                  isDropdown: true,
-                  topPadding: 0,
-                  validator: (value) {
-                    if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-                      return 'title_required'.tr;
-                    }
-                    return null;
-                  },
-                  dropdownItems: widget.titleItems ?? [
-                    'mr'.tr,
-                    'mrs'.tr,
-                    'ms'.tr,
-                    'dr'.tr,
-                    'prof'.tr,
-                  ],
-                  onDropdownChanged: (value) {
-                    titleCtrl.text = value;
-                  },
+              if (widget.showTitle) ...[
+                Expanded(
+                  child: AppInputTextField(
+                    label: 'title'.tr,
+                    controller: titleCtrl,
+                    isRequired: widget.isRequired,
+                    isDropdown: true,
+                    topPadding: 0,
+                    validator: (value) {
+                      if (widget.isRequired && (value == null || value.trim().isEmpty)) {
+                        return 'title_required'.tr;
+                      }
+                      return null;
+                    },
+                    dropdownItems: widget.titleItems ?? [
+                      'mr'.tr,
+                      'mrs'.tr,
+                      'ms'.tr,
+                      'dr'.tr,
+                      'prof'.tr,
+                    ],
+                    onDropdownChanged: (value) {
+                      titleCtrl.text = value;
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: AppInputTextField(
                   label: 'first_name'.tr,

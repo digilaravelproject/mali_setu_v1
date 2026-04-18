@@ -804,6 +804,24 @@ const Map<String, String> mrIN = {
   "created_at": "तयार केले",
   "last_updated": "शेवटचे अपडेट",
   "description": "वर्णन",
+  "spread_kindness": "थोडं दयाळूपणा पसरवा",
+  "donation_prompt_description": "तुमचे योगदान आम्हाला या कारणांना मदत करण्यास देखील मदत करते. तुम्हाला अजून योगदान द्यायला आवडेल का?",
+  "not_right_now": "आता नको",
+  "cause": "कारण",
+  "organization": "संस्था",
+  "goal": "उद्दिष्ट",
+  "general": "सामान्य",
+  "trusted_ngo": "विश्वसनीय एनजीओ",
+  "raised_of": "₹@target पैकी ₹@raised उभारले",
+  "donors_count": "@count दानशूर",
+  "about_the_cause": "कारणाबद्दल",
+  "no_description_available": "कोणतेही वर्णन उपलब्ध नाही.",
+  "enter_donation_amount": "दान रक्कम प्रविष्ट करा",
+  "enter_valid_amount": "वैध रक्कम प्रविष्ट करा",
+  "guest": "अतिथी",
+  "contribute": "योगदान द्या",
+  "high": "उच्च",
+  "medium": "मध्यम",
 
 
 
@@ -879,7 +897,6 @@ const Map<String, String> mrIN = {
 
   'blogs' : "ब्लॉग्स",
   "middle_name": "मधले नाव",
-  'contribute' : "योगदान द्या",
   'clear_all' : "सर्व हटवा",
   'whatsapp' : "व्हॉट्सअ‍ॅप",
   'invalid_pincode' : "निकाल सापडला नाही",

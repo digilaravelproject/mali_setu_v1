@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/form_validator.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 
@@ -333,39 +334,57 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
             margin: const EdgeInsets.only(bottom: 16),
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: controller.selectedImages.isNotEmpty
-                      ? Image.file(
-                          controller.selectedImages[0],
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.network(
-                          controller.existingImages[0],
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                                strokeWidth: 2,
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[200],
-                              child: const Icon(Icons.broken_image, color: Colors.grey),
-                            );
-                          },
-                        ),
+                GestureDetector(
+                  onTap: () {
+                    if (controller.selectedImages.isNotEmpty) {
+                      Get.to(() => FullScreenImageViewer(
+                        imageFile: controller.selectedImages[0],
+                        tag: 'business_photo',
+                      ));
+                    } else {
+                      Get.to(() => FullScreenImageViewer(
+                        imageUrl: controller.existingImages[0],
+                        tag: 'business_photo',
+                      ));
+                    }
+                  },
+                  child: Hero(
+                    tag: 'business_photo',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: controller.selectedImages.isNotEmpty
+                          ? Image.file(
+                              controller.selectedImages[0],
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.network(
+                              controller.existingImages[0],
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded /
+                                            loadingProgress.expectedTotalBytes!
+                                        : null,
+                                    strokeWidth: 2,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.broken_image, color: Colors.grey),
+                                );
+                              },
+                            ),
+                    ),
+                  ),
                 ),
                 Positioned(
                   top: 8,

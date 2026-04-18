@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -264,6 +265,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   final _ = controller.nameWidgetKey.value;
                   return NameFieldComponent(
                     key: controller.nameFieldKey,
+                    showTitle: false,
                     externalTitleCtrl: controller.titleCtrl,
                     externalFirstNameCtrl: controller.firstNameCtrl,
                     externalMiddleNameCtrl: controller.middleNameCtrl,
@@ -563,18 +565,27 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                           final photoUrl = controller.existingPhotos[index];
                           return Stack(
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  ApiConstants.imageBaseUrl + photoUrl,
-                                  width: 100,
-                                  height: 100,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (ctx, err, stack) => Container(
-                                    width: 100,
-                                    height: 100,
-                                    color: Colors.grey[200],
-                                    child: const Icon(Icons.error_outline, color: Colors.grey),
+                              GestureDetector(
+                                onTap: () => Get.to(() => FullScreenImageViewer(
+                                  imageUrl: ApiConstants.imageBaseUrl + photoUrl,
+                                  tag: 'matrimony_existing_$index',
+                                )),
+                                child: Hero(
+                                  tag: 'matrimony_existing_$index',
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      ApiConstants.imageBaseUrl + photoUrl,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (ctx, err, stack) => Container(
+                                        width: 100,
+                                        height: 100,
+                                        color: Colors.grey[200],
+                                        child: const Icon(Icons.error_outline, color: Colors.grey),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -614,13 +625,22 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                         final localIndex = index - totalExisting;
                         return Stack(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                controller.selectedPhotos[localIndex],
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
+                            GestureDetector(
+                              onTap: () => Get.to(() => FullScreenImageViewer(
+                                imageFile: controller.selectedPhotos[localIndex],
+                                tag: 'matrimony_local_$localIndex',
+                              )),
+                              child: Hero(
+                                tag: 'matrimony_local_$localIndex',
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    controller.selectedPhotos[localIndex],
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
                             Positioned(
@@ -840,13 +860,20 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 // Location
                 _buildSectionHeader("location".tr),
+                AppInputTextField(
+                  controller: controller.addressCtrl,
+                  label: "address".tr,
+                  textInputType: TextInputType.streetAddress,
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(height: 12),
                 Obx(() => AppInputTextField(
                   controller: controller.pinCodeCtrl,
                   label: "pincode".tr,
                   isRequired: true,
                   validator: (val) => controller.errors['pincode'],
                   textInputType: TextInputType.number,
-                  textInputAction: TextInputAction.done,
+                  textInputAction: TextInputAction.next,
                   endIcon: controller.isFetchingPincode.value
 
                       ? null
@@ -864,13 +891,6 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   )
                       : null,
                 )),
-                const SizedBox(height: 12),
-                AppInputTextField(
-                  controller: controller.addressCtrl,
-                  label: "address".tr,
-                  textInputType: TextInputType.streetAddress,
-                  textInputAction: TextInputAction.next,
-                ),
                 const SizedBox(height: 12),
                 AppInputTextField(
                   controller: controller.talukaCtrl,

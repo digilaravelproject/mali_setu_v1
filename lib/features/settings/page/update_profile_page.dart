@@ -13,6 +13,7 @@ import '../../../../widgets/phone_field_component.dart';
 import '../../../../widgets/custom_buttons.dart';
 import '../../../../widgets/custom_scaffold.dart';
 import '../../../../widgets/custom_image_view.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import '../controller/profileController.dart';
 
@@ -295,25 +296,46 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                         ),
                       ],
                     ),
-                    child: ClipOval(
-                      child: profileImage != null
-                          ? Image.file(
-                              profileImage,
-                              fit: BoxFit.cover,
-                            )
-                          : (user?.profileImage != null &&
-                                  user!.profileImage!.isNotEmpty)
-                              ? CustomImageView(
-                                  url: user.profileImage!.startsWith('http')
-                                      ? user.profileImage!
-                                      : "${ApiConstants.imageBaseUrl}${user.profileImage}",
-                                  imagePath: AppAssets.imgAppLogo,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (profileImage != null) {
+                          Get.to(() => FullScreenImageViewer(
+                            imageFile: profileImage,
+                            tag: 'profile_image',
+                          ));
+                        } else if (user?.profileImage != null && user!.profileImage!.isNotEmpty) {
+                          final url = user.profileImage!.startsWith('http')
+                              ? user.profileImage!
+                              : "${ApiConstants.imageBaseUrl}${user.profileImage}";
+                          Get.to(() => FullScreenImageViewer(
+                            imageUrl: url,
+                            tag: 'profile_image',
+                          ));
+                        }
+                      },
+                      child: Hero(
+                        tag: 'profile_image',
+                        child: ClipOval(
+                          child: profileImage != null
+                              ? Image.file(
+                                  profileImage,
                                   fit: BoxFit.cover,
                                 )
-                              : Image.asset(
-                                  AppAssets.imgAppLogo,
-                                  fit: BoxFit.cover,
-                                ),
+                              : (user?.profileImage != null &&
+                                      user!.profileImage!.isNotEmpty)
+                                  ? CustomImageView(
+                                      url: user.profileImage!.startsWith('http')
+                                          ? user.profileImage!
+                                          : "${ApiConstants.imageBaseUrl}${user.profileImage}",
+                                      imagePath: AppAssets.imgAppLogo,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      AppAssets.imgAppLogo,
+                                      fit: BoxFit.cover,
+                                    ),
+                        ),
+                      ),
                     ),
                   ),
                 ),

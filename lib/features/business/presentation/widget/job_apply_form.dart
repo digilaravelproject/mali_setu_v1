@@ -4,6 +4,7 @@ import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 
 class JobApplyForm extends StatefulWidget {
@@ -380,11 +381,22 @@ class _JobApplyFormState extends State<JobApplyForm> {
           if (isImage)
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                _resumeFile!,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
+            child: GestureDetector(
+                onTap: () {
+                  Get.to(() => FullScreenImageViewer(
+                    imageFile: _resumeFile,
+                    tag: 'resume_preview',
+                  ));
+                },
+                child: Hero(
+                  tag: 'resume_preview',
+                  child: Image.file(
+                    _resumeFile!,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             )
           else

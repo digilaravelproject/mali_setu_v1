@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 
 class AddServiceController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -148,7 +149,26 @@ class AddServiceScreen extends StatelessWidget {
                 ),
                 child: controller.selectedImage.value != null
                     ? Stack(children: [
-                        ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(controller.selectedImage.value!, width: double.infinity, height: double.infinity, fit: BoxFit.cover)),
+                        GestureDetector(
+                          onTap: () {
+                            Get.to(() => FullScreenImageViewer(
+                              imageFile: controller.selectedImage.value,
+                              tag: 'service_photo',
+                            ));
+                          },
+                          child: Hero(
+                            tag: 'service_photo',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                controller.selectedImage.value!,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
                         Positioned(top: 8, right: 8, child: GestureDetector(
                           onTap: controller.removeImage,
                           child: Container(padding: const EdgeInsets.all(6), decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), child: const Icon(Icons.close, color: Colors.white, size: 18)),

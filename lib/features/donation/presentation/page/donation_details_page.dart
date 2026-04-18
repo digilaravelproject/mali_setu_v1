@@ -259,12 +259,12 @@ class DonationDetailsPage extends GetView<DonationController> {
                         children: [
                           _buildChip(
                             cause.category?.toUpperCase() ??
-                                "GENERAL",
+                            "general".tr.toUpperCase(),
                             Colors.blue,
                           ),
                           _buildChip(
                             cause.urgency?.toUpperCase() ??
-                                "NORMAL",
+                                "normal".tr.toUpperCase(),
                             _getUrgencyColor(
                                 cause.urgency),
                           ),
@@ -282,7 +282,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                           const SizedBox(width: 8),
                           Text(
                             cause.organization ??
-                                "Trusted NGO",
+                                "trusted_ngo".tr,
                             style: const TextStyle(
                                 fontWeight:
                                 FontWeight.w500),
@@ -327,7 +327,10 @@ class DonationDetailsPage extends GetView<DonationController> {
                           CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "₹${raised.toStringAsFixed(0)} raised of ₹${target.toStringAsFixed(0)}",
+                              "raised_of".trParams({
+                                'raised': raised.toStringAsFixed(0),
+                                'target': target.toStringAsFixed(0),
+                              }),
                               style: const TextStyle(
                                   fontWeight:
                                   FontWeight.bold),
@@ -351,7 +354,9 @@ class DonationDetailsPage extends GetView<DonationController> {
                             ),
                             const SizedBox(height: 10),
                             Text(
-                                "${cause.donationsCount ?? 0} donors"),
+                                "donors_count".trParams({
+                                  'count': (cause.donationsCount ?? 0).toString(),
+                                })),
                           ],
                         ),
                       ),
@@ -359,8 +364,8 @@ class DonationDetailsPage extends GetView<DonationController> {
                       const SizedBox(height: 30),
 
                       /// DESCRIPTION
-                      const Text(
-                        "About the Cause",
+                      Text(
+                        "about_the_cause".tr,
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight:
@@ -369,7 +374,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                       const SizedBox(height: 10),
                       Text(
                         cause.description ??
-                            "No description available.",
+                            "no_description_available".tr,
                         style: TextStyle(
                           height: 1.6,
                           color:
@@ -438,7 +443,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                     decoration:
                     InputDecoration(
                       hintText:
-                      "Enter donation amount",
+                      "enter_donation_amount".tr,
                       prefixIcon:
                       const Icon(Icons
                           .currency_rupee_rounded),
@@ -466,8 +471,8 @@ class DonationDetailsPage extends GetView<DonationController> {
                         if (amount <=
                             0) {
                           Get.snackbar(
-                              "Error",
-                              "Enter valid amount");
+                              "error".tr,
+                              "enter_valid_amount".tr);
                           return;
                         }
                         controller
@@ -475,7 +480,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                           cause,
                           amount,
                           user?.name ??
-                              "Guest",
+                              "guest".tr,
                           user?.email ??
                               "",
                           user?.phone ??
@@ -497,8 +502,8 @@ class DonationDetailsPage extends GetView<DonationController> {
                         ),
                       ),
                       child:
-                      const Text(
-                        "Contribute",
+                      Text(
+                        "contribute".tr,
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight:

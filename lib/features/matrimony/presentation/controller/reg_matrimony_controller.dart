@@ -229,14 +229,14 @@ class RegMatrimonyController extends GetxController {
   Future<void> _fetchAddressFromPincode(String pincode) async {
     try {
       isFetchingPincode.value = true;
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: "Fetching address details...",
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.blue,
-          icon: Icon(Icons.location_searching, color: Colors.white),
-        ),
-      );
+      // Get.showSnackbar(
+      //   const GetSnackBar(
+      //     message: "Fetching address details...",
+      //     duration: Duration(seconds: 2),
+      //     backgroundColor: Colors.blue,
+      //     icon: Icon(Icons.location_searching, color: Colors.white),
+      //   ),
+      // );
 
       final response = await PincodeHelper.fetchAddressFromPincode(pincode);
 
@@ -252,12 +252,12 @@ class RegMatrimonyController extends GetxController {
         talukaCtrl.text = response.name; // Taluka from pincode API
         country.value = response.country; // Assumed Indian via API
 
-        CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+        // CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       } else {
-        CustomSnackBar.showError(message: "Invalid pincode or no data found");
+        // CustomSnackBar.showError(message: "Invalid pincode or no data found");
       }
     } catch (e) {
-      CustomSnackBar.showError(message: "Failed to fetch address details");
+      // CustomSnackBar.showError(message: "Failed to fetch address details");
     } finally {
       isFetchingPincode.value = false;
     }
@@ -310,14 +310,14 @@ class RegMatrimonyController extends GetxController {
   Future<void> _fetchAddressFromPincode(String pincode) async {
     try {
       isFetchingPincode.value = true;
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: "Fetching address details...",
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.blue,
-          icon: Icon(Icons.location_searching, color: Colors.white),
-        ),
-      );
+      // Get.showSnackbar(
+      //   const GetSnackBar(
+      //     message: "Fetching address details...",
+      //     duration: Duration(seconds: 2),
+      //     backgroundColor: Colors.blue,
+      //     icon: Icon(Icons.location_searching, color: Colors.white),
+      //   ),
+      // );
 
       final response = await PincodeHelper.fetchAddressFromPincode(pincode);
 
@@ -332,12 +332,12 @@ class RegMatrimonyController extends GetxController {
         cityCtrl.text = response.district; // Using district as major city
         country.value = 'India'; // Assumed Indian via API
 
-        CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+        // CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       } else {
-        CustomSnackBar.showError(message: "Invalid pincode or no data found");
+        // CustomSnackBar.showError(message: "Invalid pincode or no data found");
       }
     } catch (e) {
-      CustomSnackBar.showError(message: "Failed to fetch address details");
+      // CustomSnackBar.showError(message: "Failed to fetch address details");
     } finally {
       isFetchingPincode.value = false;
     }
@@ -514,18 +514,18 @@ class RegMatrimonyController extends GetxController {
       // Sync name from widget state if available (user may have typed after prefill)
       final widgetState = nameFieldKey.currentState;
       if (widgetState != null) {
-        titleCtrl.text = widgetState.titleCtrl.text;
+        // titleCtrl.text = widgetState.titleCtrl.text;
         firstNameCtrl.text = widgetState.firstNameCtrl.text;
         middleNameCtrl.text = widgetState.middleNameCtrl.text;
         lastNameCtrl.text = widgetState.lastNameCtrl.text;
       }
 
       // Get name parts directly from controller's own TextEditingControllers
-      final titleText = titleCtrl.text.trim();
+      // final titleText = titleCtrl.text.trim();
       final firstNameText = firstNameCtrl.text.trim();
       final middleNameText = middleNameCtrl.text.trim();
       final lastNameText = lastNameCtrl.text.trim();
-      final combinedName = [titleText, firstNameText, middleNameText, lastNameText]
+      final combinedName = [/*titleText,*/ firstNameText, middleNameText, lastNameText]
           .where((s) => s.isNotEmpty).join(' ');
 
       // Convert images to base64
@@ -556,7 +556,7 @@ class RegMatrimonyController extends GetxController {
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
         "personal_details": {
-          "title": titleText,
+          // "title": titleText,
           "first_name": firstNameText,
           "middle_name": middleNameText,
           "last_name": lastNameText,
@@ -765,13 +765,13 @@ class RegMatrimonyController extends GetxController {
 
       // Set controller's own controllers (used in API body)
       if (personal['first_name'] != null || personal['middle_name'] != null) {
-        titleCtrl.text = personal['title']?.toString() ?? '';
+        // titleCtrl.text = personal['title']?.toString() ?? '';
         firstNameCtrl.text = personal['first_name']?.toString() ?? '';
         middleNameCtrl.text = personal['middle_name']?.toString() ?? '';
         lastNameCtrl.text = personal['last_name']?.toString() ?? '';
       } else if (fullName.isNotEmpty) {
         final components = NameParser.parse(fullName);
-        titleCtrl.text = components.title;
+        // titleCtrl.text = components.title;
         firstNameCtrl.text = components.firstName;
         middleNameCtrl.text = components.middleName;
         lastNameCtrl.text = components.lastName;

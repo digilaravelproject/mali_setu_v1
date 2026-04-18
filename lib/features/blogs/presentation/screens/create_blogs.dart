@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/create_blog_controller.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../../../../widgets/basic_text_field.dart';
 
 class CreateBlogScreen extends StatelessWidget {
@@ -162,11 +163,22 @@ class CreateBlogScreen extends StatelessWidget {
                                   ],
                                 ),
                               )
-                            : Image.file(
-                                controller.selectedFile.value!,
-                                width: double.infinity,
-                                height: 200,
-                                fit: BoxFit.cover,
+                            : GestureDetector(
+                                onTap: () {
+                                  Get.to(() => FullScreenImageViewer(
+                                    imageFile: controller.selectedFile.value,
+                                    tag: 'blog_media',
+                                  ));
+                                },
+                                child: Hero(
+                                  tag: 'blog_media',
+                                  child: Image.file(
+                                    controller.selectedFile.value!,
+                                    width: double.infinity,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                       ),
                       Positioned(

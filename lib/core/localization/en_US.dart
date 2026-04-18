@@ -795,6 +795,24 @@ const Map<String, String> enUS = {
   "created_at": "Created At",
   "last_updated": "Last Updated",
   "description": "Description",
+  "spread_kindness": "Spread Some Kindness",
+  "donation_prompt_description": "Your contribution also helps us support these causes. Would you like to contribute more?",
+  "not_right_now": "Not right now",
+  "cause": "Cause",
+  "organization": "Organization",
+  "goal": "Goal",
+  "general": "GENERAL",
+  "trusted_ngo": "Trusted NGO",
+  "raised_of": "₹@raised raised of ₹@target",
+  "donors_count": "@count donors",
+  "about_the_cause": "About the Cause",
+  "no_description_available": "No description available.",
+  "enter_donation_amount": "Enter donation amount",
+  "enter_valid_amount": "Enter valid amount",
+  "guest": "Guest",
+  "contribute": "Contribute",
+  "high": "High",
+  "medium": "Medium",
 
 
 
@@ -882,7 +900,6 @@ const Map<String, String> enUS = {
 
 
   'blogs' : "Blogs",
-  'contribute' : "Contribute",
   'whatsapp' : "Whatsapp",
   'invalid_pincode' : "No Match",
   'location_information' : "Location Information",
