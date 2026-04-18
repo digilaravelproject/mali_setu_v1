@@ -40,7 +40,7 @@ import '../../../../core/routes/app_routes.dart';
 
 
 
-class BusinessController extends GetxController {
+class BusinessController extends GetxController with WidgetsBindingObserver {
   final GetAllBusinessesUseCase getAllBusinessesUseCase;
   final GetMyBusinessesUseCase getMyBusinessesUseCase;
   final GetBusinessDetailsUseCase getBusinessDetailsUseCase;
@@ -436,14 +436,33 @@ class BusinessController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchData();
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Added a small delay to ensure token and navigation state are fully settled, 
+    // especially during the first login transition.
+    Future.delayed(const Duration(milliseconds: 500), () {
+      fetchData();
+    });
   }
   
   @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchDebounce?.cancel();
     searchController.dispose();
     super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // If we resumed and have no businesses, try fetching again 
+      // (in case location was just turned on)
+      if (businesses.isEmpty && !isLoading.value && searchText.isEmpty) {
+        debugPrint("📍 [BusinessController] App resumed with empty list, auto-refreshing...");
+        fetchData();
+      }
+    }
   }
 
   Future<void> fetchData() async {

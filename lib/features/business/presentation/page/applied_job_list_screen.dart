@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
 
 class AppliedJobsScreen extends StatefulWidget {
   @override
@@ -237,54 +238,71 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
 
   void _showApplicationDetail(JobApplication application) {
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: context.theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      Material(
+        color: context.theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "application_details".tr,
-                  style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "application_details".tr,
+                      style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    _buildStatusBadge(application.status ?? "pending"),
+                  ],
                 ),
-                _buildStatusBadge(application.status ?? "pending"),
+                const Divider(height: 32),
+                _buildDetailItem("cover_letter".tr, application.coverLetter ?? "no_cover_letter".tr),
+                const SizedBox(height: 16),
+                if (application.additionalInfo != null && application.additionalInfo!.isNotEmpty) ...[
+                  _buildDetailItem("additional_info".tr, application.additionalInfo!),
+                  const SizedBox(height: 16),
+                ],
+                if (application.resumeUrl != null && application.resumeUrl!.isNotEmpty) ...[
+                  _buildDetailItem("resume".tr, "available_online".tr),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        try {
+                          final resumeUrl = application.resumeUrl!;
+                          final isUrlAbsolute = resumeUrl.startsWith('http');
+                          final fullUrl = isUrlAbsolute ? resumeUrl : ApiConstants.imageBaseUrl + resumeUrl;
+                          await controller.launchResume(fullUrl);
+                        } catch (e) {
+                          Get.snackbar("Error", "Could not open resume");
+                        }
+                      },
+                      icon: const Icon(Icons.remove_red_eye_outlined),
+                      label: Text("view_resume".tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.theme.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => Get.back(),
+                    child:  Text("close".tr),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
-            const Divider(height: 32),
-            _buildDetailItem("cover_letter".tr, application.coverLetter ?? "no_cover_letter".tr),
-            const SizedBox(height: 16),
-            if (application.additionalInfo != null && application.additionalInfo!.isNotEmpty) ...[
-              _buildDetailItem("additional_info".tr, application.additionalInfo!),
-              const SizedBox(height: 16),
-            ],
-            if (application.resumeUrl != null) ...[
-              _buildDetailItem("resume".tr, "available_online".tr),
-              const SizedBox(height: 8),
-              ElevatedButton.icon(
-                onPressed: () {
-                   // Logic to view resume
-                },
-                icon: const Icon(Icons.remove_red_eye_outlined),
-                label:  Text("view_resume".tr),
-              ),
-              const SizedBox(height: 16),
-            ],
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => Get.back(),
-                child:  Text("close".tr),
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
       ),
       isScrollControlled: true,
