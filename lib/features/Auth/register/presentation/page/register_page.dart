@@ -229,6 +229,13 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
 
                   ),
+                  AppInputTextField(
+                    label: "village".tr,
+                    controller: controller.villageCtrl,
+                    isRequired: true,
+                    readOnly: false,
+                    topPadding: 0,
+                  ),
                   // TwoColumnRow(
                   //   left: AppInputTextField(
                   //     label: "sector".tr,
@@ -335,15 +342,16 @@ class RegisterPage extends GetWidget<RegisterController> {
                           : Icons.remove_red_eye_rounded,
                       onEndIconTap: () => controller.isCnfPasswordValue.toggle(),
                       topPadding: 0,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'confirm_password_required'.tr;
-                        }
-                        if (value != controller.passwordCtrl.text) {
-                          return 'passwords_do_not_match'.tr;
-                        }
-                        return null;
-                      },
+                      validator: FormValidator.password,
+                      //     (value) {
+                      //   if (value == null || value.isEmpty) {
+                      //     return 'confirm_password_required'.tr;
+                      //   }
+                      //   if (value != controller.passwordCtrl.text) {
+                      //     return 'passwords_do_not_match'.tr;
+                      //   }
+                      //   return null;
+                      // },
                     ),
                   ),
                 ],

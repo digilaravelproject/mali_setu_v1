@@ -24,7 +24,7 @@ abstract class BusinessRepository {
   Future<BusinessResponse> getMyJobs(int businessId);
   Future<JobDetailResponse> getJobDetails(int jobId);
   Future<BusinessResponse> toggleJobStatus(int id);
-  Future<JobAnalyticsResponse> getJobAnalytics();
+  Future<JobAnalyticsResponse> getJobAnalytics(int businessId);
   Future<BusinessResponse> applyJob(Map<String, dynamic> data);
   Future<MyApplicationsResponse> getMyApplications();
   Future<JobApplicationsResponse> getJobApplications(int jobId);

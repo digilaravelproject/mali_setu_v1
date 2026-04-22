@@ -125,8 +125,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   }
 
   @override
-  Future<JobAnalyticsResponse> getJobAnalytics() {
-    return dataSource.getJobAnalytics();
+  Future<JobAnalyticsResponse> getJobAnalytics(int businessId) {
+    return dataSource.getJobAnalytics(businessId);
   }
 
   @override

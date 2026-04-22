@@ -902,6 +902,7 @@ const Map<String, String> mrIN = {
   'invalid_pincode' : "निकाल सापडला नाही",
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका / गांव",
+  'village' : "गांव",
   'enter_pincode' : "पिनकोड टाका",
   'search_volunteers' : "स्वयंसेवक शोधा",
 

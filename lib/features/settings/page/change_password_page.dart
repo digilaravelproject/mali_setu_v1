@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/helper/form_validator.dart';
 import '../../../widgets/basic_text_field.dart';
 import '../controller/changePasswordController.dart';
 
@@ -155,7 +156,8 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
                   ? Icons.visibility
                   : Icons.visibility_off,
               onEndIconTap: () => controller.isCurrentPasswordVisible.toggle(),
-              validator: controller.validateCurrentPassword,
+              validator: FormValidator.password,
+            //  controller.validateCurrentPassword,
               onChanged: (_) => controller.checkFormValidity(),
             ),
             const SizedBox(height: 20),
@@ -172,7 +174,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
                   ? Icons.visibility
                   : Icons.visibility_off,
               onEndIconTap: () => controller.isNewPasswordVisible.toggle(),
-              validator: controller.validateNewPassword,
+              validator: FormValidator.password,
               onChanged: (_) => controller.checkFormValidity(),
             ),
             const SizedBox(height: 20),

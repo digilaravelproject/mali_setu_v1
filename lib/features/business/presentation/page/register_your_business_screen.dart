@@ -173,8 +173,19 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                // const SizedBox(height: 8),
                 _buildPhotoGrid(context),
                 const SizedBox(height: 24),
-
                 SectionTitle('location_information'.tr),
+
+                AppInputTextField(
+                  label: 'address'.tr,
+                  isRequired: true,
+                  controller: controller.addressCtrl,
+                  textInputType: TextInputType.streetAddress,
+                  iconData: Icons.location_on_outlined,
+                  errorText: controller.errors['address'],
+                ),
+
+
+
                 AppInputTextField(
                   label: 'pincode'.tr,
                   isRequired: true,
@@ -198,13 +209,34 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   },
                 ),
 
-                AppInputTextField(
-                  label: 'address'.tr,
-                  isRequired: true,
-                  controller: controller.addressCtrl,
-                  textInputType: TextInputType.streetAddress,
-                  iconData: Icons.location_on_outlined,
-                  errorText: controller.errors['address'],
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AppInputTextField(
+                        label: 'country'.tr,
+                        isRequired: true,
+                        controller: controller.countryCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: Icons.public_rounded,
+                        validator: FormValidator.name,
+                        errorText: controller.errors['country'],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppInputTextField(
+                        label: 'state'.tr,
+                        // isRequired: true,
+                        controller: controller.stateCtrl,
+                        textInputType: TextInputType.text,
+                        iconData: Icons.landscape_rounded,
+                        // validator: FormValidator.name,
+                        //  errorText: controller.errors['state'],
+                      ),
+                    ),
+
+                  ],
                 ),
 
                 Row(
@@ -222,54 +254,45 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                       ),
                     ),
                     const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: AppInputTextField(
+                    //     label: 'district'.tr,
+                    //    // isRequired: true,
+                    //     controller: controller.districtCtrl,
+                    //     textInputType: TextInputType.text,
+                    //     iconData: Icons.map_outlined,
+                    //  //   validator: FormValidator.name,
+                    //   //  errorText: controller.errors['district'],
+                    //   ),
+                    //
+                    // ),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: AppInputTextField(
-                        label: 'district'.tr,
-                       // isRequired: true,
-                        controller: controller.districtCtrl,
+                        label: 'taluka'.tr,
+                        controller: controller.talukaCtrl,
                         textInputType: TextInputType.text,
-                        iconData: Icons.map_outlined,
-                     //   validator: FormValidator.name,
-                      //  errorText: controller.errors['district'],
+                        iconData: Icons.location_on_outlined,
                       ),
                     ),
                   ],
                 ),
+
+
 
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                  //  const SizedBox(width: 12),
                     Expanded(
                       child: AppInputTextField(
-                        label: 'state'.tr,
-                       // isRequired: true,
-                        controller: controller.stateCtrl,
+                        label: 'village'.tr,
+                        controller: controller.villageCtrl,
                         textInputType: TextInputType.text,
-                        iconData: Icons.landscape_rounded,
-                       // validator: FormValidator.name,
-                      //  errorText: controller.errors['state'],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppInputTextField(
-                        label: 'country'.tr,
-                        isRequired: true,
-                        controller: controller.countryCtrl,
-                        textInputType: TextInputType.text,
-                        iconData: Icons.public_rounded,
-                        validator: FormValidator.name,
-                        errorText: controller.errors['country'],
+                        iconData: Icons.location_on_outlined,
                       ),
                     ),
                   ],
-                ),
-
-                AppInputTextField(
-                  label: 'taluka'.tr,
-                  controller: controller.talukaCtrl,
-                  textInputType: TextInputType.text,
-                  iconData: Icons.location_on_outlined,
                 ),
 
                 const SizedBox(height: 24),

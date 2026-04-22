@@ -43,6 +43,7 @@ class RegisterController extends GetxController {
   final TextEditingController districtCtrl = TextEditingController();
   final TextEditingController sectorCtrl = TextEditingController();
   final TextEditingController destinationCtrl = TextEditingController();
+  final TextEditingController villageCtrl = TextEditingController();
 
   /// PROFESSIONAL DETAILS
   final TextEditingController occupationCtrl = TextEditingController();
@@ -138,7 +139,8 @@ class RegisterController extends GetxController {
         // Auto-fill state, district, and city from first PostOffice object
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
-        destinationCtrl.text = response.name;
+        destinationCtrl.text = response.block;
+        villageCtrl.text = response.name;
         cityCtrl.text = response.country; // Post office name as city
 
         CustomSnackBar.showSuccess(
@@ -351,6 +353,7 @@ class RegisterController extends GetxController {
         sector: sectorCtrl.text.trim(),
         district: districtCtrl.text.trim(),
         destination: destinationCtrl.text.trim(),
+        village: villageCtrl.text.trim(),
         password: passwordCtrl.text.trim(),
         passwordConfirmation: confirmPasswordCtrl.text.trim(),
         userType: _getApiUserType(userTypeCtrl.text.trim()),
@@ -404,6 +407,7 @@ class RegisterController extends GetxController {
     districtCtrl.dispose();
     sectorCtrl.dispose();
     destinationCtrl.dispose();
+    villageCtrl.dispose();
     roadNumberCtrl.dispose();
 
     occupationCtrl.dispose();

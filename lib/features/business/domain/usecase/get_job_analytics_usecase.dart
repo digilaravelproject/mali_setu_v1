@@ -6,7 +6,7 @@ class GetJobAnalyticsUseCase {
 
   GetJobAnalyticsUseCase(this.repository);
 
-  Future<JobAnalyticsResponse> call() async {
-    return await repository.getJobAnalytics();
+  Future<JobAnalyticsResponse> call(int businessId) async {
+    return await repository.getJobAnalytics(businessId);
   }
 }

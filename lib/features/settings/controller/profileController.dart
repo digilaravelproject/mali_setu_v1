@@ -39,6 +39,7 @@ class UpProfileController extends GetxController {
   final pincodeCtrl = TextEditingController();
   final sectorCtrl = TextEditingController();
   final destinationCtrl = TextEditingController();
+  final villageCtrl = TextEditingController();
 
   // Profile Image
   final profileImage = Rxn<File>();
@@ -72,6 +73,7 @@ class UpProfileController extends GetxController {
       pincodeCtrl.text = user.pincode ?? "";
       sectorCtrl.text = user.sector ?? "";
       destinationCtrl.text = user.destination ?? "";
+      villageCtrl.text = user.village ?? "villagewkdnsa";
     }
   }
 
@@ -230,6 +232,7 @@ class UpProfileController extends GetxController {
         'pincode': pincodeCtrl.text,
         'sector': sectorCtrl.text,
         'destination': destinationCtrl.text,
+        'village': villageCtrl.text,
         if (location != null) 'latitude': location['latitude'],
         if (location != null) 'longitude': location['longitude'],
       };
@@ -294,7 +297,8 @@ class UpProfileController extends GetxController {
         cityCtrl.text = response.division;
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
-        destinationCtrl.text = response.name; // Taluka
+        destinationCtrl.text = response.block; // Taluka
+        villageCtrl.text = response.name; // Taluka
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       } else {
         CustomSnackBar.showError(message: "Invalid pincode or no data found");
@@ -315,7 +319,7 @@ class UpProfileController extends GetxController {
     final controllers = [
       fullNameCtrl, ageCtrl, phoneNumberCtrl, occupationCtrl, emailCtrl,
       streetAddressCtrl, nearbyLocationCtrl, roadNumberCtrl, cityCtrl,
-      stateCtrl, districtCtrl, pincodeCtrl, sectorCtrl, destinationCtrl,
+      stateCtrl, districtCtrl, pincodeCtrl, sectorCtrl, destinationCtrl,villageCtrl
     ];
 
     for (final controller in controllers) {

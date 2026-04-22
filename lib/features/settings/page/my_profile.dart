@@ -37,12 +37,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'streetAddress': user?.address ?? 'N/A',
     'nearbyLocation': user?.nearbyLocation ?? 'N/A',
     'roadNumber': user?.roadNumber ?? 'N/A',
+    'country': user?.roadNumber ?? 'N/A',
     'city': user?.city ?? 'N/A',
     'state': user?.state ?? 'N/A',
     'district': user?.district ?? 'N/A',
     'pincode': user?.pincode ?? 'N/A',
     'sector': user?.sector ?? 'N/A',
     'destination': user?.destination ?? 'N/A',
+    'village': user?.village ?? 'N/A',
     'accountStatus': user?.status ?? 'Active',
     'joinedDate': user?.createdAt ?? 'N/A',
     'membershipType': 'Premium',
@@ -325,10 +327,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 16),
         _buildInfoRow(
-          label: 'taluka'.tr,
-          value: userData['destination']!,
-          icon: Icons.home_outlined,
-          isFullWidth: true,
+          label: 'pincode'.tr,
+          value: userData['pincode']!,
+          icon: Icons.pin_drop_outlined,
         ),
         const SizedBox(height: 16),
         Row(
@@ -336,7 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: _buildInfoRow(
-                label: 'city'.tr,
+                label: 'country'.tr,
                 value: userData['city']!,
                 icon: Icons.location_city_outlined,
               ),
@@ -351,13 +352,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+
+
         const SizedBox(height: 16),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
              Expanded(
               child: _buildInfoRow(
-                label: 'district'.tr,
+                label: 'city'.tr,
                 value: userData['district']!,
                 icon: Icons.terrain_outlined,
               ),
@@ -365,12 +368,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: _buildInfoRow(
-                label: 'pincode'.tr,
-                value: userData['pincode']!,
-                icon: Icons.pin_drop_outlined,
+                label: 'taluka'.tr,
+                value: userData['destination']!,
+                icon: Icons.home_outlined,
+                isFullWidth: true,
               ),
+
+
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        _buildInfoRow(
+          label: 'village'.tr,
+          value: userData['village']!,
+          icon: Icons.pin_drop_outlined,
         ),
       ],
     );

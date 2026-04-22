@@ -97,9 +97,6 @@ class ApiConstants {
     // Banner Api
     static const String getBanner = "banner";
 
-
-
-
     static const String matrimonyPymentOrder = "payment/create-order/matrimony";
     static const String paymentVerify = "payment/verify";
     static const String businessPymentOrder = "payment/create-order/business";

@@ -320,6 +320,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     Expanded(
                       child: AppInputTextField(
                         controller: controller.heightCtrl,
+                        textInputType: TextInputType.number,
                         label: "height".tr,
                         hintText: "Enter height",
                       ),
@@ -329,6 +330,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                       child: AppInputTextField(
                         controller: controller.weightCtrl,
                         label: "weight".tr,
+                        textInputType: TextInputType.number,
                         hintText: "Enter weight",
                       ),
                     ),
@@ -867,7 +869,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 12),
-                Obx(() => AppInputTextField(
+                AppInputTextField(
                   controller: controller.pinCodeCtrl,
                   label: "pincode".tr,
                   isRequired: true,
@@ -890,16 +892,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     ),
                   )
                       : null,
-                )),
-                const SizedBox(height: 12),
-                AppInputTextField(
-                  controller: controller.talukaCtrl,
-                  label: "taluka".tr,
-                  textInputType: TextInputType.text,
-                  textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
-                Obx(() => SelectionTile(
+               SelectionTile(
                   label: "country".tr,
                   value: controller.country.value,
                   icon: Icons.public,
@@ -907,9 +901,8 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   errorText: controller.errors['country'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "Country", controller.countryList, controller.onCountryChanged),
-                )),
-                const SizedBox(height: 12),
-                Obx(() => SelectionTile(
+                ),
+                SelectionTile(
                   label: "state".tr,
                   value: controller.state.value,
                   icon: Icons.map,
@@ -917,15 +910,27 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   errorText: controller.errors['state'],
                   onTap: () => _showSingleSelectBottomSheet(
                       context, "State", controller.stateList, controller.state.call),
-                )),
-                const SizedBox(height: 12),
-                Obx(() => AppInputTextField(
+                ),
+                AppInputTextField(
                   controller: controller.cityCtrl,
                   label: "city".tr,
                   isRequired: true,
                   validator: (val) => controller.errors['city'],
                   textInputAction: TextInputAction.done,
-                )),
+                ),
+                AppInputTextField(
+                  controller: controller.talukaCtrl,
+                  label: "taluka".tr,
+                  textInputType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                ),
+                AppInputTextField(
+                  controller: controller.villageCtrl,
+                  label: "village".tr,
+                  textInputType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                ),
+
               ],
             ),
           ),

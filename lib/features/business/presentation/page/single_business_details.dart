@@ -134,7 +134,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                               } else if (value == 'create_job') {
                                 Get.toNamed(AppRoutes.createJob, arguments: business.id );
                               } else if (value == 'job_analytics') {
-                                Get.toNamed(AppRoutes.jobAnalytics);
+                                Get.toNamed(AppRoutes.jobAnalytics,arguments: {
+                                  "business_id": business.id,
+                                },);
                               }
                             },
                             itemBuilder: (context) => [

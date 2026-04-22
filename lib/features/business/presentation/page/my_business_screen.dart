@@ -47,13 +47,13 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                     size: 18,
                   ),
                 ),
-                actions: [
-                  IconButton(
-                    onPressed: () => Get.toNamed(AppRoutes.jobAnalytics),
-                    icon: const Icon(Icons.analytics_outlined),
-                    tooltip: 'job_analytics'.tr,
-                  ),
-                ],
+                // actions: [
+                //   IconButton(
+                //     onPressed: () => Get.toNamed(AppRoutes.jobAnalytics),
+                //     icon: const Icon(Icons.analytics_outlined),
+                //     tooltip: 'job_analytics'.tr,
+                //   ),
+                // ],
               ),
 
               // Promotion Card

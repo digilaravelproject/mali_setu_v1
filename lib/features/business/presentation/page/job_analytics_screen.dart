@@ -19,7 +19,9 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchJobAnalytics();
+      final args = Get.arguments ?? {};
+      final int businessId = args["business_id"] ?? 0;
+      controller.fetchJobAnalytics(businessId);
     });
   }
 

@@ -156,6 +156,7 @@ class Business {
   String? state;
   String? district;
   String? taluka;
+  String? village;
   String? city;
   String? pincode;
   String? country;
@@ -190,6 +191,7 @@ class Business {
     this.state,
     this.district,
     this.taluka,
+    this.village,
     this.city,
     this.pincode,
     this.country,
@@ -227,6 +229,7 @@ class Business {
       district: json['district'],
       address: json['address'],
       taluka: json['taluka'],
+      village: json['village'],
       city: json['city'],
       pincode: json['pincode'],
       country: json['country'],

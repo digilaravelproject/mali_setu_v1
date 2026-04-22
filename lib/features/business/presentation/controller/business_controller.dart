@@ -156,14 +156,14 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   }
 
   void startListening() async {
-    if (!_authService.hasBusiness()) {
-      _showBusinessRegisterDialog();
-      return;
-    }
-    if (!_authService.hasPaymentForBusiness()) {
-      _showBusinessPaymentDialog();
-      return;
-    }
+    // if (!_authService.hasBusiness()) {
+    //   _showBusinessRegisterDialog();
+    //   return;
+    // }
+    // if (!_authService.hasPaymentForBusiness()) {
+    //   _showBusinessPaymentDialog();
+    //   return;
+    // }
 
     voiceSearchError.value = "";
     _showVoiceSearchBottomSheet();
@@ -817,10 +817,10 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> fetchJobAnalytics() async {
+  Future<void> fetchJobAnalytics(int businessId) async {
     try {
       isLoading.value = true;
-      final response = await getJobAnalyticsUseCase();
+      final response = await getJobAnalyticsUseCase(businessId);
       if (response.success == true) {
         jobAnalytics.value = response.data;
       } else {
@@ -1083,6 +1083,8 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       CustomSnackBar.showError(message: "Download failed: $e");
     }
   }
+
+
   void _showBusinessRegisterDialog() {
     Get.dialog(
       Dialog(

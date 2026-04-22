@@ -55,7 +55,8 @@ class RegBusinessController extends GetxController {
   final districtCtrl = TextEditingController();
   final countryCtrl = TextEditingController(text: "India");
   final talukaCtrl = TextEditingController();
-  
+  final villageCtrl = TextEditingController();
+
   final isFetchingPincode = false.obs;
   final isDetailsLoading = false.obs;
 
@@ -213,13 +214,14 @@ class RegBusinessController extends GetxController {
       final response = await PincodeHelper.fetchAddressFromPincode(pincode);
 
       if (response != null) {
-        cityCtrl.text = response.division;
+        cityCtrl.text = response.district;
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
         _ignorePincodeChange = true;
         countryCtrl.text = response.country;
         _ignorePincodeChange = false;
-        talukaCtrl.text = response.name;
+        talukaCtrl.text = response.block;
+        villageCtrl.text = response.name;
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       }
     } catch (e) {
@@ -525,6 +527,7 @@ class RegBusinessController extends GetxController {
         "state": stateCtrl.text,
         "district": districtCtrl.text,
         "taluka": talukaCtrl.text,
+        "village": villageCtrl.text,
         "city": cityCtrl.text,
         "pincode": pinCodeCtrl.text,
         "opening_time": openingTime == null ? "" : "${openingTime!.hour.toString().padLeft(2, '0')}:${openingTime!.minute.toString().padLeft(2, '0')}",
@@ -535,6 +538,7 @@ class RegBusinessController extends GetxController {
           "state": stateCtrl.text,
           "district": districtCtrl.text,
           "taluka": talukaCtrl.text,
+          "village": villageCtrl.text,
           "city": cityCtrl.text,
           "pincode": pinCodeCtrl.text,
           "country": countryCtrl.text,
@@ -753,6 +757,7 @@ class RegBusinessController extends GetxController {
     cityCtrl.text = business.city ?? "";
     districtCtrl.text = business.district ?? "";
     talukaCtrl.text = business.taluka ?? "";
+    villageCtrl.text = business.village ?? "";
     stateCtrl.text = business.state ?? "";
     countryCtrl.text = business.country ?? "India";
 
@@ -841,6 +846,7 @@ class RegBusinessController extends GetxController {
     districtCtrl.dispose();
     countryCtrl.dispose();
     talukaCtrl.dispose();
+    villageCtrl.dispose();
     customCategoryCtrl.dispose();
     super.onClose();
   }

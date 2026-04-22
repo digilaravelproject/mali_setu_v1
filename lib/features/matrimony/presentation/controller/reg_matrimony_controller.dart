@@ -57,6 +57,7 @@ class RegMatrimonyController extends GetxController {
   final cityCtrl = TextEditingController();
   final pinCodeCtrl = TextEditingController();
   final talukaCtrl = TextEditingController();
+  final villageCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
   final bloodGroupCtrl = TextEditingController();
   final ref_nameCtrl = TextEditingController();
@@ -248,8 +249,9 @@ class RegMatrimonyController extends GetxController {
         }
 
         state.value = fetchedState;
-        cityCtrl.text = "${response.district} , ${response.division}, ${response.name}"; // Using district as major city
-        talukaCtrl.text = response.name; // Taluka from pincode API
+        cityCtrl.text = "${response.district}"; // Using district as major city
+        talukaCtrl.text = response.block; // Taluka from pincode API
+        villageCtrl.text = response.name; // Taluka from pincode API
         country.value = response.country; // Assumed Indian via API
 
         // CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
@@ -603,6 +605,7 @@ class RegMatrimonyController extends GetxController {
           "country": country.value,
           "pincode": pinCodeCtrl.text,
           "taluka": talukaCtrl.text,
+          "village": villageCtrl.text,
           "address": addressCtrl.text,
         },
         "partner_preferences": {
@@ -907,6 +910,7 @@ class RegMatrimonyController extends GetxController {
       cityCtrl.text = location['city']?.toString() ?? '';
       pinCodeCtrl.text = location['pincode']?.toString() ?? '';
       talukaCtrl.text = location['taluka']?.toString() ?? '';
+      villageCtrl.text = location['village']?.toString() ?? '';
       addressCtrl.text = location['address']?.toString() ?? '';
       final fetchedCountry = location['country']?.toString() ?? 'India';
       onCountryChanged(fetchedCountry);
@@ -1003,6 +1007,7 @@ class RegMatrimonyController extends GetxController {
     pinCodeCtrl.removeListener(_onPincodeChanged);
     pinCodeCtrl.dispose();
     talukaCtrl.dispose();
+    villageCtrl.dispose();
     addressCtrl.dispose();
     casteCtrl.dispose();
     subCasteCtrl.dispose();

@@ -116,7 +116,9 @@ class User {
   String? city;
   String? sector;
   String? district;
+  String? country;
   String? destination;
+  String? village;
   String? userType;
   String? casteVerificationStatus;
   String? status;
@@ -161,9 +163,11 @@ class User {
     this.roadNumber,
     this.state,
     this.city,
+    this.country,
     this.sector,
     this.district,
     this.destination,
+    this.village,
     this.userType,
     this.casteVerificationStatus,
     this.status,
@@ -228,8 +232,10 @@ class User {
     state = json['state'];
     city = json['city'];
     sector = json['sector'];
+    country = json['country'];
     district = json['district'];
     destination = json['destination'];
+    village = json['village'];
     userType = json['user_type'];
     casteVerificationStatus = json['caste_verification_status'];
     status = json['status'];
@@ -276,9 +282,11 @@ class User {
     data['road_number'] = roadNumber;
     data['state'] = state;
     data['city'] = city;
+    data['country'] = country;
     data['sector'] = sector;
     data['district'] = district;
     data['destination'] = destination;
+    data['village'] = village;
     data['user_type'] = userType;
     data['caste_verification_status'] = casteVerificationStatus;
     data['status'] = status;

@@ -15,6 +15,7 @@ class ReqRegisterModel {
   String? sector;
   String? district;
   String? destination;
+  String? village;
   String? password;
   String? passwordConfirmation;
   String? userType;
@@ -43,6 +44,7 @@ class ReqRegisterModel {
       this.sector,
       this.district,
       this.destination,
+      this.village,
       this.password,
       this.passwordConfirmation,
       this.userType,
@@ -74,6 +76,7 @@ class ReqRegisterModel {
     sector = json['sector'];
     district = json['district'];
     destination = json['destination'];
+    village = json['village'];
     password = json['password'];
     passwordConfirmation = json['password_confirmation'];
     userType = json['user_type'];
@@ -102,6 +105,7 @@ class ReqRegisterModel {
     data['sector'] = sector;
     data['district'] = district;
     data['destination'] = destination;
+    data['village'] = village;
     data['password'] = password;
     data['password_confirmation'] = passwordConfirmation;
     data['user_type'] = userType;
