@@ -57,6 +57,7 @@ class ApiConstants {
     static const String matrimonyCasts = "matrimony/casts";
     static const String matrimonySubCasts = "matrimony/casts"; // matrimony/casts/{id}/subcasts
     static const String matrimonySubscriptionPlans = "plans/matrimony";
+    static const String education = "education";
 
     // Payment Api
     static const String createOrderBusiness = "payment/create-order/business";

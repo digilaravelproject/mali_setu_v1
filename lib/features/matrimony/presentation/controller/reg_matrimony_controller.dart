@@ -11,6 +11,7 @@ import '../../../../models/name_components.dart';
 import '../../../../utils/name_parser.dart';
 import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_plan_model.dart';
+import '../../data/model/education_model.dart';
 import '../../../../core/helper/pincode_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
@@ -138,7 +139,7 @@ class RegMatrimonyController extends GetxController {
   final List<String> doshList = ['No', 'Yes', 'Don\'t Know'];
   final List<String> bloodGroupList = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
-  final List<String> educationList = ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other'];
+  final RxList<String> educationList = <String>[].obs;
   final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Owner', 'Self Employed', 'Not Working'];
 
   final List<String> familyTypeList = ['Nuclear', 'Joint'];
@@ -685,6 +686,7 @@ class RegMatrimonyController extends GetxController {
     super.onInit();
     print("DEBUG_MATRIMONY: onInit with arguments: ${Get.arguments}");
     fetchCasts();
+    fetchEducations();
     // Initialize stateList for default country (India)
     onCountryChanged(country.value);
     pinCodeCtrl.addListener(_onPincodeChanged);
@@ -956,6 +958,27 @@ class RegMatrimonyController extends GetxController {
       }
     } catch (e) {
       print("Error fetching casts: $e");
+    }
+  }
+
+  Future<void> fetchEducations() async {
+    try {
+      final response = await _repository.getEducations();
+      if (response.success == true && response.data.isNotEmpty) {
+        // Extract unique highest_qualification values
+        final qualifications = response.data
+            .where((edu) => edu.highestQualification != null && edu.highestQualification!.isNotEmpty)
+            .map((edu) => edu.highestQualification!)
+            .toSet() // Remove duplicates
+            .toList();
+        
+        educationList.assignAll(qualifications);
+        print("DEBUG_EDUCATION: Fetched ${qualifications.length} education qualifications");
+      }
+    } catch (e) {
+      print("Error fetching educations: $e");
+      // Fallback to default list if API fails
+      educationList.assignAll(['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other']);
     }
   }
 

@@ -3,6 +3,7 @@ import '../../data/model/matrimony_chat_response.dart';
 import 'package:edu_cluezer/core/network/multipart.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../data/model/matrimony_plan_model.dart';
+import '../../data/model/education_model.dart';
 
 import '../../data/model/search_matrimony_response.dart';
 import '../../data/model/connection_requests_response.dart';
@@ -25,4 +26,5 @@ abstract class MatrimonyRepository {
   Future<CastResponse> getCasts();
   Future<SubCastResponse> getSubCasts(int castId);
   Future<MatrimonyPlanResponse> getMatrimonyPlans();
+  Future<EducationResponse> getEducations();
 }

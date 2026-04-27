@@ -7,6 +7,7 @@ import '../model/search_matrimony_response.dart';
 import '../model/connection_requests_response.dart';
 import '../model/matrimony_cast_model.dart';
 import '../model/matrimony_plan_model.dart';
+import '../model/education_model.dart';
 
 abstract class MatrimonyDataSource {
   Future<MatrimonyResponse> createProfile(Map<String, dynamic> data);
@@ -26,6 +27,7 @@ abstract class MatrimonyDataSource {
   Future<CastResponse> getCasts();
   Future<SubCastResponse> getSubCasts(int castId);
   Future<MatrimonyPlanResponse> getMatrimonyPlans();
+  Future<EducationResponse> getEducations();
 }
 
 class MatrimonyDataSourceImpl implements MatrimonyDataSource {
@@ -138,5 +140,11 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   Future<MatrimonyPlanResponse> getMatrimonyPlans() async {
     final response = await apiClient.get(ApiConstants.matrimonyPlans);
     return MatrimonyPlanResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<EducationResponse> getEducations() async {
+    final response = await apiClient.get(ApiConstants.education);
+    return EducationResponse.fromJson(response.data);
   }
 }

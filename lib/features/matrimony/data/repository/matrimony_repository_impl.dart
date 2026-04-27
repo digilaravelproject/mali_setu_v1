@@ -8,6 +8,7 @@ import '../../data/model/search_matrimony_response.dart';
 import '../../data/model/connection_requests_response.dart';
 import '../model/matrimony_cast_model.dart';
 import '../model/matrimony_chat_response.dart';
+import '../model/education_model.dart';
 
 class MatrimonyRepositoryImpl implements MatrimonyRepository {
   final MatrimonyDataSource dataSource;
@@ -97,5 +98,10 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   @override
   Future<MatrimonyPlanResponse> getMatrimonyPlans() async {
     return await dataSource.getMatrimonyPlans();
+  }
+
+  @override
+  Future<EducationResponse> getEducations() async {
+    return await dataSource.getEducations();
   }
 }
