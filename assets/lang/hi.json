@@ -27,5 +27,8 @@
   
   "no_plans_found_showing_all": "आपके व्यवसाय प्रकार के लिए कोई विशिष्ट योजना नहीं मिली। सभी योजनाएं दिखा रहे हैं।",
   "failed_to_create_payment_order": "भुगतान आदेश बनाने में विफल",
-  "payment_initialization_failed": "भुगतान प्रारंभ करने में विफल"
+  "payment_initialization_failed": "भुगतान प्रारंभ करने में विफल",
+  
+  "press_back_again_to_discard_data": "सभी डेटा हटाने के लिए फिर से बैक दबाएं",
+  "press_back_again_to_discard_changes": "परिवर्तन हटाने के लिए फिर से बैक दबाएं"
 }

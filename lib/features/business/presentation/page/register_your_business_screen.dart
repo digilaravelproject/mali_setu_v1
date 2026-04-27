@@ -8,22 +8,31 @@ import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 
+import '../../../../widgets/custom_scaffold.dart';
+
 class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
   const RegYourBusinessScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
+    return Obx(() {
+      controller.canExit.value; // Dummy read for Obx
+      return CustomScaffold(
+        onWillPop: () async {
+          if (controller.canExit.value) return true;
+          controller.handleBack();
+          return false;
+        },
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: controller.handleBack,
+            icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
+          ),
+          title: Text(
+            controller.isEditMode ? 'update_business'.tr : 'register_business'.tr,
+            style: context.textTheme.titleMedium,
+          ),
         ),
-        title: Text(
-          controller.isEditMode ? 'update_business'.tr : 'register_business'.tr,
-          style: context.textTheme.titleMedium,
-        ),
-      ),
       body: Obx(() {
         if (controller.isDetailsLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -341,7 +350,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
           ),
         );
       }),
-    );
+    );});
   }
 
   Widget _buildPhotoGrid(BuildContext context) {

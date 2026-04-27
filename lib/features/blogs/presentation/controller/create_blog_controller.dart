@@ -8,6 +8,28 @@ import 'blog_controller.dart';
 import '../../../../widgets/custom_snack_bar.dart';
 
 class CreateBlogController extends GetxController {
+  /// For Double Back Exit
+  DateTime? lastPressedTime;
+  final canExit = false.obs;
+
+  void handleBack() {
+    final now = DateTime.now();
+    if (lastPressedTime == null ||
+        now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
+      lastPressedTime = now;
+      canExit.value = true;
+      CustomSnackBar.showInfo(
+        message: "Back karne pe data remove ho jayega. Dubara back dabaye bahar jane ke liye.",
+      );
+      // Reset canExit after 2 seconds
+      Future.delayed(const Duration(seconds: 2), () {
+        canExit.value = false;
+      });
+      return;
+    }
+    Get.back();
+  }
+
   final BlogRepository _repository = BlogRepository();
   final ImagePicker _picker = ImagePicker();
   

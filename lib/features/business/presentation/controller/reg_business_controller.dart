@@ -111,6 +111,28 @@ class RegBusinessController extends GetxController {
   /// Validation Errors
   final errors = <String, String>{}.obs;
 
+  /// For Double Back Exit
+  DateTime? lastPressedTime;
+  final canExit = false.obs;
+
+  void handleBack() {
+    final now = DateTime.now();
+    if (lastPressedTime == null ||
+        now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
+      lastPressedTime = now;
+      canExit.value = true;
+      CustomSnackBar.showInfo(
+        message: "press_back_again_to_discard_data".tr,
+      );
+      // Reset canExit after 2 seconds
+      Future.delayed(const Duration(seconds: 3), () {
+        canExit.value = false;
+      });
+      return;
+    }
+    Get.back();
+  }
+
   @override
   void onInit() {
     super.onInit();

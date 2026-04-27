@@ -27,32 +27,39 @@ class UpdateProfilePage extends GetView<UpProfileController> {
     // Dynamic top padding to handle status bar gracefully
     final topPadding = MediaQuery.of(context).padding.top;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-      ),
-      child: CustomScaffold(
-        extendBodyBehindAppBar: true,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Form(
-            key: controller.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: topPadding + 10),
-                
-                // Back button - plain icon as previously requested
-                GestureDetector(
-                  onTap: () => Get.back(),
-                  child: const Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 24.0,
-                    color: Colors.black,
+    return Obx(() {
+      controller.canExit.value; // Dummy read for Obx
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+        child: CustomScaffold(
+          onWillPop: () async {
+            if (controller.canExit.value) return true;
+            controller.handleBack();
+            return false;
+          },
+          extendBodyBehindAppBar: true,
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Form(
+              key: controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: topPadding + 10),
+                  
+                  // Back button - plain icon as previously requested
+                  GestureDetector(
+                    onTap: controller.handleBack,
+                    child: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 24.0,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
                 const SizedBox(height: 0),
                 
                 // Header title
@@ -269,8 +276,9 @@ class UpdateProfilePage extends GetView<UpProfileController> {
             ),
           ),
         ),
-      ),
-    );
+      )
+      );
+    });
   }
 
   Widget _buildProfileImageSection(BuildContext context) {

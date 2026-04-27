@@ -17,14 +17,21 @@ class CreateJobPage extends GetWidget<CreateJobController> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
+    return Obx(() {
+      controller.canExit.value; // Dummy read for Obx
+      return CustomScaffold(
+        onWillPop: () async {
+          if (controller.canExit.value) return true;
+          controller.handleBack();
+          return false;
+        },
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(AppAssets.backArrow),
+          leading: IconButton(
+            onPressed: controller.handleBack,
+            icon: Icon(AppAssets.backArrow),
+          ),
+          title: Obx(() => Text(controller.isEditMode.value ? 'update_job_posting'.tr : 'create_job_posting'.tr)),
         ),
-        title: Obx(() => Text(controller.isEditMode.value ? 'update_job_posting'.tr : 'create_job_posting'.tr)),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -384,7 +391,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
           ),
         ),
       ),
-    );
+    );});
   }
 
   void _showCustomCategoryDialog(BuildContext context) {

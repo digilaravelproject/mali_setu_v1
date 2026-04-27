@@ -123,6 +123,28 @@ class RegMatrimonyController extends GetxController {
   final errors = <String, String>{}.obs;
   final approvalStatus = ''.obs; // 🆕 ADDED
 
+  /// For Double Back Exit
+  DateTime? lastPressedTime;
+  final canExit = false.obs;
+
+  void handleBack() {
+    final now = DateTime.now();
+    if (lastPressedTime == null ||
+        now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
+      lastPressedTime = now;
+      canExit.value = true;
+      CustomSnackBar.showInfo(
+        message: "Back karne pe data remove ho jayega. Dubara back dabaye bahar jane ke liye.",
+      );
+      // Reset canExit after 2 seconds
+      Future.delayed(const Duration(seconds: 2), () {
+        canExit.value = false;
+      });
+      return;
+    }
+    Get.back();
+  }
+
   /// --- Static Data Lists ---
   final List<String> profileCreatedByList = ['Self', 'Parent', 'Sibling', 'Relative', 'Friend'];
   final List<String> genderList = ['Male', 'Female'];
