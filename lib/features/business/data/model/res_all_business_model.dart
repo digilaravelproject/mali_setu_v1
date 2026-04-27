@@ -243,6 +243,44 @@ class Business {
           : [],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'business_name': businessName,
+      'business_type': businessType,
+      'category_id': categoryId,
+      'description': description,
+      'contact_phone': contactPhone,
+      'contact_email': contactEmail,
+      'website': website,
+      'opening_time': opening_time,
+      'closing_time': closing_time,
+      'verification_status': verificationStatus,
+      'verified_at': verifiedAt,
+      'photo': photo,
+      'subscription_status': subscriptionStatus,
+      'subscription_expires_at': subscriptionExpiresAt,
+      'job_posting_limit': jobPostingLimit,
+      'KMfromuser': KMfromuser,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'status': status,
+      'state': state,
+      'district': district,
+      'address': address,
+      'taluka': taluka,
+      'village': village,
+      'city': city,
+      'pincode': pincode,
+      'country': country,
+      'user': user?.toJson(),
+      'category': category?.toJson(),
+      'products': products?.map((x) => x.toJson()).toList(),
+      'services': services?.map((x) => x.toJson()).toList(),
+    };
+  }
 }
 
 class User {
@@ -293,6 +331,24 @@ class User {
       userType: json['user_type'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'age': age,
+      'address': address,
+      'nearby_location': nearbyLocation,
+      'pincode': pincode,
+      'state': state,
+      'city': city,
+      'district': district,
+      'destination': destination,
+      'user_type': userType,
+    };
+  }
 }
 
 class Category {
@@ -312,6 +368,16 @@ class Category {
       photo: json['photo'],
       isActive: _asBool(json['is_active']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'photo': photo,
+      'is_active': isActive,
+    };
   }
 }
 
@@ -345,6 +411,18 @@ class Product {
       status: json['status'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'business_id': businessId,
+      'name': name,
+      'description': description,
+      'cost': cost,
+      'image_path': imagePath,
+      'status': status,
+    };
+  }
 }
 
 class Service {
@@ -376,6 +454,18 @@ class Service {
       imagePath: json['image_path'],
       status: json['status'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'business_id': businessId,
+      'name': name,
+      'description': description,
+      'cost': cost,
+      'image_path': imagePath,
+      'status': status,
+    };
   }
 }
 

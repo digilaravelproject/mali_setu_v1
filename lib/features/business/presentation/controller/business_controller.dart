@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -438,11 +440,55 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     
-    // Added a small delay to ensure token and navigation state are fully settled, 
-    // especially during the first login transition.
-    Future.delayed(const Duration(milliseconds: 100), () {
-      fetchData();
-    });
+    print("DEBUG_BUSINESS: onInit() called");
+    
+    // Load cached data immediately for instant display
+    _loadCachedBusinesses();
+    
+    // Then fetch fresh data without delay
+    fetchData();
+  }
+
+  // Cache key constants
+  static const String _businessesCacheKey = 'cached_businesses';
+  static const String _businessesCacheTimeKey = 'cached_businesses_time';
+  static const Duration _cacheValidDuration = Duration(hours: 12);
+
+  /// Load businesses from cache
+  Future<void> _loadCachedBusinesses() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString(_businessesCacheKey);
+      final cachedTime = prefs.getInt(_businessesCacheTimeKey);
+      
+      if (cachedJson != null && cachedTime != null) {
+        final cacheAge = DateTime.now().millisecondsSinceEpoch - cachedTime;
+        
+        // Load cache regardless of age (fresh data will replace it)
+        final List<dynamic> jsonList = json.decode(cachedJson);
+        final cachedBusinesses = jsonList.map((json) => Business.fromJson(json)).toList();
+        
+        if (cachedBusinesses.isNotEmpty) {
+          businesses.assignAll(cachedBusinesses);
+          print("DEBUG_BUSINESSES: Loaded ${cachedBusinesses.length} businesses from cache (age: ${Duration(milliseconds: cacheAge).inHours}h)");
+        }
+      }
+    } catch (e) {
+      print("DEBUG_BUSINESSES: Error loading cache: $e");
+    }
+  }
+
+  /// Save businesses to cache
+  Future<void> _saveBusinessesCache(List<Business> businessesToCache) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = businessesToCache.map((biz) => biz.toJson()).toList();
+      await prefs.setString(_businessesCacheKey, json.encode(jsonList));
+      await prefs.setInt(_businessesCacheTimeKey, DateTime.now().millisecondsSinceEpoch);
+      print("DEBUG_BUSINESSES: Saved ${businessesToCache.length} businesses to cache");
+    } catch (e) {
+      print("DEBUG_BUSINESSES: Error saving cache: $e");
+    }
   }
   
   @override
@@ -457,7 +503,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // If we resumed and have no businesses, try fetching again 
-      // (in case location was just turned on)
+      // (in case location was just turned on or previous fetch failed)
       if (businesses.isEmpty && !isLoading.value && searchText.isEmpty) {
         debugPrint("📍 [BusinessController] App resumed with empty list, auto-refreshing...");
         fetchData();
@@ -466,25 +512,38 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> fetchData() async {
+    print("DEBUG_BUSINESS: fetchData() called");
+    
+    // Load cache first for instant display
+    await _loadCachedBusinesses();
+    
+    // Then fetch fresh data
     try {
-      isLoading.value = true;
       await Future.wait([
         fetchAllBusinesses(isRefresh: true),
         fetchMyBusinesses(),
-      ]);
+      ], eagerError: false); // Continue even if one fails
+      
+      print("DEBUG_BUSINESS: fetchData() completed successfully");
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
-    } finally {
-      isLoading.value = false;
+      print("ERROR_BUSINESS: fetchData() failed: $e");
+      // Don't show error if we have cached data
+      if (businesses.isEmpty && myBusiness.value == null) {
+        CustomSnackBar.showError(message: "Failed to load data. Please refresh.");
+      }
     }
   }
 
 
   Future<void> fetchAllBusinesses({bool isRefresh = false}) async {
     final searchQuery = searchText.value.trim();
+    
+    // Don't show loading if we already have businesses and not refreshing
+    final bool showLoading = businesses.isEmpty || isRefresh;
+    
     if (searchQuery.isNotEmpty) {
       isSearching.value = true;
-    } else {
+    } else if (showLoading) {
       isLoading.value = true;
     }
     
@@ -493,13 +552,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         currentPage.value = 1;
       }
 
-      // Determine which API to use: specialized search (POST - broken 405) or general list (GET - stable)
-      BusinessPaginationResult response;
-
       final location = await LocationHelper.getCurrentLocation();
       
-      // Use getAllBusinessesUseCase for both list and search to avoid 405 in POST search/search_business
-      response = await getAllBusinessesUseCase(
+      final response = await getAllBusinessesUseCase(
         page: currentPage.value,
         search: searchQuery.isNotEmpty ? searchQuery : null,
         lat: location?['latitude'],
@@ -508,6 +563,10 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
 
       if (isRefresh || searchQuery.isNotEmpty) {
         businesses.value = response.businesses;
+        // Save to cache only for non-search results
+        if (searchQuery.isEmpty && response.businesses.isNotEmpty) {
+          await _saveBusinessesCache(response.businesses);
+        }
       } else {
         businesses.addAll(response.businesses);
       }
@@ -517,11 +576,17 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       totalPages.value = response.lastPage;
       hasNextPage.value = response.hasNextPage;
       
-      print("DEBUG_PAGINATION: Current page: ${currentPage.value}, Total pages: ${totalPages.value}, Has next: ${hasNextPage.value}");
-      print("DEBUG_PAGINATION: Loaded ${response.businesses.length} businesses, Total in list: ${businesses.length}");
+      print("DEBUG_BUSINESSES: Loaded ${response.businesses.length} businesses, Total: ${businesses.length}");
+      print("DEBUG_PAGINATION: Page ${currentPage.value}/${totalPages.value}, Has next: ${hasNextPage.value}");
       
     } catch (e) {
-      print('Error fetching all businesses: $e');
+      print('ERROR_BUSINESSES: $e');
+      // Don't clear existing businesses on error
+      if (businesses.isEmpty) {
+        CustomSnackBar.showError(message: "Failed to load businesses");
+      } else {
+        print("DEBUG_BUSINESSES: Keeping existing ${businesses.length} businesses after error");
+      }
     } finally {
       isLoading.value = false;
       isSearching.value = false;

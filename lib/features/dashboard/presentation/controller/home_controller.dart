@@ -4,6 +4,8 @@ import 'package:edu_cluezer/core/helper/location_helper.dart' as coord_helper;
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/packages/card_swiper/src/controller/card_swiper_controller.dart';
 import 'package:edu_cluezer/packages/card_swiper/src/direction/card_swiper_direction.dart';
@@ -47,13 +49,62 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    
+    print("DEBUG_HOME: onInit() called");
+    
     if (Get.isRegistered<AuthService>()) {
       Get.find<AuthService>().refreshProfile();
     }
 
+    // Load cached data immediately for instant display
+    _loadCachedCategories();
+    
+    // Then fetch fresh data
     updateLocation();
     fetchCategories();
     fetchBanners();
+  }
+
+  // Cache key constants
+  static const String _categoriesCacheKey = 'cached_categories';
+  static const String _categoriesCacheTimeKey = 'cached_categories_time';
+  static const Duration _cacheValidDuration = Duration(hours: 24);
+
+  /// Load categories from cache
+  Future<void> _loadCachedCategories() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString(_categoriesCacheKey);
+      final cachedTime = prefs.getInt(_categoriesCacheTimeKey);
+      
+      if (cachedJson != null && cachedTime != null) {
+        final cacheAge = DateTime.now().millisecondsSinceEpoch - cachedTime;
+        
+        // Load cache regardless of age (fresh data will replace it)
+        final List<dynamic> jsonList = json.decode(cachedJson);
+        final cachedCategories = jsonList.map((json) => Category.fromJson(json)).toList();
+        
+        if (cachedCategories.isNotEmpty) {
+          categories.assignAll(cachedCategories);
+          print("DEBUG_CATEGORIES: Loaded ${cachedCategories.length} categories from cache (age: ${Duration(milliseconds: cacheAge).inHours}h)");
+        }
+      }
+    } catch (e) {
+      print("DEBUG_CATEGORIES: Error loading cache: $e");
+    }
+  }
+
+  /// Save categories to cache
+  Future<void> _saveCategoriesCache(List<Category> categoriesToCache) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonList = categoriesToCache.map((cat) => cat.toJson()).toList();
+      await prefs.setString(_categoriesCacheKey, json.encode(jsonList));
+      await prefs.setInt(_categoriesCacheTimeKey, DateTime.now().millisecondsSinceEpoch);
+      print("DEBUG_CATEGORIES: Saved ${categoriesToCache.length} categories to cache");
+    } catch (e) {
+      print("DEBUG_CATEGORIES: Error saving cache: $e");
+    }
   }
 
   @override
@@ -65,8 +116,20 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Re-fetch location when app comes to foreground (e.g. back from settings)
+      // Re-fetch location and categories when app comes to foreground
       updateLocation();
+      
+      // Only refresh categories if list is empty (indicates previous failure)
+      if (categories.isEmpty) {
+        print("DEBUG_CATEGORIES: App resumed with empty categories, refreshing...");
+        fetchCategories();
+      }
+      
+      // Same for banners
+      if (banners.isEmpty) {
+        print("DEBUG_BANNERS: App resumed with empty banners, refreshing...");
+        fetchBanners();
+      }
     }
   }
 
@@ -82,10 +145,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
 
   Future<void> refreshHomeData() async {
+    print("DEBUG_HOME: refreshHomeData() called");
+    
     try {
-      isLoadingBanners.value = true;
-      isLoadingCategories.value = true;
-
       final List<Future<dynamic>> futures = [
         updateLocation(),
         fetchBanners(),
@@ -100,23 +162,42 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         futures.add(Get.find<NotificationController>().loadUnreadCount());
       }
 
-      await Future.wait(futures);
+      await Future.wait(futures, eagerError: false); // Continue even if one fails
+      
+      print("DEBUG_HOME: refreshHomeData() completed");
     } catch (e) {
-      print("Refresh error: $e");
-    } finally {
-      isLoadingBanners.value = false;
-      isLoadingCategories.value = false;
+      print("ERROR_HOME: refreshHomeData() failed: $e");
+      // Don't show error, data might be partially loaded
     }
   }
 
 
   Future<void> fetchBanners() async {
-    try {
+    // Don't show loading if we already have banners (silent refresh)
+    final bool showLoading = banners.isEmpty;
+    
+    if (showLoading) {
       isLoadingBanners.value = true;
+    }
+    
+    try {
       final response = await getBannersUseCase();
-      banners.assignAll(response.data);
+      
+      if (response.data.isNotEmpty) {
+        banners.assignAll(response.data);
+        print("DEBUG_BANNERS: Successfully loaded ${response.data.length} banners");
+      } else {
+        print("DEBUG_BANNERS: API returned empty list");
+      }
+      
     } catch (e) {
-      print("Error fetching home banners: $e");
+      print("ERROR_BANNERS: $e");
+      // Don't clear existing banners on error
+      if (banners.isEmpty) {
+        print("DEBUG_BANNERS: Failed to load banners, list is empty");
+      } else {
+        print("DEBUG_BANNERS: Keeping existing ${banners.length} banners after error");
+      }
     } finally {
       isLoadingBanners.value = false;
     }
@@ -124,12 +205,37 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   
 
   Future<void> fetchCategories() async {
-    try {
+    // Don't show loading if we already have categories (silent refresh)
+    final bool showLoading = categories.isEmpty;
+    
+    if (showLoading) {
       isLoadingCategories.value = true;
+    }
+    
+    try {
       final list = await getBusinessCategoriesUseCase();
-      categories.assignAll(list);
+      
+      if (list.isNotEmpty) {
+        categories.assignAll(list);
+        // Save to cache for offline support
+        await _saveCategoriesCache(list);
+        print("DEBUG_CATEGORIES: Successfully loaded ${list.length} categories");
+      } else {
+        print("DEBUG_CATEGORIES: API returned empty list");
+        // Don't clear existing categories if API returns empty
+        if (categories.isEmpty) {
+          CustomSnackBar.showError(message: "No categories available");
+        }
+      }
+      
     } catch (e) {
-      print("Error fetching home categories: $e");
+      print("ERROR_CATEGORIES: $e");
+      // Don't clear existing categories on error
+      if (categories.isEmpty) {
+        CustomSnackBar.showError(message: "Failed to load categories");
+      } else {
+        print("DEBUG_CATEGORIES: Keeping existing ${categories.length} categories after error");
+      }
     } finally {
       isLoadingCategories.value = false;
     }

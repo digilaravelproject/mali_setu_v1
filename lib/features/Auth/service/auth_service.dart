@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart'; // Added
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constent/api_constants.dart';
 import '../../../core/constent/app_constants.dart';
@@ -227,12 +228,24 @@ class AuthService extends GetxService {
       await SharedPrefs.setBool(AppConstants.isLoggedInPref, false);
       await SharedPrefs.setBool(AppConstants.isCompanyLoginPref, false);
       
+      // Clear category cache on logout
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('cached_categories');
+        await prefs.remove('cached_categories_time');
+        await prefs.remove('cached_businesses');
+        await prefs.remove('cached_businesses_time');
+        debugPrint("Category and Business cache cleared on logout");
+      } catch (e) {
+        debugPrint("Error clearing caches: $e");
+      }
+      
       // Navigate to Login
       Get.offAllNamed(AppRoutes.login);
     }
   }
 
-  /// Fetch latest profile data
+ // /// Fetch latest profile data
   Future<ApiResponse<User>> refreshProfile() async {
     try {
       final response = await _apiClient.get(ApiConstants.authProfile);
