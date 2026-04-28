@@ -8,6 +8,7 @@ const Map<String, String> hiIN = {
   'apply_language': 'भाषा लागू करें',
   'language_changed_success': 'भाषा सफलतापूर्वक बदली गई',
   'language_change_failed': 'भाषा बदलने में विफल: @error',
+  'press_back_again_to_exit': 'Dubara back dabaye bahar jane ke liye',
   // Common
   'home': 'होम',
   'business': 'व्यवसाय',

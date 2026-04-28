@@ -8,6 +8,7 @@ const Map<String, String> mrIN = {
   'apply_language': 'भाषा लागू करा',
   'language_changed_success': 'भाषा यशस्वीरित्या बदलली',
   'language_change_failed': 'भाषा बदलण्यास अयशस्वी: @error',
+  'press_back_again_to_exit': 'बाहेर जाण्यासाठी पुन्हा मागे दाबा',
 
 
   // Common

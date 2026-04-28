@@ -26,11 +26,7 @@ class RegisterPage extends GetWidget<RegisterController> {
     return Obx(() {
       controller.canExit.value; // Dummy read for Obx
       return CustomScaffold(
-        onWillPop: () async {
-          if (controller.canExit.value) return true;
-          controller.handleBack();
-          return false;
-        },
+        onWillPop: controller.handleBack,
       body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
@@ -41,7 +37,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                 const SizedBox(height: 50),
                 // Back button - at the top
                 GestureDetector(
-                  onTap: controller.handleBack,
+                  onTap: () => Get.back(),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -384,7 +380,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: controller.handleBack,
+                      onTap: () => Get.back(),
                       child: Text(
                         "login_link".tr,
                         style: theme.textTheme.bodyMedium?.copyWith(

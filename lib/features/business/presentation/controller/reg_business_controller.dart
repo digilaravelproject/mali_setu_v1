@@ -115,22 +115,24 @@ class RegBusinessController extends GetxController {
   DateTime? lastPressedTime;
   final canExit = false.obs;
 
-  void handleBack() {
+  Future<bool> handleBack() async {
+    if (isEditMode) return true;
+
     final now = DateTime.now();
     if (lastPressedTime == null ||
         now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
       lastPressedTime = now;
       canExit.value = true;
       CustomSnackBar.showInfo(
-        message: "press_back_again_to_discard_data".tr,
+        message: "press_back_again_to_exit".tr,
       );
       // Reset canExit after 2 seconds
-      Future.delayed(const Duration(seconds: 3), () {
+      Future.delayed(const Duration(seconds: 2), () {
         canExit.value = false;
       });
-      return;
+      return false;
     }
-    Get.back();
+    return true;
   }
 
   @override

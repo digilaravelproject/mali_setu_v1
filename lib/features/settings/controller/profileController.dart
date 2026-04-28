@@ -17,22 +17,8 @@ class UpProfileController extends GetxController {
   DateTime? lastPressedTime;
   final canExit = false.obs;
 
-  void handleBack() {
-    final now = DateTime.now();
-    if (lastPressedTime == null ||
-        now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
-      lastPressedTime = now;
-      canExit.value = true;
-      CustomSnackBar.showInfo(
-        message: "Back karne pe data remove ho jayega. Dubara back dabaye bahar jane ke liye.",
-      );
-      // Reset canExit after 2 seconds
-      Future.delayed(const Duration(seconds: 2), () {
-        canExit.value = false;
-      });
-      return;
-    }
-    Get.back();
+  Future<bool> handleBack() async {
+    return true;
   }
 
   // NAME FIELD COMPONENT KEY

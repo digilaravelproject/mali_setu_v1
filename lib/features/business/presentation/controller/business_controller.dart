@@ -512,25 +512,27 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   }
 
   Future<void> fetchData() async {
-    print("DEBUG_BUSINESS: fetchData() called");
+    print("DEBUG_BUSINESS: fetchData() started");
     
-    // Load cache first for instant display
+    // 1. Load cache first (synchronously wait for it)
     await _loadCachedBusinesses();
     
-    // Then fetch fresh data
+    // 2. Set loading only if we have no data
+    if (businesses.isEmpty && myBusiness.value == null) {
+      isLoading.value = true;
+    }
+    
     try {
-      await Future.wait([
-        fetchAllBusinesses(isRefresh: true),
-        fetchMyBusinesses(),
-      ], eagerError: false); // Continue even if one fails
+      // 3. Fetch fresh data
+      // We don't use Future.wait here to avoid blocking everything if one fails
+      await fetchAllBusinesses(isRefresh: true);
+      await fetchMyBusinesses();
       
-      print("DEBUG_BUSINESS: fetchData() completed successfully");
+      print("DEBUG_BUSINESS: fetchData() completed");
     } catch (e) {
       print("ERROR_BUSINESS: fetchData() failed: $e");
-      // Don't show error if we have cached data
-      if (businesses.isEmpty && myBusiness.value == null) {
-        CustomSnackBar.showError(message: "Failed to load data. Please refresh.");
-      }
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -539,7 +541,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     final searchQuery = searchText.value.trim();
     
     // Don't show loading if we already have businesses and not refreshing
-    final bool showLoading = businesses.isEmpty || isRefresh;
+    final bool showLoading = (businesses.isEmpty || isRefresh) && !isSearching.value;
     
     if (searchQuery.isNotEmpty) {
       isSearching.value = true;
@@ -552,7 +554,21 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         currentPage.value = 1;
       }
 
-      final location = await LocationHelper.getCurrentLocation();
+      print("DEBUG_BUSINESSES: Fetching... Search: '$searchQuery', Page: ${currentPage.value}");
+
+      // Get location with a strict timeout to avoid hanging
+      Map<String, double>? location;
+      try {
+        location = await LocationHelper.getCurrentLocation().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            print("DEBUG_LOCATION: Location fetch timed out in fetchAllBusinesses");
+            return null;
+          },
+        );
+      } catch (e) {
+        print("DEBUG_LOCATION: Error fetching location: $e");
+      }
       
       final response = await getAllBusinessesUseCase(
         page: currentPage.value,
@@ -563,8 +579,8 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
 
       if (isRefresh || searchQuery.isNotEmpty) {
         businesses.value = response.businesses;
-        // Save to cache only for non-search results
-        if (searchQuery.isEmpty && response.businesses.isNotEmpty) {
+        // Save to cache only for non-search results on page 1
+        if (searchQuery.isEmpty && currentPage.value == 1 && response.businesses.isNotEmpty) {
           await _saveBusinessesCache(response.businesses);
         }
       } else {
@@ -576,16 +592,12 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       totalPages.value = response.lastPage;
       hasNextPage.value = response.hasNextPage;
       
-      print("DEBUG_BUSINESSES: Loaded ${response.businesses.length} businesses, Total: ${businesses.length}");
-      print("DEBUG_PAGINATION: Page ${currentPage.value}/${totalPages.value}, Has next: ${hasNextPage.value}");
+      print("DEBUG_BUSINESSES: Success. Loaded ${response.businesses.length} businesses");
       
     } catch (e) {
       print('ERROR_BUSINESSES: $e');
-      // Don't clear existing businesses on error
-      if (businesses.isEmpty) {
-        CustomSnackBar.showError(message: "Failed to load businesses");
-      } else {
-        print("DEBUG_BUSINESSES: Keeping existing ${businesses.length} businesses after error");
+      if (businesses.isEmpty && searchQuery.isEmpty) {
+        CustomSnackBar.showError(message: "Failed to load businesses. Please check your connection.");
       }
     } finally {
       isLoading.value = false;

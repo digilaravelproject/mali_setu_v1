@@ -36,11 +36,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
           statusBarBrightness: Brightness.light,
         ),
         child: CustomScaffold(
-          onWillPop: () async {
-            if (controller.canExit.value) return true;
-            controller.handleBack();
-            return false;
-          },
+          onWillPop: controller.handleBack,
           extendBodyBehindAppBar: true,
           body: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -53,7 +49,7 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                   
                   // Back button - plain icon as previously requested
                   GestureDetector(
-                    onTap: controller.handleBack,
+                    onTap: () => Get.back(),
                     child: const Icon(
                       Icons.arrow_back_ios_new_rounded,
                       size: 24.0,

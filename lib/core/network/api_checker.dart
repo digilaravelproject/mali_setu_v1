@@ -5,6 +5,7 @@ import 'package:get/get.dart' hide Response;
 import '../constent/app_constants.dart';
 import '../storage/shared_prefs.dart';
 import '../storage/token_manger.dart';
+import '../routes/app_routes.dart';
 import '../utils/logger.dart';
 import 'error_handler.dart';
 
@@ -297,7 +298,7 @@ class ApiChecker {
     TokenManager.clearToken();
 
     // GetX Navigation - Navigate to sign-in and clear all previous routes
-    Get.offAllNamed('/sign-in'); // Replace with your actual sign-in route
+    Get.offAllNamed(AppRoutes.login);
 
     // Alternative: If you want to use the navigator key
     // if (navigatorKey?.currentContext != null) {

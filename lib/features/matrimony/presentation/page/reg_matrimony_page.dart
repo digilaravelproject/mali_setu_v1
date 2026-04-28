@@ -23,14 +23,10 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     return Obx(() {
       controller.canExit.value; // Dummy read for Obx
       return CustomScaffold(
-        onWillPop: () async {
-          if (controller.canExit.value) return true;
-          controller.handleBack();
-          return false;
-        },
+        onWillPop: controller.handleBack,
       appBar: AppBar(
           leading: IconButton(
-            onPressed: controller.handleBack,
+            onPressed: () => Get.back(),
             icon: Icon(AppAssets.backArrow),
           ),
           title: Obx(() => Text(

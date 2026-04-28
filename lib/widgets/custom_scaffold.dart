@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import 'custom_snack_bar.dart';
 
@@ -35,31 +36,51 @@ class CustomScaffold extends StatefulWidget {
 
 class _CustomScaffoldState extends State<CustomScaffold> {
   DateTime? _lastPressed;
+  bool _canPop = false;
 
   @override
   Widget build(BuildContext context) {
+    // If we want to intercept, canPop should be false initially
+    final bool shouldIntercept = widget.enableDoubleTapExit || widget.onWillPop != null;
+
     return PopScope(
-      canPop: !widget.enableDoubleTapExit,
+      canPop: _canPop || !shouldIntercept,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
-        if (didPop) return;
+        if (didPop) {
+          if (_canPop) {
+            setState(() {
+              _canPop = false;
+            });
+          }
+          return;
+        }
 
         bool shouldPop = true;
         if (widget.onWillPop != null) {
           shouldPop = await widget.onWillPop!();
         }
 
-        if (shouldPop && widget.enableDoubleTapExit) {
-          final now = DateTime.now();
-          final bool shouldShowPrompt = _lastPressed == null ||
-              now.difference(_lastPressed!) > const Duration(seconds: 2);
-          if (shouldShowPrompt) {
-            _lastPressed = now;
-            CustomSnackBar.showInfo(message: "Press back again to exit");
+        if (shouldPop) {
+          if (widget.enableDoubleTapExit) {
+            final now = DateTime.now();
+            final bool shouldShowPrompt = _lastPressed == null ||
+                now.difference(_lastPressed!) > const Duration(seconds: 2);
+            if (shouldShowPrompt) {
+              _lastPressed = now;
+              CustomSnackBar.showInfo(
+                  message: "press_back_again_to_exit".tr);
+            } else {
+              setState(() {
+                _canPop = true;
+              });
+              Navigator.of(context).pop();
+            }
           } else {
-            SystemNavigator.pop();
+            setState(() {
+              _canPop = true;
+            });
+            Navigator.of(context).pop();
           }
-        } else if (shouldPop) {
-          Navigator.of(context).pop();
         }
       },
       child: Scaffold(

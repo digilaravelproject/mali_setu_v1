@@ -12,22 +12,22 @@ class CreateBlogController extends GetxController {
   DateTime? lastPressedTime;
   final canExit = false.obs;
 
-  void handleBack() {
+  Future<bool> handleBack() async {
     final now = DateTime.now();
     if (lastPressedTime == null ||
         now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
       lastPressedTime = now;
       canExit.value = true;
       CustomSnackBar.showInfo(
-        message: "Back karne pe data remove ho jayega. Dubara back dabaye bahar jane ke liye.",
+        message: "press_back_again_to_exit".tr,
       );
       // Reset canExit after 2 seconds
       Future.delayed(const Duration(seconds: 2), () {
         canExit.value = false;
       });
-      return;
+      return false;
     }
-    Get.back();
+    return true;
   }
 
   final BlogRepository _repository = BlogRepository();
