@@ -157,7 +157,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     onTap: () async {
                       try {
                         await Share.share(
-                          'Check out this amazing app!\n\nDownload https://play.google.com/store/apps/details?id=com.mali.setu',
+                          'Check out this amazing app!\n\nDownload https://play.google.com/store/apps/details?id=com.malisetu.app',
                           subject: 'Awesome App Recommendation',
                         );
                       } catch (e) {
