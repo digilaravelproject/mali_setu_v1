@@ -362,6 +362,34 @@ class BusinessScreen extends GetView<BusinessController> {
                   childCount: 5,
                 ),
               )
+            else if (controller.businesses.isEmpty)
+               SliverToBoxAdapter(
+                 child: Container(
+                   padding: const EdgeInsets.all(32),
+                   child: Column(
+                     children: [
+                       Icon(Icons.store_mall_directory_outlined, size: 64, color: Colors.grey[300]),
+                       const SizedBox(height: 16),
+                       Text(
+                         "no_businesses_found".tr,
+                         style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                       ),
+                       const SizedBox(height: 24),
+                       ElevatedButton.icon(
+                         onPressed: () => controller.fetchData(),
+                         icon: const Icon(Icons.refresh_rounded),
+                         label: Text("retry".tr),
+                         style: ElevatedButton.styleFrom(
+                           backgroundColor: theme.primaryColor,
+                           foregroundColor: Colors.white,
+                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                         ),
+                       ),
+                     ],
+                   ),
+                 ),
+               )
             else
               SliverList(
                 delegate: SliverChildBuilderDelegate(

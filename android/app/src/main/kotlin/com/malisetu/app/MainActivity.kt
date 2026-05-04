@@ -1,8 +1,8 @@
 /*
-package com.mali.setu
+package com.malisetu.app
 
 import io.flutter.embedding.android.FlutterActivity
-package com.mali.setu
+package com.malisetu.app
 
 import android.os.Bundle
 import android.view.WindowManager
@@ -21,7 +21,7 @@ class MainActivity: FlutterActivity() {
 */
 
 
-package com.mali.setu
+package com.malisetu.app
 
 import android.os.Bundle
 import android.view.WindowManager

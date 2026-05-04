@@ -27,7 +27,7 @@ class CreateJobPage extends GetWidget<CreateJobController> {
         },
       appBar: AppBar(
           leading: IconButton(
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: controller.handleBack,
             icon: Icon(AppAssets.backArrow),
           ),
           title: Obx(() => Text(controller.isEditMode.value ? 'update_job_posting'.tr : 'create_job_posting'.tr)),

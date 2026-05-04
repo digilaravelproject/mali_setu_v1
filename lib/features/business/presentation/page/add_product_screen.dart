@@ -16,22 +16,22 @@ class AddProductController extends GetxController {
   DateTime? lastPressedTime;
   final canExit = false.obs;
 
-  void handleBack() {
+  Future<bool> handleBack() async {
     final now = DateTime.now();
     if (lastPressedTime == null ||
         now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
       lastPressedTime = now;
       canExit.value = true;
       CustomSnackBar.showInfo(
-        message: "Back karne pe data remove ho jayega. Dubara back dabaye bahar jane ke liye.",
+        message: "press_back_again_to_exit".tr,
       );
       // Reset canExit after 2 seconds
       Future.delayed(const Duration(seconds: 2), () {
         canExit.value = false;
       });
-      return;
+      return false;
     }
-    Get.back();
+    return true;
   }
 
   final formKey = GlobalKey<FormState>();
@@ -150,13 +150,12 @@ class AddProductScreen extends StatelessWidget {
     return Obx(() {
       controller.canExit.value; // Dummy read for Obx
       return CustomScaffold(
-        onWillPop: () async {
-          if (controller.canExit.value) return true;
-          controller.handleBack();
-          return false;
-        },
+        onWillPop: controller.handleBack,
         appBar: AppBar(
-          leading: IconButton(onPressed: controller.handleBack, icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor)),
+          leading: IconButton(
+            onPressed: () => Get.back(),
+            icon: Icon(Icons.arrow_back_ios_new_outlined, color: context.iconColor),
+          ),
           title: Text("add_product".tr, style: context.textTheme.titleMedium),
         ),
       body: SingleChildScrollView(

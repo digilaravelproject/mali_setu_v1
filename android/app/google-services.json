@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:58378864066:android:27504936714e7cc873c25b",
         "android_client_info": {
-          "package_name": "com.mali.setu"
+          "package_name": "com.malisetu.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "58378864066-bdkscjv27m7can6i1fjb5bolbabthndd.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.mali.setu",
+            "package_name": "com.malisetu.app",
             "certificate_hash": "0272f403e987ecf308e3c2ee2bacb565bcc73952"
           }
         },
@@ -42,7 +42,7 @@
               "client_id": "58378864066-nshme2he944h5i9ij5nvvcs170aobq41.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.mali.setu"
+                "bundle_id": "com.malisetu.app"
               }
             }
           ]

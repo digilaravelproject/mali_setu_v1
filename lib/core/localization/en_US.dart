@@ -8,6 +8,7 @@ const Map<String, String> enUS = {
   'apply_language': 'Apply Language',
   'language_changed_success': 'Language changed successfully',
   'language_change_failed': 'Failed to change language: @error',
+  'press_back_again_to_exit': 'Press back again to exit',
   // Common
   'home': 'Home',
   'business': 'Business',

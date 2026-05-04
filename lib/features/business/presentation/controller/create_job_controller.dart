@@ -29,6 +29,7 @@ class CreateJobController extends GetxController {
       });
       return;
     }
+    Get.back();
   }
 
   final CreateJobUseCase createJobUseCase;

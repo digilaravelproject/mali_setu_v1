@@ -255,7 +255,11 @@ class HomePage extends GetWidget<HomeController> {
                               if (controller.isLoadingCategories.value) {
                                 return _buildCategoryShimmer();
                               }
+                              
                               if (controller.categories.isEmpty) {
+                                if (controller.isCategoryError.value) {
+                                  return _buildCategoryErrorWidget();
+                                }
                                 return const SizedBox.shrink();
                               }
 
@@ -710,6 +714,41 @@ class HomePage extends GetWidget<HomeController> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildCategoryErrorWidget() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.withOpacity(0.1)),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            "Failed to load categories",
+            style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: () => controller.fetchCategories(),
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text("Retry"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

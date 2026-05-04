@@ -36,6 +36,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
   final RxList<Category> categories = <Category>[].obs;
   final RxBool isLoadingCategories = false.obs;
+  final RxBool isCategoryError = false.obs;
 
   // Location
   final RxString currentLocation = "Detecting...".obs;
@@ -204,75 +205,83 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   }
   
 
-  Future<void> fetchCategories() async {
+  Future<void> fetchCategories({int retryCount = 0}) async {
     // Don't show loading if we already have categories (silent refresh)
     final bool showLoading = categories.isEmpty;
     
     if (showLoading) {
       isLoadingCategories.value = true;
+      isCategoryError.value = false;
     }
     
     try {
+      print("DEBUG_CATEGORIES: Fetching categories (Attempt: ${retryCount + 1})");
       final list = await getBusinessCategoriesUseCase();
       
       if (list.isNotEmpty) {
         categories.assignAll(list);
+        isCategoryError.value = false;
         // Save to cache for offline support
         await _saveCategoriesCache(list);
         print("DEBUG_CATEGORIES: Successfully loaded ${list.length} categories");
       } else {
         print("DEBUG_CATEGORIES: API returned empty list");
-        // Don't clear existing categories if API returns empty
         if (categories.isEmpty) {
-          CustomSnackBar.showError(message: "No categories available");
+          if (retryCount < 2) {
+             print("DEBUG_CATEGORIES: Retrying in 2 seconds...");
+             await Future.delayed(const Duration(seconds: 2));
+             return fetchCategories(retryCount: retryCount + 1);
+          }
+          isCategoryError.value = true;
+          // CustomSnackBar.showError(message: "No categories available");
         }
       }
       
     } catch (e) {
       print("ERROR_CATEGORIES: $e");
-      // Don't clear existing categories on error
       if (categories.isEmpty) {
-        CustomSnackBar.showError(message: "Failed to load categories");
-      } else {
-        print("DEBUG_CATEGORIES: Keeping existing ${categories.length} categories after error");
+        if (retryCount < 2) {
+           print("DEBUG_CATEGORIES: Retrying after error in 2 seconds...");
+           await Future.delayed(const Duration(seconds: 2));
+           return fetchCategories(retryCount: retryCount + 1);
+        }
+        isCategoryError.value = true;
+        // CustomSnackBar.showError(message: "Failed to load categories");
       }
     } finally {
       isLoadingCategories.value = false;
     }
   }
 
-  Future<void> onCategoryTap(int categoryId) async {
+  void onCategoryTap(int categoryId) {
+    // Find category from existing list for instant navigation
+    final category = categories.firstWhereOrNull((c) => c.id == categoryId);
+    
+    if (category != null) {
+      print("DEBUG_HOME: Instant navigation for category: ${category.name}");
+      Get.toNamed(AppRoutes.categoryDetails, arguments: category);
+    } else {
+      // Fallback if not found (shouldn't happen with categories displayed on UI)
+      print("DEBUG_HOME: Category $categoryId not found in list, fetching...");
+      _fetchAndNavigate(categoryId);
+    }
+  }
+
+  Future<void> _fetchAndNavigate(int categoryId) async {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
-      
       final repository = Get.find<BusinessRepository>();
-      final location = await coord_helper.LocationHelper.getCurrentLocation();
-      
-      if (location == null) {
-        print("DEBUG_LOCATION: Location returned null in onCategoryTap");
-      } else {
-        print("DEBUG_LOCATION: Lat: ${location['latitude']}, Long: ${location['longitude']}");
-      }
-
-      final categoryDetails = await repository.getCategoryDetails(
-        categoryId,
-        lat: location?['latitude'],
-        long: location?['longitude'],
-      );
-      
-      Get.back(); // Close loading dialog
+      final categoryDetails = await repository.getCategoryDetails(categoryId);
+      Get.back();
 
       if (categoryDetails != null) {
-        print("Category Fetched: ${categoryDetails.name}");
         Get.toNamed(AppRoutes.categoryDetails, arguments: categoryDetails);
       } else {
-        print("Category Details is null for ID: $categoryId");
         CustomSnackBar.showError(message: "Category details not found.");
       }
     } catch (e) {
       if (Get.isDialogOpen == true) Get.back();
-      print("Error fetching category details: $e");
-      CustomSnackBar.showError(message: "Failed to fetch category details: $e");
+      CustomSnackBar.showError(message: "Failed to fetch category details.");
     }
   }
 

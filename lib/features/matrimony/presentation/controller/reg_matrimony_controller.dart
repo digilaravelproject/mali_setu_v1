@@ -142,6 +142,7 @@ class RegMatrimonyController extends GetxController {
       });
       return;
     }
+    Get.back();
   }
 
   /// --- Static Data Lists ---
