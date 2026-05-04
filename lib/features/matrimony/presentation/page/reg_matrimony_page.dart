@@ -30,7 +30,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
         },
       appBar: AppBar(
           leading: IconButton(
-            onPressed: controller.handleBack,
+            onPressed: () => Navigator.of(context).maybePop(),
             icon: Icon(AppAssets.backArrow),
           ),
           title: Obx(() => Text(

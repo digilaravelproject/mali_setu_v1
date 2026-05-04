@@ -35,7 +35,6 @@ class RegisterController extends GetxController {
       });
       return;
     }
-    Get.back();
   }
 
   /// FORM KEY

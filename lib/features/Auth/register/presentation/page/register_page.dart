@@ -41,7 +41,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                 const SizedBox(height: 50),
                 // Back button - at the top
                 GestureDetector(
-                  onTap: controller.handleBack,
+                  onTap: () => Navigator.of(context).maybePop(),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
