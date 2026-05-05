@@ -1,7 +1,8 @@
 class ApiConstants {
     ApiConstants._();
 
-    static const String baseUrl = "https://greenyellow-grouse-707123.hostingersite.com";
+   // static const String baseUrl = "https://greenyellow-grouse-707123.hostingersite.com";
+    static const String baseUrl = "https://malisetu.com";
     static const String imageBaseUrl = "$baseUrl/storage/";
     static const String apiBaseUrl = "$baseUrl/api/";
 

@@ -947,6 +947,9 @@ const Map<String, String> hiIN = {
   "password_uppercase_required": "पासवर्ड में कम से कम 1 बड़ा अक्षर (uppercase) होना चाहिए",
   "password_number_required": "पासवर्ड में कम से कम 1 अंक (number) होना चाहिए",
   "password_special_required": "पासवर्ड में कम से कम 1 विशेष वर्ण (special character) होना चाहिए",
+
+  "back_message": "वापस जाने पर डेटा हट जाएगा। बाहर निकलने के लिए फिर से बैक दबाएं।",
+
 };
 
 

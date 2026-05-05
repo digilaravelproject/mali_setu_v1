@@ -435,26 +435,23 @@ class DonationDetailsPage extends GetView<DonationController> {
                 mainAxisSize:
                 MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller:
-                    amountController,
-                    keyboardType:
-                    TextInputType.number,
-                    decoration:
-                    InputDecoration(
-                      hintText:
-                      "enter_donation_amount".tr,
-                      prefixIcon:
-                      const Icon(Icons
-                          .currency_rupee_rounded),
-                      border:
-                      OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius
-                            .circular(14),
+                  Obx(() => TextField(
+                    controller: amountController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      if (controller.amountError.value != null) {
+                        controller.amountError.value = null;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: "enter_donation_amount".tr,
+                      errorText: controller.amountError.value,
+                      prefixIcon: const Icon(Icons.currency_rupee_rounded),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                  ),
+                  )),
                   const SizedBox(height: 15),
                   SizedBox(
                     width:
@@ -463,16 +460,15 @@ class DonationDetailsPage extends GetView<DonationController> {
                     child:
                     ElevatedButton(
                       onPressed: () {
-                        final amount =
-                            double.tryParse(
-                                amountController
-                                    .text) ??
-                                0;
-                        if (amount <=
-                            0) {
-                          Get.snackbar(
-                              "error".tr,
-                              "enter_valid_amount".tr);
+                        final amountStr = amountController.text.trim();
+                        if (amountStr.isEmpty) {
+                          controller.amountError.value = "enter_donation_amount".tr;
+                          return;
+                        }
+                        
+                        final amount = double.tryParse(amountStr) ?? 0;
+                        if (amount <= 0) {
+                          controller.amountError.value = "enter_valid_amount".tr;
                           return;
                         }
                         controller

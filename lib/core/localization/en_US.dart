@@ -962,7 +962,9 @@ const Map<String, String> enUS = {
   "password_special_required": "Password must contain at least 1 special character",
 
   "press_back_again_to_discard_data": "Press back again to discard all data",
-  "press_back_again_to_discard_changes": "Press back again to discard changes"
+  "press_back_again_to_discard_changes": "Press back again to discard changes",
+
+  "back_message": "Data will be cleared if you go back. Press back again to exit.",
 
 };
 

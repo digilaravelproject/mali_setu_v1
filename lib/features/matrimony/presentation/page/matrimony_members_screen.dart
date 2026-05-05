@@ -37,18 +37,21 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
           _buildSearchBar(),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value) {
+              if (controller.isLoading.value && controller.filteredMembers.isEmpty) {
                 return const Center(child: CircularProgressIndicator(color: Colors.purple));
               }
-              if (controller.filteredMembers.isEmpty) {
-                return _buildEmptyState();
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemCount: controller.filteredMembers.length,
-                itemBuilder: (context, index) {
-                  return _buildMemberCard(controller.filteredMembers[index]);
-                },
+              return RefreshIndicator(
+                onRefresh: controller.fetchMembers,
+                color: Colors.purple,
+                child: controller.filteredMembers.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: controller.filteredMembers.length,
+                        itemBuilder: (context, index) {
+                          return _buildMemberCard(controller.filteredMembers[index]);
+                        },
+                      ),
               );
             }),
           ),
@@ -220,17 +223,24 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_outline, size: 80, color: Colors.grey[200]),
-          const SizedBox(height: 16),
-          Text(
-            controller.searchQuery.isEmpty ? "No members yet." : "No results for '${controller.searchQuery.value}'",
-            style: TextStyle(color: Colors.grey[400], fontSize: 16),
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: constraints.maxHeight,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.people_outline, size: 80, color: Colors.grey[200]),
+              const SizedBox(height: 16),
+              Text(
+                controller.searchQuery.isEmpty ? "No members yet." : "No results for '${controller.searchQuery.value}'",
+                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -45,36 +45,42 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
 
   Widget _buildReceivedList() {
     return Obx(() {
-      if (controller.isLoading.value) {
+      if (controller.isLoading.value && controller.receivedRequests.isEmpty) {
         return _buildLoading();
       }
-      if (controller.receivedRequests.isEmpty) {
-        return _buildEmptyState("no_received_requests".tr);
-      }
-      return ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: controller.receivedRequests.length,
-        itemBuilder: (context, index) {
-          return _buildRequestCard(controller.receivedRequests[index], isSent: false);
-        },
+      return RefreshIndicator(
+        onRefresh: controller.fetchRequests,
+        color: Colors.purple,
+        child: controller.receivedRequests.isEmpty
+            ? _buildEmptyState("no_received_requests".tr)
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.receivedRequests.length,
+                itemBuilder: (context, index) {
+                  return _buildRequestCard(controller.receivedRequests[index], isSent: false);
+                },
+              ),
       );
     });
   }
 
   Widget _buildSentList() {
     return Obx(() {
-      if (controller.isLoading.value) {
+      if (controller.isLoading.value && controller.sentRequests.isEmpty) {
         return _buildLoading();
       }
-      if (controller.sentRequests.isEmpty) {
-        return _buildEmptyState("no_sent_requests".tr);
-      }
-      return ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: controller.sentRequests.length,
-        itemBuilder: (context, index) {
-          return _buildRequestCard(controller.sentRequests[index], isSent: true);
-        },
+      return RefreshIndicator(
+        onRefresh: controller.fetchRequests,
+        color: Colors.purple,
+        child: controller.sentRequests.isEmpty
+            ? _buildEmptyState("no_sent_requests".tr)
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.sentRequests.length,
+                itemBuilder: (context, index) {
+                  return _buildRequestCard(controller.sentRequests[index], isSent: true);
+                },
+              ),
       );
     });
   }
@@ -248,14 +254,21 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
   }
 
   Widget _buildEmptyState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(message, style: TextStyle(color: Colors.grey[500], fontSize: 16)),
-        ],
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: constraints.maxHeight,
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(message, style: TextStyle(color: Colors.grey[500], fontSize: 16)),
+            ],
+          ),
+        ),
       ),
     );
   }

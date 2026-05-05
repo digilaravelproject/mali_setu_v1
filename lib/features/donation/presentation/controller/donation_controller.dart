@@ -12,6 +12,7 @@ class DonationController extends GetxController {
   var isLoading = false.obs;
   var causes = <DonationCauseItem>[].obs;
   var selectedCause = Rxn<DonationCauseItem>();
+  var amountError = RxnString();
 
   @override
   void onInit() {

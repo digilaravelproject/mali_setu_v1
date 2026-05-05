@@ -134,7 +134,7 @@ class RegMatrimonyController extends GetxController {
       lastPressedTime = now;
       canExit.value = true;
       CustomSnackBar.showInfo(
-        message: "Back karne pe data remove ho jayega. Dubara back dabaye bahar jane ke liye.",
+        message: "back_message".tr,
       );
       // Reset canExit after 2 seconds
       Future.delayed(const Duration(seconds: 2), () {
