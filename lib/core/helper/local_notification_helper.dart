@@ -9,8 +9,12 @@ class LocalNotificationHelper {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
     
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings();
+    
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
     );
 
     await _notificationsPlugin.initialize(
