@@ -457,7 +457,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
  
   Widget _buildQuickActionItem({
-    required IconData icon,
+    required dynamic icon,
     required String label,
     required Color color,
     required VoidCallback onTap,
@@ -480,7 +480,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: icon is IconData
+                ? Icon(icon, color: Colors.white, size: 20)
+                : FaIcon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(height: 8),
           Text(

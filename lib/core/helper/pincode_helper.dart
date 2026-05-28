@@ -1,8 +1,21 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 
 /// Helper class for fetching address details from pincode
 class PincodeHelper {
-  static final Dio _dio = Dio();
+  static final Dio _dio = _createDio();
+
+  static Dio _createDio() {
+    final dio = Dio();
+    dio.httpClientAdapter = IOHttpClientAdapter()
+      ..createHttpClient = () {
+        final client = HttpClient();
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        return client;
+      };
+    return dio;
+  }
 
   /// Fetch address details from pincode
   static Future<PincodeResponse?> fetchAddressFromPincode(String pincode) async {

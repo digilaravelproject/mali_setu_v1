@@ -247,6 +247,8 @@ class RegBusinessController extends GetxController {
         talukaCtrl.text = response.block;
         villageCtrl.text = response.name;
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
+      } else {
+        CustomSnackBar.showInfo(message: "Unable to auto-fetch address details. Please fill manually.");
       }
     } catch (e) {
       print("Error fetching pincode info: $e");
@@ -516,6 +518,8 @@ class RegBusinessController extends GetxController {
     }
 
     if (errors.isNotEmpty) {
+      debugPrint("[RegBusinessController] Validation failed: ${errors.toString()}");
+      CustomSnackBar.showError(message: "Please fill all required fields correctly");
       return false;
     }
     return true;
