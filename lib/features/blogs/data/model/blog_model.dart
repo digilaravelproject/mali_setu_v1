@@ -72,6 +72,7 @@ class Blog {
   final int? likesCount;
   final bool? isLiked;
   final BlogUser? user;
+  final List<String>? mediaPaths; // 🆕 Added for multiple media carousels
 
   Blog({
     this.id,
@@ -88,6 +89,7 @@ class Blog {
     this.likesCount,
     this.isLiked,
     this.user,
+    this.mediaPaths, // 🆕 Added
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) => Blog(
@@ -96,7 +98,14 @@ class Blog {
         title: json['title'],
         description: json['description'],
         tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
-        mediaPath: json['media_path'],
+        mediaPath: json['media_path'] is List
+            ? (json['media_path'] as List).isNotEmpty
+                ? (json['media_path'] as List).first.toString()
+                : null
+            : json['media_path']?.toString(),
+        mediaPaths: json['media_path'] is List
+            ? List<String>.from(json['media_path'])
+            : (json['media_path'] != null ? [json['media_path'].toString()] : null), // 🆕 Added
         mediaType: json['media_type'],
         blogType: json['blog_type'] ?? json['blogs_type'],
         isActive: json['is_active'] == 1 || json['is_active'] == true,
@@ -122,6 +131,7 @@ class Blog {
     int? likesCount,
     bool? isLiked,
     BlogUser? user,
+    List<String>? mediaPaths, // 🆕 Added
   }) =>
       Blog(
         id: id ?? this.id,
@@ -138,6 +148,7 @@ class Blog {
         likesCount: likesCount ?? this.likesCount,
         isLiked: isLiked ?? this.isLiked,
         user: user ?? this.user,
+        mediaPaths: mediaPaths ?? this.mediaPaths, // 🆕 Added
       );
 }
 

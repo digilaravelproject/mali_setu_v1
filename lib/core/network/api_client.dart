@@ -71,7 +71,23 @@ class ApiClient {
         if (options.queryParameters.isNotEmpty) {
           Logger.d('│ Query   : ${options.queryParameters}');
         }
-        if (options.data != null) Logger.d('│ Body    : ${options.data}');
+        if (options.data != null) {
+          if (options.data is FormData) {
+            final formData = options.data as FormData;
+            Logger.d('│ Body    : [FormData]');
+            Logger.d('│ ── Fields ──');
+            for (final field in formData.fields) {
+              Logger.d('│   ${field.key} = ${field.value}');
+            }
+            Logger.d('│ ── Files ──');
+            for (final file in formData.files) {
+              final mf = file.value;
+              Logger.d('│   ${file.key} → filename: ${mf.filename}, length: ${mf.length} bytes');
+            }
+          } else {
+            Logger.d('│ Body    : ${options.data}');
+          }
+        }
         Logger.d('└───────────────────────────────────────');
 
         return handler.next(options);

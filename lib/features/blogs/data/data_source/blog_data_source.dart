@@ -118,11 +118,11 @@ import 'package:dio/dio.dart';
 class BlogRepository {
   final ApiClient _apiClient = getx.Get.find<ApiClient>();
 
-  Future<BlogResponse?> getBlogs({int page = 1}) async {
+  Future<BlogResponse?> getBlogs({int page = 1, int perPage = 100}) async {
     try {
       final response = await _apiClient.get(
         ApiConstants.getBlogs,
-        queryParameters: {'page': page},
+        queryParameters: {'page': page, 'per_page': perPage},
       );
 
       if (response.statusCode == 200) {
@@ -134,7 +134,26 @@ class BlogRepository {
     return null;
   }
 
-  Future<Map<String, dynamic>?> createBlog(Map<String, dynamic> data) async {
+  /// Fetches all blogs that belong to the logged-in user.
+  /// Sends my_blogs=1 so the server filters by authenticated user.
+  /// Falls back to fetching all and filtering client-side if server doesn't support it.
+  Future<BlogResponse?> getMyBlogs({int page = 1}) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.getBlogs,
+        queryParameters: {'page': page, 'per_page': 500, 'my_blogs': 1},
+      );
+
+      if (response.statusCode == 200) {
+        return BlogResponse.fromJson(response.data);
+      }
+    } catch (e) {
+      print('Error fetching my blogs: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> createBlog(dynamic data) async {
     try {
       final response = await _apiClient.post(
         ApiConstants.getBlogs,
@@ -196,4 +215,43 @@ class BlogRepository {
     }
     return null;
   }
+
+  Future<bool> deleteBlog(int id) async {
+    try {
+      final response = await _apiClient.delete("${ApiConstants.getBlogs}/$id");
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return true;
+      }
+    } catch (e) {
+      print('Error deleting blog: $e');
+    }
+    return false;
+  }
+
+  /// Updates a blog via POST with _method=PUT (Laravel multipart spoofing).
+  /// URL: POST /api/blogs/{id}
+  /// FormData must include: _method=PUT, title, description, blog_type, tags, media[]
+  Future<Map<String, dynamic>?> updateBlog(int id, FormData data) async {
+    try {
+      final response = await _apiClient.post(
+        "${ApiConstants.getBlogs}/$id",
+        data: data,
+      );
+      // Accept any response that has a body (success or validation error)
+      if (response.statusCode != null && response.data != null) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : null;
+      }
+    } on DioException catch (e) {
+      print('DioError updating blog: $e');
+      if (e.response?.data is Map<String, dynamic>) {
+        return e.response!.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('Error updating blog: $e');
+    }
+    return null;
+  }
 }
+

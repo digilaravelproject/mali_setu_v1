@@ -5,29 +5,70 @@ import 'package:chewie/chewie.dart';
 import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import '../../../../core/constent/api_constants.dart';
+import '../../../Auth/service/auth_service.dart';
+import '../../../../widgets/custom_snack_bar.dart';
 
 class BlogController extends GetxController {
   final BlogRepository _repository = BlogRepository();
 
   final RxList<Blog> blogs = <Blog>[].obs;
+  final RxList<Blog> myBlogs = <Blog>[].obs;  // logged-in user's blogs only
   final RxList<Blog> filteredBlogs = <Blog>[].obs;
   final RxBool isLoading = false.obs;
+  final RxBool isMyBlogsLoading = false.obs;
   final RxInt currentPage = 1.obs;
   final RxBool hasMore = true.obs;
   final RxString searchQuery = ''.obs;
   final searchTextController = TextEditingController();
   final RxString selectedCategory = 'All'.obs;
+  final RxString selectedTab = 'Others'.obs; // 'Mine' or 'Others'
 
-  // Category list
-  final List<String> categories = [
-    'All',
-    'Investment Guidance',
-    'Legal Guidance', 
-    'Job opportunity',
-    'Farming made easy',
-    'Education Guidance / Competitive Exams Guidance',
-    'How Become an Entrepreneur / Opportunities'
+  // Master Category List
+  final List<String> masterCategories = const [
+    "Technology",
+    "Business",
+    "Finance",
+    "Marketing",
+    "Startups",
+    "Artificial Intelligence (AI)",
+    "Software Development",
+    "Web Development",
+    "Mobile App Development",
+    "Cybersecurity",
+    "Cloud Computing",
+    "Data Science",
+    "Health & Fitness",
+    "Lifestyle",
+    "Travel",
+    "Food & Recipes",
+    "Fashion & Beauty",
+    "Education",
+    "Career & Jobs",
+    "Personal Development",
+    "Entertainment",
+    "Movies & TV",
+    "Music",
+    "Sports",
+    "Gaming",
+    "News & Current Affairs",
+    "Politics",
+    "Science",
+    "Environment",
+    "Parenting",
+    "Relationships",
+    "Real Estate",
+    "Automotive",
+    "Photography",
+    "Home Improvement",
+    "E-commerce",
+    "Product Reviews",
+    "Tutorials & Guides",
+    "Case Studies",
+    "Interviews",
   ];
+
+  // Dynamic active Category list
+  final RxList<String> categories = <String>['All'].obs;
 
   // Detail State
   final Rxn<Blog> selectedBlog = Rxn<Blog>();
@@ -43,15 +84,99 @@ class BlogController extends GetxController {
   void onInit() {
     super.onInit();
     fetchBlogs();
+    fetchMyBlogs(); // Pre-load my blogs in parallel
     
     // Debounce search query changes
     debounce(searchQuery, (query) {
       if (query.isEmpty) {
-        filteredBlogs.assignAll(blogs);
+        _applyFilter();
       } else {
         _performSearch(query);
       }
     }, time: const Duration(milliseconds: 500));
+  }
+
+  void _updateCategories() {
+    try {
+      // Use the correct source list based on selected tab
+      final sourceList = selectedTab.value == 'Mine' ? myBlogs.toList() : blogs.toList();
+
+      // Find unique blog types present in these tab blogs
+      final activeTypes = sourceList
+          .map((blog) => blog.blogType)
+          .whereType<String>()
+          .where((type) => type.isNotEmpty)
+          .toSet();
+
+      // Build the new categories list
+      final List<String> newCategories = ['All'];
+      
+      // Maintain the order specified in masterCategories
+      for (final masterCat in masterCategories) {
+        if (activeTypes.contains(masterCat)) {
+          newCategories.add(masterCat);
+        }
+      }
+
+      // Add any other categories present in data but not in masterCategories (robust fallback)
+      for (final activeType in activeTypes) {
+        if (!newCategories.contains(activeType)) {
+          newCategories.add(activeType);
+        }
+      }
+
+      // Update the RxList
+      categories.assignAll(newCategories);
+
+      // If the currently selected category is not in the new active categories, reset to 'All'
+      if (!categories.contains(selectedCategory.value)) {
+        selectedCategory.value = 'All';
+      }
+    } catch (e) {
+      debugPrint("Error in _updateCategories: $e");
+      categories.assignAll(['All']);
+    }
+  }
+
+  /// Returns the logged-in user's id, or null if not available.
+  int? _currentUserId() {
+    try {
+      if (Get.isRegistered<AuthService>()) {
+        return Get.find<AuthService>().currentUser.value?.id;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  void _applyFilter() {
+    try {
+      _updateCategories();
+
+      final myId = _currentUserId();
+
+      List<Blog> list;
+
+      if (selectedTab.value == 'Mine') {
+        // Show only the logged-in user's blogs
+        list = myBlogs.toList();
+      } else {
+        // "Others" tab → all blogs EXCEPT the logged-in user's
+        list = blogs.toList();
+        if (myId != null) {
+          list = list.where((b) => b.userId?.toString() != myId.toString()).toList();
+        }
+      }
+
+      // Category Filter
+      if (selectedCategory.value != 'All') {
+        list = list.where((b) => b.blogType == selectedCategory.value).toList();
+      }
+
+      filteredBlogs.assignAll(list);
+    } catch (e) {
+      debugPrint("Error in _applyFilter: $e");
+      filteredBlogs.assignAll(blogs);
+    }
   }
 
   Future<void> fetchBlogs({bool refresh = false}) async {
@@ -75,12 +200,42 @@ class BlogController extends GetxController {
         hasMore.value = false;
       } else {
         blogs.addAll(newBlogs);
-        filteredBlogs.assignAll(blogs);
+        _applyFilter();
         currentPage.value++;
       }
     }
 
     isLoading.value = false;
+  }
+
+  /// Fetch the current user's blogs.
+  /// Always does client-side userId filter as a fallback.
+  Future<void> fetchMyBlogs() async {
+    if (isMyBlogsLoading.value) return;
+    isMyBlogsLoading.value = true;
+    try {
+      final response = await _repository.getMyBlogs();
+      if (response != null && response.success == true && response.data != null) {
+        final fetched = response.data?.data ?? [];
+        final myId = _currentUserId();
+
+        if (myId != null) {
+          // Always filter by userId — works whether server filtered or not
+          myBlogs.assignAll(
+            fetched.where((b) => b.userId?.toString() == myId.toString()).toList(),
+          );
+        } else {
+          // AuthService not ready yet — store full list, will re-filter when needed
+          myBlogs.assignAll(fetched);
+        }
+
+        // Refresh view if Mine tab is active
+        if (selectedTab.value == 'Mine') _applyFilter();
+      }
+    } catch (e) {
+      debugPrint('fetchMyBlogs error: $e');
+    }
+    isMyBlogsLoading.value = false;
   }
 
   void searchBlogs(String query) {
@@ -90,20 +245,25 @@ class BlogController extends GetxController {
   void clearSearch() {
     searchTextController.clear();
     searchQuery.value = '';
-    filteredBlogs.assignAll(blogs);
+    _applyFilter();
   }
 
   void filterByCategory(String category) {
     selectedCategory.value = category;
     searchTextController.clear();
     searchQuery.value = '';
-    
-    if (category == 'All') {
-      filteredBlogs.assignAll(blogs);
+    _applyFilter();
+  }
+
+  void filterByTab(String tab) {
+    selectedTab.value = tab;
+    searchTextController.clear();
+    searchQuery.value = '';
+    // If switching to Mine tab and myBlogs is empty, fetch them
+    if (tab == 'Mine' && myBlogs.isEmpty && !isMyBlogsLoading.value) {
+      fetchMyBlogs();
     } else {
-      filteredBlogs.assignAll(
-        blogs.where((blog) => blog.blogType == category).toList(),
-      );
+      _applyFilter();
     }
   }
 
@@ -218,6 +378,25 @@ class BlogController extends GetxController {
     detailVideoController.value?.dispose();
     detailVideoController.value = null;
     isVideoInitialized.value = false;
+  }
+
+  Future<bool> deleteBlog(int id) async {
+    isLoading.value = true;
+    final success = await _repository.deleteBlog(id);
+    if (success) {
+      // Remove from locally loaded lists
+      blogs.removeWhere((b) => b.id == id);
+      myBlogs.removeWhere((b) => b.id == id); // Also remove from My Blogs tab
+      filteredBlogs.removeWhere((b) => b.id == id);
+      _applyFilter();
+      CustomSnackBar.showSuccess(message: "Blog deleted successfully");
+      isLoading.value = false;
+      return true;
+    } else {
+      CustomSnackBar.showError(message: "Failed to delete blog");
+      isLoading.value = false;
+      return false;
+    }
   }
 
   @override
