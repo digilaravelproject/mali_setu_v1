@@ -6,6 +6,7 @@ import '../model/res_login_model.dart';
 abstract class LoginDataSource {
   Future<ResLoginModel> login(ReqLoginModel reqModel);
   Future<ResLoginModel> googleLogin(Map<String, String> data);
+  Future<ResLoginModel> appleLogin(Map<String, String> data);
   Future<ResLoginModel> logout();
 }
 
@@ -33,6 +34,19 @@ class LoginDataSourceImpl implements LoginDataSource {
     try {
       final response = await apiClient.post(
         ApiConstants.authGoogleLogin,
+        data: data,
+      );
+      return ResLoginModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<ResLoginModel> appleLogin(Map<String, String> data) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.authAppleLogin,
         data: data,
       );
       return ResLoginModel.fromJson(response.data);

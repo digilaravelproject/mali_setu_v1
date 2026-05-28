@@ -170,8 +170,13 @@ const Map<String, String> mrIN = {
   'login_button': 'लॉगिन',
   'or': 'किंवा',
   'sign_in_with_google': 'Google सह साइन इन करा',
+  'sign_in_with_apple': 'Apple सह साइन इन करा',
   'dont_have_account': 'खाते नाही? ',
   'register': 'नोंदणी करा',
+  'delete_account': 'खाते हटवा',
+  'confirm_delete_account': 'खाते हटवण्याची पुष्टी करा',
+  'delete_account_message': 'तुमचा खात्री आहे की तुम्हाला तुमचे खाते हटवायचे आहे? ही क्रिया कायमस्वरूपी आहे आणि ती पूर्ववत करता येणार नाही.',
+  'account_deleted_success': 'खाते यशस्वीरित्या हटवले गेले',
   
   // Auth - Register Page
   'create_account': 'खाते तयार करा',

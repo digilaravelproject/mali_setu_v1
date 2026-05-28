@@ -14,12 +14,14 @@ class ApiConstants {
     static const String authRegister = "auth/register";
     static const String authLogin = "auth/login";
     static const String authGoogleLogin = "auth/google-login";
+    static const String authAppleLogin = "auth/apple-login";
     static const String authChangePassword = "auth/change-password";
     static const String authLogout = "auth/logout";
     static const String authProfile = "auth/profile"; // GET current user
     static const String authProfileUpdate = "auth/profile"; // PUT update profile
     static const String forgotPassword = "auth/password/forgot";
     static const String resetPassword = "auth/password/reset";
+    static const String authDeleteAccount = "auth/delete-account";
 
 
     // Bussiness Api

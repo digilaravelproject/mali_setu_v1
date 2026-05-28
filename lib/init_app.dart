@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,7 +9,20 @@ import 'features/Auth/service/auth_service.dart';
 
 
 Future<void> initApp() async {
-  await Firebase.initializeApp();
+  if (Platform.isIOS) {
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyBbGRlQRbCQS85FjCeptZ2VmKJg502HYGw',
+        appId: '1:58378864066:ios:00caa59b725958f473c25b',
+        messagingSenderId: '58378864066',
+        projectId: 'malisetu-be0df',
+        storageBucket: 'malisetu-be0df.firebasestorage.app',
+        iosBundleId: 'com.malisetu.app',
+      ),
+    );
+  } else {
+    await Firebase.initializeApp();
+  }
 
   // Initialize SharedPreferences
   await SharedPrefs.init();

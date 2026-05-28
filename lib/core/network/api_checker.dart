@@ -142,28 +142,15 @@ class ApiChecker {
                 CustomSnackBar.showError(
                   message: errorResponse.errors!.first.message ?? 'Unknown error',
                 );
-              } else if (error.response?.data['msg'] != null) {
-                CustomSnackBar.showError(
-                  message: error.response!.data['msg'].toString(),
-                );
-              } else if (error.response?.data['message'] != null) {
-                CustomSnackBar.showError(
-                  message: error.response!.data['message'].toString(),
-                );
               } else {
-                CustomSnackBar.showError(message: 'Something went wrong');
+                CustomSnackBar.showError(
+                  message: _parseErrorMessage(error.response!.data),
+                );
               }
             } catch (e) {
-              if (error.response?.data is Map) {
-                final data = error.response!.data as Map;
-                CustomSnackBar.showError(
-                  message: data['msg']?.toString() ??
-                      data['message']?.toString() ??
-                      'Something went wrong',
-                );
-              } else {
-                CustomSnackBar.showError(message: 'Something went wrong');
-              }
+              CustomSnackBar.showError(
+                message: _parseErrorMessage(error.response?.data),
+              );
             }
           } else {
             CustomSnackBar.showError(message: 'Server error. Please try again.');
@@ -221,6 +208,9 @@ class ApiChecker {
   }
 
   static String _getErrorMessage(DioException error) {
+    if (error.response?.data is Map) {
+      return _parseErrorMessage(error.response!.data);
+    }
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
         return 'Connection timeout';
@@ -230,28 +220,57 @@ class ApiChecker {
         return 'Response timeout';
       case DioExceptionType.connectionError:
         return 'No internet connection';
-      case DioExceptionType.badResponse:
-        if (error.response?.data is Map) {
-          final data = error.response!.data as Map;
-          return data['msg']?.toString() ??
-              data['message']?.toString() ??
-              'Server error';
-        }
-        return 'Server error';
       default:
         return 'Something went wrong';
     }
   }
 
-  static void _showErrorMessage(Response response, [String? defaultMessage]) {
-    String message = defaultMessage ?? 'Something went wrong';
+  static String _parseErrorMessage(dynamic data) {
+    if (data is Map) {
+      // 1. Check for 'msg'
+      if (data['msg'] != null && data['msg'] is String) return data['msg'];
+      
+      // 2. Check for 'message'
+      var message = data['message'];
+      if (message != null) {
+        if (message is String) return message;
+        if (message is Map && message.isNotEmpty) {
+          // Handle Laravel style: {"message": {"email": ["..."], "password": ["..."]}}
+          List<String> errors = [];
+          message.forEach((key, value) {
+            if (value is List && value.isNotEmpty) {
+              errors.add(value.first.toString());
+            } else {
+              errors.add(value.toString());
+            }
+          });
+          return errors.join('\n');
+        }
+      }
 
-    if (response.data != null && response.data is Map) {
-      final data = response.data as Map;
-      message = data['msg']?.toString() ??
-          data['message']?.toString() ??
-          data['error']?.toString() ??
-          message;
+      // 3. Check for 'error'
+      if (data['error'] != null && data['error'] is String) return data['error'];
+
+      // 4. Check for 'errors' list
+      if (data['errors'] != null && data['errors'] is List && data['errors'].isNotEmpty) {
+        List<String> errors = [];
+        for (var error in data['errors']) {
+          if (error is Map && error['message'] != null) {
+            errors.add(error['message'].toString());
+          } else if (error is String) {
+            errors.add(error);
+          }
+        }
+        return errors.isNotEmpty ? errors.join('\n') : 'Something went wrong';
+      }
+    }
+    return 'Something went wrong';
+  }
+
+  static void _showErrorMessage(Response response, [String? defaultMessage]) {
+    String message = _parseErrorMessage(response.data);
+    if (message == 'Something went wrong' && defaultMessage != null) {
+      message = defaultMessage;
     }
 
     if (message.contains("Disk quota exceeded")) {
@@ -277,15 +296,7 @@ class ApiChecker {
           CustomSnackBar.showError(message: 'Validation Error');
         }
       } catch (e) {
-        if (response.data is Map) {
-          final data = response.data as Map;
-          String message = data['msg']?.toString() ??
-              data['message']?.toString() ??
-              'Validation Error';
-          CustomSnackBar.showError(message: message);
-        } else {
-          CustomSnackBar.showError(message: 'Validation Error');
-        }
+        CustomSnackBar.showError(message: _parseErrorMessage(response.data));
       }
     } else {
       CustomSnackBar.showError(message: 'Validation Error');
@@ -322,18 +333,7 @@ class ApiChecker {
       } catch (e) {
         // If parsing fails, continue to default error handling
       }
-
-      if (response.data is Map) {
-        final data = response.data as Map;
-        CustomSnackBar.showError(
-          message: data['msg']?.toString() ??
-              data['message']?.toString() ??
-              data['error']?.toString() ??
-              'Something went wrong',
-        );
-      } else {
-        CustomSnackBar.showError(message: 'Something went wrong');
-      }
+      CustomSnackBar.showError(message: _parseErrorMessage(response.data));
     } else {
       CustomSnackBar.showError(message: 'Something went wrong');
     }

@@ -3,7 +3,9 @@ import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../../../../core/constent/app_constants.dart';
 import '../../../../../core/routes/app_routes.dart';
@@ -155,7 +157,11 @@ class LoginController extends GetxController {
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
-        CustomSnackBar.showError(message: response.message ?? "Login failed");
+        if (response.message == "No account found. Please register first.") {
+          Get.toNamed(AppRoutes.register, arguments: {"email": googleUser.email});
+        } else {
+          CustomSnackBar.showError(message: response.message ?? "Login failed");
+        }
       }
     } catch (e) {
       print("googlelogincatch : "+e.toString());
@@ -165,5 +171,70 @@ class LoginController extends GetxController {
       isLoading.value = false;
     }
   }
-}
 
+  Future<void> appleSignIn() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // We have the credential, now call our backend API
+      String? email = credential.email;
+      
+      // If email is null (happens on subsequent logins), try to decode it from Identity Token
+      if ((email == null || email.isEmpty) && credential.identityToken != null) {
+        try {
+          final Map<String, dynamic> decodedToken = JwtDecoder.decode(credential.identityToken!);
+          email = decodedToken['email'];
+          print("DEBUG_APPLE: Extracted email from JWT: $email");
+        } catch (e) {
+          print("DEBUG_APPLE: Failed to decode JWT: $e");
+        }
+      }
+
+      final Map<String, String> data = {
+        "apple_id": credential.userIdentifier ?? "",
+        "email": email ?? "",
+      };
+
+      isLoading.value = true;
+      final response = await loginUseCase.apple(data);
+
+      if (response.success == true) {
+        // Save Token
+        if (response.data?.token != null) {
+          await TokenManager.saveToken(response.data!.token!);
+        }
+
+        // Save User Data
+        if (response.data?.user != null) {
+          final user = response.data!.user!;
+          Get.find<AuthService>().currentUser.value = user;
+          await SharedPrefs.setString(
+            AppConstants.userDataPref,
+            jsonEncode(user.toJson()),
+          );
+        }
+
+        // Set Logged In
+        await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
+
+        CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
+        Get.offAllNamed(AppRoutes.dashboard);
+      } else {
+        if (response.message == "No account found. Please register first.") {
+          Get.toNamed(AppRoutes.register, arguments: {"email": email});
+        } else {
+          CustomSnackBar.showError(message: response.message ?? "Login failed");
+        }
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}

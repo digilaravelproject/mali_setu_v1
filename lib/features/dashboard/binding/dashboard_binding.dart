@@ -1,5 +1,6 @@
 import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
+import 'package:edu_cluezer/features/settings/domain/usecase/delete_account_usecase.dart';
 import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:edu_cluezer/features/volunteer/controller/volunteerController.dart';
 import 'package:get/get.dart';
@@ -52,7 +53,11 @@ class DashboardBinding extends Bindings {
       getBusinessCategoriesUseCase: Get.find(),
       getBannersUseCase: Get.find(),
     ));
-    Get.lazyPut(() => SettingsController(logoutUseCase: Get.find()));
+    Get.lazyPut<DeleteAccountUseCase>(() => DeleteAccountUseCase(repository: Get.find()));
+    Get.lazyPut(() => SettingsController(
+      logoutUseCase: Get.find(),
+      deleteAccountUseCase: Get.find(),
+    ));
 
     Get.lazyPut<CatBusinessDataSource>(() => CatBusinessDataSourceImpl(apiClient: Get.find()),);
     // Repository

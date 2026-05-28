@@ -170,6 +170,20 @@ class LoginPage extends GetWidget<LoginController> {
               textColor: context.theme.colorScheme.onSurface,
               borderColor: context.theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
+            if (GetPlatform.isIOS) ...[
+              const SizedBox(height: 12),
+              CustomButton(
+                title: 'sign_in_with_apple'.tr,
+                backgroundColor: Colors.black,
+                textColor: Colors.white,
+                leading: const Icon(
+                  Icons.apple,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                onPressed: controller.appleSignIn,
+              ),
+            ],
 
             Center(
               child: Padding(
