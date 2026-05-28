@@ -4,4 +4,5 @@ import '../../data/model/res_login_model.dart';
 
 abstract class LogoutRepository {
   Future<bool> logout();
+  Future<bool> deleteAccount();
 }

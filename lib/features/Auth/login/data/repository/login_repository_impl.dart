@@ -19,6 +19,11 @@ class LoginRepositoryImpl implements LoginRepository {
   }
 
   @override
+  Future<ResLoginModel> appleLogin(Map<String, String> data) async {
+    return await dataSource.appleLogin(data);
+  }
+
+  @override
   Future<ResLoginModel> logout() async {
     return await dataSource.logout();
   }

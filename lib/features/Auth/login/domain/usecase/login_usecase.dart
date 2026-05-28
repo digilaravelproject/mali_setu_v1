@@ -14,4 +14,8 @@ class LoginUseCase {
   Future<ResLoginModel> google(Map<String, String> data) async {
     return await repository.googleLogin(data);
   }
+
+  Future<ResLoginModel> apple(Map<String, String> data) async {
+    return await repository.appleLogin(data);
+  }
 }

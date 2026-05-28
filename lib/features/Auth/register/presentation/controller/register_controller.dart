@@ -118,6 +118,12 @@ class RegisterController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    
+    // Check for email in arguments (passed from Social Login)
+    if (Get.arguments != null && Get.arguments is Map && Get.arguments['email'] != null) {
+      emailCtrl.text = Get.arguments['email'].toString();
+    }
+
     // Listen to pincode changes for auto-fill
     pinCodeCtrl.addListener(_onPincodeChanged);
   }

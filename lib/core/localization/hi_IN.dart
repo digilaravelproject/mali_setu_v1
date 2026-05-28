@@ -174,8 +174,13 @@ const Map<String, String> hiIN = {
   'login_button': 'लॉगिन',
   'or': 'या',
   'sign_in_with_google': 'Google से साइन इन करें',
+  'sign_in_with_apple': 'Apple से साइन इन करें',
   'dont_have_account': 'खाता नहीं है? ',
   'register': 'पंजीकरण करें',
+  'delete_account': 'खाता हटाएं',
+  'confirm_delete_account': 'खाता हटाने की पुष्टि करें',
+  'delete_account_message': 'क्या आप वाकई अपना खाता हटाना चाहते हैं? यह क्रिया स्थायी है और इसे बदला नहीं जा सकता।',
+  'account_deleted_success': 'खाता सफलतापूर्वक हटा दिया गया',
 
   // Auth - Register Page
   'create_account': 'खाता बनाएं',

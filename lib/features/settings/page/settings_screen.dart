@@ -166,6 +166,23 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     },
                   ),
                   _SettingsItem(
+                    title: 'delete_account'.tr,
+                    icon: CupertinoIcons.delete,
+                    isDestructive: true,
+                    onTap: () async {
+                      final confirm = await LogoutDialog.show(
+                        context: context,
+                        title: 'confirm_delete_account'.tr,
+                        message: 'delete_account_message'.tr,
+                        confirmText: 'delete_account'.tr,
+                        confirmColor: Colors.red,
+                      );
+                      if (confirm == true) {
+                        controller.performDeleteAccount();
+                      }
+                    },
+                  ),
+                  _SettingsItem(
                     title: 'logout'.tr,
                     icon: Icons.logout_rounded,
                     isDestructive: true,

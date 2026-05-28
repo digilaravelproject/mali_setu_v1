@@ -12,6 +12,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:edu_cluezer/core/helper/local_notification_helper.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -1062,15 +1063,25 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       // Permission check
       if (Platform.isAndroid) {
-        final status = await Permission.storage.request();
-        if (status.isPermanentlyDenied) {
-          CustomSnackBar.showError(message: "Storage permission denied. Enable from settings.");
-          return;
+        final androidInfo = await DeviceInfoPlugin().androidInfo;
+        final sdkInt = androidInfo.version.sdkInt;
+
+        // On Android 13+ (SDK 33), Permission.storage triggers the restricted READ_MEDIA_IMAGES/VIDEO 
+        // permissions. For downloading files, we skip this check and rely on Scoped Storage/MediaStore 
+        // which does not require broad media access.
+        if (sdkInt < 33) {
+          final status = await Permission.storage.request();
+          if (status.isPermanentlyDenied) {
+            CustomSnackBar.showError(message: "Storage permission denied. Enable from settings.");
+            return;
+          }
         }
         
-        // Request notification permission for Android 13+
-        if (await Permission.notification.isDenied) {
-          await Permission.notification.request();
+        // Request notification permission for Android 13+ (separate from media permissions)
+        if (sdkInt >= 33) {
+          if (await Permission.notification.isDenied) {
+            await Permission.notification.request();
+          }
         }
       }
 

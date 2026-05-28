@@ -24,4 +24,9 @@ class LogoutRepositoryImpl implements LogoutRepository {
   Future<bool> logout() async {
     return await dataSource.logout();
   }
+
+  @override
+  Future<bool> deleteAccount() async {
+    return await dataSource.deleteAccount();
+  }
 }

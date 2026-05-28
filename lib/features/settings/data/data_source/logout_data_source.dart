@@ -30,6 +30,7 @@ import '../model/res_login_model.dart';
 
 abstract class LogoutDataSource {
   Future<bool> logout();
+  Future<bool> deleteAccount();
 }
 
 class LogoutDataSourceImpl implements LogoutDataSource {
@@ -41,6 +42,17 @@ class LogoutDataSourceImpl implements LogoutDataSource {
   Future<bool> logout() async {
     final response = await apiClient.post(
       ApiConstants.authLogout,
+      handleError: true,
+      showToaster: true,
+    );
+
+    return response.statusCode == 200;
+  }
+
+  @override
+  Future<bool> deleteAccount() async {
+    final response = await apiClient.post(
+      ApiConstants.authDeleteAccount,
       handleError: true,
       showToaster: true,
     );

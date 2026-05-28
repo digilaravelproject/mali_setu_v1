@@ -9,6 +9,7 @@ import '../data/data_source/logout_data_source.dart';
 import '../data/repository/logout_repository_impl.dart';
 import '../domain/repository/logout_repository.dart';
 import '../domain/usecase/logout_usecase.dart';
+import '../domain/usecase/delete_account_usecase.dart';
 
 
 
@@ -32,7 +33,14 @@ class SettingsBinding extends Bindings {
           () => LogoutUseCase(repository: Get.find()),
     );
 
-    Get.lazyPut(() => SettingsController( logoutUseCase: Get.find()));
+    Get.lazyPut<DeleteAccountUseCase>(
+          () => DeleteAccountUseCase(repository: Get.find()),
+    );
+
+    Get.lazyPut(() => SettingsController(
+      logoutUseCase: Get.find(),
+      deleteAccountUseCase: Get.find(),
+    ));
 
 
   }

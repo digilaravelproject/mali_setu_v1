@@ -175,8 +175,14 @@ const Map<String, String> enUS = {
   'login_button': 'Login',
   'or': 'OR',
   'sign_in_with_google': 'Sign in with Google',
+  'sign_in_with_apple': 'Sign in with Apple',
   'dont_have_account': "Don't have an account? ",
   'register': 'Register',
+  'delete_account': 'Delete Account',
+  'confirm_delete_account': 'Confirm Account Deletion',
+  'delete_account_message': 'Are you sure you want to delete your account? This action is permanent and cannot be undone.',
+  'account_deleted_success': 'Account deleted successfully',
+
 
   // Auth - Register Page
   'create_account': 'Create Account',
