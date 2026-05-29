@@ -50,7 +50,7 @@ class BlogsScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                         // Icon(Icons.menu_rounded, color: const Color(0xFF374151), size: 24),
+                          // Icon(Icons.menu_rounded, color: const Color(0xFF374151), size: 24),
                           Text(
                             'blogs'.tr,
                             style: const TextStyle(
@@ -81,11 +81,11 @@ class BlogsScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Search Bar
                       _buildSearchBar(controller),
                       const SizedBox(height: 16),
-                      
+
                       // Ultra-Professional Underlined Tabs
                       _buildUnderlineTabs(controller, primaryColor),
                     ],
@@ -107,13 +107,13 @@ class BlogsScreen extends StatelessWidget {
                 final isMine = controller.selectedTab.value == 'Mine';
                 final loading = isMine ? controller.isMyBlogsLoading.value : controller.isLoading.value;
                 final empty = isMine ? controller.myBlogs.isEmpty : controller.blogs.isEmpty;
-                
+
                 if (loading && empty) {
                   return SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (context, index) => _buildShimmerCard(),
+                            (context, index) => _buildShimmerCard(),
                         childCount: 4,
                       ),
                     ),
@@ -130,7 +130,7 @@ class BlogsScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                          (context, index) {
                         final blog = controller.filteredBlogs[index];
                         return _buildBlogCard(context, blog, primaryColor, controller);
                       },
@@ -142,7 +142,7 @@ class BlogsScreen extends StatelessWidget {
             ],
           ),
         ),
-        
+
         // Sleek Extended FAB [ + Write Blog ] which looks extremely professional
         floatingActionButton: Obx(() {
           if (!Get.isRegistered<AuthService>()) return const SizedBox.shrink();
@@ -151,7 +151,7 @@ class BlogsScreen extends StatelessWidget {
           final hasBlogAccess = user?.blogAccess ?? false;
           final isBlogger = user?.userType?.toLowerCase().trim() == 'bloger';
           if (!hasBlogAccess && !isBlogger) return const SizedBox.shrink();
-          
+
           return GestureDetector(
             onTap: () => Get.to(() => const CreateBlogScreen()),
             child: Container(
@@ -193,7 +193,7 @@ class BlogsScreen extends StatelessWidget {
   }
 
   // Premium, corporate underlined tab bar matching clean guidelines
-  Widget _buildUnderlineTabs(BlogController controller, Color primaryColor) {
+/*  Widget _buildUnderlineTabs(BlogController controller, Color primaryColor) {
     return Obx(() {
       final selected = controller.selectedTab.value;
       return Container(
@@ -201,6 +201,65 @@ class BlogsScreen extends StatelessWidget {
         decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildTabItem(
+                title: "other_blogs".tr,
+                isSelected: selected == 'Others',
+                onTap: () => controller.filterByTab('Others'),
+                primaryColor: primaryColor,
+              ),
+            ),
+            Expanded(
+              child: _buildTabItem(
+                title: "my_blogs".tr,
+                isSelected: selected == 'Mine',
+                onTap: () => controller.filterByTab('Mine'),
+                primaryColor: primaryColor,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }*/
+
+
+  Widget _buildUnderlineTabs(BlogController controller, Color primaryColor) {
+    bool showBlogTabs = false;
+
+    if (Get.isRegistered<AuthService>()) {
+      final authService = Get.find<AuthService>();
+      final user = authService.currentUser.value;
+
+      final hasBlogAccess = user?.blogAccess ?? false;
+      final isBlogger =
+          user?.userType?.toLowerCase().trim() == 'bloger';
+
+      showBlogTabs = hasBlogAccess || isBlogger;
+    }
+
+    if (!showBlogTabs) {
+      if (controller.selectedTab.value == 'Mine') {
+        controller.filterByTab('Others');
+      }
+      return const SizedBox.shrink();
+    }
+
+    return Obx(() {
+      final selected = controller.selectedTab.value;
+
+      return Container(
+        height: 44,
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Color(0xFFE5E7EB),
+              width: 1.5,
+            ),
           ),
         ),
         child: Row(
@@ -459,16 +518,16 @@ class BlogsScreen extends StatelessWidget {
   Widget _buildBlogCard(
       BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
     final String? imageUrl =
-        blog.mediaPath != null ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}" : null;
+    blog.mediaPath != null ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}" : null;
     final String? firstMedia = (blog.mediaPaths != null && blog.mediaPaths!.isNotEmpty) ? blog.mediaPaths!.first : blog.mediaPath;
     final bool isVideoFirst = firstMedia != null && (
         firstMedia.toLowerCase().endsWith('.mp4') ||
-        firstMedia.toLowerCase().endsWith('.mov') ||
-        firstMedia.toLowerCase().endsWith('.avi') ||
-        firstMedia.toLowerCase().endsWith('.mkv') ||
-        firstMedia.toLowerCase().endsWith('.webm') ||
-        firstMedia.toLowerCase().endsWith('.3gp') ||
-        firstMedia.toLowerCase().endsWith('.m4v'));
+            firstMedia.toLowerCase().endsWith('.mov') ||
+            firstMedia.toLowerCase().endsWith('.avi') ||
+            firstMedia.toLowerCase().endsWith('.mkv') ||
+            firstMedia.toLowerCase().endsWith('.webm') ||
+            firstMedia.toLowerCase().endsWith('.3gp') ||
+            firstMedia.toLowerCase().endsWith('.m4v'));
 
     return GestureDetector(
       onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0)),
@@ -499,18 +558,18 @@ class BlogsScreen extends StatelessWidget {
                     width: double.infinity,
                     child: firstMedia != null
                         ? (isVideoFirst
-                            ? VideoThumbnailWidget(
-                                key: ValueKey(firstMedia),
-                                videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
-                                height: 180,
-                                width: double.infinity,
-                                placeholder: _blogPlaceholder(primaryColor, isVideo: true),
-                              )
-                            : Image.network(
-                                "${ApiConstants.imageBaseUrl}$firstMedia",
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
-                              ))
+                        ? VideoThumbnailWidget(
+                      key: ValueKey(firstMedia),
+                      videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
+                      height: 180,
+                      width: double.infinity,
+                      placeholder: _blogPlaceholder(primaryColor, isVideo: true),
+                    )
+                        : Image.network(
+                      "${ApiConstants.imageBaseUrl}$firstMedia",
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
+                    ))
                         : _blogPlaceholder(primaryColor, isVideo: false),
                   ),
                 ),
@@ -568,15 +627,15 @@ class BlogsScreen extends StatelessWidget {
                             : null,
                         child: blog.user?.photo == null
                             ? Text(
-                                blog.user?.name?.isNotEmpty == true
-                                    ? blog.user!.name![0].toUpperCase()
-                                    : 'U',
-                                style: TextStyle(
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              )
+                          blog.user?.name?.isNotEmpty == true
+                              ? blog.user!.name![0].toUpperCase()
+                              : 'U',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        )
                             : null,
                       ),
                       const SizedBox(width: 8),
