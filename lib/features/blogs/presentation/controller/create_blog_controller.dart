@@ -294,49 +294,37 @@ void onInit() {
 
       final formData = FormData.fromMap(fields);
 
-      // Add media (both new files and existing URLs) to the FormData
-      for (final item in allMedia) {
-        if (item is File) {
-          final fileName = item.path.split('/').last;
-          formData.files.add(MapEntry(
-            "media[]",
-            await MultipartFile.fromFile(
-              item.path,
-              filename: fileName,
-            ),
-          ));
-        } else if (item is String) {
-          // Existing media URL – handle based on create or update
-          if (blogToEdit != null) {
-          // Editing – download the existing media and attach as a multipart file (in-memory)
-          try {
-            // Construct full URL (adjust base URL if needed)
-            final String mediaUrl = "https://malisetu.com/" + item;
-            // Download file bytes
-            final response = await Dio().get<List<int>>(mediaUrl, options: Options(responseType: ResponseType.bytes));
-            final bytes = response.data;
-            if (bytes != null) {
-              final String fileName = item.split('/').last;
-              // Attach as multipart file using in‑memory bytes
-              formData.files.add(MapEntry(
+    // Media handling
+    // For both create and update we need to send all media as multipart files.
+    // Existing media (URLs) are downloaded in‑memory and attached as MultipartFile.fromBytes.
+    // New selected files are attached directly.
+    Future<void> _attachMedia() async {
+      // Existing media URLs
+      for (final path in existingMediaPaths) {
+        try {
+          final String mediaUrl = "https://malisetu.com/" + path;
+          final response = await Dio().get<List<int>>(mediaUrl,
+              options: Options(responseType: ResponseType.bytes));
+          final bytes = response.data;
+          if (bytes != null) {
+            final fileName = path.split('/').last;
+            formData.files.add(MapEntry(
                 "media[]",
-                MultipartFile.fromBytes(
-                  bytes,
-                  filename: fileName,
-                ),
-              ));
-            }
-          } catch (e) {
-            // If download fails, fallback to sending the URL as a field
-            formData.fields.add(MapEntry("media[]", item));
+                MultipartFile.fromBytes(bytes, filename: fileName)));
           }
-          } else {
-            // Creating – treat as new media entries (URL string)
-            formData.fields.add(MapEntry("media[]", item));
-          }
+        } catch (e) {
+          debugPrint("Failed to fetch existing media $path: $e");
         }
-
       }
+      // Newly selected files
+      for (final file in selectedFiles) {
+        final fileName = file.path.split('/').last;
+        formData.files.add(MapEntry(
+            "media[]",
+            await MultipartFile.fromFile(file.path, filename: fileName)));
+      }
+    }
+    await _attachMedia();
 
       debugPrint("Submitting blog multipart request...");
       final response = blogToEdit != null

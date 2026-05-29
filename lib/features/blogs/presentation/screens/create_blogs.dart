@@ -640,63 +640,55 @@ class CreateBlogScreen extends StatelessWidget {
                     path.toLowerCase().endsWith('.mov') ||
                     path.toLowerCase().endsWith('.avi');
 
-                return GestureDetector(
-                  onTap: () {
-                    if (!isVideo) {
-                      // Open full-screen image viewer for images
-                      Get.to(() => FullScreenImageViewer(imageUrl: url));
-                    } else {
-                      // TODO: Implement video preview if needed
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.04),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(11),
-                          child: isVideo
-                              ? Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.videocam_rounded, size: 24, color: primaryColor),
-                                    const SizedBox(height: 4),
-                                    const Text("Video", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF4B5563))),
-                                  ],
-                                )
-                              : Image.network(
-                                  url,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => const Center(
-                                    child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 24),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: GestureDetector(
-                          onTap: () => controller.removeExistingMedia(index),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, size: 10, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                // Reverted implementation with tap to view full-screen image
+return Stack(
+  children: [
+    Container(
+      width: 90,
+      height: 90,
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(11),
+        child: isVideo
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.videocam_rounded, size: 24, color: primaryColor),
+                  const SizedBox(height: 4),
+                  const Text("Video", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF4B5563))),
+                ],
+              )
+            : Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 24),
+                ),
+              ),
+      ),
+    ),
+    Positioned(
+      top: 4,
+      right: 4,
+      child: GestureDetector(
+        onTap: () => controller.removeExistingMedia(index),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: const BoxDecoration(
+            color: Colors.red,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.close, size: 10, color: Colors.white),
+        ),
+      ),
+    ),
+  ],
+);
+
               }),
 
               // 2. Newly Selected Media Thumbnails
