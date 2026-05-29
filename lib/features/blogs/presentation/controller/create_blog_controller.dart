@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
-import 'dart:io';
+import 'package:http_parser/http_parser.dart';
 import 'package:file_picker/file_picker.dart';
+import '../../../../core/constent/api_constants.dart';
 import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_controller.dart';
@@ -294,37 +297,132 @@ void onInit() {
 
       final formData = FormData.fromMap(fields);
 
-    // Media handling
-    // For both create and update we need to send all media as multipart files.
-    // Existing media (URLs) are downloaded in‑memory and attached as MultipartFile.fromBytes.
-    // New selected files are attached directly.
-    Future<void> _attachMedia() async {
-      // Existing media URLs
-      for (final path in existingMediaPaths) {
-        try {
-          final String mediaUrl = "https://malisetu.com/" + path;
-          final response = await Dio().get<List<int>>(mediaUrl,
-              options: Options(responseType: ResponseType.bytes));
-          final bytes = response.data;
-          if (bytes != null) {
-            final fileName = path.split('/').last;
-            formData.files.add(MapEntry(
+      /*Future<void> _attachMedia() async {
+        // Attach existing media URLs as multipart files (download them)
+        for (final path in existingMediaPaths) {
+          try {
+            final String mediaUrl = "https://malisetu.com/" + path;
+            final response = await Dio().get<List<int>>(mediaUrl,
+                options: Options(responseType: ResponseType.bytes));
+            final bytes = response.data;
+            if (bytes != null) {
+              final fileName = path.split('/').last;
+              // Determine mime type from extension
+              String ext = fileName.split('.').last.toLowerCase();
+              String mime;
+              if (['jpg', 'jpeg', 'png', 'gif'].contains(ext)) {
+                mime = 'image/' + (ext == 'jpg' ? 'jpeg' : ext);
+              } else if (['mp4', 'mov', 'avi', 'webm'].contains(ext)) {
+                mime = 'video/' + ext;
+              } else {
+                mime = 'application/octet-stream';
+              }
+              formData.files.add(MapEntry(
                 "media[]",
-                MultipartFile.fromBytes(bytes, filename: fileName)));
+                MultipartFile.fromBytes(
+                  bytes,
+                  filename: fileName,
+                  contentType: MediaType.parse(mime),
+                ),
+              ));
+            }
+          } catch (e) {
+            debugPrint("Failed to fetch existing media $path: $e");
           }
-        } catch (e) {
-          debugPrint("Failed to fetch existing media $path: $e");
+        }
+        // Attach newly selected files as multipart
+        for (final file in selectedFiles) {
+          final fileName = file.path.split('/').last;
+          formData.files.add(MapEntry(
+              "media[]",
+              await MultipartFile.fromFile(file.path, filename: fileName)));
+        }
+      }*/
+
+      Future<void> _attachMedia(FormData formData) async {
+        final Dio dio = Dio();
+
+        // 1. Existing media URL/path ko download karke multipart me convert karo
+        if (blogToEdit != null) {
+          for (final path in existingMediaPaths) {
+            try {
+              String mediaUrl = path;
+
+              // Agar path already full URL nahi hai to base URL add karo
+              if (!mediaUrl.startsWith('http')) {
+                mediaUrl = "${ApiConstants.imageBaseUrl}$path";
+              }
+
+              debugPrint("Downloading existing media: $mediaUrl");
+
+              final response = await dio.get<List<int>>(
+                mediaUrl,
+                options: Options(responseType: ResponseType.bytes),
+              );
+
+              final bytes = response.data;
+
+              if (bytes != null && bytes.isNotEmpty) {
+                final fileName = path.split('/').last.split('?').first;
+                final ext = fileName.split('.').last.toLowerCase();
+
+                String mimeType = 'application/octet-stream';
+
+                if (ext == 'jpg' || ext == 'jpeg') {
+                  mimeType = 'image/jpeg';
+                } else if (ext == 'png') {
+                  mimeType = 'image/png';
+                } else if (ext == 'gif') {
+                  mimeType = 'image/gif';
+                } else if (ext == 'mp4') {
+                  mimeType = 'video/mp4';
+                } else if (ext == 'mov') {
+                  mimeType = 'video/quicktime';
+                } else if (ext == 'avi') {
+                  mimeType = 'video/x-msvideo';
+                } else if (ext == 'webm') {
+                  mimeType = 'video/webm';
+                }
+
+                formData.files.add(
+                  MapEntry(
+                    "media[]",
+                    MultipartFile.fromBytes(
+                      bytes,
+                      filename: fileName,
+                      contentType: MediaType.parse(mimeType),
+                    ),
+                  ),
+                );
+
+                debugPrint("Existing media attached: $fileName");
+              }
+            } catch (e) {
+              debugPrint("Failed to attach existing media $path: $e");
+            }
+          }
+        }
+
+        // 2. Newly selected files attach karo
+        for (final file in selectedFiles) {
+          final fileName = file.path.split('/').last;
+
+          formData.files.add(
+            MapEntry(
+              "media[]",
+              await MultipartFile.fromFile(
+                file.path,
+                filename: fileName,
+              ),
+            ),
+          );
+
+          debugPrint("New media attached: $fileName");
         }
       }
-      // Newly selected files
-      for (final file in selectedFiles) {
-        final fileName = file.path.split('/').last;
-        formData.files.add(MapEntry(
-            "media[]",
-            await MultipartFile.fromFile(file.path, filename: fileName)));
-      }
-    }
-    await _attachMedia();
+
+
+      await _attachMedia(formData);
 
       debugPrint("Submitting blog multipart request...");
       final response = blogToEdit != null
