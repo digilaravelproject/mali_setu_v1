@@ -74,16 +74,18 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     icon: Icons.language_rounded,
                     onTap: () => Get.to(() => const ChangeLanguagePage()),
                   ),
-                  _SettingsItem(
-                    title: 'transaction_history'.tr,
-                    icon: CupertinoIcons.list_bullet_indent,
-                    onTap: () => Get.toNamed(AppRoutes.transactionHistory),
-                  ),
-                  _SettingsItem(
-                    title: 'applied_jobs'.tr,
-                    icon: CupertinoIcons.bag,
-                    onTap: () => Get.toNamed(AppRoutes.appliedJobList),
-                  ),
+                  if (authService.currentUser.value?.userType?.toLowerCase().trim() != 'bloger') ...[
+                    _SettingsItem(
+                      title: 'transaction_history'.tr,
+                      icon: CupertinoIcons.list_bullet_indent,
+                      onTap: () => Get.toNamed(AppRoutes.transactionHistory),
+                    ),
+                    _SettingsItem(
+                      title: 'applied_jobs'.tr,
+                      icon: CupertinoIcons.bag,
+                      onTap: () => Get.toNamed(AppRoutes.appliedJobList),
+                    ),
+                  ],
                 ],
               ),
 

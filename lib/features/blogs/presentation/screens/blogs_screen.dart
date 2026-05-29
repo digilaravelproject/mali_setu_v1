@@ -149,7 +149,8 @@ class BlogsScreen extends StatelessWidget {
           final authService = Get.find<AuthService>();
           final user = authService.currentUser.value;
           final hasBlogAccess = user?.blogAccess ?? false;
-          if (!hasBlogAccess) return const SizedBox.shrink();
+          final isBlogger = user?.userType?.toLowerCase().trim() == 'bloger';
+          if (!hasBlogAccess && !isBlogger) return const SizedBox.shrink();
           
           return GestureDetector(
             onTap: () => Get.to(() => const CreateBlogScreen()),
@@ -168,13 +169,13 @@ class BlogsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Row(
+              child:  Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.add_rounded, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
-                    "Write Blog",
+                    'write_blog'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -206,7 +207,7 @@ class BlogsScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildTabItem(
-                title: "Other Blogs",
+                title: "other_blogs".tr,
                 isSelected: selected == 'Others',
                 onTap: () => controller.filterByTab('Others'),
                 primaryColor: primaryColor,
@@ -214,7 +215,7 @@ class BlogsScreen extends StatelessWidget {
             ),
             Expanded(
               child: _buildTabItem(
-                title: "My Blogs",
+                title: "my_blogs".tr,
                 isSelected: selected == 'Mine',
                 onTap: () => controller.filterByTab('Mine'),
                 primaryColor: primaryColor,
@@ -324,8 +325,8 @@ class BlogsScreen extends StatelessWidget {
             child: TextField(
               controller: controller.searchTextController,
               onChanged: (value) => controller.searchBlogs(value),
-              decoration: const InputDecoration(
-                hintText: 'Search blogs...',
+              decoration:  InputDecoration(
+                hintText: 'search_blogs'.tr,
                 hintStyle: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -387,8 +388,8 @@ class BlogsScreen extends StatelessWidget {
               onChanged: (value) {
                 controller.searchBlogs(value);
               },
-              decoration: const InputDecoration(
-                hintText: 'Search blogs...',
+              decoration:  InputDecoration(
+                hintText: 'search_blogs'.tr,
                 hintStyle: TextStyle(
                   color: Color(0xFF9CA3AF),
                   fontSize: 14,

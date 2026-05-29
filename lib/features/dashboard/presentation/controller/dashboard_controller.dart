@@ -19,15 +19,31 @@ class DashboardController extends GetxController {
   var currentPage = 0.obs;
   var hasShownBusinessDialog = false.obs;
 
-  var screenList = <Widget>[
-    HomePage(),
-    //BusinessPage(),
-    BusinessScreen(),
-    MatrimonyPage(),
-    BlogsScreen(),
-    SettingsScreen()
- //   MorePage(),
-  ];
+  bool get isBlogger {
+    try {
+      if (Get.isRegistered<AuthService>()) {
+        final user = Get.find<AuthService>().currentUser.value;
+        return user?.userType?.toLowerCase().trim() == 'bloger';
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  List<Widget> get screenList {
+    if (isBlogger) {
+      return <Widget>[
+        BlogsScreen(),
+        SettingsScreen(),
+      ];
+    }
+    return <Widget>[
+      HomePage(),
+      BusinessScreen(),
+      MatrimonyPage(),
+      BlogsScreen(),
+      SettingsScreen(),
+    ];
+  }
 
   @override
   void onInit() {
@@ -254,6 +270,23 @@ class DashboardController extends GetxController {
 
   List<BtmNavModel> navList(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
+    if (isBlogger) {
+      return [
+        BtmNavModel(
+          title: "blogs".tr,
+          icon: Icons.article_outlined,
+          selectedIcon: Icons.article,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "more".tr,
+          icon: Icons.more_vert,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+      ];
+    }
     return [
       BtmNavModel(
         title: "home".tr,

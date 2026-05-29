@@ -974,6 +974,10 @@ const Map<String, String> mrIN = {
   "password_special_required": "पासवर्डमध्ये किमान १ विशेष चिन्ह असणे आवश्यक आहे",
   "back_message": "मागे गेल्यास डेटा हटवला जाईल. बाहेर पडण्यासाठी पुन्हा बॅक दाबा.",
 
+"write_blog": "ब्लॉग लिहा",
+"other_blogs": "इतर ब्लॉग",
+"my_blogs": "माझे ब्लॉग",
+
 };
 
 

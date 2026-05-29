@@ -6,7 +6,6 @@ import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
-import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/core/helper/form_validator.dart';
 
 class CreateJobController extends GetxController {
@@ -83,7 +82,7 @@ class CreateJobController extends GetxController {
   final RxList<String> selectedSkills = <String>[].obs;
 
 
-  late int businessId;
+  int businessId = 0;
 
 
   
@@ -264,11 +263,6 @@ class CreateJobController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments != null) {
-      businessId = Get.arguments as int;
-    } else {
-      Get.back();
-    }
     
     // Auto-select business if coming from business detail page
     final businessController = Get.find<BusinessController>();
@@ -276,6 +270,21 @@ class CreateJobController extends GetxController {
       selectedBusinessId.value = businessController.myBusiness.value!.id;
       businessCtrl.text = businessController.myBusiness.value!.businessName ?? '';
       debugPrint("🏢 Auto-selected business: ${businessCtrl.text} (ID: ${selectedBusinessId.value})");
+    }
+
+    if (Get.arguments != null) {
+      if (Get.arguments is int) {
+        businessId = Get.arguments as int;
+        selectedBusinessId.value = businessId;
+      } else if (Get.arguments is Job) {
+        final job = Get.arguments as Job;
+        businessId = job.businessId ?? job.business?.id ?? 0;
+        selectedBusinessId.value = businessId;
+      } else {
+        businessId = selectedBusinessId.value ?? 0;
+      }
+    } else {
+      businessId = selectedBusinessId.value ?? 0;
     }
     
     // Listen to category changes
@@ -345,6 +354,7 @@ class CreateJobController extends GetxController {
 
     // Set business ID
     selectedBusinessId.value = job.businessId ?? job.business?.id;
+    businessId = selectedBusinessId.value ?? 0;
     if (selectedBusinessId.value != null) {
       final businessController = Get.find<BusinessController>();
       final business = businessController.myBusinesses.firstWhereOrNull(
@@ -422,14 +432,14 @@ class CreateJobController extends GetxController {
 
   Future<void> onRegister() async {
     // Use selected business ID or fallback to current business
-   // final businessId = selectedBusinessId.value ?? Get.find<BusinessController>().myBusiness.value?.id;
+    final activeBusinessId = selectedBusinessId.value ?? businessId;
     
-    // if (businessId == null) {
-    //   CustomSnackBar.showError(message: 'register_business_first');
-    //   return;
-    // }
+    if (activeBusinessId == 0) {
+      CustomSnackBar.showError(message: 'register_business_first'.tr);
+      return;
+    }
 
-    debugPrint("🏢 Using business ID: $businessId");
+    debugPrint("🏢 Using business ID: $activeBusinessId");
 
     // Comprehensive Validation
     errors.clear();
@@ -476,7 +486,7 @@ class CreateJobController extends GetxController {
     }
 
     final data = {
-      "business_id": businessId,
+      "business_id": activeBusinessId,
       "title": titleCtrl.text.trim(),
       "description": descriptionCtrl.text.trim(),
       "requirements": requirementsCtrl.text.trim(),

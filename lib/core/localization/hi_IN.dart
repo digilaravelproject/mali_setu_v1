@@ -955,6 +955,10 @@ const Map<String, String> hiIN = {
 
   "back_message": "वापस जाने पर डेटा हट जाएगा। बाहर निकलने के लिए फिर से बैक दबाएं।",
 
+  "write_blog": "ब्लॉग लिखें",
+  "other_blogs": "अन्य ब्लॉग",
+  "my_blogs": "मेरे ब्लॉग",
+
 };
 
 

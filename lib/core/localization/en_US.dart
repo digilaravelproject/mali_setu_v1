@@ -972,6 +972,12 @@ const Map<String, String> enUS = {
 
   "back_message": "Data will be cleared if you go back. Press back again to exit.",
 
+
+  "write_blog": "Write Blog",
+  "other_blogs": "Other Blogs",
+  "my_blogs": "My Blogs",
+
+
 };
 
 
