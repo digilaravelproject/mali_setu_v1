@@ -9,16 +9,48 @@
       "client_info": {
         "mobilesdk_app_id": "1:58378864066:android:27504936714e7cc873c25b",
         "android_client_info": {
-          "package_name": "com.malisetu.app"
+          "package_name": "com.mali.setu"
         }
       },
       "oauth_client": [
         {
+          "client_id": "58378864066-39sk8r1e1jt9mkd44g3og84jlli8fnri.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mali.setu",
+            "certificate_hash": "524b8a3360f20bb4f117569b21ede4d3c7b72ac6"
+          }
+        },
+        {
           "client_id": "58378864066-bdkscjv27m7can6i1fjb5bolbabthndd.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.malisetu.app",
+            "package_name": "com.mali.setu",
             "certificate_hash": "0272f403e987ecf308e3c2ee2bacb565bcc73952"
+          }
+        },
+        {
+          "client_id": "58378864066-c976oovkbafg688g49dvgfr6p1hbmc2n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mali.setu",
+            "certificate_hash": "29980f5f4d10fa8462be4690211da2588da238d9"
+          }
+        },
+        {
+          "client_id": "58378864066-gap3rpnqhp8cg9v86svl97dmugam9htl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mali.setu",
+            "certificate_hash": "c36d0fe3a48fdfa02ef1f0c559fe38133923a428"
+          }
+        },
+        {
+          "client_id": "58378864066-np2d1pmseq1k37cvfdg16jbknrjm3cn0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mali.setu",
+            "certificate_hash": "30681d977b1a5f44f04c70fdee505c315499c737"
           }
         },
         {
@@ -42,7 +74,83 @@
               "client_id": "58378864066-nshme2he944h5i9ij5nvvcs170aobq41.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.malisetu.app"
+                "bundle_id": "com.mali.setu"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:58378864066:android:951675018632db2e73c25b",
+        "android_client_info": {
+          "package_name": "com.malisetu.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "58378864066-1n8uo2i214bf8es8u53hbt1chcno9ovm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.malisetu.app",
+            "certificate_hash": "c36d0fe3a48fdfa02ef1f0c559fe38133923a428"
+          }
+        },
+        {
+          "client_id": "58378864066-6cdoibd15far1d4f28tb4frl21mvtv6s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.malisetu.app",
+            "certificate_hash": "0272f403e987ecf308e3c2ee2bacb565bcc73952"
+          }
+        },
+        {
+          "client_id": "58378864066-abhjn0dsfujmbp8e06divfueq6lapjk3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.malisetu.app",
+            "certificate_hash": "524b8a3360f20bb4f117569b21ede4d3c7b72ac6"
+          }
+        },
+        {
+          "client_id": "58378864066-f9468dj31lshd4fs53pvmipilh56h0j7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.malisetu.app",
+            "certificate_hash": "30681d977b1a5f44f04c70fdee505c315499c737"
+          }
+        },
+        {
+          "client_id": "58378864066-netr5allhvqklgdrlia80s13lr9p2hgu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.malisetu.app",
+            "certificate_hash": "29980f5f4d10fa8462be4690211da2588da238d9"
+          }
+        },
+        {
+          "client_id": "58378864066-33v470v5hr3spno4in97vha7kapge833.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5OtmhldQJOc6yAFLR5JMpT4yy6kDdvQc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "58378864066-33v470v5hr3spno4in97vha7kapge833.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "58378864066-nshme2he944h5i9ij5nvvcs170aobq41.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mali.setu"
               }
             }
           ]

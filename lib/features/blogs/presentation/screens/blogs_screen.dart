@@ -460,7 +460,15 @@ class BlogsScreen extends StatelessWidget {
       BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
     final String? imageUrl =
         blog.mediaPath != null ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}" : null;
-    final isVideo = blog.mediaType == 'video';
+    final String? firstMedia = (blog.mediaPaths != null && blog.mediaPaths!.isNotEmpty) ? blog.mediaPaths!.first : blog.mediaPath;
+    final bool isVideoFirst = firstMedia != null && (
+        firstMedia.toLowerCase().endsWith('.mp4') ||
+        firstMedia.toLowerCase().endsWith('.mov') ||
+        firstMedia.toLowerCase().endsWith('.avi') ||
+        firstMedia.toLowerCase().endsWith('.mkv') ||
+        firstMedia.toLowerCase().endsWith('.webm') ||
+        firstMedia.toLowerCase().endsWith('.3gp') ||
+        firstMedia.toLowerCase().endsWith('.m4v'));
 
     return GestureDetector(
       onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0)),
@@ -489,49 +497,23 @@ class BlogsScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 180,
                     width: double.infinity,
-                    child: isVideo
-                        ? (imageUrl != null
+                    child: firstMedia != null
+                        ? (isVideoFirst
                             ? VideoThumbnailWidget(
-                                key: ValueKey(imageUrl),
-                                videoUrl: imageUrl,
+                                key: ValueKey(firstMedia),
+                                videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
                                 height: 180,
                                 width: double.infinity,
                                 placeholder: _blogPlaceholder(primaryColor, isVideo: true),
                               )
-                            : _blogPlaceholder(primaryColor, isVideo: true))
-                        : (imageUrl != null
-                            ? Image.network(
-                                imageUrl,
+                            : Image.network(
+                                "${ApiConstants.imageBaseUrl}$firstMedia",
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
-                              )
-                            : _blogPlaceholder(primaryColor, isVideo: false)),
+                              ))
+                        : _blogPlaceholder(primaryColor, isVideo: false),
                   ),
                 ),
-                
-                // Play Button for Video
-                if (isVideo)
-                  Positioned.fill(
-                    child: Center(
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.withOpacity(0.4),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            )
-                          ],
-                        ),
-                        child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
-                      ),
-                    ),
-                  ),
-
                 // Category tag top-left
                 if (blog.blogType != null && blog.blogType!.isNotEmpty)
                   Positioned(
@@ -553,30 +535,118 @@ class BlogsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                // Bookmark icon top-right
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.bookmark_border_rounded,
-                      color: primaryColor,
-                      size: 18,
-                    ),
-                  ),
-                ),
               ],
             ),
-
             // Card Body
             Padding(
               padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    blog.title ?? 'No Title',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF111827),
+                      fontFamily: 'Nunito-Bold',
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 14),
+                  // Author Info Row
+                  Row(
+                    children: [
+                      // Avatar
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: primaryColor.withOpacity(0.1),
+                        backgroundImage: blog.user?.photo != null
+                            ? NetworkImage("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
+                            : null,
+                        child: blog.user?.photo == null
+                            ? Text(
+                                blog.user?.name?.isNotEmpty == true
+                                    ? blog.user!.name![0].toUpperCase()
+                                    : 'U',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 8),
+                      // Author Name & Date
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'By ${blog.user?.name ?? 'Unknown'}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF374151),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              blog.createdAt?.split('T')[0] ?? '',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Like Action
+                      GestureDetector(
+                        onTap: () => controller.toggleLike(blog.id ?? 0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: blog.isLiked == true
+                                ? primaryColor.withOpacity(0.08)
+                                : const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded,
+                                size: 16,
+                                color: blog.isLiked == true ? primaryColor : Colors.grey[400],
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${blog.likesCount ?? 0}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: blog.isLiked == true ? primaryColor : Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    /* padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -685,7 +755,8 @@ class BlogsScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    );*/
+
   }
 
   Widget _buildEmptyState(Color primaryColor) {

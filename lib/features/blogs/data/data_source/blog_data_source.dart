@@ -160,8 +160,10 @@ class BlogRepository {
         data: data,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return response.data;
+      if (response.data != null) {
+        return response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : null;
       }
     } on DioException catch (e) {
       print('DioError creating blog: $e');

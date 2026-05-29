@@ -343,34 +343,72 @@ class CreateBlogScreen extends StatelessWidget {
                         const SizedBox(height: 12),
                         const Divider(color: Color(0xFFF3F4F6), thickness: 1),
                         Flexible(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: controller.blogTypesList.length,
-                            itemBuilder: (context, index) {
-                              final type = controller.blogTypesList[index];
-                              final isSelected = controller.blogTypeCtrl.text == type;
-                              return ListTile(
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                title: Text(
-                                  type,
-                                  style: TextStyle(
-                                    color: isSelected ? const Color(0xFF111827) : const Color(0xFF4B5563),
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                trailing: isSelected
-                                    ? Icon(Icons.check_circle_rounded, color: primaryColor, size: 22)
-                                    : Icon(Icons.radio_button_off_rounded, color: Colors.grey[400], size: 22),
-                                onTap: () {
-                                  controller.blogTypeCtrl.text = type;
-                                  controller.errors.remove('type');
-                                  Get.back();
-                                },
-                              );
-                            },
-                          ),
-                        ),
+  child: Column(
+    children: [
+      // Search field
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        child: TextField(
+          onChanged: (value) {
+            controller.categorySearch.value = value;
+          },
+          decoration: InputDecoration(
+            hintText: 'Search category',
+            prefixIcon: Icon(Icons.search, size: 20, color: Color(0xFF9CA3AF)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: primaryColor, width: 1.5),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+        ),
+      ),
+      // Filtered list
+      Expanded(
+        child: Obx(() {
+          final filtered = controller.blogTypesList.where((type) =>
+              type.toLowerCase().contains(controller.categorySearch.value.toLowerCase()))
+              .toList();
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: filtered.length,
+            itemBuilder: (context, index) {
+              final type = filtered[index];
+              final isSelected = controller.blogTypeCtrl.text == type;
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                title: Text(
+                  type,
+                  style: TextStyle(
+                    color: isSelected ? const Color(0xFF111827) : const Color(0xFF4B5563),
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle_rounded, color: primaryColor, size: 22)
+                    : Icon(Icons.radio_button_off_rounded, color: Colors.grey[400], size: 22),
+                onTap: () {
+                  controller.blogTypeCtrl.text = type;
+                  controller.errors.remove('type');
+                  Get.back();
+                },
+              );
+            },
+          );
+        }),
+      ),
+    ],
+  ),
+),
                       ],
                     ),
                   ),
@@ -566,8 +604,8 @@ class CreateBlogScreen extends StatelessWidget {
                   child: GestureDetector(
                     onTap: controller.pickImages,
                     child: _dashedUploadBox(
-                      title: "Add Cover Image",
-                      subtitle: "JPG, PNG (Max. 2MB)",
+                      title: "Add Cover Images",
+                      subtitle: "Select multiple (Max. 2MB each)",
                       icon: Icons.image_outlined,
                       primaryColor: primaryColor,
                     ),
@@ -578,8 +616,8 @@ class CreateBlogScreen extends StatelessWidget {
                   child: GestureDetector(
                     onTap: controller.pickVideo,
                     child: _dashedUploadBox(
-                      title: "Add Video File",
-                      subtitle: "MP4, MOV (Max. 10MB)",
+                      title: "Add Video Files",
+                      subtitle: "Select multiple (Max. 10MB each)",
                       icon: Icons.videocam_outlined,
                       primaryColor: primaryColor,
                     ),
@@ -602,52 +640,62 @@ class CreateBlogScreen extends StatelessWidget {
                     path.toLowerCase().endsWith('.mov') ||
                     path.toLowerCase().endsWith('.avi');
 
-                return Stack(
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.04),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(11),
-                        child: isVideo
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.videocam_rounded, size: 24, color: primaryColor),
-                                  const SizedBox(height: 4),
-                                  const Text("Video", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF4B5563))),
-                                ],
-                              )
-                            : Image.network(
-                                url,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Center(
-                                  child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 24),
+                return GestureDetector(
+                  onTap: () {
+                    if (!isVideo) {
+                      // Open full-screen image viewer for images
+                      Get.to(() => FullScreenImageViewer(imageUrl: url));
+                    } else {
+                      // TODO: Implement video preview if needed
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.04),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(11),
+                          child: isVideo
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.videocam_rounded, size: 24, color: primaryColor),
+                                    const SizedBox(height: 4),
+                                    const Text("Video", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF4B5563))),
+                                  ],
+                                )
+                              : Image.network(
+                                  url,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Center(
+                                    child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 24),
+                                  ),
                                 ),
-                              ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: () => controller.removeExistingMedia(index),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.close, size: 10, color: Colors.white),
                         ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
+                          onTap: () => controller.removeExistingMedia(index),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, size: 10, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }),
 
@@ -730,8 +778,8 @@ class CreateBlogScreen extends StatelessWidget {
                                 decoration: BoxDecoration(color: primaryColor.withOpacity(0.08), shape: BoxShape.circle),
                                 child: Icon(Icons.image_outlined, color: primaryColor),
                               ),
-                              title: const Text("Add Cover Image", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                              subtitle: const Text("Select image from gallery (Max. 2MB)", style: TextStyle(fontSize: 11)),
+                              title: const Text("Add Cover Images", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              subtitle: const Text("Select images from gallery (Max. 2MB each)", style: TextStyle(fontSize: 11)),
                               onTap: () {
                                 Get.back();
                                 controller.pickImages();
@@ -743,8 +791,8 @@ class CreateBlogScreen extends StatelessWidget {
                                 decoration: BoxDecoration(color: primaryColor.withOpacity(0.08), shape: BoxShape.circle),
                                 child: Icon(Icons.videocam_outlined, color: primaryColor),
                               ),
-                              title: const Text("Add Video File", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                              subtitle: const Text("Select video from gallery (Max. 10MB)", style: TextStyle(fontSize: 11)),
+                              title: const Text("Add Video Files", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              subtitle: const Text("Select videos from gallery (Max. 10MB each)", style: TextStyle(fontSize: 11)),
                               onTap: () {
                                 Get.back();
                                 controller.pickVideo();

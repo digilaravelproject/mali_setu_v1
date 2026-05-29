@@ -200,13 +200,13 @@ class BlogDetailScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final path = mediaList[index];
               final url = "${ApiConstants.imageBaseUrl}$path";
-              final isThisVideo = (mediaType == 'video') || _isVideoFile(path);
+              final isThisVideo = _isVideoFile(path);
               
               if (isThisVideo) {
                 return Center(
                   child: FullScreenVideoItem(
                     videoUrl: url,
-                    autoPlay: false,
+                    autoPlay: true,
                   ),
                 );
               }
@@ -307,19 +307,19 @@ class BlogDetailScreen extends StatelessWidget {
                   child: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF1D1D1D), size: 16),
                 ),
               ),
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.more_vert_rounded, color: Color(0xFF1D1D1D), size: 20),
-                  ),
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Container(
+              //       width: 38,
+              //       height: 38,
+              //       decoration: const BoxDecoration(
+              //         color: Colors.white,
+              //         shape: BoxShape.circle,
+              //       ),
+              //       child: const Icon(Icons.more_vert_rounded, color: Color(0xFF1D1D1D), size: 20),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),
@@ -639,12 +639,43 @@ class BlogDetailScreen extends StatelessWidget {
   }
 
   Widget _buildRelatedCard(BuildContext context, Color primaryColor, Blog blog) {
-    final String? imageUrl = blog.mediaPath != null
-        ? "${ApiConstants.imageBaseUrl}${blog.mediaPath}"
-        : null;
-
+    final String? firstMedia = blog.mediaPaths != null && blog.mediaPaths!.isNotEmpty
+        ? blog.mediaPaths!.first
+        : blog.mediaPath;
+    final bool isVideo = firstMedia != null &&
+        (firstMedia.toLowerCase().endsWith('.mp4') ||
+            firstMedia.toLowerCase().endsWith('.mov') ||
+            firstMedia.toLowerCase().endsWith('.avi') ||
+            firstMedia.toLowerCase().endsWith('.mkv') ||
+            firstMedia.toLowerCase().endsWith('.webm') ||
+            firstMedia.toLowerCase().endsWith('.3gp') ||
+            firstMedia.toLowerCase().endsWith('.m4v'));
+    final Widget mediaWidget = isVideo
+    ? Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.network(
+            "${ApiConstants.imageBaseUrl}$firstMedia",
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
+          const Icon(Icons.play_circle_fill, color: Colors.white70, size: 40),
+        ],
+      )
+    : Image.network(
+        "${ApiConstants.imageBaseUrl}$firstMedia",
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          color: Colors.grey[100],
+          child: Center(
+            child: Icon(Icons.image_outlined, size: 24, color: primaryColor.withOpacity(0.3)),
+          ),
+        ),
+      );
     return GestureDetector(
-      onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0), preventDuplicates: false),
+      onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0),
+          preventDuplicates: false),
       child: Container(
         width: 140,
         decoration: BoxDecoration(
@@ -667,19 +698,7 @@ class BlogDetailScreen extends StatelessWidget {
               child: SizedBox(
                 height: 90,
                 width: double.infinity,
-                child: imageUrl != null
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: Colors.grey[100],
-                          child: Center(child: Icon(Icons.image_outlined, size: 24, color: primaryColor.withOpacity(0.3))),
-                        ),
-                      )
-                    : Container(
-                        color: Colors.grey[100],
-                        child: Center(child: Icon(Icons.image_outlined, size: 24, color: primaryColor.withOpacity(0.3))),
-                      ),
+                child: mediaWidget,
               ),
             ),
             Padding(
@@ -763,7 +782,7 @@ class FullMediaGalleryScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final path = mediaList[index];
               final url = "${ApiConstants.imageBaseUrl}$path";
-              final isThisVideo = (mediaType == 'video') || _isVideoFile(path);
+              final isThisVideo = _isVideoFile(path);
 
               if (isThisVideo) {
                 return Center(
@@ -874,6 +893,8 @@ class _FullScreenVideoItemState extends State<FullScreenVideoItem> {
           autoPlay: widget.autoPlay,
           looping: true,
           aspectRatio: _videoController.value.aspectRatio,
+          showControls: false,
+          customControls: const SizedBox.shrink(),
           errorBuilder: (context, errorMessage) {
             return Center(
               child: Text(

@@ -3,6 +3,7 @@ import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_controller.dart';
@@ -10,7 +11,7 @@ import '../../../../widgets/custom_snack_bar.dart';
 
 class CreateBlogController extends GetxController {
   final Blog? blogToEdit;
-  final existingMediaRemoved = false.obs;
+
 
   CreateBlogController({this.blogToEdit});
 
@@ -44,18 +45,22 @@ class CreateBlogController extends GetxController {
   final tagInputCtrl = TextEditingController(); 
   final blogTypeCtrl = TextEditingController();
   
-  final blogType = ''.obs;
+final RxString categorySearch = ''.obs; // search query for category dropdown
   final RxList<String> tags = <String>[].obs;
   
   // 🆕 Mixed media selection lists
   final RxList<File> selectedFiles = <File>[].obs;
   final RxList<String> existingMediaPaths = <String>[].obs;
+    // Track if all existing media have been removed
+  final RxBool existingMediaRemoved = false.obs;
   
   final isSubmitting = false.obs;
   final errors = <String, String>{}.obs;
   
+  final RxString blogType = ''.obs; // selected blog type observable
+  
   @override
-  void onInit() {
+void onInit() {
     super.onInit();
 
     if (blogToEdit != null) {
@@ -172,29 +177,44 @@ class CreateBlogController extends GetxController {
     }
   }
 
-  // 🆕 Picks a video file and appends it
+  // 🆕 Picks multiple video files and appends them using native picker
   Future<void> pickVideo() async {
     try {
-      final XFile? video = await _picker.pickVideo(
-        source: ImageSource.gallery,
-        maxDuration: const Duration(minutes: 5),
-      );
+      final List<XFile>? media = await _picker.pickMultipleMedia();
 
-      if (video != null) {
-        final file = File(video.path);
-        final int sizeInBytes = await file.length();
-        final double sizeInMb = sizeInBytes / (1024 * 1024);
-        
-        final String extension = video.path.split('.').last.toLowerCase();
-        final List<String> allowedExtensions = ['mp4', 'mov', 'avi'];
+      if (media != null && media.isNotEmpty) {
+        for (final item in media) {
+          final file = File(item.path);
+          final int sizeInBytes = await file.length();
+          final double sizeInMb = sizeInBytes / (1024 * 1024);
+          
+          final String extension = item.path.split('.').last.toLowerCase();
+          final List<String> allowedVideoExtensions = ['mp4', 'mov', 'avi'];
+          final List<String> allowedImageExtensions = ['jpg', 'jpeg', 'png'];
 
-        if (sizeInMb <= 10 && allowedExtensions.contains(extension)) {
-          selectedFiles.add(file);
-          errors.remove('media');
-        } else {
-          CustomSnackBar.showError(
-            message: "Max video size 10MB, Formats: MP4, MOV, AVI",
-          );
+          if (allowedVideoExtensions.contains(extension)) {
+            if (sizeInMb <= 10) {
+              selectedFiles.add(file);
+              errors.remove('media');
+            } else {
+              CustomSnackBar.showError(
+                message: "Video ${item.name} exceeds 10MB limit",
+              );
+            }
+          } else if (allowedImageExtensions.contains(extension)) {
+            if (sizeInMb <= 2) {
+              selectedFiles.add(file);
+              errors.remove('media');
+            } else {
+              CustomSnackBar.showError(
+                message: "Image ${item.name} exceeds 2MB limit",
+              );
+            }
+          } else {
+            CustomSnackBar.showError(
+              message: "File ${item.name} is not a supported format",
+            );
+          }
         }
       }
     } catch (e) {
@@ -206,10 +226,15 @@ class CreateBlogController extends GetxController {
     selectedFiles.removeAt(index);
   }
 
+  /// Returns a combined list of existing media URLs and newly selected files
+  List<dynamic> get allMedia => [...existingMediaPaths, ...selectedFiles];
+
+  /// Removes an existing media item by index and updates removal flag
   void removeExistingMedia(int index) {
     existingMediaPaths.removeAt(index);
     existingMediaRemoved.value = existingMediaPaths.isEmpty;
   }
+
 
   void addTag() {
     final text = tagInputCtrl.text.trim();
@@ -269,23 +294,48 @@ class CreateBlogController extends GetxController {
 
       final formData = FormData.fromMap(fields);
 
-      // Add selected media files to the FormData under "media[]" key!
-      for (final file in selectedFiles) {
-        final fileName = file.path.split('/').last;
-        formData.files.add(MapEntry(
-          "media[]",
-          await MultipartFile.fromFile(
-            file.path,
-            filename: fileName,
-          ),
-        ));
-      }
-
-      // If updating, send the remaining existing media files list
-      if (blogToEdit != null) {
-        for (final path in existingMediaPaths) {
-          formData.fields.add(MapEntry("existing_media[]", path));
+      // Add media (both new files and existing URLs) to the FormData
+      for (final item in allMedia) {
+        if (item is File) {
+          final fileName = item.path.split('/').last;
+          formData.files.add(MapEntry(
+            "media[]",
+            await MultipartFile.fromFile(
+              item.path,
+              filename: fileName,
+            ),
+          ));
+        } else if (item is String) {
+          // Existing media URL – handle based on create or update
+          if (blogToEdit != null) {
+          // Editing – download the existing media and attach as a multipart file (in-memory)
+          try {
+            // Construct full URL (adjust base URL if needed)
+            final String mediaUrl = "https://malisetu.com/" + item;
+            // Download file bytes
+            final response = await Dio().get<List<int>>(mediaUrl, options: Options(responseType: ResponseType.bytes));
+            final bytes = response.data;
+            if (bytes != null) {
+              final String fileName = item.split('/').last;
+              // Attach as multipart file using in‑memory bytes
+              formData.files.add(MapEntry(
+                "media[]",
+                MultipartFile.fromBytes(
+                  bytes,
+                  filename: fileName,
+                ),
+              ));
+            }
+          } catch (e) {
+            // If download fails, fallback to sending the URL as a field
+            formData.fields.add(MapEntry("media[]", item));
+          }
+          } else {
+            // Creating – treat as new media entries (URL string)
+            formData.fields.add(MapEntry("media[]", item));
+          }
         }
+
       }
 
       debugPrint("Submitting blog multipart request...");
@@ -323,12 +373,21 @@ class CreateBlogController extends GetxController {
           if (response['message'] != null) errorMessage = response['message'].toString();
           
           if (response['errors'] != null && response['errors'] is Map) {
-            Map errors = response['errors'];
-            if (errors.isNotEmpty) {
-              var firstErrorList = errors.values.first;
-              if (firstErrorList is List && firstErrorList.isNotEmpty) {
-                errorMessage = firstErrorList[0].toString();
+            final Map errorsMap = response['errors'];
+            final List<String> allErrors = [];
+            errorsMap.forEach((key, val) {
+              if (val is List) {
+                for (final e in val) {
+                  allErrors.add(e.toString());
+                }
+              } else if (val is String) {
+                allErrors.add(val);
+              } else {
+                allErrors.add(val.toString());
               }
+            });
+            if (allErrors.isNotEmpty) {
+              errorMessage = allErrors.join('\n');
             }
           }
         }
@@ -351,3 +410,7 @@ class CreateBlogController extends GetxController {
     super.onClose();
   }
 }
+
+
+
+
