@@ -152,6 +152,8 @@ class User {
   bool? isBusiness;
 
   String? matrimonyApprovalStatus; // 🆕 ADDED
+  int? blogCategoryId; // 🆕 ADDED
+  String? blogCategoryName; // 🆕 ADDED
 
   User({
     this.id,
@@ -200,6 +202,8 @@ class User {
     this.isMatrimony,
     this.isBusiness,
     this.matrimonyApprovalStatus,
+    this.blogCategoryId,
+    this.blogCategoryName,
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -269,6 +273,8 @@ class User {
     isMatrimony = json['is_matrimony'];
     isBusiness = json['is_business'];
     matrimonyApprovalStatus = json['matrimony_approval_status'];
+    blogCategoryId = json['blog_category_id'];
+    blogCategoryName = json['blog_category_name'];
   }
 
   Map<String, dynamic> toJson() {
@@ -319,6 +325,8 @@ class User {
     data['has_business_payment'] = hasBusinessPayment;
     data['has_matrimony_payment'] = hasMatrimonyPayment;
     data['matrimony_approval_status'] = matrimonyApprovalStatus;
+    data['blog_category_id'] = blogCategoryId;
+    data['blog_category_name'] = blogCategoryName;
     return data;
   }
 }

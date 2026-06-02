@@ -20,55 +20,11 @@ class BlogController extends GetxController {
   final RxBool hasMore = true.obs;
   final RxString searchQuery = ''.obs;
   final searchTextController = TextEditingController();
-  final RxString selectedCategory = 'All'.obs;
   final RxString selectedTab = 'Others'.obs; // 'Mine' or 'Others'
 
-  // Master Category List
-  final List<String> masterCategories = const [
-    "Technology",
-    "Business",
-    "Finance",
-    "Marketing",
-    "Startups",
-    "Artificial Intelligence (AI)",
-    "Software Development",
-    "Web Development",
-    "Mobile App Development",
-    "Cybersecurity",
-    "Cloud Computing",
-    "Data Science",
-    "Health & Fitness",
-    "Lifestyle",
-    "Travel",
-    "Food & Recipes",
-    "Fashion & Beauty",
-    "Education",
-    "Career & Jobs",
-    "Personal Development",
-    "Entertainment",
-    "Movies & TV",
-    "Music",
-    "Sports",
-    "Gaming",
-    "News & Current Affairs",
-    "Politics",
-    "Science",
-    "Environment",
-    "Parenting",
-    "Relationships",
-    "Real Estate",
-    "Automotive",
-    "Photography",
-    "Home Improvement",
-    "E-commerce",
-    "Product Reviews",
-    "Tutorials & Guides",
-    "Case Studies",
-    "Interviews",
-  ];
-
-  // Dynamic active Category list
-  final RxList<String> categories = <String>['All'].obs;
+  final BlogCategory allCategory = BlogCategory(id: null, name: 'All');
+  final RxList<BlogCategory> categories = <BlogCategory>[].obs;
+  final Rx<BlogCategory> selectedCategory = BlogCategory(id: null, name: 'All').obs;
 
   // Detail State
   final Rxn<Blog> selectedBlog = Rxn<Blog>();
@@ -80,9 +36,17 @@ class BlogController extends GetxController {
   final Rxn<ChewieController> chewieController = Rxn<ChewieController>();
   final RxBool isVideoInitialized = false.obs;
 
+  // Comment State
+  final commentTextController = TextEditingController();
+  final RxBool isCommentPosting = false.obs;
+  final Rxn<BlogComment> replyToComment = Rxn<BlogComment>();
+  final RxBool showAllComments = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+    categories.assignAll([allCategory]);
+    fetchCategories();
     fetchBlogs();
     fetchMyBlogs(); // Pre-load my blogs in parallel
     
@@ -96,45 +60,11 @@ class BlogController extends GetxController {
     }, time: const Duration(milliseconds: 500));
   }
 
-  void _updateCategories() {
-    try {
-      // Use the correct source list based on selected tab
-      final sourceList = selectedTab.value == 'Mine' ? myBlogs.toList() : blogs.toList();
-
-      // Find unique blog types present in these tab blogs
-      final activeTypes = sourceList
-          .map((blog) => blog.blogType)
-          .whereType<String>()
-          .where((type) => type.isNotEmpty)
-          .toSet();
-
-      // Build the new categories list
-      final List<String> newCategories = ['All'];
-      
-      // Maintain the order specified in masterCategories
-      for (final masterCat in masterCategories) {
-        if (activeTypes.contains(masterCat)) {
-          newCategories.add(masterCat);
-        }
-      }
-
-      // Add any other categories present in data but not in masterCategories (robust fallback)
-      for (final activeType in activeTypes) {
-        if (!newCategories.contains(activeType)) {
-          newCategories.add(activeType);
-        }
-      }
-
-      // Update the RxList
-      categories.assignAll(newCategories);
-
-      // If the currently selected category is not in the new active categories, reset to 'All'
-      if (!categories.contains(selectedCategory.value)) {
-        selectedCategory.value = 'All';
-      }
-    } catch (e) {
-      debugPrint("Error in _updateCategories: $e");
-      categories.assignAll(['All']);
+  Future<void> fetchCategories() async {
+    final response = await _repository.getBlogCategories();
+    if (response != null && response.success == true && response.data != null) {
+      final List<BlogCategory> fetchedCategories = response.data!;
+      categories.assignAll([allCategory, ...fetchedCategories]);
     }
   }
 
@@ -150,10 +80,7 @@ class BlogController extends GetxController {
 
   void _applyFilter() {
     try {
-      _updateCategories();
-
       final myId = _currentUserId();
-
       List<Blog> list;
 
       if (selectedTab.value == 'Mine') {
@@ -167,9 +94,12 @@ class BlogController extends GetxController {
         }
       }
 
-      // Category Filter
-      if (selectedCategory.value != 'All') {
-        list = list.where((b) => b.blogType == selectedCategory.value).toList();
+      // Category Filter (local filtering, though we also filter via API)
+      if (selectedCategory.value.name != 'All' && selectedCategory.value.id != null) {
+        list = list.where((b) => 
+          b.blogType == selectedCategory.value.id?.toString() || 
+          (b.category != null && b.category!.id == selectedCategory.value.id)
+        ).toList();
       }
 
       filteredBlogs.assignAll(list);
@@ -191,7 +121,10 @@ class BlogController extends GetxController {
     if (!hasMore.value) return;
 
     isLoading.value = true;
-    final response = await _repository.getBlogs(page: currentPage.value);
+    final response = await _repository.getBlogs(
+      page: currentPage.value, 
+      categoryId: selectedCategory.value.id
+    );
 
     if (response != null && response.success == true && response.data != null) {
       final newBlogs = response.data?.data ?? [];
@@ -248,11 +181,12 @@ class BlogController extends GetxController {
     _applyFilter();
   }
 
-  void filterByCategory(String category) {
+  void filterByCategory(BlogCategory category) {
     selectedCategory.value = category;
+    selectedCategory.refresh();
     searchTextController.clear();
     searchQuery.value = '';
-    _applyFilter();
+    fetchBlogs(refresh: true);
   }
 
   void filterByTab(String tab) {
@@ -295,11 +229,15 @@ class BlogController extends GetxController {
     
     // Update main list
     blogs[index] = updatedBlog;
-    filteredBlogs[filteredBlogs.indexWhere((b) => b.id == blogId)] = updatedBlog;
+    final filteredIndex = filteredBlogs.indexWhere((b) => b.id == blogId);
+    if (filteredIndex != -1) filteredBlogs[filteredIndex] = updatedBlog;
     
-    // Update selection if it matches
+    // Update selection if it matches (preserve detail-only fields like comments)
     if (selectedBlog.value?.id == blogId) {
-      selectedBlog.value = updatedBlog;
+      selectedBlog.value = selectedBlog.value!.copyWith(
+        isLiked: !currentLiked,
+        likesCount: currentLiked ? currentCount - 1 : currentCount + 1,
+      );
     }
 
     final response = await _repository.toggleLike(blogId);
@@ -313,16 +251,24 @@ class BlogController extends GetxController {
       
       // Sync with final server state
       blogs[index] = finalBlog;
-      filteredBlogs[filteredBlogs.indexWhere((b) => b.id == blogId)] = finalBlog;
+      if (filteredIndex != -1) filteredBlogs[filteredIndex] = finalBlog;
+      
       if (selectedBlog.value?.id == blogId) {
-        selectedBlog.value = finalBlog;
+        selectedBlog.value = selectedBlog.value!.copyWith(
+          isLiked: data['liked'],
+          likesCount: data['likes_count'],
+        );
       }
     } else {
       // Revert on failure
       blogs[index] = blog;
-      filteredBlogs[filteredBlogs.indexWhere((b) => b.id == blogId)] = blog;
+      if (filteredIndex != -1) filteredBlogs[filteredIndex] = blog;
+      
       if (selectedBlog.value?.id == blogId) {
-        selectedBlog.value = blog;
+        selectedBlog.value = selectedBlog.value!.copyWith(
+          isLiked: currentLiked,
+          likesCount: currentCount,
+        );
       }
     }
   }
@@ -331,6 +277,7 @@ class BlogController extends GetxController {
     isDetailLoading.value = true;
     selectedBlog.value = null;
     relatedBlogs.clear();
+    showAllComments.value = false;
 
     final response = await _repository.getBlogDetail(id);
 
@@ -399,9 +346,44 @@ class BlogController extends GetxController {
     }
   }
 
+  void setReplyTo(BlogComment? comment) {
+    replyToComment.value = comment;
+  }
+
+  Future<void> postComment(int blogId) async {
+    final text = commentTextController.text.trim();
+    if (text.isEmpty) return;
+    
+    isCommentPosting.value = true;
+    final parentId = replyToComment.value?.id;
+    
+    final response = await _repository.addComment(blogId, text, parentId: parentId);
+    if (response != null && response['success'] == true) {
+      CustomSnackBar.showSuccess(message: response['message'] ?? 'Comment posted');
+      commentTextController.clear();
+      replyToComment.value = null;
+      // Refresh the blog details to get updated comments
+      fetchBlogDetail(blogId);
+    } else {
+      CustomSnackBar.showError(message: 'Failed to post comment');
+    }
+    isCommentPosting.value = false;
+  }
+
+  Future<void> deleteComment(int commentId, int blogId) async {
+    final success = await _repository.deleteComment(commentId);
+    if (success) {
+      CustomSnackBar.showSuccess(message: 'Comment deleted');
+      fetchBlogDetail(blogId);
+    } else {
+      CustomSnackBar.showError(message: 'Failed to delete comment');
+    }
+  }
+
   @override
   void onClose() {
     _disposeVideo();
+    commentTextController.dispose();
     super.onClose();
   }
 }

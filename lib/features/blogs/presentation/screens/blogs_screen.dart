@@ -9,6 +9,20 @@ import 'blog_detail_screen.dart';
 import 'create_blogs.dart';
 import '../widgets/video_thumbnail_widget.dart';
 import '../../../Auth/service/auth_service.dart';
+import 'package:flutter/cupertino.dart';
+import '../../../../core/routes/app_routes.dart';
+import '../../../notification/presentation/controller/notification_controller.dart';
+
+String _formatDate(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return '';
+  try {
+    final date = DateTime.parse(dateStr);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  } catch (e) {
+    return dateStr.split('T').first;
+  }
+}
 
 class BlogsScreen extends StatelessWidget {
   const BlogsScreen({super.key});
@@ -53,41 +67,38 @@ class BlogsScreen extends StatelessWidget {
                           // Icon(Icons.menu_rounded, color: const Color(0xFF374151), size: 24),
                           Text(
                             'blogs'.tr,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF111827), // Neutral dark charcoal title
+                              color: primaryColor,
                               fontFamily: 'Nunito-Bold',
                               letterSpacing: -0.5,
                             ),
                           ),
-                          // Stack(
-                          //   children: [
-                          //     Icon(Icons.notifications_none_rounded, color: const Color(0xFF374151), size: 24),
-                          //     Positioned(
-                          //       right: 2,
-                          //       top: 2,
-                          //       child: Container(
-                          //         width: 8,
-                          //         height: 8,
-                          //         decoration: BoxDecoration(
-                          //           color: primaryColor,
-                          //           shape: BoxShape.circle,
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
+                          Obx(() {
+                            int count = 0;
+                            try {
+                              final notificationController = Get.find<NotificationController>();
+                              count = notificationController.unreadCount.value;
+                            } catch (e) { count = 0; }
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: InkWell(
+                                onTap: () => Get.toNamed(AppRoutes.notification),
+                                child: Badge(
+                                  label: Text(count > 99 ? '99+' : count.toString()),
+                                  isLabelVisible: count > 0,
+                                  backgroundColor: Colors.redAccent,
+                                  child: const Icon(CupertinoIcons.bell, color: Colors.black87, size: 24),
+                                ),
+                              ),
+                            );
+                          }),
                         ],
                       ),
                       const SizedBox(height: 16),
-
                       // Search Bar
-                      _buildSearchBar(controller),
-                      const SizedBox(height: 16),
-
-                      // Ultra-Professional Underlined Tabs
-                      _buildUnderlineTabs(controller, primaryColor),
+                      _buildSearchBar(controller, primaryColor),
                     ],
                   ),
                 ),
@@ -95,11 +106,13 @@ class BlogsScreen extends StatelessWidget {
 
               // Horizontal Category chips list (Floating just below top header)
               SliverToBoxAdapter(
-                child: Container(
-                  color: const Color(0xFFF9FAFB),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: _buildCategoryTabs(controller, primaryColor),
-                ),
+                child: Obx(() => controller.selectedTab.value == 'Mine'
+                    ? const SizedBox.shrink()
+                    : Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: _buildCategoryTabs(controller, primaryColor),
+                      )),
               ),
 
               // Blog list
@@ -148,19 +161,18 @@ class BlogsScreen extends StatelessWidget {
           if (!Get.isRegistered<AuthService>()) return const SizedBox.shrink();
           final authService = Get.find<AuthService>();
           final user = authService.currentUser.value;
-          final hasBlogAccess = user?.blogAccess ?? false;
           final isBlogger = user?.userType?.toLowerCase().trim() == 'bloger';
-          if (!hasBlogAccess && !isBlogger) return const SizedBox.shrink();
+          if (!isBlogger) return const SizedBox.shrink();
 
           return GestureDetector(
             onTap: () => Get.to(() => const CreateBlogScreen()),
             child: Container(
-              height: 48,
+              height: 56,
+              width: 56,
               margin: const EdgeInsets.only(bottom: 100), // Lift above bottom navigation bar
-              padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: primaryColor,
-                borderRadius: BorderRadius.circular(24),
+                shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: primaryColor.withOpacity(0.35),
@@ -169,22 +181,7 @@ class BlogsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child:  Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'write_blog'.tr,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                ],
-              ),
+              child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
             ),
           );
         }),
@@ -235,11 +232,9 @@ class BlogsScreen extends StatelessWidget {
       final authService = Get.find<AuthService>();
       final user = authService.currentUser.value;
 
-      final hasBlogAccess = user?.blogAccess ?? false;
-      final isBlogger =
-          user?.userType?.toLowerCase().trim() == 'bloger';
+      final isBlogger = user?.userType?.toLowerCase().trim() == 'bloger';
 
-      showBlogTabs = hasBlogAccess || isBlogger;
+      showBlogTabs = isBlogger;
     }
 
     if (!showBlogTabs) {
@@ -413,15 +408,15 @@ class BlogsScreen extends StatelessWidget {
 
 
 
-  Widget _buildSearchBar(BlogController controller) {
+  Widget _buildSearchBar(BlogController controller, Color primaryColor) {
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: const Color(0xFFE8E8E8),
+          color: primaryColor.withOpacity(0.3),
         ),
         boxShadow: [
           BoxShadow(
@@ -449,7 +444,7 @@ class BlogsScreen extends StatelessWidget {
               },
               decoration:  InputDecoration(
                 hintText: 'search_blogs'.tr,
-                hintStyle: TextStyle(
+                hintStyle: const TextStyle(
                   color: Color(0xFF9CA3AF),
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -464,7 +459,7 @@ class BlogsScreen extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              cursorColor: Colors.pink,
+              cursorColor: primaryColor,
             ),
           ),
         ],
@@ -475,36 +470,35 @@ class BlogsScreen extends StatelessWidget {
   // Highly professional categories: simple outlines and solid subtle highlights
   Widget _buildCategoryTabs(BlogController controller, Color primaryColor) {
     return SizedBox(
-      height: 38,
+      height: 32,
       child: Obx(() {
+        // Access the value synchronously so Obx tracks the dependency
+        final selectedId = controller.selectedCategory.value.id?.toString();
+        
         return ListView.builder(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: controller.categories.length,
           itemBuilder: (context, index) {
             final category = controller.categories[index];
-            final isSelected = controller.selectedCategory.value == category;
+            final isSelected = selectedId == category.id?.toString();
             return GestureDetector(
               onTap: () => controller.filterByCategory(category),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isSelected ? primaryColor.withOpacity(0.08) : Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isSelected ? primaryColor : const Color(0xFFE5E7EB),
-                    width: isSelected ? 1.5 : 1.0,
-                  ),
+                  color: isSelected ? primaryColor : primaryColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  category,
+                  category.name ?? '',
                   style: TextStyle(
-                    color: isSelected ? primaryColor : const Color(0xFF4B5563),
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    color: isSelected ? Colors.white : const Color(0xFF4B5563),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -529,13 +523,25 @@ class BlogsScreen extends StatelessWidget {
             firstMedia.toLowerCase().endsWith('.3gp') ||
             firstMedia.toLowerCase().endsWith('.m4v'));
 
+    String? categoryName;
+    if (blog.category != null) {
+      categoryName = blog.category!.name;
+    } else if (blog.blogType != null && blog.blogType!.isNotEmpty) {
+      try {
+        final cat = controller.categories.firstWhere((c) => c.id?.toString() == blog.blogType);
+        categoryName = cat.name;
+      } catch (e) {
+        categoryName = blog.blogType; // fallback to ID
+      }
+    }
+
     return GestureDetector(
       onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0)),
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -552,7 +558,7 @@ class BlogsScreen extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
                   child: SizedBox(
                     height: 180,
                     width: double.infinity,
@@ -574,21 +580,21 @@ class BlogsScreen extends StatelessWidget {
                   ),
                 ),
                 // Category tag top-left
-                if (blog.blogType != null && blog.blogType!.isNotEmpty)
+                if (categoryName != null && categoryName.isNotEmpty)
                   Positioned(
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.65),
-                        borderRadius: BorderRadius.circular(8),
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(24),
                       ),
                       child: Text(
-                        blog.blogType!,
+                        categoryName,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -620,7 +626,7 @@ class BlogsScreen extends StatelessWidget {
                     children: [
                       // Avatar
                       CircleAvatar(
-                        radius: 16,
+                        radius: 12,
                         backgroundColor: primaryColor.withOpacity(0.1),
                         backgroundImage: blog.user?.photo != null
                             ? NetworkImage("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
@@ -633,67 +639,55 @@ class BlogsScreen extends StatelessWidget {
                           style: TextStyle(
                             color: primaryColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 10,
                           ),
                         )
                             : null,
                       ),
                       const SizedBox(width: 8),
-                      // Author Name & Date
+                      // Author Name
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'By ${blog.user?.name ?? 'Unknown'}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF374151),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              blog.createdAt?.split('T')[0] ?? '',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'By ${blog.user?.name ?? 'Unknown'}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      // Date
+                      Text(
+                        _formatDate(blog.createdAt),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
                       // Like Action
                       GestureDetector(
                         onTap: () => controller.toggleLike(blog.id ?? 0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: blog.isLiked == true
-                                ? primaryColor.withOpacity(0.08)
-                                : const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded,
-                                size: 16,
-                                color: blog.isLiked == true ? primaryColor : Colors.grey[400],
+                        child: Row(
+                          children: [
+                            Icon(
+                              blog.isLiked == true ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+                              size: 18,
+                              color: blog.isLiked == true ? Colors.redAccent : Colors.grey[500],
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${blog.likesCount ?? 0}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[800],
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '${blog.likesCount ?? 0}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: blog.isLiked == true ? primaryColor : Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

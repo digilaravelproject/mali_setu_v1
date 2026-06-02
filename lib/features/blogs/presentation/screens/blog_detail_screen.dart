@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
@@ -9,10 +10,27 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import '../../../Auth/service/auth_service.dart';
 import 'create_blogs.dart';
+String _formatDate(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return '';
+  try {
+    final date = DateTime.parse(dateStr);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  } catch (e) {
+    return dateStr.split('T').first;
+  }
+}
 
-class BlogDetailScreen extends StatelessWidget {
+class BlogDetailScreen extends StatefulWidget {
   final int blogId;
   const BlogDetailScreen({super.key, required this.blogId});
+
+  @override
+  State<BlogDetailScreen> createState() => _BlogDetailScreenState();
+}
+
+class _BlogDetailScreenState extends State<BlogDetailScreen> {
+  final BlogController controller = Get.find<BlogController>();
 
   int _calculateReadingTime(String? text) {
     if (text == null || text.isEmpty) return 1;
@@ -21,38 +39,57 @@ class BlogDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.find<BlogController>();
-    final primaryColor = context.theme.primaryColor;
-
+  void initState() {
+    super.initState();
+    // Fetch details when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchBlogDetail(blogId);
+      controller.fetchBlogDetail(widget.blogId);
     });
+  }
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Obx(() {
-          if (controller.isDetailLoading.value) {
-            return Center(child: CircularProgressIndicator(color: primaryColor));
-          }
+  @override
+  Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFFC0227B);
 
-          final blog = controller.selectedBlog.value;
-          if (blog == null) {
-            return const Center(child: Text('Blog not found.'));
-          }
+    // Provide a localized dismiss for keyboard
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Obx(() {
+            if (controller.isDetailLoading.value) {
+              return Center(child: CircularProgressIndicator(color: primaryColor));
+            }
 
-          final String title = blog.title ?? 'No Title';
-          final String author = blog.user?.name ?? 'Unknown Author';
-          final String date = blog.createdAt?.split('T')[0] ?? '';
-          final List<String> tags = blog.tags ?? [];
-          final String description = blog.description ?? 'No description available.';
-          final String avatarLetter = author.isNotEmpty ? author[0].toUpperCase() : 'A';
-          final readTime = _calculateReadingTime(description);
+            final blog = controller.selectedBlog.value;
+            if (blog == null) {
+              return const Center(child: Text('Blog not found.'));
+            }
+
+            String categoryName = '';
+            if (blog.category != null && blog.category!.name != null) {
+              categoryName = blog.category!.name!;
+            } else if (blog.blogType != null && blog.blogType!.isNotEmpty) {
+              try {
+                final cat = controller.categories.firstWhere((c) => c.id?.toString() == blog.blogType);
+                categoryName = cat.name ?? blog.blogType!;
+              } catch (e) {
+                categoryName = blog.blogType!; // fallback to ID
+              }
+            }
+
+            final String title = blog.title ?? 'No Title';
+            final String author = blog.user?.name ?? 'Unknown Author';
+            final String date = _formatDate(blog.createdAt);
+            final List<String> tags = blog.tags ?? [];
+            final String description = blog.description ?? 'No description available.';
+            final String avatarLetter = author.isNotEmpty ? author[0].toUpperCase() : 'A';
+            final readTime = _calculateReadingTime(description);
 
           return SingleChildScrollView(
             child: Column(
@@ -68,15 +105,15 @@ class BlogDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Category Tag Pill
-                      if ((blog.blogType ?? '').isNotEmpty)
+                      if (categoryName.isNotEmpty)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
                             color: primaryColor,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(24),
                           ),
                           child: Text(
-                            blog.blogType!,
+                            categoryName,
                             style: const TextStyle(
                               fontSize: 11,
                               color: Colors.white,
@@ -112,14 +149,20 @@ class BlogDetailScreen extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       // Full Content Header
-                      const Text(
-                        'Full Content',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Color(0xFF1D1D1D),
-                          fontFamily: 'Nunito-Bold',
-                        ),
+                      Row(
+                        children: [
+                          Container(width: 3, height: 18, decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(2))),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Full Content',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Color(0xFF1D1D1D),
+                              fontFamily: 'Nunito-Bold',
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 10),
 
@@ -140,6 +183,10 @@ class BlogDetailScreen extends StatelessWidget {
                         const SizedBox(height: 28),
                       ],
 
+                      // Comments Section
+                      _buildCommentsSection(context, primaryColor, blog, controller),
+                      const SizedBox(height: 28),
+
                       // Related Blogs
                       _buildRelatedBlogs(context, primaryColor, controller),
                     ],
@@ -150,8 +197,9 @@ class BlogDetailScreen extends StatelessWidget {
           );
         }),
       ),
-    );
-  }
+    ),
+  );
+}
 
   bool _isVideoFile(String path) {
     final lowercasePath = path.toLowerCase();
@@ -418,159 +466,129 @@ class BlogDetailScreen extends StatelessWidget {
     final currentUserId = authService?.currentUser.value?.id;
     final bool isMyBlog = blog.userId != null && blog.userId!.toString() == currentUserId?.toString();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Left Side: Edit & Delete Buttons (Visible only if it's my blog)
-        if (isMyBlog)
-          Row(
-            children: [
-              // Edit Button Pill
-              GestureDetector(
-                onTap: () => Get.to(() => CreateBlogScreen(blog: blog)),
-                child: Container(
-                  height: 38,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(19),
-                    border: Border.all(color: primaryColor.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined, size: 14, color: primaryColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        "Edit",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor,
-                        ),
-                      ),
-                    ],
+    Widget buildButton(IconData icon, String label, VoidCallback onTap, {Color? iconColor}) {
+      return Expanded(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: primaryColor.withOpacity(0.2)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18, color: iconColor ?? primaryColor),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            // Like Button
+            buildButton(
+              blog.isLiked == true ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+              '${blog.likesCount ?? 0} Likes',
+              () => controller.toggleLike(blog.id ?? 0),
+              iconColor: blog.isLiked == true ? Colors.redAccent : primaryColor,
+            ),
+            const SizedBox(width: 8),
+            // Share Button
+            buildButton(
+              Icons.share_outlined,
+              'Share',
+              () {
+                Share.share("${blog.title ?? 'Check out this blog!'}\n\n${blog.description ?? ''}");
+              },
+            ),
+            const SizedBox(width: 8),
+            // Comment Button
+            buildButton(
+              CupertinoIcons.chat_bubble_text,
+              'Comment',
+              () {
+                _showCommentBottomSheet(context, blog, primaryColor, controller);
+              },
+            ),
+          ],
+        ),
+        if (isMyBlog) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              buildButton(
+                Icons.edit_outlined,
+                'Edit',
+                () => Get.to(() => CreateBlogScreen(blog: blog)),
               ),
               const SizedBox(width: 8),
-              
-              // Delete Button Pill
-              GestureDetector(
-                onTap: () {
-                  // Show confirmation dialog before delete
-                  Get.dialog(
-                    AlertDialog(
-                      title: const Text("Delete Blog", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Nunito-Bold')),
-                      content: const Text("Are you sure you want to delete this blog?"),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Get.back(),
-                          child: const Text("Cancel"),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            Get.back(); // Close dialog
-                            final deleted = await controller.deleteBlog(blog.id ?? 0);
-                            if (deleted) {
-                              // Use standard Navigator to pop the screen, bypassing GetX's snackbar interception
-                              if (context.mounted) {
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Get.dialog(
+                      AlertDialog(
+                        title: const Text("Delete Blog", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Nunito-Bold')),
+                        content: const Text("Are you sure you want to delete this blog?"),
+                        actions: [
+                          TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
+                          TextButton(
+                            onPressed: () async {
+                              Get.back();
+                              final deleted = await controller.deleteBlog(blog.id ?? 0);
+                              if (deleted && context.mounted) {
                                 Navigator.of(context).pop();
                               }
-                            }
-                          },
-                          child: const Text("Delete", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                            },
+                            child: const Text("Delete", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                        const SizedBox(width: 6),
+                        const Text(
+                          "Delete",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
-                child: Container(
-                  height: 38,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(19),
-                    border: Border.all(color: Colors.red.withOpacity(0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.delete_outline_rounded, size: 14, color: Colors.red),
-                      const SizedBox(width: 6),
-                      const Text(
-                        "Delete",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
             ],
-          )
-        else
-          const SizedBox.shrink(),
-
-        // Right Side: Like & Share Buttons
-        Row(
-          children: [
-            // Elegant Like Pill (Heart icon & likes count)
-            GestureDetector(
-              onTap: () => controller.toggleLike(blog.id ?? 0),
-              child: Container(
-                height: 38,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  color: blog.isLiked == true ? primaryColor.withOpacity(0.08) : Colors.grey[50],
-                  borderRadius: BorderRadius.circular(19),
-                  border: Border.all(
-                    color: blog.isLiked == true ? primaryColor.withOpacity(0.2) : const Color(0xFFE5E7EB),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      blog.isLiked == true ? Icons.favorite : Icons.favorite_border_rounded,
-                      size: 16,
-                      color: blog.isLiked == true ? primaryColor : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${blog.likesCount ?? 0}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: blog.isLiked == true ? primaryColor : Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-
-            // Elegant Share Circle Button
-            GestureDetector(
-              onTap: () {
-                Share.share(
-                  "${blog.title ?? 'Check out this blog!'}\n\n${blog.description ?? ''}",
-                );
-              },
-              child: Container(
-                height: 38,
-                width: 38,
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                ),
-                child: Icon(Icons.share_outlined, size: 16, color: Colors.grey[600]),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ]
       ],
     );
   }
@@ -578,24 +596,521 @@ class BlogDetailScreen extends StatelessWidget {
   Widget _buildTagsList(Color primaryColor, List<String> tags) {
     return Wrap(
       spacing: 8,
-      runSpacing: 8,
-      children: tags.map((tag) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: primaryColor.withOpacity(0.3)),
-        ),
-        child: Text(
-          tag,
-          style: TextStyle(
-            fontSize: 11,
-            color: primaryColor,
-            fontWeight: FontWeight.bold,
+      runSpacing: 10,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(right: 4.0),
+          child: Text(
+            'Tags:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Color(0xFF1D1D1D),
+            ),
           ),
         ),
-      )).toList(),
+        ...tags.map((tag) => Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: primaryColor.withOpacity(0.3)),
+          ),
+          child: Text(
+            tag,
+            style: TextStyle(
+              fontSize: 12,
+              color: primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        )).toList(),
+      ],
     );
+  }
+
+  String _timeAgo(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+      final diff = DateTime.now().difference(date);
+      if (diff.inDays > 365) return '${(diff.inDays / 365).floor()} years ago';
+      if (diff.inDays > 30) return '${(diff.inDays / 30).floor()} months ago';
+      if (diff.inDays > 0) return '${diff.inDays} days ago';
+      if (diff.inHours > 0) return '${diff.inHours} hours ago';
+      if (diff.inMinutes > 0) return '${diff.inMinutes} minutes ago';
+      return 'Just now';
+    } catch (e) {
+      return dateStr.split('T').first;
+    }
+  }
+
+  void _showCommentBottomSheet(BuildContext context, Blog blog, Color primaryColor, BlogController controller) {
+    final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+    final currentUser = authService?.currentUser.value;
+    final userName = currentUser?.name ?? '';
+    final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          top: 24,
+          left: 16,
+          right: 16,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Add a Comment',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontFamily: 'Nunito-Bold',
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.grey.shade600,
+                  backgroundImage: currentUser?.profileImage != null
+                      ? NetworkImage("${ApiConstants.imageBaseUrl}${currentUser!.profileImage}")
+                      : null,
+                  child: currentUser?.profileImage == null
+                      ? Text(userInitial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (userName.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6, left: 4),
+                          child: Text(
+                            userName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF1D1D1D),
+                            ),
+                          ),
+                        ),
+                      Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: TextField(
+                          controller: controller.commentTextController,
+                          maxLines: null,
+                          autofocus: true,
+                          decoration: const InputDecoration(
+                            hintText: 'Write your comment...',
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Obx(() => ElevatedButton.icon(
+                          onPressed: controller.isCommentPosting.value
+                              ? null
+                              : () async {
+                                  await controller.postComment(blog.id ?? 0);
+                                  if (Get.isBottomSheetOpen == true) {
+                                    Get.back();
+                                  }
+                                },
+                          icon: controller.isCommentPosting.value
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Icon(Icons.send_rounded, size: 16, color: Colors.white),
+                          label: const Text('Publish', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          ),
+                        )),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  Widget _buildCommentsSection(BuildContext context, Color primaryColor, Blog blog, BlogController controller) {
+    final comments = blog.comments ?? [];
+    final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+    final currentUser = authService?.currentUser.value;
+    final userName = currentUser?.name ?? '';
+    final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(width: 3, height: 18, decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(width: 8),
+            const Text(
+              'Comments',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Color(0xFF1D1D1D),
+                fontFamily: 'Nunito-Bold',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        
+        // Comments List
+        Obx(() {
+          final isShowingAll = controller.showAllComments.value;
+          final visibleComments = isShowingAll ? comments : comments.take(5).toList();
+
+          if (comments.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.chat_bubble_outline_rounded, size: 48, color: Colors.grey.shade400),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No comments yet',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Be the first to share your thoughts!',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () => _showCommentBottomSheet(context, blog, primaryColor, controller),
+                    icon: Icon(Icons.add_comment_rounded, size: 18, color: primaryColor),
+                    label: Text('Add Comment', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: primaryColor),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...visibleComments.map((comment) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildCommentItem(
+                  context: context,
+                  primaryColor: primaryColor,
+                  comment: comment,
+                  controller: controller,
+                  blog: blog,
+                ),
+              )).toList(),
+              
+              if (comments.length > 5)
+                Center(
+                  child: TextButton(
+                    onPressed: () => controller.showAllComments.value = !controller.showAllComments.value,
+                    child: Text(
+                      isShowingAll ? 'Show less' : 'View more comments',
+                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildCommentItem({
+    required BuildContext context,
+    required Color primaryColor,
+    required BlogComment comment,
+    required BlogController controller,
+    required Blog blog,
+    bool isReply = false,
+  }) {
+    final authorName = comment.user?.name ?? 'Unknown User';
+    final avatarLetter = authorName.isNotEmpty ? authorName[0].toUpperCase() : 'U';
+    final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+    final currentUserId = authService?.currentUser.value?.id;
+    final isMyComment = comment.userId != null && comment.userId.toString() == currentUserId?.toString();
+    final isBlogOwner = currentUserId?.toString() == blog.userId?.toString();
+    final hasActions = isBlogOwner || isMyComment;
+    
+    // Parse timeAgo
+    String timeAgo = _timeAgo(comment.createdAt);
+
+    return Obx(() {
+      final isReplyingToThis = controller.replyToComment.value?.id == comment.id;
+      
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (isReply)
+                Container(
+                  width: 24,
+                  height: 34,
+                  margin: const EdgeInsets.only(left: 18), // Aligns with center of parent avatar
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(color: Colors.grey.shade400, width: 2),
+                      bottom: BorderSide(color: Colors.grey.shade400, width: 2),
+                    ),
+                    borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12)),
+                  ),
+                ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isReply ? Colors.white : const Color(0xFFF9FAFB),
+                    border: isReply ? Border.all(color: Colors.grey.shade200) : null,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header: Avatar, Name, Time
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: isReply ? 14 : 18,
+                      backgroundColor: Colors.grey.shade600,
+                      backgroundImage: comment.user?.photo != null
+                          ? NetworkImage("${ApiConstants.imageBaseUrl}${comment.user!.photo}")
+                          : null,
+                      child: comment.user?.photo == null 
+                          ? Text(avatarLetter, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold))
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(authorName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1D1D1D), fontSize: 14)),
+                          const SizedBox(height: 6),
+                          Text(comment.comment ?? '', style: const TextStyle(color: Color(0xFF333333), fontSize: 14, height: 1.4)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(timeAgo, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                  ],
+                ),
+                if (hasActions) ...[
+                  const SizedBox(height: 12),
+                  // Actions: Reply & Delete
+                  Padding(
+                    padding: EdgeInsets.only(left: isReply ? 40 : 48),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // Reply Button (Only for blog owner and not a nested reply)
+                        if (isBlogOwner && !isReply)
+                          InkWell(
+                            onTap: () {
+                              // Toggle reply mode
+                              if (isReplyingToThis) {
+                                controller.setReplyTo(null);
+                              } else {
+                                controller.setReplyTo(comment);
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(4),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 4, right: 20),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(isReplyingToThis ? Icons.close : Icons.reply_rounded, size: 16, color: primaryColor),
+                                  const SizedBox(width: 4),
+                                  Text(isReplyingToThis ? 'Cancel' : 'Reply', style: TextStyle(color: primaryColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        
+                        // Delete Button
+                        if (isMyComment)
+                          InkWell(
+                            onTap: () {
+                              Get.dialog(
+                                AlertDialog(
+                                  title: const Text("Delete Comment"),
+                                  content: const Text("Are you sure you want to delete this comment?"),
+                                  actions: [
+                                    TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.back();
+                                        controller.deleteComment(comment.id ?? 0, blog.id ?? 0);
+                                      },
+                                      child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(4),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 4, bottom: 4, right: 16),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.delete_rounded, size: 16, color: Colors.red),
+                                  SizedBox(width: 4),
+                                  Text('Delete', style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+                
+                // Reply Input Section
+                if (isReplyingToThis) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: EdgeInsets.only(left: isReply ? 40 : 48),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: TextField(
+                              controller: controller.commentTextController,
+                              decoration: const InputDecoration(
+                                hintText: 'Write a reply...',
+                                hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                                isDense: true,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Loading / Send Button
+                        GestureDetector(
+                          onTap: controller.isCommentPosting.value 
+                              ? null 
+                              : () => controller.postComment(blog.id ?? 0),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: controller.isCommentPosting.value
+                                  ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                  : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                
+                // Nested Replies (Box inside a box)
+                if (comment.replies != null && comment.replies!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Column(
+                      children: comment.replies!.map((reply) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: _buildCommentItem(
+                          context: context,
+                          primaryColor: primaryColor,
+                          comment: reply,
+                          controller: controller,
+                          blog: blog,
+                          isReply: true,
+                        ),
+                      )).toList(),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ), // Close Expanded
+      ],
+    ), // Close Row
+  ],
+);
+    });
   }
 
   Widget _buildRelatedBlogs(BuildContext context, Color primaryColor, BlogController controller) {
@@ -619,9 +1134,36 @@ class BlogDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         controller.relatedBlogs.isEmpty
-            ? Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: Text('No related blogs', style: TextStyle(color: Colors.grey[400], fontSize: 13))),
+            ? Container(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.article_outlined, size: 48, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No related blogs found',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Check back later for more content.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
               )
             : SizedBox(
                 height: 180,

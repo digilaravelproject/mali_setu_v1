@@ -11,6 +11,7 @@ import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_controller.dart';
 import '../../../../widgets/custom_snack_bar.dart';
+import '../../../../features/Auth/service/auth_service.dart';
 
 class CreateBlogController extends GetxController {
   final Blog? blogToEdit;
@@ -63,8 +64,9 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
   final RxString blogType = ''.obs; // selected blog type observable
   
   @override
-void onInit() {
+  void onInit() {
     super.onInit();
+    _fetchCategories();
 
     if (blogToEdit != null) {
       titleCtrl.text = blogToEdit!.title ?? '';
@@ -80,6 +82,12 @@ void onInit() {
         existingMediaPaths.assignAll(blogToEdit!.mediaPaths!);
       } else if (blogToEdit!.mediaPath != null) {
         existingMediaPaths.assignAll([blogToEdit!.mediaPath!]);
+      }
+    } else {
+      // 🆕 Pre-fill category for bloggers
+      if (Get.isRegistered<AuthService>()) {
+        final authService = Get.find<AuthService>();
+        _initBloggerCategory(authService);
       }
     }
 
@@ -105,48 +113,40 @@ void onInit() {
     });
   }
   
-  final List<String> blogTypesList = const [
-    "Technology",
-    "Business",
-    "Finance",
-    "Marketing",
-    "Startups",
-    "Artificial Intelligence (AI)",
-    "Software Development",
-    "Web Development",
-    "Mobile App Development",
-    "Cybersecurity",
-    "Cloud Computing",
-    "Data Science",
-    "Health & Fitness",
-    "Lifestyle",
-    "Travel",
-    "Food & Recipes",
-    "Fashion & Beauty",
-    "Education",
-    "Career & Jobs",
-    "Personal Development",
-    "Entertainment",
-    "Movies & TV",
-    "Music",
-    "Sports",
-    "Gaming",
-    "News & Current Affairs",
-    "Politics",
-    "Science",
-    "Environment",
-    "Parenting",
-    "Relationships",
-    "Real Estate",
-    "Automotive",
-    "Photography",
-    "Home Improvement",
-    "E-commerce",
-    "Product Reviews",
-    "Tutorials & Guides",
-    "Case Studies",
-    "Interviews",
-  ];
+  Future<void> _initBloggerCategory(AuthService authService) async {
+    var user = authService.currentUser.value;
+    
+    // If it's a blogger but local data is stale (missing category name), refresh it
+    if (user?.userType?.toLowerCase().trim() == 'bloger' && user?.blogCategoryName == null) {
+      await authService.refreshProfile();
+      user = authService.currentUser.value;
+    }
+
+    if (user?.userType?.toLowerCase().trim() == 'bloger' && user?.blogCategoryName != null) {
+      blogTypeCtrl.text = user!.blogCategoryName!;
+      blogType.value = user.blogCategoryName!;
+    }
+  }
+  
+  final RxList<String> blogTypesList = <String>[].obs;
+  final RxMap<String, int> categoryNameToId = <String, int>{}.obs;
+
+  Future<void> _fetchCategories() async {
+    try {
+      final response = await _repository.getBlogCategories();
+      if (response != null && response.data != null) {
+        categoryNameToId.clear();
+        for (var cat in response.data!) {
+          if (cat.name != null && cat.name!.isNotEmpty && cat.id != null) {
+            categoryNameToId[cat.name!] = cat.id!;
+          }
+        }
+        blogTypesList.assignAll(categoryNameToId.keys.toList());
+      }
+    } catch (e) {
+      debugPrint("Error fetching categories: $e");
+    }
+  }
 
   // 🆕 Picks multiple images and appends them
   Future<void> pickImages() async {
@@ -284,10 +284,20 @@ void onInit() {
       debugPrint("Starting blog creation process for: $title");
       
       // Construct FormData to upload files and parameters dynamically
+      int? categoryId = categoryNameToId[type];
+      
+      // Fallback for blogger if categories haven't loaded yet
+      if (categoryId == null && Get.isRegistered<AuthService>()) {
+        final user = Get.find<AuthService>().currentUser.value;
+        if (user?.blogCategoryName == type) {
+          categoryId = user?.blogCategoryId;
+        }
+      }
+
       final Map<String, dynamic> fields = {
         "title": title,
         "description": content,
-        "blog_type": type,
+        "blog_type": categoryId ?? type,
         "tags": tags.join(','), // 🆕 Join tags with comma as expected by the API
       };
 

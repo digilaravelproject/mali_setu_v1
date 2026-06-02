@@ -120,14 +120,14 @@ class HomePage extends GetWidget<HomeController> {
                               return InkWell(
                                 onTap: () => Get.toNamed(AppRoutes.notification),
                                 child: Badge(
-                                  label: Text(count.toString()),
+                                  label: Text(count > 99 ? '99+' : count.toString()),
                                   isLabelVisible: count > 0,
                                   backgroundColor: Colors.redAccent,
                                   child: const Icon(CupertinoIcons.bell, color: Colors.black87, size: 24),
                                 ),
                               );
                             }),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 24),
                             // Profile Avatar
                             InkWell(
                               onTap: () => Get.toNamed(AppRoutes.profileScreen),

@@ -18,7 +18,7 @@ import '../../../widgets/webview_page.dart';
 import '../../volunteer/pages/volunteer_page.dart';
 import 'change_language_page.dart';
 import 'contact_support.dart';
-
+import 'package:package_info_plus/package_info_plus.dart';
 class SettingsScreen extends GetWidget<SettingsController> {
   const SettingsScreen({super.key});
 
@@ -203,41 +203,43 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
 
               // Add Business Button
-              const SizedBox(height: 32),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.theme.primaryColor.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      "want_to_grow_your_business".tr,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+              if (authService.currentUser.value?.userType?.toLowerCase().trim() != 'bloger') ...[
+                const SizedBox(height: 32),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.theme.primaryColor.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    CustomButton(
-                      height: 48,
-                      borderRadius: 14,
-                      title: "register_your_business".tr,
-                      onPressed: () {
-                        Get.toNamed(AppRoutes.regBusiness);
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "want_to_grow_your_business".tr,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      CustomButton(
+                        height: 48,
+                        borderRadius: 14,
+                        title: "register_your_business".tr,
+                        onPressed: () {
+                          Get.toNamed(AppRoutes.regBusiness);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
 
               const SizedBox(height: 40),
               Align(
@@ -261,11 +263,17 @@ class SettingsScreen extends GetWidget<SettingsController> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      "Version 1.0.0",
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[400],
-                      ),
+                    FutureBuilder<PackageInfo>(
+                      future: PackageInfo.fromPlatform(),
+                      builder: (context, snapshot) {
+                        final version = snapshot.hasData ? snapshot.data!.version : '1.0.0';
+                        return Text(
+                          "Version $version",
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[400],
+                          ),
+                        );
+                      }
                     ),
                   ],
                 ),

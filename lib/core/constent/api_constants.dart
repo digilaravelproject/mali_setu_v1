@@ -109,7 +109,10 @@ class ApiConstants {
     static const String getBlogs = "blogs";
     static const String getBlogDetail = "blogs"; // blogs/{id}
     static const String toggleBlogLike = "blogs"; // blogs/{id}/like
+    static const String addBlogComment = "blogs"; // blogs/{id}/comments
+    static const String deleteBlogComment = "blogs/comments"; // blogs/comments/{id}
     static const String searchBlogs = "blogs/search";
+    static const String blogCategories = "blogs/categories";
 
     // Legal URLs
     static const String privacyPolicyUrl = "$baseUrl/privacy-policy";

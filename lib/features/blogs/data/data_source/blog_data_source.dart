@@ -118,11 +118,14 @@ import 'package:dio/dio.dart';
 class BlogRepository {
   final ApiClient _apiClient = getx.Get.find<ApiClient>();
 
-  Future<BlogResponse?> getBlogs({int page = 1, int perPage = 100}) async {
+  Future<BlogResponse?> getBlogs({int page = 1, int perPage = 100, int? categoryId}) async {
     try {
+      final query = {'page': page, 'per_page': perPage};
+      if (categoryId != null) query['category_id'] = categoryId;
+      
       final response = await _apiClient.get(
         ApiConstants.getBlogs,
-        queryParameters: {'page': page, 'per_page': perPage},
+        queryParameters: query,
       );
 
       if (response.statusCode == 200) {
@@ -254,6 +257,53 @@ class BlogRepository {
       print('Error updating blog: $e');
     }
     return null;
+  }
+
+  Future<BlogCategoryResponse?> getBlogCategories() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.blogCategories);
+
+      if (response.statusCode == 200) {
+        return BlogCategoryResponse.fromJson(response.data);
+      }
+    } catch (e) {
+      print('Error fetching blog categories: $e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> addComment(int blogId, String comment, {int? parentId}) async {
+    try {
+      final Map<String, dynamic> data = {'comment': comment};
+      if (parentId != null) {
+        data['parent_id'] = parentId;
+      }
+      final response = await _apiClient.post(
+        "${ApiConstants.addBlogComment}/$blogId/comments",
+        data: data,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : null;
+      }
+    } catch (e) {
+      print('Error adding comment: $e');
+    }
+    return null;
+  }
+
+  Future<bool> deleteComment(int commentId) async {
+    try {
+      final response = await _apiClient.delete(
+        "${ApiConstants.deleteBlogComment}/$commentId",
+      );
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return true;
+      }
+    } catch (e) {
+      print('Error deleting comment: $e');
+    }
+    return false;
   }
 }
 

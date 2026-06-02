@@ -73,6 +73,8 @@ class Blog {
   final bool? isLiked;
   final BlogUser? user;
   final List<String>? mediaPaths; // 🆕 Added for multiple media carousels
+  final BlogCategory? category; // 🆕 Added for category
+  final List<BlogComment>? comments; // 🆕 Added for comments
 
   Blog({
     this.id,
@@ -90,6 +92,8 @@ class Blog {
     this.isLiked,
     this.user,
     this.mediaPaths, // 🆕 Added
+    this.category,
+    this.comments, // 🆕 Added
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) => Blog(
@@ -107,13 +111,17 @@ class Blog {
             ? List<String>.from(json['media_path'])
             : (json['media_path'] != null ? [json['media_path'].toString()] : null), // 🆕 Added
         mediaType: json['media_type'],
-        blogType: json['blog_type'] ?? json['blogs_type'],
+        blogType: json['blog_type']?.toString() ?? json['blogs_type']?.toString(),
         isActive: json['is_active'] == 1 || json['is_active'] == true,
         createdAt: json['created_at'],
         updatedAt: json['updated_at'],
         likesCount: json['likes_count'],
         isLiked: json['is_liked'] == 1 || json['is_liked'] == true,
         user: json['user'] != null ? BlogUser.fromJson(json['user']) : null,
+        category: json['category'] != null ? BlogCategory.fromJson(json['category']) : null,
+        comments: json['comments'] != null 
+            ? List<BlogComment>.from(json['comments'].map((x) => BlogComment.fromJson(x))) 
+            : null,
       );
 
   Blog copyWith({
@@ -132,6 +140,7 @@ class Blog {
     bool? isLiked,
     BlogUser? user,
     List<String>? mediaPaths, // 🆕 Added
+    List<BlogComment>? comments, // 🆕 Added
   }) =>
       Blog(
         id: id ?? this.id,
@@ -149,6 +158,76 @@ class Blog {
         isLiked: isLiked ?? this.isLiked,
         user: user ?? this.user,
         mediaPaths: mediaPaths ?? this.mediaPaths, // 🆕 Added
+        category: category ?? this.category,
+        comments: comments ?? this.comments, // 🆕 Added
+      );
+}
+
+class BlogComment {
+  final int? id;
+  final int? blogId;
+  final int? userId;
+  final int? parentId;
+  final String? comment;
+  final String? createdAt;
+  final String? updatedAt;
+  final BlogUser? user;
+  final List<BlogComment>? replies;
+
+  BlogComment({
+    this.id,
+    this.blogId,
+    this.userId,
+    this.parentId,
+    this.comment,
+    this.createdAt,
+    this.updatedAt,
+    this.user,
+    this.replies,
+  });
+
+  factory BlogComment.fromJson(Map<String, dynamic> json) => BlogComment(
+        id: json['id'],
+        blogId: json['blog_id'],
+        userId: json['user_id'],
+        parentId: json['parent_id'],
+        comment: json['comment'],
+        createdAt: json['created_at'],
+        updatedAt: json['updated_at'],
+        user: json['user'] != null ? BlogUser.fromJson(json['user']) : null,
+        replies: json['replies'] != null
+            ? List<BlogComment>.from(json['replies'].map((x) => BlogComment.fromJson(x)))
+            : null,
+      );
+}
+
+class BlogCategory {
+  final int? id;
+  final String? name;
+  final String? description;
+  final bool? isActive;
+
+  BlogCategory({this.id, this.name, this.description, this.isActive});
+
+  factory BlogCategory.fromJson(Map<String, dynamic> json) => BlogCategory(
+        id: json['id'],
+        name: json['name'],
+        description: json['description'],
+        isActive: json['is_active'] == 1 || json['is_active'] == true,
+      );
+}
+
+class BlogCategoryResponse {
+  final bool? success;
+  final List<BlogCategory>? data;
+
+  BlogCategoryResponse({this.success, this.data});
+
+  factory BlogCategoryResponse.fromJson(Map<String, dynamic> json) => BlogCategoryResponse(
+        success: json['success'],
+        data: json['data'] != null
+            ? List<BlogCategory>.from(json['data'].map((x) => BlogCategory.fromJson(x)))
+            : null,
       );
 }
 

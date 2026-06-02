@@ -14,6 +14,7 @@ import '../../../business/presentation/controller/business_controller.dart';
 import '../../../Auth/service/auth_service.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../page/home_page.dart';
+import '../../../blogs/presentation/controller/blog_controller.dart';
 
 class DashboardController extends GetxController {
   var currentPage = 0.obs;
@@ -32,6 +33,7 @@ class DashboardController extends GetxController {
   List<Widget> get screenList {
     if (isBlogger) {
       return <Widget>[
+        BlogsScreen(),
         BlogsScreen(),
         SettingsScreen(),
       ];
@@ -259,6 +261,17 @@ class DashboardController extends GetxController {
   }
 
   changePage(int index) {
+    if (isBlogger) {
+      if (index == 0) {
+        if (Get.isRegistered<BlogController>()) {
+          Get.find<BlogController>().filterByTab('Others');
+        }
+      } else if (index == 1) {
+        if (Get.isRegistered<BlogController>()) {
+          Get.find<BlogController>().filterByTab('Mine');
+        }
+      }
+    }
     currentPage.value = index;
   }
 
@@ -276,6 +289,13 @@ class DashboardController extends GetxController {
           title: "blogs".tr,
           icon: Icons.article_outlined,
           selectedIcon: Icons.article,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "my_blogs".tr,
+          icon: Icons.library_books_outlined,
+          selectedIcon: Icons.library_books,
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),

@@ -5,6 +5,7 @@ import '../../../../widgets/custom_scaffold.dart';
 import '../controller/create_blog_controller.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../../data/model/blog_model.dart';
+import '../../../../features/Auth/service/auth_service.dart';
 
 class CreateBlogScreen extends StatelessWidget {
   final Blog? blog;
@@ -309,6 +310,14 @@ class CreateBlogScreen extends StatelessWidget {
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {
+            // 🆕 Disable category change for bloggers
+            if (Get.isRegistered<AuthService>()) {
+              final user = Get.find<AuthService>().currentUser.value;
+              if (user?.userType?.toLowerCase().trim() == 'bloger' && user?.blogCategoryName != null) {
+                return; // Do nothing
+              }
+            }
+            
             showModalBottomSheet(
               context: context,
               backgroundColor: Colors.white,
@@ -398,6 +407,7 @@ class CreateBlogScreen extends StatelessWidget {
                     : Icon(Icons.radio_button_off_rounded, color: Colors.grey[400], size: 22),
                 onTap: () {
                   controller.blogTypeCtrl.text = type;
+                  controller.blogType.value = type; // 🆕 Update reactive value
                   controller.errors.remove('type');
                   Get.back();
                 },
@@ -418,7 +428,7 @@ class CreateBlogScreen extends StatelessWidget {
           },
           child: Obx(() {
             final hasError = controller.errors.containsKey('type');
-            final selected = controller.blogTypeCtrl.text;
+            final selected = controller.blogType.value; // Use the reactive RxString
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
@@ -443,7 +453,19 @@ class CreateBlogScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF9CA3AF)),
+                  Builder(
+                    builder: (context) {
+                      bool isBlogger = false;
+                      if (Get.isRegistered<AuthService>()) {
+                        final user = Get.find<AuthService>().currentUser.value;
+                        if (user?.userType?.toLowerCase().trim() == 'bloger' && user?.blogCategoryName != null) {
+                          isBlogger = true;
+                        }
+                      }
+                      if (isBlogger) return const SizedBox.shrink();
+                      return const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF9CA3AF));
+                    },
+                  ),
                 ],
               ),
             );
