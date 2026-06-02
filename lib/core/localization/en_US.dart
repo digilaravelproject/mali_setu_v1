@@ -976,8 +976,8 @@ const Map<String, String> enUS = {
   "write_blog": "Write Blog",
   "other_blogs": "Other Blogs",
   "my_blogs": "My Blogs",
-
-
+  "exit_app": "Exit App",
+  "want_to_exit_app_message": "Are you sure you want to exit the app?",
 };
 
 

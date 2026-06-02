@@ -958,7 +958,8 @@ const Map<String, String> hiIN = {
   "write_blog": "ब्लॉग लिखें",
   "other_blogs": "अन्य ब्लॉग",
   "my_blogs": "मेरे ब्लॉग",
-
+  "exit_app": "ऐप से बाहर निकलें",
+  "want_to_exit_app_message": "क्या आप ऐप से बाहर निकलना चाहते हैं?",
 };
 
 
