@@ -9,6 +9,7 @@ import 'package:edu_cluezer/features/donation/presentation/controller/donation_c
 import 'package:edu_cluezer/features/donation/binding/donation_binding.dart';
 import 'package:edu_cluezer/features/donation/presentation/widget/donation_bottom_sheet.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
+import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 
 class DashboardPage extends GetWidget<DashboardController> {
   const DashboardPage({super.key});
@@ -18,6 +19,21 @@ class DashboardPage extends GetWidget<DashboardController> {
     return CustomScaffold(
       enableDoubleTapExit: true,
       onWillPop: () async {
+        if (controller.isBlogger) {
+          CustomConfirmDialog.show(
+            title: 'exit_app'.tr,
+            message: 'want_to_exit_app_message'.tr,
+            confirmText: 'yes'.tr,
+            cancelText: 'cancel'.tr,
+            icon: Icons.exit_to_app,
+            confirmColor: AppColors.error,
+            onConfirm: () {
+              SystemNavigator.pop();
+            },
+          );
+          return false;
+        }
+
         // Show donation prompt on exit
         if (!Get.isRegistered<DonationController>()) {
           final donationBinding = DonationBinding();

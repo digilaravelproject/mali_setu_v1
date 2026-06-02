@@ -977,7 +977,8 @@ const Map<String, String> mrIN = {
 "write_blog": "ब्लॉग लिहा",
 "other_blogs": "इतर ब्लॉग",
 "my_blogs": "माझे ब्लॉग",
-
+"exit_app": "अॅपमधून बाहेर पडा",
+"want_to_exit_app_message": "तुम्हाला खात्री आहे की तुम्हाला अॅपमधून बाहेर पडायचे आहे?",
 };
 
 
