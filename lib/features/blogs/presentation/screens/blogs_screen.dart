@@ -162,7 +162,10 @@ class BlogsScreen extends StatelessWidget {
           final authService = Get.find<AuthService>();
           final user = authService.currentUser.value;
           final isBlogger = user?.userType?.toLowerCase().trim() == 'bloger';
-          if (!isBlogger) return const SizedBox.shrink();
+          final hasBlogAccess = user?.blogAccess == true;
+          print("df mv bftfshfewfw fgew few : "+user!.userType.toString());
+          if (!isBlogger && !hasBlogAccess) return const SizedBox.shrink();
+
 
           return GestureDetector(
             onTap: () => Get.to(() => const CreateBlogScreen()),

@@ -30,7 +30,27 @@ class DashboardController extends GetxController {
     return false;
   }
 
+  bool get hasBlogAccess {
+    try {
+      if (Get.isRegistered<AuthService>()) {
+        final user = Get.find<AuthService>().currentUser.value;
+        return user?.blogAccess == true;
+      }
+    } catch (_) {}
+    return false;
+  }
+
   List<Widget> get screenList {
+    if (hasBlogAccess) {
+      return <Widget>[
+        HomePage(),
+        BusinessScreen(),
+        MatrimonyPage(),
+        BlogsScreen(),
+        BlogsScreen(),
+        SettingsScreen(),
+      ];
+    }
     if (isBlogger) {
       return <Widget>[
         BlogsScreen(),
@@ -261,7 +281,17 @@ class DashboardController extends GetxController {
   }
 
   changePage(int index) {
-    if (isBlogger) {
+    if (hasBlogAccess) {
+      if (index == 3) {
+        if (Get.isRegistered<BlogController>()) {
+          Get.find<BlogController>().filterByTab('Others');
+        }
+      } else if (index == 4) {
+        if (Get.isRegistered<BlogController>()) {
+          Get.find<BlogController>().filterByTab('Mine');
+        }
+      }
+    } else if (isBlogger) {
       if (index == 0) {
         if (Get.isRegistered<BlogController>()) {
           Get.find<BlogController>().filterByTab('Others');
@@ -283,6 +313,52 @@ class DashboardController extends GetxController {
 
   List<BtmNavModel> navList(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
+    if (hasBlogAccess) {
+      return [
+        BtmNavModel(
+          title: "home".tr,
+          icon: CupertinoIcons.home,
+          selectedIcon: CupertinoIcons.house_fill,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+
+        BtmNavModel(
+          title: "business".tr,
+          icon: Icons.business,
+          selectedIcon: Icons.shop,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "matrimony".tr,
+          icon: CupertinoIcons.heart,
+          selectedIcon: CupertinoIcons.heart_fill,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "blogs".tr,
+          icon: Icons.article_outlined,
+          selectedIcon: Icons.article,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "my_blogs".tr,
+          icon: Icons.library_books_outlined,
+          selectedIcon: Icons.library_books,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "more".tr,
+          icon: Icons.more_vert,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+      ];
+    }
     if (isBlogger) {
       return [
         BtmNavModel(

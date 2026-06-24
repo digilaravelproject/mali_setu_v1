@@ -39,10 +39,15 @@ class DashboardPage extends GetWidget<DashboardController> {
         return true; // No causes? Just let normal exit flow handle it
       },
       extendBody: true,
-      body: Obx(() => IndexedStack(
-        index: controller.currentPage.value,
-        children: controller.screenList,
-      )),
+      body: Obx(() {
+        final screens = controller.screenList;
+        final index = controller.currentPage.value;
+        final safeIndex = (index >= 0 && index < screens.length) ? index : 0;
+        return IndexedStack(
+          index: safeIndex,
+          children: screens,
+        );
+      }),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
