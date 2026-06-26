@@ -8,7 +8,6 @@ import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../common/widgets/selection_tile.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../core/helper/date_input_formatter.dart';
@@ -499,7 +498,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 24),
 
                 // Photos Section
-                _buildSectionHeader("Photos (Up to 5)"),
+                _buildSectionHeader("Photos (Min 2, Max 5)"),
                 Obx(() {
                   final totalExisting = controller.existingPhotos.length;
                   final totalSelected = controller.selectedPhotos.length;
@@ -533,7 +532,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "Max size 2MB, Formats: JPG, PNG",
+                              "Size: 2MB - 5MB, Formats: JPG, PNG",
                               style: context.textTheme.bodySmall?.copyWith(
                                 color: context.theme.primaryColor.withValues(alpha: 0.7),
                                 fontSize: 10,
