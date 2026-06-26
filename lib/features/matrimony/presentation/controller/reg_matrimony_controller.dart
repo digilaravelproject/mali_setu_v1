@@ -210,7 +210,7 @@ class RegMatrimonyController extends GetxController {
           final String extension = images[i].path.split('.').last.toLowerCase();
           final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
 
-          if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
+          if (sizeInMb <= 5 && allowedExtensions.contains(extension)) {
             selectedPhotos.add(file);
             addedCount++;
           } else {
@@ -220,7 +220,7 @@ class RegMatrimonyController extends GetxController {
 
         if (failedFiles.isNotEmpty) {
           CustomSnackBar.showError(
-            message: "Some files were skipped. Max size 2MB, Formats: JPG, PNG",
+            message: "Some files were skipped. Max size 5MB, Formats: JPG, PNG",
           );
         } else if (images.length > remainingSlots) {
           CustomSnackBar.showError(message: "You can only select up to 5 photos.");
@@ -478,6 +478,12 @@ class RegMatrimonyController extends GetxController {
         errors['caste'] = "Please select sub-caste";
         isValid = false;
       }
+      // Minimum 2 photos validation
+      final totalPhotos = existingPhotos.length + selectedPhotos.length;
+      if (totalPhotos < 2) {
+        CustomSnackBar.showError(message: "Minimum 2 images are required");
+        isValid = false;
+      }
     } else if (currentStep.value == 2) {
       // Step 3: Education & Career
       if (education.value.isEmpty) {
@@ -531,6 +537,13 @@ class RegMatrimonyController extends GetxController {
 
   Future<void> onRegister() async {
     if (!validateCurrentStep()) {
+      return;
+    }
+
+    // Final check: minimum 2 photos required for registration and update
+    final totalPhotos = existingPhotos.length + selectedPhotos.length;
+    if (totalPhotos < 2) {
+      CustomSnackBar.showError(message: "Minimum 2 images are required");
       return;
     }
     try {

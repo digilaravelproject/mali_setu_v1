@@ -96,6 +96,13 @@ class RegisterController extends GetxController {
     'Volunteer'
   ];
 
+  final occupationList = [
+    'Service',
+    'Business',
+    'Student',
+    'Not Working'
+  ];
+
   String _getApiUserType(String displayType) {
     switch (displayType) {
       case 'General(Member Mali Setu)':
