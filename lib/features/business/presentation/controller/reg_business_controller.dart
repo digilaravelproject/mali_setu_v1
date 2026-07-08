@@ -7,6 +7,9 @@ import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../widgets/custom_snack_bar.dart';
+import '../../../payment/presentation/page/ccavenue_payment_screen.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
@@ -727,18 +730,31 @@ class RegBusinessController extends GetxController {
 
       if (response.success && response.data != null) {
         final orderData = response.data!;
+        final paymentWay = orderData['payment_way']?.toString().toLowerCase();
 
-        _razorpayController.openCheckout(
-          amount: ((double.tryParse(plan.price?.toString() ?? "0") ?? 0)).toInt(),
-          name: bNameCtrl.text,
-          description: "Business Subscription Plan",
-          mobile: phoneCtrl.text,
-          email: emailCtrl.text,
-          orderId: orderData['order_id'],
-          transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
-          key: orderData['key_id'],
-          type: 'business',
-        );
+        if (paymentWay == 'ccavenue') {
+          final result = await Get.to(() => CCAvenuePaymentScreen(
+            paymentUrl: orderData['payment_url'] ?? '',
+            encRequest: orderData['encRequest'] ?? '',
+            accessCode: orderData['access_code'] ?? '',
+            type: 'business',
+          ));
+          if (result == true) {
+            print("CCAvenue Business Payment Success");
+          }
+        } else {
+          _razorpayController.openCheckout(
+            amount: ((double.tryParse(plan.price?.toString() ?? "0") ?? 0)).toInt(),
+            name: bNameCtrl.text,
+            description: "Business Subscription Plan",
+            mobile: phoneCtrl.text,
+            email: emailCtrl.text,
+            orderId: orderData['order_id'],
+            transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+            key: orderData['key_id'],
+            type: 'business',
+          );
+        }
       } else {
         CustomSnackBar.showError(
             message: response.message ?? "Failed to create payment order");

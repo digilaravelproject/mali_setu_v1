@@ -1,0 +1,15 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.malisetu.app",
+      "sha256_cert_fingerprints": [
+        "BA:64:FC:E6:F7:76:5D:10:7A:ED:86:EE:3E:99:A1:C5:EB:99:F8:A3:24:4E:E1:7F:67:C0:40:D1:64:9B:96:1B",
+        "0D:99:76:3A:2F:18:BD:C0:5C:F8:F0:0A:07:35:3D:B4:18:BB:7C:58:F8:C0:C4:F0:5E:AC:19:6E:49:81:14:E3",
+        "E1:0F:9F:47:08:40:18:3D:35:64:66:B5:4E:3E:04:A6:C7:8B:16:7C:DB:0F:EC:5D:A2:C1:0B:6A:64:DA:8A:FF",
+        "3D:8C:ED:6E:49:0D:44:F7:A6:83:4F:33:3B:15:4A:B8:58:F9:80:E6:72:44:57:66:6C:DD:0C:B5:07:95:B0:3C"
+      ]
+    }
+  }
+]
