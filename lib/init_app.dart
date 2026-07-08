@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'core/network/api_client.dart';
 import 'core/storage/shared_prefs.dart';
 import 'features/Auth/service/auth_service.dart';
+import 'core/services/deep_link_service.dart';
 
 
 Future<void> initApp() async {
@@ -49,4 +50,7 @@ Future<void> initApp() async {
 
   // Initialize AuthService as a permanent singleton
   Get.put(AuthService(), permanent: true);
+
+  // Initialize DeepLinkService
+  Get.put(await DeepLinkService().init(), permanent: true);
 }

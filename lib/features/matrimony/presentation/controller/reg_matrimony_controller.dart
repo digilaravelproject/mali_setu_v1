@@ -6,6 +6,7 @@ import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../../../payment/presentation/page/ccavenue_payment_screen.dart';
 
 import '../../../../models/name_components.dart';
 import '../../../../utils/name_parser.dart';
@@ -1112,18 +1113,32 @@ class RegMatrimonyController extends GetxController {
 
       if (response.success && response.data != null) {
         final orderData = response.data!;
+        final paymentWay = orderData['payment_way']?.toString().toLowerCase();
 
-        _razorpayController.openCheckout(
-          amount: ((double.tryParse(orderData['amount']?.toString() ?? "0") ?? 0) / 100).toInt(),
-          name: nameCtrl.text,
-          description: "Matrimony Subscription: ${plan.planName}",
-          mobile: "", // Optional: fetch from Auth if needed
-          email: "", // Optional: fetch from Auth if needed
-          orderId: orderData['order_id'],
-          transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
-          key: orderData['key_id'],
-          type: 'matrimony',
-        );
+        if (paymentWay == 'ccavenue') {
+          final result = await Get.to(() => CCAvenuePaymentScreen(
+            paymentUrl: orderData['payment_url'] ?? '',
+            encRequest: orderData['encRequest'] ?? '',
+            accessCode: orderData['access_code'] ?? '',
+            type: 'matrimony',
+          ));
+          if (result == true) {
+            // Payment success handling, you could fetch profile or update UI here
+            print("CCAvenue Matrimony Payment Success");
+          }
+        } else {
+          _razorpayController.openCheckout(
+            amount: ((double.tryParse(orderData['amount']?.toString() ?? "0") ?? 0) / 100).toInt(),
+            name: nameCtrl.text,
+            description: "Matrimony Subscription: ${plan.planName}",
+            mobile: "", // Optional: fetch from Auth if needed
+            email: "", // Optional: fetch from Auth if needed
+            orderId: orderData['order_id'],
+            transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+            key: orderData['key_id'],
+            type: 'matrimony',
+          );
+        }
       } else {
         CustomSnackBar.showError(
             message: response.message ?? "Failed to create payment order");

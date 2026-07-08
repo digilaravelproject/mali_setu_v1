@@ -442,105 +442,112 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
 
 
   Widget _buildBottomBar(BuildContext context, MatrimonyProfile profile) {
-    return SafeArea(
-      top: false, // only care about bottom
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Obx(() {
-                final authService = Get.find<AuthService>();
-                final currentUser = authService.currentUser.value;
-                final isOwnProfile = profile.user?.id == currentUser?.id || profile.userId == currentUser?.id;
+    return Obx(() {
+      final authService = Get.find<AuthService>();
+      final currentUser = authService.currentUser.value;
+      final isOwnProfile = profile.user?.id == currentUser?.id || profile.userId == currentUser?.id;
+      final isApproved = profile.approvalStatus?.toLowerCase() == 'approved';
 
-                if (isOwnProfile) {
-                  return ElevatedButton(
-                    onPressed: () {
-                      Get.toNamed(AppRoutes.regMatrimony, arguments: true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+      if (isOwnProfile && isApproved) {
+        return const SizedBox.shrink();
+      }
+
+      return SafeArea(
+        top: false, // only care about bottom
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: isOwnProfile
+                  ? ElevatedButton(
+                      onPressed: () {
+                        Get.toNamed(AppRoutes.regMatrimony, arguments: true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      "edit_profile".tr,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                      child: Text(
+                        "edit_profile".tr,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
-                    ),
-                  );
-                }
+                    )
+                  : Builder(
+                      builder: (context) {
+                        final status = profile.connectionStatus?.toLowerCase();
+                        String buttonText = "send_connection_request".tr;
+                        Color buttonColor = Colors.purple;
+                        VoidCallback? onPressed = controller.sendRequest;
 
-                final status = profile.connectionStatus?.toLowerCase();
-                String buttonText = "send_connection_request".tr;
-                Color buttonColor = Colors.purple;
-                VoidCallback? onPressed = controller.sendRequest;
+                        if (status == "pending") {
+                          buttonText = "request_sent".tr;
+                          buttonColor = Colors.grey;
+                          onPressed = null;
+                        } else if (status == "accepted") {
+                          buttonText = "start_chat".tr;
+                          buttonColor = Colors.green;
+                            onPressed = () {
+                            Get.toNamed(AppRoutes.matrimonyChat, arguments: {
+                              'conversation_id': profile.conversationId,
+                              'other_user_id': profile.user?.id ?? profile.userId,
+                              'user_name': profile.personalDetails?.name?.toString() ?? '',
+                            });
+                          };
+                        }
 
-                if (status == "pending") {
-                  buttonText = "request_sent".tr;
-                  buttonColor = Colors.grey;
-                  onPressed = null;
-                } else if (status == "accepted") {
-                  buttonText = "start_chat".tr;
-                  buttonColor = Colors.green;
-                    onPressed = () {
-                    Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                      'conversation_id': profile.conversationId,
-                      'other_user_id': profile.user?.id ?? profile.userId,
-                      'user_name': profile.personalDetails?.name?.toString() ?? '',
-                    });
-                  };
-                }
-
-                return ElevatedButton(
-                  onPressed: controller.isLoading.value ? null : onPressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: buttonColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                        return ElevatedButton(
+                          onPressed: controller.isLoading.value ? null : onPressed,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: buttonColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                              : Text(
+                            buttonText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        );
+                      }
                     ),
-                  ),
-                  child: controller.isLoading.value
-                      ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : Text(
-                    buttonText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

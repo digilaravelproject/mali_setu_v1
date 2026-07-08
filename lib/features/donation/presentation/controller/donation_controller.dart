@@ -4,6 +4,7 @@ import '../../domain/repository/donation_repository.dart';
 import '../../data/model/donation_cause_model.dart';
 import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import 'package:flutter/material.dart';
+import '../../../payment/presentation/page/ccavenue_payment_screen.dart';
 
 class DonationController extends GetxController {
   final DonationRepository _repository = Get.find<DonationRepository>();
@@ -53,17 +54,31 @@ class DonationController extends GetxController {
       if (response.success && response.data != null) {
         final data = response.data!;
 
-        _razorpayController.openCheckout(
-          amount: (data['amount'] as num).toInt(),
-          name: name,
-          description: "Donation for ${cause.title}",
-          mobile: phone,
-          email: email,
-          orderId: data['order_id'],
-          transaction_id: int.tryParse(data['donation_id']?.toString() ?? "0") ?? 0,
-          key: data['key'],
-          type: 'donation', // Track this for verification logic
-        );
+        final paymentWay = data['payment_way']?.toString().toLowerCase();
+
+        if (paymentWay == 'ccavenue') {
+          final result = await Get.to(() => CCAvenuePaymentScreen(
+            paymentUrl: data['payment_url'] ?? '',
+            encRequest: data['encRequest'] ?? '',
+            accessCode: data['access_code'] ?? '',
+            type: 'donation',
+          ));
+          if (result == true) {
+            print("CCAvenue Donation Payment Success");
+          }
+        } else {
+          _razorpayController.openCheckout(
+            amount: (data['amount'] as num).toInt(),
+            name: name,
+            description: "Donation for ${cause.title}",
+            mobile: phone,
+            email: email,
+            orderId: data['order_id'],
+            transaction_id: int.tryParse(data['donation_id']?.toString() ?? "0") ?? 0,
+            key: data['key'],
+            type: 'donation', // Track this for verification logic
+          );
+        }
       } else {
         CustomSnackBar.showError(message: response.message ?? "Failed to create donation order");
       }

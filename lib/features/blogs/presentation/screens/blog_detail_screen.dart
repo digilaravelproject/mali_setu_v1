@@ -514,7 +514,11 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
               Icons.share_outlined,
               'Share',
               () {
-                Share.share("${blog.title ?? 'Check out this blog!'}\n\n${blog.description ?? ''}");
+                // Using an https URL so it's clickable in WhatsApp/social media.
+                // Deep link handling will open the app if installed.
+                final String shareLink = 'https://malisetu.com/blog/${blog.id}';
+                final String playStoreLink = 'https://play.google.com/store/apps/details?id=com.malisetu.app';
+                Share.share("${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload our app: $playStoreLink");
               },
             ),
             const SizedBox(width: 8),
