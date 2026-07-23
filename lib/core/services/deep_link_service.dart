@@ -37,6 +37,9 @@ class DeepLinkService extends GetxService {
       await Future.delayed(const Duration(milliseconds: 300));
     }
     
+    // Add a small delay to allow any pending route transitions (e.g., Get.offNamed to dashboard) to complete
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     // Example: https://malisetu.com/blog/123
     if (uri.pathSegments.isNotEmpty) {
       if (uri.pathSegments.first == 'blog' && uri.pathSegments.length > 1) {

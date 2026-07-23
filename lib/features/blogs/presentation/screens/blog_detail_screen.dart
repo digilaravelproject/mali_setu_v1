@@ -30,7 +30,7 @@ class BlogDetailScreen extends StatefulWidget {
 }
 
 class _BlogDetailScreenState extends State<BlogDetailScreen> {
-  final BlogController controller = Get.find<BlogController>();
+  final BlogController controller = Get.isRegistered<BlogController>() ? Get.find<BlogController>() : Get.put(BlogController());
 
   int _calculateReadingTime(String? text) {
     if (text == null || text.isEmpty) return 1;
