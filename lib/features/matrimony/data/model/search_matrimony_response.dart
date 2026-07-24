@@ -433,35 +433,35 @@ class MatrimonyProfile {
       weight: json['weight']?.toString(),
       complexion: json['complexion']?.toString(),
       physicalStatus: json['physical_status']?.toString(),
-      personalDetails: json['personal_details'] != null
+      personalDetails: json['personal_details'] is Map<String, dynamic>
           ? PersonalDetails.fromJson(json['personal_details'])
           : null,
-      familyDetails: json['family_details'] != null
+      familyDetails: json['family_details'] is Map<String, dynamic>
           ? FamilyDetails.fromJson(json['family_details'])
           : null,
-      educationDetails: json['education_details'] != null
+      educationDetails: json['education_details'] is Map<String, dynamic>
           ? EducationDetails.fromJson(json['education_details'])
           : null,
-      professionalDetails: json['professional_details'] != null
+      professionalDetails: json['professional_details'] is Map<String, dynamic>
           ? ProfessionalDetails.fromJson(json['professional_details'])
           : null,
-      lifestyleDetails: json['lifestyle_details'] != null
+      lifestyleDetails: json['lifestyle_details'] is Map<String, dynamic>
           ? LifestyleDetails.fromJson(json['lifestyle_details'])
           : null,
-      locationDetails: json['location_details'] != null
+      locationDetails: json['location_details'] is Map<String, dynamic>
           ? LocationDetails.fromJson(json['location_details'])
           : null,
-      partnerPreferences: json['partner_preferences'] != null
+      partnerPreferences: json['partner_preferences'] is Map<String, dynamic>
           ? PartnerPreferences.fromJson(json['partner_preferences'])
           : null,
-      privacySettings: json['privacy_settings'] != null
+      privacySettings: json['privacy_settings'] is Map<String, dynamic>
           ? PrivacySettings.fromJson(json['privacy_settings'])
           : null,
       approvalStatus: json['approval_status']?.toString(),
       status: json['status']?.toString(),
       createdAt: json['created_at']?.toString(),
       connectionStatus: json['connection_status']?.toString(),
-      user: json['user'] != null ? User.fromJson(json['user']) : null,
+      user: json['user'] is Map<String, dynamic> ? User.fromJson(json['user']) : null,
     );
   }
 }
