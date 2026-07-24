@@ -4,6 +4,7 @@ import '../models/name_components.dart';
 import '../utils/name_combiner.dart';
 import '../utils/name_parser.dart';
 import 'basic_text_field.dart';
+import 'package:flutter/services.dart';
 
 /// Reusable widget component for name input with Title, First Name, and Last Name fields
 class NameFieldComponent extends StatefulWidget {
@@ -180,6 +181,9 @@ class NameFieldComponentState extends State<NameFieldComponent> {
                   isRequired: widget.isRequired,
                   textInputType: TextInputType.name,
                   topPadding: 0,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                  ],
                   validator: (value) {
                     if (widget.isRequired && (value == null || value.trim().isEmpty)) {
                       return 'first_name_required'.tr;
@@ -201,6 +205,9 @@ class NameFieldComponentState extends State<NameFieldComponent> {
                   isRequired: false, // middle name is optional
                   textInputType: TextInputType.name,
                   topPadding: 0,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),
@@ -211,6 +218,9 @@ class NameFieldComponentState extends State<NameFieldComponent> {
                   isRequired: widget.isRequired,
                   textInputType: TextInputType.name,
                   topPadding: 0,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                  ],
                   validator: (value) {
                     if (widget.isRequired && (value == null || value.trim().isEmpty)) {
                       return 'last_name_required'.tr;

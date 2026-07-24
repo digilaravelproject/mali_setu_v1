@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'basic_text_field.dart';
 
@@ -366,6 +367,10 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
           ),
         ),
       ),
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
       validator: (value) {
         if (widget.isRequired && (value == null || value.trim().isEmpty)) {
           return 'Please enter phone number';

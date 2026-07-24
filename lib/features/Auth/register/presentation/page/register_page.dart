@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/date_input_formatter.dart';
@@ -212,6 +213,9 @@ class RegisterPage extends GetWidget<RegisterController> {
                         isRequired: true,
                         readOnly: false,
                         topPadding: 0,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                        ],
                       ),
                       right: AppInputTextField(
                         label: "city".tr,
@@ -219,6 +223,9 @@ class RegisterPage extends GetWidget<RegisterController> {
                         isRequired: true,
                         readOnly: false,
                         topPadding: 0,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                        ],
                       ),
                     ),
                     TwoColumnRow(
@@ -228,11 +235,17 @@ class RegisterPage extends GetWidget<RegisterController> {
                         isRequired: true,
                         readOnly: false,
                         topPadding: 0,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                        ],
                       ),
                       right: AppInputTextField(
                         label: "taluka".tr,
                         controller: controller.destinationCtrl,
                         topPadding: 0,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                        ],
                       ),
   
                     ),
@@ -242,6 +255,9 @@ class RegisterPage extends GetWidget<RegisterController> {
                       isRequired: true,
                       readOnly: false,
                       topPadding: 0,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                      ],
                     ),
                     // TwoColumnRow(
                     //   left: AppInputTextField(

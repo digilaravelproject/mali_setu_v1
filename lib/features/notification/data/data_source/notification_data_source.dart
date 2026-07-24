@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 abstract class NotificationDataSource {
   Future<NotificationResponse> getNotifications({int page = 1});
   Future<UnreadCountResponse> getUnreadCount();
+  Future<void> readAllNotifications();
   Future<void> deleteNotification(String id);
   Future<void> deleteMultipleNotifications(List<String> ids);
 }
@@ -25,6 +26,11 @@ class NotificationDataSourceImpl implements NotificationDataSource {
   Future<UnreadCountResponse> getUnreadCount() async {
     final response = await apiClient.get(ApiConstants.getUnreadCount);
     return UnreadCountResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<void> readAllNotifications() async {
+    await apiClient.post(ApiConstants.readAllNotifications);
   }
 
   @override

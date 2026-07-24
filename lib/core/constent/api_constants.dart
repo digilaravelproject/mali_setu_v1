@@ -94,6 +94,7 @@ class ApiConstants {
 
     // Notification Api
     static const String getNotifications = "notifications";
+    static const String readAllNotifications = "notifications/read-all";
     static const String getUnreadCount = "notifications/unread-count";
     static const String deleteNotification = "notifications";
     static const String deleteMultipleNotifications = "notifications";

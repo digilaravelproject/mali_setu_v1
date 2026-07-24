@@ -34,6 +34,7 @@ class NotificationController extends GetxController {
     super.onInit();
     loadNotifications();
     loadUnreadCount();
+    readAllNotifications();
     
     scrollController.addListener(() {
       if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
@@ -98,6 +99,15 @@ class NotificationController extends GetxController {
       }
     } catch (e) {
       print('Error loading unread count: $e');
+    }
+  }
+
+  Future<void> readAllNotifications() async {
+    try {
+      await repository.readAllNotifications();
+      unreadCount.value = 0;
+    } catch (e) {
+      print('Error marking notifications as read: $e');
     }
   }
 

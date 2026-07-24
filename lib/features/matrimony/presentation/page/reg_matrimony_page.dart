@@ -7,6 +7,7 @@ import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../common/widgets/selection_tile.dart';
 import '../../../../core/utils/app_assets.dart';
@@ -330,6 +331,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                         textInputType: TextInputType.number,
                         label: "height".tr,
                         hintText: "Enter height",
+                        inputFormatters: [_HeightInputFormatter()],
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -339,6 +341,11 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                         label: "weight".tr,
                         textInputType: TextInputType.number,
                         hintText: "Enter weight",
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(3),
+                          _WeightInputFormatter(),
+                        ],
                       ),
                     ),
                   ],
@@ -1199,3 +1206,53 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
       ),
     );
   }*/
+
+class _HeightInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String newText = newValue.text;
+    
+    if (newText.isEmpty) {
+      return newValue;
+    }
+
+    // Remove any characters other than digits
+    String digitsOnly = newText.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Limit to 2 digits
+    if (digitsOnly.length > 2) {
+      digitsOnly = digitsOnly.substring(0, 2);
+    }
+
+    String formatted = digitsOnly;
+    if (digitsOnly.length > 1) {
+      formatted = '${digitsOnly.substring(0, 1)}.${digitsOnly.substring(1)}';
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class _WeightInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    int? value = int.tryParse(newValue.text);
+    if (value != null && value > 120) {
+      return const TextEditingValue(
+        text: '120',
+        selection: TextSelection.collapsed(offset: 3),
+      );
+    }
+
+    return newValue;
+  }
+}

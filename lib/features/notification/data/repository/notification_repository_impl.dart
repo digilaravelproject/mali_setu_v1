@@ -19,6 +19,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   @override
+  Future<void> readAllNotifications() async {
+    await dataSource.readAllNotifications();
+  }
+
+  @override
   Future<void> deleteNotification(String id) async {
     await dataSource.deleteNotification(id);
   }
