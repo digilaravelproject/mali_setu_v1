@@ -34,7 +34,8 @@ class RegMatrimonyController extends GetxController {
   final isPreFilling = false.obs;
 
   /// NAME FIELD COMPONENT KEY
-  final GlobalKey<NameFieldComponentState> nameFieldKey = GlobalKey<NameFieldComponentState>();
+  final GlobalKey<NameFieldComponentState> nameFieldKey =
+      GlobalKey<NameFieldComponentState>();
 
   /// Incremented to force NameFieldComponent rebuild when prefill data arrives
   final nameWidgetKey = 0.obs;
@@ -136,9 +137,7 @@ class RegMatrimonyController extends GetxController {
         now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
       lastPressedTime = now;
       canExit.value = true;
-      CustomSnackBar.showInfo(
-        message: "back_message".tr,
-      );
+      CustomSnackBar.showInfo(message: "back_message".tr);
       // Reset canExit after 2 seconds
       Future.delayed(const Duration(seconds: 2), () {
         canExit.value = false;
@@ -149,29 +148,142 @@ class RegMatrimonyController extends GetxController {
   }
 
   /// --- Static Data Lists ---
-  final List<String> profileCreatedByList = ['Self', 'Parent', 'Sibling', 'Relative', 'Friend'];
+  final List<String> profileCreatedByList = [
+    'Self',
+    'Parent',
+    'Sibling',
+    'Relative',
+    'Friend',
+  ];
   final List<String> genderList = ['Male', 'Female'];
   final List<String> complexionList = ['Fair', 'Wheatish', 'Dark'];
   final List<String> physicalStatusList = ['Normal', 'Physically Challenged'];
-  final List<String> maritalStatusList = ['Never Married', 'Divorced', 'Widowed', 'Awaiting Divorce'];
-  final List<String> languageList = ['Hindi', 'English', 'Marathi', 'Gujarati', 'Punjabi', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Urdu', 'Other'];
+  final List<String> maritalStatusList = [
+    'Never Married',
+    'Divorced',
+    'Widowed',
+    'Awaiting Divorce',
+  ];
+  final List<String> languageList = [
+    'Hindi',
+    'English',
+    'Marathi',
+    'Gujarati',
+    'Punjabi',
+    'Bengali',
+    'Tamil',
+    'Telugu',
+    'Kannada',
+    'Malayalam',
+    'Urdu',
+    'Other',
+  ];
   final List<String> citizenshipList = ['Indian', 'NRI', 'Other'];
 
-  final List<String> religionList = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Jain', 'Buddhist', 'Parsi', 'Jewish', 'Other'];
-  final List<String> starList = ['Ashwini', 'Bharani', 'Krittika', 'Rohini', 'Mrigashirsha', 'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha', 'Magha', 'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra', 'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Mula', 'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta', 'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati'];
-  final List<String> raasiList = ['Mesha (Aries)', 'Vrishabha (Taurus)', 'Mithuna (Gemini)', 'Karka (Cancer)', 'Simha (Leo)', 'Kanya (Virgo)', 'Tula (Libra)', 'Vrishchika (Scorpio)', 'Dhanu (Sagittarius)', 'Makara (Capricorn)', 'Kumbha (Aquarius)', 'Meena (Pisces)'];
-  final List<String> manglikList = ['Yes', 'No', 'Anshik (Partial)', 'Don\'t Know'];
+  final List<String> religionList = [
+    'Hindu',
+    'Muslim',
+    'Christian',
+    'Sikh',
+    'Jain',
+    'Buddhist',
+    'Parsi',
+    'Jewish',
+    'Other',
+  ];
+  final List<String> starList = [
+    'Ashwini',
+    'Bharani',
+    'Krittika',
+    'Rohini',
+    'Mrigashirsha',
+    'Ardra',
+    'Punarvasu',
+    'Pushya',
+    'Ashlesha',
+    'Magha',
+    'Purva Phalguni',
+    'Uttara Phalguni',
+    'Hasta',
+    'Chitra',
+    'Swati',
+    'Vishakha',
+    'Anuradha',
+    'Jyeshtha',
+    'Mula',
+    'Purva Ashadha',
+    'Uttara Ashadha',
+    'Shravana',
+    'Dhanishta',
+    'Shatabhisha',
+    'Purva Bhadrapada',
+    'Uttara Bhadrapada',
+    'Revati',
+  ];
+  final List<String> raasiList = [
+    'Mesha (Aries)',
+    'Vrishabha (Taurus)',
+    'Mithuna (Gemini)',
+    'Karka (Cancer)',
+    'Simha (Leo)',
+    'Kanya (Virgo)',
+    'Tula (Libra)',
+    'Vrishchika (Scorpio)',
+    'Dhanu (Sagittarius)',
+    'Makara (Capricorn)',
+    'Kumbha (Aquarius)',
+    'Meena (Pisces)',
+  ];
+  final List<String> manglikList = [
+    'Yes',
+    'No',
+    'Anshik (Partial)',
+    'Don\'t Know',
+  ];
   final List<String> doshList = ['No', 'Yes', 'Don\'t Know'];
-  final List<String> bloodGroupList = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+  final List<String> bloodGroupList = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'O+',
+    'O-',
+    'AB+',
+    'AB-',
+  ];
 
   final RxList<String> educationList = <String>[].obs;
-  final List<String> employmentTypeList = ['Private Sector', 'Government/Public Sector', 'Civil Service', 'Defense', 'Owner', 'Self Employed', 'Not Working'];
+  final List<String> employmentTypeList = [
+    'Private Sector',
+    'Government/Public Sector',
+    'Civil Service',
+    'Defense',
+    'Owner',
+    'Self Employed',
+    'Not Working',
+  ];
 
   final List<String> familyTypeList = ['Nuclear', 'Joint'];
-  final List<String> familyClassList = ['Rich', 'Upper Middle Class', 'Middle Class', 'Lower Middle Class', 'Lower Class'];
-  final List<String> familyValueList = ['Orthodox', 'Traditional', 'Moderate', 'Liberal'];
+  final List<String> familyClassList = [
+    'Rich',
+    'Upper Middle Class',
+    'Middle Class',
+    'Lower Middle Class',
+    'Lower Class',
+  ];
+  final List<String> familyValueList = [
+    'Orthodox',
+    'Traditional',
+    'Moderate',
+    'Liberal',
+  ];
 
-  final List<String> dietList = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian', 'Vegan'];
+  final List<String> dietList = [
+    'Vegetarian',
+    'Non-Vegetarian',
+    'Eggetarian',
+    'Vegan',
+  ];
   final List<String> smokingList = ['No', 'Yes', 'Occasionally'];
   final List<String> drinkingList = ['No', 'Yes', 'Occasionally'];
 
@@ -180,13 +292,23 @@ class RegMatrimonyController extends GetxController {
     'USA': ['California', 'Texas', 'Florida', 'New York', 'Washington'],
     'Canada': ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba'],
     'UK': ['England', 'Scotland', 'Wales', 'Northern Ireland'],
-    'Australia': ['New South Wales', 'Victoria', 'Queensland', 'Western Australia'],
+    'Australia': [
+      'New South Wales',
+      'Victoria',
+      'Queensland',
+      'Western Australia',
+    ],
   };
 
-  final List<String> countryList = ['India', 'USA', 'UK', 'Canada', 'Australia', 'Other'];
+  final List<String> countryList = [
+    'India',
+    'USA',
+    'UK',
+    'Canada',
+    'Australia',
+    'Other',
+  ];
   final RxList<String> stateList = <String>[].obs;
-
-
 
   /// --- Methods ---
 
@@ -200,7 +322,8 @@ class RegMatrimonyController extends GetxController {
       );
 
       if (images.isNotEmpty) {
-        int remainingSlots = 5 - (selectedPhotos.length + existingPhotos.length);
+        int remainingSlots =
+            5 - (selectedPhotos.length + existingPhotos.length);
         int addedCount = 0;
         List<String> failedFiles = [];
 
@@ -226,7 +349,9 @@ class RegMatrimonyController extends GetxController {
             message: "Some files were skipped. Max size 5MB, Formats: JPG, PNG",
           );
         } else if (images.length > remainingSlots) {
-          CustomSnackBar.showError(message: "You can only select up to 5 photos.");
+          CustomSnackBar.showError(
+            message: "You can only select up to 5 photos.",
+          );
         }
       }
     } catch (e) {
@@ -294,7 +419,7 @@ class RegMatrimonyController extends GetxController {
   }
 
   /// Pick Multiple Photos
-/*  Future<void> pickPhotos() async {
+  /*  Future<void> pickPhotos() async {
     try {
       final ImagePicker picker = ImagePicker();
       final List<XFile> images = await picker.pickMultiImage(
@@ -373,7 +498,6 @@ class RegMatrimonyController extends GetxController {
     }
   }*/
 
-
   void selectDate(BuildContext context) async {
     final now = DateTime.now();
     final lastAllowedDate = DateTime(now.year - 18, now.month, now.day);
@@ -398,7 +522,8 @@ class RegMatrimonyController extends GetxController {
     );
     if (picked != null) {
       selectedDate = picked;
-      String formatted = "${picked.day.toString().padLeft(2, '0')}/"
+      String formatted =
+          "${picked.day.toString().padLeft(2, '0')}/"
           "${picked.month.toString().padLeft(2, '0')}/"
           "${picked.year}";
       dobCtrl.text = formatted;
@@ -428,7 +553,8 @@ class RegMatrimonyController extends GetxController {
 
     final now = DateTime.now();
     int age = now.year - birthDate.year;
-    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+    if (now.month < birthDate.month ||
+        (now.month == birthDate.month && now.day < birthDate.day)) {
       age--;
     }
     return age;
@@ -508,7 +634,8 @@ class RegMatrimonyController extends GetxController {
       if (pinCodeCtrl.text.isEmpty) {
         errors['pincode'] = "Please enter pincode";
         isValid = false;
-      } else if (pinCodeCtrl.text.trim().length < 5 || pinCodeCtrl.text.trim().length > 10) {
+      } else if (pinCodeCtrl.text.trim().length < 5 ||
+          pinCodeCtrl.text.trim().length > 10) {
         errors['pincode'] = "No Match";
         isValid = false;
       }
@@ -552,7 +679,10 @@ class RegMatrimonyController extends GetxController {
       return;
     }
     try {
-      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
 
       // Sync name from widget state if available (user may have typed after prefill)
       final widgetState = nameFieldKey.currentState;
@@ -568,8 +698,11 @@ class RegMatrimonyController extends GetxController {
       final firstNameText = firstNameCtrl.text.trim();
       final middleNameText = middleNameCtrl.text.trim();
       final lastNameText = lastNameCtrl.text.trim();
-      final combinedName = [/*titleText,*/ firstNameText, middleNameText, lastNameText]
-          .where((s) => s.isNotEmpty).join(' ');
+      final combinedName = [
+        /*titleText,*/ firstNameText,
+        middleNameText,
+        lastNameText,
+      ].where((s) => s.isNotEmpty).join(' ');
 
       // Convert images to base64
       List<String> base64Photos = [];
@@ -615,7 +748,11 @@ class RegMatrimonyController extends GetxController {
           "family_type": familyType.value,
           "marital_status": maritalStatus.value,
           "religion": [religion.value, casteCtrl.text],
-          "star_details": [star.value, raasi.value, "manglik-${manglik.value.toLowerCase()}"],
+          "star_details": [
+            star.value,
+            raasi.value,
+            "manglik-${manglik.value.toLowerCase()}",
+          ],
           "dosh": dosh.value,
           "photos": [...existingPhotos, ...base64Photos],
           "blood_group": bloodGroup.value,
@@ -689,7 +826,13 @@ class RegMatrimonyController extends GetxController {
         }
 
         Get.back(); // Close Registration Screen
-        CustomSnackBar.showSuccess(message: response.message ?? (isEditMode.value ? "Profile Updated Successfully" : "Profile Created Successfully"));
+        CustomSnackBar.showSuccess(
+          message:
+              response.message ??
+              (isEditMode.value
+                  ? "Profile Updated Successfully"
+                  : "Profile Created Successfully"),
+        );
 
         if (!isEditMode.value) {
           // Only show plans for new registration
@@ -709,11 +852,12 @@ class RegMatrimonyController extends GetxController {
         }
         CustomSnackBar.showError(message: errorMsg);
       }
-
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
       print("API Error: $e");
-      CustomSnackBar.showError(message: "Something went wrong. Please try again.");
+      CustomSnackBar.showError(
+        message: "Something went wrong. Please try again.",
+      );
     }
   }
 
@@ -804,11 +948,16 @@ class RegMatrimonyController extends GetxController {
       heightCtrl.text = profile['height']?.toString() ?? '';
       weightCtrl.text = profile['weight']?.toString() ?? '';
       complexion.value = _safeValue(profile['complexion'], complexionList);
-      physicalStatus.value = _safeValue(profile['physical_status'], physicalStatusList);
-      approvalStatus.value = profile['approval_status']?.toString() ?? ''; // 🆕 ADDED
+      physicalStatus.value = _safeValue(
+        profile['physical_status'],
+        physicalStatusList,
+      );
+      approvalStatus.value =
+          profile['approval_status']?.toString() ?? ''; // 🆕 ADDED
 
       // Personal details
-      final personal = profile['personal_details'] as Map<String, dynamic>? ?? {};
+      final personal =
+          profile['personal_details'] as Map<String, dynamic>? ?? {};
 
       // Name: set controller's own fields + sync to NameFieldComponent
       final apiTitle = personal['title']?.toString() ?? '';
@@ -851,7 +1000,8 @@ class RegMatrimonyController extends GetxController {
             selectedDate = DateTime.parse(dobStr);
             // Reformat to DD/MM/YYYY for display
             final d = selectedDate!;
-            dobCtrl.text = "${d.day.toString().padLeft(2, '0')}/"
+            dobCtrl.text =
+                "${d.day.toString().padLeft(2, '0')}/"
                 "${d.month.toString().padLeft(2, '0')}/"
                 "${d.year}";
           }
@@ -868,39 +1018,50 @@ class RegMatrimonyController extends GetxController {
         (personal['gender']?.toString() ?? '').capitalizeFirst ?? '',
         genderList,
       );
-      profileCreatedBy.value = _safeValue(personal['profile_created_by'], profileCreatedByList);
+      profileCreatedBy.value = _safeValue(
+        personal['profile_created_by'],
+        profileCreatedByList,
+      );
       language.value = _safeValue(personal['language'], languageList);
       citizenship.value = _safeValue(personal['citizenship'], citizenshipList);
       // employment_type: do case-insensitive match
       final rawEmpType = personal['employment_type']?.toString() ?? '';
       employmentType.value = employmentTypeList.firstWhere(
-            (e) => e.toLowerCase() == rawEmpType.toLowerCase(),
+        (e) => e.toLowerCase() == rawEmpType.toLowerCase(),
         orElse: () => _safeValue(rawEmpType, employmentTypeList),
       );
       familyType.value = _safeValue(personal['family_type'], familyTypeList);
-      maritalStatus.value = _safeValue(personal['marital_status'], maritalStatusList);
+      maritalStatus.value = _safeValue(
+        personal['marital_status'],
+        maritalStatusList,
+      );
       // blood_group: API may return "A" but list has "A+","A-" etc — try exact match first, then prefix match
       final rawBloodGroup = personal['blood_group']?.toString() ?? '';
       bloodGroup.value = bloodGroupList.contains(rawBloodGroup)
           ? rawBloodGroup
-          : bloodGroupList.firstWhere((b) => b.startsWith(rawBloodGroup), orElse: () => '');
+          : bloodGroupList.firstWhere(
+              (b) => b.startsWith(rawBloodGroup),
+              orElse: () => '',
+            );
       ref_nameCtrl.text = personal['refferal_name']?.toString() ?? '';
       dosh.value = _safeValue(personal['dosh'], doshList);
 
       // Religion array: ["Mali","Phulmali"] → Mali = Caste (religion.value), Phulmali = Sub-Caste (casteCtrl.text)
       final religionArr = personal['religion'];
       if (religionArr is List && religionArr.isNotEmpty) {
-        religion.value = religionArr[0]?.toString() ?? '';       // Caste
+        religion.value = religionArr[0]?.toString() ?? ''; // Caste
         if (religionArr.length > 1) {
-          casteCtrl.text = religionArr[1]?.toString() ?? '';     // Sub-Caste
+          casteCtrl.text = religionArr[1]?.toString() ?? ''; // Sub-Caste
         }
       }
 
       // Star details array: [star, raasi, "manglik-yes/no"]
       final starArr = personal['star_details'];
       if (starArr is List) {
-        if (starArr.isNotEmpty) star.value = _safeValue(starArr[0]?.toString(), starList);
-        if (starArr.length > 1) raasi.value = _safeValue(starArr[1]?.toString(), raasiList);
+        if (starArr.isNotEmpty)
+          star.value = _safeValue(starArr[0]?.toString(), starList);
+        if (starArr.length > 1)
+          raasi.value = _safeValue(starArr[1]?.toString(), raasiList);
         if (starArr.length > 2) {
           final manglikStr = starArr[2]?.toString() ?? '';
           final manglikVal = manglikStr.replaceFirst('manglik-', '');
@@ -919,12 +1080,12 @@ class RegMatrimonyController extends GetxController {
       motherOccupationCtrl.text = family['mother']?.toString() ?? '';
       final rawFamilyClass = family['family_class']?.toString() ?? '';
       familyClass.value = familyClassList.firstWhere(
-            (e) => e.toLowerCase() == rawFamilyClass.toLowerCase(),
+        (e) => e.toLowerCase() == rawFamilyClass.toLowerCase(),
         orElse: () => '',
       );
       final rawFamilyValue = family['family_value']?.toString() ?? '';
       familyValue.value = familyValueList.firstWhere(
-            (e) => e.toLowerCase() == rawFamilyValue.toLowerCase(),
+        (e) => e.toLowerCase() == rawFamilyValue.toLowerCase(),
         orElse: () => '',
       );
 
@@ -934,29 +1095,32 @@ class RegMatrimonyController extends GetxController {
       collegeCtrl.text = edu['college']?.toString() ?? '';
 
       // Professional details
-      final prof = profile['professional_details'] as Map<String, dynamic>? ?? {};
+      final prof =
+          profile['professional_details'] as Map<String, dynamic>? ?? {};
       jobTitleCtrl.text = prof['job_title']?.toString() ?? jobTitleCtrl.text;
       companyCtrl.text = prof['company']?.toString() ?? '';
 
       // Lifestyle details
-      final lifestyle = profile['lifestyle_details'] as Map<String, dynamic>? ?? {};
+      final lifestyle =
+          profile['lifestyle_details'] as Map<String, dynamic>? ?? {};
       diet.value = _safeValue(lifestyle['diet'], dietList);
       final rawSmoking = lifestyle['smoking']?.toString() ?? '';
       smoking.value = smokingList.firstWhere(
-            (e) => e.toLowerCase() == rawSmoking.toLowerCase(),
+        (e) => e.toLowerCase() == rawSmoking.toLowerCase(),
         orElse: () => smokingList.firstWhere(
-              (e) => rawSmoking.toLowerCase().contains(e.toLowerCase()),
+          (e) => rawSmoking.toLowerCase().contains(e.toLowerCase()),
           orElse: () => '',
         ),
       );
       final rawDrinking = lifestyle['drinking']?.toString() ?? '';
       drinking.value = drinkingList.firstWhere(
-            (e) => e.toLowerCase() == rawDrinking.toLowerCase(),
+        (e) => e.toLowerCase() == rawDrinking.toLowerCase(),
         orElse: () => '',
       );
 
       // Location details
-      final location = profile['location_details'] as Map<String, dynamic>? ?? {};
+      final location =
+          profile['location_details'] as Map<String, dynamic>? ?? {};
       cityCtrl.text = location['city']?.toString() ?? '';
       pinCodeCtrl.text = location['pincode']?.toString() ?? '';
       talukaCtrl.text = location['taluka']?.toString() ?? '';
@@ -965,7 +1129,7 @@ class RegMatrimonyController extends GetxController {
       final fetchedCountry = location['country']?.toString() ?? 'India';
       onCountryChanged(fetchedCountry);
       countryCtrl.text = fetchedCountry;
-      
+
       final fetchedState = location['state']?.toString() ?? '';
       state.value = fetchedState;
       stateCtrl.text = fetchedState;
@@ -975,7 +1139,6 @@ class RegMatrimonyController extends GetxController {
       if (photos is List) {
         existingPhotos.assignAll(photos.map((e) => e.toString()).toList());
       }
-
     } catch (e) {
       debugPrint('prefillFromApi error: $e');
     } finally {
@@ -1016,18 +1179,31 @@ class RegMatrimonyController extends GetxController {
       if (response.success == true && response.data.isNotEmpty) {
         // Extract unique highest_qualification values
         final qualifications = response.data
-            .where((edu) => edu.highestQualification != null && edu.highestQualification!.isNotEmpty)
+            .where(
+              (edu) =>
+                  edu.highestQualification != null &&
+                  edu.highestQualification!.isNotEmpty,
+            )
             .map((edu) => edu.highestQualification!)
             .toSet() // Remove duplicates
             .toList();
-        
+
         educationList.assignAll(qualifications);
-        print("DEBUG_EDUCATION: Fetched ${qualifications.length} education qualifications");
+        print(
+          "DEBUG_EDUCATION: Fetched ${qualifications.length} education qualifications",
+        );
       }
     } catch (e) {
       print("Error fetching educations: $e");
       // Fallback to default list if API fails
-      educationList.assignAll(['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Other']);
+      educationList.assignAll([
+        'High School',
+        'Diploma',
+        'Bachelor',
+        'Master',
+        'Doctorate',
+        'Other',
+      ]);
     }
   }
 
@@ -1044,7 +1220,8 @@ class RegMatrimonyController extends GetxController {
   }
 
   void onCasteSelected(String casteName) {
-    religion.value = casteName; // Using religion variable to store Caste Name as per plan
+    religion.value =
+        casteName; // Using religion variable to store Caste Name as per plan
 
     // Find ID
     final selectedCast = casteList.firstWhereOrNull((c) => c.name == casteName);
@@ -1086,7 +1263,6 @@ class RegMatrimonyController extends GetxController {
     super.onClose();
   }
 
-
   Future<void> fetchAndShowPlans() async {
     try {
       // Get.dialog(const Center(child: CircularProgressIndicator()),
@@ -1095,7 +1271,9 @@ class RegMatrimonyController extends GetxController {
       Get.back(); // Close Loading
 
       if (response.success == true && response.data?.plans != null) {
-        final selectedPlan = await showSubscriptionBottomSheet(response.data!.plans!);
+        final selectedPlan = await showSubscriptionBottomSheet(
+          response.data!.plans!,
+        );
 
         if (selectedPlan != null) {
           await initiateMatrimonyPayment(selectedPlan);
@@ -1117,8 +1295,10 @@ class RegMatrimonyController extends GetxController {
     try {
       if (plan.id == null) return;
 
-      Get.dialog(const Center(child: CircularProgressIndicator()),
-          barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
 
       final response = await _paymentRepository.createOrder(planId: plan.id!);
 
@@ -1129,32 +1309,51 @@ class RegMatrimonyController extends GetxController {
         final paymentWay = orderData['payment_way']?.toString().toLowerCase();
 
         if (paymentWay == 'ccavenue') {
-          final result = await Get.to(() => CCAvenuePaymentScreen(
-            paymentUrl: orderData['payment_url'] ?? '',
-            encRequest: orderData['encRequest'] ?? '',
-            accessCode: orderData['access_code'] ?? '',
-            type: 'matrimony',
-          ));
+          final result = await Get.to(
+            () => CCAvenuePaymentScreen(
+              paymentUrl: orderData['payment_url'] ?? '',
+              encRequest: orderData['encRequest'] ?? '',
+              accessCode: orderData['access_code'] ?? '',
+              type: 'matrimony',
+            ),
+          );
           if (result == true) {
-            // Payment success handling, you could fetch profile or update UI here
+            // Payment success handling
             print("CCAvenue Matrimony Payment Success");
+            PaymentSuccessDialog.show(
+              amount: plan.price?.toString() ?? '0',
+              paymentId: orderData['order_id']?.toString() ?? 'N/A',
+              onOkPressed: () {
+                if (Get.isRegistered<AuthService>()) {
+                  Get.find<AuthService>().refreshProfile();
+                }
+                Get.back(); // Go back from payment page
+              },
+            );
           }
         } else {
           _razorpayController.openCheckout(
-            amount: ((double.tryParse(orderData['amount']?.toString() ?? "0") ?? 0) / 100).toInt(),
+            amount:
+                ((double.tryParse(orderData['amount']?.toString() ?? "0") ??
+                            0) /
+                        100)
+                    .toInt(),
             name: nameCtrl.text,
             description: "Matrimony Subscription: ${plan.planName}",
             mobile: "", // Optional: fetch from Auth if needed
             email: "", // Optional: fetch from Auth if needed
             orderId: orderData['order_id'],
-            transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+            transaction_id:
+                int.tryParse(orderData['transaction_id']?.toString() ?? "0") ??
+                0,
             key: orderData['key_id'],
             type: 'matrimony',
           );
         }
       } else {
         CustomSnackBar.showError(
-            message: response.message ?? "Failed to create payment order");
+          message: response.message ?? "Failed to create payment order",
+        );
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();

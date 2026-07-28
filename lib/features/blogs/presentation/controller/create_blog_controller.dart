@@ -16,7 +16,6 @@ import '../../../../features/Auth/service/auth_service.dart';
 class CreateBlogController extends GetxController {
   final Blog? blogToEdit;
 
-
   CreateBlogController({this.blogToEdit});
 
   /// For Double Back Exit
@@ -29,9 +28,7 @@ class CreateBlogController extends GetxController {
         now.difference(lastPressedTime!) > const Duration(seconds: 2)) {
       lastPressedTime = now;
       canExit.value = true;
-      CustomSnackBar.showInfo(
-        message: "press_back_again_to_exit".tr,
-      );
+      CustomSnackBar.showInfo(message: "press_back_again_to_exit".tr);
       // Reset canExit after 2 seconds
       Future.delayed(const Duration(seconds: 2), () {
         canExit.value = false;
@@ -43,26 +40,26 @@ class CreateBlogController extends GetxController {
 
   final BlogRepository _repository = BlogRepository();
   final ImagePicker _picker = ImagePicker();
-  
+
   final titleCtrl = TextEditingController();
   final descriptionCtrl = TextEditingController();
-  final tagInputCtrl = TextEditingController(); 
+  final tagInputCtrl = TextEditingController();
   final blogTypeCtrl = TextEditingController();
-  
-final RxString categorySearch = ''.obs; // search query for category dropdown
+
+  final RxString categorySearch = ''.obs; // search query for category dropdown
   final RxList<String> tags = <String>[].obs;
-  
+
   // 🆕 Mixed media selection lists
   final RxList<File> selectedFiles = <File>[].obs;
   final RxList<String> existingMediaPaths = <String>[].obs;
-    // Track if all existing media have been removed
+  // Track if all existing media have been removed
   final RxBool existingMediaRemoved = false.obs;
-  
+
   final isSubmitting = false.obs;
   final errors = <String, String>{}.obs;
-  
+
   final RxString blogType = ''.obs; // selected blog type observable
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -71,14 +68,17 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
     if (blogToEdit != null) {
       titleCtrl.text = blogToEdit!.title ?? '';
       descriptionCtrl.text = blogToEdit!.description ?? '';
-      blogTypeCtrl.text = blogToEdit!.blogType ?? '';
-      blogType.value = blogToEdit!.blogType ?? '';
+      final categoryName =
+          blogToEdit!.category?.name ?? blogToEdit!.blogType ?? '';
+      blogTypeCtrl.text = categoryName;
+      blogType.value = categoryName;
       if (blogToEdit!.tags != null) {
         tags.assignAll(blogToEdit!.tags!);
       }
-      
+
       // Populate existing media files
-      if (blogToEdit!.mediaPaths != null && blogToEdit!.mediaPaths!.isNotEmpty) {
+      if (blogToEdit!.mediaPaths != null &&
+          blogToEdit!.mediaPaths!.isNotEmpty) {
         existingMediaPaths.assignAll(blogToEdit!.mediaPaths!);
       } else if (blogToEdit!.mediaPath != null) {
         existingMediaPaths.assignAll([blogToEdit!.mediaPath!]);
@@ -112,22 +112,24 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
       }
     });
   }
-  
+
   Future<void> _initBloggerCategory(AuthService authService) async {
     var user = authService.currentUser.value;
-    
+
     // If it's a blogger but local data is stale (missing category name), refresh it
-    if (user?.userType?.toLowerCase().trim() == 'bloger' && user?.blogCategoryName == null) {
+    if (user?.userType?.toLowerCase().trim() == 'bloger' &&
+        user?.blogCategoryName == null) {
       await authService.refreshProfile();
       user = authService.currentUser.value;
     }
 
-    if (user?.userType?.toLowerCase().trim() == 'bloger' && user?.blogCategoryName != null) {
+    if (user?.userType?.toLowerCase().trim() == 'bloger' &&
+        user?.blogCategoryName != null) {
       blogTypeCtrl.text = user!.blogCategoryName!;
       blogType.value = user.blogCategoryName!;
     }
   }
-  
+
   final RxList<String> blogTypesList = <String>[].obs;
   final RxMap<String, int> categoryNameToId = <String, int>{}.obs;
 
@@ -161,16 +163,17 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
           final file = File(image.path);
           final int sizeInBytes = await file.length();
           final double sizeInMb = sizeInBytes / (1024 * 1024);
-          
+
           final String extension = image.path.split('.').last.toLowerCase();
           final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
 
           if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
             selectedFiles.add(file);
-            errors.remove('media'); 
+            errors.remove('media');
           } else {
             CustomSnackBar.showError(
-              message: "Image ${image.name} exceeds 2MB limit or is not JPG/PNG",
+              message:
+                  "Image ${image.name} exceeds 2MB limit or is not JPG/PNG",
             );
           }
         }
@@ -190,7 +193,7 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
           final file = File(item.path);
           final int sizeInBytes = await file.length();
           final double sizeInMb = sizeInBytes / (1024 * 1024);
-          
+
           final String extension = item.path.split('.').last.toLowerCase();
           final List<String> allowedVideoExtensions = ['mp4', 'mov', 'avi'];
           final List<String> allowedImageExtensions = ['jpg', 'jpeg', 'png'];
@@ -238,7 +241,6 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
     existingMediaRemoved.value = existingMediaPaths.isEmpty;
   }
 
-
   void addTag() {
     final text = tagInputCtrl.text.trim();
     if (text.isNotEmpty) {
@@ -282,10 +284,10 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
     try {
       isSubmitting.value = true;
       debugPrint("Starting blog creation process for: $title");
-      
+
       // Construct FormData to upload files and parameters dynamically
       int? categoryId = categoryNameToId[type];
-      
+
       // Fallback for blogger if categories haven't loaded yet
       if (categoryId == null && Get.isRegistered<AuthService>()) {
         final user = Get.find<AuthService>().currentUser.value;
@@ -298,11 +300,14 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
         "title": title,
         "description": content,
         "blog_type": categoryId ?? type,
-        "tags": tags.join(','), // 🆕 Join tags with comma as expected by the API
+        "tags": tags.join(
+          ',',
+        ), // 🆕 Join tags with comma as expected by the API
       };
 
       if (blogToEdit != null) {
-        fields["_method"] = "PUT"; // 🆕 Laravel method spoofing for PUT request with files
+        fields["_method"] =
+            "PUT"; // 🆕 Laravel method spoofing for PUT request with files
       }
 
       final formData = FormData.fromMap(fields);
@@ -420,10 +425,7 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
           formData.files.add(
             MapEntry(
               "media[]",
-              await MultipartFile.fromFile(
-                file.path,
-                filename: fileName,
-              ),
+              await MultipartFile.fromFile(file.path, filename: fileName),
             ),
           );
 
@@ -431,24 +433,33 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
         }
       }
 
-
       await _attachMedia(formData);
 
       debugPrint("Submitting blog multipart request...");
       final response = blogToEdit != null
-          ? await _repository.updateBlog(blogToEdit!.id ?? 0, formData) // POST /blogs/{id} with _method=PUT
+          ? await _repository.updateBlog(
+              blogToEdit!.id ?? 0,
+              formData,
+            ) // POST /blogs/{id} with _method=PUT
           : await _repository.createBlog(formData);
-      
-      final String successMessage = blogToEdit != null ? "Blog updated successfully!" : "Blog created successfully!";
 
-      if (response != null && (response['success'] == true || response['success'] == 1 || response['success'] == "true")) {
+      final String successMessage = blogToEdit != null
+          ? "Blog updated successfully!"
+          : "Blog created successfully!";
+
+      if (response != null &&
+          (response['success'] == true ||
+              response['success'] == 1 ||
+              response['success'] == "true")) {
         isSubmitting.value = false; // Reset before navigating
 
         // Go back to the previous screen FIRST, so GetX doesn't swallow the back command to close the snackbar
         Get.back();
-        
+
         // Show snackbar after navigating
-        CustomSnackBar.showSuccess(message: response['message'] ?? successMessage);
+        CustomSnackBar.showSuccess(
+          message: response['message'] ?? successMessage,
+        );
 
         if (Get.isRegistered<BlogController>()) {
           final blogCtrl = Get.find<BlogController>();
@@ -462,12 +473,14 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
             blogCtrl.fetchMyBlogs();
           }
         }
-
       } else {
-        String errorMessage = blogToEdit != null ? "Failed to update blog" : "Failed to create blog";
+        String errorMessage = blogToEdit != null
+            ? "Failed to update blog"
+            : "Failed to create blog";
         if (response != null) {
-          if (response['message'] != null) errorMessage = response['message'].toString();
-          
+          if (response['message'] != null)
+            errorMessage = response['message'].toString();
+
           if (response['errors'] != null && response['errors'] is Map) {
             final Map errorsMap = response['errors'];
             final List<String> allErrors = [];
@@ -491,7 +504,9 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
       }
     } catch (e) {
       debugPrint("Error in CreateBlogController.createBlog: $e");
-      CustomSnackBar.showError(message: "An unexpected error occurred. Please try again.");
+      CustomSnackBar.showError(
+        message: "An unexpected error occurred. Please try again.",
+      );
     } finally {
       isSubmitting.value = false;
     }
@@ -506,7 +521,3 @@ final RxString categorySearch = ''.obs; // search query for category dropdown
     super.onClose();
   }
 }
-
-
-
-

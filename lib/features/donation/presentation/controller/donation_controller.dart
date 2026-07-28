@@ -31,7 +31,9 @@ class DonationController extends GetxController {
         causes.assignAll(response.data!.data!.data!);
         debugPrint("DonationController: Loaded ${causes.length} causes");
       } else {
-        debugPrint("DonationController: No causes found or error: ${response.message}");
+        debugPrint(
+          "DonationController: No causes found or error: ${response.message}",
+        );
       }
     } catch (e) {
       debugPrint("DonationController: Exception: $e");
@@ -40,10 +42,19 @@ class DonationController extends GetxController {
     }
   }
 
-  Future<void> initiateDonationPayment(DonationCauseItem cause, double amount, String name, String email, String phone) async {
+  Future<void> initiateDonationPayment(
+    DonationCauseItem cause,
+    double amount,
+    String name,
+    String email,
+    String phone,
+  ) async {
     try {
-      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
-      
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
       final response = await _repository.createDonationOrder(
         causeId: cause.id!,
         amount: amount,
@@ -57,14 +68,23 @@ class DonationController extends GetxController {
         final paymentWay = data['payment_way']?.toString().toLowerCase();
 
         if (paymentWay == 'ccavenue') {
-          final result = await Get.to(() => CCAvenuePaymentScreen(
-            paymentUrl: data['payment_url'] ?? '',
-            encRequest: data['encRequest'] ?? '',
-            accessCode: data['access_code'] ?? '',
-            type: 'donation',
-          ));
+          final result = await Get.to(
+            () => CCAvenuePaymentScreen(
+              paymentUrl: data['payment_url'] ?? '',
+              encRequest: data['encRequest'] ?? '',
+              accessCode: data['access_code'] ?? '',
+              type: 'donation',
+            ),
+          );
           if (result == true) {
             print("CCAvenue Donation Payment Success");
+            PaymentSuccessDialog.show(
+              amount: data['amount']?.toString() ?? '0',
+              paymentId: data['order_id']?.toString() ?? 'N/A',
+              onOkPressed: () {
+                Get.back(); // Go back from details page
+              },
+            );
           }
         } else {
           _razorpayController.openCheckout(
@@ -74,13 +94,16 @@ class DonationController extends GetxController {
             mobile: phone,
             email: email,
             orderId: data['order_id'],
-            transaction_id: int.tryParse(data['donation_id']?.toString() ?? "0") ?? 0,
+            transaction_id:
+                int.tryParse(data['donation_id']?.toString() ?? "0") ?? 0,
             key: data['key'],
             type: 'donation', // Track this for verification logic
           );
         }
       } else {
-        CustomSnackBar.showError(message: response.message ?? "Failed to create donation order");
+        CustomSnackBar.showError(
+          message: response.message ?? "Failed to create donation order",
+        );
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();

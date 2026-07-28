@@ -12,7 +12,7 @@ class BlogController extends GetxController {
   final BlogRepository _repository = BlogRepository();
 
   final RxList<Blog> blogs = <Blog>[].obs;
-  final RxList<Blog> myBlogs = <Blog>[].obs;  // logged-in user's blogs only
+  final RxList<Blog> myBlogs = <Blog>[].obs; // logged-in user's blogs only
   final RxList<Blog> filteredBlogs = <Blog>[].obs;
   final RxBool isLoading = false.obs;
   final RxBool isMyBlogsLoading = false.obs;
@@ -24,7 +24,10 @@ class BlogController extends GetxController {
 
   final BlogCategory allCategory = BlogCategory(id: null, name: 'All');
   final RxList<BlogCategory> categories = <BlogCategory>[].obs;
-  final Rx<BlogCategory> selectedCategory = BlogCategory(id: null, name: 'All').obs;
+  final Rx<BlogCategory> selectedCategory = BlogCategory(
+    id: null,
+    name: 'All',
+  ).obs;
 
   // Detail State
   final Rxn<Blog> selectedBlog = Rxn<Blog>();
@@ -32,7 +35,8 @@ class BlogController extends GetxController {
   final RxBool isDetailLoading = false.obs;
 
   // Video State for detail screen
-  final Rxn<VideoPlayerController> detailVideoController = Rxn<VideoPlayerController>();
+  final Rxn<VideoPlayerController> detailVideoController =
+      Rxn<VideoPlayerController>();
   final Rxn<ChewieController> chewieController = Rxn<ChewieController>();
   final RxBool isVideoInitialized = false.obs;
 
@@ -49,7 +53,7 @@ class BlogController extends GetxController {
     fetchCategories();
     fetchBlogs();
     fetchMyBlogs(); // Pre-load my blogs in parallel
-    
+
     // Debounce search query changes
     debounce(searchQuery, (query) {
       if (query.isEmpty) {
@@ -90,16 +94,23 @@ class BlogController extends GetxController {
         // "Others" tab → all blogs EXCEPT the logged-in user's
         list = blogs.toList();
         if (myId != null) {
-          list = list.where((b) => b.userId?.toString() != myId.toString()).toList();
+          list = list
+              .where((b) => b.userId?.toString() != myId.toString())
+              .toList();
         }
       }
 
       // Category Filter (local filtering, though we also filter via API)
-      if (selectedCategory.value.name != 'All' && selectedCategory.value.id != null) {
-        list = list.where((b) => 
-          b.blogType == selectedCategory.value.id?.toString() || 
-          (b.category != null && b.category!.id == selectedCategory.value.id)
-        ).toList();
+      if (selectedCategory.value.name != 'All' &&
+          selectedCategory.value.id != null) {
+        list = list
+            .where(
+              (b) =>
+                  b.blogType == selectedCategory.value.id?.toString() ||
+                  (b.category != null &&
+                      b.category!.id == selectedCategory.value.id),
+            )
+            .toList();
       }
 
       filteredBlogs.assignAll(list);
@@ -121,24 +132,28 @@ class BlogController extends GetxController {
     if (!hasMore.value) return;
 
     isLoading.value = true;
-    final response = await _repository.getBlogs(
-      page: currentPage.value, 
-      categoryId: selectedCategory.value.id
-    );
+    try {
+      final response = await _repository.getBlogs(
+        page: currentPage.value,
+        categoryId: selectedCategory.value.id,
+      );
 
-    if (response != null && response.success == true && response.data != null) {
-      final newBlogs = response.data?.data ?? [];
-      
-      if (newBlogs.isEmpty) {
-        hasMore.value = false;
-      } else {
-        blogs.addAll(newBlogs);
-        _applyFilter();
-        currentPage.value++;
+      if (response != null &&
+          response.success == true &&
+          response.data != null) {
+        final newBlogs = response.data?.data ?? [];
+
+        if (newBlogs.isEmpty) {
+          hasMore.value = false;
+        } else {
+          blogs.addAll(newBlogs);
+          _applyFilter();
+          currentPage.value++;
+        }
       }
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = false;
   }
 
   /// Fetch the current user's blogs.
@@ -148,14 +163,18 @@ class BlogController extends GetxController {
     isMyBlogsLoading.value = true;
     try {
       final response = await _repository.getMyBlogs();
-      if (response != null && response.success == true && response.data != null) {
+      if (response != null &&
+          response.success == true &&
+          response.data != null) {
         final fetched = response.data?.data ?? [];
         final myId = _currentUserId();
 
         if (myId != null) {
           // Always filter by userId — works whether server filtered or not
           myBlogs.assignAll(
-            fetched.where((b) => b.userId?.toString() == myId.toString()).toList(),
+            fetched
+                .where((b) => b.userId?.toString() == myId.toString())
+                .toList(),
           );
         } else {
           // AuthService not ready yet — store full list, will re-filter when needed
@@ -167,8 +186,9 @@ class BlogController extends GetxController {
       }
     } catch (e) {
       debugPrint('fetchMyBlogs error: $e');
+    } finally {
+      isMyBlogsLoading.value = false;
     }
-    isMyBlogsLoading.value = false;
   }
 
   void searchBlogs(String query) {
@@ -204,7 +224,7 @@ class BlogController extends GetxController {
   Future<void> _performSearch(String query) async {
     isLoading.value = true;
     final response = await _repository.searchBlogs(query);
-    
+
     if (response != null && response.success == true && response.data != null) {
       filteredBlogs.assignAll(response.data?.data ?? []);
     } else {
@@ -226,12 +246,12 @@ class BlogController extends GetxController {
       isLiked: !currentLiked,
       likesCount: currentLiked ? currentCount - 1 : currentCount + 1,
     );
-    
+
     // Update main list
     blogs[index] = updatedBlog;
     final filteredIndex = filteredBlogs.indexWhere((b) => b.id == blogId);
     if (filteredIndex != -1) filteredBlogs[filteredIndex] = updatedBlog;
-    
+
     // Update selection if it matches (preserve detail-only fields like comments)
     if (selectedBlog.value?.id == blogId) {
       selectedBlog.value = selectedBlog.value!.copyWith(
@@ -248,11 +268,11 @@ class BlogController extends GetxController {
         isLiked: data['liked'],
         likesCount: data['likes_count'],
       );
-      
+
       // Sync with final server state
       blogs[index] = finalBlog;
       if (filteredIndex != -1) filteredBlogs[filteredIndex] = finalBlog;
-      
+
       if (selectedBlog.value?.id == blogId) {
         selectedBlog.value = selectedBlog.value!.copyWith(
           isLiked: data['liked'],
@@ -263,7 +283,7 @@ class BlogController extends GetxController {
       // Revert on failure
       blogs[index] = blog;
       if (filteredIndex != -1) filteredBlogs[filteredIndex] = blog;
-      
+
       if (selectedBlog.value?.id == blogId) {
         selectedBlog.value = selectedBlog.value!.copyWith(
           isLiked: currentLiked,
@@ -284,7 +304,7 @@ class BlogController extends GetxController {
     if (response != null && response.success == true && response.data != null) {
       selectedBlog.value = response.data?.blog;
       relatedBlogs.assignAll(response.data?.related ?? []);
-      
+
       _initializeDetailVideo();
     }
 
@@ -296,9 +316,11 @@ class BlogController extends GetxController {
     final blog = selectedBlog.value;
     if (blog != null && blog.mediaType == 'video' && blog.mediaPath != null) {
       final videoUrl = "${ApiConstants.imageBaseUrl}${blog.mediaPath}";
-      final videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+      final videoPlayerController = VideoPlayerController.networkUrl(
+        Uri.parse(videoUrl),
+      );
       detailVideoController.value = videoPlayerController;
-      
+
       videoPlayerController.initialize().then((_) {
         chewieController.value = ChewieController(
           videoPlayerController: videoPlayerController,
@@ -353,13 +375,19 @@ class BlogController extends GetxController {
   Future<void> postComment(int blogId) async {
     final text = commentTextController.text.trim();
     if (text.isEmpty) return;
-    
+
     isCommentPosting.value = true;
     final parentId = replyToComment.value?.id;
-    
-    final response = await _repository.addComment(blogId, text, parentId: parentId);
+
+    final response = await _repository.addComment(
+      blogId,
+      text,
+      parentId: parentId,
+    );
     if (response != null && response['success'] == true) {
-      CustomSnackBar.showSuccess(message: response['message'] ?? 'Comment posted');
+      CustomSnackBar.showSuccess(
+        message: response['message'] ?? 'Comment posted',
+      );
       commentTextController.clear();
       replyToComment.value = null;
       // Refresh the blog details to get updated comments
