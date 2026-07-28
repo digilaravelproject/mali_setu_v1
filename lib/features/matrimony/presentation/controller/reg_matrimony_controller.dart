@@ -63,6 +63,8 @@ class RegMatrimonyController extends GetxController {
   final addressCtrl = TextEditingController();
   final bloodGroupCtrl = TextEditingController();
   final ref_nameCtrl = TextEditingController();
+  final countryCtrl = TextEditingController(text: 'India');
+  final stateCtrl = TextEditingController();
 
   // Keep some old ones if needed or reuse
   final casteCtrl = TextEditingController();
@@ -273,10 +275,12 @@ class RegMatrimonyController extends GetxController {
         }
 
         state.value = fetchedState;
+        stateCtrl.text = fetchedState;
         cityCtrl.text = "${response.district}"; // Using district as major city
         talukaCtrl.text = response.block; // Taluka from pincode API
         villageCtrl.text = response.name; // Taluka from pincode API
         country.value = response.country; // Assumed Indian via API
+        countryCtrl.text = response.country;
 
         // CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
       } else {
@@ -738,6 +742,14 @@ class RegMatrimonyController extends GetxController {
     ever(state, (_) => errors.remove('state'));
 
     cityCtrl.addListener(() => errors.remove('city'));
+    countryCtrl.addListener(() {
+      country.value = countryCtrl.text;
+      errors.remove('country');
+    });
+    stateCtrl.addListener(() {
+      state.value = stateCtrl.text;
+      errors.remove('state');
+    });
 
     // DOB controller listener to sync with rxDob and clear error
     dobCtrl.addListener(() {
@@ -952,10 +964,11 @@ class RegMatrimonyController extends GetxController {
       addressCtrl.text = location['address']?.toString() ?? '';
       final fetchedCountry = location['country']?.toString() ?? 'India';
       onCountryChanged(fetchedCountry);
-      state.value = _safeValue(location['state']?.toString(), stateList.toList(), fallback: location['state']?.toString() ?? '');
-      if (state.value.isNotEmpty && !stateList.contains(state.value)) {
-        stateList.add(state.value);
-      }
+      countryCtrl.text = fetchedCountry;
+      
+      final fetchedState = location['state']?.toString() ?? '';
+      state.value = fetchedState;
+      stateCtrl.text = fetchedState;
 
       // Photos
       final photos = personal['photos'];

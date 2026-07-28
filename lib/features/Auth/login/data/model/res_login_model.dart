@@ -37,24 +37,28 @@ class ResLoginModel {
       success = _parseBool(json['status']);
     }
 
-    if (json['message'] is Map) {
-      // Handle Laravel style validation errors: {"message": {"email": ["..."], "password": ["..."]}}
-      var msgMap = json['message'] as Map;
-      if (msgMap.isNotEmpty) {
-        List<String> errors = [];
-        msgMap.forEach((key, value) {
-          if (value is List && value.isNotEmpty) {
-            errors.add(value.first.toString());
-          } else {
-            errors.add(value.toString());
-          }
-        });
-        message = errors.join('\n');
+    if (json['message'] != null) {
+      if (json['message'] is Map) {
+        // Handle Laravel style validation errors: {"message": {"email": ["..."], "password": ["..."]}}
+        var msgMap = json['message'] as Map;
+        if (msgMap.isNotEmpty) {
+          List<String> errors = [];
+          msgMap.forEach((key, value) {
+            if (value is List && value.isNotEmpty) {
+              errors.add(value.first.toString());
+            } else {
+              errors.add(value.toString());
+            }
+          });
+          message = errors.join('\n');
+        } else {
+          message = "Validation Error";
+        }
       } else {
-        message = "Validation Error";
+        message = json['message']?.toString();
       }
-    } else {
-      message = json['message']?.toString();
+    } else if (json['msg'] != null) {
+      message = json['msg']?.toString();
     }
     data = json['data'] != null ? LoginData.fromJson(json['data']) : null;
   }
