@@ -23,8 +23,8 @@ class ApiClient {
   void _initializeDio() {
     _dio.options = BaseOptions(
       baseUrl: ApiConstants.apiBaseUrl,
-      connectTimeout: const Duration(milliseconds: 30000),
-      receiveTimeout: const Duration(milliseconds: 30000),
+      connectTimeout: const Duration(milliseconds: 60000),
+      receiveTimeout: const Duration(milliseconds: 60000),
       contentType: 'application/json',
       validateStatus: (status) => status != null && status < 600, // Accept all responses
     );

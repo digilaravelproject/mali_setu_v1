@@ -103,7 +103,13 @@ class LoginController extends GetxController {
         CustomSnackBar.showError(message: response.message ?? "Login failed");
       }
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      String errorMessage = e.toString();
+      if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
+        errorMessage = 'Connection timeout. Please check your internet and try again.';
+      } else if (errorMessage.contains('SocketException')) {
+        errorMessage = 'No internet connection. Please try again.';
+      }
+      CustomSnackBar.showError(message: errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -165,8 +171,13 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       print("googlelogincatch : "+e.toString());
-
-      CustomSnackBar.showError(message: e.toString());
+      String errorMessage = e.toString();
+      if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
+        errorMessage = 'Connection timeout. Please check your internet and try again.';
+      } else if (errorMessage.contains('SocketException')) {
+        errorMessage = 'No internet connection. Please try again.';
+      }
+      CustomSnackBar.showError(message: errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -232,7 +243,13 @@ class LoginController extends GetxController {
         }
       }
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      String errorMessage = e.toString();
+      if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
+        errorMessage = 'Connection timeout. Please check your internet and try again.';
+      } else if (errorMessage.contains('SocketException')) {
+        errorMessage = 'No internet connection. Please try again.';
+      }
+      CustomSnackBar.showError(message: errorMessage);
     } finally {
       isLoading.value = false;
     }

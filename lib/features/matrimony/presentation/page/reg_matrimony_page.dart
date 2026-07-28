@@ -907,23 +907,19 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   )
                       : null,
                 ),
-               SelectionTile(
+                AppInputTextField(
+                  controller: controller.countryCtrl,
                   label: "country".tr,
-                  value: controller.country.value,
-                  icon: Icons.public,
                   isRequired: true,
-                  errorText: controller.errors['country'],
-                  onTap: () => _showSingleSelectBottomSheet(
-                      context, "Country", controller.countryList, controller.onCountryChanged),
+                  validator: (val) => controller.errors['country'],
+                  textInputAction: TextInputAction.next,
                 ),
-                SelectionTile(
+                AppInputTextField(
+                  controller: controller.stateCtrl,
                   label: "state".tr,
-                  value: controller.state.value,
-                  icon: Icons.map,
                   isRequired: true,
-                  errorText: controller.errors['state'],
-                  onTap: () => _showSingleSelectBottomSheet(
-                      context, "State", controller.stateList, controller.state.call),
+                  validator: (val) => controller.errors['state'],
+                  textInputAction: TextInputAction.next,
                 ),
                 AppInputTextField(
                   controller: controller.cityCtrl,
