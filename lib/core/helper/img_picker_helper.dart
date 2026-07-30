@@ -143,17 +143,7 @@ class ImagePickerHelper {
     String flags,
     bool allowMultiple,
   ) async {
-    final status = await Permission.camera.request();
-
-    if (status.isGranted || status.isLimited) {
-      _pickImages(ImageSource.camera, flags, allowMultiple);
-    } else if (status.isPermanentlyDenied) {
-      if (context.mounted) {
-        _showPermissionDialog(context, "Camera");
-      }
-    } else {
-      _pickImages(ImageSource.camera, flags, allowMultiple);
-    }
+    _pickImages(ImageSource.camera, flags, allowMultiple);
   }
 
   Future<void> _checkGalleryPermission(
