@@ -334,9 +334,9 @@ class RegMatrimonyController extends GetxController {
 
           // Check format
           final String extension = images[i].path.split('.').last.toLowerCase();
-          final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+          final List<String> allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'];
 
-          if (sizeInMb <= 5 && allowedExtensions.contains(extension)) {
+          if (sizeInMb <= 10 && (allowedExtensions.contains(extension) || extension.isEmpty)) {
             selectedPhotos.add(file);
             addedCount++;
           } else {

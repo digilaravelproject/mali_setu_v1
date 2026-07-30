@@ -7,7 +7,9 @@ class AppConstants {
 
   static const String packageName = "iconly";
   static const String playStoreUrl =
-      "https://play.google.com/store/apps/details?id=sign.fitness.villa";
+      "https://play.google.com/store/apps/details?id=com.malisetu.app";
+  static const String appStoreUrl =
+      "https://apps.apple.com/in/app/mali-setu/id6766891247";
 
   // SharedPreferences Keys
   static const String transitionLogo = "transitionLogo";

@@ -165,15 +165,15 @@ class CreateBlogController extends GetxController {
           final double sizeInMb = sizeInBytes / (1024 * 1024);
 
           final String extension = image.path.split('.').last.toLowerCase();
-          final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+          final List<String> allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'];
 
-          if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
+          if (sizeInMb <= 10 && (allowedExtensions.contains(extension) || extension.isEmpty)) {
             selectedFiles.add(file);
             errors.remove('media');
           } else {
             CustomSnackBar.showError(
               message:
-                  "Image ${image.name} exceeds 2MB limit or is not JPG/PNG",
+                  "Image ${image.name} exceeds size limit or has an invalid format",
             );
           }
         }

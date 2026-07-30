@@ -15,6 +15,7 @@ import '../../../widgets/custom_image_view.dart';
 import '../../../core/utils/app_assets.dart';
 import '../../../core/constent/api_constants.dart';
 import '../../../widgets/webview_page.dart';
+import '../../../core/constent/app_constants.dart';
 import '../../volunteer/pages/volunteer_page.dart';
 import 'change_language_page.dart';
 import 'contact_support.dart';
@@ -156,11 +157,17 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   _SettingsItem(
                     title: 'share_app'.tr,
                     icon: CupertinoIcons.share,
-                    onTap: () async {
+                    onTapWithContext: (itemContext) async {
                       try {
+                        final box = itemContext.findRenderObject() as RenderBox?;
+                        final Rect? sharePositionOrigin = box != null
+                            ? (box.localToGlobal(Offset.zero) & box.size)
+                            : Rect.fromLTWH(0, 0, MediaQuery.of(itemContext).size.width, MediaQuery.of(itemContext).size.height / 2);
+
                         await Share.share(
-                          'Check out this amazing app!\n\nDownload https://play.google.com/store/apps/details?id=com.malisetu.app',
-                          subject: 'Awesome App Recommendation',
+                          'Check out Mali Setu app!\n\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}',
+                          subject: 'Mali Setu App',
+                          sharePositionOrigin: sharePositionOrigin,
                         );
                       } catch (e) {
                         debugPrint('Share failed: $e');
@@ -399,63 +406,73 @@ class SettingsScreen extends GetWidget<SettingsController> {
           final item = items[index];
           final isLast = index == items.length - 1;
 
-          return Column(
-            children: [
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: item.onTap,
-                  borderRadius: isLast
-                      ? const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20))
-                      : index == 0
-                      ? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
-                      : BorderRadius.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: item.isDestructive
-                                ? Colors.red.withOpacity(0.1)
-                                : context.theme.primaryColor.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            item.icon,
-                            size: 20,
-                            color: item.isDestructive ? Colors.red : context.theme.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: context.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: item.isDestructive ? Colors.red : Colors.grey[800],
+          return Builder(
+            builder: (itemContext) {
+              return Column(
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        if (item.onTapWithContext != null) {
+                          item.onTapWithContext!(itemContext);
+                        } else if (item.onTap != null) {
+                          item.onTap!();
+                        }
+                      },
+                      borderRadius: isLast
+                          ? const BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20))
+                          : index == 0
+                          ? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
+                          : BorderRadius.zero,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: item.isDestructive
+                                    ? Colors.red.withOpacity(0.1)
+                                    : context.theme.primaryColor.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                item.icon,
+                                size: 20,
+                                color: item.isDestructive ? Colors.red : context.theme.primaryColor,
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                item.title,
+                                style: context.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: item.isDestructive ? Colors.red : Colors.grey[800],
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 22,
+                              color: Colors.grey[400],
+                            ),
+                          ],
                         ),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          size: 22,
-                          color: Colors.grey[400],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  indent: 60,
-                  color: Colors.grey[200],
-                ),
-            ],
+                  if (!isLast)
+                    Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      indent: 60,
+                      color: Colors.grey[200],
+                    ),
+                ],
+              );
+            },
           );
         }),
       ),
@@ -532,13 +549,15 @@ class SettingsScreen extends GetWidget<SettingsController> {
 class _SettingsItem {
   final String title;
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final Function(BuildContext context)? onTapWithContext;
   final bool isDestructive;
 
   _SettingsItem({
     required this.title,
     required this.icon,
-    required this.onTap,
+    this.onTap,
+    this.onTapWithContext,
     this.isDestructive = false,
   });
 }
