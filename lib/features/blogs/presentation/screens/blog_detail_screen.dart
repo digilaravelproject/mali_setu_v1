@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/constent/api_constants.dart';
+import '../../../../core/constent/app_constants.dart';
 import '../../data/model/blog_model.dart';
 import '../controller/blog_controller.dart';
 import 'package:video_player/video_player.dart';
@@ -510,15 +511,24 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
             ),
             const SizedBox(width: 8),
             // Share Button
-            buildButton(
-              Icons.share_outlined,
-              'Share',
-              () {
-                // Using an https URL so it's clickable in WhatsApp/social media.
-                // Deep link handling will open the app if installed.
-                final String shareLink = 'https://malisetu.com/blog/${blog.id}';
-                final String playStoreLink = 'https://play.google.com/store/apps/details?id=com.malisetu.app';
-                Share.share("${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload our app: $playStoreLink");
+            Builder(
+              builder: (buttonContext) {
+                return buildButton(
+                  Icons.share_outlined,
+                  'Share',
+                  () {
+                    final RenderBox? box = buttonContext.findRenderObject() as RenderBox?;
+                    final Rect? sharePositionOrigin = box != null
+                        ? (box.localToGlobal(Offset.zero) & box.size)
+                        : Rect.fromLTWH(0, 0, MediaQuery.of(buttonContext).size.width, MediaQuery.of(buttonContext).size.height / 2);
+
+                    final String shareLink = 'https://malisetu.com/blog/${blog.id}';
+                    Share.share(
+                      "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}",
+                      sharePositionOrigin: sharePositionOrigin,
+                    );
+                  },
+                );
               },
             ),
             const SizedBox(width: 8),

@@ -143,15 +143,7 @@ class ImagePickerHelper {
     String flags,
     bool allowMultiple,
   ) async {
-    final status = await Permission.camera.request();
-
-    if (status.isGranted) {
-      _pickImages(ImageSource.camera, flags, allowMultiple);
-    } else {
-      if (context.mounted) {
-        _showPermissionDialog(context, "Camera");
-      }
-    }
+    _pickImages(ImageSource.camera, flags, allowMultiple);
   }
 
   Future<void> _checkGalleryPermission(
@@ -159,29 +151,9 @@ class ImagePickerHelper {
     String flags,
     bool allowMultiple,
   ) async {
-    if (Platform.isAndroid) {
-      // On Android, image_picker uses the system Photo Picker which does NOT require permissions
-      // for SDK 33+ and handles intents for older versions. This complies with Google Play's 
-      // Photo and Video Permissions policy for infrequent access.
-      _pickImages(ImageSource.gallery, flags, allowMultiple);
-      return;
-    }
-
-    PermissionStatus status;
-
-    if (Platform.isIOS) {
-      status = await Permission.photos.request();
-    } else {
-      status = PermissionStatus.granted;
-    }
-
-    if (status.isGranted || status.isLimited) {
-      _pickImages(ImageSource.gallery, flags, allowMultiple);
-    } else {
-      if (context.mounted) {
-        _showPermissionDialog(context, "Gallery");
-      }
-    }
+    // Both Android & iOS system photo pickers (PHPickerViewController on iOS & Photo Picker on Android)
+    // run out-of-process and do NOT require explicit photo permission requests.
+    _pickImages(ImageSource.gallery, flags, allowMultiple);
   }
 
   /// -------------------- Image Picking --------------------

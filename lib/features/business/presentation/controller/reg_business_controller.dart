@@ -171,9 +171,9 @@ class RegBusinessController extends GetxController {
             final double sizeInMb = sizeInBytes / (1024 * 1024);
 
             final String extension = file.path.split('.').last.toLowerCase();
-            final List<String> allowedExtensions = ['jpg', 'jpeg', 'png'];
+            final List<String> allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'];
 
-            if (sizeInMb <= 2 && allowedExtensions.contains(extension)) {
+            if (sizeInMb <= 10 && (allowedExtensions.contains(extension) || extension.isEmpty)) {
               validFiles.add(file);
             } else {
               failedFiles.add(file.path.split('/').last);
