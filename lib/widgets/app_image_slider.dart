@@ -16,6 +16,7 @@ class ImageSlider extends StatefulWidget {
   final double borderRadius;
   final bool enableNavigation;
   final IndicatorType indicatorType;
+  final BoxFit fit;
   final Function(int index)? onImageTap; // Callback when image is tapped
 
   const ImageSlider({
@@ -29,6 +30,7 @@ class ImageSlider extends StatefulWidget {
     this.borderRadius = 16,
     this.autoScroll = true,
     this.indicatorType = IndicatorType.dot,
+    this.fit = BoxFit.cover,
     this.onImageTap, // Optional tap callback
   });
 
@@ -127,6 +129,7 @@ class _ImageSliderState extends State<ImageSlider> {
                   },
                   child: CustomImageView(
                     url: _loopImages[index],
+                    fit: widget.fit,
                     errorBuilder: (ctx, p, q) =>
                         Center(child: Image.asset(AppAssets.getAppLogo())),
                   ),

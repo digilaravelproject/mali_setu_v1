@@ -235,7 +235,7 @@ class CustomImageView extends StatelessWidget {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: imageProvider,
-                  fit: BoxFit.cover,
+                  fit: fit ?? BoxFit.cover,
                   colorFilter: color != null
                       ? ColorFilter.mode(color!, BlendMode.color)
                       : colorFilter,

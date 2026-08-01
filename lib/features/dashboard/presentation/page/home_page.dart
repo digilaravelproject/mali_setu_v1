@@ -202,31 +202,36 @@ class HomePage extends GetWidget<HomeController> {
                       // Banners Slider
                       Obx(() {
                         if (controller.isLoadingBanners.value) {
-                          return Container(
-                            height: 130,
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            child: const ShimmerLoading.rounded(height: 130),
+                          return AspectRatio(
+                            aspectRatio: 2.5,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              child: const ShimmerLoading.rounded(height: double.infinity),
+                            ),
                           );
                         }
                         if (controller.banners.isEmpty) {
                           return const SizedBox.shrink();
                         }
-                        return Container(
-                          height: 130,
-                          margin: const EdgeInsets.only(top: 4, bottom: 8),
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(0), boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
-                          ]),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(0),
-                            child: ImageSlider(
-                              indicatorType: IndicatorType.rectangle,
-                              images: controller.banners
-                                  .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
-                                  .toList(),
-                              onImageTap: (index) {
-                                controller.onBannerTap(index);
-                              },
+                        return AspectRatio(
+                          aspectRatio: 2.5,
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 4, bottom: 8),
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(0), boxShadow: [
+                              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                            ]),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(0),
+                              child: ImageSlider(
+                                fit: BoxFit.fill,
+                                indicatorType: IndicatorType.rectangle,
+                                images: controller.banners
+                                    .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
+                                    .toList(),
+                                onImageTap: (index) {
+                                  controller.onBannerTap(index);
+                                },
+                              ),
                             ),
                           ),
                         );
