@@ -3,6 +3,8 @@ import 'package:edu_cluezer/core/styles/theme/app_light_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:upgrader/upgrader.dart';
+
 import 'core/constent/app_constants.dart';
 import 'core/localization/languages.dart';
 import 'core/localization/language_controller.dart';
@@ -47,6 +49,12 @@ class MyApp extends StatelessWidget {
         scaffoldMessengerKey: rootScaffoldMessengerKey,
         getPages: AppPages.getPages,
         initialRoute: AppRoutes.splash,
+        builder: (context, child) {
+          return UpgradeAlert(
+            navigatorKey: Get.key,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
     );
 
 
