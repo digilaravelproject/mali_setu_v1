@@ -588,19 +588,19 @@ class BlogsScreen extends StatelessWidget {
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Text(
-                        categoryName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      // padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      // decoration: BoxDecoration(
+                      //   color: primaryColor,
+                      //   borderRadius: BorderRadius.circular(24),
+                      // ),
+                      // child: Text(
+                      //   categoryName,
+                      //   style: const TextStyle(
+                      //     color: Colors.white,
+                      //     fontSize: 11,
+                      //     fontWeight: FontWeight.bold,
+                      //   ),
+                      // ),
                     ),
                   ),
               ],

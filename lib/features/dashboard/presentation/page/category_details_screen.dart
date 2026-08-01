@@ -120,7 +120,8 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                               );
                             },
                             child: Container(
-                              padding: const EdgeInsets.all(20),
+                              width: 90,
+                              height: 90,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
@@ -132,11 +133,31 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                                   ),
                                 ],
                               ),
-                              child: Icon(
-                                _getCategoryIcon(category.name),
-                                size: 50,
-                                color: theme.primaryColor,
-                              ),
+                              child: (category.photo != null && category.photo!.isNotEmpty)
+                                  ? ClipOval(
+                                      child: Image.network(
+                                        ApiConstants.imageBaseUrl + category.photo!,
+                                        width: 90,
+                                        height: 90,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Center(
+                                            child: Icon(
+                                              _getCategoryIcon(category.name),
+                                              size: 50,
+                                              color: theme.primaryColor,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Icon(
+                                        _getCategoryIcon(category.name),
+                                        size: 50,
+                                        color: theme.primaryColor,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),

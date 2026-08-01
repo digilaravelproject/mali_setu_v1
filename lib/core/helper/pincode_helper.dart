@@ -5,6 +5,7 @@ import 'package:dio/io.dart';
 /// Helper class for fetching address details from pincode
 class PincodeHelper {
   static final Dio _dio = _createDio();
+  static final Map<String, PincodeResponse> _cache = {};
 
   static Dio _createDio() {
     final dio = Dio();
@@ -25,13 +26,35 @@ class PincodeHelper {
         return null;
       }
 
+      if (_cache.containsKey(pincode)) {
+        print('========================================================================================');
+        print('=== API Response (Cached) ===');
+        print('Pincode: $pincode');
+        print('========================================================================================');
+        return _cache[pincode];
+      }
+
+      final url = 'https://api.postalpincode.in/pincode/$pincode';
+      print('========================================================================================');
+      print('=== API Request ===');
+      print('URL: $url');
+      print('Method: GET');
+      print('========================================================================================');
+
       final response = await _dio.get(
-        'https://api.postalpincode.in/pincode/$pincode',
+        url,
         options: Options(
           receiveTimeout: const Duration(seconds: 10),
           sendTimeout: const Duration(seconds: 10),
         ),
       );
+
+      print('========================================================================================');
+      print('=== API Response ===');
+      print('URL: $url');
+      print('Status Code: ${response.statusCode}');
+      print('Response: ${response.data}');
+      print('========================================================================================');
 
       if (response.statusCode == 200 && response.data != null) {
         final List<dynamic> data = response.data;
@@ -47,7 +70,7 @@ class PincodeHelper {
             // Get first post office from the list
             final postOffice = (firstResult['PostOffice'] as List)[0];
             
-            return PincodeResponse(
+            final pincodeResponse = PincodeResponse(
               state: postOffice['State'] ?? '',
               district: postOffice['District'] ?? '',
               name: postOffice['Name'] ?? '', // Post office name as city
@@ -59,6 +82,9 @@ class PincodeHelper {
               postOfficeName: postOffice['Name'] ?? '',
               pincode: postOffice['Pincode'] ?? pincode,
             );
+            
+            _cache[pincode] = pincodeResponse;
+            return pincodeResponse;
           }
         }
       }
