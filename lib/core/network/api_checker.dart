@@ -197,7 +197,12 @@ class ApiChecker {
       );
     } else {
       Logger.e('Error: $error');
-      CustomSnackBar.showError(message: 'Unexpected error occurred. Please try again.');
+      
+      if (error.toString().contains('PathNotFoundException')) {
+        CustomSnackBar.showError(message: 'Some selected files are no longer available. Please re-select them.');
+      } else {
+        CustomSnackBar.showError(message: 'Unexpected error occurred. Please try again.');
+      }
 
       return Response(
         requestOptions: RequestOptions(path: ''),

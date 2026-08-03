@@ -214,7 +214,7 @@ class ImagePickerHelper {
 
       if (compressedBytes == null) break;
 
-      final tempDir = await getTemporaryDirectory();
+      final tempDir = await getApplicationDocumentsDirectory();
       final tempPath =
           "${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg";
 

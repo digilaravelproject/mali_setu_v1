@@ -44,6 +44,7 @@ class UpProfileController extends GetxController {
   final cityCtrl = TextEditingController();
   final stateCtrl = TextEditingController();
   final districtCtrl = TextEditingController();
+  final countryCtrl = TextEditingController();
   final pincodeCtrl = TextEditingController();
   final sectorCtrl = TextEditingController();
   final destinationCtrl = TextEditingController();
@@ -79,6 +80,7 @@ class UpProfileController extends GetxController {
       stateCtrl.text = user.state ?? "";
       districtCtrl.text = user.district ?? "";
       pincodeCtrl.text = user.pincode ?? "";
+      countryCtrl.text =user.country ?? "";
       sectorCtrl.text = user.sector ?? "";
       destinationCtrl.text = user.destination ?? "";
       villageCtrl.text = user.village ?? "villagewkdnsa";
@@ -238,6 +240,7 @@ class UpProfileController extends GetxController {
         'state': stateCtrl.text,
         'district': districtCtrl.text,
         'pincode': pincodeCtrl.text,
+        'country': countryCtrl.text,
         'sector': sectorCtrl.text,
         'destination': destinationCtrl.text,
         'village': villageCtrl.text,
@@ -305,6 +308,7 @@ class UpProfileController extends GetxController {
         cityCtrl.text = response.division;
         stateCtrl.text = response.state;
         districtCtrl.text = response.district;
+        countryCtrl.text = response.country;
         destinationCtrl.text = response.block; // Taluka
         villageCtrl.text = response.name; // Taluka
         CustomSnackBar.showSuccess(message: "Address auto-filled successfully!");
@@ -327,7 +331,7 @@ class UpProfileController extends GetxController {
     final controllers = [
       fullNameCtrl, ageCtrl, phoneNumberCtrl, occupationCtrl, emailCtrl,
       streetAddressCtrl, nearbyLocationCtrl, roadNumberCtrl, cityCtrl,
-      stateCtrl, districtCtrl, pincodeCtrl, sectorCtrl, destinationCtrl,villageCtrl
+      stateCtrl, districtCtrl, countryCtrl, pincodeCtrl, sectorCtrl, destinationCtrl,villageCtrl
     ];
 
     for (final controller in controllers) {

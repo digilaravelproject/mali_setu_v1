@@ -37,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'streetAddress': user?.address ?? 'N/A',
     'nearbyLocation': user?.nearbyLocation ?? 'N/A',
     'roadNumber': user?.roadNumber ?? 'N/A',
-    'country': user?.roadNumber ?? 'N/A',
+    'country': user?.country ?? 'N/A',
     'city': user?.city ?? 'N/A',
     'state': user?.state ?? 'N/A',
     'district': user?.district ?? 'N/A',
@@ -338,8 +338,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               child: _buildInfoRow(
                 label: 'country'.tr,
-                value: userData['city']!,
-                icon: Icons.location_city_outlined,
+                value: userData['country']!,
+                icon: Icons.flag_outlined,
               ),
             ),
             const SizedBox(width: 16),
@@ -361,8 +361,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
              Expanded(
               child: _buildInfoRow(
                 label: 'city'.tr,
-                value: userData['district']!,
-                icon: Icons.terrain_outlined,
+                value: userData['city']!,
+                icon: Icons.location_city_outlined,
               ),
             ),
             const SizedBox(width: 16),
