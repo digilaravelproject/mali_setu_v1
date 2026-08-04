@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
 
 class DeepLinkService extends GetxService {
+  static bool isAppReady = false;
   final _appLinks = AppLinks();
   StreamSubscription<Uri>? _linkSubscription;
 
@@ -32,8 +33,8 @@ class DeepLinkService extends GetxService {
   Future<void> _handleDeepLink(Uri uri) async {
     print('DeepLinkService: Received URI: $uri');
     
-    // Wait until the app navigates away from the splash screen
-    while (Get.currentRoute == '/' || Get.currentRoute == '') {
+    // Wait until the app is fully initialized (splash screen is gone)
+    while (!isAppReady) {
       await Future.delayed(const Duration(milliseconds: 300));
     }
     

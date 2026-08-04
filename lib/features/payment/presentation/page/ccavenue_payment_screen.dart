@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:get/get.dart';
@@ -64,26 +66,16 @@ class _CCAvenuePaymentScreenState extends State<CCAvenuePaymentScreen> {
   }
 
   void _loadPaymentForm() {
-    final String htmlContent = '''
-      <html>
-        <head>
-          <title>Processing Payment...</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body onload="document.f.submit();" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif;">
-          <form id="f" name="f" method="post" action="${widget.paymentUrl}">
-            <input type="hidden" name="encRequest" value="${widget.encRequest}" />
-            <input type="hidden" name="access_code" value="${widget.accessCode}" />
-          </form>
-          <div style="text-align: center;">
-            <h2>Redirecting to Secure Payment Gateway...</h2>
-            <p>Please do not refresh the page.</p>
-          </div>
-        </body>
-      </html>
-    ''';
-
-    _controller.loadHtmlString(htmlContent);
+    // CCAvenue expects a POST request with encRequest and access_code
+    // Using loadRequest natively handles POST without HTML/CORS issues
+    final String postData = 'encRequest=${Uri.encodeComponent(widget.encRequest)}&access_code=${Uri.encodeComponent(widget.accessCode)}';
+    
+    _controller.loadRequest(
+      Uri.parse(widget.paymentUrl),
+      method: LoadRequestMethod.post,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: Uint8List.fromList(utf8.encode(postData)),
+    );
   }
 
   void _checkUrlForStatus(String url) async {
