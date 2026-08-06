@@ -726,6 +726,7 @@ class RegBusinessController extends GetxController {
       );
       final response = await _repository.getBusinessPlans();
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success == true && response.data?.plans != null) {
         final targetType = businessType.toLowerCase();
@@ -777,6 +778,7 @@ class RegBusinessController extends GetxController {
       );
 
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success && response.data != null) {
         final orderData = response.data!;

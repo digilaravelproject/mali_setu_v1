@@ -430,7 +430,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: Icons.phone_outlined,
               label: 'call'.tr,
               color: Colors.blue,
-              onTap: () => controller.launchPhone(business.user!.phone.toString()),
+              onTap: () => controller.launchPhone(business.contactPhone.toString()),
             ),
           ),
           _buildVerticalDivider(context, height: 30),
@@ -751,7 +751,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
           top: false,
           child: ElevatedButton.icon(
             onPressed: () {
-              controller.launchPhone(business.user!.phone.toString());
+              controller.launchPhone(business.contactPhone.toString());
             },
             icon: const Icon(Icons.call, size: 20),
             label: Text(

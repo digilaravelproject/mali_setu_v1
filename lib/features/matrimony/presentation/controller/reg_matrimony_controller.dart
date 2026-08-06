@@ -17,6 +17,7 @@ import '../../../../core/helper/pincode_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import '../../../../features/Auth/service/auth_service.dart';
 import '../page/matrimony_subscription_plan.dart';
 import 'matrimony_details_controller.dart';
@@ -337,7 +338,10 @@ class RegMatrimonyController extends GetxController {
           final List<String> allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif', 'webp'];
 
           if (sizeInMb <= 10 && (allowedExtensions.contains(extension) || extension.isEmpty)) {
-            selectedPhotos.add(file);
+            final appDir = await getApplicationDocumentsDirectory();
+            final fileName = '${DateTime.now().millisecondsSinceEpoch}_${images[i].name}';
+            final savedFile = await file.copy('${appDir.path}/$fileName');
+            selectedPhotos.add(savedFile);
             addedCount++;
           } else {
             failedFiles.add(images[i].name);
@@ -703,6 +707,15 @@ class RegMatrimonyController extends GetxController {
         middleNameText,
         lastNameText,
       ].where((s) => s.isNotEmpty).join(' ');
+
+      // Verify photos exist
+      for (var file in selectedPhotos) {
+        if (!await file.exists()) {
+          Get.back(); // close dialog
+          CustomSnackBar.showError(message: "Some selected photos are no longer available. Please re-select them.");
+          return;
+        }
+      }
 
       // Convert images to base64
       List<String> base64Photos = [];
@@ -1265,10 +1278,13 @@ class RegMatrimonyController extends GetxController {
 
   Future<void> fetchAndShowPlans() async {
     try {
-      // Get.dialog(const Center(child: CircularProgressIndicator()),
-      //     barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
       final response = await _repository.getMatrimonyPlans();
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success == true && response.data?.plans != null) {
         final selectedPlan = await showSubscriptionBottomSheet(
@@ -1303,6 +1319,7 @@ class RegMatrimonyController extends GetxController {
       final response = await _paymentRepository.createOrder(planId: plan.id!);
 
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success && response.data != null) {
         final orderData = response.data!;

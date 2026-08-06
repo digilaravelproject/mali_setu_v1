@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/constent/app_constants.dart';
 import '../../../../core/storage/shared_prefs.dart';
+import '../../../../core/services/deep_link_service.dart';
 
 class InitController extends GetxController
     implements GetTickerProviderStateMixin {
@@ -21,6 +22,9 @@ class InitController extends GetxController
     } else {
       Get.offNamed(AppRoutes.login);
     }
+
+    // Mark app as ready for deep link handling
+    DeepLinkService.isAppReady = true;
   }
 
   @override

@@ -180,11 +180,11 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                     TwoColumnRow(
                       left: AppInputTextField(
                         label: "country".tr,
-                        controller: controller.districtCtrl,
+                        controller: controller.countryCtrl,
                         isRequired: true,
                       //  iconData: CupertinoIcons.location_fill,
                         topPadding: 0,
-                        validator: (v) => FormValidator.emptycheck(v, "district".tr),
+                        validator: (v) => FormValidator.emptycheck(v, "country".tr),
                       ),
 
                       right: AppInputTextField(

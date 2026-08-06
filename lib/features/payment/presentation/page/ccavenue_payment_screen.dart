@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:get/get.dart';
@@ -71,7 +73,7 @@ class _CCAvenuePaymentScreenState extends State<CCAvenuePaymentScreen> {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
         <body onload="document.f.submit();" style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif;">
-          <form id="f" name="f" method="post" action="${widget.paymentUrl}">
+          <form id="f" name="f" method="post" action="${widget.paymentUrl.trim()}">
             <input type="hidden" name="encRequest" value="${widget.encRequest}" />
             <input type="hidden" name="access_code" value="${widget.accessCode}" />
           </form>
@@ -83,7 +85,9 @@ class _CCAvenuePaymentScreenState extends State<CCAvenuePaymentScreen> {
       </html>
     ''';
 
-    _controller.loadHtmlString(htmlContent);
+    // Using the merchant's registered domain as baseUrl fixes iOS CORS blocks
+    // and avoids CCAvenue's "Merchant Authentication Failed" spoofing protection.
+    _controller.loadHtmlString(htmlContent, baseUrl: 'https://malisetu.com');
   }
 
   void _checkUrlForStatus(String url) async {
