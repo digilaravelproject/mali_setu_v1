@@ -61,6 +61,7 @@ class DonationController extends GetxController {
       );
 
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success && response.data != null) {
         final data = response.data!;

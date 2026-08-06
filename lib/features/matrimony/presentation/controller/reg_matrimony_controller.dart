@@ -1278,10 +1278,13 @@ class RegMatrimonyController extends GetxController {
 
   Future<void> fetchAndShowPlans() async {
     try {
-      // Get.dialog(const Center(child: CircularProgressIndicator()),
-      //     barrierDismissible: false);
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
       final response = await _repository.getMatrimonyPlans();
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success == true && response.data?.plans != null) {
         final selectedPlan = await showSubscriptionBottomSheet(
@@ -1316,6 +1319,7 @@ class RegMatrimonyController extends GetxController {
       final response = await _paymentRepository.createOrder(planId: plan.id!);
 
       Get.back(); // Close Loading
+      await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success && response.data != null) {
         final orderData = response.data!;
