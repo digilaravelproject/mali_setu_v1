@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -393,24 +393,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   Widget _buildHeaderIconLabel(IconData icon, String label, BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
-        const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            label,
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[700],
-              fontSize: 14,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
+    return ExpandableIconLabel(icon: icon, label: label);
   }
 
   Widget _buildQuickActions(Business business, BuildContext context) {
@@ -1493,5 +1476,101 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_StickyTabBarDelegate oldDelegate) {
     return false;
+  }
+}
+
+class ExpandableIconLabel extends StatefulWidget {
+  final IconData icon;
+  final String label;
+
+  const ExpandableIconLabel({
+    Key? key,
+    required this.icon,
+    required this.label,
+  }) : super(key: key);
+
+  @override
+  State<ExpandableIconLabel> createState() => _ExpandableIconLabelState();
+}
+
+class _ExpandableIconLabelState extends State<ExpandableIconLabel> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 2.0),
+          child: Icon(widget.icon, size: 16, color: Colors.grey[600]),
+        ),
+        const SizedBox(width: 6),
+        Flexible(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final span = TextSpan(
+                text: widget.label,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey[700],
+                  fontSize: 14,
+                ),
+              );
+
+              final tp = TextPainter(
+                text: span,
+                textDirection: TextDirection.ltr,
+                maxLines: 1,
+              );
+
+              tp.layout(maxWidth: constraints.maxWidth);
+
+              if (tp.didExceedMaxLines) {
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      isExpanded = !isExpanded;
+                    });
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        widget.label,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[700],
+                          fontSize: 14,
+                        ),
+                        maxLines: isExpanded ? null : 1,
+                        overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isExpanded ? 'less'.tr : 'more'.tr,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: context.theme.primaryColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                return Text(
+                  widget.label,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[700],
+                    fontSize: 14,
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
   }
 }
