@@ -562,24 +562,26 @@ class BlogsScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                  child: SizedBox(
-                    height: 180,
-                    width: double.infinity,
-                    child: firstMedia != null
-                        ? (isVideoFirst
-                        ? VideoThumbnailWidget(
-                      key: ValueKey(firstMedia),
-                      videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
-                      height: 180,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 400, minHeight: 180),
+                    child: SizedBox(
                       width: double.infinity,
-                      placeholder: _blogPlaceholder(primaryColor, isVideo: true),
-                    )
-                        : Image.network(
-                      "${ApiConstants.imageBaseUrl}$firstMedia",
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
+                      child: firstMedia != null
+                          ? (isVideoFirst
+                          ? VideoThumbnailWidget(
+                        key: ValueKey(firstMedia),
+                        videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
+                        height: 180,
+                        width: double.infinity,
+                        placeholder: _blogPlaceholder(primaryColor, isVideo: true),
+                      )
+                          : Image.network(
+                        "${ApiConstants.imageBaseUrl}$firstMedia",
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
                     ))
                         : _blogPlaceholder(primaryColor, isVideo: false),
+                    ),
                   ),
                 ),
                 // Category tag top-left

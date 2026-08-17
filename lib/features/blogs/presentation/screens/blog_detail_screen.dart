@@ -269,10 +269,10 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                       ));
                 },
                 child: Container(
-                  color: Colors.black,
+                  color: Colors.transparent,
                   child: Image.network(
                     url,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => _dummyImage(primaryColor),
                   ),
                 ),
@@ -1212,7 +1212,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         children: [
           Image.network(
             "${ApiConstants.imageBaseUrl}$firstMedia",
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             width: double.infinity,
             height: double.infinity,
           ),
@@ -1221,7 +1221,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
       )
     : Image.network(
         "${ApiConstants.imageBaseUrl}$firstMedia",
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => Container(
           color: Colors.grey[100],
           child: Center(
