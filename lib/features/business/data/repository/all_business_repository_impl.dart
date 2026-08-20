@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/business/data/data_source/all_business_data_source.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/data/model/res_single_product_model.dart';
+import 'package:edu_cluezer/features/business/data/model/res_single_service_model.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 
@@ -23,6 +25,16 @@ class BusinessRepositoryImpl implements BusinessRepository {
   @override
   Future<BusinessResponse> getBusinessDetails(int id) {
     return dataSource.getBusinessDetails(id);
+  }
+
+  @override
+  Future<SingleProductResponse> getSingleProductDetails(int productId) {
+    return dataSource.getSingleProductDetails(productId);
+  }
+
+  @override
+  Future<SingleServiceResponse> getSingleServiceDetails(int serviceId) {
+    return dataSource.getSingleServiceDetails(serviceId);
   }
 
   @override

@@ -1,5 +1,7 @@
 import 'dart:io';
 import '../../data/model/res_all_business_model.dart';
+import '../../data/model/res_single_product_model.dart';
+import '../../data/model/res_single_service_model.dart';
 import '../../data/model/business_plan_model.dart';
 
 
@@ -7,6 +9,8 @@ abstract class BusinessRepository {
   Future<BusinessResponse> getAllBusinesses({int page = 1, String? search, double? lat, double? long});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
+  Future<SingleProductResponse> getSingleProductDetails(int productId);
+  Future<SingleServiceResponse> getSingleServiceDetails(int serviceId);
   Future<BusinessResponse> getBusinessProducts(int businessId);
   Future<BusinessResponse> getBusinessServices(int businessId);
   Future<BusinessResponse> addProduct(Map<String, dynamic> data, List<File> images);

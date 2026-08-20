@@ -155,19 +155,19 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ],
                 ),
   
-                const SizedBox(height: 8),
+                // const SizedBox(height: 8),
   
-                // Caste Certificate Section
-                _buildFormSection(
-                  context,
-                  title: "caste_certificate".tr,
-                  icon: CupertinoIcons.doc_plaintext,
-                  isRequired: true,
-                  titleSize: 12,
-                  children: [
-                    Obx(() => _buildCasteCertificateUpload(context)),
-                  ],
-                ),
+                // // Caste Certificate Section
+                // _buildFormSection(
+                //   context,
+                //   title: "caste_certificate".tr,
+                //   icon: CupertinoIcons.doc_plaintext,
+                //   isRequired: true,
+                //   titleSize: 12,
+                //   children: [
+                //     Obx(() => _buildCasteCertificateUpload(context)),
+                //   ],
+                // ),
   
                 const SizedBox(height: 8),
   
@@ -296,12 +296,11 @@ class RegisterPage extends GetWidget<RegisterController> {
                     AppInputTextField(
                       label: "occupation".tr,
                       controller: controller.occupationCtrl,
-                      isRequired: true,
+                      isRequired: false,
                       isDropdown: true,
                       iconData: CupertinoIcons.briefcase_fill,
                       dropdownItems: controller.occupationList,
                       onDropdownChanged: (v) => controller.occupationCtrl.text = v,
-                      validator: (v) => FormValidator.emptycheck(v, "occupation".tr),
                       topPadding: 0,
                     ),
                     AppInputTextField(
@@ -330,6 +329,30 @@ class RegisterPage extends GetWidget<RegisterController> {
                     //   iconData: CupertinoIcons.tag_fill,
                     //   topPadding: 0,
                     // ),
+                  ],
+                ),
+  
+                const SizedBox(height: 20),
+                
+                // Reference Details Section
+                _buildFormSection(
+                  context,
+                  title: "Reference Details",
+                  icon: CupertinoIcons.person_3_fill,
+                  children: [
+                    AppInputTextField(
+                      label: "Respected Person Name",
+                      controller: controller.respectedPersonNameCtrl,
+                      iconData: CupertinoIcons.person_fill,
+                      topPadding: 0,
+                    ),
+                    AppInputTextField(
+                      label: "Respected Person Mobile",
+                      controller: controller.respectedPersonMobileCtrl,
+                      iconData: CupertinoIcons.phone_fill,
+                      textInputType: TextInputType.phone,
+                      topPadding: 0,
+                    ),
                   ],
                 ),
   

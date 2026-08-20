@@ -2,6 +2,8 @@ import 'package:edu_cluezer/features/business/presentation/controller/create_job
 import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/page/create_job_post_page.dart';
 import 'package:edu_cluezer/features/filter/presentation/controller/filter_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/single_product_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/single_service_controller.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:get/get.dart';
 
@@ -100,5 +102,15 @@ class BusinessBinding extends Bindings {
           updateApplicationStatusUseCase: Get.find<UpdateApplicationStatusUseCase>(),
           searchBusinessUseCase: Get.find<SearchBusinessUseCase>(),
         ), fenix: true);
+
+    Get.lazyPut<SingleProductController>(
+      () => SingleProductController(repository: Get.find<BusinessRepository>()),
+      fenix: true,
+    );
+
+    Get.lazyPut<SingleServiceController>(
+      () => SingleServiceController(repository: Get.find<BusinessRepository>()),
+      fenix: true,
+    );
   }
 }

@@ -28,6 +28,8 @@ class ApiConstants {
     static const String allBusiness = "business";
     static const String getSingleBusiness = "business";
     static const String getBusinessProducts = "business";
+    static const String getSingleProduct = "business/products";
+    static const String getSingleService = "business/services";
     static const String getBusinessServices = "business";
     static const String updateBusinessServices = "business";
     static const String deleteBusinessServices = "business";

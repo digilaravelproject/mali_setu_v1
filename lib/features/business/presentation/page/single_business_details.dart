@@ -1,5 +1,8 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/constent/app_constants.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:flutter/cupertino.dart';
@@ -76,164 +79,258 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               final currentUser = authService.currentUser.value;
               final isOwner = currentUser?.id == business.userId;
               final topPadding = MediaQuery.of(context).padding.top;
-              final fixedHeight = 500.0;
+              final fixedHeight = 580.0;
 
               return RefreshIndicator(
-                onRefresh: () => controller.fetchBusinessDetails(argBusiness.id!, isRefresh: true),
+                onRefresh: () => controller.fetchBusinessDetails(
+                  argBusiness.id!,
+                  isRefresh: true,
+                ),
                 color: context.theme.primaryColor,
                 backgroundColor: context.theme.scaffoldBackgroundColor,
                 child: NestedScrollView(
-                controller: _outerScrollController,
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverOverlapAbsorber(
-                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                      sliver: SliverAppBar(
-                        floating: false,
-                        pinned: false,
-                        centerTitle: false,
-                        backgroundColor: context.theme.scaffoldBackgroundColor,
-                        elevation: innerBoxIsScrolled ? 4 : 0,
-                        shadowColor: Colors.black.withOpacity(0.05),
-                    //    expandedHeight: isOwner ? 580 : 460,
-                        expandedHeight: fixedHeight + topPadding,
-                        forceElevated: innerBoxIsScrolled,
-                        title: Obx(() => AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: _showTitle.value ? 1.0 : 0.0,
-                          child: Text(
-                            business.businessName?.toTitleCase() ?? '',
-                            style: context.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18,
+                  controller: _outerScrollController,
+                  headerSliverBuilder: (context, innerBoxIsScrolled) {
+                    return [
+                      SliverOverlapAbsorber(
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                          context,
+                        ),
+                        sliver: SliverAppBar(
+                          floating: false,
+                          pinned: false,
+                          centerTitle: false,
+                          backgroundColor:
+                              context.theme.scaffoldBackgroundColor,
+                          elevation: innerBoxIsScrolled ? 4 : 0,
+                          shadowColor: Colors.black.withOpacity(0.05),
+                          //    expandedHeight: isOwner ? 580 : 460,
+                          expandedHeight: fixedHeight + topPadding,
+                          forceElevated: innerBoxIsScrolled,
+                          title: Obx(
+                            () => AnimatedOpacity(
+                              duration: const Duration(milliseconds: 200),
+                              opacity: _showTitle.value ? 1.0 : 0.0,
+                              child: Text(
+                                business.businessName?.toTitleCase() ?? '',
+                                style: context.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  color: Colors.black87,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          leading: IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back_ios_new,
                               color: Colors.black87,
+                              size: 20,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
-                        )),
-                        leading: IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
 
-                        actions: [
-                          PopupMenuButton<String>(
-                            offset: const Offset(0, 48),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            icon: const Icon(Icons.more_vert, color: Colors.black87, size: 24),
-                            onSelected: (value) {
-                              if (value == 'refresh') {
-                                if (argBusiness.id != null) {
-                                  controller.fetchBusinessDetails(argBusiness.id!, isRefresh: true);
+                          actions: [
+                            PopupMenuButton<String>(
+                              offset: const Offset(0, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              icon: const Icon(
+                                Icons.more_vert,
+                                color: Colors.black87,
+                                size: 24,
+                              ),
+                              onSelected: (value) {
+                                if (value == 'refresh') {
+                                  if (argBusiness.id != null) {
+                                    controller.fetchBusinessDetails(
+                                      argBusiness.id!,
+                                      isRefresh: true,
+                                    );
+                                  }
+                                } else if (value == 'add_product') {
+                                  Get.toNamed(
+                                    AppRoutes.addProduct,
+                                    arguments: business.id,
+                                  );
+                                } else if (value == 'add_service') {
+                                  Get.toNamed(
+                                    AppRoutes.addService,
+                                    arguments: business.id,
+                                  );
+                                } else if (value == 'create_job') {
+                                  Get.toNamed(
+                                    AppRoutes.createJob,
+                                    arguments: business.id,
+                                  );
+                                } else if (value == 'job_analytics') {
+                                  Get.toNamed(
+                                    AppRoutes.jobAnalytics,
+                                    arguments: {"business_id": business.id},
+                                  );
                                 }
-                              } else if (value == 'add_product') {
-                                Get.toNamed(AppRoutes.addProduct, arguments: business.id);
-                              } else if (value == 'add_service') {
-                                Get.toNamed(AppRoutes.addService, arguments: business.id);
-                              } else if (value == 'create_job') {
-                                Get.toNamed(AppRoutes.createJob, arguments: business.id );
-                              } else if (value == 'job_analytics') {
-                                Get.toNamed(AppRoutes.jobAnalytics,arguments: {
-                                  "business_id": business.id,
-                                },);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 'refresh',
-                                child: Row(children: [Icon(Icons.refresh, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('refresh'.tr)]),
-                              ),
-                              if (isOwner) ...[
+                              },
+                              itemBuilder: (context) => [
                                 PopupMenuItem(
-                                  value: 'add_product',
-                                  child: Row(children: [Icon(Icons.add_box_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_product'.tr)]),
+                                  value: 'refresh',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.refresh,
+                                        size: 20,
+                                        color: context.theme.primaryColor,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text('refresh'.tr),
+                                    ],
+                                  ),
                                 ),
-                                PopupMenuItem(
-                                  value: 'add_service',
-                                  child: Row(children: [Icon(Icons.add_circle_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('add_service'.tr)]),
-                                ),
-                                PopupMenuItem(
-                                  value: 'create_job',
-                                  child: Row(children: [Icon(Icons.work_outline, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('create_job'.tr)]),
-                                ),
-                                PopupMenuItem(
-                                  value: 'job_analytics',
-                                  child: Row(children: [Icon(Icons.analytics_outlined, size: 20, color: context.theme.primaryColor), const SizedBox(width: 12), Text('job_analytics'.tr)]),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                        flexibleSpace: FlexibleSpaceBar(
-                          collapseMode: CollapseMode.pin,
-                          background: OverflowBox(
-                            alignment: Alignment.topCenter,
-                            maxHeight: double.infinity,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(height: MediaQuery.of(context).padding.top + 48),
-                                _buildBusinessHeader(business, context),
-                                const SizedBox(height: 20),
-                                _buildQuickActions(business, context),
-                                const SizedBox(height: 12),
-                                _buildStatsRow(business, context),
-                                const SizedBox(height: 16),
+                                if (isOwner) ...[
+                                  PopupMenuItem(
+                                    value: 'add_product',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.add_box_outlined,
+                                          size: 20,
+                                          color: context.theme.primaryColor,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text('add_product'.tr),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'add_service',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.add_circle_outline,
+                                          size: 20,
+                                          color: context.theme.primaryColor,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text('add_service'.tr),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'create_job',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.work_outline,
+                                          size: 20,
+                                          color: context.theme.primaryColor,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text('create_job'.tr),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'job_analytics',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.analytics_outlined,
+                                          size: 20,
+                                          color: context.theme.primaryColor,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text('job_analytics'.tr),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                          ),
-                        ),
-                        bottom: PreferredSize(
-                          preferredSize: const Size.fromHeight(48),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: context.theme.cardColor,
-                              border: Border(
-                                bottom: BorderSide(color: context.theme.dividerColor, width: 0.5),
+                            const SizedBox(width: 4),
+                          ],
+                          flexibleSpace: FlexibleSpaceBar(
+                            collapseMode: CollapseMode.pin,
+                            background: OverflowBox(
+                              alignment: Alignment.topCenter,
+                              maxHeight: double.infinity,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    height:
+                                        MediaQuery.of(context).padding.top + 48,
+                                  ),
+                                  _buildBusinessHeader(business, context),
+                                  const SizedBox(height: 20),
+                                  _buildQuickActions(business, context),
+                                  const SizedBox(height: 12),
+                                  _buildStatsRow(business, context),
+                                  const SizedBox(height: 16),
+                                ],
                               ),
                             ),
-                            child: TabBar(
-                              labelColor: context.theme.primaryColor,
-                              unselectedLabelColor: Colors.grey[600],
-                              indicatorColor: context.theme.primaryColor,
-                              indicatorWeight: 2,
-                              dividerColor: Colors.transparent,
-                              labelStyle: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                          ),
+                          bottom: PreferredSize(
+                            preferredSize: const Size.fromHeight(48),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: context.theme.cardColor,
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: context.theme.dividerColor,
+                                    width: 0.5,
+                                  ),
+                                ),
                               ),
-                              unselectedLabelStyle: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                              child: TabBar(
+                                labelColor: context.theme.primaryColor,
+                                unselectedLabelColor: Colors.grey[600],
+                                indicatorColor: context.theme.primaryColor,
+                                indicatorWeight: 2,
+                                dividerColor: Colors.transparent,
+                                labelStyle: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                                unselectedLabelStyle: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                                tabs: [
+                                  Tab(text: 'products'.tr),
+                                  Tab(text: 'services'.tr),
+                                  Tab(text: 'jobs'.tr),
+                                  Tab(text: 'info'.tr),
+                                ],
                               ),
-                              tabs: [
-                                Tab(text: 'products'.tr),
-                                Tab(text: 'services'.tr),
-                                Tab(text: 'jobs'.tr),
-                                Tab(text: 'info'.tr),
-                              ],
                             ),
                           ),
                         ),
                       ),
+                    ];
+                  },
+                  body: Padding(
+                    padding: const EdgeInsets.only(bottom: 70),
+                    child: TabBarView(
+                      children: [
+                        Builder(
+                          builder: (context) => _buildProductsTab(context),
+                        ),
+                        Builder(
+                          builder: (context) => _buildServicesTab(context),
+                        ),
+                        Builder(builder: (context) => _buildJobsTab(context)),
+                        Builder(
+                          builder: (context) =>
+                              _buildBusinessInfoTab(business, context),
+                        ),
+                      ],
                     ),
-                  ];
-                },
-                body: Padding(
-                  padding: const EdgeInsets.only(bottom: 70),
-                  child: TabBarView(
-                    children: [
-                      Builder(builder: (context) => _buildProductsTab(context)),
-                      Builder(builder: (context) => _buildServicesTab(context)),
-                      Builder(builder: (context) => _buildJobsTab(context)),
-                      Builder(builder: (context) => _buildBusinessInfoTab(business, context)),
-                    ],
                   ),
                 ),
-              ),
-            );
+              );
             }),
           ),
           Obx(() {
@@ -259,7 +356,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      business.businessName?.toTitleCase() ?? 'unnamed_business'.tr,
+                      business.businessName?.toTitleCase() ??
+                          'unnamed_business'.tr,
                       style: context.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 24,
@@ -307,7 +405,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.verified, color: Colors.blue, size: 18),
+                              const Icon(
+                                Icons.verified,
+                                color: Colors.blue,
+                                size: 18,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 'verified'.tr,
@@ -322,19 +424,35 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    _buildHeaderIconLabel(Icons.category_outlined, business.category?.name?.toTitleCase() ?? 'category'.tr, context),
+                    _buildHeaderIconLabel(
+                      Icons.category_outlined,
+                      business.category?.name?.toTitleCase() ?? 'category'.tr,
+                      context,
+                    ),
                     const SizedBox(height: 6),
-                    _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
+                    _buildHeaderIconLabel(
+                      Icons.info_outline,
+                      business.description.toString(),
+                      context,
+                    ),
                     const SizedBox(height: 6),
-                    _buildHeaderIconLabel(Icons.location_on_outlined, business.state.toString()+', '+business.city.toString()+', '+business.pincode.toString(), context),
-                   // const SizedBox(height: 6),
+                    _buildHeaderIconLabel(
+                      Icons.location_on_outlined,
+                      business.state.toString() +
+                          ', ' +
+                          business.city.toString() +
+                          ', ' +
+                          business.pincode.toString(),
+                      context,
+                    ),
+                    // const SizedBox(height: 6),
                     // Row(
                     //   children: [
                     //     Text("distance : ",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
                     //     Text("${business.KMfromuser}",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
                     //   ],
                     // ),
-                  //  _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
+                    //  _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
                   ],
                 ),
               ),
@@ -347,30 +465,41 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     height: 72,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1.5),
+                      border: Border.all(
+                        color: Colors.grey.withOpacity(0.2),
+                        width: 1.5,
+                      ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: business.photo != null
                           ? Image.network(
-                        ApiConstants.imageBaseUrl+ business.photo!,
+                              ApiConstants.imageBaseUrl + business.photo!,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => _buildDetailPlaceholderIcon(),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  _buildDetailPlaceholderIcon(),
                             )
                           : _buildDetailPlaceholderIcon(),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: business.verificationStatus == 'active' ? Colors.green.withOpacity(0.12) : Colors.grey.withOpacity(0.12),
+                      color: business.verificationStatus == 'active'
+                          ? Colors.green.withOpacity(0.12)
+                          : Colors.grey.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       (business.verificationStatus ?? 'active').toTitleCase(),
                       style: TextStyle(
-                        color: business.verificationStatus == 'active' ? Colors.green[800] : Colors.grey[800],
+                        color: business.verificationStatus == 'active'
+                            ? Colors.green[800]
+                            : Colors.grey[800],
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
@@ -382,17 +511,17 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildTimingHighlight(business, context),
-            ],
-          ),
+          Row(children: [_buildTimingHighlight(business, context)]),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderIconLabel(IconData icon, String label, BuildContext context) {
+  Widget _buildHeaderIconLabel(
+    IconData icon,
+    String label,
+    BuildContext context,
+  ) {
     return ExpandableIconLabel(icon: icon, label: label);
   }
 
@@ -413,7 +542,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: Icons.phone_outlined,
               label: 'call'.tr,
               color: Colors.blue,
-              onTap: () => controller.launchPhone(business.contactPhone.toString()),
+              onTap: () =>
+                  controller.launchPhone(business.contactPhone.toString()),
             ),
           ),
           _buildVerticalDivider(context, height: 30),
@@ -422,7 +552,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: Icons.email_outlined,
               label: 'email'.tr,
               color: Colors.red.shade400,
-              onTap: () => controller.launchEmail(business.user!.email.toString()),
+              onTap: () =>
+                  controller.launchEmail(business.user!.email.toString()),
             ),
           ),
           _buildVerticalDivider(context, height: 30),
@@ -431,14 +562,79 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: FontAwesomeIcons.whatsapp,
               label: 'whatsapp'.tr,
               color: Colors.green,
-              onTap: () => controller.launchWhatsApp(business.user!.phone.toString()),
+              onTap: () =>
+                  controller.launchWhatsApp(business.user!.phone.toString()),
+            ),
+          ),
+          _buildVerticalDivider(context, height: 30),
+          Expanded(
+            child: Builder(
+              builder: (buttonContext) {
+                return _buildQuickActionItem(
+                  icon: Icons.share_outlined,
+                  label: 'share'.tr,
+                  color: Colors.orange,
+                  onTap: () async {
+                    final RenderBox? box =
+                        buttonContext.findRenderObject() as RenderBox?;
+                    final Rect? sharePositionOrigin = box != null
+                        ? (box.localToGlobal(Offset.zero) & box.size)
+                        : Rect.fromLTWH(
+                            0,
+                            0,
+                            MediaQuery.of(buttonContext).size.width,
+                            MediaQuery.of(buttonContext).size.height / 2,
+                          );
+
+                    final String shareLink =
+                        'https://malisetu.com/business/${business.id}';
+                    final String businessName =
+                        business.businessName ?? 'Check out this business!';
+                    final String shareText =
+                        "$businessName\n\nCheck out this business on Mali Setu: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}";
+
+                    // if (business.photo != null && business.photo!.isNotEmpty) {
+                    //   try {
+                    //     String ext = '.jpg';
+                    //     if (business.photo!.contains('.')) {
+                    //       ext = '.${business.photo!.split('.').last}';
+                    //     }
+                    //     final imageUrl =
+                    //         "${ApiConstants.imageBaseUrl}${business.photo}";
+                    //     final tempDir = await getTemporaryDirectory();
+                    //     final tempPath =
+                    //         '${tempDir.path}/business_share_${DateTime.now().millisecondsSinceEpoch}$ext';
+                    //     await Dio().download(imageUrl, tempPath);
+                    //     await Share.shareXFiles(
+                    //       [XFile(tempPath)],
+                    //       text: shareText,
+                    //       subject: businessName,
+                    //       sharePositionOrigin: sharePositionOrigin,
+                    //     );
+                    //   } catch (e) {
+                    //     Share.share(
+                    //       shareText,
+                    //       subject: businessName,
+                    //       sharePositionOrigin: sharePositionOrigin,
+                    //     );
+                    //   }
+                    // } else {
+                      Share.share(
+                        shareText,
+                        subject: businessName,
+                        sharePositionOrigin: sharePositionOrigin,
+                      );
+                  //  }
+                  },
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
- 
+
   Widget _buildQuickActionItem({
     required dynamic icon,
     required String label,
@@ -480,7 +676,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       ),
     );
   }
- 
+
   Widget _buildStatsRow(Business business, BuildContext context) {
     return Obx(() {
       // Check if current user is the owner
@@ -488,12 +684,12 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       final currentUser = authService.currentUser.value;
       final b = controller.selectedBusiness.value ?? business;
       final isOwner = currentUser?.id == b.userId;
-      
+
       // If owner, show all jobs count. Otherwise, hide pending jobs from count
-      final jobCount = isOwner 
-          ? controller.businessJobs.length 
+      final jobCount = isOwner
+          ? controller.businessJobs.length
           : controller.businessJobs.where((j) => j.status != 'pending').length;
-      
+
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -506,16 +702,40 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               color: Colors.black.withOpacity(0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
-            )
+            ),
           ],
         ),
         child: Row(
           children: [
-            Expanded(child: _buildStatItem('products'.tr, '${controller.businessProducts.length}', Icons.shopping_bag_outlined, Colors.orange, context)),
+            Expanded(
+              child: _buildStatItem(
+                'products'.tr,
+                '${controller.businessProducts.length}',
+                Icons.shopping_bag_outlined,
+                Colors.orange,
+                context,
+              ),
+            ),
             _buildVerticalDivider(context),
-            Expanded(child: _buildStatItem('services'.tr, '${controller.businessServices.length}', Icons.design_services_outlined, Colors.blue, context)),
+            Expanded(
+              child: _buildStatItem(
+                'services'.tr,
+                '${controller.businessServices.length}',
+                Icons.design_services_outlined,
+                Colors.blue,
+                context,
+              ),
+            ),
             _buildVerticalDivider(context),
-            Expanded(child: _buildStatItem('jobs'.tr, '$jobCount', Icons.work_outline, Colors.green, context)),
+            Expanded(
+              child: _buildStatItem(
+                'jobs'.tr,
+                '$jobCount',
+                Icons.work_outline,
+                Colors.green,
+                context,
+              ),
+            ),
           ],
         ),
       );
@@ -529,8 +749,14 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       color: context.theme.dividerColor.withOpacity(0.3),
     );
   }
- 
-  Widget _buildStatItem(String label, String value, IconData icon, Color color, BuildContext context) {
+
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+    BuildContext context,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -577,10 +803,10 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     final authService = Get.find<AuthService>();
     final currentUser = authService.currentUser.value;
     final business = controller.selectedBusiness.value ?? argBusiness;
-    
+
     // If user is not logged in or doesn't match owner ID, hide section
     if (currentUser?.id != business.userId) {
-       return const SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return Container(
@@ -629,7 +855,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   onTap: () {
                     Get.toNamed(AppRoutes.addProduct, arguments: business.id);
                   },
-                  child: _buildActionButton('add_product'.tr, Icons.add_box_outlined, context),
+                  child: _buildActionButton(
+                    'add_product'.tr,
+                    Icons.add_box_outlined,
+                    context,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -639,19 +869,28 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   onTap: () {
                     Get.toNamed(AppRoutes.addService, arguments: business.id);
                   },
-                  child: _buildActionButton('add_service'.tr, Icons.add_circle_outline, context),
+                  child: _buildActionButton(
+                    'add_service'.tr,
+                    Icons.add_circle_outline,
+                    context,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: InkWell(
-                    onTap: () {
-                      if (Get.isRegistered<CreateJobController>()) {
-                        Get.find<CreateJobController>().clearFields();
-                      }
-                      Get.toNamed(AppRoutes.createJob,arguments: business.id);
-                    },
-                    child: _buildActionButton('create_job'.tr, Icons.work_outline, context)),
+                  onTap: () {
+                    if (Get.isRegistered<CreateJobController>()) {
+                      Get.find<CreateJobController>().clearFields();
+                    }
+                    Get.toNamed(AppRoutes.createJob, arguments: business.id);
+                  },
+                  child: _buildActionButton(
+                    'create_job'.tr,
+                    Icons.work_outline,
+                    context,
+                  ),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -660,7 +899,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   onTap: () {
                     Get.toNamed(AppRoutes.jobAnalytics);
                   },
-                  child: _buildActionButton('job_analytics'.tr, Icons.analytics_outlined, context),
+                  child: _buildActionButton(
+                    'job_analytics'.tr,
+                    Icons.analytics_outlined,
+                    context,
+                  ),
                 ),
               ),
             ],
@@ -684,35 +927,35 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
           Icon(icon, size: 22, color: context.iconColor),
           const SizedBox(height: 4),
           Text(
-              label,
-              style: context.textTheme.titleSmall
+            label,
+            style: context.textTheme.titleSmall,
             //const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.black87),
           ),
         ],
       ),
     );
   }
-    // return ElevatedButton(
-    //   onPressed: () {},
-    //   style: ElevatedButton.styleFrom(
-    //     backgroundColor: context.theme.hoverColor,
-    //     foregroundColor: Colors.black87,
-    //     elevation: 0,
-    //     padding: const EdgeInsets.symmetric(vertical: 12),
-    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    //   ),
-    //   child: Column(
-    //     children: [
-    //       Icon(icon, size: 22),
-    //       const SizedBox(height: 4),
-    //       Text(
-    //         label,
-    //         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-    //       ),
-    //     ],
-    //   ),
-    // );
-  
+  // return ElevatedButton(
+  //   onPressed: () {},
+  //   style: ElevatedButton.styleFrom(
+  //     backgroundColor: context.theme.hoverColor,
+  //     foregroundColor: Colors.black87,
+  //     elevation: 0,
+  //     padding: const EdgeInsets.symmetric(vertical: 12),
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //   ),
+  //   child: Column(
+  //     children: [
+  //       Icon(icon, size: 22),
+  //       const SizedBox(height: 4),
+  //       Text(
+  //         label,
+  //         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+  //       ),
+  //     ],
+  //   ),
+  // );
+
   Widget _buildBottomActionBar(Business business, BuildContext context) {
     return Positioned(
       bottom: 0,
@@ -759,7 +1002,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       ),
     );
   }
- 
+
   Widget _buildProductsTab(BuildContext context) {
     return Obx(() {
       if (controller.isDetailsLoading.isTrue) {
@@ -769,7 +1012,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         return CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
-            SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
             SliverFillRemaining(
               child: Center(child: Text('no_products_found'.tr)),
             ),
@@ -779,14 +1024,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       return CustomScrollView(
         physics: const ClampingScrollPhysics(),
         slivers: [
-          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final product = controller.businessProducts[index];
-                  return Card(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final product = controller.businessProducts[index];
+                return InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.singleProductDetails,
+                      arguments: product.id,
+                    );
+                  },
+                  child: Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     elevation: 1,
                     shape: RoundedRectangleBorder(
@@ -809,12 +1062,19 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
                                     child: Image.network(
-                                      ApiConstants.imageBaseUrl+product.imagePath!,
+                                      ApiConstants.imageBaseUrl +
+                                          product.imagePath!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (c, e, s) => Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
+                                      errorBuilder: (c, e, s) => Icon(
+                                        Icons.shopping_bag_outlined,
+                                        color: context.theme.primaryColor,
+                                      ),
                                     ),
                                   )
-                                : Icon(Icons.shopping_bag_outlined, color: context.theme.primaryColor),
+                                : Icon(
+                                    Icons.shopping_bag_outlined,
+                                    color: context.theme.primaryColor,
+                                  ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -830,17 +1090,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 const SizedBox(height: 4),
                                 if (product.cost != null)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: context.theme.primaryColor.withOpacity(0.1),
+                                      color: context.theme.primaryColor
+                                          .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
                                       '₹${product.cost}',
-                                      style: context.textTheme.bodyMedium?.copyWith(
-                                        color: context.theme.primaryColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: context.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: context.theme.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                   ),
                                 if (product.description != null)
@@ -859,10 +1124,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                         ],
                       ),
                     ),
-                  );
-                },
-                childCount: controller.businessProducts.length,
-              ),
+                  ),
+                );
+              }, childCount: controller.businessProducts.length),
             ),
           ),
         ],
@@ -879,7 +1143,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         return CustomScrollView(
           physics: const ClampingScrollPhysics(),
           slivers: [
-            SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
             SliverFillRemaining(
               child: Center(child: Text('no_services_found'.tr)),
             ),
@@ -889,14 +1155,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       return CustomScrollView(
         physics: const ClampingScrollPhysics(),
         slivers: [
-          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final service = controller.businessServices[index];
-                  return Card(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final service = controller.businessServices[index];
+                return InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.singleServiceDetails,
+                      arguments: service.id,
+                    );
+                  },
+                  child: Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -920,34 +1194,61 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 child: service.imagePath != null
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(ApiConstants.imageBaseUrl+service.imagePath!, fit: BoxFit.cover, errorBuilder: (c, e, s) => Icon(Icons.medical_services, color: context.theme.primaryColor)),
+                                        child: Image.network(
+                                          ApiConstants.imageBaseUrl +
+                                              service.imagePath!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (c, e, s) => Icon(
+                                            Icons.medical_services,
+                                            color: context.theme.primaryColor,
+                                          ),
+                                        ),
                                       )
-                                    : Icon(Icons.medical_services, color: context.theme.primaryColor),
+                                    : Icon(
+                                        Icons.medical_services,
+                                        color: context.theme.primaryColor,
+                                      ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(service.name ?? 'unknown_service'.tr, style: context.textTheme.titleLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                    Text('₹${service.cost ?? '0.00'}', style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor)),
+                                    Text(
+                                      service.name ?? 'unknown_service'.tr,
+                                      style: context.textTheme.titleLarge,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      '₹${service.cost ?? '0.00'}',
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: context.theme.primaryColor,
+                                          ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                          if (service.description != null)
+                          if (service.description != null &&
+                              service.description!.isNotEmpty)
                             Padding(
-                              padding: const EdgeInsets.only(left: 10, top: 10),
-                              child: Text(service.description!, style: context.textTheme.bodyMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                service.description!,
+                                style: context.textTheme.bodyMedium,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                         ],
                       ),
                     ),
-                  );
-                },
-                childCount: controller.businessServices.length,
-              ),
+                  ),
+                );
+              }, childCount: controller.businessServices.length),
             ),
           ),
         ],
@@ -957,53 +1258,71 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   Widget _buildJobsTab(BuildContext context) {
     return Obx(() {
-    final authService = Get.find<AuthService>();
-    final currentUser = authService.currentUser.value;
-    final business = controller.selectedBusiness.value ?? argBusiness;
-    final isOwner = currentUser?.id == business.userId;
+      final authService = Get.find<AuthService>();
+      final currentUser = authService.currentUser.value;
+      final business = controller.selectedBusiness.value ?? argBusiness;
+      final isOwner = currentUser?.id == business.userId;
 
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
       }
-      
-      final displayedJobs = isOwner 
-          ? controller.businessJobs 
-          : controller.businessJobs.where((job) => job.status != 'pending').toList();
-      
+
+      final displayedJobs = isOwner
+          ? controller.businessJobs
+          : controller.businessJobs
+                .where((job) => job.status != 'pending')
+                .toList();
+
       if (displayedJobs.isEmpty) {
-         return CustomScrollView(
-           physics: const ClampingScrollPhysics(),
-           slivers: [
-             SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
-             SliverFillRemaining(
-               child: Center(
-                 child: Column(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   mainAxisSize: MainAxisSize.min,
-                   children: [
-                     Icon(Icons.work_off_outlined, size: 64, color: context.theme.disabledColor),
-                     const SizedBox(height: 16),
-                     Text("No jobs posted yet", style: context.textTheme.titleMedium),
-                   ],
-                 ),
-               ),
-             ),
-           ],
-         );
+        return CustomScrollView(
+          physics: const ClampingScrollPhysics(),
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.work_off_outlined,
+                      size: 64,
+                      color: context.theme.disabledColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No jobs posted yet",
+                      style: context.textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
       }
 
       return CustomScrollView(
         physics: const ClampingScrollPhysics(),
         slivers: [
-          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          ),
           SliverPadding(
-            padding: const EdgeInsets.only(right: 16,left: 16,top: 16,bottom: 50),
+            padding: const EdgeInsets.only(
+              right: 16,
+              left: 16,
+              top: 16,
+              bottom: 50,
+            ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 if (isOwner)
-                Row(
-                  children: [
-                   /* Expanded(
+                  Row(
+                    children: [
+                      /* Expanded(
                       child: CustomButton(
                         title: "job_analytics".tr,
                         height: 40,
@@ -1020,8 +1339,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                         onPressed: () => Get.toNamed(AppRoutes.appliedJobList),
                       ),
                     ),*/
-                  ],
-                ),
+                    ],
+                  ),
                 const SizedBox(height: 16),
                 ...displayedJobs.map((job) {
                   return Card(
@@ -1039,9 +1358,16 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           Row(
                             children: [
                               Container(
-                                width: 45, height: 45,
-                                decoration: BoxDecoration(color: context.theme.primaryColorLight, borderRadius: BorderRadius.circular(12)),
-                                child: Icon(Icons.work_outline, color: context.theme.primaryColor),
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: context.theme.primaryColorLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.work_outline,
+                                  color: context.theme.primaryColor,
+                                ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
@@ -1049,14 +1375,27 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(child: Text(job.title ?? 'no_title'.tr, style: context.textTheme.titleLarge)),
+                                        Expanded(
+                                          child: Text(
+                                            job.title ?? 'no_title'.tr,
+                                            style: context.textTheme.titleLarge,
+                                          ),
+                                        ),
                                         const SizedBox(width: 8),
                                         _buildJobStatusBadge(job, context),
                                       ],
                                     ),
-                                    Text(job.salaryRange ?? 'salary_not_specified'.tr, style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor)),
+                                    Text(
+                                      job.salaryRange ??
+                                          'salary_not_specified'.tr,
+                                      style: context.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: context.theme.primaryColor,
+                                          ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1064,24 +1403,87 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(left: 10, top: 10),
-                            child: Text(job.description ?? '', style: context.textTheme.bodyMedium),
+                            child: Text(
+                              job.description ?? '',
+                              style: context.textTheme.bodyMedium,
+                            ),
                           ),
                           const SizedBox(height: 16),
-                          Row(children: [Icon(Icons.location_on, size: 16, color: context.theme.primaryColor), const SizedBox(width: 4), Expanded(child: Text(job.location ?? 'unknown'.tr, style: context.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis))]),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                size: 16,
+                                color: context.theme.primaryColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  job.location ?? 'unknown'.tr,
+                                  style: context.textTheme.titleSmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 8),
-                          Row(children: [Icon(Icons.business_rounded, size: 16, color: context.theme.primaryColor), const SizedBox(width: 4), Expanded(child: Text(job.jobType ?? 'not_specified'.tr, style: context.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis))]),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.business_rounded,
+                                size: 16,
+                                color: context.theme.primaryColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  job.jobType ?? 'not_specified'.tr,
+                                  style: context.textTheme.titleSmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 8),
-                          Row(children: [Icon(Icons.alarm, size: 16, color: context.theme.primaryColor), const SizedBox(width: 4), Expanded(child: Text(job.employmentType ?? 'full_time'.tr, style: context.textTheme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis))]),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.alarm,
+                                size: 16,
+                                color: context.theme.primaryColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  job.employmentType ?? 'full_time'.tr,
+                                  style: context.textTheme.titleSmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 10),
                           if (job.status == 'pending')
-                            CustomButton(title: "waiting_for_approval".tr, backgroundColor: Colors.orange, borderRadius: 12, height: 40, onPressed: () {}),
+                            CustomButton(
+                              title: "waiting_for_approval".tr,
+                              backgroundColor: Colors.orange,
+                              borderRadius: 12,
+                              height: 40,
+                              onPressed: () {},
+                            ),
                           const SizedBox(height: 10),
                           CustomButton(
                             backgroundColor: context.theme.primaryColor,
                             title: "view_details".tr,
                             borderRadius: 12,
                             height: 40,
-                            onPressed: () => Get.toNamed(AppRoutes.jobDetails, arguments: job),
+                            onPressed: () => Get.toNamed(
+                              AppRoutes.jobDetails,
+                              arguments: job,
+                            ),
                           ),
                         ],
                       ),
@@ -1105,24 +1507,73 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       return CustomScrollView(
         physics: const ClampingScrollPhysics(),
         slivers: [
-          SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+          SliverOverlapInjector(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+          ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 _buildInfoCard('business_details'.tr, [
-                  _buildInfoRow(Icons.business, 'name'.tr, b.businessName ?? 'N/A', context),
-                  _buildInfoRow(Icons.category, 'category'.tr, b.category?.name ?? 'N/A', context),
-                  _buildInfoRow(Icons.verified, 'verification_status'.tr, (b.verificationStatus ?? 'pending').toTitleCase(), context, isGreen: b.verificationStatus == 'approved'),
-                  _buildInfoRow(Icons.stacked_bar_chart_sharp, 'business_status'.tr, (b.verificationStatus ?? 'active').toTitleCase(), context),
-                  _buildInfoRow(Icons.description, 'description'.tr, b.description ?? 'No description available', context, maxLines: 5),
-                  _buildInfoRow(Icons.access_time_filled_rounded, 'business_hours'.tr, "${_formatTimeString(b.opening_time)} - ${_formatTimeString(b.closing_time)}", context),
+                  _buildInfoRow(
+                    Icons.business,
+                    'name'.tr,
+                    b.businessName ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.category,
+                    'category'.tr,
+                    b.category?.name ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.verified,
+                    'verification_status'.tr,
+                    (b.verificationStatus ?? 'pending').toTitleCase(),
+                    context,
+                    isGreen: b.verificationStatus == 'approved',
+                  ),
+                  _buildInfoRow(
+                    Icons.stacked_bar_chart_sharp,
+                    'business_status'.tr,
+                    (b.verificationStatus ?? 'active').toTitleCase(),
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.description,
+                    'description'.tr,
+                    b.description ?? 'No description available',
+                    context,
+                    maxLines: 5,
+                  ),
+                  _buildInfoRow(
+                    Icons.access_time_filled_rounded,
+                    'business_hours'.tr,
+                    "${_formatTimeString(b.opening_time)} - ${_formatTimeString(b.closing_time)}",
+                    context,
+                  ),
                 ], context),
                 const SizedBox(height: 16),
                 _buildInfoCard('contact_info'.tr, [
-                  _buildInfoRow(Icons.phone, 'phone'.tr, b.contactPhone ?? 'N/A', context),
-                  _buildInfoRow(Icons.email, 'email'.tr, b.contactEmail ?? 'N/A', context),
-                  _buildInfoRow(Icons.language, 'website'.tr, b.website ?? 'N/A', context),
+                  _buildInfoRow(
+                    Icons.phone,
+                    'phone'.tr,
+                    b.contactPhone ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.email,
+                    'email'.tr,
+                    b.contactEmail ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.language,
+                    'website'.tr,
+                    b.website ?? 'N/A',
+                    context,
+                  ),
                 ], context),
                 const SizedBox(height: 16),
                 _buildInfoCard('address_info'.tr, [
@@ -1130,18 +1581,53 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   // business.district,
                   // business.city,
                   // business.pincode,
-                  _buildInfoRow(Icons.location_city, 'state'.tr, b.state ?? 'N/A', context),
-                  _buildInfoRow(Icons.location_city, 'district'.tr, b.district ?? 'N/A', context),
-                  _buildInfoRow(Icons.location_on_outlined, 'city'.tr, b.city ?? 'N/A', context),
-                  _buildInfoRow(Icons.pin, 'pincode'.tr, b.pincode ?? 'N/A', context),
+                  _buildInfoRow(
+                    Icons.location_city,
+                    'state'.tr,
+                    b.state ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.location_city,
+                    'district'.tr,
+                    b.district ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.location_on_outlined,
+                    'city'.tr,
+                    b.city ?? 'N/A',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.pin,
+                    'pincode'.tr,
+                    b.pincode ?? 'N/A',
+                    context,
+                  ),
                 ], context),
                 const SizedBox(height: 16),
                 _buildInfoCard('additional_information'.tr, [
-                //  _buildInfoRow(Icons.calendar_today, 'created_at'.tr, b.createdAt != null ? b.createdAt!.split('T')[0] : 'N/A', context),
-                //  _buildInfoRow(Icons.update, 'last_updated'.tr, b.updatedAt != null ? b.updatedAt!.split('T')[0] : 'N/A', context),
-                  _buildInfoRow(Icons.shopping_bag_outlined, 'total_products'.tr, '${b.products?.length ?? 0}', context),
-                  _buildInfoRow(Icons.design_services_outlined, 'total_services'.tr, '${b.services?.length ?? 0}', context),
-                  _buildInfoRow(Icons.work_outline, 'active_jobs'.tr, '${controller.businessJobs.where((j) => j.status != 'pending').length}', context),
+                  //  _buildInfoRow(Icons.calendar_today, 'created_at'.tr, b.createdAt != null ? b.createdAt!.split('T')[0] : 'N/A', context),
+                  //  _buildInfoRow(Icons.update, 'last_updated'.tr, b.updatedAt != null ? b.updatedAt!.split('T')[0] : 'N/A', context),
+                  _buildInfoRow(
+                    Icons.shopping_bag_outlined,
+                    'total_products'.tr,
+                    '${b.products?.length ?? 0}',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.design_services_outlined,
+                    'total_services'.tr,
+                    '${b.services?.length ?? 0}',
+                    context,
+                  ),
+                  _buildInfoRow(
+                    Icons.work_outline,
+                    'active_jobs'.tr,
+                    '${controller.businessJobs.where((j) => j.status != 'pending').length}',
+                    context,
+                  ),
                 ], context),
                 const SizedBox(height: 20),
               ]),
@@ -1155,15 +1641,15 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   Widget _buildDetailPlaceholderIcon() {
     return Container(
       color: Colors.grey[200],
-      child: const Icon(
-        Icons.business,
-        size: 40,
-        color: Colors.grey,
-      ),
+      child: const Icon(Icons.business, size: 40, color: Colors.grey),
     );
   }
 
-  Widget _buildInfoCard(String title, List<Widget> children, BuildContext context) {
+  Widget _buildInfoCard(
+    String title,
+    List<Widget> children,
+    BuildContext context,
+  ) {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -1176,8 +1662,10 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-                title,
-                style: context.textTheme.titleMedium?.copyWith(color: context.theme.primaryColor)
+              title,
+              style: context.textTheme.titleMedium?.copyWith(
+                color: context.theme.primaryColor,
+              ),
               // style: const TextStyle(
               //   fontSize: 16,
               //   fontWeight: FontWeight.bold,
@@ -1193,13 +1681,13 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   Widget _buildInfoRow(
-      IconData icon,
-      String label,
-      String value,
-      BuildContext context, {
-        bool isGreen = false,
-        int? maxLines,
-      }) {
+    IconData icon,
+    String label,
+    String value,
+    BuildContext context, {
+    bool isGreen = false,
+    int? maxLines,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -1211,17 +1699,16 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(label, style: context.textTheme.bodyMedium),
+                const SizedBox(height: 2),
                 Text(
-                  label,
-                  style: context.textTheme.bodyMedium,
-                ),
-                 const SizedBox(height: 2),
-                 Text(
-                    value,
-                    style: context.textTheme.titleSmall?.copyWith(color: isGreen ? Colors.green : context.iconColor),
-                    maxLines: maxLines,
-                    overflow: maxLines != null ? TextOverflow.ellipsis : null,
+                  value,
+                  style: context.textTheme.titleSmall?.copyWith(
+                    color: isGreen ? Colors.green : context.iconColor,
                   ),
+                  maxLines: maxLines,
+                  overflow: maxLines != null ? TextOverflow.ellipsis : null,
+                ),
               ],
             ),
           ),
@@ -1244,50 +1731,70 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       ),
     );
   }
+
   Widget _buildShimmerList(BuildContext context) {
     return CustomScrollView(
       physics: const ClampingScrollPhysics(),
       slivers: [
-        SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60, height: 60,
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              return Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(child: Column(
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(height: 14, width: 150, color: Colors.white),
+                              Container(
+                                height: 14,
+                                width: 150,
+                                color: Colors.white,
+                              ),
                               const SizedBox(height: 8),
-                              Container(height: 12, width: 100, color: Colors.white),
+                              Container(
+                                height: 12,
+                                width: 100,
+                                color: Colors.white,
+                              ),
                               const SizedBox(height: 8),
-                              Container(height: 10, width: double.infinity, color: Colors.white),
+                              Container(
+                                height: 10,
+                                width: double.infinity,
+                                color: Colors.white,
+                              ),
                             ],
-                          ))
-                        ],
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-              childCount: 6,
-            ),
+                ),
+              );
+            }, childCount: 6),
           ),
         ),
       ],
@@ -1298,7 +1805,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     return CustomScrollView(
       physics: const ClampingScrollPhysics(),
       slivers: [
-        SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverList(
@@ -1309,9 +1818,23 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 200, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    Container(height: 150, width: double.infinity, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12))),
+                    Container(
+                      height: 150,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1328,9 +1851,14 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: isActive
+            ? Colors.green.withOpacity(0.1)
+            : Colors.red.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: isActive ? Colors.green : Colors.red, width: 0.5),
+        border: Border.all(
+          color: isActive ? Colors.green : Colors.red,
+          width: 0.5,
+        ),
       ),
       child: Text(
         isActive ? "Active" : "Inactive",
@@ -1348,12 +1876,14 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     final bool currentlyActive = job.isActive ?? false;
     CustomConfirmDialog.show(
       title: currentlyActive ? "Deactivate Job" : "Activate Job",
-      message: currentlyActive 
+      message: currentlyActive
           ? "Are you sure you want to deactivate this job posting? It will no longer be visible to applicants."
           : "Are you sure you want to activate this job posting? It will become visible to applicants.",
       confirmText: currentlyActive ? "Deactivate" : "Activate",
       confirmColor: currentlyActive ? Colors.orange : Colors.green,
-      icon: currentlyActive ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+      icon: currentlyActive
+          ? Icons.visibility_off_outlined
+          : Icons.visibility_outlined,
       onConfirm: () {
         controller.toggleJobStatus(job.id!);
       },
@@ -1373,12 +1903,13 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   bool _isOpen(String? open, String? close) {
-    if (open == null || close == null || open.isEmpty || close.isEmpty) return false;
+    if (open == null || close == null || open.isEmpty || close.isEmpty)
+      return false;
     try {
       final now = DateTime.now();
       final openParts = open.split(':');
       final closeParts = close.split(':');
-      
+
       final nowMin = now.hour * 60 + now.minute;
       final openMin = int.parse(openParts[0]) * 60 + int.parse(openParts[1]);
       final closeMin = int.parse(closeParts[0]) * 60 + int.parse(closeParts[1]);
@@ -1388,8 +1919,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         return nowMin >= openMin || nowMin <= closeMin;
       }
       return nowMin >= openMin && nowMin <= closeMin;
-    } catch(e) {
-      return false; 
+    } catch (e) {
+      return false;
     }
   }
 
@@ -1466,10 +1997,10 @@ class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context,
-      double shrinkOffset,
-      bool overlapsContent,
-      ) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(color: context.theme.primaryColorLight, child: tabBar);
   }
 
@@ -1483,11 +2014,8 @@ class ExpandableIconLabel extends StatefulWidget {
   final IconData icon;
   final String label;
 
-  const ExpandableIconLabel({
-    Key? key,
-    required this.icon,
-    required this.label,
-  }) : super(key: key);
+  const ExpandableIconLabel({Key? key, required this.icon, required this.label})
+    : super(key: key);
 
   @override
   State<ExpandableIconLabel> createState() => _ExpandableIconLabelState();
@@ -1544,7 +2072,9 @@ class _ExpandableIconLabelState extends State<ExpandableIconLabel> {
                           fontSize: 14,
                         ),
                         maxLines: isExpanded ? null : 1,
-                        overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                        overflow: isExpanded
+                            ? TextOverflow.visible
+                            : TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(

@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../../../../core/constent/app_constants.dart';
 import '../../data/model/blog_model.dart';
@@ -516,17 +518,43 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                 return buildButton(
                   Icons.share_outlined,
                   'Share',
-                  () {
+                  () async {
                     final RenderBox? box = buttonContext.findRenderObject() as RenderBox?;
                     final Rect? sharePositionOrigin = box != null
                         ? (box.localToGlobal(Offset.zero) & box.size)
                         : Rect.fromLTWH(0, 0, MediaQuery.of(buttonContext).size.width, MediaQuery.of(buttonContext).size.height / 2);
 
                     final String shareLink = 'https://malisetu.com/blog/${blog.id}';
-                    Share.share(
-                      "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}",
-                      sharePositionOrigin: sharePositionOrigin,
-                    );
+                    final String shareText = "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}";
+
+                    final String? firstMedia = blog.mediaPaths != null && blog.mediaPaths!.isNotEmpty
+                        ? blog.mediaPaths!.first
+                        : blog.mediaPath;
+
+                    bool isVideo = false;
+                    if (firstMedia != null) {
+                      final lowerMedia = firstMedia.toLowerCase();
+                      isVideo = lowerMedia.endsWith('.mp4') || lowerMedia.endsWith('.mov') || lowerMedia.endsWith('.avi') || lowerMedia.endsWith('.mkv') || lowerMedia.endsWith('.webm') || lowerMedia.endsWith('.3gp') || lowerMedia.endsWith('.m4v');
+                    }
+
+                    if (firstMedia != null && !isVideo) {
+                      try {
+                        final imageUrl = "${ApiConstants.imageBaseUrl}$firstMedia";
+                        final tempDir = await getTemporaryDirectory();
+                        final tempPath = '${tempDir.path}/share_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                        await Dio().download(imageUrl, tempPath);
+                        await Share.shareXFiles(
+                          [XFile(tempPath)], 
+                          text: shareText, 
+                          subject: blog.title,
+                          sharePositionOrigin: sharePositionOrigin
+                        );
+                      } catch (e) {
+                        Share.share(shareText, subject: blog.title, sharePositionOrigin: sharePositionOrigin);
+                      }
+                    } else {
+                      Share.share(shareText, subject: blog.title, sharePositionOrigin: sharePositionOrigin);
+                    }
                   },
                 );
               },
