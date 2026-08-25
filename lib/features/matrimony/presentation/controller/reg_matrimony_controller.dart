@@ -744,6 +744,7 @@ class RegMatrimonyController extends GetxController {
         "weight": weightCtrl.text.isEmpty ? "0" : weightCtrl.text,
         "complexion": complexion.value,
         "physical_status": physicalStatus.value,
+        "approval_status": "pending",
         "personal_details": {
           // "title": titleText,
           "first_name": firstNameText,

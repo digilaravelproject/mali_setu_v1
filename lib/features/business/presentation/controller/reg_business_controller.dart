@@ -608,6 +608,7 @@ class RegBusinessController extends GetxController {
           "pincode": pinCodeCtrl.text,
           "country": countryCtrl.text,
         },
+        "verification_status": "pending",
       };
       print("registerbusiness : " + body.toString());
 

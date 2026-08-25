@@ -138,8 +138,8 @@ class FormValidator {
     if (value == null || value.isEmpty) {
       return "Please enter password";
     }
-    if (value.length < 8) {
-      return "Password must be at least 8 characters";
+    if (value.length < 2) {
+      return "Password must be at least 2 characters";
     }
     return null;
   }
@@ -151,8 +151,8 @@ class FormValidator {
       return "Please enter password";
     }
 
-    if (value.length < 8) {
-      return "Password must be at least 8 characters";
+    if (value.length < 2) {
+      return "Password must be at least 2 characters";
     }
 
     if (!RegExp(r'[A-Z]').hasMatch(value)) {
@@ -172,11 +172,10 @@ class FormValidator {
 
 
 
-  static String? confirmPassword(String? value, String password) {
-    if (value == null || value.isEmpty) {
-      return "Please confirm your password";
-    }
-    if (value != password) {
+  static String? confirmPassword(String? value, String passwordStr) {
+    final passError = password(value);
+    if (passError != null) return passError;
+    if (value != passwordStr) {
       return "Passwords do not match";
     }
     return null;

@@ -315,9 +315,6 @@ class RegisterController extends GetxController {
 
     print("call registration function ");
 
-    // Validate caste certificate
-    bool isCasteCertificateValid = _validateCasteCertificate();
-
     // Validate name fields (inner Form - triggers visual error display)
     final nameValidationError = nameFieldKey.currentState?.validate();
     final isNameValid = nameValidationError == null;
@@ -329,7 +326,10 @@ class RegisterController extends GetxController {
     // Validate form (triggers all inline validators for other fields)
     bool isFormValid = formKey.currentState!.validate();
 
-    if (!isFormValid || !isNameValid || !isPhoneValid || !isCasteCertificateValid) {
+    // Caste certificate is commented out in UI, skipping its validation
+    // bool isCasteCertificateValid = _validateCasteCertificate();
+
+    if (!isFormValid || !isNameValid || !isPhoneValid) {
       return;
     }
 

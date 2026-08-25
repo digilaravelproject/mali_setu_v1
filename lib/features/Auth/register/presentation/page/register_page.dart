@@ -337,20 +337,24 @@ class RegisterPage extends GetWidget<RegisterController> {
                 // Reference Details Section
                 _buildFormSection(
                   context,
-                  title: "Reference Details",
+                  title: "well_known_mali_person".tr,
                   icon: CupertinoIcons.person_3_fill,
                   children: [
                     AppInputTextField(
-                      label: "Respected Person Name",
+                      label: "person_name".tr,
                       controller: controller.respectedPersonNameCtrl,
                       iconData: CupertinoIcons.person_fill,
+                      isRequired: true,
+                      validator: (v) => FormValidator.emptycheck(v, "person_name".tr),
                       topPadding: 0,
                     ),
                     AppInputTextField(
-                      label: "Respected Person Mobile",
+                      label: "person_mobile".tr,
                       controller: controller.respectedPersonMobileCtrl,
                       iconData: CupertinoIcons.phone_fill,
                       textInputType: TextInputType.phone,
+                      isRequired: true,
+                      validator: FormValidator.mobile,
                       topPadding: 0,
                     ),
                   ],
@@ -371,7 +375,15 @@ class RegisterPage extends GetWidget<RegisterController> {
                         isRequired: true,
                         isObscure: !controller.isPasswordValue.value,
                         iconData: CupertinoIcons.lock_fill,
-                        validator: FormValidator.strictPassword,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please enter password";
+                          }
+                          if (value.length < 2) {
+                            return "Password must be at least 2 characters";
+                          }
+                          return null;
+                        },
                         endIcon: controller.isPasswordValue.value
                             ? Icons.visibility_off
                             : Icons.remove_red_eye_rounded,

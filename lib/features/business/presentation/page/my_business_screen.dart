@@ -434,13 +434,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
             label: 'view'.tr,
             color: const Color(0xFF3B82F6),
           ),
-          if (isPending)
-            _buildPopupMenuItem(
-              value: 'edit',
-              icon: Icons.edit_note_outlined,
-              label: 'edit'.tr,
-              color: const Color(0xFF10B981),
-            ),
+          _buildPopupMenuItem(
+            value: 'edit',
+            icon: Icons.edit_note_outlined,
+            label: 'edit'.tr,
+            color: const Color(0xFF10B981),
+          ),
           _buildPopupMenuItem(
             value: 'delete',
             icon: Icons.delete_sweep_outlined,
