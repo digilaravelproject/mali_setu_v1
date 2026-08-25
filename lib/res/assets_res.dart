@@ -9,6 +9,7 @@ class AssetsRes {
   static const String PROJECT_NAME = 'edu_cluezer';
   static const String PROJECT_VERSION = '1.0.15+21';
 
+
   static const String GMAIL = 'assets/icons/gmail.png';
   static const String MOBILE = 'assets/icons/mobile.png';
   static const String WHATSAPP = 'assets/icons/whatsapp.png';

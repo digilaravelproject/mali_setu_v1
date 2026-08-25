@@ -446,11 +446,8 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
       final authService = Get.find<AuthService>();
       final currentUser = authService.currentUser.value;
       final isOwnProfile = profile.user?.id == currentUser?.id || profile.userId == currentUser?.id;
-      final isApproved = profile.approvalStatus?.toLowerCase() == 'approved';
 
-      if (isOwnProfile && isApproved) {
-        return const SizedBox.shrink();
-      }
+      // Removed the condition that prevented editing when approved
 
       return SafeArea(
         top: false, // only care about bottom
