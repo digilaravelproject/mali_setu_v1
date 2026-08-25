@@ -43,6 +43,8 @@ import '../../features/_init/presentation/page/splash_page.dart';
 import '../../features/business/presentation/page/applied_job_list_screen.dart';
 import '../../features/business/presentation/page/register_your_business_screen.dart';
 import '../../features/business/presentation/page/single_business_details.dart';
+import '../../features/business/presentation/page/single_product_details_screen.dart';
+import '../../features/business/presentation/page/single_service_details_screen.dart';
 import '../../features/dashboard/binding/dashboard_binding.dart';
 import '../../features/dashboard/presentation/page/dashboard_page.dart';
 import '../../features/date/binding/date_binding.dart';
@@ -101,6 +103,8 @@ class AppRoutes {
   static const String donationDetails = "/donationDetails";
   static const String volunteerSearch = "/volunteerSearch";
   static const String contactSupport = "/contactSupport";
+  static const String singleProductDetails = "/singleProductDetails";
+  static const String singleServiceDetails = "/singleServiceDetails";
 }
 
 class AppPages {
@@ -370,6 +374,20 @@ class AppPages {
     GetPage(
       name: AppRoutes.contactSupport,
       page: () =>  ContactSupportPage(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.singleProductDetails,
+      page: () => SingleProductDetailsScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.singleServiceDetails,
+      page: () => SingleServiceDetailsScreen(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:get/get.dart';
-
+import "../../core/routes/app_routes.dart";
 import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
+import '../../features/business/data/model/res_all_business_model.dart';
 
 class DeepLinkService extends GetxService {
   static bool isAppReady = false;
@@ -11,11 +12,14 @@ class DeepLinkService extends GetxService {
 
   Future<DeepLinkService> init() async {
     // Handle link when app is in warm state (foreground or background)
-    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-      _handleDeepLink(uri);
-    }, onError: (err) {
-      print('Failed to handle app link: $err');
-    });
+    _linkSubscription = _appLinks.uriLinkStream.listen(
+      (uri) {
+        _handleDeepLink(uri);
+      },
+      onError: (err) {
+        print('Failed to handle app link: $err');
+      },
+    );
 
     // Check initial link if app was in cold state (terminated)
     try {
@@ -32,15 +36,15 @@ class DeepLinkService extends GetxService {
 
   Future<void> _handleDeepLink(Uri uri) async {
     print('DeepLinkService: Received URI: $uri');
-    
+
     // Wait until the app is fully initialized (splash screen is gone)
     while (!isAppReady) {
       await Future.delayed(const Duration(milliseconds: 300));
     }
-    
+
     // Add a small delay to allow any pending route transitions (e.g., Get.offNamed to dashboard) to complete
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Example: https://malisetu.com/blog/123
     if (uri.pathSegments.isNotEmpty) {
       if (uri.pathSegments.first == 'blog' && uri.pathSegments.length > 1) {
@@ -48,6 +52,16 @@ class DeepLinkService extends GetxService {
         final blogId = int.tryParse(blogIdStr);
         if (blogId != null) {
           Get.to(() => BlogDetailScreen(blogId: blogId));
+        }
+      } else if (uri.pathSegments.first == 'business' &&
+          uri.pathSegments.length > 1) {
+        final businessIdStr = uri.pathSegments[1];
+        final businessId = int.tryParse(businessIdStr);
+        if (businessId != null) {
+          Get.toNamed(
+            AppRoutes.businessDetails,
+            arguments: Business(id: businessId),
+          );
         }
       }
     }

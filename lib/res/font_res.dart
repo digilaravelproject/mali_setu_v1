@@ -8,6 +8,7 @@ class FontRes {
 
   static const String PROJECT_NAME = 'edu_cluezer';
   static const String PROJECT_VERSION = '1.0.15+21';
+
   static const String NUNITO_BOLD = 'Nunito-Bold';
   static const String NUNITO_EXTRABOLD = 'Nunito-ExtraBold';
   static const String NUNITO_EXTRALIGHT = 'Nunito-ExtraLight';

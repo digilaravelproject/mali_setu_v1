@@ -54,6 +54,8 @@ class RegisterController extends GetxController {
   final TextEditingController ageCtrl = TextEditingController();
   final TextEditingController mobileCtrl = TextEditingController();
   final TextEditingController userTypeCtrl = TextEditingController();
+  final TextEditingController respectedPersonNameCtrl = TextEditingController();
+  final TextEditingController respectedPersonMobileCtrl = TextEditingController();
 
   /// ADDRESS DETAILS
   final TextEditingController addressCtrl = TextEditingController();
@@ -392,13 +394,15 @@ class RegisterController extends GetxController {
         password: passwordCtrl.text.trim(),
         passwordConfirmation: confirmPasswordCtrl.text.trim(),
         userType: _getApiUserType(userTypeCtrl.text.trim()),
-        castCertificate: castCertificateData,
+        // castCertificate: castCertificateData,
         termCondition: true,
         company_name: companynameCtrl.text.trim(),
         dept_name: deptCtrl.text.trim(),
         designation: designationCtrl.text.trim(),
         latitude: location?['latitude'],
         longitude: location?['longitude'],
+        respectedPersonName: respectedPersonNameCtrl.text.trim(),
+        respectedPersonMobileNumber: respectedPersonMobileCtrl.text.trim(),
       );
 
       final response = await registerUseCase(reqModel);
@@ -443,6 +447,8 @@ class RegisterController extends GetxController {
     sectorCtrl.dispose();
     destinationCtrl.dispose();
     villageCtrl.dispose();
+    respectedPersonNameCtrl.dispose();
+    respectedPersonMobileCtrl.dispose();
     roadNumberCtrl.dispose();
 
     occupationCtrl.dispose();

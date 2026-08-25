@@ -389,6 +389,7 @@ class Product {
   String? cost;
   String? imagePath;
   String? status;
+  Business? business;
 
   Product({
     this.id,
@@ -398,6 +399,7 @@ class Product {
     this.cost,
     this.imagePath,
     this.status,
+    this.business,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -409,6 +411,7 @@ class Product {
       cost: json['cost'],
       imagePath: json['image_path'],
       status: json['status'],
+      business: json['business'] != null ? Business.fromJson(json['business']) : null,
     );
   }
 
@@ -421,6 +424,7 @@ class Product {
       'cost': cost,
       'image_path': imagePath,
       'status': status,
+      if (business != null) 'business': business!.toJson(),
     };
   }
 }
@@ -433,6 +437,7 @@ class Service {
   String? cost;
   String? imagePath;
   String? status;
+  Business? business;
 
   Service({
     this.id,
@@ -442,6 +447,7 @@ class Service {
     this.cost,
     this.imagePath,
     this.status,
+    this.business,
   });
 
   factory Service.fromJson(Map<String, dynamic> json) {
@@ -453,6 +459,7 @@ class Service {
       cost: json['cost'],
       imagePath: json['image_path'],
       status: json['status'],
+      business: json['business'] != null ? Business.fromJson(json['business']) : null,
     );
   }
 
@@ -465,6 +472,7 @@ class Service {
       'cost': cost,
       'image_path': imagePath,
       'status': status,
+      if (business != null) 'business': business!.toJson(),
     };
   }
 }

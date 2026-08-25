@@ -5,6 +5,8 @@ import 'package:http_parser/http_parser.dart'; // Added for MediaType
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/data/model/res_single_product_model.dart';
+import 'package:edu_cluezer/features/business/data/model/res_single_service_model.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 
 
@@ -14,6 +16,8 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> getAllBusinesses({int page = 1, String? search, double? lat, double? long});
   Future<BusinessResponse> getMyBusinesses();
   Future<BusinessResponse> getBusinessDetails(int id);
+  Future<SingleProductResponse> getSingleProductDetails(int productId);
+  Future<SingleServiceResponse> getSingleServiceDetails(int serviceId);
   Future<BusinessResponse> getBusinessProducts(int businessId);
   Future<BusinessResponse> getBusinessServices(int businessId);
   Future<BusinessResponse> addProduct(Map<String, dynamic> data, List<File> images);
@@ -70,6 +74,18 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   Future<BusinessResponse> getBusinessDetails(int id) async {
     final response = await apiClient.get('${ApiConstants.getSingleBusiness}/$id');
     return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<SingleProductResponse> getSingleProductDetails(int productId) async {
+    final response = await apiClient.get('${ApiConstants.getSingleProduct}/$productId');
+    return SingleProductResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<SingleServiceResponse> getSingleServiceDetails(int serviceId) async {
+    final response = await apiClient.get('${ApiConstants.getSingleService}/$serviceId');
+    return SingleServiceResponse.fromJson(response.data);
   }
 
   @override
