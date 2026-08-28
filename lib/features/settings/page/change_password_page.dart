@@ -59,20 +59,12 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
                   height: 50,
                   borderRadius: 16,
                   isLoading: controller.isLoading.value,
-                  backgroundColor: controller.isFormValid.value && !controller.isLoading.value 
-                      ? Get.theme.primaryColor 
-                      : Colors.grey[300],
+                  backgroundColor: Get.theme.primaryColor,
                   onPressed: () {
-                    if (controller.isFormValid.value && !controller.isLoading.value) {
-                      controller.changePassword();
-                    }
+                    controller.changePassword();
                   },
                 )),
 
-                const SizedBox(height: 30),
-
-                // Password Guidelines
-                _buildPasswordGuidelines(context),
               ],
             ),
           ),
@@ -200,67 +192,5 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
     );
   }
 
-  Widget _buildPasswordGuidelines(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Get.theme.primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Get.theme.primaryColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.security_rounded, size: 20, color: Get.theme.primaryColor),
-              const SizedBox(width: 10),
-               Text(
-                'password_guidelines'.tr,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: Get.theme.primaryColor,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildGuidelineItem(context, 'password_rule_length'.tr),
-          const SizedBox(height: 8),
-          _buildGuidelineItem(context, 'password_rule_letters_numbers'.tr),
-          const SizedBox(height: 8),
-          _buildGuidelineItem(context, 'password_rule_different'.tr),
-          const SizedBox(height: 8),
-          _buildGuidelineItem(context, 'password_rule_personal'.tr),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildGuidelineItem(BuildContext context, String text) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Icon(
-            Icons.circle,
-            size: 6,
-            color: Get.theme.primaryColor.withOpacity(0.6),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
