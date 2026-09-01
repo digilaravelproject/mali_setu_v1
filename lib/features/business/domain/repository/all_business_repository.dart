@@ -18,6 +18,7 @@ abstract class BusinessRepository {
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
   Future<List<Category>> getBusinessCategories();
+  Future<CategoryResponse> getBusinessCategoriesPaginated({int page = 1});
   Future<Category?> getCategoryDetails(int id, {double? lat, double? long});
   Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long});
   

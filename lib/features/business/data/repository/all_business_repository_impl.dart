@@ -70,31 +70,23 @@ class BusinessRepositoryImpl implements BusinessRepository {
   @override
   Future<List<Category>> getBusinessCategories() async {
     List<Category> allCategories = [];
-    int currentPage = 1;
-    bool hasMorePages = true;
 
     try {
-      while (hasMorePages) {
-        final response = await dataSource.getBusinessCategories(page: currentPage);
-        
-        if (response.success == true && response.data != null && response.data!.data != null) {
-          allCategories.addAll(response.data!.data!);
-          
-          if (response.data!.nextPageUrl != null) {
-            currentPage++;
-          } else {
-            hasMorePages = false;
-          }
-        } else {
-          hasMorePages = false;
-        }
+      final response = await dataSource.getBusinessCategories(page: 1);
+      
+      if (response.success == true && response.data != null && response.data!.data != null) {
+        allCategories.addAll(response.data!.data!);
       }
     } catch (e) {
-      print("Error fetching categories page $currentPage: $e");
-      // If error occurs (e.g. network issue on page 2), return what we have so far
+      print("Error fetching categories page 1: $e");
     }
     
     return allCategories;
+  }
+
+  @override
+  Future<CategoryResponse> getBusinessCategoriesPaginated({int page = 1}) async {
+    return await dataSource.getBusinessCategories(page: page);
   }
 
   @override

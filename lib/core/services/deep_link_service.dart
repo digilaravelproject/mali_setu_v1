@@ -37,13 +37,22 @@ class DeepLinkService extends GetxService {
   Future<void> _handleDeepLink(Uri uri) async {
     print('DeepLinkService: Received URI: $uri');
 
-    // Wait until the app is fully initialized (splash screen is gone)
+    // Check if we need to wait for app initialization
+    bool wasWaiting = false;
     while (!isAppReady) {
+      wasWaiting = true;
       await Future.delayed(const Duration(milliseconds: 300));
     }
 
-    // Add a small delay to allow any pending route transitions (e.g., Get.offNamed to dashboard) to complete
-    await Future.delayed(const Duration(milliseconds: 500));
+    // If we had to wait (cold start), the splash screen is transitioning to dashboard.
+    // The transition takes 500ms, so we must wait longer than that to prevent the 
+    // dashboard route from replacing our deep link route due to a race condition.
+    if (wasWaiting) {
+      await Future.delayed(const Duration(milliseconds: 1000));
+    } else {
+      // Warm start: just a tiny delay to ensure any active UI interactions settle
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
 
     // Example: https://malisetu.com/blog/123
     if (uri.pathSegments.isNotEmpty) {

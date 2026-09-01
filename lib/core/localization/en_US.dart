@@ -223,7 +223,7 @@ const Map<String, String> enUS = {
   'referral_code': 'Referral Code (Optional)',
   'referral_optional': '* Referral code is optional',
   'security': 'Security',
-  'well_known_mali_person': 'Well Known Mali Person',
+  'well_known_mali_person': 'Refrence Detail (Well Known Mali Person)',
   'person_name': 'Person Name',
   'person_mobile': 'Person Mobile',
   'password': 'Password',

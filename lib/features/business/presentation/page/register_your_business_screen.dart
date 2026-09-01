@@ -91,13 +91,18 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     errorText: controller.errors['businessType'],
                   ),
 
-                  SingleDropdown(
-                    controller: controller.bCategoryCtrl,
-                    label: 'business_category'.tr,
-                    isRequired: true,
-                    prefixIcon: Icons.category_rounded,
-                    items: controller.businessCategories.toList(),
-                    errorText: controller.errors['businessCategory'],
+                  GestureDetector(
+                    onTap: () => controller.openCategorySelection(context),
+                    child: AbsorbPointer(
+                      child: AppInputTextField(
+                        controller: controller.bCategoryCtrl,
+                        label: 'business_category'.tr,
+                        isRequired: true,
+                        iconData: Icons.category_rounded,
+                        endIcon: Icons.arrow_drop_down,
+                        errorText: controller.errors['businessCategory'],
+                      ),
+                    ),
                   ),
 
                   ValueListenableBuilder<TextEditingValue>(
