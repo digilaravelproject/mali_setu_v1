@@ -8,6 +8,7 @@ import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../widgets/category_paginated_bottom_sheet.dart';
 import '../../../../widgets/custom_snack_bar.dart';
 import '../../../payment/presentation/page/ccavenue_payment_screen.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -29,14 +30,12 @@ import '../../../Auth/service/auth_service.dart';
 
 class RegBusinessController extends GetxController {
   final ApiClient _apiClient = Get.find<ApiClient>();
-  final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
   final GetBusinessDetailsUseCase getBusinessDetailsUseCase;
   final BusinessRepository _repository = Get.find<BusinessRepository>();
   final PaymentRepository _paymentRepository = Get.find<PaymentRepository>();
   final RazorpayController _razorpayController = Get.find<RazorpayController>();
 
   RegBusinessController({
-    required this.getBusinessCategoriesUseCase,
     required this.getBusinessDetailsUseCase,
   });
 
@@ -92,7 +91,7 @@ class RegBusinessController extends GetxController {
     "Public Ltd": "Public Ltd",
   };
 
-  Map<String, int> categoryIdMap = {};
+  int? selectedCategoryId;
 
   /// Image Selection
   final RxList<File> selectedImages = <File>[].obs;
@@ -101,7 +100,6 @@ class RegBusinessController extends GetxController {
 
   bool isEditMode = false;
   int? businessId;
-  int? editingCategoryId;
 
   // For custom category registration
   final isRegisteringCategory = false.obs;
@@ -199,10 +197,6 @@ class RegBusinessController extends GetxController {
     if (businessTypes.isEmpty) {
       loadBusinessTypes();
     }
-    fetchCategories();
-
-    // Listen to category changes
-    bCategoryCtrl.addListener(_onCategoryChanged);
 
     // Reactive error clearing
     ever(errors, (_) {}); // Force refresh
@@ -266,104 +260,76 @@ class RegBusinessController extends GetxController {
     }
   }
 
-  void _onCategoryChanged() {
-    // if (bCategoryCtrl.text == "Other") {
-    //   // Show dialog when "Other" is selected
-    //   Future.delayed(const Duration(milliseconds: 100), () {
-    //     Get.dialog(
-    //       AlertDialog(
-    //         title: Text('add_custom_category'.tr),
-    //         content: Column(
-    //           mainAxisSize: MainAxisSize.min,
-    //           children: [
-    //             Text(
-    //               'enter_category_name'.tr,
-    //               style: Get.context?.textTheme.bodyMedium,
-    //             ),
-    //             const SizedBox(height: 16),
-    //             TextField(
-    //               controller: customCategoryCtrl,
-    //               decoration: InputDecoration(
-    //                 hintText: 'category_name_hint'.tr,
-    //                 border: OutlineInputBorder(
-    //                   borderRadius: BorderRadius.circular(8),
-    //                 ),
-    //                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //         actions: [
-    //           TextButton(
-    //             onPressed: () {
-    //               customCategoryCtrl.clear();
-    //               bCategoryCtrl.clear();
-    //               Get.back();
-    //             },
-    //             child: Text('cancel'.tr),
-    //           ),
-    //           Obx(() => TextButton(
-    //             onPressed: isRegisteringCategory.value
-    //                 ? null
-    //                 : () {
-    //                     registerCustomCategory(customCategoryCtrl.text);
-    //                   },
-    //             child: isRegisteringCategory.value
-    //                 ? const SizedBox(
-    //                     width: 20,
-    //                     height: 20,
-    //                     child: CircularProgressIndicator(strokeWidth: 2),
-    //                   )
-    //                 : Text('add_category'.tr),
-    //           )),
-    //         ],
-    //       ),
-    //       barrierDismissible: false,
-    //     );
-    //   });
-    // }
+  void openCategorySelection(BuildContext context) {
+    Get.bottomSheet(
+      CategoryPaginatedBottomSheet(
+        isRegistrationMode: true,
+        onCategorySelected: (category) {
+          if (category.id == -1) {
+            // Custom category requested
+            bCategoryCtrl.text = "Other";
+            _showCustomCategoryDialog();
+          } else {
+            selectedCategoryId = category.id;
+            bCategoryCtrl.text = category.name ?? "";
+            errors.remove('businessCategory');
+          }
+        },
+      ),
+      isScrollControlled: true,
+    );
   }
 
-  Future<void> fetchCategories() async {
-    try {
-      final categories = await getBusinessCategoriesUseCase();
-
-      final tempCategories = <String>[];
-      final tempIdMap = <String, int>{};
-
-      for (var cat in categories) {
-        if (cat.name != null && cat.id != null) {
-          tempCategories.add(cat.name!);
-          tempIdMap[cat.name!] = cat.id!;
-        }
-      }
-
-      // Add "Other" option at the end
-      tempCategories.add("Other");
-
-      // Atomic updates
-      categoryIdMap = tempIdMap;
-      businessCategories.assignAll(tempCategories);
-
-      // If in edit mode, re-trigger category name set after fetch
-      if (isEditMode && editingCategoryId != null) {
-        String? catName;
-        for (var entry in categoryIdMap.entries) {
-          if (entry.value == editingCategoryId) {
-            catName = entry.key;
-            break;
-          }
-        }
-        if (catName != null) {
-          bCategoryCtrl.text = catName;
-          print("DEBUG: Async set category to $catName");
-        }
-      }
-    } catch (e) {
-      print("Error fetching categories: $e");
-    } finally {
-      print("Categories loaded: ${businessCategories.length}");
-    }
+  void _showCustomCategoryDialog() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      Get.dialog(
+        AlertDialog(
+          title: Text('add_custom_category'.tr),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'enter_category_name'.tr,
+                style: Get.context?.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: customCategoryCtrl,
+                decoration: InputDecoration(
+                  hintText: 'category_name_hint'.tr,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                customCategoryCtrl.clear();
+                bCategoryCtrl.clear();
+                Get.back();
+              },
+              child: Text('cancel'.tr, style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (customCategoryCtrl.text.trim().isNotEmpty) {
+                  Get.back();
+                  registerCustomCategory(customCategoryCtrl.text.trim());
+                } else {
+                  CustomSnackBar.showError(message: "enter_category_name".tr);
+                }
+              },
+              child: Text('submit'.tr),
+            ),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+    });
   }
 
   Future<void> registerCustomCategory(String categoryName) async {
@@ -393,22 +359,10 @@ class RegBusinessController extends GetxController {
           final newCategoryId = categoryData['id'];
           final newCategoryName = categoryData['name'];
 
-          // Add to local lists
-          businessCategories.remove("Other");
-          businessCategories.add(newCategoryName);
-          businessCategories.add("Other");
-          categoryIdMap[newCategoryName] = newCategoryId;
-
           // Set the newly created category as selected
           bCategoryCtrl.text = newCategoryName;
+          selectedCategoryId = newCategoryId;
           customCategoryCtrl.clear();
-
-          // Refresh categories from server as requested
-          await fetchCategories();
-
-          // Ensure the selected value remains valid after fetch
-          // (fetchCategories clears and rebuilds the list, so we might need to ensure the name logic in UI holds)
-          // Since bCategoryCtrl.text is just a string, it should be fine.
 
           CustomSnackBar.showSuccess(message: "Category added successfully");
         } else {
@@ -564,7 +518,7 @@ class RegBusinessController extends GetxController {
 
       // Get IDs from maps
       final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
-      final categoryId = categoryIdMap[bCategoryCtrl.text] ?? 1;
+      final categoryId = selectedCategoryId ?? 1;
 
       // Get combined phone from PhoneFieldComponent
       final combinedPhone =
@@ -844,8 +798,11 @@ class RegBusinessController extends GetxController {
     );
     isEditMode = true;
     businessId = business.id;
-    editingCategoryId =
-        business.categoryId; // Store for async lookup in fetchCategories
+    selectedCategoryId = business.categoryId;
+    
+    if (business.category?.name != null) {
+      bCategoryCtrl.text = business.category!.name!;
+    }
 
     _ignorePincodeChange = true;
     bNameCtrl.text = business.businessName ?? "";
@@ -950,7 +907,6 @@ class RegBusinessController extends GetxController {
 
   @override
   void onClose() {
-    bCategoryCtrl.removeListener(_onCategoryChanged);
     bNameCtrl.dispose();
     bTypeCtrl.dispose();
     bCategoryCtrl.dispose();

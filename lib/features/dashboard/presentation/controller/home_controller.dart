@@ -227,12 +227,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       } else {
         print("DEBUG_CATEGORIES: API returned empty list");
         if (categories.isEmpty) {
-          if (retryCount < 2) {
-             print("DEBUG_CATEGORIES: Retrying in 2 seconds...");
-             await Future.delayed(const Duration(seconds: 2));
-             return fetchCategories(retryCount: retryCount + 1);
-          }
-          isCategoryError.value = true;
+          isCategoryError.value = false; // Empty is not an error, it's just no data
           // CustomSnackBar.showError(message: "No categories available");
         }
       }
@@ -240,9 +235,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       print("ERROR_CATEGORIES: $e");
       if (categories.isEmpty) {
-        if (retryCount < 2) {
-           print("DEBUG_CATEGORIES: Retrying after error in 2 seconds...");
-           await Future.delayed(const Duration(seconds: 2));
+        if (retryCount < 1) { // Only retry once on error
+           print("DEBUG_CATEGORIES: Retrying after error...");
+           await Future.delayed(const Duration(milliseconds: 500));
            return fetchCategories(retryCount: retryCount + 1);
         }
         isCategoryError.value = true;

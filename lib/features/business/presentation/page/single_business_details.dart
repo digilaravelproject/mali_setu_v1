@@ -75,13 +75,16 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             length: 4,
             child: Obx(() {
               final business = controller.selectedBusiness.value ?? argBusiness;
+              
               final authService = Get.find<AuthService>();
               final currentUser = authService.currentUser.value;
               final isOwner = currentUser?.id == business.userId;
               final topPadding = MediaQuery.of(context).padding.top;
               final fixedHeight = 580.0;
 
-              return RefreshIndicator(
+              return Stack(
+                children: [
+                  RefreshIndicator(
                 onRefresh: () => controller.fetchBusinessDetails(
                   argBusiness.id!,
                   isRefresh: true,
@@ -330,14 +333,96 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     ),
                   ),
                 ),
-              );
-            }),
+              ),
+              if (controller.selectedBusiness.value == null && (argBusiness.businessName == null || argBusiness.businessName!.isEmpty))
+                _buildDetailShimmer(context),
+            ],
+          );
+        }),
           ),
           Obx(() {
             final business = controller.selectedBusiness.value ?? argBusiness;
+            if (controller.selectedBusiness.value == null && (argBusiness.businessName == null || argBusiness.businessName!.isEmpty)) {
+              return const SizedBox.shrink();
+            }
             return _buildBottomActionBar(business, context);
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDetailShimmer(BuildContext context) {
+    return Container(
+      color: context.theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const ShimmerLoading.rounded(height: 30, width: double.infinity),
+                          const SizedBox(height: 12),
+                          const ShimmerLoading.rounded(height: 20, width: 120),
+                          const SizedBox(height: 8),
+                          const ShimmerLoading.rounded(height: 20, width: 150),
+                          const SizedBox(height: 8),
+                          const ShimmerLoading.rounded(height: 20, width: 180),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const ShimmerLoading.rounded(height: 72, width: 72),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: ShimmerLoading.rounded(height: 40, width: 150),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(4, (index) => const ShimmerLoading.circular(height: 50, width: 50)),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: ShimmerLoading.rounded(height: 100, width: double.infinity),
+              ),
+              const SizedBox(height: 24),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: ShimmerLoading.rounded(height: 50, width: double.infinity),
+              ),
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: ShimmerLoading.rounded(height: 150, width: double.infinity),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

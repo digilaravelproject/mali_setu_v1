@@ -14,14 +14,16 @@ class InitController extends GetxController
   Future<void> startNavigate() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    // Check login status
     final bool isLoggedIn = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
-
+    
     if (isLoggedIn) {
-      Get.offNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.dashboard);
     } else {
-      Get.offNamed(AppRoutes.login);
+      Get.offAllNamed(AppRoutes.login);
     }
+
+    // Wait for the transition to fully complete before unblocking DeepLinkService
+    await Future.delayed(const Duration(milliseconds: 600));
 
     // Mark app as ready for deep link handling
     DeepLinkService.isAppReady = true;

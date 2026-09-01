@@ -74,7 +74,7 @@ class ChangePasswordController extends GetxController {
   Future<void> changePassword() async {
     print("change password : call function");
     // Form valid check
-    if (!isFormValid.value) return;
+   // if (!isFormValid.value) return;
 
     isLoading.value = true;
 

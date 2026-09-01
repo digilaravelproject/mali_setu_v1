@@ -13,6 +13,7 @@ import 'package:edu_cluezer/features/business/data/repository/all_business_repos
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/all_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_paginated_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_details_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_products_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_services_usecase.dart';
@@ -43,9 +44,9 @@ class BusinessBinding extends Bindings {
     // Get.lazyPut(() => FilterController(), fenix: true);
     // UseCases
     Get.lazyPut<GetBusinessCategoriesUseCase>(() => GetBusinessCategoriesUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<GetBusinessCategoriesPaginatedUseCase>(() => GetBusinessCategoriesPaginatedUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
 
     Get.lazyPut<RegBusinessController>(() => RegBusinessController(
-      getBusinessCategoriesUseCase: Get.find<GetBusinessCategoriesUseCase>(),
       getBusinessDetailsUseCase: Get.find<GetBusinessDetailsUseCase>(),
     ), fenix: true);
 
