@@ -221,7 +221,7 @@ const Map<String, String> hiIN = {
   'referral_code': 'रेफरल कोड (वैकल्पिक)',
   'referral_optional': '* रेफरल कोड वैकल्पिक है',
   'security': 'सुरक्षा',
-  'well_known_mali_person': 'प्रसिद्ध माली व्यक्ति',
+  'well_known_mali_person': 'पसंदर्भ विवरण (प्रसिद्ध माली व्यक्ति)',
   'person_name': 'व्यक्ति का नाम',
   'person_mobile': 'व्यक्ति का मोबाइल',
   'password': 'पासवर्ड',

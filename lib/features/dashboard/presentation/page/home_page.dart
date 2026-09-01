@@ -12,6 +12,7 @@ import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import '../../../../widgets/category_paginated_bottom_sheet.dart';
 import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
@@ -268,17 +269,15 @@ class HomePage extends GetWidget<HomeController> {
                                 return const SizedBox.shrink();
                               }
 
-                              final displayList = controller.categories.length > 12
-                                  ? controller.categories.take(11).toList()
-                                  : controller.categories.toList();
+                              final displayList = controller.categories.take(11).toList();
                               
-                              final showViewAll = controller.categories.length > 12;
+                              final showViewAll = true; // Always show View All to open bottom sheet
 
                               return GridView.builder(
                                 physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 padding: EdgeInsets.zero,
-                                itemCount: showViewAll ? 12 : displayList.length,
+                                itemCount: displayList.length + 1, // Add 1 for View All button
                                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 4,
                                   crossAxisSpacing: 16,
@@ -286,7 +285,7 @@ class HomePage extends GetWidget<HomeController> {
                                   childAspectRatio: 0.85,
                                 ),
                                 itemBuilder: (context, index) {
-                                  if (showViewAll && index == 11) {
+                                  if (index == displayList.length) {
                                     return _buildViewAllCategoryItem(context);
                                   }
                                   return _buildCategoryItem(context, displayList[index]);
@@ -401,7 +400,13 @@ class HomePage extends GetWidget<HomeController> {
       onTap: () {
         if (controller.categories.isNotEmpty) {
           Get.bottomSheet(
-            _buildAllCategoriesSheet(context),
+            CategoryPaginatedBottomSheet(
+              onCategorySelected: (category) {
+                if (category.id != null) {
+                  controller.onCategoryTap(category.id!);
+                }
+              },
+            ),
             isScrollControlled: true,
           );
         }

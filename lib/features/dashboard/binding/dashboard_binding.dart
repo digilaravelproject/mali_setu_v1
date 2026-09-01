@@ -9,6 +9,7 @@ import 'package:edu_cluezer/features/business/data/data_source/all_business_data
 import 'package:edu_cluezer/features/business/data/repository/all_business_repository_impl.dart';
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_paginated_usecase.dart';
 import '../../notification/data/data_source/notification_data_source.dart';
 import '../../notification/data/repository/notification_repository_impl.dart';
 import '../../notification/domain/repository/notification_repository.dart';
@@ -38,6 +39,7 @@ class DashboardBinding extends Bindings {
     Get.lazyPut<BusinessDataSource>(() => BusinessDataSourceImpl(apiClient: Get.find()));
     Get.lazyPut<BusinessRepository>(() => BusinessRepositoryImpl(dataSource: Get.find()));
     Get.lazyPut(() => GetBusinessCategoriesUseCase(repository: Get.find()));
+    Get.lazyPut(() => GetBusinessCategoriesPaginatedUseCase(repository: Get.find()));
 
     // Inject Notification Dependencies (for Badge Count on Home)
     Get.lazyPut<NotificationDataSource>(() => NotificationDataSourceImpl(apiClient: Get.find()));
