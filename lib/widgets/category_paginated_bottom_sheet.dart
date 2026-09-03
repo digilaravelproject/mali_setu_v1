@@ -24,6 +24,7 @@ class CategoryPaginatedBottomSheet extends StatefulWidget {
 class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSheet> {
   final GetBusinessCategoriesPaginatedUseCase _useCase = Get.find<GetBusinessCategoriesPaginatedUseCase>();
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
   
   List<Category> _categories = [];
   bool _isLoadingInitial = true;
@@ -31,6 +32,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
   bool _hasMoreData = true;
   int _currentPage = 1;
   String? _error;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -42,12 +44,13 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (!_isLoadingMore && _hasMoreData) {
+      if (!_isLoadingMore && _hasMoreData && _searchQuery.isEmpty) {
         _fetchCategories(loadMore: true);
       }
     }
@@ -98,10 +101,18 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
     }
   }
 
+  String _capitalizeText(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: Get.height * 0.7, // Take 70% of screen height
+      height: Get.height * 0.85, // Take 85% of screen height
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -126,12 +137,12 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
           
           // Title
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'category'.tr,
+                  'all_categories'.tr,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -142,6 +153,38 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
                   onPressed: () => Get.back(),
                 ),
               ],
+            ),
+          ),
+
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search Category...',
+                prefixIcon: const Icon(Icons.search, color: Colors.black54, size: 20),
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                ),
+              ),
             ),
           ),
           
@@ -229,23 +272,29 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
       );
     }
 
-    if (_categories.isEmpty) {
+    final filteredCategories = _categories.where((category) {
+      final catName = category.name?.toLowerCase() ?? '';
+      return catName.contains(_searchQuery.toLowerCase());
+    }).toList();
+
+    if (filteredCategories.isEmpty) {
       return const Center(child: Text('No categories found'));
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      itemCount: _categories.length + (_hasMoreData ? 1 : 0),
+      itemCount: filteredCategories.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == _categories.length) {
+        if (index == filteredCategories.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
-        final category = _categories[index];
+        final category = filteredCategories[index];
         return InkWell(
           onTap: () {
             Get.back();

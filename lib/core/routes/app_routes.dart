@@ -52,6 +52,7 @@ import '../../features/date/presentation/page/date_profile_page.dart';
 import '../../features/matrimony/presentation/page/matrimony_profile_screen.dart';
 import '../../features/notification/binding/notification_binding.dart';
 import '../../features/notification/presentation/page/notification_page.dart';
+import '../../features/notification/presentation/page/notification_details_page.dart';
 import '../../features/profile/binding/profile_binding.dart';
 import '../../features/profile/presentation/page/edit_profile_page.dart';
 import '../../features/dashboard/presentation/page/category_details_screen.dart';
@@ -105,6 +106,7 @@ class AppRoutes {
   static const String contactSupport = "/contactSupport";
   static const String singleProductDetails = "/singleProductDetails";
   static const String singleServiceDetails = "/singleServiceDetails";
+  static const String notificationDetails = '/notificationDetails';
 }
 
 class AppPages {
@@ -388,6 +390,12 @@ class AppPages {
       name: AppRoutes.singleServiceDetails,
       page: () => SingleServiceDetailsScreen(),
       binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.notificationDetails,
+      page: () => const NotificationDetailsPage(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
