@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
@@ -566,11 +567,42 @@ class RegBusinessController extends GetxController {
       };
       print("registerbusiness : " + body.toString());
 
-      // Fetch current location
-      final location = await LocationHelper.getCurrentLocation();
-      if (location != null) {
-        body['latitude'] = location['latitude'];
-        body['longitude'] = location['longitude'];
+      // Fetch location from Nominatim using address
+      try {
+        final addressQuery = "${addressCtrl.text}, ${cityCtrl.text}, ${stateCtrl.text}, ${pinCodeCtrl.text}";
+        final dio = Dio();
+        final response = await dio.get(
+          'https://nominatim.openstreetmap.org/search',
+          queryParameters: {
+            'q': addressQuery,
+            'format': 'jsonv2',
+            'limit': '1',
+          },
+          options: Options(
+            headers: {'User-Agent': 'MaliSetuApp/1.0'},
+          ),
+        );
+        if (response.statusCode == 200 && response.data != null && response.data is List && response.data.isNotEmpty) {
+          final lat = response.data[0]['lat'];
+          final lon = response.data[0]['lon'];
+          body['latitude'] = lat.toString();
+          body['longitude'] = lon.toString();
+        } else {
+          // Fallback to current location
+          final location = await LocationHelper.getCurrentLocation();
+          if (location != null) {
+            body['latitude'] = location['latitude'];
+            body['longitude'] = location['longitude'];
+          }
+        }
+      } catch (e) {
+        print("Nominatim API error: $e");
+        // Fallback to current location
+        final location = await LocationHelper.getCurrentLocation();
+        if (location != null) {
+          body['latitude'] = location['latitude'];
+          body['longitude'] = location['longitude'];
+        }
       }
 
       if (isEditMode && businessId != null) {
