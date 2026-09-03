@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:get/get.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../../../../widgets/custom_scaffold.dart';
@@ -684,7 +685,7 @@ return Stack(
                   const Text("Video", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF4B5563))),
                 ],
               )
-            : Image.network(
+            : CustomImageView(url: 
                 url,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => const Center(

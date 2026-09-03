@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -575,7 +577,7 @@ class BlogsScreen extends StatelessWidget {
                         width: double.infinity,
                         placeholder: _blogPlaceholder(primaryColor, isVideo: true),
                       )
-                          : Image.network(
+                          : CustomImageView(url: 
                         "${ApiConstants.imageBaseUrl}$firstMedia",
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
@@ -634,7 +636,7 @@ class BlogsScreen extends StatelessWidget {
                         radius: 12,
                         backgroundColor: primaryColor.withOpacity(0.1),
                         backgroundImage: blog.user?.photo != null
-                            ? NetworkImage("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
+                            ? CachedNetworkImageProvider("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
                             : null,
                         child: blog.user?.photo == null
                             ? Text(
@@ -730,7 +732,7 @@ class BlogsScreen extends StatelessWidget {
                         radius: 16,
                         backgroundColor: primaryColor.withOpacity(0.1),
                         backgroundImage: blog.user?.photo != null
-                            ? NetworkImage("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
+                            ? CachedNetworkImageProvider("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
                             : null,
                         child: blog.user?.photo == null
                             ? Text(

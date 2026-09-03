@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/common/widgets/bg_gradient_border.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/styles/app_decoration.dart';
 import 'package:edu_cluezer/widgets/app_image_slider.dart';
@@ -138,7 +139,7 @@ class HomePage extends GetWidget<HomeController> {
                                   radius: 16,
                                   backgroundColor: Colors.grey[200],
                                   backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
-                                      ? NetworkImage(
+                                      ? CachedNetworkImageProvider(
                                       user.profileImage!.startsWith('http')
                                           ? user.profileImage!
                                           : "${ApiConstants.imageBaseUrl}${user.profileImage}"

@@ -135,7 +135,7 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
                               ),
                               child: (category.photo != null && category.photo!.isNotEmpty)
                                   ? ClipOval(
-                                      child: Image.network(
+                                      child: CustomImageView(url: 
                                         ApiConstants.imageBaseUrl + category.photo!,
                                         width: 90,
                                         height: 90,
@@ -401,7 +401,7 @@ class BusinessListCard extends StatelessWidget {
                     border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
                   ),
                   child: Center(
-                    child: Image.network(ApiConstants.imageBaseUrl + (business.photo ?? ""),)
+                    child: CustomImageView(url: ApiConstants.imageBaseUrl + (business.photo ?? ""),)
                     // Icon(
                     //   Icons.store_rounded,
                     //   size: 30,

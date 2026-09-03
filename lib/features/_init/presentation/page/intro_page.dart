@@ -1,4 +1,5 @@
 // import 'dart:ui';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 //
 // import 'package:edu_cluezer/core/routes/app_routes.dart';
 // import 'package:edu_cluezer/core/styles/app_colors.dart';
@@ -57,7 +58,7 @@
 //     return Stack(
 //       fit: StackFit.expand,
 //       children: [
-//         Image.network(
+//         CustomImageView(url: 
 //           model.image,
 //           fit: BoxFit.cover,
 //           errorBuilder: (context, error, stackTrace) {

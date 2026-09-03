@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:dio/dio.dart';
@@ -558,7 +559,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: business.photo != null
-                          ? Image.network(
+                          ? CustomImageView(url: 
                               ApiConstants.imageBaseUrl + business.photo!,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
@@ -1146,7 +1147,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                             child: product.imagePath != null
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: Image.network(
+                                    child: CustomImageView(url: 
                                       ApiConstants.imageBaseUrl +
                                           product.imagePath!,
                                       fit: BoxFit.cover,
@@ -1279,7 +1280,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 child: service.imagePath != null
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
+                                        child: CustomImageView(url: 
                                           ApiConstants.imageBaseUrl +
                                               service.imagePath!,
                                           fit: BoxFit.cover,

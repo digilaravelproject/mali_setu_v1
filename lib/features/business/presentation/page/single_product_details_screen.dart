@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/single_product_controller.dart';
@@ -100,7 +102,7 @@ class SingleProductDetailsScreen extends StatelessWidget {
       );
     }
 
-    return Image.network(
+    return CustomImageView(url: 
       '${ApiConstants.imageBaseUrl}/${product.imagePath}',
       height: 250,
       width: double.infinity,
@@ -132,7 +134,7 @@ class SingleProductDetailsScreen extends StatelessWidget {
             radius: 25,
             backgroundColor: Colors.grey[200],
             backgroundImage: business.photo != null
-                ? NetworkImage('${ApiConstants.imageBaseUrl}/${business.photo}')
+                ? CachedNetworkImageProvider('${ApiConstants.imageBaseUrl}/${business.photo}')
                 : null,
             child: business.photo == null
                 ? const Icon(Icons.store, color: Colors.grey)

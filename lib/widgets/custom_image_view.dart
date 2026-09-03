@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -443,7 +444,7 @@ class _ZoomableImageState extends State<_ZoomableImage> {
 
 //   Widget _buildImage() {
 //     if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
-//       return Image.network(widget.imageUrl!, fit: BoxFit.contain);
+//       return CustomImageView(url: widget.imageUrl!, fit: BoxFit.contain);
 //     } else if (widget.imageFile != null) {
 //       return Image.file(widget.imageFile!, fit: BoxFit.contain);
 //     }

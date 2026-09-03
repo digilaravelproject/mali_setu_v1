@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -228,7 +229,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: (business.photo != null)
-                              ? Image.network(
+                              ? CustomImageView(url: 
                             ApiConstants.imageBaseUrl + business.photo!,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => _buildPlaceholderIcon(),

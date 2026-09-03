@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/form_validator.dart';
@@ -392,23 +393,12 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                         height: double.infinity,
                         fit: BoxFit.cover,
                       )
-                          : Image.network(
+                          : CustomImageView(url: 
                         controller.existingImages[0],
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2,
-                            ),
-                          );
-                        },
+
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: Colors.grey[200],

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -272,7 +274,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                 },
                 child: Container(
                   color: Colors.transparent,
-                  child: Image.network(
+                  child: CustomImageView(url: 
                     url,
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => _dummyImage(primaryColor),
@@ -406,7 +408,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
           radius: 20,
           backgroundColor: primaryColor.withOpacity(0.1),
           backgroundImage: blog.user?.photo != null
-              ? NetworkImage("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
+              ? CachedNetworkImageProvider("${ApiConstants.imageBaseUrl}${blog.user!.photo}")
               : null,
           child: blog.user?.photo == null
               ? Text(
@@ -726,7 +728,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                   radius: 20,
                   backgroundColor: Colors.grey.shade600,
                   backgroundImage: currentUser?.profileImage != null
-                      ? NetworkImage("${ApiConstants.imageBaseUrl}${currentUser!.profileImage}")
+                      ? CachedNetworkImageProvider("${ApiConstants.imageBaseUrl}${currentUser!.profileImage}")
                       : null,
                   child: currentUser?.profileImage == null
                       ? Text(userInitial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
@@ -979,7 +981,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                       radius: isReply ? 14 : 18,
                       backgroundColor: Colors.grey.shade600,
                       backgroundImage: comment.user?.photo != null
-                          ? NetworkImage("${ApiConstants.imageBaseUrl}${comment.user!.photo}")
+                          ? CachedNetworkImageProvider("${ApiConstants.imageBaseUrl}${comment.user!.photo}")
                           : null,
                       child: comment.user?.photo == null 
                           ? Text(avatarLetter, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold))
@@ -1238,7 +1240,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     ? Stack(
         alignment: Alignment.center,
         children: [
-          Image.network(
+          CustomImageView(url: 
             "${ApiConstants.imageBaseUrl}$firstMedia",
             fit: BoxFit.contain,
             width: double.infinity,
@@ -1247,7 +1249,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
           const Icon(Icons.play_circle_fill, color: Colors.white70, size: 40),
         ],
       )
-    : Image.network(
+    : CustomImageView(url: 
         "${ApiConstants.imageBaseUrl}$firstMedia",
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => Container(
@@ -1379,7 +1381,7 @@ class FullMediaGalleryScreen extends StatelessWidget {
                 minScale: 0.5,
                 maxScale: 4.0,
                 child: Center(
-                  child: Image.network(
+                  child: CustomImageView(url: 
                     url,
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => const Center(

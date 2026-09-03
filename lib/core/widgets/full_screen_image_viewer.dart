@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,17 +43,12 @@ class FullScreenImageViewer extends StatelessWidget {
                     height: double.infinity,
                   )
                 : imageUrl != null
-                    ? Image.network(
+                    ? CustomImageView(url: 
                         imageUrl!,
                         fit: BoxFit.contain,
                         width: double.infinity,
                         height: double.infinity,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const Center(
-                            child: CircularProgressIndicator(color: Colors.white),
-                          );
-                        },
+
                         errorBuilder: (context, error, stackTrace) => const Center(
                           child: Icon(Icons.broken_image, color: Colors.white, size: 50),
                         ),
