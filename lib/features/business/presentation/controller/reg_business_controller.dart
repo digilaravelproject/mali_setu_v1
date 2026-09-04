@@ -269,7 +269,7 @@ class RegBusinessController extends GetxController {
           if (category.id == -1) {
             // Custom category requested
             bCategoryCtrl.text = "Other";
-            _showCustomCategoryDialog();
+           // _showCustomCategoryDialog();
           } else {
             selectedCategoryId = category.id;
             bCategoryCtrl.text = category.name ?? "";

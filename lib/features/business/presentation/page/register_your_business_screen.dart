@@ -106,7 +106,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     ),
                   ),
 
-                  ValueListenableBuilder<TextEditingValue>(
+                  /* ValueListenableBuilder<TextEditingValue>(
                     valueListenable: controller.bCategoryCtrl,
                     builder: (context, value, child) {
                       if (value.text == "Other") {
@@ -152,7 +152,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                       }
                       return const SizedBox.shrink();
                     },
-                  ),
+                  ), */
 
                   AppInputTextField(
                     label: 'business_description'.tr,

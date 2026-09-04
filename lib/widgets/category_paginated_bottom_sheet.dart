@@ -22,7 +22,7 @@ class CategoryPaginatedBottomSheet extends StatefulWidget {
 }
 
 class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSheet> {
-  final GetBusinessCategoriesPaginatedUseCase _useCase = Get.find<GetBusinessCategoriesPaginatedUseCase>();
+  late final GetBusinessCategoriesPaginatedUseCase _useCase;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   
@@ -37,6 +37,10 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
   @override
   void initState() {
     super.initState();
+    if (!Get.isRegistered<GetBusinessCategoriesPaginatedUseCase>()) {
+      Get.put(GetBusinessCategoriesPaginatedUseCase(repository: Get.find()));
+    }
+    _useCase = Get.find<GetBusinessCategoriesPaginatedUseCase>();
     _fetchCategories();
     _scrollController.addListener(_onScroll);
   }
@@ -189,7 +193,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
           ),
           
           // Custom Category Option (Only in Registration Mode)
-          if (widget.isRegistrationMode) ...[
+          /* if (widget.isRegistrationMode) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
               child: InkWell(
@@ -223,7 +227,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
               ),
             ),
             const Divider(height: 1),
-          ],
+          ], */
           
           // List content
           Expanded(
