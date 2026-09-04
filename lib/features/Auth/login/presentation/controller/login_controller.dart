@@ -244,6 +244,10 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       String errorMessage = e.toString();
+      if (errorMessage.contains('canceled') || errorMessage.contains('AuthorizationErrorCode.canceled')) {
+        // User canceled the sign-in flow, do not show error.
+        return;
+      }
       if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
         errorMessage = 'Connection timeout. Please check your internet and try again.';
       } else if (errorMessage.contains('SocketException')) {

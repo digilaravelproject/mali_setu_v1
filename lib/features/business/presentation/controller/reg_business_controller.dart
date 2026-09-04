@@ -53,6 +53,7 @@ class RegBusinessController extends GetxController {
   final emailCtrl = TextEditingController();
   //final websiteCtrl = TextEditingController();
   final websiteCtrl = TextEditingController(text: "https://");
+  final RxBool hasWebsite = false.obs;
   final addressCtrl = TextEditingController();
   final pinCodeCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
@@ -858,6 +859,11 @@ class RegBusinessController extends GetxController {
     phoneCtrl.text = business.contactPhone ?? "";
     emailCtrl.text = business.contactEmail ?? "";
     websiteCtrl.text = business.website ?? "";
+    if (websiteCtrl.text.isNotEmpty && websiteCtrl.text != "https://") {
+      hasWebsite.value = true;
+    } else {
+      hasWebsite.value = false;
+    }
 
     // Pre-fill location fields
     addressCtrl.text = business.address ?? "";

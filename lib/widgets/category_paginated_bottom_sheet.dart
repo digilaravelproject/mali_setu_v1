@@ -160,8 +160,25 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
             ),
           ),
 
+          // Instruction text
+          if (widget.isRegistrationMode)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0, left: 24.0, right: 24.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'If your category is not listed, please select "Other"',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ),
+
           // Search Bar
-          Padding(
+          /* Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: TextField(
               controller: _searchController,
@@ -190,7 +207,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
                 ),
               ),
             ),
-          ),
+          ), */
           
           // Custom Category Option (Only in Registration Mode)
           /* if (widget.isRegistrationMode) ...[

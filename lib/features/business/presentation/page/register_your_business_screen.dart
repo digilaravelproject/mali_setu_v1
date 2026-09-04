@@ -329,11 +329,32 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     errorText: controller.errors['email'],
                   ),
 
-                  AppInputTextField(
-                    label: 'website'.tr,
-                    iconData: Icons.language_rounded,
-                    textInputType: TextInputType.webSearch,
-                    controller: controller.websiteCtrl,
+                  Obx(() => Row(
+                    children: [
+                      Checkbox(
+                        value: controller.hasWebsite.value,
+                        onChanged: (val) {
+                          controller.hasWebsite.value = val ?? false;
+                          if (!controller.hasWebsite.value) {
+                            controller.websiteCtrl.text = "https://";
+                          }
+                        },
+                      ),
+                      Text(
+                        'Do you have a website?',
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                      ),
+                    ],
+                  )),
+                  
+                  Obx(() => controller.hasWebsite.value 
+                    ? AppInputTextField(
+                        label: 'website'.tr,
+                        iconData: Icons.language_rounded,
+                        textInputType: TextInputType.webSearch,
+                        controller: controller.websiteCtrl,
+                      )
+                    : const SizedBox.shrink(),
                   ),
 
                   const SizedBox(height: 30),
