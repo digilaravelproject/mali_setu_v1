@@ -169,8 +169,9 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
                 child: Text(
                   'If your category is not listed, please select "Other"',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
                     fontStyle: FontStyle.italic,
                   ),
                 ),

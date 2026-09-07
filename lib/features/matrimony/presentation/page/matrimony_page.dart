@@ -225,6 +225,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               else if(!hasPayment){
                 return _buildPymentRestrictedView(context);
               }
+              else if (currentUser?.matrimonyApprovalStatus?.toLowerCase() == 'pending') {
+                return _buildPendingApprovalView(context);
+              }
               try {
                 if (controller.isLoading.value) {
                   return Center(child: CircularProgressIndicator(color: theme.primaryColor));
@@ -1031,6 +1034,51 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   "Purchase Now",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPendingApprovalView(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 40),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.hourglass_empty_rounded,
+                size: 80,
+                color: Colors.orange,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "pending_approval".tr,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "pending_approval_desc".tr,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
               ),
             ),
           ],
