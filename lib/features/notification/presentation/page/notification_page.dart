@@ -241,7 +241,7 @@ class NotificationPage extends GetView<NotificationController> {
                     }
                   }
                 : () {
-                    // Tap to view detail or mark as read logic could go here
+                    Get.toNamed('/notificationDetails', arguments: notification);
                   },
             onLongPress: () {
               if (!isMode && notification.id != null) {

@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -180,7 +181,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                   children: [
                     // Background Image or Gradient
                     if (job.business?.photo != null)
-                      Image.network(
+                      CustomImageView(url: 
                         job.business!.photo!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => _buildFallbackHeader(),

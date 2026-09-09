@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/common/widgets/bg_gradient_border.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/cupertino.dart';
@@ -1968,7 +1969,7 @@ class _FamilyTypeSelectionPageState extends State<FamilyTypeSelectionPage> {
                 ),
                 // If using network images:
                 // child: CircleAvatar(
-                //   backgroundImage: NetworkImage('your_image_url'),
+                //   backgroundImage: CachedNetworkImageProvider('your_image_url'),
                 // ),
               ),
 

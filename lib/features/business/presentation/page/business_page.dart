@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/constent/app_constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/business/presentation/page/single_business_details.dart';
 import 'package:edu_cluezer/widgets/custom_scaffold.dart';
@@ -839,7 +840,7 @@ class BusinessListCard extends StatelessWidget {
                     border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
                     image: business.photo != null && business.photo!.isNotEmpty
                         ? DecorationImage(
-                      image: NetworkImage(ApiConstants.imageBaseUrl+business.photo!),
+                      image: CachedNetworkImageProvider(ApiConstants.imageBaseUrl+business.photo!),
                       fit: BoxFit.cover,
                     )
                         : null, // agar image null ho to background image nahi lagegi

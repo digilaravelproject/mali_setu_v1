@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/helper/form_validator.dart';
@@ -105,7 +106,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     ),
                   ),
 
-                  ValueListenableBuilder<TextEditingValue>(
+                  /* ValueListenableBuilder<TextEditingValue>(
                     valueListenable: controller.bCategoryCtrl,
                     builder: (context, value, child) {
                       if (value.text == "Other") {
@@ -151,7 +152,7 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                       }
                       return const SizedBox.shrink();
                     },
-                  ),
+                  ), */
 
                   AppInputTextField(
                     label: 'business_description'.tr,
@@ -328,11 +329,32 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     errorText: controller.errors['email'],
                   ),
 
-                  AppInputTextField(
-                    label: 'website'.tr,
-                    iconData: Icons.language_rounded,
-                    textInputType: TextInputType.webSearch,
-                    controller: controller.websiteCtrl,
+                  Obx(() => Row(
+                    children: [
+                      Checkbox(
+                        value: controller.hasWebsite.value,
+                        onChanged: (val) {
+                          controller.hasWebsite.value = val ?? false;
+                          if (!controller.hasWebsite.value) {
+                            controller.websiteCtrl.text = "https://";
+                          }
+                        },
+                      ),
+                      Text(
+                        'Do you have a website?',
+                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                      ),
+                    ],
+                  )),
+                  
+                  Obx(() => controller.hasWebsite.value 
+                    ? AppInputTextField(
+                        label: 'website'.tr,
+                        iconData: Icons.language_rounded,
+                        textInputType: TextInputType.webSearch,
+                        controller: controller.websiteCtrl,
+                      )
+                    : const SizedBox.shrink(),
                   ),
 
                   const SizedBox(height: 30),
@@ -392,23 +414,12 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                         height: double.infinity,
                         fit: BoxFit.cover,
                       )
-                          : Image.network(
+                          : CustomImageView(url: 
                         controller.existingImages[0],
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2,
-                            ),
-                          );
-                        },
+
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: Colors.grey[200],

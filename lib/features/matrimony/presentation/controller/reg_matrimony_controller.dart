@@ -1181,6 +1181,14 @@ class RegMatrimonyController extends GetxController {
       final response = await _repository.getCasts();
       if (response.success == true && response.data?.casts != null) {
         casteList.assignAll(response.data!.casts!);
+        
+        // Auto-select 'Mali' by default for new registrations
+        if (!isEditMode.value && religion.value.isEmpty) {
+          final maliCast = casteList.firstWhereOrNull((c) => c.name?.toLowerCase() == 'mali');
+          if (maliCast != null && maliCast.name != null) {
+            onCasteSelected(maliCast.name!);
+          }
+        }
       }
     } catch (e) {
       print("Error fetching casts: $e");

@@ -981,6 +981,8 @@ const Map<String, String> enUS = {
   "my_blogs": "My Blogs",
   "exit_app": "Exit App",
   "want_to_exit_app_message": "Are you sure you want to exit the app?",
+  "pending_approval": "Pending Approval",
+  "pending_approval_desc": "Your matrimony profile is currently under review by the admin. You will be able to view profiles once it is approved.",
 };
 
 

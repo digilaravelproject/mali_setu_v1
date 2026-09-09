@@ -277,6 +277,9 @@ class User {
     isMatrimony = json['is_matrimony'];
     isBusiness = json['is_business'];
     matrimonyApprovalStatus = json['matrimony_approval_status'];
+    if (json['matrimony_profile'] != null && json['matrimony_profile']['approval_status'] != null) {
+      matrimonyApprovalStatus = json['matrimony_profile']['approval_status'];
+    }
     blogCategoryId = json['blog_category_id'];
     blogCategoryName = json['blog_category_name'];
   }

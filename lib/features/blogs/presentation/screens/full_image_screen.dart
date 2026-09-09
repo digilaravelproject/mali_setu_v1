@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:get/get.dart';
 
 class FullImageScreen extends StatefulWidget {
@@ -49,17 +50,12 @@ class _FullImageScreenState extends State<FullImageScreen> {
                 maxScale: 5.0,
                 child: Hero(
                   tag: widget.imageUrl,
-                  child: Image.network(
+                  child: CustomImageView(url: 
                     widget.imageUrl,
                     fit: BoxFit.contain,
                     width: double.infinity,
                     height: double.infinity,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    },
+
                     errorBuilder: (context, error, stackTrace) => const Center(
                       child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
                     ),

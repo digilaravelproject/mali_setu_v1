@@ -351,7 +351,7 @@ class _ExplorePageState extends State<ExplorePage> {
         child: Stack(
           children: [
             // Background Image
-            Image.network(
+            CustomImageView(url: 
               user.imageUrl,
               width: double.infinity,
               height: double.infinity,

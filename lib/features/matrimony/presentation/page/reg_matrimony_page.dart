@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/styles/app_colors.dart';
+import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
@@ -590,7 +591,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                                   tag: 'matrimony_existing_$index',
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
+                                    child: CustomImageView(url: 
                                       ApiConstants.imageBaseUrl + photoUrl,
                                       width: 100,
                                       height: 100,
