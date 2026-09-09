@@ -213,6 +213,7 @@ const Map<String, String> mrIN = {
   'company_name': 'कंपनीचे नाव',
   'department_name': 'विभागाचे नाव',
   'user_type': 'वापरकर्ता प्रकार',
+
   'designation': 'पदनाम',
   'referral_code': 'रेफरल कोड (पर्यायी)',
   'referral_optional': '* रेफरल कोड पर्यायी आहे',
