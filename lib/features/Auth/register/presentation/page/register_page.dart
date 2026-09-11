@@ -99,6 +99,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       isRequired: true,
                     ),
                     AppInputTextField(
+                      key: controller.emailKey,
                       label: "email_id".tr,
                       textInputType: TextInputType.emailAddress,
                       validator: FormValidator.email,
@@ -108,6 +109,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       topPadding: 0,
                     ),
                     AppInputTextField(
+                      key: controller.dobKey,
                       label: "date_of_birth".tr,
                       textInputType: TextInputType.datetime,
                       controller: controller.ageCtrl,
@@ -178,6 +180,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   icon: CupertinoIcons.location_circle_fill,
                   children: [
                     AppInputTextField(
+                      key: controller.addressKey,
                       label: "address".tr,
                       textInputType: TextInputType.text,
                       controller: controller.addressCtrl,
@@ -198,6 +201,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     //   topPadding: 0,
                     // ),
                     AppInputTextField(
+                      key: controller.pinCodeKey,
                       label: "pin_code".tr,
                       textInputType: TextInputType.number,
                       validator: FormValidator.pincode,
@@ -208,6 +212,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
                     TwoColumnRow(
                       left: AppInputTextField(
+                        key: controller.stateKey,
                         label: "state".tr,
                         controller: controller.stateCtrl,
                         isRequired: true,
@@ -218,6 +223,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         ],
                       ),
                       right: AppInputTextField(
+                        key: controller.districtKey,
                         label: "city".tr,
                         controller: controller.districtCtrl,
                         isRequired: true,
@@ -230,6 +236,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
                     TwoColumnRow(
                       left: AppInputTextField(
+                        key: controller.cityKey,
                         label: "country".tr,
                         controller: controller.cityCtrl,
                         isRequired: true,
@@ -250,6 +257,7 @@ class RegisterPage extends GetWidget<RegisterController> {
   
                     ),
                     AppInputTextField(
+                      key: controller.villageKey,
                       label: "village".tr,
                       controller: controller.villageCtrl,
                       isRequired: true,
@@ -283,6 +291,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   icon: CupertinoIcons.briefcase_fill,
                   children: [
                     AppInputTextField(
+                      key: controller.userTypeKey,
                       label: "user_type".tr,
                       controller: controller.userTypeCtrl,
                       isRequired: true,
@@ -341,6 +350,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   icon: CupertinoIcons.person_3_fill,
                   children: [
                     AppInputTextField(
+                      key: controller.respectedPersonNameKey,
                       label: "person_name".tr,
                       controller: controller.respectedPersonNameCtrl,
                       iconData: CupertinoIcons.person_fill,
@@ -349,6 +359,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       topPadding: 0,
                     ),
                     AppInputTextField(
+                      key: controller.respectedPersonMobileKey,
                       label: "person_mobile".tr,
                       controller: controller.respectedPersonMobileCtrl,
                       iconData: CupertinoIcons.phone_fill,
@@ -370,6 +381,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   children: [
                     Obx(
                       () => AppInputTextField(
+                        key: controller.passwordKey,
                         label: "password".tr,
                         controller: controller.passwordCtrl,
                         isRequired: true,
@@ -393,6 +405,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
                     Obx(
                       () => AppInputTextField(
+                        key: controller.confirmPasswordKey,
                         label: "confirm_password".tr,
                         controller: controller.confirmPasswordCtrl,
                         isRequired: true,
@@ -403,16 +416,15 @@ class RegisterPage extends GetWidget<RegisterController> {
                             : Icons.remove_red_eye_rounded,
                         onEndIconTap: () => controller.isCnfPasswordValue.toggle(),
                         topPadding: 0,
-                        validator: FormValidator.password,
-                        //     (value) {
-                        //   if (value == null || value.isEmpty) {
-                        //     return 'confirm_password_required'.tr;
-                        //   }
-                        //   if (value != controller.passwordCtrl.text) {
-                        //     return 'passwords_do_not_match'.tr;
-                        //   }
-                        //   return null;
-                        // },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'confirm_password_required'.tr;
+                          }
+                          if (value != controller.passwordCtrl.text) {
+                            return 'passwords_do_not_match'.tr;
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],

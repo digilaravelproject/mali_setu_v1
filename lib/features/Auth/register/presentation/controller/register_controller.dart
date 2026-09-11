@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../../../core/routes/app_routes.dart';
+import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/pincode_helper.dart';
 import '../../../../../core/helper/location_helper.dart';
 import '../../data/model/req_register_model.dart';
@@ -46,6 +47,36 @@ class RegisterController extends GetxController {
   
   /// PHONE FIELD COMPONENT KEY
   final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
+
+  /// FIELD KEYS FOR AUTO-SCROLL ON VALIDATION ERROR
+  final GlobalKey emailKey = GlobalKey();
+  final GlobalKey dobKey = GlobalKey();
+  final GlobalKey addressKey = GlobalKey();
+  final GlobalKey pinCodeKey = GlobalKey();
+  final GlobalKey stateKey = GlobalKey();
+  final GlobalKey districtKey = GlobalKey();
+  final GlobalKey cityKey = GlobalKey();
+  final GlobalKey villageKey = GlobalKey();
+  final GlobalKey userTypeKey = GlobalKey();
+  final GlobalKey respectedPersonNameKey = GlobalKey();
+  final GlobalKey respectedPersonMobileKey = GlobalKey();
+  final GlobalKey passwordKey = GlobalKey();
+  final GlobalKey confirmPasswordKey = GlobalKey();
+
+  /// Smoothly scroll to the field with error
+  void scrollToKey(GlobalKey key) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+          alignment: 0.15,
+        );
+      }
+    });
+  }
 
   /// BASIC DETAILS
   var selectedBirthDate = Rxn<DateTime>();
@@ -324,17 +355,145 @@ class RegisterController extends GetxController {
     final isPhoneValid = phoneValidationError == null;
 
     // Validate form (triggers all inline validators for other fields)
-    bool isFormValid = formKey.currentState!.validate();
+    bool isFormValid = formKey.currentState?.validate() ?? false;
 
-    // Caste certificate is commented out in UI, skipping its validation
-    // bool isCasteCertificateValid = _validateCasteCertificate();
+    // Check errors in top-to-bottom visual order:
 
-    if (!isFormValid || !isNameValid || !isPhoneValid) {
+    // 1. Name fields (Title, First Name, Last Name)
+    if (!isNameValid) {
+      scrollToKey(nameFieldKey);
+      CustomSnackBar.showError(
+        message: nameValidationError,
+      );
       return;
     }
 
-    // Validate password confirmation (redundant if using inline validator but keeping as safety)
+    // 2. Email
+    final emailError = FormValidator.email(emailCtrl.text);
+    if (emailError != null) {
+      scrollToKey(emailKey);
+      CustomSnackBar.showError(message: emailError);
+      return;
+    }
+
+    // 3. Date of Birth
+    final dobError = FormValidator.dob(ageCtrl.text);
+    if (dobError != null) {
+      scrollToKey(dobKey);
+      CustomSnackBar.showError(message: dobError);
+      return;
+    }
+
+    // 4. Phone
+    if (!isPhoneValid) {
+      scrollToKey(phoneFieldKey);
+      CustomSnackBar.showError(
+        message: phoneValidationError,
+      );
+      return;
+    }
+
+    // 5. Address
+    final addressError = FormValidator.emptycheck(addressCtrl.text, "address".tr);
+    if (addressError != null) {
+      scrollToKey(addressKey);
+      CustomSnackBar.showError(message: addressError);
+      return;
+    }
+
+    // 6. Pincode
+    final pincodeError = FormValidator.pincode(pinCodeCtrl.text);
+    if (pincodeError != null) {
+      scrollToKey(pinCodeKey);
+      CustomSnackBar.showError(
+        message: pincodeError == "No Match" ? "Please enter valid 6-digit pincode" : pincodeError,
+      );
+      return;
+    }
+
+    // 7. State
+    if (stateCtrl.text.trim().isEmpty) {
+      scrollToKey(stateKey);
+      CustomSnackBar.showError(message: "Please enter state");
+      return;
+    }
+
+    // 8. District / City
+    if (districtCtrl.text.trim().isEmpty) {
+      scrollToKey(districtKey);
+      CustomSnackBar.showError(message: "Please enter city");
+      return;
+    }
+
+    // 9. Country
+    if (cityCtrl.text.trim().isEmpty) {
+      scrollToKey(cityKey);
+      CustomSnackBar.showError(message: "Please enter country");
+      return;
+    }
+
+    // 10. Village
+    if (villageCtrl.text.trim().isEmpty) {
+      scrollToKey(villageKey);
+      CustomSnackBar.showError(message: "Please enter village");
+      return;
+    }
+
+    // 11. User Type
+    final userTypeError = FormValidator.emptycheck(userTypeCtrl.text, "user_type".tr);
+    if (userTypeError != null) {
+      scrollToKey(userTypeKey);
+      CustomSnackBar.showError(message: userTypeError);
+      return;
+    }
+
+    // 12. Well Known Mali Person Name
+    final personNameError = FormValidator.emptycheck(respectedPersonNameCtrl.text, "person_name".tr);
+    if (personNameError != null) {
+      scrollToKey(respectedPersonNameKey);
+      CustomSnackBar.showError(message: personNameError);
+      return;
+    }
+
+    // 13. Well Known Mali Person Mobile
+    final personMobileError = FormValidator.mobile(respectedPersonMobileCtrl.text);
+    if (personMobileError != null) {
+      scrollToKey(respectedPersonMobileKey);
+      CustomSnackBar.showError(message: personMobileError);
+      return;
+    }
+
+    // 14. Password
+    if (passwordCtrl.text.isEmpty) {
+      scrollToKey(passwordKey);
+      CustomSnackBar.showError(message: "Please enter password");
+      return;
+    }
+    if (passwordCtrl.text.length < 2) {
+      scrollToKey(passwordKey);
+      CustomSnackBar.showError(message: "Password must be at least 2 characters");
+      return;
+    }
+
+    // 15. Confirm Password
+    if (confirmPasswordCtrl.text.isEmpty) {
+      scrollToKey(confirmPasswordKey);
+      CustomSnackBar.showError(message: "confirm_password_required".tr);
+      return;
+    }
     if (passwordCtrl.text != confirmPasswordCtrl.text) {
+      scrollToKey(confirmPasswordKey);
+      CustomSnackBar.showError(
+        message: "passwords_do_not_match".tr.isNotEmpty
+            ? "passwords_do_not_match".tr
+            : "Passwords do not match",
+      );
+      return;
+    }
+
+    // General fallback
+    if (!isFormValid) {
+      CustomSnackBar.showError(message: "Please check the highlighted fields");
       return;
     }
 
