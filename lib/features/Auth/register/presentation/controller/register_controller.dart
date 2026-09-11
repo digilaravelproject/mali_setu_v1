@@ -469,11 +469,6 @@ class RegisterController extends GetxController {
       CustomSnackBar.showError(message: "Please enter password");
       return;
     }
-    if (passwordCtrl.text.length < 2) {
-      scrollToKey(passwordKey);
-      CustomSnackBar.showError(message: "Password must be at least 2 characters");
-      return;
-    }
 
     // 15. Confirm Password
     if (confirmPasswordCtrl.text.isEmpty) {

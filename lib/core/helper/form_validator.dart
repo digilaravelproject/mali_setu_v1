@@ -138,35 +138,13 @@ class FormValidator {
     if (value == null || value.isEmpty) {
       return "Please enter password";
     }
-    if (value.length < 2) {
-      return "Password must be at least 2 characters";
-    }
     return null;
   }
-
-
 
   static String? strictPassword(String? value) {
     if (value == null || value.isEmpty) {
       return "Please enter password";
     }
-
-    if (value.length < 2) {
-      return "Password must be at least 2 characters";
-    }
-
-    if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return "password_uppercase_required".tr;
-    }
-
-    if (!RegExp(r'[0-9]').hasMatch(value)) {
-      return "password_number_required".tr;
-    }
-
-    if (!RegExp(r'[!@#\$&*~_+\-=\[\]{};:"\\|,.<>?]').hasMatch(value)) {
-      return "password_special_required".tr;
-    }
-
     return null;
   }
 

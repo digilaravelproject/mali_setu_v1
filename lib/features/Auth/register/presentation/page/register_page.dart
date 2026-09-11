@@ -387,15 +387,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         isRequired: true,
                         isObscure: !controller.isPasswordValue.value,
                         iconData: CupertinoIcons.lock_fill,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter password";
-                          }
-                          if (value.length < 2) {
-                            return "Password must be at least 2 characters";
-                          }
-                          return null;
-                        },
+                        validator: FormValidator.password,
                         endIcon: controller.isPasswordValue.value
                             ? Icons.visibility_off
                             : Icons.remove_red_eye_rounded,
