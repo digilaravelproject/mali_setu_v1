@@ -227,6 +227,8 @@ class HomePage extends GetWidget<HomeController> {
                               child: ImageSlider(
                                 fit: BoxFit.fill,
                                 indicatorType: IndicatorType.rectangle,
+                                autoScrollInterval: const Duration(seconds: 5),
+                                scrollAnimationDuration: const Duration(milliseconds: 800),
                                 images: controller.banners
                                     .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
                                     .toList(),

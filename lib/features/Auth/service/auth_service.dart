@@ -267,8 +267,13 @@ class AuthService extends GetxService {
             final matResponse = await _apiClient.get("${ApiConstants.GetMatrimonyProfile}/${user.id}");
             if (matResponse.statusCode == 200) {
               final matData = matResponse.data['data']?['profile'] ?? matResponse.data['profile'] ?? matResponse.data['data'];
-              if (matData != null && (matData['approval_status'] != null || matData['status'] != null)) {
-                user.matrimonyApprovalStatus = (matData['approval_status'] ?? matData['status']).toString();
+              if (matData != null) {
+                if (matData['approval_status'] != null || matData['status'] != null) {
+                  user.matrimonyApprovalStatus = (matData['approval_status'] ?? matData['status']).toString();
+                }
+                if (matData['rejection_reason'] != null) {
+                  user.matrimonyRejectionReason = matData['rejection_reason'].toString();
+                }
                 // currentUser.value = user; // Refresh observable
                 // currentUser.refresh();
                 currentUser.value = null;

@@ -125,8 +125,9 @@ const Map<String, String> mrIN = {
   'country': 'देश',
   'citizenship': 'नागरिकत्व',
   'state': 'राज्य',
-  'city': 'शहर',
-  
+  //'city': 'शहर',
+  'city': 'जिल्हा',
+
   // Lifestyle Filters
   'eggetarian': 'अंडाहारी',
   'vegetarian': 'शाकाहारी',
@@ -364,7 +365,7 @@ const Map<String, String> mrIN = {
 
 
   'complexion': 'त्वचेचा रंग',
-  'personal_details_sub': 'तुमची मूलभूत माहितीपासून सुरुवात करा"',
+  'personal_details_sub': 'वधू आणि वराचा तपशील"',
   'personal_details': 'वैयक्तिक तपशील',
   'are_you_sure_for_logout': 'आपण नक्की लॉगआउट करू इच्छिता का?',
   'choose_your_preferred_language': 'आपली प्राधान्याची भाषा निवडा',
@@ -912,7 +913,8 @@ const Map<String, String> mrIN = {
   'invalid_pincode' : "निकाल सापडला नाही",
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका / गांव",
-  'village' : "गांव",
+  //'village' : "गांव",
+  'village' : "गाव / शहर",
   'enter_pincode' : "पिनकोड टाका",
   'search_volunteers' : "स्वयंसेवक शोधा",
 
@@ -985,6 +987,9 @@ const Map<String, String> mrIN = {
 "want_to_exit_app_message": "तुम्हाला खात्री आहे की तुम्हाला अॅपमधून बाहेर पडायचे आहे?",
 "pending_approval": "मंजुरी प्रलंबित आहे",
 "pending_approval_desc": "तुमची विवाह प्रोफाइल सध्या प्रशासकाद्वारे पुनरावलोकनाखाली आहे. ती मंजूर झाल्यानंतरच तुम्ही इतर प्रोफाइल पाहू शकाल.",
+"profile_rejected": "प्रोफाइल नाकारली",
+"profile_rejected_desc": "तुमची विवाह प्रोफाइल प्रशासकाद्वारे नाकारली गेली आहे.",
+"rejection_reason": "नाकारण्याचे कारण",
 };
 
 

@@ -82,15 +82,17 @@ class RegBusinessController extends GetxController {
   // };
 
   var businessTypes = <String>[
-    "Proprietary /Partnership - LLP",
     "Private Ltd",
+    "Proprietary(Owner)/Partnership - LLP",
     "Public Ltd",
+    "Registered Trust / Mandal- Charitable",
   ].obs;
 
   Map<String, String> typeIdMap = {
-    "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
     "Private Ltd": "Private Ltd",
+    "Proprietary(Owner)/Partnership - LLP": "Proprietary(Owner)/Partnership - LLP",
     "Public Ltd": "Public Ltd",
+    "Registered Trust / Mandal- Charitable": "Registered Trust / Mandal- Charitable",
   };
 
   int? selectedCategoryId;
@@ -195,10 +197,8 @@ class RegBusinessController extends GetxController {
       },
     );
 
-    // Init lists
-    if (businessTypes.isEmpty) {
-      loadBusinessTypes();
-    }
+    // Init business types from plans API
+    loadBusinessTypes();
 
     // Reactive error clearing
     ever(errors, (_) {}); // Force refresh
@@ -408,16 +408,44 @@ class RegBusinessController extends GetxController {
   // }
 
   Future<void> loadBusinessTypes() async {
+    try {
+      final response = await _repository.getBusinessPlans();
+      if (response.success == true && response.data?.plans != null) {
+        final plans = response.data!.plans!;
+        final types = <String>[];
+        final idMap = <String, String>{};
+
+        for (var plan in plans) {
+          final cType = plan.companyType?.trim();
+          if (cType != null && cType.isNotEmpty && !types.contains(cType)) {
+            types.add(cType);
+            idMap[cType] = cType;
+          }
+        }
+
+        if (types.isNotEmpty) {
+          businessTypes.assignAll(types);
+          typeIdMap = idMap;
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint("Error loading business types from plans API: $e");
+    }
+
+    // Fallback defaults
     businessTypes.assignAll([
-      "Proprietary /Partnership - LLP",
       "Private Ltd",
+      "Proprietary(Owner)/Partnership - LLP",
       "Public Ltd",
+      "Registered Trust / Mandal- Charitable",
     ]);
 
     typeIdMap = {
-      "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
       "Private Ltd": "Private Ltd",
+      "Proprietary(Owner)/Partnership - LLP": "Proprietary(Owner)/Partnership - LLP",
       "Public Ltd": "Public Ltd",
+      "Registered Trust / Mandal- Charitable": "Registered Trust / Mandal- Charitable",
     };
   }
 
@@ -519,7 +547,7 @@ class RegBusinessController extends GetxController {
       isRegistering.value = true;
 
       // Get IDs from maps
-      final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
+      final typeId = typeIdMap[bTypeCtrl.text] ?? bTypeCtrl.text.trim();
       final categoryId = selectedCategoryId ?? 1;
 
       // Get combined phone from PhoneFieldComponent

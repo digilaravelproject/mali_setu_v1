@@ -130,7 +130,8 @@ const Map<String, String> enUS = {
   'country': 'Country',
   'citizenship': 'Citizenship',
   'state': 'State',
-  'city': 'City',
+  //'city': 'City',
+  'city': 'District',
   "middle_name" : "Middle Name",
 
   // Lifestyle Filters
@@ -633,7 +634,7 @@ const Map<String, String> enUS = {
 
 
   'tap_camera_update_photo': 'Tap to update photo',
-  'personal_details_sub': 'Start with your basic info',
+  'personal_details_sub': 'Bride(Vadhu) & Groom(Var) Details',
   'gender': 'Gender',
   'complexion': 'Complexion',
   'language': 'Language',
@@ -914,7 +915,8 @@ const Map<String, String> enUS = {
   'invalid_pincode' : "No Match",
   'location_information' : "Location Information",
   'taluka' : "Taluka",
-  'village' : "Village",
+  //'village' : "Village",
+  'village' : "Village/City",
   'clear_all' : "Clear All",
   'enter_pincode' : "Enter Pincode",
   'search_volunteers' : "Search Volunteers",
@@ -983,6 +985,9 @@ const Map<String, String> enUS = {
   "want_to_exit_app_message": "Are you sure you want to exit the app?",
   "pending_approval": "Pending Approval",
   "pending_approval_desc": "Your matrimony profile is currently under review by the admin. You will be able to view profiles once it is approved.",
+  "profile_rejected": "Profile Rejected",
+  "profile_rejected_desc": "Your matrimony profile has been rejected by the admin.",
+  "rejection_reason": "Rejection Reason",
 };
 
 

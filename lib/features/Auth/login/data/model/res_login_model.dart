@@ -156,6 +156,7 @@ class User {
   bool? isBusiness;
 
   String? matrimonyApprovalStatus; // 🆕 ADDED
+  String? matrimonyRejectionReason; // 🆕 ADDED
   int? blogCategoryId; // 🆕 ADDED
   String? blogCategoryName; // 🆕 ADDED
 
@@ -206,6 +207,7 @@ class User {
     this.isMatrimony,
     this.isBusiness,
     this.matrimonyApprovalStatus,
+    this.matrimonyRejectionReason,
     this.blogCategoryId,
     this.blogCategoryName,
   });
@@ -277,8 +279,14 @@ class User {
     isMatrimony = json['is_matrimony'];
     isBusiness = json['is_business'];
     matrimonyApprovalStatus = json['matrimony_approval_status'];
-    if (json['matrimony_profile'] != null && json['matrimony_profile']['approval_status'] != null) {
-      matrimonyApprovalStatus = json['matrimony_profile']['approval_status'];
+    matrimonyRejectionReason = json['matrimony_rejection_reason'];
+    if (json['matrimony_profile'] != null) {
+      if (json['matrimony_profile']['approval_status'] != null) {
+        matrimonyApprovalStatus = json['matrimony_profile']['approval_status'];
+      }
+      if (json['matrimony_profile']['rejection_reason'] != null) {
+        matrimonyRejectionReason = json['matrimony_profile']['rejection_reason'];
+      }
     }
     blogCategoryId = json['blog_category_id'];
     blogCategoryName = json['blog_category_name'];
@@ -332,6 +340,7 @@ class User {
     data['has_business_payment'] = hasBusinessPayment;
     data['has_matrimony_payment'] = hasMatrimonyPayment;
     data['matrimony_approval_status'] = matrimonyApprovalStatus;
+    data['matrimony_rejection_reason'] = matrimonyRejectionReason;
     data['blog_category_id'] = blogCategoryId;
     data['blog_category_name'] = blogCategoryName;
     return data;

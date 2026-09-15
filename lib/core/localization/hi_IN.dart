@@ -130,7 +130,8 @@ const Map<String, String> hiIN = {
   'country': 'देश',
   'citizenship': 'नागरिकता',
   'state': 'राज्य',
-  'city': 'शहर',
+  //'city': 'शहर',
+  'city': 'जिला',
 
   // Lifestyle Filters
   'eggetarian': 'अंडाहारी',
@@ -620,7 +621,7 @@ const Map<String, String> hiIN = {
 
 
   'tap_camera_update_photo': 'फोटो अपडेट करने के लिए टैप करें',
-  'personal_details_sub': 'अपनी मूल जानकारी से शुरू करें',
+  'personal_details_sub': 'वधू एवं वर का विवरण',
   'gender': 'लिंग',
   'complexion': 'रंग',
   'language': 'भाषा',
@@ -898,7 +899,8 @@ const Map<String, String> hiIN = {
   'invalid_pincode': 'कोई मिलान नहीं',
   'location_information': 'स्थान जानकारी',
   'taluka': 'तालुका',
-  'village': 'गांव',
+  //'village': 'गांव',
+  'village': 'गाँव / शहर',
   'clear_all': 'सभी साफ करें',
   'enter_pincode': 'पिन कोड दर्ज करें',
   'search_volunteers': 'स्वयंसेवक खोजें',
@@ -965,6 +967,9 @@ const Map<String, String> hiIN = {
   "want_to_exit_app_message": "क्या आप ऐप से बाहर निकलना चाहते हैं?",
   "pending_approval": "मंज़ूरी लंबित है",
   "pending_approval_desc": "आपकी वैवाहिक प्रोफ़ाइल वर्तमान में एडमिन द्वारा समीक्षा के अधीन है। इसके मंज़ूर होने के बाद आप अन्य प्रोफ़ाइल देख पाएंगे।",
+  "profile_rejected": "प्रोफ़ाइल अस्वीकृत",
+  "profile_rejected_desc": "आपकी वैवाहिक प्रोफ़ाइल एडमिन द्वारा अस्वीकृत कर दी गई है।",
+  "rejection_reason": "अस्वीकृति का कारण",
 };
 
 

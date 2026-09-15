@@ -18,6 +18,10 @@ class ImageSlider extends StatefulWidget {
   final IndicatorType indicatorType;
   final BoxFit fit;
   final Function(int index)? onImageTap; // Callback when image is tapped
+  final Duration autoScrollInterval;
+  final Duration scrollAnimationDuration;
+  final Curve animationCurve;
+  final bool pauseOnTouch;
 
   const ImageSlider({
     super.key,
@@ -32,6 +36,10 @@ class ImageSlider extends StatefulWidget {
     this.indicatorType = IndicatorType.dot,
     this.fit = BoxFit.cover,
     this.onImageTap, // Optional tap callback
+    this.autoScrollInterval = const Duration(seconds: 5),
+    this.scrollAnimationDuration = const Duration(milliseconds: 800),
+    this.animationCurve = Curves.easeInOutCubic,
+    this.pauseOnTouch = true,
   });
 
   @override
@@ -42,22 +50,55 @@ class _ImageSliderState extends State<ImageSlider> {
   late PageController _pageController;
   int _currentPage = 1;
   Timer? _timer;
+  bool _isHolding = false;
 
-  List<String> get _loopImages => [
-    widget.images.last,
-    ...widget.images,
-    widget.images.first,
-  ];
+  List<String> get _loopImages {
+    if (widget.images.isEmpty) return [];
+    if (widget.images.length == 1) return widget.images;
+    return [
+      widget.images.last,
+      ...widget.images,
+      widget.images.first,
+    ];
+  }
+
+  int get _activeIndicatorIndex {
+    if (widget.images.isEmpty) return 0;
+    if (widget.images.length == 1) return 0;
+    if (_currentPage == 0) return widget.images.length - 1;
+    if (_currentPage >= _loopImages.length - 1) return 0;
+    return (_currentPage - 1).clamp(0, widget.images.length - 1);
+  }
 
   @override
   void initState() {
     super.initState();
+    _currentPage = widget.images.length > 1 ? 1 : 0;
     _pageController = PageController(
       initialPage: _currentPage,
       viewportFraction: widget.viewPort,
     );
 
-    if (widget.autoScroll) _startTimer();
+    if (widget.autoScroll && widget.images.length > 1) {
+      _startTimer();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ImageSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.images.length != oldWidget.images.length ||
+        widget.autoScroll != oldWidget.autoScroll ||
+        widget.autoScrollInterval != oldWidget.autoScrollInterval) {
+      _timer?.cancel();
+      _currentPage = widget.images.length > 1 ? 1 : 0;
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(_currentPage);
+      }
+      if (widget.autoScroll && widget.images.length > 1 && !_isHolding) {
+        _startTimer();
+      }
+    }
   }
 
   @override
@@ -68,24 +109,50 @@ class _ImageSliderState extends State<ImageSlider> {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_currentPage < widget.images.length + 1) {
+    if (!widget.autoScroll || widget.images.length <= 1) return;
+    _timer?.cancel();
+    _timer = Timer.periodic(widget.autoScrollInterval, (timer) async {
+      if (!mounted || !_pageController.hasClients || _isHolding) return;
+
+      if (_currentPage < _loopImages.length - 1) {
         _currentPage++;
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        try {
+          await _pageController.animateToPage(
+            _currentPage,
+            duration: widget.scrollAnimationDuration,
+            curve: widget.animationCurve,
+          );
+          if (!mounted || !_pageController.hasClients) return;
+          if (_currentPage >= _loopImages.length - 1) {
+            _currentPage = 1;
+            _pageController.jumpToPage(1);
+          }
+        } catch (_) {}
       } else {
         _currentPage = 1;
-        _pageController.jumpToPage(_currentPage);
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(1);
+        }
       }
     });
   }
 
+  void _pauseTimer() {
+    _isHolding = true;
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void _resumeTimer() {
+    _isHolding = false;
+    if (widget.autoScroll && widget.images.length > 1) {
+      _startTimer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    Widget slider = Stack(
       children: [
         PageView.builder(
           controller: _pageController,
@@ -98,30 +165,35 @@ class _ImageSliderState extends State<ImageSlider> {
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTapDown: (details) {
-                    final width = MediaQuery.of(context).size.width;
-                    final tapPosition = details.localPosition.dx;
+                    if (widget.enableNavigation) {
+                      final width = MediaQuery.of(context).size.width;
+                      final tapPosition = details.localPosition.dx;
 
-                    if (tapPosition > width / 2) {
-                      if (_currentPage < widget.images.length + 1) {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    } else {
-                      if (_currentPage > 0) {
-                        _pageController.previousPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                        );
+                      if (tapPosition > width / 2) {
+                        if (_currentPage < _loopImages.length - 1) {
+                          _pageController.nextPage(
+                            duration: widget.scrollAnimationDuration,
+                            curve: widget.animationCurve,
+                          );
+                        }
+                      } else {
+                        if (_currentPage > 0) {
+                          _pageController.previousPage(
+                            duration: widget.scrollAnimationDuration,
+                            curve: widget.animationCurve,
+                          );
+                        }
                       }
                     }
+                  },
+                  onLongPress: () {
+                    // Intentionally absorb long press so releasing after holding
+                    // does not accidentally trigger onTap
                   },
                   onTap: () {
                     // Call the onImageTap callback with the actual image index (not loop index)
                     if (widget.onImageTap != null) {
-                      // Convert loop index to actual image index
-                      int actualIndex = index - 1; // Remove first duplicate
+                      int actualIndex = widget.images.length > 1 ? index - 1 : index;
                       if (actualIndex < 0) actualIndex = widget.images.length - 1;
                       if (actualIndex >= widget.images.length) actualIndex = 0;
                       widget.onImageTap!(actualIndex);
@@ -140,20 +212,42 @@ class _ImageSliderState extends State<ImageSlider> {
           onPageChanged: (index) {
             setState(() => _currentPage = index);
 
-            if (index == _loopImages.length - 1) {
-              Future.delayed(const Duration(milliseconds: 250), () {
-                _pageController.jumpToPage(1);
-              });
-            } else if (index == 0) {
-              Future.delayed(const Duration(milliseconds: 250), () {
-                _pageController.jumpToPage(widget.images.length);
-              });
+            if (widget.images.length > 1) {
+              if (index == _loopImages.length - 1) {
+                Future.delayed(widget.scrollAnimationDuration, () {
+                  if (mounted &&
+                      _pageController.hasClients &&
+                      _currentPage == _loopImages.length - 1) {
+                    _pageController.jumpToPage(1);
+                  }
+                });
+              } else if (index == 0) {
+                Future.delayed(widget.scrollAnimationDuration, () {
+                  if (mounted &&
+                      _pageController.hasClients &&
+                      _currentPage == 0) {
+                    _pageController.jumpToPage(widget.images.length);
+                  }
+                });
+              }
             }
           },
         ),
-        if (widget.isIndicatorVisible) _buildIndicator(context),
+        if (widget.isIndicatorVisible && widget.images.length > 1)
+          _buildIndicator(context),
       ],
     );
+
+    if (widget.pauseOnTouch) {
+      slider = Listener(
+        onPointerDown: (_) => _pauseTimer(),
+        onPointerUp: (_) => _resumeTimer(),
+        onPointerCancel: (_) => _resumeTimer(),
+        child: slider,
+      );
+    }
+
+    return slider;
   }
 
   /// ------------------------------------------------------------
@@ -166,7 +260,7 @@ class _ImageSliderState extends State<ImageSlider> {
         return Row(
           mainAxisAlignment: widget.indicatorAlignment,
           children: List.generate(widget.images.length, (i) {
-            bool active = (_currentPage == i + 1);
+            bool active = (_activeIndicatorIndex == i);
             return AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -191,7 +285,7 @@ class _ImageSliderState extends State<ImageSlider> {
           child: Row(
             mainAxisAlignment: widget.indicatorAlignment,
             children: List.generate(widget.images.length, (i) {
-              bool active = (_currentPage == i + 1);
+              bool active = (_activeIndicatorIndex == i);
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -214,7 +308,7 @@ class _ImageSliderState extends State<ImageSlider> {
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(widget.images.length, (i) {
-            bool active = (_currentPage == i + 1);
+            bool active = (_activeIndicatorIndex == i);
             return Expanded(
               child: Container(
                 height: 6,
