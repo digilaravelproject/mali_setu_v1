@@ -352,8 +352,10 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   Obx(() => controller.hasWebsite.value 
                     ? AppInputTextField(
                         label: 'website'.tr,
+                        subLabel: 'website_example_hint'.tr,
+                        hintText: 'https://www.example.com',
                         iconData: Icons.language_rounded,
-                        textInputType: TextInputType.webSearch,
+                        textInputType: TextInputType.url,
                         controller: controller.websiteCtrl,
                       )
                     : const SizedBox.shrink(),

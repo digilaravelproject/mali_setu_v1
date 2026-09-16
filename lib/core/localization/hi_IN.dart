@@ -282,6 +282,7 @@ const Map<String, String> hiIN = {
   'call': 'कॉल करें',
   'message': 'संदेश',
   'website': 'वेबसाइट',
+  'website_example_hint': '(उदा: https://www.example.com)',
   'no_description': 'कोई विवरण उपलब्ध नहीं',
   'no_products': 'कोई उत्पाद उपलब्ध नहीं',
   'no_services': 'कोई सेवाएं उपलब्ध नहीं',

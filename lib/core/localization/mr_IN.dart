@@ -280,6 +280,7 @@ const Map<String, String> mrIN = {
   'call': 'कॉल करा',
   'message': 'संदेश',
   'website': 'वेबसाइट',
+  'website_example_hint': '(उदा: https://www.example.com)',
   'no_description': 'वर्णन उपलब्ध नाही',
   'no_products': 'उत्पादने उपलब्ध नाहीत',
   'no_services': 'सेवा उपलब्ध नाहीत',

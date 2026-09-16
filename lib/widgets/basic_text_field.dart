@@ -39,6 +39,7 @@ class AppInputTextField extends StatelessWidget {
   final bool? readOnly;
   final Color? textColor;
   final VoidCallback? onOtherSelected;
+  final String? subLabel;
   final bool isRequired;
   final double topPadding;
   final String? errorText;
@@ -46,6 +47,7 @@ class AppInputTextField extends StatelessWidget {
   const AppInputTextField({
     super.key,
     this.label = "Input Label",
+    this.subLabel,
     this.iconData,
     this.controller,
     this.endIcon,
@@ -93,23 +95,31 @@ class AppInputTextField extends StatelessWidget {
       children: [
         if (showLabel) ...[
           SizedBox(height: topPadding),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  label,
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: label,
                   style: theme.textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              if (isRequired)
-                Text(
-                  ' *',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.red,
+                if (isRequired)
+                  TextSpan(
+                    text: ' *',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.red,
+                    ),
                   ),
-                ),
-            ],
+                if (subLabel != null && subLabel!.isNotEmpty)
+                  TextSpan(
+                    text: '  $subLabel',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.hintColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
 

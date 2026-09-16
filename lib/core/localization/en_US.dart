@@ -284,6 +284,7 @@ const Map<String, String> enUS = {
   'call': 'Call',
   'message': 'Message',
   'website': 'Website',
+  'website_example_hint': '(e.g., https://www.example.com)',
   'no_description': 'No description available',
   'no_products': 'No products available',
   'no_services': 'No services available',
