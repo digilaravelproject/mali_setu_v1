@@ -14,6 +14,7 @@ import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import '../../../../widgets/category_paginated_bottom_sheet.dart';
+import '../../../../widgets/language_selection_dialog.dart';
 import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
@@ -112,6 +113,9 @@ class HomePage extends GetWidget<HomeController> {
                               ],
                             ),
                             const Spacer(),
+                            // Language Change Icon (A ⇄ अ)
+                            const LanguageAppBarButton(),
+                            const SizedBox(width: 16),
                             // Notification Icon
                             Obx(() {
                               int count = 0;

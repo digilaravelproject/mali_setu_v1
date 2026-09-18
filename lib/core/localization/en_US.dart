@@ -1,6 +1,8 @@
 const Map<String, String> enUS = {
   // Language Settings
   'select_language': 'Select Language',
+  'choose_your_app_language': 'Choose your app language',
+  'more_languages_coming_soon': '*More regional languages coming soon!',
   'search_language': 'Search language...',
   'selected_language': 'Selected Language',
   'available_languages': 'Available Languages',

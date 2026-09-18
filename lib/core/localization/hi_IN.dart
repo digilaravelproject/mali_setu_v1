@@ -1,6 +1,8 @@
 const Map<String, String> hiIN = {
   // Language Settings
   'select_language': 'भाषा चुनें',
+  'choose_your_app_language': 'ऐप की भाषा चुनें',
+  'more_languages_coming_soon': '*अन्य क्षेत्रीय भाषाएं जल्द ही उपलब्ध होंगी!',
   'search_language': 'भाषा खोजें...',
   'selected_language': 'चयनित भाषा',
   'available_languages': 'उपलब्ध भाषाएं',

@@ -1,6 +1,8 @@
 const Map<String, String> mrIN = {
   // Language Settings
   'select_language': 'भाषा निवडा',
+  'choose_your_app_language': 'अ‍ॅपची भाषा निवडा',
+  'more_languages_coming_soon': '*इतर प्रादेशिक भाषा लवकरच उपलब्ध होतील!',
   'search_language': 'भाषा शोधा...',
   'selected_language': 'निवडलेली भाषा',
   'available_languages': 'उपलब्ध भाषा',
