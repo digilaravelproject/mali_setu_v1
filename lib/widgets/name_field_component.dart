@@ -114,10 +114,10 @@ class NameFieldComponentState extends State<NameFieldComponent> {
         // Trigger rebuild to sync error display
         if (mounted) setState(() {});
 
-        if (widget.showTitle && titleCtrl.text.trim().isEmpty) return 'Please select title';
+        if (widget.showTitle && titleCtrl.text.trim().isEmpty) return 'title_required'.tr;
         if (firstNameCtrl.text.trim().isEmpty) return 'first_name_required'.tr;
         if (lastNameCtrl.text.trim().isEmpty) return 'last_name_required'.tr;
-        return "Please fill name details";
+        return 'first_name_required'.tr;
       }
     }
     // Clear display state if valid

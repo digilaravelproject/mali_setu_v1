@@ -142,7 +142,9 @@ class AppInputTextField extends StatelessWidget {
               (isRequired
                   ? (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return "Please enter ${label.toLowerCase()}";
+                        return isDropdown
+                            ? 'please_select_field'.trParams({'field': label})
+                            : 'please_enter_field'.trParams({'field': label});
                       }
                       return null;
                     }
@@ -157,7 +159,9 @@ class AppInputTextField extends StatelessWidget {
 
 
           decoration: InputDecoration(
-            hintText: hintText ?? " Enter Your ${label[0].toUpperCase()}${label.substring(1).toLowerCase()}",
+            hintText: hintText ?? (isDropdown
+                ? 'select_field'.trParams({'field': label})
+                : 'enter_field'.trParams({'field': label})),
             hintStyle: context.textTheme.bodyMedium,
             errorText: errorText,
             
@@ -284,7 +288,7 @@ class AppInputTextField extends StatelessWidget {
                         child: TextField(
                           autofocus: false,
                           decoration: InputDecoration(
-                            hintText: "Search items...",
+                            hintText: 'search'.tr,
                             hintStyle: TextStyle(color: Colors.grey[400]),
                             prefixIcon: Icon(CupertinoIcons.search, size: 20, color: Colors.grey[400]),
                             border: OutlineInputBorder(

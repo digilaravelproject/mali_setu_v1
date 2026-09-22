@@ -1,19 +1,17 @@
-import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/date_input_formatter.dart';
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../widgets/basic_text_field.dart';
 import '../../../../../widgets/name_field_component.dart';
 import '../../../../../widgets/phone_field_component.dart';
 import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_scaffold.dart';
-import '../../../../../widgets/custom_image_view.dart';
+import '../../../../../widgets/language_selection_dialog.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../controller/register_controller.dart';
 
@@ -40,24 +38,40 @@ class RegisterPage extends GetWidget<RegisterController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 50),
-                // Back button - at the top
-                GestureDetector(
-                  onTap: controller.handleBack,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: context.theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: theme.dividerColor.withValues(alpha: 0.1),
+                // Top Action Bar: Back button on left, Language Switcher on right
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: controller.handleBack,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: context.theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: theme.dividerColor.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 16.0,
+                          color: context.iconColor,
+                        ),
                       ),
                     ),
-                    child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 16.0,
-                      color: context.iconColor,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: context.theme.cardColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: context.theme.dividerColor.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: const LanguageAppBarButton(),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 // Header title - centered

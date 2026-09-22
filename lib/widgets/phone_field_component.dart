@@ -373,10 +373,10 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       ],
       validator: (value) {
         if (widget.isRequired && (value == null || value.trim().isEmpty)) {
-          return 'Please enter phone number';
+          return 'please_enter_phone'.tr;
         }
         if (value != null && value.trim().isNotEmpty && value.trim().length < 10) {
-          return 'Phone number must be at least 10 digits';
+          return 'phone_min_digits'.tr;
         }
         return null;
       },

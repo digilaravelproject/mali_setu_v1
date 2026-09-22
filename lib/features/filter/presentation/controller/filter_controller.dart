@@ -34,7 +34,7 @@ class FilterController extends GetxController {
   // Basic Details
   RangeValues ageRange = RangeValues(18, 60);
   RangeValues salaryRange = RangeValues(0, 5000000); // Default wider range
-  RangeValues heightRange = RangeValues(140, 200); // Default full range
+  RangeValues heightRange = const RangeValues(4.0, 7.0); // Default full range in feet
   List<String> maritalStatus = [];
   List<String> motherTongue = [];
 
@@ -272,7 +272,7 @@ class FilterController extends GetxController {
 
 
     ageRange = RangeValues(18, 60);
-    heightRange = RangeValues(140, 200);
+    heightRange = const RangeValues(4.0, 7.0);
     salaryRange = RangeValues(0, 5000000);
     maritalStatus = [];
     motherTongue = [];
@@ -332,7 +332,7 @@ class FilterController extends GetxController {
     if (profileCreatedBy.isNotEmpty && profileCreatedBy.first != 'Any') filters['profile_created_by'] = profileCreatedBy.first;
     if (mothertangueCtrl.text.isNotEmpty) filters['language'] = mothertangueCtrl.text;
 
-    if (heightRange.start > 140 || heightRange.end < 200) {
+    if (heightRange.start > 4.0 || heightRange.end < 7.0) {
       filters['height'] = heightRange.start.toStringAsFixed(1);
     }
 
@@ -377,7 +377,7 @@ class FilterController extends GetxController {
     if (maritalStatus.isNotEmpty && maritalStatus.first != 'Any') count++;
     if (profileCreatedBy.isNotEmpty && profileCreatedBy.first != 'Any') count++;
     if (mothertangueCtrl.text.isNotEmpty) count++;
-    if (heightRange.start > 140 || heightRange.end < 200) count++;
+    if (heightRange.start > 4.0 || heightRange.end < 7.0) count++;
     if (salaryRange.start > 0 || salaryRange.end < 5000000) count++;
     if (educationCtrl.text.isNotEmpty) count++;
     if (familyStatusCtrl.text.isNotEmpty) count++;

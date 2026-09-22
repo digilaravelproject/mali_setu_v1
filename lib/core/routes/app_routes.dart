@@ -14,7 +14,6 @@ import 'package:edu_cluezer/features/matrimony/presentation/page/reg_matrimony_p
 import 'package:edu_cluezer/features/settings/page/change_password_page.dart';
 import 'package:edu_cluezer/features/settings/page/my_profile.dart';
 import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
-import 'package:edu_cluezer/features/volunteer/binding/volunteerBinding.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_page.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_search_page.dart';
 import 'package:edu_cluezer/features/volunteer/pages/volunteer_update_profile_screen.dart';
@@ -57,6 +56,7 @@ import '../../features/profile/binding/profile_binding.dart';
 import '../../features/profile/presentation/page/edit_profile_page.dart';
 import '../../features/dashboard/presentation/page/category_details_screen.dart';
 import '../../features/search/binding/search_binding.dart';
+import '../../features/language/presentation/page/language_selection_screen.dart';
 import '../../features/search/presentation/page/search_page.dart';
 import '../../features/settings/binding/profile_binding.dart';
 import '../../features/settings/page/update_profile_page.dart';
@@ -68,6 +68,7 @@ class AppRoutes {
 
   static const String splash = '/';
   static const String intro = '/intro';
+  static const String languageSelection = '/languageSelection';
   static const String login = '/login';
   static const String register = '/register';
   static const String dashboard = '/dashboard';
@@ -125,6 +126,12 @@ class AppPages {
     //   transition: Transition.cupertino,
     //   transitionDuration: const Duration(milliseconds: 500),
     // ),
+    GetPage(
+      name: AppRoutes.languageSelection,
+      page: () => const LanguageSelectionScreen(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
     GetPage(
       name: AppRoutes.login,
       page: () => const LoginPage(),

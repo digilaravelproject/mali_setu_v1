@@ -14,6 +14,7 @@ class AppConstants {
   // SharedPreferences Keys
   static const String transitionLogo = "transitionLogo";
   static const String has_seen_intro = "has_seen_intro";
+  static const String hasSelectedLanguagePref = "has_selected_language";
   static const String tokenPref = "auth_token";
   static const String userDataPref = "user_data";
   static const String profileDataPref = "profile_data";
