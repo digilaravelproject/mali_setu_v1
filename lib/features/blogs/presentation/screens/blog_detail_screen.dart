@@ -527,7 +527,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                         : Rect.fromLTWH(0, 0, MediaQuery.of(buttonContext).size.width, MediaQuery.of(buttonContext).size.height / 2);
 
                     final String shareLink = 'https://malisetu.com/blog/${blog.id}';
-                    final String shareText = "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}";
+                    final String shareText = "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\n${AppConstants.appDownloadUrl}";
 
                     final String? firstMedia = blog.mediaPaths != null && blog.mediaPaths!.isNotEmpty
                         ? blog.mediaPaths!.first

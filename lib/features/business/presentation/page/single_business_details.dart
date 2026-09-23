@@ -677,7 +677,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     final String businessName =
                         business.businessName ?? 'Check out this business!';
                     final String shareText =
-                        "$businessName\n\nCheck out this business on Mali Setu: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}";
+                        "$businessName\n\nCheck out this business on Mali Setu: $shareLink\n\nDownload Mali Setu App:\n${AppConstants.appDownloadUrl}";
 
                     // if (business.photo != null && business.photo!.isNotEmpty) {
                     //   try {

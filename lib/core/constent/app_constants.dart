@@ -6,6 +6,7 @@ class AppConstants {
   static const String defaultTag = "MaliSetu";
 
   static const String packageName = "iconly";
+  static const String appDownloadUrl = "https://malisetu.com/app";
   static const String playStoreUrl =
       "https://play.google.com/store/apps/details?id=com.malisetu.app";
   static const String appStoreUrl =

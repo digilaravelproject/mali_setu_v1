@@ -268,14 +268,24 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 ],
               ),
               const SizedBox(height: 16),
-              if (profile.partnerPreferences != null)
+              if (profile.partnerPreferences != null || profile.personalDetails?.dob != null)
                 _buildSectionCard(
                   context,
                   title: 'partner_preferences'.tr,
                   icon: Icons.favorite_border,
                   children: [
-                    _buildInfoRow('Age Range', profile.partnerPreferences?.ageRange ?? '-'),
-                    _buildInfoRow('education_career'.tr, profile.partnerPreferences?.education ?? '-'),
+                    _buildInfoRow(
+                      'date_of_birth'.tr,
+                      _formatDob(profile.personalDetails?.dob?.isNotEmpty == true
+                          ? profile.personalDetails!.dob
+                          : profile.user?.dob),
+                    ),
+                    _buildInfoRow(
+                      'education_career'.tr,
+                      profile.educationDetails?.highestQualification?.isNotEmpty == true
+                          ? profile.educationDetails!.highestQualification!
+                          : (profile.partnerPreferences?.education ?? '-'),
+                    ),
                   //  _buildInfoRow('Location', profile.partnerPreferences?.location ?? '-'),
                   ],
                 ),
@@ -329,6 +339,23 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
         ],
       ),
     );
+  }
+
+  String _formatDob(String? dob) {
+    if (dob == null || dob.trim().isEmpty) return '-';
+    try {
+      final trimmed = dob.trim();
+      if (trimmed.contains('/')) {
+        return trimmed;
+      }
+      final parsed = DateTime.tryParse(trimmed);
+      if (parsed != null) {
+        return "${parsed.day.toString().padLeft(2, '0')}/${parsed.month.toString().padLeft(2, '0')}/${parsed.year}";
+      }
+      return trimmed;
+    } catch (_) {
+      return dob;
+    }
   }
 
   Widget _buildInfoRow(String label, String value) {
