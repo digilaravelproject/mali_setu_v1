@@ -417,9 +417,17 @@ class RegBusinessController extends GetxController {
 
         for (var plan in plans) {
           final cType = plan.companyType?.trim();
-          if (cType != null && cType.isNotEmpty && !types.contains(cType)) {
-            types.add(cType);
-            idMap[cType] = cType;
+          if (cType != null && cType.isNotEmpty) {
+            final normalized =
+                cType.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+            final alreadyExists = types.any(
+              (t) =>
+                  t.toLowerCase().replaceAll(RegExp(r'\s+'), '') == normalized,
+            );
+            if (!alreadyExists) {
+              types.add(cType);
+              idMap[cType] = cType;
+            }
           }
         }
 
@@ -745,11 +753,15 @@ class RegBusinessController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success == true && response.data?.plans != null) {
-        final targetType = businessType.toLowerCase();
+        String normalize(String s) =>
+            s.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+        final targetType = normalize(businessType);
 
         final filteredPlans = response.data!.plans!.where((plan) {
-          final planType = plan.companyType?.toLowerCase() ?? "";
-          return planType.contains(targetType) || targetType.contains(planType);
+          if (targetType.isEmpty) return true;
+          final planType = normalize(plan.companyType ?? "");
+          return planType.isNotEmpty &&
+              (planType.contains(targetType) || targetType.contains(planType));
         }).toList();
 
         if (filteredPlans.isEmpty) {

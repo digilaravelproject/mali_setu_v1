@@ -56,15 +56,17 @@ class SingleServiceDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      '₹${service.cost ?? "0"}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.green,
-                        fontWeight: FontWeight.w600,
+                    if (service.cost != null && service.cost!.isNotEmpty) ...[
+                      Text(
+                        '₹${service.cost}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
+                    ],
                     Text(
                       'description'.tr,
                       style: const TextStyle(

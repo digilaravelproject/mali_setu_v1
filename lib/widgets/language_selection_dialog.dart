@@ -41,14 +41,14 @@ class _LanguageSelectionDialogState extends State<LanguageSelectionDialog> {
       'subtitle': 'English',
     },
     {
-      'code': 'hi',
-      'title': 'हिंदी',
-      'subtitle': 'Hindi',
-    },
-    {
       'code': 'mr',
       'title': 'मराठी',
       'subtitle': 'Marathi',
+    },
+    {
+      'code': 'hi',
+      'title': 'हिंदी',
+      'subtitle': 'Hindi',
     },
   ];
 

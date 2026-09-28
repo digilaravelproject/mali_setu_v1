@@ -1174,7 +1174,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
-                                if (product.cost != null)
+                                if (product.cost != null && product.cost!.isNotEmpty)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -1306,13 +1306,15 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    Text(
-                                      '₹${service.cost ?? '0.00'}',
-                                      style: context.textTheme.titleMedium
-                                          ?.copyWith(
-                                            color: context.theme.primaryColor,
-                                          ),
-                                    ),
+                                    if (service.cost != null &&
+                                        service.cost!.isNotEmpty)
+                                      Text(
+                                        '₹${service.cost}',
+                                        style: context.textTheme.titleMedium
+                                            ?.copyWith(
+                                              color: context.theme.primaryColor,
+                                            ),
+                                      ),
                                   ],
                                 ),
                               ),

@@ -35,18 +35,18 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       'greeting': 'Welcome to Mali Setu',
     },
     {
-      'code': 'hi',
-      'title': 'Hindi',
-      'native': 'हिंदी',
-      'letter': 'अ',
-      'greeting': 'माली सेतु में आपका स्वागत है',
-    },
-    {
       'code': 'mr',
       'title': 'Marathi',
       'native': 'मराठी',
       'letter': 'म',
       'greeting': 'माळी सेतू मध्ये आपले स्वागत आहे',
+    },
+    {
+      'code': 'hi',
+      'title': 'Hindi',
+      'native': 'हिंदी',
+      'letter': 'अ',
+      'greeting': 'माली सेतु में आपका स्वागत है',
     },
   ];
 
