@@ -62,6 +62,11 @@ class RegisterController extends GetxController {
   final GlobalKey respectedPersonMobileKey = GlobalKey();
   final GlobalKey passwordKey = GlobalKey();
   final GlobalKey confirmPasswordKey = GlobalKey();
+  final GlobalKey termsKey = GlobalKey();
+
+  /// TERMS & CONDITIONS & COMMUNITY ACCEPTANCE
+  final isAcceptedTerms = false.obs;
+  final termsError = false.obs;
 
   /// Smoothly scroll to the field with error
   void scrollToKey(GlobalKey key) {
@@ -343,6 +348,7 @@ class RegisterController extends GetxController {
   Future<void> onRegister() async {
     // Clear all validation errors first
     casteCertificateError.value = '';
+    termsError.value = false;
 
     print("call registration function ");
 
@@ -486,6 +492,16 @@ class RegisterController extends GetxController {
       return;
     }
 
+    // 16. Terms & Conditions and Mali Community Acceptance
+    if (!isAcceptedTerms.value) {
+      termsError.value = true;
+      scrollToKey(termsKey);
+      CustomSnackBar.showError(
+        message: "terms_and_community_acceptance_required".tr,
+      );
+      return;
+    }
+
     // General fallback
     if (!isFormValid) {
       CustomSnackBar.showError(message: "Please check the highlighted fields");
@@ -549,7 +565,7 @@ class RegisterController extends GetxController {
         passwordConfirmation: confirmPasswordCtrl.text.trim(),
         userType: _getApiUserType(userTypeCtrl.text.trim()),
         // castCertificate: castCertificateData,
-        termCondition: true,
+        termCondition: isAcceptedTerms.value,
         company_name: companynameCtrl.text.trim(),
         dept_name: deptCtrl.text.trim(),
         designation: designationCtrl.text.trim(),

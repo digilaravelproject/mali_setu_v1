@@ -12,6 +12,9 @@ import '../../../../../widgets/phone_field_component.dart';
 import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_scaffold.dart';
 import '../../../../../widgets/language_selection_dialog.dart';
+import 'package:flutter/gestures.dart';
+import '../../../../../core/constent/api_constants.dart';
+import '../../../../../widgets/webview_page.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../controller/register_controller.dart';
 
@@ -436,7 +439,103 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ],
                 ),
   
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+
+                // Terms & Conditions and Mali Community Acceptance Checkbox
+                Obx(() {
+                  final isChecked = controller.isAcceptedTerms.value;
+                  final hasError = controller.termsError.value;
+                  final primaryColor = theme.colorScheme.primary;
+
+                  return Container(
+                    key: controller.termsKey,
+                    margin: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: hasError
+                          ? Colors.red.withValues(alpha: 0.05)
+                          : isChecked
+                              ? primaryColor.withValues(alpha: 0.04)
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: hasError
+                            ? Colors.red.shade400
+                            : isChecked
+                                ? primaryColor.withValues(alpha: 0.3)
+                                : Colors.transparent,
+                        width: hasError ? 1.2 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Checkbox(
+                            value: isChecked,
+                            activeColor: primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            side: BorderSide(
+                              color: hasError ? Colors.red : Colors.grey.shade400,
+                              width: 1.5,
+                            ),
+                            onChanged: (val) {
+                              controller.isAcceptedTerms.value = val ?? false;
+                              if (controller.isAcceptedTerms.value) {
+                                controller.termsError.value = false;
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              controller.isAcceptedTerms.toggle();
+                              if (controller.isAcceptedTerms.value) {
+                                controller.termsError.value = false;
+                              }
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontSize: 13,
+                                  height: 1.45,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                                ),
+                                children: [
+                                  TextSpan(text: "terms_and_community_prefix".tr),
+                                  TextSpan(
+                                    text: "terms_and_community_link".tr,
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Get.to(() => WebViewPage(
+                                          title: 'terms & conditions'.tr,
+                                          url: ApiConstants.termsConditionsUrl,
+                                        ));
+                                      },
+                                  ),
+                                  TextSpan(text: "terms_and_community_suffix".tr),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 20),
   
                 Obx(() => CustomButton(
                       title: "register_button".tr,

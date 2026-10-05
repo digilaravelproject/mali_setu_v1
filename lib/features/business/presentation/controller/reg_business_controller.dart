@@ -604,14 +604,15 @@ class RegBusinessController extends GetxController {
       };
       print("registerbusiness : " + body.toString());
 
-      // Fetch location from Nominatim using address
+      // Fetch location from Nominatim using pincode / postalcode
       try {
-        final addressQuery = "${addressCtrl.text}, ${cityCtrl.text}, ${stateCtrl.text}, ${pinCodeCtrl.text}";
+        final pincode = pinCodeCtrl.text.trim();
         final dio = Dio();
         final response = await dio.get(
           'https://nominatim.openstreetmap.org/search',
           queryParameters: {
-            'q': addressQuery,
+            'postalcode': pincode,
+            'country': countryCtrl.text.trim().isNotEmpty ? countryCtrl.text.trim() : 'India',
             'format': 'jsonv2',
             'limit': '1',
           },

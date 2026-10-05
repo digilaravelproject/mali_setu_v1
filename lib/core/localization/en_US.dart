@@ -1000,6 +1000,11 @@ const Map<String, String> enUS = {
   "profile_rejected": "Profile Rejected",
   "profile_rejected_desc": "Your matrimony profile has been rejected by the admin.",
   "rejection_reason": "Rejection Reason",
+  "terms_and_community_prefix": "I confirm I have read the ",
+  "terms_and_community_link": "Terms & Conditions",
+  "terms_and_community_suffix": " and I am from the Mali community.",
+  "terms_and_community_acceptance_required": "Please confirm that you have read the Terms & Conditions and are from the Mali community.",
+  "full_view": "Full View",
 };
 
 

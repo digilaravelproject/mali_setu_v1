@@ -1002,6 +1002,11 @@ const Map<String, String> mrIN = {
 "profile_rejected": "प्रोफाइल नाकारली",
 "profile_rejected_desc": "तुमची विवाह प्रोफाइल प्रशासकाद्वारे नाकारली गेली आहे.",
 "rejection_reason": "नाकारण्याचे कारण",
+"terms_and_community_prefix": "मी पुष्टी करतो/करते की मी ",
+"terms_and_community_link": "अटी व शर्ती",
+"terms_and_community_suffix": " वाचल्या आहेत आणि मी माळी समाजातील आहे.",
+"terms_and_community_acceptance_required": "कृपया अटी व शर्ती वाचल्याची आणि माळी समाजातील असल्याची पुष्टी करा.",
+"full_view": "पूर्ण फोटो",
 };
 
 

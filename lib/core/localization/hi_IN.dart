@@ -982,6 +982,11 @@ const Map<String, String> hiIN = {
   "profile_rejected": "प्रोफ़ाइल अस्वीकृत",
   "profile_rejected_desc": "आपकी वैवाहिक प्रोफ़ाइल एडमिन द्वारा अस्वीकृत कर दी गई है।",
   "rejection_reason": "अस्वीकृति का कारण",
+  "terms_and_community_prefix": "मैं पुष्टि करता/करती हूँ कि मैंने ",
+  "terms_and_community_link": "नियम और शर्तें",
+  "terms_and_community_suffix": " पढ़ ली हैं और मैं माली समाज से हूँ।",
+  "terms_and_community_acceptance_required": "कृपया नियम और शर्तें पढ़ने तथा माली समाज से होने की पुष्टि करें।",
+  "full_view": "पूरा फोटो",
 };
 
 

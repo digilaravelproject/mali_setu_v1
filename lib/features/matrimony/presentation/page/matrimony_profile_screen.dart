@@ -53,6 +53,72 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
       expandedHeight: 350,
       pinned: true,
       backgroundColor: Colors.transparent,
+      leading: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CircleAvatar(
+          backgroundColor: Colors.black.withOpacity(0.4),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+            padding: EdgeInsets.zero,
+            onPressed: () => Get.back(),
+          ),
+        ),
+      ),
+      actions: [
+        if (images.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  final List<String> imageUrls = images.map((img) {
+                    if (img.startsWith("http")) return img;
+                    return "${ApiConstants.imageBaseUrl}$img";
+                  }).toList();
+
+                  Get.to(() => ImageFvScreen(
+                    imageUrls: imageUrls,
+                    initialIndex: controller.currentImageIndex.value,
+                  ));
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.45),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.35),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        "full_view".tr,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,
@@ -106,6 +172,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                 ),
               ),
             ),
+
 
 
             if (images.length > 1)
