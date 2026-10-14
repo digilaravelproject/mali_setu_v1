@@ -208,39 +208,62 @@ class HomePage extends GetWidget<HomeController> {
                       // Banners Slider
                       Obx(() {
                         if (controller.isLoadingBanners.value) {
-                          return AspectRatio(
-                            aspectRatio: 2.5,
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              child: const ShimmerLoading.rounded(height: double.infinity),
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4, bottom: 8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AspectRatio(
+                                  aspectRatio: 2.5,
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: ShimmerLoading.withBorderRadius(
+                                      height: double.infinity,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(
+                                    3,
+                                    (index) => Container(
+                                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                                      width: index == 0 ? 18 : 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: context.isDarkMode
+                                            ? Colors.white12
+                                            : Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         }
                         if (controller.banners.isEmpty) {
                           return const SizedBox.shrink();
                         }
-                        return AspectRatio(
-                          aspectRatio: 2.5,
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 4, bottom: 8),
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(0), boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
-                            ]),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(0),
-                              child: ImageSlider(
-                                fit: BoxFit.fill,
-                                indicatorType: IndicatorType.rectangle,
-                                autoScrollInterval: const Duration(seconds: 5),
-                                scrollAnimationDuration: const Duration(milliseconds: 800),
-                                images: controller.banners
-                                    .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
-                                    .toList(),
-                                onImageTap: (index) {
-                                  controller.onBannerTap(index);
-                                },
-                              ),
-                            ),
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4, bottom: 8),
+                          child: ImageSlider(
+                            aspectRatio: 2.5,
+                            isIndicatorBelow: true,
+                            indicatorSpacing: 8,
+                            fit: BoxFit.fill,
+                            indicatorType: IndicatorType.dot,
+                            autoScrollInterval: const Duration(seconds: 5),
+                            scrollAnimationDuration: const Duration(milliseconds: 800),
+                            images: controller.banners
+                                .map((banner) => "${ApiConstants.imageBaseUrl}/${banner.imageUrl}")
+                                .toList(),
+                            onImageTap: (index) {
+                              controller.onBannerTap(index);
+                            },
                           ),
                         );
                       }),

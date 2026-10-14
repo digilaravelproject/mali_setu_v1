@@ -476,7 +476,7 @@ class BusinessListCard extends StatelessWidget {
 
                       const SizedBox(height: 10),
                       Text(
-                        "${(business.KMfromuser ?? 0).toStringAsFixed(2)} Km",
+                        "${(business.KMfromuser ?? 0).toStringAsFixed(2)} Km (Approx)",
                         style: TextStyle(
                           color: AppColors.black,
                           fontWeight: FontWeight.bold,
@@ -489,7 +489,7 @@ class BusinessListCard extends StatelessWidget {
 
 
                       //const SizedBox(height: 5),
-                     // Text("${business.KMfromuser} Km ",style: TextStyle(color: AppColors.black,fontWeight: FontWeight.bold),),
+                     // Text("${business.KMfromuser} Km (Approx)",style: TextStyle(color: AppColors.black,fontWeight: FontWeight.bold),),
                       const SizedBox(height: 10),
                       Row(
                         children: [

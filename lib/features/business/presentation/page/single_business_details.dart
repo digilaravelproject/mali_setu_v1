@@ -535,7 +535,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     // Row(
                     //   children: [
                     //     Text("distance : ",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
-                    //     Text("${business.KMfromuser}",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
+                    //     Text("${business.KMfromuser} Km (Approx)",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
                     //   ],
                     // ),
                     //  _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
