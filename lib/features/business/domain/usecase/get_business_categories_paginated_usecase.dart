@@ -6,7 +6,7 @@ class GetBusinessCategoriesPaginatedUseCase {
 
   GetBusinessCategoriesPaginatedUseCase({required this.repository});
   
-  Future<CategoryResponse> call({int page = 1}) {
-    return repository.getBusinessCategoriesPaginated(page: page);
+  Future<CategoryResponse> call({int page = 1, String? search}) {
+    return repository.getBusinessCategoriesPaginated(page: page, search: search);
   }
 }

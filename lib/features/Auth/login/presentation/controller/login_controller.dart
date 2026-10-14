@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -118,7 +119,11 @@ class LoginController extends GetxController {
 
   Future<void> googleSignIn() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: Platform.isIOS
+            ? '58378864066-v76vfc91l3jt4p7rsglcnmohe70vin25.apps.googleusercontent.com'
+            : null,
+      );
       // Force sign out to ensure account selector shows up every time
       await googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();

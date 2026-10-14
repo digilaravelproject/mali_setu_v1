@@ -85,8 +85,8 @@ class BusinessRepositoryImpl implements BusinessRepository {
   }
 
   @override
-  Future<CategoryResponse> getBusinessCategoriesPaginated({int page = 1}) async {
-    return await dataSource.getBusinessCategories(page: page);
+  Future<CategoryResponse> getBusinessCategoriesPaginated({int page = 1, String? search}) async {
+    return await dataSource.getBusinessCategories(page: page, search: search);
   }
 
   @override

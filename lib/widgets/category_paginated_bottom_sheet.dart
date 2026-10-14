@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_paginated_usecase.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
-import 'package:edu_cluezer/core/helper/string_extensions.dart';
 
 import '../core/widgets/shimmer_loading.dart';
 
@@ -25,6 +25,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
   late final GetBusinessCategoriesPaginatedUseCase _useCase;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
   
   List<Category> _categories = [];
   bool _isLoadingInitial = true;
@@ -41,12 +42,16 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
       Get.put(GetBusinessCategoriesPaginatedUseCase(repository: Get.find()));
     }
     _useCase = Get.find<GetBusinessCategoriesPaginatedUseCase>();
+    _searchController.addListener(() {
+      setState(() {});
+    });
     _fetchCategories();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -54,15 +59,33 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      if (!_isLoadingMore && _hasMoreData && _searchQuery.isEmpty) {
+      if (!_isLoadingMore && _hasMoreData) {
         _fetchCategories(loadMore: true);
       }
     }
   }
 
-  Future<void> _fetchCategories({bool loadMore = false}) async {
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value.trim();
+    });
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      setState(() {
+        _currentPage = 1;
+        _hasMoreData = true;
+      });
+      _fetchCategories(isSearch: true);
+    });
+  }
+
+  Future<void> _fetchCategories({bool loadMore = false, bool isSearch = false}) async {
     if (loadMore) {
       setState(() => _isLoadingMore = true);
+    } else if (isSearch) {
+      setState(() {
+        _error = null;
+      });
     } else {
       setState(() {
         _isLoadingInitial = true;
@@ -71,7 +94,10 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
     }
 
     try {
-      final response = await _useCase(page: _currentPage);
+      final response = await _useCase(
+        page: _currentPage,
+        search: _searchQuery.isNotEmpty ? _searchQuery : null,
+      );
       
       if (response.success == true && response.data != null && response.data!.data != null) {
         final newCategories = response.data!.data!;
@@ -95,7 +121,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
       }
     } catch (e) {
       setState(() {
-        if (!loadMore) _error = 'Failed to load categories';
+        if (!loadMore && !isSearch) _error = 'Failed to load categories';
       });
     } finally {
       setState(() {
@@ -179,36 +205,46 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
             ),
 
           // Search Bar
-          /* Padding(
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: TextField(
               controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
+              onChanged: _onSearchChanged,
+              textInputAction: TextInputAction.search,
               decoration: InputDecoration(
                 hintText: 'Search Category...',
-                prefixIcon: const Icon(Icons.search, color: Colors.black54, size: 20),
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 14,
+                ),
+                prefixIcon: const Icon(Icons.search, color: Colors.black54, size: 22),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.black54, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearchChanged('');
+                        },
+                      )
+                    : null,
                 filled: true,
                 fillColor: Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1.5),
                 ),
               ),
             ),
-          ), */
+          ),
           
           // Custom Category Option (Only in Registration Mode)
           /* if (widget.isRegistrationMode) ...[
@@ -307,7 +343,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
       physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      itemCount: filteredCategories.length + (_hasMoreData && _searchQuery.isEmpty ? 1 : 0),
+      itemCount: filteredCategories.length + (_isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == filteredCategories.length) {
           return const Padding(
@@ -344,7 +380,7 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    category.name ?? "",
+                    _capitalizeText(category.name ?? ""),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

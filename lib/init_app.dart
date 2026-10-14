@@ -14,7 +14,7 @@ Future<void> initApp() async {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
         apiKey: 'AIzaSyBbGRlQRbCQS85FjCeptZ2VmKJg502HYGw',
-        appId: '1:58378864066:ios:00caa59b725958f473c25b',
+        appId: '1:58378864066:ios:a3044996b8f5ba8b73c25b',
         messagingSenderId: '58378864066',
         projectId: 'malisetu-be0df',
         storageBucket: 'malisetu-be0df.firebasestorage.app',

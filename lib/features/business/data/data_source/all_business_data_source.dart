@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart'; // Added for MediaType
@@ -24,7 +23,7 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images);
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
-  Future<CategoryResponse> getBusinessCategories({int page = 1});
+  Future<CategoryResponse> getBusinessCategories({int page = 1, String? search});
   Future<CategoryResponse> getCategoryDetails(int id, {double? lat, double? long});
   Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long});
   
@@ -142,10 +141,14 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   }
 
   @override
-  Future<CategoryResponse> getBusinessCategories({int page = 1}) async {
+  Future<CategoryResponse> getBusinessCategories({int page = 1, String? search}) async {
+    final Map<String, dynamic> queryParams = {'page': page};
+    if (search != null && search.trim().isNotEmpty) {
+      queryParams['search'] = search.trim();
+    }
     final response = await apiClient.get(
       ApiConstants.getCategory,
-      queryParameters: {'page': page},
+      queryParameters: queryParams,
     );
     return CategoryResponse.fromJson(response.data);
   }
