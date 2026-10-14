@@ -230,6 +230,7 @@ class CustomImageView extends StatelessWidget {
         width: width,
         fit: fit,
         imageUrl: fullUrl,
+        memCacheWidth: 800,
         imageBuilder:
             imageBuilder ??
             (context, imageProvider) => Container(
@@ -245,12 +246,16 @@ class CustomImageView extends StatelessWidget {
             ),
         placeholder:
             placeHolder ??
-            (context, url) => SizedBox(
-              height: 30,
-              width: 30,
-              child: LinearProgressIndicator(
-                color: Colors.grey.shade200,
-                backgroundColor: Colors.grey.shade100,
+            (context, url) => Center(
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor.withOpacity(0.7),
+                  ),
+                ),
               ),
             ),
         alignment: alignment ?? Alignment.center,

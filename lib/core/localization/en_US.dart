@@ -1,13 +1,23 @@
 const Map<String, String> enUS = {
   // Language Settings
   'select_language': 'Select Language',
+  'choose_your_app_language': 'Choose your app language',
+  'more_languages_coming_soon': '*More regional languages coming soon!',
   'search_language': 'Search language...',
   'selected_language': 'Selected Language',
   'available_languages': 'Available Languages',
   'languages_count': '@count languages',
   'apply_language': 'Apply Language',
   'language_changed_success': 'Language changed successfully',
-  'language_change_failed': 'Failed to change language: @error',
+  'welcome_to_app': 'Welcome to Mali Setu',
+  'choose_language_desc': 'Select your preferred language to get started',
+  'change_language_anytime_note': 'You can change the language anytime from settings',
+  'enter_field': 'Enter your @field',
+  'select_field': 'Select @field',
+  'please_enter_field': 'Please enter @field',
+  'please_select_field': 'Please select @field',
+  'please_enter_phone': 'Please enter mobile number',
+  'phone_min_digits': 'Mobile number must be at least 10 digits',
   'press_back_again_to_exit': 'Press back again to exit',
   // Common
   'home': 'Home',
@@ -82,6 +92,7 @@ const Map<String, String> enUS = {
   'height': 'Height (Feet)',
   'weight': 'Weight (kg)',
   'cm': 'cm',
+  'ft': 'ft',
   'physical_status': 'Physical Status',
   'normal': 'Normal',
   'doesnt_matter': "Doesn't Matter",
@@ -130,7 +141,8 @@ const Map<String, String> enUS = {
   'country': 'Country',
   'citizenship': 'Citizenship',
   'state': 'State',
-  'city': 'City',
+  //'city': 'City',
+  'city': 'District',
   "middle_name" : "Middle Name",
 
   // Lifestyle Filters
@@ -283,6 +295,7 @@ const Map<String, String> enUS = {
   'call': 'Call',
   'message': 'Message',
   'website': 'Website',
+  'website_example_hint': '(e.g., https://www.example.com)',
   'no_description': 'No description available',
   'no_products': 'No products available',
   'no_services': 'No services available',
@@ -633,7 +646,7 @@ const Map<String, String> enUS = {
 
 
   'tap_camera_update_photo': 'Tap to update photo',
-  'personal_details_sub': 'Start with your basic info',
+  'personal_details_sub': 'Bride(Vadhu) & Groom(Var) Details',
   'gender': 'Gender',
   'complexion': 'Complexion',
   'language': 'Language',
@@ -914,7 +927,8 @@ const Map<String, String> enUS = {
   'invalid_pincode' : "No Match",
   'location_information' : "Location Information",
   'taluka' : "Taluka",
-  'village' : "Village",
+  //'village' : "Village",
+  'village' : "Village/City",
   'clear_all' : "Clear All",
   'enter_pincode' : "Enter Pincode",
   'search_volunteers' : "Search Volunteers",
@@ -983,6 +997,14 @@ const Map<String, String> enUS = {
   "want_to_exit_app_message": "Are you sure you want to exit the app?",
   "pending_approval": "Pending Approval",
   "pending_approval_desc": "Your matrimony profile is currently under review by the admin. You will be able to view profiles once it is approved.",
+  "profile_rejected": "Profile Rejected",
+  "profile_rejected_desc": "Your matrimony profile has been rejected by the admin.",
+  "rejection_reason": "Rejection Reason",
+  "terms_and_community_prefix": "I confirm I have read the ",
+  "terms_and_community_link": "Terms & Conditions",
+  "terms_and_community_suffix": " and I am from the Mali community.",
+  "terms_and_community_acceptance_required": "Please confirm that you have read the Terms & Conditions and are from the Mali community.",
+  "full_view": "Full View",
 };
 
 

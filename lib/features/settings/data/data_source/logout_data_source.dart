@@ -51,7 +51,7 @@ class LogoutDataSourceImpl implements LogoutDataSource {
 
   @override
   Future<bool> deleteAccount() async {
-    final response = await apiClient.post(
+    final response = await apiClient.delete(
       ApiConstants.authDeleteAccount,
       handleError: true,
       showToaster: true,

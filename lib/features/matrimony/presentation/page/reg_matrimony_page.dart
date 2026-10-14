@@ -961,7 +961,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
         ),
         Text(
           subtitle,
-          style: Get.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+          style: Get.textTheme.bodyMedium?.copyWith(color: Colors.black),
         ),
         const SizedBox(height: 24),
       ],

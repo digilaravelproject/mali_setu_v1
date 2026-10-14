@@ -1,19 +1,20 @@
-import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/date_input_formatter.dart';
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../widgets/basic_text_field.dart';
 import '../../../../../widgets/name_field_component.dart';
 import '../../../../../widgets/phone_field_component.dart';
 import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_scaffold.dart';
-import '../../../../../widgets/custom_image_view.dart';
+import '../../../../../widgets/language_selection_dialog.dart';
+import 'package:flutter/gestures.dart';
+import '../../../../../core/constent/api_constants.dart';
+import '../../../../../widgets/webview_page.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../controller/register_controller.dart';
 
@@ -40,24 +41,40 @@ class RegisterPage extends GetWidget<RegisterController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 50),
-                // Back button - at the top
-                GestureDetector(
-                  onTap: controller.handleBack,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: context.theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: theme.dividerColor.withValues(alpha: 0.1),
+                // Top Action Bar: Back button on left, Language Switcher on right
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: controller.handleBack,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: context.theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: theme.dividerColor.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 16.0,
+                          color: context.iconColor,
+                        ),
                       ),
                     ),
-                    child: Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 16.0,
-                      color: context.iconColor,
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: context.theme.cardColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: context.theme.dividerColor.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: const LanguageAppBarButton(),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 // Header title - centered
@@ -99,6 +116,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       isRequired: true,
                     ),
                     AppInputTextField(
+                      key: controller.emailKey,
                       label: "email_id".tr,
                       textInputType: TextInputType.emailAddress,
                       validator: FormValidator.email,
@@ -108,6 +126,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       topPadding: 0,
                     ),
                     AppInputTextField(
+                      key: controller.dobKey,
                       label: "date_of_birth".tr,
                       textInputType: TextInputType.datetime,
                       controller: controller.ageCtrl,
@@ -178,6 +197,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   icon: CupertinoIcons.location_circle_fill,
                   children: [
                     AppInputTextField(
+                      key: controller.addressKey,
                       label: "address".tr,
                       textInputType: TextInputType.text,
                       controller: controller.addressCtrl,
@@ -198,6 +218,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     //   topPadding: 0,
                     // ),
                     AppInputTextField(
+                      key: controller.pinCodeKey,
                       label: "pin_code".tr,
                       textInputType: TextInputType.number,
                       validator: FormValidator.pincode,
@@ -208,6 +229,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
                     TwoColumnRow(
                       left: AppInputTextField(
+                        key: controller.stateKey,
                         label: "state".tr,
                         controller: controller.stateCtrl,
                         isRequired: true,
@@ -218,6 +240,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                         ],
                       ),
                       right: AppInputTextField(
+                        key: controller.districtKey,
                         label: "city".tr,
                         controller: controller.districtCtrl,
                         isRequired: true,
@@ -230,6 +253,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
                     TwoColumnRow(
                       left: AppInputTextField(
+                        key: controller.cityKey,
                         label: "country".tr,
                         controller: controller.cityCtrl,
                         isRequired: true,
@@ -250,6 +274,7 @@ class RegisterPage extends GetWidget<RegisterController> {
   
                     ),
                     AppInputTextField(
+                      key: controller.villageKey,
                       label: "village".tr,
                       controller: controller.villageCtrl,
                       isRequired: true,
@@ -283,6 +308,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   icon: CupertinoIcons.briefcase_fill,
                   children: [
                     AppInputTextField(
+                      key: controller.userTypeKey,
                       label: "user_type".tr,
                       controller: controller.userTypeCtrl,
                       isRequired: true,
@@ -341,6 +367,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   icon: CupertinoIcons.person_3_fill,
                   children: [
                     AppInputTextField(
+                      key: controller.respectedPersonNameKey,
                       label: "person_name".tr,
                       controller: controller.respectedPersonNameCtrl,
                       iconData: CupertinoIcons.person_fill,
@@ -349,6 +376,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                       topPadding: 0,
                     ),
                     AppInputTextField(
+                      key: controller.respectedPersonMobileKey,
                       label: "person_mobile".tr,
                       controller: controller.respectedPersonMobileCtrl,
                       iconData: CupertinoIcons.phone_fill,
@@ -370,20 +398,13 @@ class RegisterPage extends GetWidget<RegisterController> {
                   children: [
                     Obx(
                       () => AppInputTextField(
+                        key: controller.passwordKey,
                         label: "password".tr,
                         controller: controller.passwordCtrl,
                         isRequired: true,
                         isObscure: !controller.isPasswordValue.value,
                         iconData: CupertinoIcons.lock_fill,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Please enter password";
-                          }
-                          if (value.length < 2) {
-                            return "Password must be at least 2 characters";
-                          }
-                          return null;
-                        },
+                        validator: FormValidator.password,
                         endIcon: controller.isPasswordValue.value
                             ? Icons.visibility_off
                             : Icons.remove_red_eye_rounded,
@@ -393,6 +414,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                     ),
                     Obx(
                       () => AppInputTextField(
+                        key: controller.confirmPasswordKey,
                         label: "confirm_password".tr,
                         controller: controller.confirmPasswordCtrl,
                         isRequired: true,
@@ -403,22 +425,117 @@ class RegisterPage extends GetWidget<RegisterController> {
                             : Icons.remove_red_eye_rounded,
                         onEndIconTap: () => controller.isCnfPasswordValue.toggle(),
                         topPadding: 0,
-                        validator: FormValidator.password,
-                        //     (value) {
-                        //   if (value == null || value.isEmpty) {
-                        //     return 'confirm_password_required'.tr;
-                        //   }
-                        //   if (value != controller.passwordCtrl.text) {
-                        //     return 'passwords_do_not_match'.tr;
-                        //   }
-                        //   return null;
-                        // },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'confirm_password_required'.tr;
+                          }
+                          if (value != controller.passwordCtrl.text) {
+                            return 'passwords_do_not_match'.tr;
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
                 ),
   
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+
+                // Terms & Conditions and Mali Community Acceptance Checkbox
+                Obx(() {
+                  final isChecked = controller.isAcceptedTerms.value;
+                  final hasError = controller.termsError.value;
+                  final primaryColor = theme.colorScheme.primary;
+
+                  return Container(
+                    key: controller.termsKey,
+                    margin: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: hasError
+                          ? Colors.red.withValues(alpha: 0.05)
+                          : isChecked
+                              ? primaryColor.withValues(alpha: 0.04)
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: hasError
+                            ? Colors.red.shade400
+                            : isChecked
+                                ? primaryColor.withValues(alpha: 0.3)
+                                : Colors.transparent,
+                        width: hasError ? 1.2 : 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: Checkbox(
+                            value: isChecked,
+                            activeColor: primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            side: BorderSide(
+                              color: hasError ? Colors.red : Colors.grey.shade400,
+                              width: 1.5,
+                            ),
+                            onChanged: (val) {
+                              controller.isAcceptedTerms.value = val ?? false;
+                              if (controller.isAcceptedTerms.value) {
+                                controller.termsError.value = false;
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              controller.isAcceptedTerms.toggle();
+                              if (controller.isAcceptedTerms.value) {
+                                controller.termsError.value = false;
+                              }
+                            },
+                            child: RichText(
+                              text: TextSpan(
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontSize: 13,
+                                  height: 1.45,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                                ),
+                                children: [
+                                  TextSpan(text: "terms_and_community_prefix".tr),
+                                  TextSpan(
+                                    text: "terms_and_community_link".tr,
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Get.to(() => WebViewPage(
+                                          title: 'terms & conditions'.tr,
+                                          url: ApiConstants.termsConditionsUrl,
+                                        ));
+                                      },
+                                  ),
+                                  TextSpan(text: "terms_and_community_suffix".tr),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: 20),
   
                 Obx(() => CustomButton(
                       title: "register_button".tr,

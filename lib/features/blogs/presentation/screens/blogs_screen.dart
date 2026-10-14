@@ -31,7 +31,9 @@ class BlogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(BlogController());
+    final controller = Get.isRegistered<BlogController>()
+        ? Get.find<BlogController>()
+        : Get.put(BlogController());
     final primaryColor = context.theme.primaryColor;
     final topPadding = MediaQuery.of(context).padding.top;
 
@@ -67,8 +69,10 @@ class BlogsScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Icon(Icons.menu_rounded, color: const Color(0xFF374151), size: 24),
-                          Text(
-                            'blogs'.tr,
+                          Obx(() => Text(
+                            controller.selectedTab.value == 'Mine'
+                                ? 'my_blogs'.tr
+                                : 'blogs'.tr,
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
@@ -76,7 +80,7 @@ class BlogsScreen extends StatelessWidget {
                               fontFamily: 'Nunito-Bold',
                               letterSpacing: -0.5,
                             ),
-                          ),
+                          )),
                           Obx(() {
                             int count = 0;
                             try {
@@ -137,7 +141,7 @@ class BlogsScreen extends StatelessWidget {
 
                 if (controller.filteredBlogs.isEmpty) {
                   return SliverFillRemaining(
-                    child: _buildEmptyState(primaryColor),
+                    child: _buildEmptyState(primaryColor, controller),
                   );
                 }
 
@@ -163,9 +167,9 @@ class BlogsScreen extends StatelessWidget {
           if (!Get.isRegistered<AuthService>()) return const SizedBox.shrink();
           final authService = Get.find<AuthService>();
           final user = authService.currentUser.value;
-          final isBlogger = user?.userType?.toLowerCase().trim() == 'bloger';
+          final type = user?.userType?.toLowerCase().trim();
+          final isBlogger = type == 'bloger' || type == 'blogger';
           final hasBlogAccess = user?.blogAccess == true;
-          print("df mv bftfshfewfw fgew few : "+user!.userType.toString());
           if (!isBlogger && !hasBlogAccess) return const SizedBox.shrink();
 
 
@@ -819,21 +823,45 @@ class BlogsScreen extends StatelessWidget {
 
   }
 
-  Widget _buildEmptyState(Color primaryColor) {
+  Widget _buildEmptyState(Color primaryColor, BlogController controller) {
+    final isMine = controller.selectedTab.value == 'Mine';
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: primaryColor.withOpacity(0.08), shape: BoxShape.circle),
-            child: Icon(Icons.article_outlined, size: 48, color: primaryColor.withOpacity(0.5)),
-          ),
-          const SizedBox(height: 16),
-          Text('No blogs found', style: TextStyle(fontSize: 15, color: Colors.grey[600], fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Text('Pull down to refresh', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(color: primaryColor.withOpacity(0.08), shape: BoxShape.circle),
+              child: Icon(Icons.article_outlined, size: 48, color: primaryColor.withOpacity(0.5)),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isMine ? 'No blogs posted by you yet' : 'No blogs found',
+              style: TextStyle(fontSize: 15, color: Colors.grey[600], fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text('Pull down to refresh', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                if (isMine) {
+                  controller.fetchMyBlogs();
+                } else {
+                  controller.fetchBlogs(refresh: true);
+                }
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Refresh'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

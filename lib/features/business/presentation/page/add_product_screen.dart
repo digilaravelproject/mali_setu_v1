@@ -84,7 +84,7 @@ class AddProductController extends GetxController {
     errors.clear();
     if (nameController.text.trim().isEmpty) errors['name'] = 'please_enter_product_name'.tr;
     if (descriptionController.text.trim().isEmpty) errors['description'] = 'please_enter_product_description'.tr;
-    if (priceController.text.trim().isEmpty) errors['price'] = 'please_enter_product_price'.tr;
+    //if (priceController.text.trim().isEmpty) errors['price'] = 'please_enter_product_price'.tr;
     if (selectedImage.value == null) errors['image'] = 'please_select_image'.tr;
     if (errors.isNotEmpty) return;
 
@@ -218,7 +218,7 @@ class AddProductScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Obx(() => AppInputTextField(label: "product_name".tr, isRequired: true, textInputType: TextInputType.text, controller: controller.nameController, errorText: controller.errors['name'])),
             Obx(() => AppInputTextField(label: "product_description".tr, isRequired: true, textInputType: TextInputType.text, controller: controller.descriptionController, maxLines: 4, errorText: controller.errors['description'])),
-            Obx(() => AppInputTextField(label: "product_price".tr, isRequired: true, textInputType: TextInputType.number, controller: controller.priceController, errorText: controller.errors['price'])),
+            Obx(() => AppInputTextField(label: "product_price".tr, isRequired: false, textInputType: TextInputType.number, controller: controller.priceController, errorText: controller.errors['price'])),
             const SizedBox(height: 24),
             Obx(() => CustomButton(
               onPressed: controller.isLoading.value ? null : controller.createProduct,

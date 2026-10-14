@@ -24,7 +24,8 @@ class DashboardController extends GetxController {
     try {
       if (Get.isRegistered<AuthService>()) {
         final user = Get.find<AuthService>().currentUser.value;
-        return user?.userType?.toLowerCase().trim() == 'bloger';
+        final type = user?.userType?.toLowerCase().trim();
+        return type == 'bloger' || type == 'blogger';
       }
     } catch (_) {}
     return false;
@@ -281,24 +282,39 @@ class DashboardController extends GetxController {
   }
 
   changePage(int index) {
+    final blogController = Get.isRegistered<BlogController>()
+        ? Get.find<BlogController>()
+        : null;
+
     if (hasBlogAccess) {
       if (index == 3) {
-        if (Get.isRegistered<BlogController>()) {
-          Get.find<BlogController>().filterByTab('Others');
+        blogController?.filterByTab('Others');
+        if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
+          blogController.fetchBlogs();
         }
       } else if (index == 4) {
-        if (Get.isRegistered<BlogController>()) {
-          Get.find<BlogController>().filterByTab('Mine');
+        blogController?.filterByTab('Mine');
+        if (blogController != null && blogController.myBlogs.isEmpty && !blogController.isMyBlogsLoading.value) {
+          blogController.fetchMyBlogs();
         }
       }
     } else if (isBlogger) {
       if (index == 0) {
-        if (Get.isRegistered<BlogController>()) {
-          Get.find<BlogController>().filterByTab('Others');
+        blogController?.filterByTab('Others');
+        if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
+          blogController.fetchBlogs();
         }
       } else if (index == 1) {
-        if (Get.isRegistered<BlogController>()) {
-          Get.find<BlogController>().filterByTab('Mine');
+        blogController?.filterByTab('Mine');
+        if (blogController != null && blogController.myBlogs.isEmpty && !blogController.isMyBlogsLoading.value) {
+          blogController.fetchMyBlogs();
+        }
+      }
+    } else {
+      if (index == 3) {
+        blogController?.filterByTab('Others');
+        if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
+          blogController.fetchBlogs();
         }
       }
     }

@@ -24,6 +24,7 @@ import '../data/data_source/category_business_data_source.dart';
 import '../data/repository/category_business_repository_impl.dart';
 import '../domain/repository/category_business_repository.dart';
 import '../domain/usecase/category_business_usecase.dart';
+import '../../blogs/presentation/controller/blog_controller.dart';
 import '../presentation/controller/cat_business_controller.dart';
 import '../presentation/controller/dashboard_controller.dart';
 import '../presentation/controller/home_controller.dart';
@@ -51,6 +52,7 @@ class DashboardBinding extends Bindings {
     Get.lazyPut(() => GetBannersUseCase(repository: Get.find()));
 
     Get.lazyPut(() => DashboardController());
+    Get.lazyPut(() => BlogController());
     Get.lazyPut(() => HomeController(
       getBusinessCategoriesUseCase: Get.find(),
       getBannersUseCase: Get.find(),

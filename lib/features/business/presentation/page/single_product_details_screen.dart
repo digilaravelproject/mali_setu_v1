@@ -56,15 +56,17 @@ class SingleProductDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      '₹${product.cost ?? "0"}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.green,
-                        fontWeight: FontWeight.w600,
+                    if (product.cost != null && product.cost!.isNotEmpty) ...[
+                      Text(
+                        '₹${product.cost}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
+                    ],
                     Text(
                       'description'.tr,
                       style: const TextStyle(

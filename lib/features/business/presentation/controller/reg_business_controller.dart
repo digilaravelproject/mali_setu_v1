@@ -82,15 +82,17 @@ class RegBusinessController extends GetxController {
   // };
 
   var businessTypes = <String>[
-    "Proprietary /Partnership - LLP",
     "Private Ltd",
+    "Proprietary(Owner)/Partnership - LLP",
     "Public Ltd",
+    "Registered Trust / Mandal- Charitable",
   ].obs;
 
   Map<String, String> typeIdMap = {
-    "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
     "Private Ltd": "Private Ltd",
+    "Proprietary(Owner)/Partnership - LLP": "Proprietary(Owner)/Partnership - LLP",
     "Public Ltd": "Public Ltd",
+    "Registered Trust / Mandal- Charitable": "Registered Trust / Mandal- Charitable",
   };
 
   int? selectedCategoryId;
@@ -195,10 +197,8 @@ class RegBusinessController extends GetxController {
       },
     );
 
-    // Init lists
-    if (businessTypes.isEmpty) {
-      loadBusinessTypes();
-    }
+    // Init business types from plans API
+    loadBusinessTypes();
 
     // Reactive error clearing
     ever(errors, (_) {}); // Force refresh
@@ -408,16 +408,52 @@ class RegBusinessController extends GetxController {
   // }
 
   Future<void> loadBusinessTypes() async {
+    try {
+      final response = await _repository.getBusinessPlans();
+      if (response.success == true && response.data?.plans != null) {
+        final plans = response.data!.plans!;
+        final types = <String>[];
+        final idMap = <String, String>{};
+
+        for (var plan in plans) {
+          final cType = plan.companyType?.trim();
+          if (cType != null && cType.isNotEmpty) {
+            final normalized =
+                cType.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+            final alreadyExists = types.any(
+              (t) =>
+                  t.toLowerCase().replaceAll(RegExp(r'\s+'), '') == normalized,
+            );
+            if (!alreadyExists) {
+              types.add(cType);
+              idMap[cType] = cType;
+            }
+          }
+        }
+
+        if (types.isNotEmpty) {
+          businessTypes.assignAll(types);
+          typeIdMap = idMap;
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint("Error loading business types from plans API: $e");
+    }
+
+    // Fallback defaults
     businessTypes.assignAll([
-      "Proprietary /Partnership - LLP",
       "Private Ltd",
+      "Proprietary(Owner)/Partnership - LLP",
       "Public Ltd",
+      "Registered Trust / Mandal- Charitable",
     ]);
 
     typeIdMap = {
-      "Proprietary /Partnership - LLP": "Proprietary /Partnership - LLP",
       "Private Ltd": "Private Ltd",
+      "Proprietary(Owner)/Partnership - LLP": "Proprietary(Owner)/Partnership - LLP",
       "Public Ltd": "Public Ltd",
+      "Registered Trust / Mandal- Charitable": "Registered Trust / Mandal- Charitable",
     };
   }
 
@@ -519,7 +555,7 @@ class RegBusinessController extends GetxController {
       isRegistering.value = true;
 
       // Get IDs from maps
-      final typeId = typeIdMap[bTypeCtrl.text] ?? "product";
+      final typeId = typeIdMap[bTypeCtrl.text] ?? bTypeCtrl.text.trim();
       final categoryId = selectedCategoryId ?? 1;
 
       // Get combined phone from PhoneFieldComponent
@@ -568,14 +604,15 @@ class RegBusinessController extends GetxController {
       };
       print("registerbusiness : " + body.toString());
 
-      // Fetch location from Nominatim using address
+      // Fetch location from Nominatim using pincode / postalcode
       try {
-        final addressQuery = "${addressCtrl.text}, ${cityCtrl.text}, ${stateCtrl.text}, ${pinCodeCtrl.text}";
+        final pincode = pinCodeCtrl.text.trim();
         final dio = Dio();
         final response = await dio.get(
           'https://nominatim.openstreetmap.org/search',
           queryParameters: {
-            'q': addressQuery,
+            'postalcode': pincode,
+            'country': countryCtrl.text.trim().isNotEmpty ? countryCtrl.text.trim() : 'India',
             'format': 'jsonv2',
             'limit': '1',
           },
@@ -717,11 +754,15 @@ class RegBusinessController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success == true && response.data?.plans != null) {
-        final targetType = businessType.toLowerCase();
+        String normalize(String s) =>
+            s.toLowerCase().replaceAll(RegExp(r'\s+'), '');
+        final targetType = normalize(businessType);
 
         final filteredPlans = response.data!.plans!.where((plan) {
-          final planType = plan.companyType?.toLowerCase() ?? "";
-          return planType.contains(targetType) || targetType.contains(planType);
+          if (targetType.isEmpty) return true;
+          final planType = normalize(plan.companyType ?? "");
+          return planType.isNotEmpty &&
+              (planType.contains(targetType) || targetType.contains(planType));
         }).toList();
 
         if (filteredPlans.isEmpty) {

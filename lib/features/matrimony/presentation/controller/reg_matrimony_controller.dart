@@ -802,7 +802,7 @@ class RegMatrimonyController extends GetxController {
         },
         "partner_preferences": {
           "age_range": "20-30",
-          "education": "Any",
+          "education": education.value.isNotEmpty ? education.value : "Any",
           "location": "Any",
         },
         "privacy_settings": {

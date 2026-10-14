@@ -706,9 +706,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         _buildRangeFilter(
           title: 'height'.tr,
           range: widget.controller.heightRange,
-          min: 140,
-          max: 200,
-          unit: 'cm'.tr,
+          min: 4.0,
+          max: 7.0,
+          unit: 'ft'.tr,
+          isDecimal: true,
           onChanged: (range) {
             setState(() {
               widget.controller.heightRange = range;
@@ -1400,7 +1401,17 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
     required double max,
     required String unit,
     required ValueChanged<RangeValues> onChanged,
+    bool isDecimal = false,
   }) {
+    final int effectiveDivisions =
+        isDecimal ? ((max - min) * 10).round() : (max - min).round();
+    final String startLabel = isDecimal
+        ? "${range.start.toStringAsFixed(1)} $unit"
+        : "${range.start.round()} $unit";
+    final String endLabel = isDecimal
+        ? "${range.end.toStringAsFixed(1)} $unit"
+        : "${range.end.round()} $unit";
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1414,10 +1425,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           values: range,
           min: min,
           max: max,
-          divisions: (max - min).toInt(),
+          divisions: effectiveDivisions > 0 ? effectiveDivisions : null,
           labels: RangeLabels(
-            "${range.start.round()} $unit",
-            "${range.end.round()} $unit",
+            startLabel,
+            endLabel,
           ),
           onChanged: onChanged,
         ),
@@ -1426,11 +1437,11 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "${range.start.round()} $unit",
+              startLabel,
               style: context.textTheme.titleSmall,
             ),
             Text(
-              "${range.end.round()} $unit",
+              endLabel,
               style: context.textTheme.titleSmall,
             ),
           ],

@@ -1,14 +1,24 @@
 const Map<String, String> hiIN = {
   // Language Settings
   'select_language': 'भाषा चुनें',
+  'choose_your_app_language': 'ऐप की भाषा चुनें',
+  'more_languages_coming_soon': '*अन्य क्षेत्रीय भाषाएं जल्द ही उपलब्ध होंगी!',
   'search_language': 'भाषा खोजें...',
   'selected_language': 'चयनित भाषा',
   'available_languages': 'उपलब्ध भाषाएं',
   'languages_count': '@count भाषाएं',
   'apply_language': 'भाषा लागू करें',
   'language_changed_success': 'भाषा सफलतापूर्वक बदली गई',
-  'language_change_failed': 'भाषा बदलने में विफल: @error',
-  'press_back_again_to_exit': 'Dubara back dabaye bahar jane ke liye',
+  'welcome_to_app': 'माली सेतु में आपका स्वागत है',
+  'choose_language_desc': 'शुरू करने के लिए अपनी पसंदीदा भाषा चुनें',
+  'change_language_anytime_note': 'आप बाद में सेटिंग्स से कभी भी भाषा बदल सकते हैं',
+  'enter_field': '@field दर्ज करें',
+  'select_field': '@field चुनें',
+  'please_enter_field': 'कृपया @field दर्ज करें',
+  'please_select_field': 'कृपया @field चुनें',
+  'please_enter_phone': 'कृपया मोबाइल नंबर दर्ज करें',
+  'phone_min_digits': 'मोबाइल नंबर कम से कम 10 अंकों का होना चाहिए',
+  'press_back_again_to_exit': 'बाहर जाने के लिए दोबारा बैक दबाएं',
   // Common
   'home': 'होम',
   'business': 'व्यवसाय',
@@ -82,6 +92,7 @@ const Map<String, String> hiIN = {
   'height': 'ऊंचाई (फीट)',
   'weight': 'वजन (किलो)',
   'cm': 'सेमी',
+  'ft': 'फीट',
   'physical_status': 'शारीरिक स्थिति',
   'normal': 'सामान्य',
   'doesnt_matter': "कोई फर्क नहीं पड़ता",
@@ -130,7 +141,8 @@ const Map<String, String> hiIN = {
   'country': 'देश',
   'citizenship': 'नागरिकता',
   'state': 'राज्य',
-  'city': 'शहर',
+  //'city': 'शहर',
+  'city': 'जिला',
 
   // Lifestyle Filters
   'eggetarian': 'अंडाहारी',
@@ -281,6 +293,7 @@ const Map<String, String> hiIN = {
   'call': 'कॉल करें',
   'message': 'संदेश',
   'website': 'वेबसाइट',
+  'website_example_hint': '(उदा: https://www.example.com)',
   'no_description': 'कोई विवरण उपलब्ध नहीं',
   'no_products': 'कोई उत्पाद उपलब्ध नहीं',
   'no_services': 'कोई सेवाएं उपलब्ध नहीं',
@@ -620,7 +633,7 @@ const Map<String, String> hiIN = {
 
 
   'tap_camera_update_photo': 'फोटो अपडेट करने के लिए टैप करें',
-  'personal_details_sub': 'अपनी मूल जानकारी से शुरू करें',
+  'personal_details_sub': 'वधू एवं वर का विवरण',
   'gender': 'लिंग',
   'complexion': 'रंग',
   'language': 'भाषा',
@@ -898,7 +911,8 @@ const Map<String, String> hiIN = {
   'invalid_pincode': 'कोई मिलान नहीं',
   'location_information': 'स्थान जानकारी',
   'taluka': 'तालुका',
-  'village': 'गांव',
+  //'village': 'गांव',
+  'village': 'गाँव / शहर',
   'clear_all': 'सभी साफ करें',
   'enter_pincode': 'पिन कोड दर्ज करें',
   'search_volunteers': 'स्वयंसेवक खोजें',
@@ -965,6 +979,14 @@ const Map<String, String> hiIN = {
   "want_to_exit_app_message": "क्या आप ऐप से बाहर निकलना चाहते हैं?",
   "pending_approval": "मंज़ूरी लंबित है",
   "pending_approval_desc": "आपकी वैवाहिक प्रोफ़ाइल वर्तमान में एडमिन द्वारा समीक्षा के अधीन है। इसके मंज़ूर होने के बाद आप अन्य प्रोफ़ाइल देख पाएंगे।",
+  "profile_rejected": "प्रोफ़ाइल अस्वीकृत",
+  "profile_rejected_desc": "आपकी वैवाहिक प्रोफ़ाइल एडमिन द्वारा अस्वीकृत कर दी गई है।",
+  "rejection_reason": "अस्वीकृति का कारण",
+  "terms_and_community_prefix": "मैं पुष्टि करता/करती हूँ कि मैंने ",
+  "terms_and_community_link": "नियम और शर्तें",
+  "terms_and_community_suffix": " पढ़ ली हैं और मैं माली समाज से हूँ।",
+  "terms_and_community_acceptance_required": "कृपया नियम और शर्तें पढ़ने तथा माली समाज से होने की पुष्टि करें।",
+  "full_view": "पूरा फोटो",
 };
 
 

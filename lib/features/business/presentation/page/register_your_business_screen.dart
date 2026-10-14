@@ -83,13 +83,15 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     errorText: controller.errors['businessName'],
                   ),
 
-                  SingleDropdown(
-                    controller: controller.bTypeCtrl,
-                    label: 'business_type'.tr,
-                    isRequired: true,
-                    prefixIcon: Icons.category_rounded,
-                    items: controller.businessTypes.toList(),
-                    errorText: controller.errors['businessType'],
+                  Obx(
+                    () => SingleDropdown(
+                      controller: controller.bTypeCtrl,
+                      label: 'business_type'.tr,
+                      isRequired: true,
+                      prefixIcon: Icons.category_rounded,
+                      items: controller.businessTypes.toList(),
+                      errorText: controller.errors['businessType'],
+                    ),
                   ),
 
                   GestureDetector(
@@ -350,8 +352,10 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   Obx(() => controller.hasWebsite.value 
                     ? AppInputTextField(
                         label: 'website'.tr,
+                        subLabel: 'website_example_hint'.tr,
+                        hintText: 'https://www.example.com',
                         iconData: Icons.language_rounded,
-                        textInputType: TextInputType.webSearch,
+                        textInputType: TextInputType.url,
                         controller: controller.websiteCtrl,
                       )
                     : const SizedBox.shrink(),

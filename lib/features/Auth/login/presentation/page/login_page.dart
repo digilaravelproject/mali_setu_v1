@@ -4,13 +4,12 @@ import 'package:get/get.dart';
 
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/routes/app_routes.dart';
-import '../../../../../core/styles/app_colors.dart';
-import '../../../../../core/styles/app_decoration.dart';
 import '../../../../../core/utils/app_assets.dart';
 import '../../../../../widgets/basic_text_field.dart';
 import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_image_view.dart';
 import '../../../../../widgets/custom_scaffold.dart';
+import '../../../../../widgets/language_selection_dialog.dart';
 import '../controller/login_controller.dart';
 
 class LoginPage extends GetWidget<LoginController> {
@@ -25,7 +24,22 @@ class LoginPage extends GetWidget<LoginController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
+              // Top Bar with Language Switcher
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: context.theme.cardColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: context.theme.dividerColor.withValues(alpha: 0.15),
+                    ),
+                  ),
+                  child: const LanguageAppBarButton(),
+                ),
+              ),
+              const SizedBox(height: 8),
               // Logo
               Center(
                 child: Hero(

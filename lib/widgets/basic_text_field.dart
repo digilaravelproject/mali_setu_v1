@@ -39,6 +39,7 @@ class AppInputTextField extends StatelessWidget {
   final bool? readOnly;
   final Color? textColor;
   final VoidCallback? onOtherSelected;
+  final String? subLabel;
   final bool isRequired;
   final double topPadding;
   final String? errorText;
@@ -46,6 +47,7 @@ class AppInputTextField extends StatelessWidget {
   const AppInputTextField({
     super.key,
     this.label = "Input Label",
+    this.subLabel,
     this.iconData,
     this.controller,
     this.endIcon,
@@ -93,23 +95,31 @@ class AppInputTextField extends StatelessWidget {
       children: [
         if (showLabel) ...[
           SizedBox(height: topPadding),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  label,
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: label,
                   style: theme.textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              if (isRequired)
-                Text(
-                  ' *',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.red,
+                if (isRequired)
+                  TextSpan(
+                    text: ' *',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.red,
+                    ),
                   ),
-                ),
-            ],
+                if (subLabel != null && subLabel!.isNotEmpty)
+                  TextSpan(
+                    text: '  $subLabel',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.hintColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
 
@@ -132,7 +142,9 @@ class AppInputTextField extends StatelessWidget {
               (isRequired
                   ? (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return "Please enter ${label.toLowerCase()}";
+                        return isDropdown
+                            ? 'please_select_field'.trParams({'field': label})
+                            : 'please_enter_field'.trParams({'field': label});
                       }
                       return null;
                     }
@@ -147,7 +159,9 @@ class AppInputTextField extends StatelessWidget {
 
 
           decoration: InputDecoration(
-            hintText: hintText ?? " Enter Your ${label[0].toUpperCase()}${label.substring(1).toLowerCase()}",
+            hintText: hintText ?? (isDropdown
+                ? 'select_field'.trParams({'field': label})
+                : 'enter_field'.trParams({'field': label})),
             hintStyle: context.textTheme.bodyMedium,
             errorText: errorText,
             
@@ -274,7 +288,7 @@ class AppInputTextField extends StatelessWidget {
                         child: TextField(
                           autofocus: false,
                           decoration: InputDecoration(
-                            hintText: "Search items...",
+                            hintText: 'search'.tr,
                             hintStyle: TextStyle(color: Colors.grey[400]),
                             prefixIcon: Icon(CupertinoIcons.search, size: 20, color: Colors.grey[400]),
                             border: OutlineInputBorder(

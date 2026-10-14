@@ -1,13 +1,23 @@
 const Map<String, String> mrIN = {
   // Language Settings
   'select_language': 'भाषा निवडा',
+  'choose_your_app_language': 'अ‍ॅपची भाषा निवडा',
+  'more_languages_coming_soon': '*इतर प्रादेशिक भाषा लवकरच उपलब्ध होतील!',
   'search_language': 'भाषा शोधा...',
   'selected_language': 'निवडलेली भाषा',
   'available_languages': 'उपलब्ध भाषा',
   'languages_count': '@count भाषा',
   'apply_language': 'भाषा लागू करा',
   'language_changed_success': 'भाषा यशस्वीरित्या बदलली',
-  'language_change_failed': 'भाषा बदलण्यास अयशस्वी: @error',
+  'welcome_to_app': 'माळी सेतू मध्ये आपले स्वागत आहे',
+  'choose_language_desc': 'सुरू करण्यासाठी आपली पसंतीची भाषा निवडा',
+  'change_language_anytime_note': 'तुम्ही नंतर सेटिंग्जमधून कधीही भाषा बदलू शकता',
+  'enter_field': '@field प्रविष्ट करा',
+  'select_field': '@field निवडा',
+  'please_enter_field': 'कृपया @field प्रविष्ट करा',
+  'please_select_field': 'कृपया @field निवडा',
+  'please_enter_phone': 'कृपया मोबाईल नंबर प्रविष्ट करा',
+  'phone_min_digits': 'मोबाईल नंबर किमान १० अंकी असणे आवश्यक आहे',
   'press_back_again_to_exit': 'बाहेर जाण्यासाठी पुन्हा मागे दाबा',
 
 
@@ -77,6 +87,7 @@ const Map<String, String> mrIN = {
   'mother_tongue': 'मातृभाषा',
   'height': 'उंची (फूट)',
   'cm': 'सेमी',
+  'ft': 'फूट',
   'physical_status': 'शारीरिक स्थिती',
   'normal': 'सामान्य',
   'doesnt_matter': 'फरक पडत नाही',
@@ -125,8 +136,9 @@ const Map<String, String> mrIN = {
   'country': 'देश',
   'citizenship': 'नागरिकत्व',
   'state': 'राज्य',
-  'city': 'शहर',
-  
+  //'city': 'शहर',
+  'city': 'जिल्हा',
+
   // Lifestyle Filters
   'eggetarian': 'अंडाहारी',
   'vegetarian': 'शाकाहारी',
@@ -279,6 +291,7 @@ const Map<String, String> mrIN = {
   'call': 'कॉल करा',
   'message': 'संदेश',
   'website': 'वेबसाइट',
+  'website_example_hint': '(उदा: https://www.example.com)',
   'no_description': 'वर्णन उपलब्ध नाही',
   'no_products': 'उत्पादने उपलब्ध नाहीत',
   'no_services': 'सेवा उपलब्ध नाहीत',
@@ -364,7 +377,7 @@ const Map<String, String> mrIN = {
 
 
   'complexion': 'त्वचेचा रंग',
-  'personal_details_sub': 'तुमची मूलभूत माहितीपासून सुरुवात करा"',
+  'personal_details_sub': 'वधू आणि वराचा तपशील"',
   'personal_details': 'वैयक्तिक तपशील',
   'are_you_sure_for_logout': 'आपण नक्की लॉगआउट करू इच्छिता का?',
   'choose_your_preferred_language': 'आपली प्राधान्याची भाषा निवडा',
@@ -912,7 +925,8 @@ const Map<String, String> mrIN = {
   'invalid_pincode' : "निकाल सापडला नाही",
   'location_information' : "स्थान माहिती",
   'taluka' : "तालुका / गांव",
-  'village' : "गांव",
+  //'village' : "गांव",
+  'village' : "गाव / शहर",
   'enter_pincode' : "पिनकोड टाका",
   'search_volunteers' : "स्वयंसेवक शोधा",
 
@@ -985,6 +999,14 @@ const Map<String, String> mrIN = {
 "want_to_exit_app_message": "तुम्हाला खात्री आहे की तुम्हाला अॅपमधून बाहेर पडायचे आहे?",
 "pending_approval": "मंजुरी प्रलंबित आहे",
 "pending_approval_desc": "तुमची विवाह प्रोफाइल सध्या प्रशासकाद्वारे पुनरावलोकनाखाली आहे. ती मंजूर झाल्यानंतरच तुम्ही इतर प्रोफाइल पाहू शकाल.",
+"profile_rejected": "प्रोफाइल नाकारली",
+"profile_rejected_desc": "तुमची विवाह प्रोफाइल प्रशासकाद्वारे नाकारली गेली आहे.",
+"rejection_reason": "नाकारण्याचे कारण",
+"terms_and_community_prefix": "मी पुष्टी करतो/करते की मी ",
+"terms_and_community_link": "अटी व शर्ती",
+"terms_and_community_suffix": " वाचल्या आहेत आणि मी माळी समाजातील आहे.",
+"terms_and_community_acceptance_required": "कृपया अटी व शर्ती वाचल्याची आणि माळी समाजातील असल्याची पुष्टी करा.",
+"full_view": "पूर्ण फोटो",
 };
 
 

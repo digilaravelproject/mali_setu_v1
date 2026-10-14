@@ -93,7 +93,7 @@ class CreateBlogScreen extends StatelessWidget {
                             controller: controller.descriptionCtrl,
                             prefixIcon: Icons.article_outlined,
                             maxLines: 8,
-                            maxLength: 5000,
+                            maxLength: null,
                             errorText: controller.errors['description'],
                             primaryColor: primaryColor,
                           )),
@@ -216,7 +216,7 @@ class CreateBlogScreen extends StatelessWidget {
     required IconData prefixIcon,
     required Color primaryColor,
     int? maxLines,
-    int maxLength = 100,
+    int? maxLength,
     String? errorText,
   }) {
     final charCount = 0.obs;
@@ -276,14 +276,16 @@ class CreateBlogScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 6),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Obx(() => Text(
-                "${charCount.value}/$maxLength",
-                style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF), fontWeight: FontWeight.w500),
-              )),
-        ),
+        if (maxLength != null) ...[
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Obx(() => Text(
+                  "${charCount.value}/$maxLength",
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF9CA3AF), fontWeight: FontWeight.w500),
+                )),
+          ),
+        ],
       ],
     );
   }

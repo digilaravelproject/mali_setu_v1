@@ -6,6 +6,7 @@ class AppConstants {
   static const String defaultTag = "MaliSetu";
 
   static const String packageName = "iconly";
+  static const String appDownloadUrl = "https://malisetu.com/app";
   static const String playStoreUrl =
       "https://play.google.com/store/apps/details?id=com.malisetu.app";
   static const String appStoreUrl =
@@ -14,6 +15,7 @@ class AppConstants {
   // SharedPreferences Keys
   static const String transitionLogo = "transitionLogo";
   static const String has_seen_intro = "has_seen_intro";
+  static const String hasSelectedLanguagePref = "has_selected_language";
   static const String tokenPref = "auth_token";
   static const String userDataPref = "user_data";
   static const String profileDataPref = "profile_data";

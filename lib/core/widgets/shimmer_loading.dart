@@ -29,6 +29,15 @@ class ShimmerLoading extends StatelessWidget {
     ),
   });
 
+  ShimmerLoading.withBorderRadius({
+    super.key,
+    this.width = double.infinity,
+    required this.height,
+    BorderRadiusGeometry borderRadius = const BorderRadius.all(Radius.circular(12)),
+  }) : shapeBorder = RoundedRectangleBorder(
+          borderRadius: borderRadius,
+        );
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;

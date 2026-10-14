@@ -76,6 +76,7 @@ class LanguageController extends GetxController {
       
       // Update locale in GetX
       currentLocale.value = newLocale;
+      tempLanguageCode.value = languageCode;
       Get.updateLocale(newLocale);
       print("DEBUG_LANGUAGE: ✅ Locale updated in GetX");
       

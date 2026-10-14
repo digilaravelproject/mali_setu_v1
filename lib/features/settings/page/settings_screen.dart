@@ -165,7 +165,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                             : Rect.fromLTWH(0, 0, MediaQuery.of(itemContext).size.width, MediaQuery.of(itemContext).size.height / 2);
 
                         await Share.share(
-                          'Check out Mali Setu app!\n\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}',
+                          'Check out Mali Setu app!\n\nDownload Mali Setu App:\n${AppConstants.appDownloadUrl}',
                           subject: 'Mali Setu App',
                           sharePositionOrigin: sharePositionOrigin,
                         );

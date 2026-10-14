@@ -15,6 +15,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import '../../../Auth/service/auth_service.dart';
 import 'create_blogs.dart';
+import '../../../../widgets/clickable_url_text.dart';
 String _formatDate(String? dateStr) {
   if (dateStr == null || dateStr.isEmpty) return '';
   try {
@@ -172,10 +173,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                       const SizedBox(height: 10),
 
                       // Blog content
-                      Text(
-                        description,
+                      ClickableUrlText(
+                        text: description,
                         style: TextStyle(
                           color: Colors.grey[800],
+                          height: 1.65,
+                          fontSize: 14,
+                        ),
+                        linkStyle: const TextStyle(
+                          color: Color(0xFF1976D2),
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.w600,
                           height: 1.65,
                           fontSize: 14,
                         ),
@@ -527,7 +535,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                         : Rect.fromLTWH(0, 0, MediaQuery.of(buttonContext).size.width, MediaQuery.of(buttonContext).size.height / 2);
 
                     final String shareLink = 'https://malisetu.com/blog/${blog.id}';
-                    final String shareText = "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}";
+                    final String shareText = "${blog.title ?? 'Check out this blog!'}\n\nRead more: $shareLink\n\nDownload Mali Setu App:\n${AppConstants.appDownloadUrl}";
 
                     final String? firstMedia = blog.mediaPaths != null && blog.mediaPaths!.isNotEmpty
                         ? blog.mediaPaths!.first
@@ -994,7 +1002,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                         children: [
                           Text(authorName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1D1D1D), fontSize: 14)),
                           const SizedBox(height: 6),
-                          Text(comment.comment ?? '', style: const TextStyle(color: Color(0xFF333333), fontSize: 14, height: 1.4)),
+                          ClickableUrlText(
+                            text: comment.comment ?? '',
+                            style: const TextStyle(color: Color(0xFF333333), fontSize: 14, height: 1.4),
+                            linkStyle: const TextStyle(
+                              color: Color(0xFF1976D2),
+                              decoration: TextDecoration.underline,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
                         ],
                       ),
                     ),

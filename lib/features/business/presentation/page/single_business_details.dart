@@ -535,7 +535,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     // Row(
                     //   children: [
                     //     Text("distance : ",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
-                    //     Text("${business.KMfromuser}",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
+                    //     Text("${business.KMfromuser} Km (Approx)",style: TextStyle(fontWeight: FontWeight.bold,color: AppColors.black,fontSize: 16),),
                     //   ],
                     // ),
                     //  _buildHeaderIconLabel(Icons.info_outline, business.description.toString(), context),
@@ -677,7 +677,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     final String businessName =
                         business.businessName ?? 'Check out this business!';
                     final String shareText =
-                        "$businessName\n\nCheck out this business on Mali Setu: $shareLink\n\nDownload Mali Setu App:\nAndroid: ${AppConstants.playStoreUrl}\niOS: ${AppConstants.appStoreUrl}";
+                        "$businessName\n\nCheck out this business on Mali Setu: $shareLink\n\nDownload Mali Setu App:\n${AppConstants.appDownloadUrl}";
 
                     // if (business.photo != null && business.photo!.isNotEmpty) {
                     //   try {
@@ -1174,7 +1174,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
-                                if (product.cost != null)
+                                if (product.cost != null && product.cost!.isNotEmpty)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
@@ -1306,13 +1306,15 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    Text(
-                                      '₹${service.cost ?? '0.00'}',
-                                      style: context.textTheme.titleMedium
-                                          ?.copyWith(
-                                            color: context.theme.primaryColor,
-                                          ),
-                                    ),
+                                    if (service.cost != null &&
+                                        service.cost!.isNotEmpty)
+                                      Text(
+                                        '₹${service.cost}',
+                                        style: context.textTheme.titleMedium
+                                            ?.copyWith(
+                                              color: context.theme.primaryColor,
+                                            ),
+                                      ),
                                   ],
                                 ),
                               ),

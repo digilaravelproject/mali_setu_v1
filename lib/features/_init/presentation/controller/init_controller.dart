@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -30,7 +29,7 @@ class InitController extends GetxController
     if (isLoggedIn) {
       Get.offAllNamed(AppRoutes.dashboard);
     } else {
-      Get.offAllNamed(AppRoutes.login);
+      Get.offAllNamed(AppRoutes.languageSelection);
     }
 
     // Wait for the transition to fully complete before unblocking DeepLinkService

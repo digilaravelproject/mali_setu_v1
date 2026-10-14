@@ -45,7 +45,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   final currentUser = authService.currentUser.value;
                   final hasPayment = authService.hasPaymentForMatrimony();
                   final hasMatrimony = authService.hasMatrimony();
-                  final isRestricted = !hasMatrimony || !hasPayment;
+                  final approvalStatus = currentUser?.matrimonyApprovalStatus?.toLowerCase();
+                  final isApproved = approvalStatus == 'approved';
+                  final isRestricted = !hasMatrimony || !hasPayment || !isApproved;
 
                   return SliverAppBar(
                     expandedHeight: (isRestricted ? 60 : 120) + topPadding,
@@ -163,7 +165,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                 ],
                               ),
                             ),
-                            if (hasMatrimony && hasPayment)
+                            if (hasMatrimony && hasPayment && isApproved)
                               Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 padding: const EdgeInsets.all(4),
@@ -219,13 +221,18 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
               final hasPayment = authService.hasPaymentForMatrimony();
               final hasMatrimony = authService.hasMatrimony();
 
+              final approvalStatus = currentUser?.matrimonyApprovalStatus?.toLowerCase();
+
               if (!hasMatrimony) {
                 return _buildRestrictedView(context);
               }
-              else if(!hasPayment){
+              else if (!hasPayment) {
                 return _buildPymentRestrictedView(context);
               }
-              else if (currentUser?.matrimonyApprovalStatus?.toLowerCase() == 'pending') {
+              else if (approvalStatus == 'rejected') {
+                return _buildRejectedApprovalView(context, reason: currentUser?.matrimonyRejectionReason);
+              }
+              else if (approvalStatus != 'approved') {
                 return _buildPendingApprovalView(context);
               }
               try {
@@ -1081,6 +1088,89 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 color: Colors.grey[600],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRejectedApprovalView(BuildContext context, {String? reason}) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 40),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.cancel_outlined,
+                size: 80,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "profile_rejected".tr,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "profile_rejected_desc".tr,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            if (reason != null && reason.trim().isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: Colors.red, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          "rejection_reason".tr,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      reason,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
