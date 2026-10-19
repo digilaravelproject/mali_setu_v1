@@ -17,6 +17,7 @@ import '../../data/model/res_login_model.dart' hide User;
 import '../../data/model/req_login_model.dart';
 import '../../domain/usecase/login_usecase.dart';
 import '../../../../business/presentation/controller/business_controller.dart';
+import '../../../../../core/services/deep_link_service.dart';
 
 
 class LoginController extends GetxController {
@@ -99,7 +100,7 @@ class LoginController extends GetxController {
         }
 
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
-        Get.offAllNamed(AppRoutes.dashboard);
+        _navigateToDashboardOrDeepLink();
       } else {
         CustomSnackBar.showError(message: response.message ?? "Login failed");
       }
@@ -166,7 +167,7 @@ class LoginController extends GetxController {
         print("googlelogin : "+response.message.toString());
 
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
-        Get.offAllNamed(AppRoutes.dashboard);
+        _navigateToDashboardOrDeepLink();
       } else {
         if (response.message == "No account found. Please register first.") {
           Get.toNamed(AppRoutes.register, arguments: {"email": googleUser.email});
@@ -239,7 +240,7 @@ class LoginController extends GetxController {
         await SharedPrefs.setBool(AppConstants.isLoggedInPref, true);
 
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
-        Get.offAllNamed(AppRoutes.dashboard);
+        _navigateToDashboardOrDeepLink();
       } else {
         if (response.message == "No account found. Please register first.") {
           Get.toNamed(AppRoutes.register, arguments: {"email": email});
@@ -261,6 +262,16 @@ class LoginController extends GetxController {
       CustomSnackBar.showError(message: errorMessage);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _navigateToDashboardOrDeepLink() {
+    if (Get.isRegistered<AuthService>()) {
+      Get.find<AuthService>().isLoggedIn.value = true;
+    }
+    Get.offAllNamed(AppRoutes.dashboard);
+    if (DeepLinkService.hasPendingDeepLink) {
+      DeepLinkService.executePendingDeepLink();
     }
   }
 }
