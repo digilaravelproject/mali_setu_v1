@@ -16,8 +16,8 @@ class ImagePickerHelper {
   final ImagePicker _picker = ImagePicker();
   final Function(List<File>?, String) onImagePicked;
 
-  /// Default compression size in MB
-  static double maxFileSizeInMB = 2.0;
+  /// Default compression size in MB (Safely below Nginx 1MB client_max_body_size limit)
+  static double maxFileSizeInMB = 0.7;
 
   ImagePickerHelper({required this.onImagePicked});
 
@@ -165,7 +165,11 @@ class ImagePickerHelper {
   ) async {
     try {
       if (allowMultiple && source == ImageSource.gallery) {
-        final pickedFiles = await _picker.pickMultiImage();
+        final pickedFiles = await _picker.pickMultiImage(
+          maxWidth: 1200,
+          maxHeight: 1200,
+          imageQuality: 85,
+        );
 
         if (pickedFiles.isNotEmpty) {
           List<File> resultFiles = [];
@@ -180,7 +184,12 @@ class ImagePickerHelper {
           onImagePicked(null, flags);
         }
       } else {
-        final pickedFile = await _picker.pickImage(source: source);
+        final pickedFile = await _picker.pickImage(
+          source: source,
+          maxWidth: 1200,
+          maxHeight: 1200,
+          imageQuality: 85,
+        );
 
         if (pickedFile != null) {
           final compressedFile = await _compressImage(File(pickedFile.path));
@@ -201,15 +210,23 @@ class ImagePickerHelper {
 
     if (!await originalFile.exists()) return originalFile;
 
-    int quality = 95;
-    const int minQuality = 10;
+    // If original file is already smaller than target size, return it
+    if (originalFile.lengthSync() <= targetSize) {
+      return originalFile;
+    }
+
+    int quality = 85;
+    const int minQuality = 20;
 
     File? resultFile;
 
     while (quality >= minQuality) {
       final compressedBytes = await FlutterImageCompress.compressWithFile(
         originalFile.path,
+        minWidth: 1080,
+        minHeight: 1080,
         quality: quality,
+        format: CompressFormat.jpeg,
       );
 
       if (compressedBytes == null) break;
@@ -224,7 +241,7 @@ class ImagePickerHelper {
         return resultFile;
       }
 
-      quality -= 10;
+      quality -= 15;
     }
 
     return resultFile ?? originalFile;

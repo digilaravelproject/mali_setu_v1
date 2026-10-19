@@ -144,6 +144,7 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   Future<CategoryResponse> getBusinessCategories({int page = 1, String? search}) async {
     final Map<String, dynamic> queryParams = {'page': page};
     if (search != null && search.trim().isNotEmpty) {
+      queryParams['q'] = search.trim();
       queryParams['search'] = search.trim();
     }
     final response = await apiClient.get(

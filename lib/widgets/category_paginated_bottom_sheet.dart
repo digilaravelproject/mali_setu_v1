@@ -330,12 +330,19 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
       );
     }
 
-    final filteredCategories = _categories.where((category) {
-      final catName = category.name?.toLowerCase() ?? '';
-      return catName.contains(_searchQuery.toLowerCase());
-    }).toList();
+    final filteredCategories = _searchQuery.isEmpty
+        ? _categories
+        : _categories.where((category) {
+            final catName = category.name?.toLowerCase() ?? '';
+            return catName.contains(_searchQuery.toLowerCase());
+          }).toList();
 
-    if (filteredCategories.isEmpty) {
+    // If local name filter yielded nothing but backend returned search results, show backend results
+    final displayCategories = (filteredCategories.isEmpty && _categories.isNotEmpty)
+        ? _categories
+        : filteredCategories;
+
+    if (displayCategories.isEmpty) {
       return const Center(child: Text('No categories found'));
     }
 
@@ -343,16 +350,16 @@ class _CategoryPaginatedBottomSheetState extends State<CategoryPaginatedBottomSh
       physics: const AlwaysScrollableScrollPhysics(),
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      itemCount: filteredCategories.length + (_isLoadingMore ? 1 : 0),
+      itemCount: displayCategories.length + (_isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == filteredCategories.length) {
+        if (index == displayCategories.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
-        final category = filteredCategories[index];
+        final category = displayCategories[index];
         return InkWell(
           onTap: () {
             Get.back();

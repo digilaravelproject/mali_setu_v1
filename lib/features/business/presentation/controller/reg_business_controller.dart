@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart' as p;
 
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import '../../../../widgets/category_paginated_bottom_sheet.dart';
 import '../../../../widgets/custom_snack_bar.dart';
@@ -434,6 +436,9 @@ class RegBusinessController extends GetxController {
         if (types.isNotEmpty) {
           businessTypes.assignAll(types);
           typeIdMap = idMap;
+          if (!isEditMode || bTypeCtrl.text.trim().isEmpty) {
+            bTypeCtrl.text = types.first;
+          }
           return;
         }
       }
@@ -455,6 +460,10 @@ class RegBusinessController extends GetxController {
       "Public Ltd": "Public Ltd",
       "Registered Trust / Mandal- Charitable": "Registered Trust / Mandal- Charitable",
     };
+
+    if (!isEditMode || bTypeCtrl.text.trim().isEmpty) {
+      bTypeCtrl.text = businessTypes.first;
+    }
   }
 
   String _toTitleCase(String text) {
@@ -643,23 +652,58 @@ class RegBusinessController extends GetxController {
         }
       }
 
-      if (isEditMode && businessId != null) {
-        // Convert images to base64
-        List<String> base64Images = [];
-
-        // Add newly selected images as base64
-        for (var file in selectedImages) {
-          final bytes = await file.readAsBytes();
-          final base64String = base64Encode(bytes);
-          base64Images.add(base64String);
+      Future<FormData> buildFormData({bool isUpdate = false}) async {
+        final formData = FormData();
+        if (isUpdate) {
+          formData.fields.add(const MapEntry('_method', 'PUT'));
         }
 
-        // Always add photos array (even if empty, to clear old images if user removed them)
-        body['photos'] = base64Images;
+        body.forEach((key, value) {
+          if (key == 'location_details' || key == 'photos') return;
+          if (value != null && value.toString().isNotEmpty) {
+            formData.fields.add(MapEntry(key, value.toString()));
+          }
+        });
 
-        final response = await _apiClient.put(
+        // Add photos as multipart files (photos[])
+        for (var file in selectedImages) {
+          final fileName = p.basename(file.path);
+          final ext = p.extension(fileName).toLowerCase().replaceAll('.', '');
+          MediaType mediaType;
+          if (ext == 'png') {
+            mediaType = MediaType('image', 'png');
+          } else if (ext == 'webp') {
+            mediaType = MediaType('image', 'webp');
+          } else {
+            mediaType = MediaType('image', 'jpeg');
+          }
+
+          formData.files.add(
+            MapEntry(
+              'photos[]',
+              await MultipartFile.fromFile(
+                file.path,
+                filename: fileName,
+                contentType: mediaType,
+              ),
+            ),
+          );
+        }
+
+        return formData;
+      }
+
+      if (isEditMode && businessId != null) {
+        final formData = await buildFormData(isUpdate: true);
+
+        final response = await _apiClient.post(
           "${ApiConstants.updateBusinessServices}/$businessId",
-          data: body,
+          data: formData,
+          options: Options(
+            headers: {
+              'X-HTTP-Method-Override': 'PUT',
+            },
+          ),
         );
 
         if (response.statusCode == 200 || response.statusCode == 201) {
@@ -667,7 +711,7 @@ class RegBusinessController extends GetxController {
           debugPrint(
             "[RegBusinessController] Update Response: ${jsonEncode(data)}",
           );
-          if (data['success'] == true) {
+          if (data is Map && (data['success'] == true || data['status'] == true || data['id'] != null)) {
             // Refresh list if controller exists
             if (Get.isRegistered<BusinessController>()) {
               Get.find<BusinessController>().fetchMyBusinesses();
@@ -678,39 +722,29 @@ class RegBusinessController extends GetxController {
             );
           } else {
             CustomSnackBar.showError(
-              message: data['message'] ?? "Update failed",
+              message: data is Map ? (data['message'] ?? "Update failed") : "Update failed",
             );
           }
         } else {
           final data = response.data;
           CustomSnackBar.showError(
-            message: data['message'] ?? "Something went wrong",
+            message: data is Map ? (data['message'] ?? "Something went wrong") : "Something went wrong",
           );
         }
         return;
       }
 
-      // Convert images to base64 for new registration
-      List<String> base64Images = [];
-
-      // Add newly selected images as base64
-      for (var file in selectedImages) {
-        final bytes = await file.readAsBytes();
-        final base64String = base64Encode(bytes);
-        base64Images.add(base64String);
-      }
-
-      // Add photos array to body
-      body['photos'] = base64Images;
+      // New Registration with Multipart
+      final formData = await buildFormData(isUpdate: false);
 
       final response = await _apiClient.post(
         ApiConstants.regBusiness,
-        data: body,
+        data: formData,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
-        if (data['success'] == true) {
+        if (data is Map && (data['success'] == true || data['status'] == true || data['id'] != null)) {
           // Refresh list if controller exists
           if (Get.isRegistered<BusinessController>()) {
             Get.find<BusinessController>().fetchMyBusinesses();
@@ -721,13 +755,13 @@ class RegBusinessController extends GetxController {
         } else {
           // Handle server-side validation/business logic errors
           CustomSnackBar.showError(
-            message: data['message'] ?? "Registration failed",
+            message: data is Map ? (data['message'] ?? "Registration failed") : "Registration failed",
           );
         }
       } else {
         final data = response.data;
         CustomSnackBar.showError(
-          message: data['message'] ?? "Something went wrong",
+          message: data is Map ? (data['message'] ?? "Something went wrong") : "Something went wrong",
         );
       }
     } catch (e) {
