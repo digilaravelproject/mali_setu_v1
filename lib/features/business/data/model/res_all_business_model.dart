@@ -10,39 +10,51 @@ class BusinessResponse {
     // Check if directly a list response (pagination) or single object
     BusinessData? businessData;
     if (json['data'] != null) {
-      if (json['data']['business'] != null) {
-         // Handle single business details response
-         businessData = BusinessData(
-           data: [Business.fromJson(json['data']['business'])]
-         );
-      } else if (json['data']['products'] != null) {
+      if (json['data'] is Map<String, dynamic>) {
+        final dataMap = json['data'] as Map<String, dynamic>;
+        if (dataMap['business'] != null && dataMap['business'] is Map<String, dynamic>) {
+          // Handle single business details response
+          businessData = BusinessData(
+            data: [Business.fromJson(dataMap['business'])],
+          );
+        } else if (dataMap['products'] != null && dataMap['products'] is List) {
           // Handle products list response
           businessData = BusinessData(
-              data: [],
-              products: List<Product>.from(json['data']['products'].map((x) => Product.fromJson(x))),
+            data: [],
+            products: List<Product>.from(
+                (dataMap['products'] as List).whereType<Map<String, dynamic>>().map((x) => Product.fromJson(x))),
           );
-      } else if (json['data']['services'] != null) {
+        } else if (dataMap['services'] != null && dataMap['services'] is List) {
           // Handle services list response
           businessData = BusinessData(
-              data: [],
-              services: List<Service>.from(json['data']['services'].map((x) => Service.fromJson(x))),
+            data: [],
+            services: List<Service>.from(
+                (dataMap['services'] as List).whereType<Map<String, dynamic>>().map((x) => Service.fromJson(x))),
           );
-      } else if (json['data']['jobs'] != null) {
+        } else if (dataMap['jobs'] != null && dataMap['jobs'] is List) {
           // Handle jobs list response
           businessData = BusinessData(
-              data: [],
-              jobs: List<Job>.from(json['data']['jobs'].map((x) => Job.fromJson(x))),
+            data: [],
+            jobs: List<Job>.from(
+                (dataMap['jobs'] as List).whereType<Map<String, dynamic>>().map((x) => Job.fromJson(x))),
           );
-      } else {
-        // Standard pagination response
-         businessData = BusinessData.fromJson(json['data']);
+        } else {
+          // Standard pagination response
+          businessData = BusinessData.fromJson(dataMap);
+        }
+      } else if (json['data'] is List) {
+        // Direct list of businesses
+        final list = json['data'] as List;
+        businessData = BusinessData(
+          data: list.whereType<Map<String, dynamic>>().map((x) => Business.fromJson(x)).toList(),
+        );
       }
     }
 
     return BusinessResponse(
-      success: json['success'],
-      message: json['message'],
-      errors: json['errors'],
+      success: json['success'] == true || json['success'] == 1,
+      message: json['message']?.toString(),
+      errors: json['errors'] is Map<String, dynamic> ? json['errors'] : null,
       data: businessData,
     );
   }

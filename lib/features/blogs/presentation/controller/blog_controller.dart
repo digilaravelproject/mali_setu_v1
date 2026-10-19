@@ -15,6 +15,7 @@ class BlogController extends GetxController {
   final RxList<Blog> myBlogs = <Blog>[].obs; // logged-in user's blogs only
   final RxList<Blog> filteredBlogs = <Blog>[].obs;
   final RxBool isLoading = false.obs;
+  final RxBool isMoreLoading = false.obs;
   final RxBool isMyBlogsLoading = false.obs;
   final RxInt currentPage = 1.obs;
   final RxBool hasMore = true.obs;
@@ -51,7 +52,7 @@ class BlogController extends GetxController {
     super.onInit();
     categories.assignAll([allCategory]);
     fetchCategories();
-    fetchBlogs();
+    fetchBlogs(refresh: true);
     fetchMyBlogs(); // Pre-load my blogs in parallel
 
     // Debounce search query changes
@@ -101,9 +102,8 @@ class BlogController extends GetxController {
         list = blogs.toList();
       }
 
-      // Category Filter (safe string comparison)
-      if (selectedCategory.value.name != 'All' &&
-          selectedCategory.value.id != null) {
+      // Category Filter (safe check against category id)
+      if (selectedCategory.value.id != null) {
         final catId = selectedCategory.value.id.toString();
         list = list
             .where(
@@ -123,20 +123,21 @@ class BlogController extends GetxController {
   }
 
   Future<void> fetchBlogs({bool refresh = false}) async {
-    if (isLoading.value) return;
+    if (isLoading.value || isMoreLoading.value) return;
 
     if (refresh) {
       currentPage.value = 1;
-      blogs.clear();
       hasMore.value = true;
+      isLoading.value = true;
+    } else {
+      if (!hasMore.value) return;
+      isMoreLoading.value = true;
     }
 
-    if (!hasMore.value) return;
-
-    isLoading.value = true;
     try {
       final response = await _repository.getBlogs(
         page: currentPage.value,
+        perPage: 10,
         categoryId: selectedCategory.value.id,
       );
 
@@ -145,18 +146,28 @@ class BlogController extends GetxController {
           response.data != null) {
         final newBlogs = response.data?.data ?? [];
 
-        if (newBlogs.isEmpty) {
-          hasMore.value = false;
+        if (refresh) {
+          blogs.assignAll(newBlogs);
         } else {
           blogs.addAll(newBlogs);
+        }
+
+        if (newBlogs.isEmpty || newBlogs.length < 10) {
+          hasMore.value = false;
+        } else {
           currentPage.value++;
         }
+      } else {
+        if (refresh) blogs.clear();
+        hasMore.value = false;
       }
     } catch (e) {
       debugPrint("fetchBlogs error: $e");
+      if (refresh) blogs.clear();
     } finally {
       _applyFilter();
       isLoading.value = false;
+      isMoreLoading.value = false;
     }
   }
 

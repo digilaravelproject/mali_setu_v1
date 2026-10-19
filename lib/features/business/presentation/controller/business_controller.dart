@@ -171,52 +171,60 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     voiceSearchError.value = "";
     _showVoiceSearchBottomSheet();
 
-    bool available = await _speechToText.initialize(
-      onStatus: (status) {
-        if (status == 'done' || status == 'notListening') {
-          isListening.value = false;
-          // Fallback: If engine stopped but sheet is still open and we have words, search and close
-          if (searchText.value.isNotEmpty && (Get.isBottomSheetOpen ?? false)) {
-             Get.back();
-             fetchAllBusinesses(isRefresh: true);
-          }
-        }
-      },
-      onError: (errorNotification) {
-        isListening.value = false;
-        if (errorNotification.errorMsg == "error_no_match") {
-          voiceSearchError.value = "We didn't catch that. Please try again.";
-        } else {
-          voiceSearchError.value = errorNotification.errorMsg;
-        }
-      },
-    );
-
-    if (available) {
-      isListening.value = true;
-      voiceSearchError.value = "";
-      _speechToText.listen(
-        onResult: (result) {
-          searchController.text = result.recognizedWords;
-          searchText.value = result.recognizedWords;
-          
-          if (result.finalResult) {
+    try {
+      bool available = await _speechToText.initialize(
+        onStatus: (status) {
+          if (status == 'done' || status == 'notListening') {
             isListening.value = false;
-            // Only close bottom sheet if it's actually open
-            if (Get.isBottomSheetOpen ?? false) {
+            // Fallback: If engine stopped but sheet is still open and we have words, search and close
+            if (searchText.value.isNotEmpty && (Get.isBottomSheetOpen ?? false)) {
                Get.back();
+               fetchAllBusinesses(isRefresh: true);
             }
-            fetchAllBusinesses(isRefresh: true);
+          }
+        },
+        onError: (errorNotification) {
+          isListening.value = false;
+          if (errorNotification.errorMsg == "error_no_match") {
+            voiceSearchError.value = "We didn't catch that. Please try again.";
+          } else {
+            voiceSearchError.value = errorNotification.errorMsg;
           }
         },
       );
-    } else {
-      voiceSearchError.value = "Speech recognition is not available";
+
+      if (available) {
+        isListening.value = true;
+        voiceSearchError.value = "";
+        _speechToText.listen(
+          onResult: (result) {
+            searchController.text = result.recognizedWords;
+            searchText.value = result.recognizedWords;
+            
+            if (result.finalResult) {
+              isListening.value = false;
+              // Only close bottom sheet if it's actually open
+              if (Get.isBottomSheetOpen ?? false) {
+                 Get.back();
+              }
+              fetchAllBusinesses(isRefresh: true);
+            }
+          },
+        );
+      } else {
+        voiceSearchError.value = "Speech recognition is not available";
+      }
+    } catch (e) {
+      debugPrint("Speech recognition error: $e");
+      isListening.value = false;
+      voiceSearchError.value = "Speech recognition is not available on this device";
     }
   }
 
   void stopListening() async {
-    await _speechToText.stop();
+    try {
+      await _speechToText.stop();
+    } catch (_) {}
     isListening.value = false;
     // Don't call Get.back() here - let the bottom sheet's .then() handle it
   }

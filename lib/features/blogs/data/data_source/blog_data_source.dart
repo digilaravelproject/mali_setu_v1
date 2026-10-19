@@ -118,7 +118,7 @@ import 'package:dio/dio.dart';
 class BlogRepository {
   final ApiClient _apiClient = getx.Get.find<ApiClient>();
 
-  Future<BlogResponse?> getBlogs({int page = 1, int perPage = 100, int? categoryId}) async {
+  Future<BlogResponse?> getBlogs({int page = 1, int perPage = 10, int? categoryId}) async {
     try {
       final query = {'page': page, 'per_page': perPage};
       if (categoryId != null) query['category_id'] = categoryId;
@@ -128,11 +128,13 @@ class BlogRepository {
         queryParameters: query,
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data != null) {
         return BlogResponse.fromJson(response.data);
+      } else {
+        debugPrint('Blog fetch failed: status ${response.statusCode}, response: ${response.data}');
       }
     } catch (e) {
-      print('Error fetching blogs: $e');
+      debugPrint('Error fetching blogs: $e');
     }
     return null;
   }

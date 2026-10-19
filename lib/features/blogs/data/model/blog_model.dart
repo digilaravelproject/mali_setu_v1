@@ -1,3 +1,23 @@
+int? _asInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value);
+  if (value is double) return value.toInt();
+  if (value is List && value.isNotEmpty) return _asInt(value.first);
+  return null;
+}
+
+List<String>? _parseTags(dynamic tags) {
+  if (tags == null) return null;
+  if (tags is List) {
+    return tags.map((e) => e.toString()).toList();
+  }
+  if (tags is String && tags.isNotEmpty) {
+    return tags.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+  }
+  return null;
+}
+
 class BlogResponse {
   final bool? success;
   final BlogData? data;
@@ -5,8 +25,10 @@ class BlogResponse {
   BlogResponse({this.success, this.data});
 
   factory BlogResponse.fromJson(Map<String, dynamic> json) => BlogResponse(
-        success: json['success'],
-        data: json['data'] != null ? BlogData.fromJson(json['data']) : null,
+        success: json['success'] == true || json['success'] == 1,
+        data: json['data'] != null && json['data'] is Map<String, dynamic>
+            ? BlogData.fromJson(json['data'])
+            : null,
       );
 }
 
@@ -40,20 +62,23 @@ class BlogData {
   });
 
   factory BlogData.fromJson(Map<String, dynamic> json) => BlogData(
-        currentPage: json['current_page'],
-        data: json['data'] != null
-            ? List<Blog>.from(json['data'].map((x) => Blog.fromJson(x)))
+        currentPage: _asInt(json['current_page']),
+        data: json['data'] != null && json['data'] is List
+            ? (json['data'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map((x) => Blog.fromJson(x))
+                .toList()
             : null,
-        firstPageUrl: json['first_page_url'],
-        from: json['from'],
-        lastPage: json['last_page'],
-        lastPageUrl: json['last_page_url'],
-        nextPageUrl: json['next_page_url'],
-        path: json['path'],
-        perPage: json['per_page'],
-        prevPageUrl: json['prev_page_url'],
-        to: json['to'],
-        total: json['total'],
+        firstPageUrl: json['first_page_url']?.toString(),
+        from: _asInt(json['from']),
+        lastPage: _asInt(json['last_page']),
+        lastPageUrl: json['last_page_url']?.toString(),
+        nextPageUrl: json['next_page_url']?.toString(),
+        path: json['path']?.toString(),
+        perPage: _asInt(json['per_page']),
+        prevPageUrl: json['prev_page_url']?.toString(),
+        to: _asInt(json['to']),
+        total: _asInt(json['total']),
       );
 }
 
@@ -97,30 +122,36 @@ class Blog {
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) => Blog(
-        id: json['id'],
-        userId: json['user_id'],
-        title: json['title'],
-        description: json['description'],
-        tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
+        id: _asInt(json['id']),
+        userId: _asInt(json['user_id']),
+        title: json['title']?.toString(),
+        description: json['description']?.toString(),
+        tags: _parseTags(json['tags']),
         mediaPath: json['media_path'] is List
             ? (json['media_path'] as List).isNotEmpty
                 ? (json['media_path'] as List).first.toString()
                 : null
             : json['media_path']?.toString(),
         mediaPaths: json['media_path'] is List
-            ? List<String>.from(json['media_path'])
+            ? (json['media_path'] as List).map((e) => e.toString()).toList()
             : (json['media_path'] != null ? [json['media_path'].toString()] : null), // 🆕 Added
-        mediaType: json['media_type'],
+        mediaType: json['media_type']?.toString(),
         blogType: json['blog_type']?.toString() ?? json['blogs_type']?.toString(),
-        isActive: json['is_active'] == 1 || json['is_active'] == true,
-        createdAt: json['created_at'],
-        updatedAt: json['updated_at'],
-        likesCount: json['likes_count'],
-        isLiked: json['is_liked'] == 1 || json['is_liked'] == true,
-        user: json['user'] != null ? BlogUser.fromJson(json['user']) : null,
-        category: json['category'] != null ? BlogCategory.fromJson(json['category']) : null,
-        comments: json['comments'] != null 
-            ? List<BlogComment>.from(json['comments'].map((x) => BlogComment.fromJson(x))) 
+        isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
+        createdAt: json['created_at']?.toString(),
+        updatedAt: json['updated_at']?.toString(),
+        likesCount: _asInt(json['likes_count']),
+        isLiked: json['is_liked'] == 1 || json['is_liked'] == true || json['is_liked'] == '1',
+        user: json['user'] != null && json['user'] is Map<String, dynamic>
+            ? BlogUser.fromJson(json['user'])
+            : null,
+        category: json['category'] != null && json['category'] is Map<String, dynamic>
+            ? BlogCategory.fromJson(json['category'])
+            : null,
+        comments: json['comments'] != null && json['comments'] is List
+            ? List<BlogComment>.from((json['comments'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map((x) => BlogComment.fromJson(x)))
             : null,
       );
 
@@ -187,16 +218,20 @@ class BlogComment {
   });
 
   factory BlogComment.fromJson(Map<String, dynamic> json) => BlogComment(
-        id: json['id'],
-        blogId: json['blog_id'],
-        userId: json['user_id'],
-        parentId: json['parent_id'],
-        comment: json['comment'],
-        createdAt: json['created_at'],
-        updatedAt: json['updated_at'],
-        user: json['user'] != null ? BlogUser.fromJson(json['user']) : null,
-        replies: json['replies'] != null
-            ? List<BlogComment>.from(json['replies'].map((x) => BlogComment.fromJson(x)))
+        id: _asInt(json['id']),
+        blogId: _asInt(json['blog_id']),
+        userId: _asInt(json['user_id']),
+        parentId: _asInt(json['parent_id']),
+        comment: json['comment']?.toString(),
+        createdAt: json['created_at']?.toString(),
+        updatedAt: json['updated_at']?.toString(),
+        user: json['user'] != null && json['user'] is Map<String, dynamic>
+            ? BlogUser.fromJson(json['user'])
+            : null,
+        replies: json['replies'] != null && json['replies'] is List
+            ? List<BlogComment>.from((json['replies'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map((x) => BlogComment.fromJson(x)))
             : null,
       );
 }
@@ -210,10 +245,10 @@ class BlogCategory {
   BlogCategory({this.id, this.name, this.description, this.isActive});
 
   factory BlogCategory.fromJson(Map<String, dynamic> json) => BlogCategory(
-        id: json['id'],
-        name: json['name'],
-        description: json['description'],
-        isActive: json['is_active'] == 1 || json['is_active'] == true,
+        id: _asInt(json['id']),
+        name: json['name']?.toString(),
+        description: json['description']?.toString(),
+        isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
       );
 }
 
@@ -224,9 +259,11 @@ class BlogCategoryResponse {
   BlogCategoryResponse({this.success, this.data});
 
   factory BlogCategoryResponse.fromJson(Map<String, dynamic> json) => BlogCategoryResponse(
-        success: json['success'],
-        data: json['data'] != null
-            ? List<BlogCategory>.from(json['data'].map((x) => BlogCategory.fromJson(x)))
+        success: json['success'] == true || json['success'] == 1,
+        data: json['data'] != null && json['data'] is List
+            ? List<BlogCategory>.from((json['data'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map((x) => BlogCategory.fromJson(x)))
             : null,
       );
 }
@@ -269,22 +306,22 @@ class BlogUser {
   });
 
   factory BlogUser.fromJson(Map<String, dynamic> json) => BlogUser(
-        id: json['id'],
-        googleId: json['google_id'],
-        name: json['name'],
-        email: json['email'],
-        photo: json['photo'],
-        phone: json['phone'],
-        age: json['age'],
-        occupation: json['occupation'],
-        address: json['address'],
-        nearbyLocation: json['nearby_location'],
-        pincode: json['pincode'],
-        state: json['state'],
-        city: json['city'],
-        district: json['district'],
-        userType: json['user_type'],
-        status: json['status'],
+        id: _asInt(json['id']),
+        googleId: json['google_id']?.toString(),
+        name: json['name']?.toString(),
+        email: json['email']?.toString(),
+        photo: json['photo']?.toString(),
+        phone: json['phone']?.toString(),
+        age: _asInt(json['age']),
+        occupation: json['occupation']?.toString(),
+        address: json['address']?.toString(),
+        nearbyLocation: json['nearby_location']?.toString(),
+        pincode: json['pincode']?.toString(),
+        state: json['state']?.toString(),
+        city: json['city']?.toString(),
+        district: json['district']?.toString(),
+        userType: json['user_type']?.toString(),
+        status: json['status']?.toString(),
       );
 }
 class BlogDetailResponse {

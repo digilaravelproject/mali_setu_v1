@@ -53,112 +53,147 @@ class BlogsScreen extends StatelessWidget {
             }
             return controller.fetchBlogs(refresh: true);
           },
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              // Clean Header (No pink gradient, simple & premium)
-              SliverToBoxAdapter(
-                child: Container(
-                  padding: EdgeInsets.only(top: topPadding + 16, bottom: 8, left: 16, right: 16),
-                  color: Colors.white, // Solid pure white for top header
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Professional Custom App Bar
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Icon(Icons.menu_rounded, color: const Color(0xFF374151), size: 24),
-                          Obx(() => Text(
-                            controller.selectedTab.value == 'Mine'
-                                ? 'my_blogs'.tr
-                                : 'blogs'.tr,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: primaryColor,
-                              fontFamily: 'Nunito-Bold',
-                              letterSpacing: -0.5,
-                            ),
-                          )),
-                          Obx(() {
-                            int count = 0;
-                            try {
-                              final notificationController = Get.find<NotificationController>();
-                              count = notificationController.unreadCount.value;
-                            } catch (e) { count = 0; }
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: InkWell(
-                                onTap: () => Get.toNamed(AppRoutes.notification),
-                                child: Badge(
-                                  label: Text(count > 99 ? '99+' : count.toString()),
-                                  isLabelVisible: count > 0,
-                                  backgroundColor: Colors.redAccent,
-                                  child: const Icon(CupertinoIcons.bell, color: Colors.black87, size: 24),
-                                ),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (controller.selectedTab.value != 'Mine' &&
+                  controller.searchQuery.isEmpty &&
+                  controller.hasMore.value &&
+                  !controller.isLoading.value &&
+                  !controller.isMoreLoading.value &&
+                  scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                controller.fetchBlogs();
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // Clean Header (No pink gradient, simple & premium)
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.only(top: topPadding + 16, bottom: 8, left: 16, right: 16),
+                    color: Colors.white, // Solid pure white for top header
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Professional Custom App Bar
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Icon(Icons.menu_rounded, color: const Color(0xFF374151), size: 24),
+                            Obx(() => Text(
+                              controller.selectedTab.value == 'Mine'
+                                  ? 'my_blogs'.tr
+                                  : 'blogs'.tr,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: primaryColor,
+                                fontFamily: 'Nunito-Bold',
+                                letterSpacing: -0.5,
                               ),
-                            );
-                          }),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Search Bar
-                      _buildSearchBar(controller, primaryColor),
-                    ],
+                            )),
+                            Obx(() {
+                              int count = 0;
+                              try {
+                                final notificationController = Get.find<NotificationController>();
+                                count = notificationController.unreadCount.value;
+                              } catch (e) { count = 0; }
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: InkWell(
+                                  onTap: () => Get.toNamed(AppRoutes.notification),
+                                  child: Badge(
+                                    label: Text(count > 99 ? '99+' : count.toString()),
+                                    isLabelVisible: count > 0,
+                                    backgroundColor: Colors.redAccent,
+                                    child: const Icon(CupertinoIcons.bell, color: Colors.black87, size: 24),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Search Bar
+                        _buildSearchBar(controller, primaryColor),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Horizontal Category chips list (Floating just below top header)
-              SliverToBoxAdapter(
-                child: Obx(() => controller.selectedTab.value == 'Mine'
-                    ? const SizedBox.shrink()
-                    : Container(
-                        color: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: _buildCategoryTabs(controller, primaryColor),
-                      )),
-              ),
+                // Horizontal Category chips list (Floating just below top header)
+                SliverToBoxAdapter(
+                  child: Obx(() => controller.selectedTab.value == 'Mine'
+                      ? const SizedBox.shrink()
+                      : Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          child: _buildCategoryTabs(controller, primaryColor),
+                        )),
+                ),
 
-              // Blog list
-              Obx(() {
-                final isMine = controller.selectedTab.value == 'Mine';
-                final loading = isMine ? controller.isMyBlogsLoading.value : controller.isLoading.value;
-                final empty = isMine ? controller.myBlogs.isEmpty : controller.blogs.isEmpty;
+                // Blog list
+                Obx(() {
+                  final isMine = controller.selectedTab.value == 'Mine';
+                  final loading = isMine ? controller.isMyBlogsLoading.value : controller.isLoading.value;
+                  final empty = isMine ? controller.myBlogs.isEmpty : controller.blogs.isEmpty;
 
-                if (loading && empty) {
+                  if (loading && empty) {
+                    return SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                              (context, index) => _buildShimmerCard(),
+                          childCount: 4,
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (controller.filteredBlogs.isEmpty) {
+                    return SliverFillRemaining(
+                      child: _buildEmptyState(primaryColor, controller),
+                    );
+                  }
+
                   return SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
-                            (context, index) => _buildShimmerCard(),
-                        childCount: 4,
+                            (context, index) {
+                          final blog = controller.filteredBlogs[index];
+                          return _buildBlogCard(context, blog, primaryColor, controller);
+                        },
+                        childCount: controller.filteredBlogs.length,
                       ),
                     ),
                   );
-                }
+                }),
 
-                if (controller.filteredBlogs.isEmpty) {
-                  return SliverFillRemaining(
-                    child: _buildEmptyState(primaryColor, controller),
-                  );
-                }
-
-                return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                        final blog = controller.filteredBlogs[index];
-                        return _buildBlogCard(context, blog, primaryColor, controller);
-                      },
-                      childCount: controller.filteredBlogs.length,
-                    ),
-                  ),
-                );
-              }),
-            ],
+                // Bottom Pagination Spinner
+                Obx(() {
+                  if (controller.isMoreLoading.value) {
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 90),
+                        child: Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SliverToBoxAdapter(child: SizedBox(height: 80));
+                }),
+              ],
+            ),
           ),
         ),
 
