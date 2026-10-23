@@ -95,15 +95,23 @@ class HomePage extends GetWidget<HomeController> {
                                        ),
                                      ),
                                      Obx(() => Row(
+                                       mainAxisSize: MainAxisSize.min,
                                        children: [
                                          Icon(Icons.location_on, size: 10, color: Colors.grey[600]),
                                          const SizedBox(width: 2),
-                                         Text(
-                                           controller.currentLocation.value,
-                                           style: TextStyle(
-                                             fontSize: 10,
-                                             color: Colors.grey[600],
-                                             fontWeight: FontWeight.w500,
+                                         ConstrainedBox(
+                                           constraints: BoxConstraints(
+                                             maxWidth: MediaQuery.of(context).size.width * 0.35,
+                                           ),
+                                           child: Text(
+                                             controller.currentLocation.value,
+                                             style: TextStyle(
+                                               fontSize: 10,
+                                               color: Colors.grey[600],
+                                               fontWeight: FontWeight.w500,
+                                             ),
+                                             maxLines: 1,
+                                             overflow: TextOverflow.ellipsis,
                                            ),
                                          ),
                                        ],
@@ -312,7 +320,7 @@ class HomePage extends GetWidget<HomeController> {
                                   crossAxisCount: 4,
                                   crossAxisSpacing: 16,
                                   mainAxisSpacing: 4,
-                                  childAspectRatio: 0.85,
+                                  childAspectRatio: 0.76,
                                 ),
                                 itemBuilder: (context, index) {
                                   if (index == displayList.length) {
@@ -408,16 +416,18 @@ class HomePage extends GetWidget<HomeController> {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            _capitalizeText(category.name ?? ""),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-              color: Colors.grey[800],
-              height: 1.2,
+          Flexible(
+            child: Text(
+              _capitalizeText(category.name ?? ""),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+                color: Colors.grey[800],
+                height: 1.1,
+              ),
             ),
           ),
         ],

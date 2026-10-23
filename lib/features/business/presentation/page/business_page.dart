@@ -50,26 +50,17 @@ class BusinessScreen extends GetView<BusinessController> {
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               slivers: [
               SliverAppBar(
-                expandedHeight: 50 + topPadding,
-                toolbarHeight: 50 + topPadding,
                 pinned: false,
                 floating: true,
                 backgroundColor: theme.scaffoldBackgroundColor,
                 elevation: 0,
                 automaticallyImplyLeading: false,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Padding(
-                    padding: EdgeInsets.only(top: topPadding, left: 16, right: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'business_dashboard'.tr,
-                        style: context.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
+                title: Text(
+                  'business_dashboard'.tr,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    color: Colors.black87,
                   ),
                 ),
                 centerTitle: false,

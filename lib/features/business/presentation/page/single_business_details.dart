@@ -42,7 +42,13 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     controller = Get.find<BusinessController>();
     // Store argBusiness once — safe from route argument changes on back navigation
     final args = Get.arguments;
-    argBusiness = args is Business ? args : controller.selectedBusiness.value!;
+    if (args is Business) {
+      argBusiness = args;
+    } else if (controller.selectedBusiness.value != null) {
+      argBusiness = controller.selectedBusiness.value!;
+    } else {
+      argBusiness = Business();
+    }
     _outerScrollController.addListener(_onScroll);
   }
 

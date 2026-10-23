@@ -141,14 +141,18 @@ class DashboardPage extends GetWidget<DashboardController> {
                 },
               ),
               const SizedBox(height: 2),
-              Text(
-                e.title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isSelected ? e.selectedColor : e.unselectedColor,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: 10,
-                  letterSpacing: 0.2,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  e.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: isSelected ? e.selectedColor : e.unselectedColor,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontSize: 10,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ),
             ],

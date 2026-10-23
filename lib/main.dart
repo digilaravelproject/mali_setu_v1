@@ -50,9 +50,18 @@ class MyApp extends StatelessWidget {
         getPages: AppPages.getPages,
         initialRoute: AppRoutes.splash,
         builder: (context, child) {
-          return UpgradeAlert(
-            navigatorKey: Get.key,
-            child: child ?? const SizedBox.shrink(),
+          final mediaQuery = MediaQuery.of(context);
+          return MediaQuery(
+            data: mediaQuery.copyWith(
+              textScaler: mediaQuery.textScaler.clamp(
+                minScaleFactor: 0.85,
+                maxScaleFactor: 1.15,
+              ),
+            ),
+            child: UpgradeAlert(
+              navigatorKey: Get.key,
+              child: child ?? const SizedBox.shrink(),
+            ),
           );
         },
     );
