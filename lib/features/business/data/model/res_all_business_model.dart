@@ -161,7 +161,7 @@ class Business {
   String? subscriptionStatus;
   String? subscriptionExpiresAt;
   int? jobPostingLimit;
-  int? KMfromuser;
+  double? KMfromuser;
   String? createdAt;
   String? updatedAt;
   String? status;
@@ -233,7 +233,7 @@ class Business {
       subscriptionStatus: json['subscription_status'],
       subscriptionExpiresAt: json['subscription_expires_at'],
       jobPostingLimit: _asInt(json['job_posting_limit']),
-      KMfromuser: _asInt(json['KMfromuser']),
+      KMfromuser: _asDouble(json['KMfromuser']),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       status: json['status'],
@@ -863,6 +863,15 @@ class JobApplicationsPagination {
       total: _asInt(json['total']),
     );
   }
+}
+
+double? _asDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  if (value is List && value.isNotEmpty) return _asDouble(value.first);
+  return null;
 }
 
 int? _asInt(dynamic value) {

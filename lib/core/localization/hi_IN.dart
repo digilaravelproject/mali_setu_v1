@@ -210,6 +210,8 @@ const Map<String, String> hiIN = {
   'ms': 'सुश्री.',
   'dr': 'डॉ.',
   'prof': 'प्रो.',
+  'ca': 'सी.ए.',
+  'adv': 'एड.',
   'email_id': 'ईमेल आईडी',
   'date_of_birth': 'जन्म तिथि',
   'mobile_number': 'मोबाइल नंबर',

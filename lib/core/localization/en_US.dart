@@ -212,6 +212,8 @@ const Map<String, String> enUS = {
   'ms': 'Ms.',
   'dr': 'Dr.',
   'prof': 'Prof.',
+  'ca': 'CA',
+  'adv': 'Adv.',
   'email_id': 'Email ID',
   'date_of_birth': 'Date of Birth',
   'mobile_number': 'Mobile Number',

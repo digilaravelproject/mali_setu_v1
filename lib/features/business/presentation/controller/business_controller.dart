@@ -565,16 +565,10 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
 
       print("DEBUG_BUSINESSES: Fetching... Search: '$searchQuery', Page: ${currentPage.value}");
 
-      // Get location with a strict timeout to avoid hanging
+      // Get live real-time location
       Map<String, double>? location;
       try {
-        location = await LocationHelper.getCurrentLocation().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            print("DEBUG_LOCATION: Location fetch timed out in fetchAllBusinesses");
-            return null;
-          },
-        );
+        location = await LocationHelper.getCurrentLocation();
       } catch (e) {
         print("DEBUG_LOCATION: Error fetching location: $e");
       }

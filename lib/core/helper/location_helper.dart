@@ -1,76 +1,65 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationHelper {
-  static const String _latKey = 'last_latitude';
-  static const String _lngKey = 'last_longitude';
-
-  /// Returns {latitude, longitude} or null if permission denied / unavailable
+  /// Returns fresh real-time {latitude, longitude} or null if permission denied / service unavailable.
+  /// Always fetches current live position and does NOT use stale/stored location.
   static Future<Map<String, double>?> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return await _getLastStoredLocation();
+      if (!serviceEnabled) {
+        print("DEBUG_LOCATION: Location service is disabled on device");
+        return null;
+      }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) return await _getLastStoredLocation();
+        if (permission == LocationPermission.denied) {
+          print("DEBUG_LOCATION: Location permission denied by user");
+          return null;
+        }
       }
-      if (permission == LocationPermission.deniedForever) return await _getLastStoredLocation();
+      if (permission == LocationPermission.deniedForever) {
+        print("DEBUG_LOCATION: Location permission denied forever");
+        return null;
+      }
 
-      // Try to get last known position first for instant result
-      Position? position = await Geolocator.getLastKnownPosition();
-      
-      // If last known is null, fetch fresh one with a short timeout
-      if (position == null) {
+      // Always fetch fresh real-time current position where the app is currently opened
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+      } catch (e) {
+        print("DEBUG_LOCATION: High accuracy position fetch failed ($e), trying balanced accuracy...");
         try {
           position = await Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.low,
+              accuracy: LocationAccuracy.medium,
               timeLimit: Duration(seconds: 5),
             ),
           );
-        } catch (e) {
-          print("DEBUG_LOCATION: Fresh location fetch failed: $e");
+        } catch (e2) {
+          print("DEBUG_LOCATION: Medium accuracy fallback also failed: $e2");
         }
       }
 
       if (position != null) {
-        final location = {
+        print("DEBUG_LOCATION: Live Location acquired: ${position.latitude}, ${position.longitude}");
+        return {
           'latitude': position.latitude,
           'longitude': position.longitude,
         };
-        // Save to persistent storage for future use if GPS fails
-        await _saveLocation(position.latitude, position.longitude);
-        return location;
       }
 
-      // Fallback to stored location if everything else fails
-      return await _getLastStoredLocation();
+      return null;
     } catch (e) {
       print("DEBUG_LOCATION: Error in getCurrentLocation: $e");
-      return await _getLastStoredLocation();
+      return null;
     }
   }
-
-  static Future<void> _saveLocation(double lat, double lng) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble(_latKey, lat);
-      await prefs.setDouble(_lngKey, lng);
-    } catch (_) {}
-  }
-
-  static Future<Map<String, double>?> _getLastStoredLocation() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lat = prefs.getDouble(_latKey);
-      final lng = prefs.getDouble(_lngKey);
-      if (lat != null && lng != null) {
-        print("DEBUG_LOCATION: Using last stored location: $lat, $lng");
-        return {'latitude': lat, 'longitude': lng};
-      }
-    } catch (_) {}
-    return null;
-  }
 }
+

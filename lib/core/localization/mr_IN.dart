@@ -206,6 +206,8 @@ const Map<String, String> mrIN = {
   'ms': 'सुश्री.',
   'dr': 'डॉ.',
   'prof': 'प्रा.',
+  'ca': 'सी.ए.',
+  'adv': 'ॲड.',
   'email_id': 'ईमेल आयडी',
   'date_of_birth': 'जन्मतारीख',
   'mobile_number': 'मोबाइल नंबर',
