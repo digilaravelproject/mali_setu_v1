@@ -24,6 +24,10 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_business_servic
 import 'dart:io';
 import 'package:edu_cluezer/features/business/domain/usecase/get_my_businesses_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/add_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_service_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_service_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/delete_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_job_details_usecase.dart';
@@ -50,7 +54,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   final GetBusinessProductsUseCase getBusinessProductsUseCase;
   final GetBusinessServicesUseCase getBusinessServicesUseCase;
   final AddBusinessProductUseCase addBusinessProductUseCase;
+  final UpdateBusinessProductUseCase? updateBusinessProductUseCase;
+  final DeleteBusinessProductUseCase? deleteBusinessProductUseCase;
   final AddBusinessServiceUseCase addBusinessServiceUseCase;
+  final UpdateBusinessServiceUseCase? updateBusinessServiceUseCase;
+  final DeleteBusinessServiceUseCase? deleteBusinessServiceUseCase;
   final UpdateBusinessUseCase updateBusinessUseCase;
   final DeleteBusinessUseCase deleteBusinessUseCase;
   final GetMyJobsUseCase getMyJobsUseCase;
@@ -73,7 +81,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     required this.getBusinessProductsUseCase,
     required this.getBusinessServicesUseCase,
     required this.addBusinessProductUseCase,
+    this.updateBusinessProductUseCase,
+    this.deleteBusinessProductUseCase,
     required this.addBusinessServiceUseCase,
+    this.updateBusinessServiceUseCase,
+    this.deleteBusinessServiceUseCase,
     required this.updateBusinessUseCase,
     required this.deleteBusinessUseCase,
     required this.getMyJobsUseCase,
@@ -803,6 +815,98 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       if (selectedBusiness.value != null && data['business_id'].toString() == selectedBusiness.value!.id.toString()) {
          await fetchBusinessServices(int.parse(data['business_id'].toString()));
       }
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateProduct(int id, Map<String, dynamic> data, List<File> images) async {
+    try {
+      isLoading.value = true;
+      final usecase = updateBusinessProductUseCase ?? Get.find<UpdateBusinessProductUseCase>();
+      await usecase(id, data, images);
+      
+      // Refresh products if editing for current business
+      if (selectedBusiness.value != null && data['business_id'] != null) {
+        await fetchBusinessProducts(int.parse(data['business_id'].toString()));
+      }
+      await fetchMyBusinesses();
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteProduct(int id, {int? businessId}) async {
+    try {
+      isLoading.value = true;
+      final usecase = deleteBusinessProductUseCase ?? Get.find<DeleteBusinessProductUseCase>();
+      await usecase(id);
+      
+      // Remove locally from list
+      businessProducts.removeWhere((p) => p.id == id);
+      if (selectedBusiness.value != null) {
+        selectedBusiness.value!.products?.removeWhere((p) => p.id == id);
+        selectedBusiness.refresh();
+      }
+      if (businessId != null) {
+        await fetchBusinessProducts(businessId);
+      }
+      await fetchMyBusinesses();
+      CustomSnackBar.showSuccess(message: 'Product deleted successfully!');
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateService(int id, Map<String, dynamic> data, List<File> images) async {
+    try {
+      isLoading.value = true;
+      final usecase = updateBusinessServiceUseCase ?? Get.find<UpdateBusinessServiceUseCase>();
+      await usecase(id, data, images);
+      
+      // Refresh services if editing for current business
+      if (selectedBusiness.value != null && data['business_id'] != null) {
+        await fetchBusinessServices(int.parse(data['business_id'].toString()));
+      }
+      await fetchMyBusinesses();
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString());
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteService(int id, {int? businessId}) async {
+    try {
+      isLoading.value = true;
+      final usecase = deleteBusinessServiceUseCase ?? Get.find<DeleteBusinessServiceUseCase>();
+      await usecase(id);
+      
+      // Remove locally from list
+      businessServices.removeWhere((s) => s.id == id);
+      if (selectedBusiness.value != null) {
+        selectedBusiness.value!.services?.removeWhere((s) => s.id == id);
+        selectedBusiness.refresh();
+      }
+      if (businessId != null) {
+        await fetchBusinessServices(businessId);
+      }
+      await fetchMyBusinesses();
+      CustomSnackBar.showSuccess(message: 'Service deleted successfully!');
       return true;
     } catch (e) {
       CustomSnackBar.showError(message: e.toString());

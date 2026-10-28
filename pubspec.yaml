@@ -73,6 +73,7 @@ dependencies:
   jwt_decoder: ^2.0.1
   package_info_plus: ^9.0.1
   upgrader: ^13.6.0
+  firebase_messaging: ^16.7.1
 
 
 dev_dependencies:

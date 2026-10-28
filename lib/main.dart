@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 
 import 'package:upgrader/upgrader.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/constent/app_constants.dart';
 import 'core/localization/languages.dart';
 import 'core/localization/language_controller.dart';
@@ -13,10 +15,25 @@ import 'core/helper/local_notification_helper.dart';
 import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
 import 'init_app.dart';
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("════════════════════════════════════════════════════════════");
+  print("📩 [FCM BACKGROUND NOTIFICATION RECEIVED]");
+  print("   Message ID: ${message.messageId}");
+  print("   Title:      ${message.notification?.title}");
+  print("   Body:       ${message.notification?.body}");
+  print("   Data:       ${message.data}");
+  print("════════════════════════════════════════════════════════════");
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initApp();
   await LocalNotificationHelper.init();
+  
+  // Register background notification handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   
   // Initialize LanguageController
   Get.put(LanguageController());

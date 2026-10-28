@@ -4,6 +4,9 @@ import 'package:app_links/app_links.dart';
 import 'package:edu_cluezer/features/business/binding/business_binding.dart';
 import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/add_service_page.dart';
+import 'package:edu_cluezer/features/business/presentation/page/my_products_services_screen.dart';
+import 'package:edu_cluezer/features/business/presentation/page/edit_product_screen.dart';
+import 'package:edu_cluezer/features/business/presentation/page/edit_service_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/create_job_post_page.dart';
 import 'package:edu_cluezer/features/business/presentation/page/job_analytics_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/job_details_screen.dart';
@@ -79,6 +82,9 @@ class AppRoutes {
   static const String regMatrimony = '/regMatrimony';
   static const String addProduct = '/addProduct';
   static const String addService = "/addService";
+  static const String myProductsServices = "/myProductsServices";
+  static const String editProduct = "/editProduct";
+  static const String editService = "/editService";
   static const String createJob = "/createJob";
   static const String jobAnalytics = "/jobAnalytics";
   static const String myBusiness = "/myBusiness";
@@ -215,7 +221,28 @@ class AppPages {
     GetPage(
       name: AppRoutes.addService,
       page: () => const AddServiceScreen(),
-      binding: MatrimonyBinding(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.myProductsServices,
+      page: () => const MyProductsServicesScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.editProduct,
+      page: () => const EditProductScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.editService,
+      page: () => const EditServiceScreen(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),

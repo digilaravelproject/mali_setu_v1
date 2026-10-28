@@ -53,8 +53,28 @@ class BusinessRepositoryImpl implements BusinessRepository {
   }
 
   @override
+  Future<BusinessResponse> updateProduct(int id, Map<String, dynamic> data, List<File> images) {
+    return dataSource.updateProduct(id, data, images);
+  }
+
+  @override
+  Future<BusinessResponse> deleteProduct(int id) {
+    return dataSource.deleteProduct(id);
+  }
+
+  @override
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images) {
     return dataSource.addService(data, images);
+  }
+
+  @override
+  Future<BusinessResponse> updateService(int id, Map<String, dynamic> data, List<File> images) {
+    return dataSource.updateService(id, data, images);
+  }
+
+  @override
+  Future<BusinessResponse> deleteService(int id) {
+    return dataSource.deleteService(id);
   }
 
   @override

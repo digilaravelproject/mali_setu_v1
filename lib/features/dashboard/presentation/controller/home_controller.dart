@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../../core/utils/location_helper.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart' as coord_helper;
 import 'package:get/get.dart';
@@ -17,6 +18,9 @@ import 'package:edu_cluezer/features/business/domain/repository/all_business_rep
 import 'package:edu_cluezer/features/dashboard/domain/usecase/get_banners_usecase.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/banner_model.dart';
 import 'package:edu_cluezer/features/notification/presentation/controller/notification_controller.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/storage/token_manger.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final RxInt currentIndex = 0.obs;
@@ -41,6 +45,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   // Location
   final RxString currentLocation = "Detecting...".obs;
 
+  // Firebase Messaging Token
+  final RxString firebaseToken = ''.obs;
+
   HomeController({
     required this.getBusinessCategoriesUseCase,
     required this.getBannersUseCase,
@@ -53,6 +60,20 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     
     print("DEBUG_HOME: onInit() called");
     
+    // First thing on Home screen: fetch FCM device token and send to API
+    fetchAndSyncFcmToken();
+
+    // Setup push notification listeners (foreground, background click, app launch)
+    _setupPushNotificationListeners();
+
+    // Listen to token refresh events
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      if (newToken.isNotEmpty) {
+        firebaseToken.value = newToken;
+        sendFcmTokenToServer(newToken);
+      }
+    });
+
     if (Get.isRegistered<AuthService>()) {
       Get.find<AuthService>().refreshProfile();
     }
@@ -64,6 +85,119 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     updateLocation();
     fetchCategories();
     fetchBanners();
+  }
+
+  /// Fetch Firebase Cloud Messaging (FCM) token and sync to backend API
+  Future<void> fetchAndSyncFcmToken() async {
+    try {
+      final FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+      // Request permission for push notifications
+      NotificationSettings settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+      print("🔔 [FCM] Notification permission status: ${settings.authorizationStatus}");
+
+      // Retrieve device FCM token
+      String? token = await messaging.getToken();
+
+      if (token != null && token.isNotEmpty) {
+        firebaseToken.value = token;
+        print("════════════════════════════════════════════════════════════");
+        print("🔥 FIREBASE TOKEN (FCM): $token");
+        print("════════════════════════════════════════════════════════════");
+
+        // Send FCM token to server API: PUT https://malisetu.com/api/auth/fcm-token
+        await sendFcmTokenToServer(token);
+      } else {
+        print("⚠️ [FCM] Firebase token returned null or empty");
+      }
+    } catch (e) {
+      print("❌ [FCM] Error fetching Firebase token: $e");
+    }
+  }
+
+  /// Call PUT https://malisetu.com/api/auth/fcm-token to update FCM token on server
+  Future<void> sendFcmTokenToServer(String token) async {
+    try {
+      final authToken = await TokenManager.getToken();
+      if (authToken.isEmpty) {
+        print("⚠️ [FCM] User access token not found. Skipping FCM token server update.");
+        return;
+      }
+
+      print("🚀 [FCM] Calling PUT '${ApiConstants.updateFcmToken}' with token: $token");
+      final apiClient = Get.find<ApiClient>();
+      final response = await apiClient.put(
+        ApiConstants.updateFcmToken,
+        data: {
+          "fcm_token": token,
+        },
+      );
+
+      print("📡 [FCM] Server response status: ${response.statusCode}");
+      print("📡 [FCM] Server response data: ${response.data}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("✅ [FCM] FCM token updated successfully on server.");
+      } else {
+        print("⚠️ [FCM] Server returned status ${response.statusCode}: ${response.data}");
+      }
+    } catch (e) {
+      print("❌ [FCM] Error sending FCM token to server: $e");
+    }
+  }
+
+  /// Setup FCM Push Notification Listeners and print complete incoming responses
+  void _setupPushNotificationListeners() {
+    // 1. Foreground Notification (When app is open and notification arrives)
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("════════════════════════════════════════════════════════════");
+      print("🔔 [FCM FOREGROUND NOTIFICATION RECEIVED]");
+      print("   Message ID:   ${message.messageId}");
+      print("   Title:        ${message.notification?.title}");
+      print("   Body:         ${message.notification?.body}");
+      print("   Data Payload: ${message.data}");
+      print("   Sent Time:    ${message.sentTime}");
+      print("════════════════════════════════════════════════════════════");
+
+      // Auto-refresh in-app notifications if NotificationController is active
+      if (Get.isRegistered<NotificationController>()) {
+        Get.find<NotificationController>().loadUnreadCount();
+      }
+    });
+
+    // 2. Notification Clicked from System Tray (When app was in background)
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("════════════════════════════════════════════════════════════");
+      print("📲 [FCM NOTIFICATION CLICKED FROM TRAY]");
+      print("   Message ID:   ${message.messageId}");
+      print("   Title:        ${message.notification?.title}");
+      print("   Body:         ${message.notification?.body}");
+      print("   Data Payload: ${message.data}");
+      print("════════════════════════════════════════════════════════════");
+    });
+
+    // 3. Notification Launched App (When app was terminated/killed and opened via notification)
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        print("════════════════════════════════════════════════════════════");
+        print("🚀 [FCM APP LAUNCHED VIA NOTIFICATION]");
+        print("   Message ID:   ${message.messageId}");
+        print("   Title:        ${message.notification?.title}");
+        print("   Body:         ${message.notification?.body}");
+        print("   Data Payload: ${message.data}");
+        print("════════════════════════════════════════════════════════════");
+      }
+    });
+  }
+
+  /// Backward-compatible method
+  Future<void> getFirebaseTokenAndToast() async {
+    await fetchAndSyncFcmToken();
   }
 
   // Cache key constants

@@ -14,7 +14,11 @@ abstract class BusinessRepository {
   Future<BusinessResponse> getBusinessProducts(int businessId);
   Future<BusinessResponse> getBusinessServices(int businessId);
   Future<BusinessResponse> addProduct(Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> updateProduct(int id, Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> deleteProduct(int id);
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> updateService(int id, Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> deleteService(int id);
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
   Future<List<Category>> getBusinessCategories();

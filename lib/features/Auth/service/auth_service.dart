@@ -388,4 +388,30 @@ class AuthService extends GetxService {
       return ApiResponse.error(e.toString());
     }
   }
+
+  /// Update FCM device token on server
+  Future<ApiResponse<Map<String, dynamic>>> updateFcmToken(String fcmToken) async {
+    try {
+      debugPrint("📡 [FCM] Calling API to update token: ${ApiConstants.updateFcmToken}");
+      final response = await _apiClient.put(
+        ApiConstants.updateFcmToken,
+        data: {
+          "fcm_token": fcmToken,
+        },
+      );
+
+      debugPrint("📡 [FCM] Response status: ${response.statusCode}");
+      debugPrint("📡 [FCM] Response data: ${response.data}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : <String, dynamic>{};
+        return ApiResponse.success(data);
+      } else {
+        return ApiResponse.error(response.data?['message'] ?? 'Failed to update FCM token');
+      }
+    } catch (e) {
+      debugPrint("❌ [FCM] Update FCM token error: $e");
+      return ApiResponse.error(e.toString());
+    }
+  }
 }

@@ -19,7 +19,11 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_business_produc
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_services_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_my_businesses_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/add_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_product_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/add_business_service_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_service_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_service_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/delete_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/create_job_usecase.dart';
@@ -58,7 +62,11 @@ class BusinessBinding extends Bindings {
     Get.lazyPut<GetBusinessProductsUseCase>(() => GetBusinessProductsUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<GetBusinessServicesUseCase>(() => GetBusinessServicesUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<AddBusinessProductUseCase>(() => AddBusinessProductUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<UpdateBusinessProductUseCase>(() => UpdateBusinessProductUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<DeleteBusinessProductUseCase>(() => DeleteBusinessProductUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<AddBusinessServiceUseCase>(() => AddBusinessServiceUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<UpdateBusinessServiceUseCase>(() => UpdateBusinessServiceUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
+    Get.lazyPut<DeleteBusinessServiceUseCase>(() => DeleteBusinessServiceUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<UpdateBusinessUseCase>(() => UpdateBusinessUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<DeleteBusinessUseCase>(() => DeleteBusinessUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
     Get.lazyPut<CreateJobUseCase>(() => CreateJobUseCase(repository: Get.find<BusinessRepository>()), fenix: true);
@@ -87,7 +95,11 @@ class BusinessBinding extends Bindings {
           getBusinessProductsUseCase: Get.find<GetBusinessProductsUseCase>(),
           getBusinessServicesUseCase: Get.find<GetBusinessServicesUseCase>(),
           addBusinessProductUseCase: Get.find<AddBusinessProductUseCase>(),
+          updateBusinessProductUseCase: Get.find<UpdateBusinessProductUseCase>(),
+          deleteBusinessProductUseCase: Get.find<DeleteBusinessProductUseCase>(),
           addBusinessServiceUseCase: Get.find<AddBusinessServiceUseCase>(),
+          updateBusinessServiceUseCase: Get.find<UpdateBusinessServiceUseCase>(),
+          deleteBusinessServiceUseCase: Get.find<DeleteBusinessServiceUseCase>(),
           updateBusinessUseCase: Get.find<UpdateBusinessUseCase>(),
           deleteBusinessUseCase: Get.find<DeleteBusinessUseCase>(),
           getMyJobsUseCase: Get.find<GetMyJobsUseCase>(),

@@ -59,13 +59,23 @@ class NotificationController extends GetxController {
         notifications.value = response.data!.notifications ?? [];
         unreadCount.value = response.data!.unreadCount ?? 0;
         
+        print("════════════════════════════════════════════════════════════");
+        print("📬 [IN-APP NOTIFICATIONS API RESPONSE]");
+        print("   Success:             ${response.success}");
+        print("   Total Notifications: ${notifications.length}");
+        print("   Unread Count:        ${unreadCount.value}");
+        for (var n in notifications) {
+          print("   • [ID: ${n.id}] Title: '${n.title}' | Message: '${n.message}' | Data: ${n.data}");
+        }
+        print("════════════════════════════════════════════════════════════");
+
         if (response.data!.pagination != null) {
           currentPage.value = response.data!.pagination!.currentPage ?? 1;
           lastPage.value = response.data!.pagination!.lastPage ?? 1;
         }
       }
     } catch (e) {
-      print('Error loading notifications: $e');
+      print('❌ Error loading notifications: $e');
     } finally {
       isLoading.value = false;
     }

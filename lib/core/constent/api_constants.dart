@@ -22,6 +22,7 @@ class ApiConstants {
     static const String forgotPassword = "auth/password/forgot";
     static const String resetPassword = "auth/password/reset";
     static const String authDeleteAccount = "auth/delete-account";
+    static const String updateFcmToken = "auth/fcm-token"; // PUT update FCM token
 
 
     // Bussiness Api

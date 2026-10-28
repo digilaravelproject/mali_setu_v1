@@ -22,6 +22,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/widget/product_service_action_sheet.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
   const BusinessDetailScreen({Key? key}) : super(key: key);
@@ -65,6 +66,19 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     _outerScrollController.removeListener(_onScroll);
     _outerScrollController.dispose();
     super.dispose();
+  }
+
+  bool get _isCurrentBusinessOwner {
+    final business = controller.selectedBusiness.value ?? argBusiness;
+    final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+    final currentUser = authService?.currentUser.value;
+    if (currentUser?.id != null && business.userId != null && currentUser!.id == business.userId) {
+      return true;
+    }
+    if (business.id != null && controller.myBusinesses.any((b) => b.id != null && b.id == business.id)) {
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -1213,6 +1227,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                               ],
                             ),
                           ),
+                          if (_isCurrentBusinessOwner)
+                            IconButton(
+                              icon: const Icon(Icons.more_vert, size: 20),
+                              onPressed: () {
+                                ProductServiceActionSheet.show(
+                                  context,
+                                  product: product,
+                                  businessId: controller.selectedBusiness.value?.id,
+                                  onRefresh: () {
+                                    if (controller.selectedBusiness.value?.id != null) {
+                                      controller.fetchBusinessProducts(controller.selectedBusiness.value!.id!);
+                                    }
+                                  },
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),
@@ -1324,6 +1354,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   ],
                                 ),
                               ),
+                              if (_isCurrentBusinessOwner)
+                                IconButton(
+                                  icon: const Icon(Icons.more_vert, size: 20),
+                                  onPressed: () {
+                                    ProductServiceActionSheet.show(
+                                      context,
+                                      service: service,
+                                      businessId: controller.selectedBusiness.value?.id,
+                                      onRefresh: () {
+                                        if (controller.selectedBusiness.value?.id != null) {
+                                          controller.fetchBusinessServices(controller.selectedBusiness.value!.id!);
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
                             ],
                           ),
                           if (service.description != null &&

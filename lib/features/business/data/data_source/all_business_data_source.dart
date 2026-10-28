@@ -20,7 +20,11 @@ abstract class BusinessDataSource {
   Future<BusinessResponse> getBusinessProducts(int businessId);
   Future<BusinessResponse> getBusinessServices(int businessId);
   Future<BusinessResponse> addProduct(Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> updateProduct(int id, Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> deleteProduct(int id);
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> updateService(int id, Map<String, dynamic> data, List<File> images);
+  Future<BusinessResponse> deleteService(int id);
   Future<BusinessResponse> updateBusiness(int id, Map<String, dynamic> data);
   Future<void> deleteBusiness(int id);
   Future<CategoryResponse> getBusinessCategories({int page = 1, String? search});
@@ -115,6 +119,30 @@ class BusinessDataSourceImpl implements BusinessDataSource {
   }
 
   @override
+  Future<BusinessResponse> updateProduct(int id, Map<String, dynamic> data, List<File> images) async {
+    final Map<String, dynamic> map = {
+      '_method': 'PUT',
+      ...data.map((k, v) => MapEntry(k, v.toString())),
+    };
+    if (images.isNotEmpty) {
+      map['image'] = await MultipartFile.fromFile(
+        images.first.path,
+        filename: images.first.path.split('/').last,
+        contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
+      );
+    }
+    final formData = FormData.fromMap(map);
+    final response = await apiClient.post('${ApiConstants.addBusinessProduct}/$id', data: formData);
+    return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessResponse> deleteProduct(int id) async {
+    final response = await apiClient.delete('${ApiConstants.addBusinessProduct}/$id');
+    return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images) async {
     final formData = FormData.fromMap({
       ...data.map((k, v) => MapEntry(k, v.toString())),
@@ -126,6 +154,30 @@ class BusinessDataSourceImpl implements BusinessDataSource {
         ),
     });
     final response = await apiClient.post(ApiConstants.addBusinessService, data: formData);
+    return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessResponse> updateService(int id, Map<String, dynamic> data, List<File> images) async {
+    final Map<String, dynamic> map = {
+      '_method': 'PUT',
+      ...data.map((k, v) => MapEntry(k, v.toString())),
+    };
+    if (images.isNotEmpty) {
+      map['image'] = await MultipartFile.fromFile(
+        images.first.path,
+        filename: images.first.path.split('/').last,
+        contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
+      );
+    }
+    final formData = FormData.fromMap(map);
+    final response = await apiClient.post('${ApiConstants.addBusinessService}/$id', data: formData);
+    return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<BusinessResponse> deleteService(int id) async {
+    final response = await apiClient.delete('${ApiConstants.addBusinessService}/$id');
     return BusinessResponse.fromJson(response.data);
   }
 
