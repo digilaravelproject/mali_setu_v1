@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /*class NotificationResponse {
   final bool? success;
   final NotificationData? data;
@@ -194,13 +196,27 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? parsedData;
+    if (json['data'] != null) {
+      if (json['data'] is Map) {
+        parsedData = Map<String, dynamic>.from(json['data']);
+      } else if (json['data'] is String) {
+        try {
+          final decoded = jsonDecode(json['data']);
+          if (decoded is Map) {
+            parsedData = Map<String, dynamic>.from(decoded);
+          }
+        } catch (_) {}
+      }
+    }
+
     return NotificationModel(
       id: json['id']?.toString(),
       userId: json['user_id']?.toString(),
       type: json['type'],
       title: json['title'],
       message: json['message'],
-      data: json['data'],
+      data: parsedData ?? (json['data'] is Map ? Map<String, dynamic>.from(json['data']) : null),
       actionUrl: json['action_url'],
       priority: json['priority'],
       channel: json['channel'],
@@ -211,7 +227,7 @@ class NotificationModel {
       pushSent: json['push_sent'],
       pushSentAt: json['push_sent_at'],
       relatedType: json['related_type'],
-      relatedId: json['related_id'],
+      relatedId: json['related_id'] is int ? json['related_id'] : int.tryParse(json['related_id']?.toString() ?? ''),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
     );

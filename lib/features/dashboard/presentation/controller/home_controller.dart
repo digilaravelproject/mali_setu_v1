@@ -21,6 +21,7 @@ import 'package:edu_cluezer/features/notification/presentation/controller/notifi
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/storage/token_manger.dart';
+import 'package:edu_cluezer/core/services/notification_handler_service.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final RxInt currentIndex = 0.obs;
@@ -179,6 +180,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       print("   Body:         ${message.notification?.body}");
       print("   Data Payload: ${message.data}");
       print("════════════════════════════════════════════════════════════");
+      NotificationHandlerService.navigateFromPayload(message.data);
     });
 
     // 3. Notification Launched App (When app was terminated/killed and opened via notification)
@@ -191,6 +193,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         print("   Body:         ${message.notification?.body}");
         print("   Data Payload: ${message.data}");
         print("════════════════════════════════════════════════════════════");
+        NotificationHandlerService.navigateFromPayload(message.data);
       }
     });
   }

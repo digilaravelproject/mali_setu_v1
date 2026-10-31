@@ -7,6 +7,7 @@ import 'core/network/api_client.dart';
 import 'core/storage/shared_prefs.dart';
 import 'features/Auth/service/auth_service.dart';
 import 'core/services/deep_link_service.dart';
+import 'core/services/notification_handler_service.dart';
 
 
 Future<void> initApp() async {
@@ -53,4 +54,7 @@ Future<void> initApp() async {
 
   // Initialize DeepLinkService
   Get.put(await DeepLinkService().init(), permanent: true);
+
+  // Initialize NotificationHandlerService for Push and Deep Navigation
+  Get.put(await NotificationHandlerService().init(), permanent: true);
 }

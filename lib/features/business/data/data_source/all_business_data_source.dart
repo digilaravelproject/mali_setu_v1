@@ -105,79 +105,207 @@ class BusinessDataSourceImpl implements BusinessDataSource {
 
   @override
   Future<BusinessResponse> addProduct(Map<String, dynamic> data, List<File> images) async {
-    final formData = FormData.fromMap({
-      ...data.map((k, v) => MapEntry(k, v.toString())),
-      if (images.isNotEmpty)
-        'image': await MultipartFile.fromFile(
-          images.first.path,
-          filename: images.first.path.split('/').last,
-          contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
-        ),
+    final formData = FormData();
+    data.forEach((k, v) {
+      if (v != null) {
+        formData.fields.add(MapEntry(k, v.toString()));
+      }
     });
+
+    for (final file in images) {
+      final fileName = file.path.split('/').last;
+      final ext = fileName.split('.').last.toLowerCase();
+      MediaType mediaType;
+      if (ext == 'png') {
+        mediaType = MediaType('image', 'png');
+      } else if (ext == 'webp') {
+        mediaType = MediaType('image', 'webp');
+      } else {
+        mediaType = MediaType('image', 'jpeg');
+      }
+
+      formData.files.add(
+        MapEntry(
+          'images[]',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: fileName,
+            contentType: mediaType,
+          ),
+        ),
+      );
+    }
+
     final response = await apiClient.post(ApiConstants.addBusinessProduct, data: formData);
+    if (response.statusCode != null && (response.statusCode! < 200 || response.statusCode! >= 300)) {
+      final msg = response.data is Map ? response.data['message'] ?? 'Failed to add product' : 'Failed to add product';
+      throw Exception(msg);
+    }
     return BusinessResponse.fromJson(response.data);
   }
 
   @override
   Future<BusinessResponse> updateProduct(int id, Map<String, dynamic> data, List<File> images) async {
-    final Map<String, dynamic> map = {
-      '_method': 'PUT',
-      ...data.map((k, v) => MapEntry(k, v.toString())),
-    };
-    if (images.isNotEmpty) {
-      map['image'] = await MultipartFile.fromFile(
-        images.first.path,
-        filename: images.first.path.split('/').last,
-        contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
+    final formData = FormData();
+    formData.fields.add(const MapEntry('_method', 'PUT'));
+
+    data.forEach((k, v) {
+      if (k == '_method') return;
+      if (k == 'remove_image_paths' || k == 'remove_image_paths[]') {
+        if (v is List) {
+          for (final path in v) {
+            if (path != null && path.toString().isNotEmpty) {
+              formData.fields.add(MapEntry('remove_image_paths[]', path.toString()));
+            }
+          }
+        }
+      } else if (v != null) {
+        formData.fields.add(MapEntry(k, v.toString()));
+      }
+    });
+
+    for (final file in images) {
+      final fileName = file.path.split('/').last;
+      final ext = fileName.split('.').last.toLowerCase();
+      MediaType mediaType;
+      if (ext == 'png') {
+        mediaType = MediaType('image', 'png');
+      } else if (ext == 'webp') {
+        mediaType = MediaType('image', 'webp');
+      } else {
+        mediaType = MediaType('image', 'jpeg');
+      }
+
+      formData.files.add(
+        MapEntry(
+          'images[]',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: fileName,
+            contentType: mediaType,
+          ),
+        ),
       );
     }
-    final formData = FormData.fromMap(map);
+
     final response = await apiClient.post('${ApiConstants.addBusinessProduct}/$id', data: formData);
+    if (response.statusCode != null && (response.statusCode! < 200 || response.statusCode! >= 300)) {
+      final msg = response.data is Map ? response.data['message'] ?? 'Failed to update product' : 'Failed to update product';
+      throw Exception(msg);
+    }
     return BusinessResponse.fromJson(response.data);
   }
 
   @override
   Future<BusinessResponse> deleteProduct(int id) async {
     final response = await apiClient.delete('${ApiConstants.addBusinessProduct}/$id');
+    if (response.statusCode != null && (response.statusCode! < 200 || response.statusCode! >= 300)) {
+      final msg = response.data is Map ? response.data['message'] ?? 'Failed to delete product' : 'Failed to delete product';
+      throw Exception(msg);
+    }
     return BusinessResponse.fromJson(response.data);
   }
 
   @override
   Future<BusinessResponse> addService(Map<String, dynamic> data, List<File> images) async {
-    final formData = FormData.fromMap({
-      ...data.map((k, v) => MapEntry(k, v.toString())),
-      if (images.isNotEmpty)
-        'image': await MultipartFile.fromFile(
-          images.first.path,
-          filename: images.first.path.split('/').last,
-          contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
-        ),
+    final formData = FormData();
+    data.forEach((k, v) {
+      if (v != null) {
+        formData.fields.add(MapEntry(k, v.toString()));
+      }
     });
+
+    for (final file in images) {
+      final fileName = file.path.split('/').last;
+      final ext = fileName.split('.').last.toLowerCase();
+      MediaType mediaType;
+      if (ext == 'png') {
+        mediaType = MediaType('image', 'png');
+      } else if (ext == 'webp') {
+        mediaType = MediaType('image', 'webp');
+      } else {
+        mediaType = MediaType('image', 'jpeg');
+      }
+
+      formData.files.add(
+        MapEntry(
+          'images[]',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: fileName,
+            contentType: mediaType,
+          ),
+        ),
+      );
+    }
+
     final response = await apiClient.post(ApiConstants.addBusinessService, data: formData);
+    if (response.statusCode != null && (response.statusCode! < 200 || response.statusCode! >= 300)) {
+      final msg = response.data is Map ? response.data['message'] ?? 'Failed to add service' : 'Failed to add service';
+      throw Exception(msg);
+    }
     return BusinessResponse.fromJson(response.data);
   }
 
   @override
   Future<BusinessResponse> updateService(int id, Map<String, dynamic> data, List<File> images) async {
-    final Map<String, dynamic> map = {
-      '_method': 'PUT',
-      ...data.map((k, v) => MapEntry(k, v.toString())),
-    };
-    if (images.isNotEmpty) {
-      map['image'] = await MultipartFile.fromFile(
-        images.first.path,
-        filename: images.first.path.split('/').last,
-        contentType: MediaType('image', images.first.path.split('.').last == 'png' ? 'png' : 'jpeg'),
+    final formData = FormData();
+    formData.fields.add(const MapEntry('_method', 'PUT'));
+
+    data.forEach((k, v) {
+      if (k == '_method') return;
+      if (k == 'remove_image_paths' || k == 'remove_image_paths[]') {
+        if (v is List) {
+          for (final path in v) {
+            if (path != null && path.toString().isNotEmpty) {
+              formData.fields.add(MapEntry('remove_image_paths[]', path.toString()));
+            }
+          }
+        }
+      } else if (v != null) {
+        formData.fields.add(MapEntry(k, v.toString()));
+      }
+    });
+
+    for (final file in images) {
+      final fileName = file.path.split('/').last;
+      final ext = fileName.split('.').last.toLowerCase();
+      MediaType mediaType;
+      if (ext == 'png') {
+        mediaType = MediaType('image', 'png');
+      } else if (ext == 'webp') {
+        mediaType = MediaType('image', 'webp');
+      } else {
+        mediaType = MediaType('image', 'jpeg');
+      }
+
+      formData.files.add(
+        MapEntry(
+          'images[]',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: fileName,
+            contentType: mediaType,
+          ),
+        ),
       );
     }
-    final formData = FormData.fromMap(map);
+
     final response = await apiClient.post('${ApiConstants.addBusinessService}/$id', data: formData);
+    if (response.statusCode != null && (response.statusCode! < 200 || response.statusCode! >= 300)) {
+      final msg = response.data is Map ? response.data['message'] ?? 'Failed to update service' : 'Failed to update service';
+      throw Exception(msg);
+    }
     return BusinessResponse.fromJson(response.data);
   }
 
   @override
   Future<BusinessResponse> deleteService(int id) async {
     final response = await apiClient.delete('${ApiConstants.addBusinessService}/$id');
+    if (response.statusCode != null && (response.statusCode! < 200 || response.statusCode! >= 300)) {
+      final msg = response.data is Map ? response.data['message'] ?? 'Failed to delete service' : 'Failed to delete service';
+      throw Exception(msg);
+    }
     return BusinessResponse.fromJson(response.data);
   }
 

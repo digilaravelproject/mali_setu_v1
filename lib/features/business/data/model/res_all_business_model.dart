@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+
 class BusinessResponse {
   bool? success;
   BusinessData? data;
@@ -393,6 +395,25 @@ class Category {
   }
 }
 
+class ProductImage {
+  final String? path;
+  final String? url;
+
+  ProductImage({this.path, this.url});
+
+  factory ProductImage.fromJson(Map<String, dynamic> json) {
+    return ProductImage(
+      path: json['path']?.toString(),
+      url: json['url']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'path': path,
+    'url': url,
+  };
+}
+
 class Product {
   int? id;
   int? businessId;
@@ -400,7 +421,11 @@ class Product {
   String? description;
   String? cost;
   String? imagePath;
+  List<String>? imagePaths;
+  List<ProductImage>? images;
   String? status;
+  String? createdAt;
+  String? updatedAt;
   Business? business;
 
   Product({
@@ -410,19 +435,64 @@ class Product {
     this.description,
     this.cost,
     this.imagePath,
+    this.imagePaths,
+    this.images,
     this.status,
+    this.createdAt,
+    this.updatedAt,
     this.business,
   });
 
+  List<String> get allImages {
+    final List<String> list = [];
+    if (images != null && images!.isNotEmpty) {
+      for (final img in images!) {
+        if (img.url != null && img.url!.isNotEmpty) {
+          list.add(img.url!);
+        } else if (img.path != null && img.path!.isNotEmpty) {
+          final p = img.path!;
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePaths != null && imagePaths!.isNotEmpty) {
+      for (final p in imagePaths!) {
+        if (p.isNotEmpty) {
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePath != null && imagePath!.isNotEmpty) {
+      list.add(imagePath!.startsWith('http') ? imagePath! : '${ApiConstants.imageBaseUrl}/$imagePath');
+    }
+    return list;
+  }
+
   factory Product.fromJson(Map<String, dynamic> json) {
+    List<String>? paths;
+    if (json['image_paths'] is List) {
+      paths = (json['image_paths'] as List).map((e) => e.toString()).toList();
+    }
+    List<ProductImage>? imageList;
+    if (json['images'] is List) {
+      imageList = (json['images'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((e) => ProductImage.fromJson(e))
+          .toList();
+    }
+
     return Product(
       id: _asInt(json['id']),
       businessId: _asInt(json['business_id']),
       name: json['name'],
       description: json['description'],
-      cost: json['cost'],
+      cost: json['cost']?.toString(),
       imagePath: json['image_path'],
+      imagePaths: paths,
+      images: imageList,
       status: json['status'],
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
       business: json['business'] != null ? Business.fromJson(json['business']) : null,
     );
   }
@@ -435,7 +505,11 @@ class Product {
       'description': description,
       'cost': cost,
       'image_path': imagePath,
+      'image_paths': imagePaths,
+      'images': images?.map((x) => x.toJson()).toList(),
       'status': status,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
       if (business != null) 'business': business!.toJson(),
     };
   }
@@ -448,7 +522,11 @@ class Service {
   String? description;
   String? cost;
   String? imagePath;
+  List<String>? imagePaths;
+  List<ProductImage>? images;
   String? status;
+  String? createdAt;
+  String? updatedAt;
   Business? business;
 
   Service({
@@ -458,19 +536,64 @@ class Service {
     this.description,
     this.cost,
     this.imagePath,
+    this.imagePaths,
+    this.images,
     this.status,
+    this.createdAt,
+    this.updatedAt,
     this.business,
   });
 
+  List<String> get allImages {
+    final List<String> list = [];
+    if (images != null && images!.isNotEmpty) {
+      for (final img in images!) {
+        if (img.url != null && img.url!.isNotEmpty) {
+          list.add(img.url!);
+        } else if (img.path != null && img.path!.isNotEmpty) {
+          final p = img.path!;
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePaths != null && imagePaths!.isNotEmpty) {
+      for (final p in imagePaths!) {
+        if (p.isNotEmpty) {
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePath != null && imagePath!.isNotEmpty) {
+      list.add(imagePath!.startsWith('http') ? imagePath! : '${ApiConstants.imageBaseUrl}/$imagePath');
+    }
+    return list;
+  }
+
   factory Service.fromJson(Map<String, dynamic> json) {
+    List<String>? paths;
+    if (json['image_paths'] is List) {
+      paths = (json['image_paths'] as List).map((e) => e.toString()).toList();
+    }
+    List<ProductImage>? imageList;
+    if (json['images'] is List) {
+      imageList = (json['images'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((e) => ProductImage.fromJson(e))
+          .toList();
+    }
+
     return Service(
       id: _asInt(json['id']),
       businessId: _asInt(json['business_id']),
       name: json['name'],
       description: json['description'],
-      cost: json['cost'],
+      cost: json['cost']?.toString(),
       imagePath: json['image_path'],
+      imagePaths: paths,
+      images: imageList,
       status: json['status'],
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
       business: json['business'] != null ? Business.fromJson(json['business']) : null,
     );
   }
@@ -483,7 +606,11 @@ class Service {
       'description': description,
       'cost': cost,
       'image_path': imagePath,
+      'image_paths': imagePaths,
+      'images': images?.map((x) => x.toJson()).toList(),
       'status': status,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
       if (business != null) 'business': business!.toJson(),
     };
   }

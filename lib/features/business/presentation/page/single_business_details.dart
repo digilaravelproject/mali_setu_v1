@@ -179,12 +179,20 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   Get.toNamed(
                                     AppRoutes.addProduct,
                                     arguments: business.id,
-                                  );
+                                  )?.then((res) {
+                                    if (res == true && business.id != null) {
+                                      controller.fetchBusinessProducts(business.id!);
+                                    }
+                                  });
                                 } else if (value == 'add_service') {
                                   Get.toNamed(
                                     AppRoutes.addService,
                                     arguments: business.id,
-                                  );
+                                  )?.then((res) {
+                                    if (res == true && business.id != null) {
+                                      controller.fetchBusinessServices(business.id!);
+                                    }
+                                  });
                                 } else if (value == 'create_job') {
                                   Get.toNamed(
                                     AppRoutes.createJob,
@@ -973,7 +981,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
-                    Get.toNamed(AppRoutes.addService, arguments: business.id);
+                    Get.toNamed(AppRoutes.addService, arguments: business.id)?.then((res) {
+                      if (res == true && business.id != null) {
+                        controller.fetchBusinessServices(business.id!);
+                      }
+                    });
                   },
                   child: _buildActionButton(
                     'add_service'.tr,
@@ -1139,14 +1151,18 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final product = controller.businessProducts[index];
                 return InkWell(
-                  onTap: () {
-                    Get.toNamed(
+                  onTap: () async {
+                    final res = await Get.toNamed(
                       AppRoutes.singleProductDetails,
                       arguments: product.id,
                     );
+                    final bId = product.businessId ?? controller.selectedBusiness.value?.id;
+                    if (res == true && bId != null) {
+                      controller.fetchBusinessProducts(bId);
+                    }
                   },
                   child: Card(
-                    margin: const EdgeInsets.only(bottom: 12),
+                    margin:  const EdgeInsets.only(bottom: 12),
                     elevation: 1,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1286,11 +1302,15 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final service = controller.businessServices[index];
                 return InkWell(
-                  onTap: () {
-                    Get.toNamed(
+                  onTap: () async {
+                    final res = await Get.toNamed(
                       AppRoutes.singleServiceDetails,
                       arguments: service.id,
                     );
+                    final bId = service.businessId ?? controller.selectedBusiness.value?.id;
+                    if (res == true && bId != null) {
+                      controller.fetchBusinessServices(bId);
+                    }
                   },
                   child: Card(
                     margin: const EdgeInsets.only(bottom: 12),

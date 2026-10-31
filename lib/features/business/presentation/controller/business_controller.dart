@@ -791,7 +791,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<bool> addProduct(Map<String, dynamic> data, List<File> images) async {
     try {
       isLoading.value = true;
-      await addBusinessProductUseCase(data, images);
+      final res = await addBusinessProductUseCase(data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to add product');
+        return false;
+      }
       
       // Refresh products if adding for current business
       if (selectedBusiness.value != null && data['business_id'].toString() == selectedBusiness.value!.id.toString()) {
@@ -799,7 +803,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       }
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
@@ -809,15 +813,20 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<bool> addService(Map<String, dynamic> data, List<File> images) async {
     try {
       isLoading.value = true;
-      await addBusinessServiceUseCase(data, images);
+      final res = await addBusinessServiceUseCase(data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to add service');
+        return false;
+      }
       
       // Refresh services if adding for current business
       if (selectedBusiness.value != null && data['business_id'].toString() == selectedBusiness.value!.id.toString()) {
          await fetchBusinessServices(int.parse(data['business_id'].toString()));
       }
+      await fetchMyBusinesses();
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
@@ -828,7 +837,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       isLoading.value = true;
       final usecase = updateBusinessProductUseCase ?? Get.find<UpdateBusinessProductUseCase>();
-      await usecase(id, data, images);
+      final res = await usecase(id, data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to update product');
+        return false;
+      }
       
       // Refresh products if editing for current business
       if (selectedBusiness.value != null && data['business_id'] != null) {
@@ -837,18 +850,22 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       await fetchMyBusinesses();
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<bool> deleteProduct(int id, {int? businessId}) async {
+  Future<bool> deleteProduct(int id, {int? businessId, bool showSuccessSnackbar = true}) async {
     try {
       isLoading.value = true;
       final usecase = deleteBusinessProductUseCase ?? Get.find<DeleteBusinessProductUseCase>();
-      await usecase(id);
+      final res = await usecase(id);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to delete product');
+        return false;
+      }
       
       // Remove locally from list
       businessProducts.removeWhere((p) => p.id == id);
@@ -860,10 +877,12 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         await fetchBusinessProducts(businessId);
       }
       await fetchMyBusinesses();
-      CustomSnackBar.showSuccess(message: 'Product deleted successfully!');
+      if (showSuccessSnackbar) {
+        CustomSnackBar.showSuccess(message: res.message ?? 'Product deleted successfully!');
+      }
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
@@ -874,7 +893,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       isLoading.value = true;
       final usecase = updateBusinessServiceUseCase ?? Get.find<UpdateBusinessServiceUseCase>();
-      await usecase(id, data, images);
+      final res = await usecase(id, data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to update service');
+        return false;
+      }
       
       // Refresh services if editing for current business
       if (selectedBusiness.value != null && data['business_id'] != null) {
@@ -883,18 +906,22 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       await fetchMyBusinesses();
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<bool> deleteService(int id, {int? businessId}) async {
+  Future<bool> deleteService(int id, {int? businessId, bool showSuccessSnackbar = true}) async {
     try {
       isLoading.value = true;
       final usecase = deleteBusinessServiceUseCase ?? Get.find<DeleteBusinessServiceUseCase>();
-      await usecase(id);
+      final res = await usecase(id);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to delete service');
+        return false;
+      }
       
       // Remove locally from list
       businessServices.removeWhere((s) => s.id == id);
@@ -906,10 +933,12 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         await fetchBusinessServices(businessId);
       }
       await fetchMyBusinesses();
-      CustomSnackBar.showSuccess(message: 'Service deleted successfully!');
+      if (showSuccessSnackbar) {
+        CustomSnackBar.showSuccess(message: res.message ?? 'Service deleted successfully!');
+      }
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;

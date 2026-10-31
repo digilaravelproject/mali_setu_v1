@@ -378,9 +378,12 @@ class MyProductsServicesScreen extends StatelessWidget {
               isActive: isActive,
               primaryColor: primaryColor,
               showMenu: controller.isOwner,
-              onTap: () {
+              onTap: () async {
                 if (product.id != null) {
-                  Get.toNamed(AppRoutes.singleProductDetails, arguments: product.id);
+                  final res = await Get.toNamed(AppRoutes.singleProductDetails, arguments: product.id);
+                  if (res == true) {
+                    controller.loadData();
+                  }
                 }
               },
               onMenuTap: () {
@@ -451,9 +454,12 @@ class MyProductsServicesScreen extends StatelessWidget {
               isActive: isActive,
               primaryColor: primaryColor,
               showMenu: controller.isOwner,
-              onTap: () {
+              onTap: () async {
                 if (service.id != null) {
-                  Get.toNamed(AppRoutes.singleServiceDetails, arguments: service.id);
+                  final res = await Get.toNamed(AppRoutes.singleServiceDetails, arguments: service.id);
+                  if (res == true) {
+                    controller.loadData();
+                  }
                 }
               },
               onMenuTap: () {

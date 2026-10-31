@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import '../../../Auth/service/auth_service.dart';
 import '../../domain/repository/matrimony_repository.dart';
 import '../../data/model/search_matrimony_response.dart';
 
@@ -94,6 +97,17 @@ class MatrimonyDetailsController extends GetxController {
         profile.value = fetchedProfile;
         _startAutoScroll();
       } else {
+        // If profile_user_id/{id} failed, check if id was profile_id instead of user_id
+        try {
+          final profileByIdRes = await Get.find<ApiClient>().get("${ApiConstants.matrimonyProfile}/$id");
+          final parsed = MatrimonyProfileDetailResponse.fromJson(profileByIdRes.data);
+          if (parsed.success == true && parsed.data?.profile != null) {
+            profile.value = parsed.data!.profile!;
+            _startAutoScroll();
+            return;
+          }
+        } catch (_) {}
+
         CustomSnackBar.showError(message: "Failed to fetch profile details");
       }
     } catch (e) {

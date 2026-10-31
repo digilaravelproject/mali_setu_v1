@@ -6,6 +6,7 @@ import '../controller/notification_controller.dart';
 import '../../../../core/widgets/custom_confirm_dialog.dart';
 import '../../data/model/notification_model.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
+import '../../../../core/services/notification_handler_service.dart';
 
 class NotificationPage extends GetView<NotificationController> {
   const NotificationPage({super.key});
@@ -241,7 +242,7 @@ class NotificationPage extends GetView<NotificationController> {
                     }
                   }
                 : () {
-                    Get.toNamed('/notificationDetails', arguments: notification);
+                    NotificationHandlerService.navigateFromNotification(notification);
                   },
             onLongPress: () {
               if (!isMode && notification.id != null) {

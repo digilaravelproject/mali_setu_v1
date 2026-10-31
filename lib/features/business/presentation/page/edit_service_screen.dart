@@ -10,6 +10,7 @@ import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/single_service_controller.dart';
 
 class EditServiceController extends GetxController {
   late Service service;
@@ -20,11 +21,15 @@ class EditServiceController extends GetxController {
   final priceController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  final Rx<File?> selectedImage = Rx<File?>(null);
-  final RxString existingImagePath = ''.obs;
+  final RxList<String> existingImages = <String>[].obs;
+  final RxList<String> removedImagePaths = <String>[].obs;
+  final RxList<File> newImages = <File>[].obs;
+
   final RxBool isLoading = false.obs;
   final errors = <String, String>{}.obs;
   final ImagePicker _picker = ImagePicker();
+
+  static const int maxImageCount = 10;
 
   @override
   void onInit() {
@@ -41,7 +46,21 @@ class EditServiceController extends GetxController {
     nameController.text = service.name ?? '';
     priceController.text = service.cost ?? '';
     descriptionController.text = service.description ?? '';
-    existingImagePath.value = service.imagePath ?? '';
+
+    // Load existing images from service
+    if (service.images != null && service.images!.isNotEmpty) {
+      for (final img in service.images!) {
+        if (img.path != null && img.path!.isNotEmpty) {
+          existingImages.add(img.path!);
+        }
+      }
+    }
+    if (existingImages.isEmpty && service.imagePaths != null && service.imagePaths!.isNotEmpty) {
+      existingImages.assignAll(service.imagePaths!.where((p) => p.isNotEmpty));
+    }
+    if (existingImages.isEmpty && service.imagePath != null && service.imagePath!.isNotEmpty) {
+      existingImages.add(service.imagePath!);
+    }
 
     nameController.addListener(() => errors.remove('name'));
     priceController.addListener(() => errors.remove('price'));
@@ -58,27 +77,76 @@ class EditServiceController extends GetxController {
 
   Future<void> pickImage(ImageSource source) async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1080,
-        maxHeight: 1080,
-        imageQuality: 85,
-      );
-      if (image != null) {
-        selectedImage.value = File(image.path);
-        errors.remove('image');
+      final totalImages = existingImages.length + newImages.length;
+      if (totalImages >= maxImageCount) {
+        CustomSnackBar.showInfo(message: 'Maximum $maxImageCount images limit reached.');
+        return;
+      }
+
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage(
+          maxWidth: 1200,
+          maxHeight: 1200,
+          imageQuality: 85,
+        );
+        if (images.isNotEmpty) {
+          final remainingSlots = maxImageCount - (existingImages.length + newImages.length);
+          if (remainingSlots <= 0) {
+            CustomSnackBar.showInfo(message: 'Maximum $maxImageCount images limit reached.');
+            return;
+          }
+          if (images.length > remainingSlots) {
+            CustomSnackBar.showInfo(
+              message: 'Only $remainingSlots image(s) added. Maximum limit is $maxImageCount.',
+            );
+          }
+          for (final img in images.take(remainingSlots)) {
+            newImages.add(File(img.path));
+          }
+          errors.remove('image');
+        }
+      } else {
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1200,
+          maxHeight: 1200,
+          imageQuality: 85,
+        );
+        if (image != null) {
+          newImages.add(File(image.path));
+          errors.remove('image');
+        }
       }
     } catch (e) {
       CustomSnackBar.showError(message: 'Error selecting image: $e');
     }
   }
 
-  void removeNewImage() {
-    selectedImage.value = null;
+  void removeExistingImage(int index) {
+    if (index >= 0 && index < existingImages.length) {
+      final path = existingImages.removeAt(index);
+      removedImagePaths.add(path);
+      if (existingImages.isEmpty && newImages.isEmpty) {
+        errors['image'] = 'please_select_at_least_one_image'.tr;
+      }
+    }
+  }
+
+  void removeNewImage(int index) {
+    if (index >= 0 && index < newImages.length) {
+      newImages.removeAt(index);
+      if (existingImages.isEmpty && newImages.isEmpty) {
+        errors['image'] = 'please_select_at_least_one_image'.tr;
+      }
+    }
   }
 
   Future<void> saveService() async {
     errors.clear();
+    final totalImages = existingImages.length + newImages.length;
+    if (totalImages == 0) {
+      errors['image'] = 'please_select_at_least_one_image'.tr;
+    }
     if (nameController.text.trim().isEmpty) {
       errors['name'] = 'please_enter_service_name'.tr;
     }
@@ -95,17 +163,15 @@ class EditServiceController extends GetxController {
         'name': nameController.text.trim(),
         'cost': priceController.text.trim(),
         'description': descriptionController.text.trim(),
+        'status': service.status ?? 'active',
+        if (removedImagePaths.isNotEmpty)
+          'remove_image_paths': removedImagePaths.toList(),
       };
-
-      final List<File> filesToSend = [];
-      if (selectedImage.value != null) {
-        filesToSend.add(selectedImage.value!);
-      }
 
       final success = await bCtrl.updateService(
         service.id!,
         data,
-        filesToSend,
+        newImages.toList(),
       );
 
       isLoading.value = false;
@@ -114,8 +180,16 @@ class EditServiceController extends GetxController {
         service.cost = priceController.text.trim();
         service.description = descriptionController.text.trim();
 
-        CustomSnackBar.showSuccess(message: 'Service updated successfully!');
+        // 1. Immediately refresh single service details controller if registered
+        if (Get.isRegistered<SingleServiceController>()) {
+          Get.find<SingleServiceController>().fetchServiceDetails(service.id!);
+        }
+
+        // 2. Immediately pop back to the details screen with result true
         Get.back(result: true);
+
+        // 3. Show success notification on the details screen
+        CustomSnackBar.showSuccess(message: 'Service updated successfully!');
       }
     } catch (e) {
       isLoading.value = false;
@@ -130,47 +204,214 @@ class EditServiceScreen extends StatelessWidget {
   void _showImageSourceDialog(BuildContext context, EditServiceController controller) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('select_image_source'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 20),
+            Center(
+              child: Container(
+                width: 44,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildSourceOption(Icons.camera_alt, 'camera'.tr, () {
-                  Navigator.pop(context);
-                  controller.pickImage(ImageSource.camera);
-                }),
-                _buildSourceOption(Icons.photo_library, 'gallery'.tr, () {
-                  Navigator.pop(context);
-                  controller.pickImage(ImageSource.gallery);
-                }),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: context.theme.primaryColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.add_photo_alternate_rounded,
+                    color: context.theme.primaryColor,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'select_image_source'.tr,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Upload clear photos of your service',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+            _buildSourceCard(
+              context: context,
+              icon: Icons.photo_library_rounded,
+              iconColor: const Color(0xFF2563EB),
+              iconBgColor: const Color(0xFFEFF6FF),
+              title: 'gallery'.tr,
+              subtitle: 'Select multiple photos at once',
+              badgeText: 'Multi-Select',
+              onTap: () {
+                Navigator.pop(context);
+                controller.pickImage(ImageSource.gallery);
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildSourceCard(
+              context: context,
+              icon: Icons.camera_alt_rounded,
+              iconColor: const Color(0xFF059669),
+              iconBgColor: const Color(0xFFECFDF5),
+              title: 'camera'.tr,
+              subtitle: 'Take a new photo directly',
+              onTap: () {
+                Navigator.pop(context);
+                controller.pickImage(ImageSource.camera);
+              },
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Supported formats: JPG, JPEG, PNG, WEBP\nYou can add up to ${EditServiceController.maxImageCount} images. High quality photos attract more customers.',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700], height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSourceOption(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildSourceCard({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String title,
+    required String subtitle,
+    String? badgeText,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-        decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
-        child: Column(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
           children: [
-            Icon(icon, size: 40, color: Colors.black87),
-            const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 26),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (badgeText != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFBFDBFE)),
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: const TextStyle(
+                              color: Color(0xFF1D4ED8),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400], size: 22),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFormatChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          color: Colors.grey[700],
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
         ),
       ),
     );
@@ -179,8 +420,8 @@ class EditServiceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(EditServiceController());
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final itemSize = (screenWidth - 40 - 20) / 3;
 
     return Scaffold(
       appBar: AppBar(
@@ -202,193 +443,411 @@ class EditServiceScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Preview Card
-            Text(
-              'service_image'.tr.isNotEmpty ? 'service_image'.tr : 'Service Image',
-              style: context.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Obx(() {
-              final newImg = controller.selectedImage.value;
-              final hasExisting = controller.existingImagePath.value.isNotEmpty;
-
-              return Container(
-                height: 190,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.grey.shade50,
-                  border: Border.all(
-                    color: controller.errors['image'] != null
-                        ? Colors.red
-                        : Colors.grey.shade200,
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'service_image'.tr.isNotEmpty ? 'service_image'.tr : 'Service Images',
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      '*',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Main Image Display
-                    ClipRRect(
+                Obx(() {
+                  final totalCount = controller.existingImages.length + controller.newImages.length;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: context.theme.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$totalCount/${EditServiceController.maxImageCount} Images',
+                      style: TextStyle(
+                        color: context.theme.primaryColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Upload up to ${EditServiceController.maxImageCount} photos. First photo is the main cover.',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600], height: 1.3),
+            ),
+            const SizedBox(height: 12),
+
+            // Images Grid
+            Obx(() {
+              final totalCount = controller.existingImages.length + controller.newImages.length;
+
+              if (totalCount == 0) {
+                return GestureDetector(
+                  onTap: () => _showImageSourceDialog(context, controller),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: controller.errors['image'] != null
+                          ? Colors.red.withOpacity(0.04)
+                          : Colors.grey[50],
                       borderRadius: BorderRadius.circular(16),
-                      child: newImg != null
-                          ? GestureDetector(
+                      border: Border.all(
+                        color: controller.errors['image'] != null
+                            ? Colors.red
+                            : Colors.grey[300]!,
+                        width: controller.errors['image'] != null ? 1.5 : 1.2,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: context.theme.primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 34,
+                            color: context.theme.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Tap to upload service photos',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Supports multiple images (Gallery or Camera)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          alignment: WrapAlignment.center,
+                          children: [
+                            _buildFormatChip('JPG'),
+                            _buildFormatChip('PNG'),
+                            _buildFormatChip('WEBP'),
+                            _buildFormatChip('MAX 10MB'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      // Existing Network Images
+                      for (int i = 0; i < controller.existingImages.length; i++)
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            GestureDetector(
                               onTap: () {
+                                final path = controller.existingImages[i];
+                                final url = path.startsWith('http')
+                                    ? path
+                                    : '${ApiConstants.imageBaseUrl}/$path';
                                 Get.to(() => FullScreenImageViewer(
-                                      imageFile: newImg,
-                                      tag: 'edit_service_img',
+                                      imageUrl: url,
+                                      tag: 'edit_service_exist_$i',
                                     ));
                               },
                               child: Hero(
-                                tag: 'edit_service_img',
-                                child: Image.file(
-                                  newImg,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
+                                tag: 'edit_service_exist_$i',
+                                child: Container(
+                                  width: itemSize,
+                                  height: itemSize,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: i == 0
+                                          ? context.theme.primaryColor
+                                          : Colors.grey[300]!,
+                                      width: i == 0 ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: CustomImageView(
+                                      url: controller.existingImages[i].startsWith('http')
+                                          ? controller.existingImages[i]
+                                          : '${ApiConstants.imageBaseUrl}/${controller.existingImages[i]}',
+                                      fit: BoxFit.cover,
+                                      width: itemSize,
+                                      height: itemSize,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            )
-                          : hasExisting
-                              ? CustomImageView(
-                                  url: ApiConstants.imageBaseUrl +
-                                      controller.existingImagePath.value,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => _buildPlaceholder(context),
-                                )
-                              : _buildPlaceholder(context),
-                    ),
-
-                    // Change Photo Button Overlay
-                    Positioned(
-                      bottom: 12,
-                      right: 12,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => _showImageSourceDialog(context, controller),
-                          borderRadius: BorderRadius.circular(24),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: primaryColor,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primaryColor.withOpacity(0.4),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.camera_alt_outlined, color: Colors.white, size: 16),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Change Photo',
-                                  style: TextStyle(
+                            // Primary / Cover Tag
+                            if (i == 0)
+                              Positioned(
+                                bottom: 4,
+                                left: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: context.theme.primaryColor,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'COVER',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            // Delete Button
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: GestureDetector(
+                                onTap: () => controller.removeExistingImage(i),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDC2626),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.15),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    size: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      // Newly Added Local Files
+                      for (int j = 0; j < controller.newImages.length; j++)
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Get.to(() => FullScreenImageViewer(
+                                      imageFile: controller.newImages[j],
+                                      tag: 'edit_service_new_$j',
+                                    ));
+                              },
+                              child: Hero(
+                                tag: 'edit_service_new_$j',
+                                child: Container(
+                                  width: itemSize,
+                                  height: itemSize,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: (controller.existingImages.isEmpty && j == 0)
+                                          ? context.theme.primaryColor
+                                          : Colors.grey[300]!,
+                                      width: (controller.existingImages.isEmpty && j == 0) ? 2 : 1,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.file(
+                                      controller.newImages[j],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Primary / Cover Tag (if no existing images)
+                            if (controller.existingImages.isEmpty && j == 0)
+                              Positioned(
+                                bottom: 4,
+                                left: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: context.theme.primaryColor,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'COVER',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            // Delete Button
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: GestureDetector(
+                                onTap: () => controller.removeNewImage(j),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDC2626),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.15),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      // Add More Button (if total < maxImageCount)
+                      if (totalCount < EditServiceController.maxImageCount)
+                        GestureDetector(
+                          onTap: () => _showImageSourceDialog(context, controller),
+                          child: Container(
+                            width: itemSize,
+                            height: itemSize,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[50],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.grey[300]!,
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate_outlined,
+                                  size: 26,
+                                  color: context.theme.primaryColor,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Add More',
+                                  style: TextStyle(
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w600,
+                                    color: context.theme.primaryColor,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      ),
-                    ),
-
-                    // Cancel picked image button (if user picked a new file)
-                    if (newImg != null)
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: GestureDetector(
-                          onTap: controller.removeNewImage,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, color: Colors.white, size: 16),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               );
             }),
 
+            Obx(
+              () => controller.errors['image'] != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 6, left: 4),
+                      child: Text(
+                        controller.errors['image']!,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+
+            const SizedBox(height: 16),
+            Obx(
+              () => AppInputTextField(
+                label: "service_name".tr,
+                isRequired: true,
+                textInputType: TextInputType.text,
+                controller: controller.nameController,
+                errorText: controller.errors['name'],
+              ),
+            ),
+            Obx(
+              () => AppInputTextField(
+                label: "service_description".tr,
+                isRequired: true,
+                textInputType: TextInputType.text,
+                controller: controller.descriptionController,
+                maxLines: 4,
+                errorText: controller.errors['description'],
+              ),
+            ),
+            Obx(
+              () => AppInputTextField(
+                label: "service_price".tr.isNotEmpty ? "service_price".tr : "Price",
+                isRequired: false,
+                textInputType: TextInputType.number,
+                controller: controller.priceController,
+                errorText: controller.errors['price'],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Obx(
+              () => CustomButton(
+                onPressed: controller.isLoading.value ? null : controller.saveService,
+                title: controller.isLoading.value ? "saving".tr : "Save Changes",
+              ),
+            ),
             const SizedBox(height: 20),
-
-            // Form Fields: EXACTLY matching original
-            Obx(() => AppInputTextField(
-                  label: "service_name".tr,
-                  isRequired: true,
-                  textInputType: TextInputType.text,
-                  controller: controller.nameController,
-                  errorText: controller.errors['name'],
-                )),
-
-            Obx(() => AppInputTextField(
-                  label: "service_price".tr.isNotEmpty ? "service_price".tr : "Price",
-                  isRequired: false,
-                  textInputType: TextInputType.number,
-                  controller: controller.priceController,
-                  errorText: controller.errors['price'],
-                )),
-
-            Obx(() => AppInputTextField(
-                  label: "service_description".tr,
-                  isRequired: true,
-                  textInputType: TextInputType.text,
-                  controller: controller.descriptionController,
-                  maxLines: 4,
-                  errorText: controller.errors['description'],
-                )),
-
-            const SizedBox(height: 32),
-
-            // Save Button
-            Obx(() => CustomButton(
-                  onPressed: controller.isLoading.value ? null : controller.saveService,
-                  title: controller.isLoading.value ? "saving".tr : "Save Changes",
-                )),
-
-            const SizedBox(height: 30),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildPlaceholder(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add_photo_alternate_outlined, size: 50, color: context.theme.focusColor),
-          const SizedBox(height: 8),
-          Text('tap_to_add_images'.tr, style: context.textTheme.bodyLarge),
-          Text('camera_or_gallery'.tr, style: context.textTheme.bodySmall),
-        ],
       ),
     );
   }
