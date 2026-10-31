@@ -23,6 +23,7 @@ import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/widget/product_service_action_sheet.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
   const BusinessDetailScreen({Key? key}) : super(key: key);
@@ -90,6 +91,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     });
 
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 75),
       body: Stack(
         children: [
           DefaultTabController(

@@ -9,6 +9,7 @@ import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/single_service_controller.dart';
@@ -235,6 +236,7 @@ class SingleServiceDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 65),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

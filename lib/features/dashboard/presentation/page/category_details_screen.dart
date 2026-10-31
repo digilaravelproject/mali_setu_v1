@@ -13,6 +13,7 @@ import '../../../business/presentation/page/business_page.dart';
 import '../../../business/presentation/page/single_business_details.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../controller/cat_business_controller.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 
 class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
   const CategoryDetailsScreen({super.key});
@@ -24,6 +25,7 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: RefreshIndicator(
         onRefresh: () => controller.fetchBusinesses(category.id!),
         color: theme.primaryColor,

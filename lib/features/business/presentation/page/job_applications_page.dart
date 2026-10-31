@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class JobApplicationsPage extends StatefulWidget {
   const JobApplicationsPage({super.key});
@@ -65,6 +66,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: InkWell(
           onTap: () => Navigator.of(context).pop(),

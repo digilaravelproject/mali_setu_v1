@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/opportunity_details_controller.dart';
 import 'package:intl/intl.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
   const OpportunityDetailsPage({super.key});
@@ -10,6 +11,7 @@ class OpportunityDetailsPage extends GetView<OpportunityDetailsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,

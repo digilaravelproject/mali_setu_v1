@@ -7,6 +7,7 @@ import '../../../../core/widgets/custom_confirm_dialog.dart';
 import '../../data/model/notification_model.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/services/notification_handler_service.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 
 class NotificationPage extends GetView<NotificationController> {
   const NotificationPage({super.key});
@@ -18,6 +19,7 @@ class NotificationPage extends GetView<NotificationController> {
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.grey.shade50,
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: Stack(
         children: [
           Column(

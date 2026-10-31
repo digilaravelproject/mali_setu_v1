@@ -2,6 +2,7 @@ import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import '../controller/all_volunteer_controller.dart';
 import '../controller/volunteerController.dart';
 import '../data/model/res_all_volunteer_model.dart';
@@ -57,6 +58,7 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50], // Light background
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: Column(
         children: [
           // 1. Custom Header Area

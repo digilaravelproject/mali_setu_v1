@@ -197,35 +197,40 @@ class BlogsScreen extends StatelessWidget {
           ),
         ),
 
-        // Sleek Extended FAB [ + Write Blog ] which looks extremely professional
+        // Sleek Extended FAB [ + Write Blog ] which sits neatly above the WhatsApp Support FAB
         floatingActionButton: Obx(() {
-          if (!Get.isRegistered<AuthService>()) return const SizedBox.shrink();
-          final authService = Get.find<AuthService>();
-          final user = authService.currentUser.value;
-          final type = user?.userType?.toLowerCase().trim();
-          final isBlogger = type == 'bloger' || type == 'blogger';
-          final hasBlogAccess = user?.blogAccess == true;
-          if (!isBlogger && !hasBlogAccess) return const SizedBox.shrink();
+          bool canCreate = false;
+          if (Get.isRegistered<AuthService>()) {
+            final authService = Get.find<AuthService>();
+            final user = authService.currentUser.value;
+            final type = user?.userType?.toLowerCase().trim();
+            final isBlogger = type == 'bloger' || type == 'blogger';
+            final hasBlogAccess = user?.blogAccess == true;
+            canCreate = isBlogger || hasBlogAccess;
+          }
 
+          if (!canCreate) return const SizedBox.shrink();
 
-          return GestureDetector(
-            onTap: () => Get.to(() => const CreateBlogScreen()),
-            child: Container(
-              height: 56,
-              width: 56,
-              margin: const EdgeInsets.only(bottom: 100), // Lift above bottom navigation bar
-              decoration: BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.35),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+          return Container(
+            margin: const EdgeInsets.only(bottom: 145),
+            child: GestureDetector(
+              onTap: () => Get.to(() => const CreateBlogScreen()),
+              child: Container(
+                height: 52,
+                width: 52,
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
               ),
-              child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
             ),
           );
         }),

@@ -16,6 +16,7 @@ import 'package:chewie/chewie.dart';
 import '../../../Auth/service/auth_service.dart';
 import 'create_blogs.dart';
 import '../../../../widgets/clickable_url_text.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 String _formatDate(String? dateStr) {
   if (dateStr == null || dateStr.isEmpty) return '';
   try {
@@ -67,6 +68,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         ),
         child: Scaffold(
           backgroundColor: Colors.white,
+          floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
           body: Obx(() {
             if (controller.isDetailLoading.value) {
               return Center(child: CircularProgressIndicator(color: primaryColor));

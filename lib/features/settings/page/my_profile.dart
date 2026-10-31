@@ -1,3 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
@@ -63,6 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
       backgroundColor: Colors.grey[50],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
@@ -164,11 +168,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
             child: ClipOval(
-               child: CustomImageView(
-                  url: user?.profileImage,
-                  imagePath: AppAssets.getAppLogo(),
-                  fit: BoxFit.cover,
-                ),
+               child: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                   ? CachedNetworkImage(
+                       imageUrl: user!.profileImage!.startsWith('http')
+                           ? user!.profileImage!
+                           : "${ApiConstants.imageBaseUrl}${user!.profileImage}",
+                       width: 100,
+                       height: 100,
+                       fit: BoxFit.cover,
+                       placeholder: (context, url) => Container(
+                         color: Colors.grey[100],
+                       ),
+                       errorWidget: (context, url, error) => Center(
+                         child: Icon(
+                           CupertinoIcons.person_fill,
+                           size: 50,
+                           color: Colors.grey[400],
+                         ),
+                       ),
+                     )
+                   : Center(
+                       child: Icon(
+                         CupertinoIcons.person_fill,
+                         size: 50,
+                         color: Colors.grey[400],
+                       ),
+                     ),
             ),
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../widgets/custom_image_view.dart';
 import '../../../../core/styles/app_decoration.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 
 class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
   const MatrimonyRequestsScreen({super.key});
@@ -15,6 +16,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
       length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
+        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
         appBar: AppBar(
           title:  Text("connection_requests".tr, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
           backgroundColor: Colors.white,

@@ -9,6 +9,7 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import '../../../../core/constent/api_constants.dart';
 
 
@@ -19,6 +20,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: Obx(() {
         final businesses = controller.myBusinesses;
 

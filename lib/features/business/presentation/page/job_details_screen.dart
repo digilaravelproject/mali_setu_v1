@@ -9,6 +9,7 @@ import 'package:edu_cluezer/features/business/presentation/controller/create_job
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/features/business/presentation/widget/job_apply_form.dart';
 
 class JobDetailsScreen extends StatefulWidget {
@@ -89,6 +90,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       }
 
       return Scaffold(
+        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 65),
         body: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [

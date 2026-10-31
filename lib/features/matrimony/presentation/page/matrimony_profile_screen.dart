@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
   const MatrimonyProfileScreen({super.key});
@@ -16,6 +17,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 75),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());

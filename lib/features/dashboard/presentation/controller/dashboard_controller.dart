@@ -49,14 +49,12 @@ class DashboardController extends GetxController {
         MatrimonyPage(),
         BlogsScreen(),
         BlogsScreen(),
-        SettingsScreen(),
       ];
     }
     if (isBlogger) {
       return <Widget>[
         BlogsScreen(),
         BlogsScreen(),
-        SettingsScreen(),
       ];
     }
     return <Widget>[
@@ -64,7 +62,6 @@ class DashboardController extends GetxController {
       BusinessScreen(),
       MatrimonyPage(),
       BlogsScreen(),
-      SettingsScreen(),
     ];
   }
 
@@ -369,12 +366,6 @@ class DashboardController extends GetxController {
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
-        BtmNavModel(
-          title: "more".tr,
-          icon: Icons.more_vert,
-          selectedColor: theme.primary,
-          unselectedColor: theme.onSurfaceVariant,
-        ),
       ];
     }
     if (isBlogger) {
@@ -390,12 +381,6 @@ class DashboardController extends GetxController {
           title: "my_blogs".tr,
           icon: Icons.library_books_outlined,
           selectedIcon: Icons.library_books,
-          selectedColor: theme.primary,
-          unselectedColor: theme.onSurfaceVariant,
-        ),
-        BtmNavModel(
-          title: "more".tr,
-          icon: Icons.more_vert,
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
@@ -427,12 +412,6 @@ class DashboardController extends GetxController {
         title: "blogs".tr,
         icon: Icons.article_outlined,
         selectedIcon: Icons.article,
-        selectedColor: theme.primary,
-        unselectedColor: theme.onSurfaceVariant,
-      ),
-      BtmNavModel(
-        title: "more".tr,
-        icon: Icons.more_vert,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),

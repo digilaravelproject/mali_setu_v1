@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -312,6 +313,7 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       backgroundColor: const Color(0xFFF8F9FC),
       appBar: AppBar(
         leading: GestureDetector(

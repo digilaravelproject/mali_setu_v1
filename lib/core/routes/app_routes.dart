@@ -1,3 +1,4 @@
+import '../../features/settings/page/settings_screen.dart';
 import 'dart:async';
 
 import 'package:app_links/app_links.dart';
@@ -91,6 +92,7 @@ class AppRoutes {
   static const String regBusiness = "/regBusiness";
   static const String businessDetails = "/businessDetails";
   static const String jobDetails = "/jobDetails";
+  static const String settings = "/settings";
   static const String profileScreen = "/profileScreen";
   static const String updateProfile = "/update_Profile";
   static const String changePassword = "/changePassword";
@@ -287,6 +289,13 @@ class AppPages {
       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.settings,
+      page: () => const SettingsScreen(),
+      binding: SettingsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: AppRoutes.profileScreen,

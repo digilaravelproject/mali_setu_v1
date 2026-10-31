@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/features/filter/presentation/page/filter_page.dart';
@@ -83,11 +85,30 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                         border: Border.all(color: Colors.white, width: 2),
                                       ),
                                       child: ClipOval(
-                                        child: CustomImageView(
-                                          url: currentUser?.profileImage,
-                                          imagePath: AppAssets.getAppLogo(),
-                                          fit: BoxFit.cover,
-                                        ),
+                                        child: (currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty)
+                                            ? CachedNetworkImage(
+                                                imageUrl: currentUser!.profileImage!.startsWith('http')
+                                                    ? currentUser!.profileImage!
+                                                    : "${ApiConstants.imageBaseUrl}${currentUser!.profileImage}",
+                                                width: 44,
+                                                height: 44,
+                                                fit: BoxFit.cover,
+                                                placeholder: (context, url) => Container(color: Colors.grey[100]),
+                                                errorWidget: (context, url, error) => Center(
+                                                  child: Icon(
+                                                    CupertinoIcons.person_fill,
+                                                    size: 24,
+                                                    color: Colors.grey[400],
+                                                  ),
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Icon(
+                                                  CupertinoIcons.person_fill,
+                                                  size: 24,
+                                                  color: Colors.grey[400],
+                                                ),
+                                              ),
                                       ),
                                     ),
                                   ),

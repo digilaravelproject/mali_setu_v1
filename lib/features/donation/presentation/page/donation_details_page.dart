@@ -5,6 +5,7 @@ import '../../data/model/donation_cause_model.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 /*
 class DonationDetailsPage extends GetView<DonationController> {
@@ -170,6 +171,7 @@ import '../../data/model/donation_cause_model.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class DonationDetailsPage extends GetView<DonationController> {
   const DonationDetailsPage({super.key});
@@ -196,6 +198,7 @@ class DonationDetailsPage extends GetView<DonationController> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 155),
       body: Stack(
         children: [
 

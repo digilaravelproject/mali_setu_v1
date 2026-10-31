@@ -18,6 +18,7 @@ import '../../../../widgets/language_selection_dialog.dart';
 import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 import '../controller/home_controller.dart';
 
 class HomePage extends GetWidget<HomeController> {
@@ -144,21 +145,44 @@ class HomePage extends GetWidget<HomeController> {
                             const SizedBox(width: 24),
                             // Profile Avatar
                             InkWell(
-                              onTap: () => Get.toNamed(AppRoutes.profileScreen),
+                              onTap: () => Get.toNamed(AppRoutes.settings),
                               child: Hero(
                                 tag: 'profile_avatar',
-                                child: CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor: Colors.grey[200],
-                                  backgroundImage: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
-                                      ? CachedNetworkImageProvider(
-                                      user.profileImage!.startsWith('http')
-                                          ? user.profileImage!
-                                          : "${ApiConstants.imageBaseUrl}${user.profileImage}"
-                                  ) : null,
-                                  child: (user?.profileImage == null || user!.profileImage!.isEmpty)
-                                      ? const Icon(CupertinoIcons.person_fill, color: Colors.grey, size: 20)
-                                      : null,
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.grey[200],
+                                    border: Border.all(
+                                      color: Colors.grey[300]!,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: ClipOval(
+                                    child: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                                        ? CachedNetworkImage(
+                                            imageUrl: user!.profileImage!.startsWith('http')
+                                                ? user!.profileImage!
+                                                : "${ApiConstants.imageBaseUrl}${user!.profileImage}",
+                                            fit: BoxFit.cover,
+                                            width: 34,
+                                            height: 34,
+                                            placeholder: (context, url) => Container(
+                                              color: Colors.grey[200],
+                                            ),
+                                            errorWidget: (context, url, error) => const Icon(
+                                              CupertinoIcons.person_fill,
+                                              color: Colors.grey,
+                                              size: 20,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            CupertinoIcons.person_fill,
+                                            color: Colors.grey,
+                                            size: 20,
+                                          ),
+                                  ),
                                 ),
                               ),
                             ),

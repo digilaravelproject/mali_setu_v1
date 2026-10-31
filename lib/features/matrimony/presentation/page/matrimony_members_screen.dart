@@ -6,6 +6,7 @@ import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
   const MatrimonyMembersScreen({super.key});
@@ -14,6 +15,7 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         title: Text("members".tr, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         backgroundColor: Colors.white,

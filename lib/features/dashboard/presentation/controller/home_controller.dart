@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/controllers/support_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../../core/utils/location_helper.dart';
@@ -86,6 +87,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     updateLocation();
     fetchCategories();
     fetchBanners();
+    SupportController.to.fetchSupportNumbers();
   }
 
   /// Fetch Firebase Cloud Messaging (FCM) token and sync to backend API
@@ -290,6 +292,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         updateLocation(),
         fetchBanners(),
         fetchCategories(),
+        SupportController.to.fetchSupportNumbers(),
       ];
 
       if (Get.isRegistered<AuthService>()) {

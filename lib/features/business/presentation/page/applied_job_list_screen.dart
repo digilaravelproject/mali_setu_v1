@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class AppliedJobsScreen extends StatefulWidget {
   @override
@@ -25,6 +26,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Get.back(),

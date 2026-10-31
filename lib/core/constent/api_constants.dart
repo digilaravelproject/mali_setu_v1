@@ -118,6 +118,9 @@ class ApiConstants {
     static const String searchBlogs = "blogs/search";
     static const String blogCategories = "blogs/categories";
 
+    // Support Numbers Endpoint
+    static const String supportNumbers = "support-numbers";
+
     // Legal URLs
     static const String privacyPolicyUrl = "$baseUrl/privacy-policy";
     static const String termsConditionsUrl = "$baseUrl/terms-condition";

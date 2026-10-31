@@ -10,6 +10,7 @@ import 'package:edu_cluezer/features/business/presentation/widget/product_servic
 import 'package:edu_cluezer/features/notification/presentation/controller/notification_controller.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class MyProductsServicesController extends GetxController with GetSingleTickerProviderStateMixin {
   late TabController tabController;
@@ -153,6 +154,7 @@ class MyProductsServicesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

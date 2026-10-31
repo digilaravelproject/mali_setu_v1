@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -325,16 +326,28 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                                 )
                               : (user?.profileImage != null &&
                                       user!.profileImage!.isNotEmpty)
-                                  ? CustomImageView(
-                                      url: user.profileImage!.startsWith('http')
+                                  ? CachedNetworkImage(
+                                      imageUrl: user.profileImage!.startsWith('http')
                                           ? user.profileImage!
                                           : "${ApiConstants.imageBaseUrl}${user.profileImage}",
-                                      imagePath: AppAssets.imgAppLogo,
+                                      width: 110,
+                                      height: 110,
                                       fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(color: Colors.grey[100]),
+                                      errorWidget: (context, url, error) => Center(
+                                        child: Icon(
+                                          CupertinoIcons.person_fill,
+                                          size: 50,
+                                          color: Colors.grey[400],
+                                        ),
+                                      ),
                                     )
-                                  : Image.asset(
-                                      AppAssets.imgAppLogo,
-                                      fit: BoxFit.cover,
+                                  : Center(
+                                      child: Icon(
+                                        CupertinoIcons.person_fill,
+                                        size: 50,
+                                        color: Colors.grey[400],
+                                      ),
                                     ),
                         ),
                       ),
