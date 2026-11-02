@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
@@ -450,6 +451,7 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
     
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(

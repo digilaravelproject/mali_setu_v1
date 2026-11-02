@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -402,6 +403,7 @@ class EditProductScreen extends StatelessWidget {
     final itemSize = (screenWidth - 40 - 20) / 3;
 
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         elevation: 0.5,
         leading: IconButton(

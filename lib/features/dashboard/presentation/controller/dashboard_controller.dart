@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/features/jobs/presentation/screens/jobs_screen.dart';
+import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/btm_nav_model.dart';
 import 'package:edu_cluezer/features/dashboard/presentation/page/more_page.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/page/matrimony_page.dart';
@@ -46,6 +48,7 @@ class DashboardController extends GetxController {
       return <Widget>[
         HomePage(),
         BusinessScreen(),
+        JobsScreen(),
         MatrimonyPage(),
         BlogsScreen(),
         BlogsScreen(),
@@ -60,6 +63,7 @@ class DashboardController extends GetxController {
     return <Widget>[
       HomePage(),
       BusinessScreen(),
+      JobsScreen(),
       MatrimonyPage(),
       BlogsScreen(),
     ];
@@ -284,14 +288,21 @@ class DashboardController extends GetxController {
     final blogController = Get.isRegistered<BlogController>()
         ? Get.find<BlogController>()
         : null;
+    final jobsController = Get.isRegistered<JobsController>()
+        ? Get.find<JobsController>()
+        : null;
 
     if (hasBlogAccess) {
-      if (index == 3) {
+      if (index == 2) {
+        if (jobsController != null && jobsController.jobs.isEmpty && !jobsController.isLoading.value) {
+          jobsController.fetchJobs();
+        }
+      } else if (index == 4) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
           blogController.fetchBlogs();
         }
-      } else if (index == 4) {
+      } else if (index == 5) {
         blogController?.filterByTab('Mine');
         if (blogController != null && blogController.myBlogs.isEmpty && !blogController.isMyBlogsLoading.value) {
           blogController.fetchMyBlogs();
@@ -310,7 +321,11 @@ class DashboardController extends GetxController {
         }
       }
     } else {
-      if (index == 3) {
+      if (index == 2) {
+        if (jobsController != null && jobsController.jobs.isEmpty && !jobsController.isLoading.value) {
+          jobsController.fetchJobs();
+        }
+      } else if (index == 4) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
           blogController.fetchBlogs();
@@ -342,6 +357,13 @@ class DashboardController extends GetxController {
           title: "business".tr,
           icon: Icons.business,
           selectedIcon: Icons.shop,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
+          title: "jobs".tr,
+          icon: CupertinoIcons.briefcase,
+          selectedIcon: CupertinoIcons.briefcase_fill,
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
@@ -398,6 +420,13 @@ class DashboardController extends GetxController {
         title: "business".tr,
         icon: Icons.business,
         selectedIcon: Icons.shop,
+        selectedColor: theme.primary,
+        unselectedColor: theme.onSurfaceVariant,
+      ),
+      BtmNavModel(
+        title: "jobs".tr,
+        icon: CupertinoIcons.briefcase,
+        selectedIcon: CupertinoIcons.briefcase_fill,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),

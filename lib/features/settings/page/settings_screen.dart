@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/blogs/presentation/screens/blogs_screen.dart';
@@ -38,6 +39,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.grey[50],
+        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20),

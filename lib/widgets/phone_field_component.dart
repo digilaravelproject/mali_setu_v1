@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 
 /// Country data model
@@ -22,7 +24,7 @@ class CountryCode {
 /// Matches exact layout with:
 /// - "Mobile Number *" Label
 /// - Row with: [ Country Code Dropdown ] [ Phone Number Field ] [ Verify Button ]
-/// - Enter OTP Card with 5 Clean Digit Input Boxes and "Didn't receive OTP? Resend"
+/// - Enter OTP Card with 4 Clean Digit Input Boxes and "Didn't receive OTP? Resend"
 class PhoneFieldComponent extends StatefulWidget {
   final String? initialPhone;
   final bool isRequired;
@@ -38,7 +40,7 @@ class PhoneFieldComponent extends StatefulWidget {
     this.onChanged,
     this.errorText,
     this.showOtpSection = true,
-    this.otpLength = 5,
+    this.otpLength = 4,
   });
 
   @override
@@ -52,6 +54,8 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
   late List<TextEditingController> otpControllers;
   late List<FocusNode> otpFocusNodes;
 
+  bool isSendingOtp = false;
+  bool isResendingOtp = false;
   bool isOtpSent = false;
   bool isVerified = false;
   String? errorMessage;
@@ -337,7 +341,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
     return null;
   }
 
-  void _handleVerifyClick() {
+  Future<void> _handleVerifyClick() async {
     final phone = phoneCtrl.text.trim();
     if (phone.isEmpty) {
       setState(() => errorMessage = 'please_enter_phone'.tr);
@@ -350,33 +354,127 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       return;
     }
 
+    if (isSendingOtp) return;
+
     setState(() {
+      isSendingOtp = true;
       errorMessage = null;
-      isOtpSent = true;
     });
 
-    _startResendTimer();
-    HapticFeedback.lightImpact();
-    CustomSnackBar.showSuccess(
-      message: 'OTP sent to ${countryCodeCtrl.text} $phone',
-    );
+    final fullPhoneNumber = getCombinedPhone();
 
-    if (otpFocusNodes.isNotEmpty) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) otpFocusNodes[0].requestFocus();
-      });
+    try {
+      ApiClient apiClient;
+      if (Get.isRegistered<ApiClient>()) {
+        apiClient = Get.find<ApiClient>();
+      } else {
+        apiClient = ApiClient();
+        Get.put<ApiClient>(apiClient, permanent: true);
+      }
+
+      final response = await apiClient.post(
+        ApiConstants.authPhoneSendOtp,
+        data: {
+          "phone_number": fullPhoneNumber,
+          "recaptcha_token": "FIREBASE_RECAPTCHA_TOKEN",
+        },
+      );
+
+      final data = response.data;
+      final bool isSuccess = data is Map && data['success'] == true;
+      final String msg = data is Map
+          ? (data['message'] ?? (isSuccess ? 'OTP sent successfully' : 'Failed to send OTP'))
+          : 'OTP request completed';
+
+      if (isSuccess) {
+        CustomSnackBar.showSuccess(message: msg);
+      } else {
+        final err = (data is Map && data['error'] != null)
+            ? data['error'].toString()
+            : msg;
+        CustomSnackBar.showError(message: err);
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: 'Error sending OTP: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSendingOtp = false;
+          isOtpSent = true;
+          errorMessage = null;
+        });
+        _startResendTimer();
+        HapticFeedback.lightImpact();
+
+        if (otpFocusNodes.isNotEmpty) {
+          Future.delayed(const Duration(milliseconds: 150), () {
+            if (mounted) otpFocusNodes[0].requestFocus();
+          });
+        }
+      }
     }
   }
 
-  void _handleResendOtp() {
+  Future<void> _handleResendOtp() async {
+    if (isResendingOtp || _resendCountdown > 0) return;
+
     for (var ctrl in otpControllers) {
       ctrl.clear();
     }
-    _startResendTimer();
-    HapticFeedback.lightImpact();
-    CustomSnackBar.showSuccess(message: 'OTP resent successfully');
-    if (otpFocusNodes.isNotEmpty) {
-      otpFocusNodes[0].requestFocus();
+
+    setState(() {
+      isResendingOtp = true;
+    });
+
+    final fullPhoneNumber = getCombinedPhone();
+
+    try {
+      ApiClient apiClient;
+      if (Get.isRegistered<ApiClient>()) {
+        apiClient = Get.find<ApiClient>();
+      } else {
+        apiClient = ApiClient();
+        Get.put<ApiClient>(apiClient, permanent: true);
+      }
+
+      final response = await apiClient.post(
+        ApiConstants.authPhoneResendOtp,
+        data: {
+          "phone_number": fullPhoneNumber,
+          "recaptcha_token": "NEW_FIREBASE_RECAPTCHA_TOKEN",
+        },
+      );
+
+      final data = response.data;
+      final bool isSuccess = data is Map && data['success'] == true;
+      final String msg = data is Map
+          ? (data['message'] ?? (isSuccess ? 'OTP resent successfully' : 'Failed to resend OTP'))
+          : 'OTP resent';
+
+      if (isSuccess) {
+        CustomSnackBar.showSuccess(message: msg);
+      } else {
+        final err = (data is Map && data['error'] != null)
+            ? data['error'].toString()
+            : msg;
+        CustomSnackBar.showError(message: err);
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: 'Error resending OTP: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          isResendingOtp = false;
+        });
+        _startResendTimer();
+        HapticFeedback.lightImpact();
+
+        if (otpFocusNodes.isNotEmpty) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) otpFocusNodes[0].requestFocus();
+          });
+        }
+      }
     }
   }
 
@@ -567,7 +665,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
             // Verify Button
             InkWell(
-              onTap: isVerified ? null : _handleVerifyClick,
+              onTap: (isVerified || isSendingOtp) ? null : _handleVerifyClick,
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 height: 50,
@@ -585,30 +683,39 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                   ],
                 ),
                 alignment: Alignment.center,
-                child: isVerified
-                    ? const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.check_rounded, color: Colors.white, size: 18),
-                          SizedBox(width: 4),
-                          Text(
-                            'Verified',
+                child: isSendingOtp
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : isVerified
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                              SizedBox(width: 4),
+                              Text(
+                                'Verified',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Text(
+                            'Verify',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      )
-                    : const Text(
-                        'Verify',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
               ),
             ),
           ],
@@ -627,7 +734,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
         ],
 
         // 3. Enter OTP Card (matching exact screenshot layout)
-        if (widget.showOtpSection) ...[
+        if (widget.showOtpSection && isOtpSent) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
@@ -672,19 +779,19 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                 ),
                 const SizedBox(height: 10),
 
-                // Row with 5 Single-Bordered OTP boxes + "Didn't receive OTP? Resend"
+                // Row with 4 Single-Bordered OTP boxes + "Didn't receive OTP? Resend"
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 5 Clean OTP digit boxes (single crisp border, NO double borders)
+                    // 4 Clean OTP digit boxes (single crisp border, NO double borders)
                     ...List.generate(widget.otpLength, (index) {
                       return Padding(
                         padding: EdgeInsets.only(
-                          right: index < widget.otpLength - 1 ? 6 : 0,
+                          right: index < widget.otpLength - 1 ? 8 : 0,
                         ),
                         child: SizedBox(
-                          width: 38,
-                          height: 44,
+                          width: 44,
+                          height: 48,
                           child: TextField(
                             controller: otpControllers[index],
                             focusNode: otpFocusNodes[index],
@@ -692,7 +799,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                             textAlign: TextAlign.center,
                             maxLength: 1,
                             style: const TextStyle(
-                              fontSize: 19,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF111827),
                             ),
@@ -705,7 +812,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                               fillColor: Colors.white,
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10,
+                                vertical: 12,
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -739,7 +846,9 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
                     // "Didn't receive OTP? Resend" on right side
                     InkWell(
-                      onTap: _resendCountdown > 0 ? null : _handleResendOtp,
+                      onTap: (_resendCountdown > 0 || isResendingOtp)
+                          ? null
+                          : _handleResendOtp,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         mainAxisSize: MainAxisSize.min,
@@ -754,16 +863,18 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _resendCountdown > 0
-                                ? 'Resend (${_resendCountdown}s)'
-                                : 'Resend',
+                            isResendingOtp
+                                ? 'Resending...'
+                                : _resendCountdown > 0
+                                    ? 'Resend (${_resendCountdown}s)'
+                                    : 'Resend',
                             style: TextStyle(
                               fontSize: 12,
-                              color: _resendCountdown > 0
+                              color: (_resendCountdown > 0 || isResendingOtp)
                                   ? const Color(0xFF9CA3AF)
                                   : primaryColor,
                               fontWeight: FontWeight.w700,
-                              decoration: _resendCountdown > 0
+                              decoration: (_resendCountdown > 0 || isResendingOtp)
                                   ? TextDecoration.none
                                   : TextDecoration.underline,
                             ),

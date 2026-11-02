@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -17,6 +18,7 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50], // Match profile view background
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,

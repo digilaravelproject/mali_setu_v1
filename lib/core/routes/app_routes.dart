@@ -1,3 +1,6 @@
+import 'package:edu_cluezer/features/business/presentation/page/apply_job_page.dart';
+import 'package:edu_cluezer/features/jobs/presentation/screens/jobs_screen.dart';
+import 'package:edu_cluezer/features/jobs/binding/jobs_binding.dart';
 import '../../features/settings/page/settings_screen.dart';
 import 'dart:async';
 
@@ -91,6 +94,8 @@ class AppRoutes {
   static const String myBusiness = "/myBusiness";
   static const String regBusiness = "/regBusiness";
   static const String businessDetails = "/businessDetails";
+  static const String jobs = "/jobs";
+  static const String applyJob = "/applyJob";
   static const String jobDetails = "/jobDetails";
   static const String settings = "/settings";
   static const String profileScreen = "/profileScreen";
@@ -282,6 +287,20 @@ class AppPages {
       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.applyJob,
+      page: () => const ApplyJobPage(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.jobs,
+      page: () => const JobsScreen(),
+      binding: JobsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: AppRoutes.jobDetails,
