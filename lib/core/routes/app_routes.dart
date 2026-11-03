@@ -68,6 +68,11 @@ import '../../features/search/presentation/page/search_page.dart';
 import '../../features/settings/binding/profile_binding.dart';
 import '../../features/settings/page/update_profile_page.dart';
 import '../../features/volunteer/pages/opportunity_details_page.dart';
+import '../../features/webinars/binding/webinars_binding.dart';
+import '../../features/webinars/presentation/pages/webinars_list_screen.dart';
+import '../../features/webinars/presentation/pages/webinar_details_screen.dart';
+import '../../features/webinars/presentation/pages/webinar_registration_page.dart';
+import '../../features/webinars/presentation/pages/webinar_confirmation_page.dart';
 import '../helper/logger_helper.dart';
 
 class AppRoutes {
@@ -121,6 +126,10 @@ class AppRoutes {
   static const String singleProductDetails = "/singleProductDetails";
   static const String singleServiceDetails = "/singleServiceDetails";
   static const String notificationDetails = '/notificationDetails';
+  static const String webinars = '/webinars';
+  static const String webinarDetails = '/webinarDetails';
+  static const String webinarRegistration = '/webinarRegistration';
+  static const String webinarConfirmation = '/webinarConfirmation';
 }
 
 class AppPages {
@@ -460,6 +469,33 @@ class AppPages {
       page: () => const NotificationDetailsPage(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.webinars,
+      page: () => const WebinarsListScreen(),
+      binding: WebinarsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.webinarDetails,
+      page: () => const WebinarDetailsScreen(),
+      binding: WebinarsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.webinarRegistration,
+      page: () => const WebinarRegistrationPage(),
+      binding: WebinarsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.webinarConfirmation,
+      page: () => WebinarConfirmationPage(webinar: Get.arguments),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
   ];
 }

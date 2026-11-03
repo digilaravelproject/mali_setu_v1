@@ -18,6 +18,8 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_business_catego
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/dashboard/domain/usecase/get_banners_usecase.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/banner_model.dart';
+import 'package:edu_cluezer/features/webinars/data/models/webinar_model.dart';
+import 'package:edu_cluezer/features/webinars/presentation/controllers/webinars_controller.dart';
 import 'package:edu_cluezer/features/notification/presentation/controller/notification_controller.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
@@ -37,6 +39,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   final GetBannersUseCase getBannersUseCase;
   final RxList<BannerData> banners = <BannerData>[].obs;
   final RxBool isLoadingBanners = false.obs;
+
+  // Upcoming Webinars (from banner API)
+  final RxList<Webinar> upcomingWebinars = <Webinar>[].obs;
   
   // Categories
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
@@ -329,6 +334,20 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         print("DEBUG_BANNERS: Successfully loaded ${response.data.length} banners");
       } else {
         print("DEBUG_BANNERS: API returned empty list");
+      }
+
+      // Store upcoming webinars from banner API
+      if (response.upcomingWebinars.isNotEmpty) {
+        upcomingWebinars.assignAll(response.upcomingWebinars);
+        print("DEBUG_BANNERS: Loaded ${response.upcomingWebinars.length} upcoming webinars");
+
+        // Sync to WebinarsController if registered
+        if (Get.isRegistered<WebinarsController>()) {
+          Get.find<WebinarsController>().setWebinarsFromApi(response.upcomingWebinars);
+        }
+      } else {
+        upcomingWebinars.clear();
+        print("DEBUG_BANNERS: No upcoming webinars found in banner API");
       }
       
     } catch (e) {

@@ -1,17 +1,39 @@
+import '../../../webinars/data/models/webinar_model.dart';
+
 class BannerResponse {
   final List<BannerData> data;
+  final List<Webinar> upcomingWebinars;
   final Links? links;
   final Meta? meta;
 
   BannerResponse({
     required this.data,
+    this.upcomingWebinars = const [],
     this.links,
     this.meta,
   });
 
   factory BannerResponse.fromJson(Map<String, dynamic> json) {
+    List<Webinar> webinars = [];
+    if (json['upcoming_webinars'] != null && json['upcoming_webinars'] is List) {
+      webinars = (json['upcoming_webinars'] as List)
+          .map((item) {
+            try {
+              if (item is Map<String, dynamic>) {
+                return Webinar.fromApiJson(item);
+              }
+              return null;
+            } catch (e) {
+              return null;
+            }
+          })
+          .whereType<Webinar>()
+          .toList();
+    }
+
     return BannerResponse(
-      data: (json['data'] as List).map((i) => BannerData.fromJson(i)).toList(),
+      data: json['data'] != null ? (json['data'] as List).map((i) => BannerData.fromJson(i)).toList() : [],
+      upcomingWebinars: webinars,
       links: json['links'] != null ? Links.fromJson(json['links']) : null,
       meta: json['meta'] != null ? Meta.fromJson(json['meta']) : null,
     );

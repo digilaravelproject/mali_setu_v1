@@ -19,6 +19,12 @@ import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
+import 'package:edu_cluezer/core/styles/app_colors.dart';
+import '../../../webinars/presentation/controllers/webinars_controller.dart';
+import '../../../webinars/presentation/pages/webinar_details_screen.dart';
+import '../../../webinars/presentation/pages/webinar_live_screen.dart';
+import '../../../webinars/presentation/widgets/webinar_registration_sheet.dart';
+import '../../../webinars/data/models/webinar_model.dart';
 import '../controller/home_controller.dart';
 
 class HomePage extends GetWidget<HomeController> {
@@ -399,6 +405,55 @@ class HomePage extends GetWidget<HomeController> {
 
                             ),
 
+                            // Upcoming Webinars Section (only shown when banner API returns upcoming webinars)
+                            if (controller.upcomingWebinars.isNotEmpty) ...[
+                              const SizedBox(height: 22),
+                              // Section Heading: Upcoming Webinars | See All
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      "Upcoming Webinars",
+                                      style: TextStyle(
+                                        fontSize: 16.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.lightTextPrimary,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => Get.toNamed(AppRoutes.webinars),
+                                      behavior: HitTestBehavior.opaque,
+                                      child: const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "See All",
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                          SizedBox(width: 3),
+                                          Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 11,
+                                            color: AppColors.primary,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildWebinarPromoCard(context, controller.upcomingWebinars),
+                            ],
+
                             const SizedBox(height: 120),
                           ],
                         ),
@@ -661,6 +716,310 @@ class HomePage extends GetWidget<HomeController> {
                           ),
                         ),
                       ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebinarPromoCard(BuildContext context, List<Webinar> webinars) {
+    if (webinars.isEmpty) return const SizedBox.shrink();
+
+    final featured = webinars.first;
+    final isLive = featured.isLive;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryLight.withOpacity(0.55),
+            Colors.white,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.28),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: () {
+            Get.toNamed(AppRoutes.webinarDetails, arguments: featured);
+          },
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Top Row: LIVE/UPCOMING Badge + Category Chip + View All
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: isLive ? const Color(0xFFEF4444) : const Color(0xFFEF4444).withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleAvatar(
+                            radius: 3,
+                            backgroundColor: isLive ? Colors.white : const Color(0xFFEF4444),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isLive ? "LIVE NOW" : "UPCOMING WEBINAR",
+                            style: TextStyle(
+                              color: isLive ? Colors.white : const Color(0xFFEF4444),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryLight,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        featured.category,
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Duration chip
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.access_time_rounded,
+                            size: 11,
+                            color: Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            featured.duration,
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Middle Row: Dynamic Title & Speaker + Video Badge
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            featured.title,
+                            style: const TextStyle(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.lightTextPrimary,
+                              letterSpacing: -0.2,
+                              height: 1.25,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              const Icon(
+                                CupertinoIcons.person_crop_circle_fill,
+                                size: 14,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 5),
+                              Expanded(
+                                child: Text(
+                                  featured.speaker.name,
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF475569),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.videocam_rounded,
+                              color: AppColors.primary,
+                              size: 26,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: -3,
+                          right: -3,
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEF4444),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.play_arrow_rounded, size: 8, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Divider
+                Container(
+                  height: 1,
+                  color: AppColors.primary.withOpacity(0.12),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Bottom Row: Date/Time + Registrations Count + Action Button
+                Row(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            size: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            featured.dateString,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF334155),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          const Icon(
+                            Icons.people_alt_outlined,
+                            size: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${featured.registeredCount} joined",
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF334155),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.28),
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isLive ? "Join Now" : "Register Now",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ],
