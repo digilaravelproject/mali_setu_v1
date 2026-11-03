@@ -49,6 +49,7 @@ class RegisterController extends GetxController {
   final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
 
   /// FIELD KEYS FOR AUTO-SCROLL ON VALIDATION ERROR
+  final GlobalKey casteCertificateKey = GlobalKey();
   final GlobalKey emailKey = GlobalKey();
   final GlobalKey dobKey = GlobalKey();
   final GlobalKey addressKey = GlobalKey();
@@ -399,6 +400,16 @@ class RegisterController extends GetxController {
       return;
     }
 
+    // Caste Certificate
+    if (casteCertificatePath.value.isEmpty) {
+      casteCertificateError.value = "upload_caste_certificate".tr;
+      scrollToKey(casteCertificateKey);
+      CustomSnackBar.showError(
+        message: "upload_caste_certificate".tr,
+      );
+      return;
+    }
+
     // 5. Address
     final addressError = FormValidator.emptycheck(addressCtrl.text, "address".tr);
     if (addressError != null) {
@@ -511,19 +522,6 @@ class RegisterController extends GetxController {
     isLoading.value = true;
 
     try {
-      // Prepare caste certificate data URL
-      String castCertificateData = '';
-      if (casteCertificateFile != null) {
-        final bytes = await casteCertificateFile!.readAsBytes();
-        casteCertificateBase64 = base64Encode(bytes);
-      }
-
-      if (casteCertificateBase64 != null &&
-          casteCertificatePath.value.isNotEmpty) {
-        final mimeType = _getMimeType(casteCertificatePath.value);
-        castCertificateData = 'data:$mimeType;base64,$casteCertificateBase64';
-      }
-
       // Get combined name from NameFieldComponent
       final combinedName = nameFieldKey.currentState?.getCombinedName() ?? '';
       
@@ -564,7 +562,7 @@ class RegisterController extends GetxController {
         password: passwordCtrl.text.trim(),
         passwordConfirmation: confirmPasswordCtrl.text.trim(),
         userType: _getApiUserType(userTypeCtrl.text.trim()),
-        // castCertificate: castCertificateData,
+        castCertificate: casteCertificatePath.value.isNotEmpty ? casteCertificatePath.value : null,
         termCondition: isAcceptedTerms.value,
         company_name: companynameCtrl.text.trim(),
         dept_name: deptCtrl.text.trim(),

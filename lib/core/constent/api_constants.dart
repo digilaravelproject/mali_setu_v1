@@ -93,6 +93,7 @@ class ApiConstants {
     static const String toggleJobStatus = "jobs";
     static const String jobAnalytics = "jobs/analytics";
     static const String applyJob = "jobs/apply";
+    static String jobLikeToggle(int id) => "jobs/$id/like-toggle";
     static const String myApplications = "jobs/my-applications";
     static const String getJobApplications = "jobs"; // jobs/{id}/applications
     static const String updateApplicationStatus = "jobs/applications"; // jobs/applications/{id}/status

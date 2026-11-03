@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../business/data/model/res_all_business_model.dart';
+import '../../../business/presentation/controller/business_controller.dart';
 
 class JobsController extends GetxController {
   final ApiClient _apiClient = Get.isRegistered<ApiClient>()
@@ -19,6 +20,11 @@ class JobsController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxSet<int> favoriteJobIds = <int>{}.obs;
   final RxInt totalJobsCount = 0.obs;
+
+  // Main screen tabs (0: All Jobs, 1: My Applied Jobs)
+  final RxInt selectedMainTab = 0.obs;
+  final RxList<JobApplication> myApplications = <JobApplication>[].obs;
+  final RxBool isMyApplicationsLoading = false.obs;
 
   final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
@@ -35,9 +41,15 @@ class JobsController extends GetxController {
   final RxList<String> employmentTypes = <String>[].obs;
 
   // Filter selections in modal sheet
+  final RxSet<String> selectedLocations = <String>{}.obs;
+  final RxSet<String> selectedCategories = <String>{}.obs;
+  final RxSet<String> selectedJobTypes = <String>{}.obs;
   final RxString selectedCategory = ''.obs;
   final RxString selectedLocation = ''.obs;
   final RxString selectedExperience = ''.obs;
+
+  int get activeFiltersCount =>
+      selectedLocations.length + selectedCategories.length + selectedJobTypes.length;
 
   @override
   void onInit() {
@@ -64,34 +76,221 @@ class JobsController extends GetxController {
     }
   }
 
+  void changeMainTab(int index) {
+    if (selectedMainTab.value == index) return;
+    selectedMainTab.value = index;
+    HapticFeedback.lightImpact();
+    if (index == 1) {
+      fetchMyApplications();
+    } else {
+      if (jobs.isEmpty) {
+        fetchJobs();
+      }
+    }
+  }
+
+  Future<void> fetchMyApplications({bool isRefresh = false}) async {
+    try {
+      if (!isRefresh && myApplications.isEmpty) {
+        isMyApplicationsLoading.value = true;
+      }
+      final response = await _apiClient.post(
+        ApiConstants.myApplications,
+      );
+
+      if (response.data != null && response.data['success'] == true) {
+        final dataWrapper = response.data['data'];
+        final List<JobApplication> fetched = [];
+        if (dataWrapper is Map && dataWrapper['data'] != null) {
+          final List rawList = dataWrapper['data'];
+          for (var item in rawList) {
+            if (item is Map<String, dynamic>) {
+              fetched.add(JobApplication.fromJson(item));
+            }
+          }
+        }
+        myApplications.value = fetched;
+      }
+    } catch (e) {
+      debugPrint("Error fetching my applications: $e");
+    } finally {
+      isMyApplicationsLoading.value = false;
+    }
+  }
+
   void onSearchChanged(String query) {
     searchQuery.value = query;
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () {
-      applyFilters();
+    _debounce = Timer(const Duration(milliseconds: 450), () {
+      fetchJobs(isRefresh: true);
     });
   }
 
   void clearSearch() {
     searchController.clear();
     searchQuery.value = '';
-    applyFilters();
+    fetchJobs(isRefresh: true);
   }
 
   void setFilter(String filter) {
     selectedFilter.value = filter;
     HapticFeedback.lightImpact();
-    applyFilters();
+    fetchJobs(isRefresh: true);
   }
 
-  void toggleFavorite(int? jobId) {
-    if (jobId == null) return;
+  Future<bool> toggleFavorite(int? jobId, {bool? currentLiked}) async {
+    if (jobId == null) return false;
     HapticFeedback.selectionClick();
-    if (favoriteJobIds.contains(jobId)) {
+
+    if (currentLiked == true && !favoriteJobIds.contains(jobId)) {
+      favoriteJobIds.add(jobId);
+    }
+
+    final bool currentlyLiked = favoriteJobIds.contains(jobId);
+    // Optimistic UI update
+    if (currentlyLiked) {
       favoriteJobIds.remove(jobId);
     } else {
       favoriteJobIds.add(jobId);
     }
+
+    for (var j in jobs) {
+      if (j.id == jobId) {
+        j.isLiked = !currentlyLiked;
+      }
+    }
+    jobs.refresh();
+
+    if (Get.isRegistered<BusinessController>()) {
+      final bCtrl = Get.find<BusinessController>();
+      for (var j in bCtrl.businessJobs) {
+        if (j.id == jobId) {
+          j.isLiked = !currentlyLiked;
+        }
+      }
+      bCtrl.businessJobs.refresh();
+    }
+
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.jobLikeToggle(jobId),
+      );
+
+      if (response.data != null && response.data['success'] == true) {
+        final data = response.data['data'];
+        final bool serverLiked = data is Map ? (data['is_liked'] == true) : !currentlyLiked;
+        if (serverLiked) {
+          favoriteJobIds.add(jobId);
+        } else {
+          favoriteJobIds.remove(jobId);
+        }
+        for (var j in jobs) {
+          if (j.id == jobId) {
+            j.isLiked = serverLiked;
+          }
+        }
+        jobs.refresh();
+
+        if (Get.isRegistered<BusinessController>()) {
+          final bCtrl = Get.find<BusinessController>();
+          for (var j in bCtrl.businessJobs) {
+            if (j.id == jobId) {
+              j.isLiked = serverLiked;
+            }
+          }
+          bCtrl.businessJobs.refresh();
+        }
+        return true;
+      } else {
+        // Revert on failure
+        if (currentlyLiked) {
+          favoriteJobIds.add(jobId);
+        } else {
+          favoriteJobIds.remove(jobId);
+        }
+        for (var j in jobs) {
+          if (j.id == jobId) {
+            j.isLiked = currentlyLiked;
+          }
+        }
+        jobs.refresh();
+
+        if (Get.isRegistered<BusinessController>()) {
+          final bCtrl = Get.find<BusinessController>();
+          for (var j in bCtrl.businessJobs) {
+            if (j.id == jobId) {
+              j.isLiked = currentlyLiked;
+            }
+          }
+          bCtrl.businessJobs.refresh();
+        }
+        return false;
+      }
+    } catch (e) {
+      // Revert on error
+      if (currentlyLiked) {
+        favoriteJobIds.add(jobId);
+      } else {
+        favoriteJobIds.remove(jobId);
+      }
+      for (var j in jobs) {
+        if (j.id == jobId) {
+          j.isLiked = currentlyLiked;
+        }
+      }
+      jobs.refresh();
+
+      if (Get.isRegistered<BusinessController>()) {
+        final bCtrl = Get.find<BusinessController>();
+        for (var j in bCtrl.businessJobs) {
+          if (j.id == jobId) {
+            j.isLiked = currentlyLiked;
+          }
+        }
+        bCtrl.businessJobs.refresh();
+      }
+      return false;
+    }
+  }
+
+  Map<String, dynamic> _buildQueryParams({required int page}) {
+    final Map<String, dynamic> queryParams = {
+      'page': page,
+    };
+
+    // 1. Search Query
+    final query = searchQuery.value.trim();
+    if (query.isNotEmpty) {
+      queryParams['search'] = query;
+    }
+
+    // 2. Category Filter
+    if (selectedCategories.isNotEmpty) {
+      queryParams['category'] = selectedCategories.join(',');
+    } else if (selectedCategory.value.trim().isNotEmpty) {
+      queryParams['category'] = selectedCategory.value.trim();
+    }
+
+    // 3. Location Filter
+    if (selectedLocations.isNotEmpty) {
+      queryParams['location'] = selectedLocations.join(',');
+    } else if (selectedLocation.value.trim().isNotEmpty) {
+      queryParams['location'] = selectedLocation.value.trim();
+    }
+
+    // 4. Employment Type Filter (from bottom sheet and/or horizontal tabs)
+    final Set<String> activeTypes = <String>{};
+    for (var t in selectedJobTypes) {
+      activeTypes.add(t.toLowerCase().replaceAll(' ', '-'));
+    }
+    if (selectedFilter.value != 'All' && !selectedFilter.value.startsWith('All')) {
+      activeTypes.add(selectedFilter.value.toLowerCase().replaceAll(' ', '-'));
+    }
+    if (activeTypes.isNotEmpty) {
+      queryParams['employment_type'] = activeTypes.join(',');
+    }
+
+    return queryParams;
   }
 
   Future<void> fetchJobs({bool isRefresh = false}) async {
@@ -104,13 +303,7 @@ class JobsController extends GetxController {
         isLoading.value = true;
       }
 
-      final Map<String, dynamic> queryParams = {
-        'page': _currentPage,
-      };
-
-      if (searchQuery.value.trim().isNotEmpty) {
-        queryParams['search'] = searchQuery.value.trim();
-      }
+      final queryParams = _buildQueryParams(page: _currentPage);
 
       final response = await _apiClient.get(
         ApiConstants.createJobs,
@@ -125,7 +318,11 @@ class JobsController extends GetxController {
           final List rawList = dataWrapper['data'];
           for (var item in rawList) {
             if (item is Map<String, dynamic>) {
-              fetchedJobs.add(Job.fromJson(item));
+              final job = Job.fromJson(item);
+              fetchedJobs.add(job);
+              if (job.isLiked == true && job.id != null) {
+                favoriteJobIds.add(job.id!);
+              }
             }
           }
           _currentPage = dataWrapper['current_page'] ?? 1;
@@ -151,46 +348,35 @@ class JobsController extends GetxController {
           }
         }
 
-        // If backend returned real jobs, use them
-        if (fetchedJobs.isNotEmpty) {
-          allJobsList.value = fetchedJobs;
-          totalJobsCount.value = fetchedJobs.length;
-        } else {
-          // If database currently has 0 live jobs, use fallback sample jobs
-          // matching user design reference
-          allJobsList.value = _getSampleJobs();
-          totalJobsCount.value = 520; // Matches mockup counter
-        }
+        allJobsList.value = fetchedJobs;
+        jobs.value = fetchedJobs;
       } else {
-        // Fallback to sample jobs
-        allJobsList.value = _getSampleJobs();
-        totalJobsCount.value = 520;
+        // Fallback to sample jobs if initial load fails
+        if (jobs.isEmpty && allJobsList.isEmpty) {
+          allJobsList.value = _getSampleJobs();
+          jobs.value = _getSampleJobs();
+          totalJobsCount.value = 520;
+        }
       }
     } catch (e) {
-      // In case of network error, keep sample jobs
-      if (allJobsList.isEmpty) {
+      // In case of network error on first launch
+      if (jobs.isEmpty && allJobsList.isEmpty) {
         allJobsList.value = _getSampleJobs();
+        jobs.value = _getSampleJobs();
         totalJobsCount.value = 520;
       }
     } finally {
       isLoading.value = false;
-      applyFilters();
     }
   }
 
   Future<void> fetchMoreJobs() async {
     if (_hasMore && !isMoreLoading.value) {
       isMoreLoading.value = true;
-      _currentPage++;
+      final nextPage = _currentPage + 1;
 
       try {
-        final Map<String, dynamic> queryParams = {
-          'page': _currentPage,
-        };
-        if (searchQuery.value.trim().isNotEmpty) {
-          queryParams['search'] = searchQuery.value.trim();
-        }
-
+        final queryParams = _buildQueryParams(page: nextPage);
         final response = await _apiClient.get(
           ApiConstants.createJobs,
           queryParameters: queryParams,
@@ -202,82 +388,39 @@ class JobsController extends GetxController {
             final List rawList = dataWrapper['data'];
             for (var item in rawList) {
               if (item is Map<String, dynamic>) {
-                allJobsList.add(Job.fromJson(item));
+                final newJob = Job.fromJson(item);
+                allJobsList.add(newJob);
+                jobs.add(newJob);
+                if (newJob.isLiked == true && newJob.id != null) {
+                  favoriteJobIds.add(newJob.id!);
+                }
               }
             }
-            _currentPage = dataWrapper['current_page'] ?? _currentPage;
+            _currentPage = dataWrapper['current_page'] ?? nextPage;
             _lastPage = dataWrapper['last_page'] ?? _lastPage;
             _hasMore = _currentPage < _lastPage;
+            totalJobsCount.value = dataWrapper['total'] ?? jobs.length;
           }
         }
       } catch (_) {
       } finally {
         isMoreLoading.value = false;
-        applyFilters();
       }
     }
   }
 
   void applyFilters() {
-    List<Job> filtered = List.from(allJobsList);
-
-    // 1. Employment Type Filter
-    final filter = selectedFilter.value.toLowerCase().replaceAll(' ', '-').replaceAll('(', '').replaceAll(')', '');
-    if (selectedFilter.value != 'All' && !selectedFilter.value.startsWith('All')) {
-      filtered = filtered.where((job) {
-        final type = (job.employmentType ?? job.jobType ?? '').toLowerCase().trim();
-        if (selectedFilter.value == 'Full Time') {
-          return type.contains('full') || type == 'full-time';
-        } else if (selectedFilter.value == 'Part Time') {
-          return type.contains('part') || type == 'part-time';
-        } else if (selectedFilter.value == 'Remote') {
-          return type.contains('remote') || (job.location ?? '').toLowerCase().contains('remote');
-        } else if (selectedFilter.value == 'Contract') {
-          return type.contains('contract');
-        } else if (selectedFilter.value == 'Internship') {
-          return type.contains('intern');
-        }
-        return type.contains(filter);
-      }).toList();
-    }
-
-    // 2. Search Query Filter
-    final query = searchQuery.value.trim().toLowerCase();
-    if (query.isNotEmpty) {
-      filtered = filtered.where((job) {
-        final title = (job.title ?? '').toLowerCase();
-        final company = (job.business?.businessName ?? '').toLowerCase();
-        final loc = (job.location ?? '').toLowerCase();
-        final cat = (job.category ?? '').toLowerCase();
-        final desc = (job.description ?? '').toLowerCase();
-        return title.contains(query) ||
-            company.contains(query) ||
-            loc.contains(query) ||
-            cat.contains(query) ||
-            desc.contains(query);
-      }).toList();
-    }
-
-    // 3. Category Filter from Sheet
-    if (selectedCategory.value.isNotEmpty) {
-      filtered = filtered.where((job) =>
-          (job.category ?? '').toLowerCase() == selectedCategory.value.toLowerCase()).toList();
-    }
-
-    // 4. Location Filter from Sheet
-    if (selectedLocation.value.isNotEmpty) {
-      filtered = filtered.where((job) =>
-          (job.location ?? '').toLowerCase().contains(selectedLocation.value.toLowerCase())).toList();
-    }
-
-    jobs.value = filtered;
+    fetchJobs(isRefresh: true);
   }
 
   void resetSheetFilters() {
+    selectedLocations.clear();
+    selectedCategories.clear();
+    selectedJobTypes.clear();
     selectedCategory.value = '';
     selectedLocation.value = '';
     selectedExperience.value = '';
-    applyFilters();
+    fetchJobs(isRefresh: true);
   }
 
   List<Job> _getSampleJobs() {

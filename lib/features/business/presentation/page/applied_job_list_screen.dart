@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/binding/business_binding.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
@@ -13,7 +14,12 @@ class AppliedJobsScreen extends StatefulWidget {
 }
 
 class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
-  final BusinessController controller = Get.find<BusinessController>();
+  BusinessController get controller {
+    if (!Get.isRegistered<BusinessController>()) {
+      BusinessBinding().dependencies();
+    }
+    return Get.find<BusinessController>();
+  }
 
   @override
   void initState() {

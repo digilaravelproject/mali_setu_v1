@@ -174,19 +174,20 @@ class RegisterPage extends GetWidget<RegisterController> {
                   ],
                 ),
   
-                // const SizedBox(height: 8),
-  
-                // // Caste Certificate Section
-                // _buildFormSection(
-                //   context,
-                //   title: "caste_certificate".tr,
-                //   icon: CupertinoIcons.doc_plaintext,
-                //   isRequired: true,
-                //   titleSize: 12,
-                //   children: [
-                //     Obx(() => _buildCasteCertificateUpload(context)),
-                //   ],
-                // ),
+                const SizedBox(height: 8),
+
+                // Caste Certificate Section
+                _buildFormSection(
+                  context,
+                  key: controller.casteCertificateKey,
+                  title: "caste_certificate".tr,
+                  icon: CupertinoIcons.doc_plaintext,
+                  isRequired: true,
+                  titleSize: 12,
+                  children: [
+                    Obx(() => _buildCasteCertificateUpload(context)),
+                  ],
+                ),
   
                 const SizedBox(height: 8),
   
@@ -655,6 +656,7 @@ class RegisterPage extends GetWidget<RegisterController> {
 
   Widget _buildFormSection(
       BuildContext context, {
+        Key? key,
         required String title,
         required IconData icon,
         required List<Widget> children,
@@ -667,6 +669,7 @@ class RegisterPage extends GetWidget<RegisterController> {
     final theme = Theme.of(context);
 
     return Container(
+      key: key,
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),

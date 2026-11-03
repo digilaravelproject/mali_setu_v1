@@ -698,6 +698,8 @@ class Job {
   String? updatedAt;
   String? createdAt;
   Business? business;
+  int? applicationsCount;
+  bool? isLiked;
 
   Job({
     this.id,
@@ -720,6 +722,8 @@ class Job {
     this.updatedAt,
     this.createdAt,
     this.business,
+    this.applicationsCount,
+    this.isLiked,
   });
 
   factory Job.fromJson(Map<String, dynamic> json) {
@@ -750,6 +754,8 @@ class Job {
       business: json['business'] != null
           ? Business.fromJson(json['business'])
           : null,
+      applicationsCount: _asInt(json['applications_count']),
+      isLiked: json['is_liked'] == 1 || json['is_liked'] == true,
     );
   }
 }

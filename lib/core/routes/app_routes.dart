@@ -1,4 +1,4 @@
-import 'package:edu_cluezer/features/business/presentation/page/apply_job_page.dart';
+import 'package:edu_cluezer/features/business/presentation/page/apply_job_screen.dart';
 import 'package:edu_cluezer/features/jobs/presentation/screens/jobs_screen.dart';
 import 'package:edu_cluezer/features/jobs/binding/jobs_binding.dart';
 import '../../features/settings/page/settings_screen.dart';
@@ -290,7 +290,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.applyJob,
-      page: () => const ApplyJobPage(),
+      page: () => const ApplyJobScreen(),
       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),

@@ -22,6 +22,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
+import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/widget/product_service_action_sheet.dart';
 import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
@@ -1548,6 +1549,37 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                         _buildJobStatusBadge(job, context),
+                                        if (job.id != null) ...[
+                                          const SizedBox(width: 6),
+                                          Obx(() {
+                                            final jobsCtrl = Get.isRegistered<JobsController>()
+                                                ? Get.find<JobsController>()
+                                                : Get.put(JobsController());
+                                            final isFav = jobsCtrl.favoriteJobIds.contains(job.id) ||
+                                                job.isLiked == true;
+                                            return GestureDetector(
+                                              behavior: HitTestBehavior.opaque,
+                                              onTap: () {
+                                                jobsCtrl.toggleFavorite(
+                                                  job.id,
+                                                  currentLiked: job.isLiked,
+                                                );
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(4.0),
+                                                child: Icon(
+                                                  isFav
+                                                      ? CupertinoIcons.heart_fill
+                                                      : CupertinoIcons.heart,
+                                                  size: 22,
+                                                  color: isFav
+                                                      ? const Color(0xFFE11D48)
+                                                      : const Color(0xFF9CA3AF),
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ],
                                       ],
                                     ),
                                     Text(
