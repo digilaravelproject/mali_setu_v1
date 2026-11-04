@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/styles/app_colors.dart';
+import '../../../../widgets/custom_snack_bar.dart';
 import '../controllers/webinars_controller.dart';
 import '../widgets/webinar_card.dart';
 import 'webinar_details_screen.dart';
@@ -247,25 +248,26 @@ class WebinarsListScreen extends StatelessWidget {
                       onRegisterTap: () {
                         controller.selectWebinar(webinar);
                         final isReg = controller.isWebinarRegistered(webinar.id) || webinar.isRegistered;
+                        final needsRegistration = webinar.requireRegistration && !isReg;
 
-                        if (webinar.isLiveSession) {
-                          Get.to(
-                            () => WebinarLiveScreen(webinar: webinar),
-                            transition: Transition.fadeIn,
-                          );
-                        } else if (webinar.isCompleted) {
+                        if (webinar.isCompleted) {
                           Get.to(
                             () => WebinarDetailsScreen(webinar: webinar),
                             transition: Transition.cupertino,
                           );
-                        } else if (isReg) {
+                        } else if (needsRegistration) {
+                          // Direct register on click!
+                          controller.registerForWebinar(webinar.id);
+                        } else if (webinar.isLiveSession) {
                           Get.to(
                             () => WebinarLiveScreen(webinar: webinar),
                             transition: Transition.fadeIn,
                           );
                         } else {
-                          // Direct register on click! No form/page!
-                          controller.registerForWebinar(webinar.id);
+                          // Already registered & Upcoming: session has not started yet
+                          CustomSnackBar.showInfo(
+                            message: "You are registered. You can join when the session goes live on ${webinar.dateString} at ${webinar.timeString}.",
+                          );
                         }
                       },
                     );

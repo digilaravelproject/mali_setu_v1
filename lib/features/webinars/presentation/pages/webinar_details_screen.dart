@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/styles/app_colors.dart';
+import '../../../../widgets/custom_snack_bar.dart';
 import '../../data/models/webinar_model.dart';
 import '../controllers/webinars_controller.dart';
 import 'webinar_live_screen.dart';
@@ -134,6 +135,21 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
                   Center(
                     child: GestureDetector(
                       onTap: () {
+                        if (webinar.isCompleted) {
+                          CustomSnackBar.showInfo(message: "This webinar has already ended.");
+                          return;
+                        }
+                        if (!webinar.isLiveSession) {
+                          CustomSnackBar.showInfo(
+                            message: "Webinar will start on ${webinar.dateString} at ${webinar.timeString}. You can join when it goes live.",
+                          );
+                          return;
+                        }
+                        final isReg = controller.isWebinarRegistered(webinar.id) || webinar.isRegistered;
+                        if (webinar.requireRegistration && !isReg) {
+                          CustomSnackBar.showInfo(message: "Please register first to join this live webinar.");
+                          return;
+                        }
                         Get.to(
                           () => WebinarLiveScreen(webinar: webinar),
                           transition: Transition.fadeIn,
@@ -373,52 +389,69 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
             final isRegistered = controller.isWebinarRegistered(webinar.id) || webinar.isRegistered;
             final isLive = webinar.isLiveSession;
             final isCompleted = webinar.isCompleted;
+            final requireRegistration = webinar.requireRegistration;
             final isRegistering = controller.isRegistering.value;
 
-            String buttonText = "Register for Webinar";
-            Color buttonColor = AppColors.primary;
-            IconData buttonIcon = Icons.app_registration_rounded;
+            // Registration is required if requireRegistration is true AND user is not registered yet
+            final needsRegistration = requireRegistration && !isRegistered;
 
-            if (isLive) {
-              buttonText = "Join Webinar (Live)";
-              buttonColor = const Color(0xFFEF4444);
-              buttonIcon = Icons.videocam_rounded;
-            } else if (isCompleted) {
+            String buttonText;
+            Color buttonColor;
+            IconData buttonIcon;
+            VoidCallback? onTapAction;
+
+            if (isCompleted) {
               buttonText = "Webinar Completed";
               buttonColor = const Color(0xFF64748B);
               buttonIcon = Icons.check_circle_outline_rounded;
-            } else if (isRegistered) {
-              buttonText = "Registered • Join Live";
+              onTapAction = () {
+                CustomSnackBar.showInfo(message: "This webinar has already ended.");
+              };
+            } else if (needsRegistration) {
+              // Registration is required and user has NOT registered yet
+              buttonText = isLive ? "Register to Join Live" : "Register for Webinar";
+              buttonColor = AppColors.primary;
+              buttonIcon = Icons.app_registration_rounded;
+              onTapAction = () async {
+                final ok = await controller.registerForWebinar(webinar.id);
+                if (ok && mounted) {
+                  setState(() {
+                    webinar = webinar.copyWith(
+                      isRegistered: true,
+                      registeredCount: webinar.registeredCount + 1,
+                    );
+                  });
+                }
+              };
+            } else if (isLive) {
+              // Webinar is LIVE and user has access (registered or registration not required)
+              buttonText = "Join Webinar (Live)";
+              buttonColor = const Color(0xFFEF4444);
+              buttonIcon = Icons.videocam_rounded;
+              onTapAction = () {
+                Get.to(
+                  () => WebinarLiveScreen(webinar: webinar),
+                  transition: Transition.fadeIn,
+                );
+              };
+            } else {
+              // Webinar is UPCOMING and user has access (registered or require_registration == false)
+              // User cannot join until live, and cannot re-register!
+              buttonText = "Registered • Starts Soon";
               buttonColor = const Color(0xFF10B981);
               buttonIcon = Icons.check_circle_rounded;
+              onTapAction = () {
+                CustomSnackBar.showInfo(
+                  message: "You are registered. You can join when the session goes live on ${webinar.dateString} at ${webinar.timeString}.",
+                );
+              };
             }
 
             return SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () async {
-                  if (isCompleted || isRegistering) {
-                    return;
-                  }
-                  if (isRegistered || isLive) {
-                    Get.to(
-                      () => WebinarLiveScreen(webinar: webinar),
-                      transition: Transition.fadeIn,
-                    );
-                  } else {
-                    // Direct API Call on click! No separate page or form fields!
-                    final ok = await controller.registerForWebinar(webinar.id);
-                    if (ok && mounted) {
-                      setState(() {
-                        webinar = webinar.copyWith(
-                          isRegistered: true,
-                          registeredCount: webinar.registeredCount + 1,
-                        );
-                      });
-                    }
-                  }
-                },
+                onPressed: isRegistering ? null : onTapAction,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   elevation: 0,
