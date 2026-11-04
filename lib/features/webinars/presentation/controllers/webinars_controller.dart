@@ -240,34 +240,82 @@ class WebinarsController extends GetxController {
     selectedWebinar.value = webinar;
   }
 
-  Future<bool> registerForWebinar({
-    required int webinarId,
-    required String name,
-    required String email,
-    required String phone,
-  }) async {
+  Future<bool> registerForWebinar([int? webinarId]) async {
+    final targetId = webinarId ?? selectedWebinar.value?.id;
+    if (targetId == null) {
+      CustomSnackBar.showError(message: "Webinar details not found");
+      return false;
+    }
+
+    if (isRegistering.value) return false;
     isRegistering.value = true;
     HapticFeedback.mediumImpact();
 
-    await Future.delayed(const Duration(milliseconds: 700));
-
-    registeredWebinarIds.add(webinarId);
-
-    final idx = webinars.indexWhere((w) => w.id == webinarId);
-    if (idx != -1) {
-      final current = webinars[idx];
-      webinars[idx] = current.copyWith(
-        isRegistered: true,
-        registeredCount: current.registeredCount + 1,
+    try {
+      final response = await _apiClient.post(
+        "${ApiConstants.getWebinars}/$targetId/register",
+        data: '',
       );
-      if (selectedWebinar.value?.id == webinarId) {
-        selectedWebinar.value = webinars[idx];
-      }
-      webinars.refresh();
-    }
 
-    isRegistering.value = false;
-    return true;
+      final data = response.data;
+      final int statusCode = response.statusCode ?? 500;
+      final bool isSuccess = (statusCode == 200 || statusCode == 201) &&
+          (data is Map
+              ? (data['success'] == true ||
+                  data['success'] == 1 ||
+                  data['status'] == true)
+              : true);
+
+      String msg = isSuccess
+          ? "Webinar registration successful. Details were emailed to you."
+          : "Failed to register for webinar";
+
+      if (data is Map && data['message'] != null && data['message'].toString().isNotEmpty) {
+        msg = data['message'].toString();
+      }
+
+      if (isSuccess) {
+        registeredWebinarIds.add(targetId);
+
+        final idx = webinars.indexWhere((w) => w.id == targetId);
+        if (idx != -1) {
+          final current = webinars[idx];
+          webinars[idx] = current.copyWith(
+            isRegistered: true,
+            registeredCount: current.registeredCount + 1,
+          );
+          if (selectedWebinar.value?.id == targetId) {
+            selectedWebinar.value = webinars[idx];
+          }
+          webinars.refresh();
+        }
+
+        if (Get.isRegistered<HomeController>()) {
+          final homeCtrl = Get.find<HomeController>();
+          final hIdx = homeCtrl.upcomingWebinars.indexWhere((w) => w.id == targetId);
+          if (hIdx != -1) {
+            final hCurrent = homeCtrl.upcomingWebinars[hIdx];
+            homeCtrl.upcomingWebinars[hIdx] = hCurrent.copyWith(
+              isRegistered: true,
+              registeredCount: hCurrent.registeredCount + 1,
+            );
+            homeCtrl.upcomingWebinars.refresh();
+          }
+        }
+
+        CustomSnackBar.showSuccess(message: msg);
+        return true;
+      } else {
+        CustomSnackBar.showError(message: msg);
+        return false;
+      }
+    } catch (e) {
+      print("ERROR_REGISTER_WEBINAR: $e");
+      CustomSnackBar.showError(message: "Failed to register for webinar. Please try again.");
+      return false;
+    } finally {
+      isRegistering.value = false;
+    }
   }
 
   bool isWebinarRegistered(int webinarId) {

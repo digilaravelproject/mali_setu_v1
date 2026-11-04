@@ -226,12 +226,7 @@ class _WebinarRegistrationPageState extends State<WebinarRegistrationPage> {
                               return;
                             }
 
-                            final success = await controller.registerForWebinar(
-                              webinarId: webinar.id,
-                              name: name,
-                              email: email,
-                              phone: phone,
-                            );
+                            final success = await controller.registerForWebinar(webinar.id);
 
                             if (success) {
                               Get.off(

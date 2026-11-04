@@ -18,9 +18,28 @@ class WebinarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isRegistered = webinar.isRegistered;
+    final needsRegistration = webinar.requireRegistration && !webinar.isRegistered;
     final isLive = webinar.isLiveSession;
     final isCompleted = webinar.isCompleted;
+
+    Color btnColor;
+    String btnText;
+    bool showCheck = false;
+
+    if (isCompleted) {
+      btnColor = const Color(0xFFF1F5F9);
+      btnText = "Details";
+    } else if (needsRegistration) {
+      btnColor = AppColors.primary;
+      btnText = "Register";
+    } else if (isLive) {
+      btnColor = const Color(0xFFEF4444);
+      btnText = "Join Live";
+    } else {
+      btnColor = const Color(0xFF10B981);
+      btnText = "Registered";
+      showCheck = true;
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
@@ -256,13 +275,7 @@ class WebinarCard extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: isLive
-                                    ? const Color(0xFFEF4444)
-                                    : isCompleted
-                                        ? const Color(0xFFF1F5F9)
-                                        : (isRegistered
-                                            ? const Color(0xFF10B981)
-                                            : AppColors.primary),
+                                color: btnColor,
                                 borderRadius: BorderRadius.circular(8),
                                 border: isCompleted
                                     ? Border.all(color: const Color(0xFFCBD5E1), width: 1)
@@ -271,7 +284,7 @@ class WebinarCard extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  if (isRegistered && !isLive && !isCompleted) ...[
+                                  if (showCheck) ...[
                                     const Icon(
                                       Icons.check_rounded,
                                       size: 13,
@@ -280,11 +293,7 @@ class WebinarCard extends StatelessWidget {
                                     const SizedBox(width: 3),
                                   ],
                                   Text(
-                                    isLive
-                                        ? "Join Live"
-                                        : isCompleted
-                                            ? "Details"
-                                            : (isRegistered ? "Registered" : "Register"),
+                                    btnText,
                                     style: TextStyle(
                                       color: isCompleted
                                           ? const Color(0xFF475569)

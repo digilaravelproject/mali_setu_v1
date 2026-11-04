@@ -236,12 +236,7 @@ class WebinarRegistrationSheet extends StatelessWidget {
                                   return;
                                 }
 
-                                final success = await controller.registerForWebinar(
-                                  webinarId: webinar.id,
-                                  name: name,
-                                  email: email,
-                                  phone: phone,
-                                );
+                                final success = await controller.registerForWebinar(webinar.id);
 
                                 if (success) {
                                   Get.back(); // Close registration sheet

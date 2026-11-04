@@ -6,7 +6,6 @@ import '../controllers/webinars_controller.dart';
 import '../widgets/webinar_card.dart';
 import 'webinar_details_screen.dart';
 import 'webinar_live_screen.dart';
-import 'webinar_registration_page.dart';
 
 class WebinarsListScreen extends StatelessWidget {
   const WebinarsListScreen({super.key});
@@ -247,6 +246,8 @@ class WebinarsListScreen extends StatelessWidget {
                       },
                       onRegisterTap: () {
                         controller.selectWebinar(webinar);
+                        final isReg = controller.isWebinarRegistered(webinar.id) || webinar.isRegistered;
+
                         if (webinar.isLiveSession) {
                           Get.to(
                             () => WebinarLiveScreen(webinar: webinar),
@@ -257,16 +258,14 @@ class WebinarsListScreen extends StatelessWidget {
                             () => WebinarDetailsScreen(webinar: webinar),
                             transition: Transition.cupertino,
                           );
-                        } else if (webinar.isRegistered) {
+                        } else if (isReg) {
                           Get.to(
                             () => WebinarLiveScreen(webinar: webinar),
                             transition: Transition.fadeIn,
                           );
                         } else {
-                          Get.to(
-                            () => WebinarRegistrationPage(webinar: webinar),
-                            transition: Transition.cupertino,
-                          );
+                          // Direct register on click! No form/page!
+                          controller.registerForWebinar(webinar.id);
                         }
                       },
                     );

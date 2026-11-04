@@ -7,7 +7,6 @@ import '../../../../core/styles/app_colors.dart';
 import '../../data/models/webinar_model.dart';
 import '../controllers/webinars_controller.dart';
 import 'webinar_live_screen.dart';
-import 'webinar_registration_page.dart';
 
 class WebinarDetailsScreen extends StatefulWidget {
   final Webinar? webinar;
@@ -374,6 +373,7 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
             final isRegistered = controller.isWebinarRegistered(webinar.id) || webinar.isRegistered;
             final isLive = webinar.isLiveSession;
             final isCompleted = webinar.isCompleted;
+            final isRegistering = controller.isRegistering.value;
 
             String buttonText = "Register for Webinar";
             Color buttonColor = AppColors.primary;
@@ -397,8 +397,8 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  if (isCompleted) {
+                onPressed: () async {
+                  if (isCompleted || isRegistering) {
                     return;
                   }
                   if (isRegistered || isLive) {
@@ -407,10 +407,16 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
                       transition: Transition.fadeIn,
                     );
                   } else {
-                    Get.to(
-                      () => WebinarRegistrationPage(webinar: webinar),
-                      transition: Transition.cupertino,
-                    );
+                    // Direct API Call on click! No separate page or form fields!
+                    final ok = await controller.registerForWebinar(webinar.id);
+                    if (ok && mounted) {
+                      setState(() {
+                        webinar = webinar.copyWith(
+                          isRegistered: true,
+                          registeredCount: webinar.registeredCount + 1,
+                        );
+                      });
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -420,26 +426,32 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      buttonIcon,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      buttonText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
+                child: isRegistering
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CupertinoActivityIndicator(color: Colors.white, radius: 10),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            buttonIcon,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            buttonText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             );
           }),

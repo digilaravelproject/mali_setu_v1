@@ -486,7 +486,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.webinarRegistration,
-      page: () => const WebinarRegistrationPage(),
+      page: () => const WebinarDetailsScreen(),
       binding: WebinarsBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),

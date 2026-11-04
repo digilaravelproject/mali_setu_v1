@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/storage/token_manger.dart';
+import 'package:edu_cluezer/core/helper/firebase_recaptcha_helper.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 
 /// Country data model
@@ -313,9 +316,29 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
   /// Returns the combined phone string in format "+919876543210"
   String getCombinedPhone() {
-    final code = countryCodeCtrl.text.trim();
-    final number = phoneCtrl.text.trim();
+    String code = countryCodeCtrl.text.trim();
+    String number = phoneCtrl.text.trim();
     if (number.isEmpty) return '';
+
+    // Strip spaces and special chars
+    number = number.replaceAll(RegExp(r'\s+|-'), '');
+    code = code.replaceAll(RegExp(r'\s+|-'), '');
+
+    if (!code.startsWith('+')) {
+      code = '+$code';
+    }
+
+    if (number.startsWith('+')) {
+      return number;
+    }
+
+    final codeDigits = code.replaceAll('+', '');
+    if (codeDigits.isNotEmpty &&
+        number.startsWith(codeDigits) &&
+        number.length >= codeDigits.length + 10) {
+      return '+$number';
+    }
+
     return '$code$number';
   }
 
@@ -364,6 +387,16 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
     final fullPhoneNumber = getCombinedPhone();
 
     try {
+      // 1. Obtain real Firebase reCAPTCHA token
+      final recaptchaToken = await FirebaseRecaptchaHelper.getRecaptchaToken(context);
+      if (recaptchaToken == null || recaptchaToken.isEmpty) {
+        if (mounted) {
+          setState(() => isSendingOtp = false);
+        }
+        CustomSnackBar.showError(message: 'Security verification failed or was cancelled. Please try again.');
+        return;
+      }
+
       ApiClient apiClient;
       if (Get.isRegistered<ApiClient>()) {
         apiClient = Get.find<ApiClient>();
@@ -372,46 +405,86 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
         Get.put<ApiClient>(apiClient, permanent: true);
       }
 
+      final token = await TokenManager.getToken();
+      final headers = <String, dynamic>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token ?? ''}',
+      };
+
+      // Exact API: POST https://malisetu.com/api/auth/phone/send-otp
       final response = await apiClient.post(
         ApiConstants.authPhoneSendOtp,
         data: {
           "phone_number": fullPhoneNumber,
-          "recaptcha_token": "FIREBASE_RECAPTCHA_TOKEN",
+          "recaptcha_token": recaptchaToken,
         },
+        options: Options(headers: headers),
       );
 
       final data = response.data;
-      final bool isSuccess = data is Map && data['success'] == true;
-      final String msg = data is Map
-          ? (data['message'] ?? (isSuccess ? 'OTP sent successfully' : 'Failed to send OTP'))
-          : 'OTP request completed';
+      final int statusCode = response.statusCode ?? 500;
+      final bool isSuccess = (statusCode == 200 || statusCode == 201) &&
+          (data is Map
+              ? (data['success'] == true ||
+                  data['success'] == 1 ||
+                  data['status'] == true ||
+                  (data['error'] == null && data['errors'] == null))
+              : true);
+
+      String msg = isSuccess ? 'OTP sent successfully' : 'Failed to send OTP';
+      if (data is Map) {
+        if (data['message'] != null && data['message'].toString().isNotEmpty) {
+          msg = data['message'].toString();
+        } else if (data['error'] != null) {
+          msg = data['error'].toString();
+        } else if (data['errors'] != null && data['errors'] is Map) {
+          final errMap = data['errors'] as Map;
+          if (errMap.isNotEmpty) {
+            final firstErr = errMap.values.first;
+            if (firstErr is List && firstErr.isNotEmpty) {
+              msg = firstErr.first.toString();
+            } else {
+              msg = firstErr.toString();
+            }
+          }
+        }
+      }
 
       if (isSuccess) {
         CustomSnackBar.showSuccess(message: msg);
+        if (mounted) {
+          setState(() {
+            isOtpSent = true;
+            isSendingOtp = false;
+            errorMessage = null;
+          });
+          _startResendTimer();
+          HapticFeedback.lightImpact();
+
+          if (otpFocusNodes.isNotEmpty) {
+            Future.delayed(const Duration(milliseconds: 150), () {
+              if (mounted) otpFocusNodes[0].requestFocus();
+            });
+          }
+        }
       } else {
-        final err = (data is Map && data['error'] != null)
-            ? data['error'].toString()
-            : msg;
-        CustomSnackBar.showError(message: err);
+        if (mounted) {
+          setState(() {
+            isSendingOtp = false;
+            errorMessage = msg;
+          });
+        }
+        CustomSnackBar.showError(message: msg);
       }
     } catch (e) {
-      CustomSnackBar.showError(message: 'Error sending OTP: $e');
-    } finally {
       if (mounted) {
         setState(() {
           isSendingOtp = false;
-          isOtpSent = true;
-          errorMessage = null;
+          errorMessage = 'Error sending OTP: $e';
         });
-        _startResendTimer();
-        HapticFeedback.lightImpact();
-
-        if (otpFocusNodes.isNotEmpty) {
-          Future.delayed(const Duration(milliseconds: 150), () {
-            if (mounted) otpFocusNodes[0].requestFocus();
-          });
-        }
       }
+      CustomSnackBar.showError(message: 'Error sending OTP: $e');
     }
   }
 
@@ -429,6 +502,16 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
     final fullPhoneNumber = getCombinedPhone();
 
     try {
+      // 1. Obtain real Firebase reCAPTCHA token
+      final recaptchaToken = await FirebaseRecaptchaHelper.getRecaptchaToken(context);
+      if (recaptchaToken == null || recaptchaToken.isEmpty) {
+        if (mounted) {
+          setState(() => isResendingOtp = false);
+        }
+        CustomSnackBar.showError(message: 'Security verification failed or was cancelled. Please try again.');
+        return;
+      }
+
       ApiClient apiClient;
       if (Get.isRegistered<ApiClient>()) {
         apiClient = Get.find<ApiClient>();
@@ -437,44 +520,93 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
         Get.put<ApiClient>(apiClient, permanent: true);
       }
 
-      final response = await apiClient.post(
+      final token = await TokenManager.getToken();
+      final headers = <String, dynamic>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token ?? ''}',
+      };
+
+      // Try authPhoneResendOtp, fall back to authPhoneSendOtp if needed
+      Response response = await apiClient.post(
         ApiConstants.authPhoneResendOtp,
         data: {
           "phone_number": fullPhoneNumber,
-          "recaptcha_token": "NEW_FIREBASE_RECAPTCHA_TOKEN",
+          "recaptcha_token": recaptchaToken,
         },
+        options: Options(headers: headers),
       );
 
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        response = await apiClient.post(
+          ApiConstants.authPhoneSendOtp,
+          data: {
+            "phone_number": fullPhoneNumber,
+            "recaptcha_token": recaptchaToken,
+          },
+          options: Options(headers: headers),
+        );
+      }
+
       final data = response.data;
-      final bool isSuccess = data is Map && data['success'] == true;
-      final String msg = data is Map
-          ? (data['message'] ?? (isSuccess ? 'OTP resent successfully' : 'Failed to resend OTP'))
-          : 'OTP resent';
+      final int statusCode = response.statusCode ?? 500;
+      final bool isSuccess = (statusCode == 200 || statusCode == 201) &&
+          (data is Map
+              ? (data['success'] == true ||
+                  data['success'] == 1 ||
+                  data['status'] == true ||
+                  (data['error'] == null && data['errors'] == null))
+              : true);
+
+      String msg = isSuccess ? 'OTP resent successfully' : 'Failed to resend OTP';
+      if (data is Map) {
+        if (data['message'] != null && data['message'].toString().isNotEmpty) {
+          msg = data['message'].toString();
+        } else if (data['error'] != null) {
+          msg = data['error'].toString();
+        } else if (data['errors'] != null && data['errors'] is Map) {
+          final errMap = data['errors'] as Map;
+          if (errMap.isNotEmpty) {
+            final firstErr = errMap.values.first;
+            if (firstErr is List && firstErr.isNotEmpty) {
+              msg = firstErr.first.toString();
+            } else {
+              msg = firstErr.toString();
+            }
+          }
+        }
+      }
 
       if (isSuccess) {
         CustomSnackBar.showSuccess(message: msg);
+        if (mounted) {
+          setState(() {
+            isResendingOtp = false;
+          });
+          _startResendTimer();
+          HapticFeedback.lightImpact();
+
+          if (otpFocusNodes.isNotEmpty) {
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (mounted) otpFocusNodes[0].requestFocus();
+            });
+          }
+        }
       } else {
-        final err = (data is Map && data['error'] != null)
-            ? data['error'].toString()
-            : msg;
-        CustomSnackBar.showError(message: err);
+        if (mounted) {
+          setState(() {
+            isResendingOtp = false;
+          });
+        }
+        CustomSnackBar.showError(message: msg);
       }
     } catch (e) {
-      CustomSnackBar.showError(message: 'Error resending OTP: $e');
-    } finally {
       if (mounted) {
         setState(() {
           isResendingOtp = false;
         });
-        _startResendTimer();
-        HapticFeedback.lightImpact();
-
-        if (otpFocusNodes.isNotEmpty) {
-          Future.delayed(const Duration(milliseconds: 100), () {
-            if (mounted) otpFocusNodes[0].requestFocus();
-          });
-        }
       }
+      CustomSnackBar.showError(message: 'Error resending OTP: $e');
     }
   }
 

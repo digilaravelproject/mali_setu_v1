@@ -21,6 +21,7 @@ class Webinar {
   final String meetingLink;
   final String accessType;
   final String fee;
+  final bool requireRegistration;
   final List<String> keyPoints;
   final List<WebinarAgendaItem> agenda;
 
@@ -43,6 +44,7 @@ class Webinar {
     this.meetingLink = 'https://meet.google.com/malisetu-live',
     this.accessType = 'free',
     this.fee = 'Free',
+    this.requireRegistration = true,
     required this.keyPoints,
     required this.agenda,
   });
@@ -50,7 +52,8 @@ class Webinar {
   bool get isPaid => accessType.toLowerCase() == 'paid' || (fee.isNotEmpty && fee.toLowerCase() != 'free' && fee != '0');
   bool get isCompleted => status.toLowerCase() == 'completed';
   bool get isLiveSession => status.toLowerCase() == 'live' || isLive;
-  bool get isUpcoming => !isCompleted && !isLiveSession;
+  bool get isUpcoming => status.toLowerCase() == 'upcoming' || (!isCompleted && !isLiveSession);
+  bool get hasAccess => !requireRegistration || isRegistered;
 
   factory Webinar.fromApiJson(Map<String, dynamic> json) {
     final int id = json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0;
@@ -145,6 +148,12 @@ class Webinar {
     final String accessType = (json['access_type'] ?? 'free').toString();
     final String fee = (json['fee'] ?? json['price'] ?? (accessType.toLowerCase() == 'paid' ? 'Paid' : 'Free')).toString();
 
+    bool requireReg = true;
+    if (json.containsKey('require_registration')) {
+      final v = json['require_registration'];
+      requireReg = v == true || v == 1 || v?.toString() == '1' || v?.toString().toLowerCase() == 'true';
+    }
+
     return Webinar(
       id: id,
       title: title,
@@ -166,6 +175,7 @@ class Webinar {
           : '',
       accessType: accessType,
       fee: fee,
+      requireRegistration: requireReg,
       keyPoints: keyPointsList,
       agenda: agendaList,
     );
@@ -190,6 +200,7 @@ class Webinar {
     String? meetingLink,
     String? accessType,
     String? fee,
+    bool? requireRegistration,
     List<String>? keyPoints,
     List<WebinarAgendaItem>? agenda,
   }) {
@@ -212,6 +223,7 @@ class Webinar {
       meetingLink: meetingLink ?? this.meetingLink,
       accessType: accessType ?? this.accessType,
       fee: fee ?? this.fee,
+      requireRegistration: requireRegistration ?? this.requireRegistration,
       keyPoints: keyPoints ?? this.keyPoints,
       agenda: agenda ?? this.agenda,
     );
