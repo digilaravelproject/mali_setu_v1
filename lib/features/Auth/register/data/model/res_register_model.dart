@@ -97,13 +97,15 @@ class Data {
   User? user;
   String? token;
   String? tokenType;
+  String? referralCode;
 
-  Data({this.user, this.token, this.tokenType});
+  Data({this.user, this.token, this.tokenType, this.referralCode});
 
   Data.fromJson(Map<String, dynamic> json) {
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     token = json['token'];
     tokenType = json['token_type'];
+    referralCode = json['referral_code'] ?? json['reffral_code'];
   }
 
   Map<String, dynamic> toJson() {
@@ -113,6 +115,7 @@ class Data {
     }
     data['token'] = token;
     data['token_type'] = tokenType;
+    data['referral_code'] = referralCode;
     return data;
   }
 }
@@ -139,6 +142,7 @@ class User {
   String? updatedAt;
   String? createdAt;
   int? id;
+  int? referredByUserId;
 
   User(
       {this.name,
@@ -161,7 +165,8 @@ class User {
       this.casteVerificationStatus,
       this.updatedAt,
       this.createdAt,
-      this.id});
+      this.id,
+      this.referredByUserId});
 
   User.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -171,7 +176,7 @@ class User {
       age = int.tryParse(json['age'].toString());
     }
     occupation = json['occupation'];
-    reffralCode = json['reffral_code'];
+    reffralCode = json['referral_code'] ?? json['reffral_code'];
     address = json['address'];
     nearbyLocation = json['nearby_location'];
     pincode = json['pincode'];
@@ -187,6 +192,9 @@ class User {
     updatedAt = json['updated_at'];
     createdAt = json['created_at'];
     id = json['id'];
+    if (json['referred_by_user_id'] != null) {
+      referredByUserId = int.tryParse(json['referred_by_user_id'].toString());
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -196,6 +204,7 @@ class User {
     data['phone'] = phone;
     data['age'] = age;
     data['occupation'] = occupation;
+    data['referral_code'] = reffralCode;
     data['reffral_code'] = reffralCode;
     data['address'] = address;
     data['nearby_location'] = nearbyLocation;
@@ -212,6 +221,7 @@ class User {
     data['updated_at'] = updatedAt;
     data['created_at'] = createdAt;
     data['id'] = id;
+    data['referred_by_user_id'] = referredByUserId;
     return data;
   }
 }

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,6 +12,9 @@ import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/pincode_helper.dart';
 import '../../../../../core/helper/location_helper.dart';
+import '../../../../../core/constent/app_constants.dart';
+import '../../../../../core/storage/shared_prefs.dart';
+import '../../../../../core/storage/token_manger.dart';
 import '../../data/model/req_register_model.dart';
 import '../../domain/usecase/register_usecase.dart';
 
@@ -318,29 +320,6 @@ class RegisterController extends GetxController {
     casteCertificateBase64 = null;
   }
 
-  /// VALIDATE CASTE CERTIFICATE
-  bool _validateCasteCertificate() {
-    if (casteCertificatePath.value.isEmpty) {
-      casteCertificateError.value = "Please upload caste certificate";
-      return false;
-    }
-    casteCertificateError.value = '';
-    return true;
-  }
-
-  String _getMimeType(String filePath) {
-    final ext = filePath.split('.').last.toLowerCase();
-    switch (ext) {
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'png':
-        return 'image/png';
-      default:
-        return 'image/jpeg';
-    }
-  }
-
   final RegisterUseCase registerUseCase;
 
   RegisterController({required this.registerUseCase});
@@ -396,16 +375,6 @@ class RegisterController extends GetxController {
       scrollToKey(phoneFieldKey);
       CustomSnackBar.showError(
         message: phoneValidationError,
-      );
-      return;
-    }
-
-    // Caste Certificate
-    if (casteCertificatePath.value.isEmpty) {
-      casteCertificateError.value = "upload_caste_certificate".tr;
-      scrollToKey(casteCertificateKey);
-      CustomSnackBar.showError(
-        message: "upload_caste_certificate".tr,
       );
       return;
     }
@@ -578,7 +547,31 @@ class RegisterController extends GetxController {
       print("registerresponse : " + response.toString());
 
       if (response.success == true ||
-          response.message == "User registered successfully") {
+          response.message == "User registered successfully" ||
+          (response.messageString?.toLowerCase().contains("registered") ?? false)) {
+
+        // Save referral_code to SharedPreferences
+        final refCode = response.data?.referralCode ??
+            response.data?.user?.reffralCode ??
+            referralCtrl.text.trim();
+        if (refCode.isNotEmpty) {
+          await SharedPrefs.setString(AppConstants.referralCodePref, refCode);
+          debugPrint("DEBUG_REGISTER: Saved referral_code to SharedPreferences: $refCode");
+        }
+
+        // Save token if available
+        if (response.data?.token != null && response.data!.token!.isNotEmpty) {
+          await TokenManager.saveToken(response.data!.token!);
+        }
+
+        // Save user data if available
+        if (response.data?.user != null) {
+          await SharedPrefs.setString(
+            AppConstants.userDataPref,
+            jsonEncode(response.data!.user!.toJson()),
+          );
+        }
+
         CustomSnackBar.showSuccess(
           message: response.messageString ?? "Registration completed successfully",
         );

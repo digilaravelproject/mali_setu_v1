@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +14,6 @@ import '../../../../../widgets/language_selection_dialog.dart';
 import 'package:flutter/gestures.dart';
 import '../../../../../core/constent/api_constants.dart';
 import '../../../../../widgets/webview_page.dart';
-import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../controller/register_controller.dart';
 
 class RegisterPage extends GetWidget<RegisterController> {
@@ -171,21 +169,6 @@ class RegisterPage extends GetWidget<RegisterController> {
                       key: controller.phoneFieldKey,
                       isRequired: true,
                     ),
-                  ],
-                ),
-  
-                const SizedBox(height: 8),
-
-                // Caste Certificate Section
-                _buildFormSection(
-                  context,
-                  key: controller.casteCertificateKey,
-                  title: "caste_certificate".tr,
-                  icon: CupertinoIcons.doc_plaintext,
-                  isRequired: true,
-                  titleSize: 12,
-                  children: [
-                    Obx(() => _buildCasteCertificateUpload(context)),
                   ],
                 ),
   
@@ -350,12 +333,14 @@ class RegisterPage extends GetWidget<RegisterController> {
                      // validator: (v) => FormValidator.emptycheck(v, "designation".tr),
                       topPadding: 0,
                     ),
-                    // AppInputTextField(
-                    //   label: "referral_code".tr,
-                    //   controller: controller.referralCtrl,
-                    //   iconData: CupertinoIcons.tag_fill,
-                    //   topPadding: 0,
-                    // ),
+                    AppInputTextField(
+                      label: "referral_code".tr,
+                      controller: controller.referralCtrl,
+                      hintText: "MSU0001728",
+                      iconData: CupertinoIcons.tag_fill,
+                      isRequired: false,
+                      topPadding: 0,
+                    ),
                   ],
                 ),
   
@@ -736,150 +721,6 @@ class RegisterPage extends GetWidget<RegisterController> {
           ...children,
         ],
       ),
-    );
-  // }
-  // );
-  }
-
-  Widget _buildCasteCertificateUpload(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: controller.pickCasteCertificate,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              vertical: controller.casteCertificatePath.value.isEmpty ? 24 : 8,
-              horizontal: 16,
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: controller.casteCertificateError.value.isNotEmpty
-                    ? theme.colorScheme.error
-                    : controller.casteCertificatePath.value.isEmpty
-                        ? theme.dividerColor
-                        : Colors.transparent,
-                width: 1.5,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              color: controller.casteCertificatePath.value.isEmpty
-                  ? theme.colorScheme.surface
-                  : Colors.transparent,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Center(
-                  child: controller.casteCertificatePath.value.isEmpty
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              size: 40,
-                              color: theme.primaryColor,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "upload_caste_certificate".tr,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: theme.hintColor,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "caste_certificate_criteria".tr,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                if (controller.casteCertificatePath.value.toLowerCase().endsWith('.pdf'))
-                                  const Icon(
-                                    Icons.picture_as_pdf_rounded,
-                                    size: 60,
-                                    color: Colors.red,
-                                  )
-                                else
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.to(() => FullScreenImageViewer(
-                                        imageFile: File(controller.casteCertificatePath.value),
-                                        tag: 'caste_certificate',
-                                      ));
-                                    },
-                                    child: Hero(
-                                      tag: 'caste_certificate',
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.file(
-                                          File(controller.casteCertificatePath.value),
-                                          height: 120,
-                                          width: 120,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                Positioned(
-                                  top: -8,
-                                  right: -8,
-                                  child: GestureDetector(
-                                    onTap: controller.removeCasteCertificate,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white, width: 2),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (controller.casteCertificateError.value.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8, left: 4),
-            child: Text(
-              controller.casteCertificateError.value,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
-            ),
-          ),
-      ],
     );
   }
 }

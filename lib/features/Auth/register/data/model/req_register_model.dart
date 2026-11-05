@@ -70,7 +70,7 @@ class ReqRegisterModel {
     }
     phone = json['phone'];
     occupation = json['occupation'];
-    reffralCode = json['reffral_code'];
+    reffralCode = json['referral_code'] ?? json['reffral_code'];
     address = json['address'];
     nearbyLocation = json['nearby_location'];
     pincode = json['pincode'];
@@ -101,7 +101,10 @@ class ReqRegisterModel {
     data['age'] = age;
     data['phone'] = phone;
     data['occupation'] = occupation;
-    data['reffral_code'] = reffralCode;
+    if (reffralCode != null && reffralCode!.isNotEmpty) {
+      data['referral_code'] = reffralCode;
+      data['reffral_code'] = reffralCode;
+    }
     data['address'] = address;
     data['nearby_location'] = nearbyLocation;
     data['pincode'] = pincode;

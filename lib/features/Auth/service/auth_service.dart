@@ -23,6 +23,9 @@ class AuthService extends GetxService {
   final isCompanyLogin = false.obs;
   final currentUser = Rxn<User>();
 
+  /// Get saved referral code
+  String? get referralCode => SharedPrefs.getString(AppConstants.referralCodePref);
+
   // Added for logout functionality
   late final LogoutUseCase _logoutUseCase;
 
@@ -102,6 +105,20 @@ class AuthService extends GetxService {
             await SharedPrefs.setString(
               AppConstants.profileDataPref,
               jsonEncode(data['user']),
+            );
+          }
+
+          // Save referral code if present
+          final refCode = data['data']?['referral_code'] ??
+              data['data']?['user']?['referral_code'] ??
+              data['data']?['user']?['reffral_code'] ??
+              data['referral_code'] ??
+              data['user']?['referral_code'] ??
+              data['user']?['reffral_code'];
+          if (refCode != null && refCode.toString().isNotEmpty) {
+            await SharedPrefs.setString(
+              AppConstants.referralCodePref,
+              refCode.toString(),
             );
           }
 

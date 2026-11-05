@@ -27,6 +27,7 @@ class AppConstants {
   static const String savedEmailPref = "saved_email";
   static const String savedPasswordPref = "saved_password";
   static const String themePref = "theme_mode";
+  static const String referralCodePref = "referral_code";
 
   // User Type
   static const String userTypeUser = "user";
