@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/styles/app_colors.dart';
-import '../../../../widgets/custom_snack_bar.dart';
 import '../controllers/webinars_controller.dart';
 import '../widgets/webinar_card.dart';
+import '../widgets/webinar_notice_dialog.dart';
 import 'webinar_details_screen.dart';
 import 'webinar_live_screen.dart';
 
@@ -265,8 +265,10 @@ class WebinarsListScreen extends StatelessWidget {
                           );
                         } else {
                           // Already registered & Upcoming: session has not started yet
-                          CustomSnackBar.showInfo(
-                            message: "You are registered. You can join when the session goes live on ${webinar.dateString} at ${webinar.timeString}.",
+                          WebinarNoticeDialog.showUpcoming(
+                            context: context,
+                            dateString: webinar.dateString,
+                            timeString: webinar.timeString,
                           );
                         }
                       },

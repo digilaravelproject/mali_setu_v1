@@ -74,6 +74,7 @@ dependencies:
   package_info_plus: ^9.0.1
   upgrader: ^13.6.0
   firebase_messaging: ^16.7.1
+  agora_rtc_engine: ^6.6.4
 
 
 dev_dependencies:

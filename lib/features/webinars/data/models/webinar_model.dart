@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:intl/intl.dart';
 import '../../../../core/constent/api_constants.dart';
 
@@ -19,6 +18,7 @@ class Webinar {
   final bool isLive;
   final String status; // 'upcoming', 'live', 'completed'
   final String meetingLink;
+  final String agoraChannel;
   final String accessType;
   final String fee;
   final bool requireRegistration;
@@ -42,6 +42,7 @@ class Webinar {
     this.isLive = false,
     this.status = 'upcoming',
     this.meetingLink = 'https://meet.google.com/malisetu-live',
+    this.agoraChannel = '',
     this.accessType = 'free',
     this.fee = 'Free',
     this.requireRegistration = true,
@@ -173,6 +174,7 @@ class Webinar {
       meetingLink: (json['agora_link'] != null && json['agora_link'] != 'pending')
           ? json['agora_link'].toString()
           : '',
+      agoraChannel: (json['agora_channel'] ?? '').toString(),
       accessType: accessType,
       fee: fee,
       requireRegistration: requireReg,
@@ -198,6 +200,7 @@ class Webinar {
     bool? isLive,
     String? status,
     String? meetingLink,
+    String? agoraChannel,
     String? accessType,
     String? fee,
     bool? requireRegistration,
@@ -221,6 +224,7 @@ class Webinar {
       isLive: isLive ?? this.isLive,
       status: status ?? this.status,
       meetingLink: meetingLink ?? this.meetingLink,
+      agoraChannel: agoraChannel ?? this.agoraChannel,
       accessType: accessType ?? this.accessType,
       fee: fee ?? this.fee,
       requireRegistration: requireRegistration ?? this.requireRegistration,

@@ -1,10 +1,14 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/styles/app_colors.dart';
 import '../../../../widgets/custom_snack_bar.dart';
 import '../../data/models/webinar_model.dart';
+import '../../data/models/agora_token_model.dart';
 import '../controllers/webinars_controller.dart';
 
 class WebinarLiveScreen extends StatefulWidget {
@@ -23,21 +27,339 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
   final controller = Get.find<WebinarsController>();
   final ScrollController _commentsScrollController = ScrollController();
 
+  // Agora Engine & State
+  RtcEngine? _engine;
+  bool _isJoiningAgora = false;
+  bool _isJoined = false;
+  int? _remoteUid; // Host / Speaker UID
+  bool _isMicOn = false;
+  bool _isCameraOn = false;
+  bool _isFrontCamera = true;
+  String _streamStatusText = "Connecting to live session...";
+  bool _joinTokenFailed = false;
+  AgoraJoinTokenData? _tokenData;
+
   @override
   void initState() {
     super.initState();
     controller.liveViewerCount.value = widget.webinar.registeredCount;
     controller.fetchWebinarComments(widget.webinar.id, isRefresh: true);
+    controller.isMicOn.value = false;
+    controller.isCameraOn.value = false;
+    _initAgoraAndJoin();
+  }
+
+  Future<void> _initAgoraAndJoin() async {
+    if (!mounted) return;
+    setState(() {
+      _isJoiningAgora = true;
+      _joinTokenFailed = false;
+      _streamStatusText = "Fetching live stream access...";
+    });
+
+    try {
+      // 1. Fetch Agora Join Token from backend API: GET /api/webinars/{id}/join-token
+      final tokenData = await controller.getWebinarJoinToken(widget.webinar.id);
+
+      if (tokenData == null || (tokenData.token.isEmpty && tokenData.appId.isEmpty)) {
+        if (mounted) {
+          setState(() {
+            _isJoiningAgora = false;
+            _joinTokenFailed = true;
+            _streamStatusText = tokenData?.message.isNotEmpty == true
+                ? tokenData!.message
+                : "Webinar meeting has not started yet or access is restricted.";
+          });
+        }
+        return;
+      }
+
+      _tokenData = tokenData;
+
+      final appId = tokenData.appId;
+      if (appId.isEmpty) {
+        if (mounted) {
+          setState(() {
+            _isJoiningAgora = false;
+            _joinTokenFailed = true;
+            _streamStatusText = "Agora App ID is missing from server response.";
+          });
+        }
+        return;
+      }
+
+      final channelName = tokenData.channel.isNotEmpty
+          ? tokenData.channel
+          : widget.webinar.agoraChannel;
+
+      if (mounted) {
+        setState(() {
+          _streamStatusText = "Joining channel: $channelName...";
+        });
+      }
+
+      // 2. Initialize Agora Engine
+      _engine = createAgoraRtcEngine();
+      await _engine!.initialize(RtcEngineContext(
+        appId: appId,
+        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+      ));
+
+      // 3. Register Event Handlers
+      _engine!.registerEventHandler(
+        RtcEngineEventHandler(
+          onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
+            debugPrint("[Agora] User joined channel successfully: ${connection.channelId}, localUid: ${connection.localUid}");
+            if (mounted) {
+              setState(() {
+                _isJoined = true;
+                _isJoiningAgora = false;
+                if (_remoteUid == null) {
+                  _streamStatusText = "Waiting for speaker video stream...";
+                }
+              });
+            }
+          },
+          onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
+            debugPrint("[Agora] Connection state: $state, reason: $reason");
+            if (state == ConnectionStateType.connectionStateConnected) {
+              if (mounted) {
+                setState(() {
+                  _isJoined = true;
+                  _isJoiningAgora = false;
+                  if (_remoteUid == null) {
+                    _streamStatusText = "Waiting for speaker video stream...";
+                  }
+                });
+              }
+            } else if (state == ConnectionStateType.connectionStateFailed) {
+              if (mounted) {
+                setState(() {
+                  _isJoiningAgora = false;
+                  _joinTokenFailed = true;
+                  _streamStatusText = "Connection failed: ${reason.name}";
+                });
+              }
+            }
+          },
+          onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
+            debugPrint("[Agora] Remote speaker joined: $remoteUid");
+            if (mounted) {
+              setState(() {
+                _remoteUid = remoteUid;
+                _isJoined = true;
+                _isJoiningAgora = false;
+                _streamStatusText = "Live";
+              });
+            }
+          },
+          onUserOffline: (RtcConnection connection, int remoteUid, UserOfflineReasonType reason) {
+            debugPrint("[Agora] Remote speaker went offline: $remoteUid, reason: $reason");
+            if (mounted && _remoteUid == remoteUid) {
+              setState(() {
+                _remoteUid = null;
+                _streamStatusText = "Speaker paused or ended the stream.";
+              });
+            }
+          },
+          onTokenPrivilegeWillExpire: (RtcConnection connection, String token) async {
+            debugPrint("[Agora] Token privilege will expire soon, renewing...");
+            final refreshed = await controller.getWebinarJoinToken(widget.webinar.id);
+            if (refreshed != null && refreshed.token.isNotEmpty) {
+              await _engine?.renewToken(refreshed.token);
+            }
+          },
+          onError: (ErrorCodeType err, String msg) {
+            debugPrint("[Agora Error] $err - $msg");
+          },
+        ),
+      );
+
+      // 4. Enable Audio & Video
+      await _engine!.enableVideo();
+      await _engine!.enableLocalVideo(false); // Keep local camera hardware off until user turns it on
+      await _engine!.enableAudio();
+      await _engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+
+      // 5. Per User Request: User mic is NOT unmuted (user is audience for audio, only listens)
+      await _engine!.muteLocalAudioStream(true);
+
+      // Default camera is OFF
+      await _engine!.muteLocalVideoStream(true);
+
+      // 6. Join Channel (support both String userAccount and numeric uid)
+      final channelMediaOptions = const ChannelMediaOptions(
+        channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+        clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        publishCameraTrack: false,
+        publishMicrophoneTrack: false, // User mic is always muted
+        autoSubscribeAudio: true, // Listen to Host audio
+        autoSubscribeVideo: true, // Watch Host video
+      );
+
+      if (tokenData.userAccount.isNotEmpty && int.tryParse(tokenData.userAccount) == null) {
+        debugPrint("[Agora] Joining with userAccount: ${tokenData.userAccount}");
+        await _engine!.joinChannelWithUserAccount(
+          token: tokenData.token,
+          channelId: channelName,
+          userAccount: tokenData.userAccount,
+          options: channelMediaOptions,
+        );
+      } else {
+        debugPrint("[Agora] Joining with numeric uid: ${tokenData.uid}");
+        await _engine!.joinChannel(
+          token: tokenData.token,
+          channelId: channelName,
+          uid: tokenData.uid,
+          options: channelMediaOptions,
+        );
+      }
+
+      // Safety Timeout: Prevent infinite spinner if host is not yet streaming
+      Future.delayed(const Duration(seconds: 12), () {
+        if (mounted && !_isJoined && _isJoiningAgora) {
+          setState(() {
+            _isJoiningAgora = false;
+            _joinTokenFailed = true;
+            _streamStatusText = "Connecting took too long. Host may still be preparing the live stream.";
+          });
+        }
+      });
+    } catch (e) {
+      debugPrint("[Agora Init Error] $e");
+      if (mounted) {
+        setState(() {
+          _isJoiningAgora = false;
+          _joinTokenFailed = true;
+          _streamStatusText = "Failed to connect to live stream: $e";
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleMic() async {
+    if (_engine == null || !_isJoined) {
+      CustomSnackBar.showInfo(message: "Connecting to stream, please wait...");
+      return;
+    }
+
+    if (!_isMicOn) {
+      final status = await Permission.microphone.request();
+      if (!status.isGranted) {
+        CustomSnackBar.showError(message: "Microphone permission is required to speak.");
+        return;
+      }
+      try {
+        await _engine!.muteLocalAudioStream(false);
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(publishMicrophoneTrack: true),
+        );
+        setState(() {
+          _isMicOn = true;
+        });
+        controller.isMicOn.value = true;
+        CustomSnackBar.showInfo(message: "Microphone turned on");
+      } catch (e) {
+        debugPrint("[Mic On Error] $e");
+      }
+    } else {
+      try {
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(publishMicrophoneTrack: false),
+        );
+        await _engine!.muteLocalAudioStream(true);
+        setState(() {
+          _isMicOn = false;
+        });
+        controller.isMicOn.value = false;
+        CustomSnackBar.showInfo(message: "Microphone muted");
+      } catch (e) {
+        debugPrint("[Mic Off Error] $e");
+      }
+    }
+  }
+
+  Future<void> _toggleCamera() async {
+    if (_engine == null || !_isJoined) {
+      CustomSnackBar.showInfo(message: "Connecting to stream, please wait...");
+      return;
+    }
+
+    if (!_isCameraOn) {
+      final status = await Permission.camera.request();
+      if (!status.isGranted) {
+        CustomSnackBar.showError(message: "Camera permission is required to turn on video.");
+        return;
+      }
+      try {
+        await _engine!.enableLocalVideo(true);
+        await _engine!.muteLocalVideoStream(false);
+        await _engine!.startPreview();
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(publishCameraTrack: true),
+        );
+        setState(() {
+          _isCameraOn = true;
+        });
+        controller.isCameraOn.value = true;
+        CustomSnackBar.showInfo(message: "Camera turned on");
+      } catch (e) {
+        debugPrint("[Camera On Error] $e");
+      }
+    } else {
+      try {
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(publishCameraTrack: false),
+        );
+        await _engine!.muteLocalVideoStream(true);
+        await _engine!.stopPreview();
+        await _engine!.enableLocalVideo(false);
+        setState(() {
+          _isCameraOn = false;
+        });
+        controller.isCameraOn.value = false;
+        CustomSnackBar.showInfo(message: "Camera turned off");
+      } catch (e) {
+        debugPrint("[Camera Off Error] $e");
+      }
+    }
+  }
+
+  Future<void> _switchCamera() async {
+    if (_engine != null && _isCameraOn) {
+      HapticFeedback.lightImpact();
+      await _engine!.switchCamera();
+      setState(() {
+        _isFrontCamera = !_isFrontCamera;
+      });
+    }
+  }
+
+  Future<void> _leaveAgora() async {
+    try {
+      if (_engine != null) {
+        await _engine!.leaveChannel();
+        await _engine!.release();
+        _engine = null;
+      }
+    } catch (e) {
+      debugPrint("[Agora Leave Error] $e");
+    }
   }
 
   @override
   void dispose() {
+    _leaveAgora();
     _commentsScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final channelName = _tokenData?.channel.isNotEmpty == true
+        ? _tokenData!.channel
+        : widget.webinar.agoraChannel;
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
@@ -50,7 +372,10 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                 children: [
                   // Back button + Title
                   GestureDetector(
-                    onTap: () => Get.back(),
+                    onTap: () {
+                      _leaveAgora();
+                      Get.back();
+                    },
                     behavior: HitTestBehavior.opaque,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -147,50 +472,119 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
               aspectRatio: 16 / 9.5,
               child: Stack(
                 children: [
-                  // Speaker Video Feed / Thumbnail
-                  Positioned.fill(
-                    child: CachedNetworkImage(
-                      imageUrl: widget.webinar.videoThumbnailUrl,
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => Container(
-                        color: Colors.black,
-                        child: const Center(
-                          child: Icon(Icons.person, size: 60, color: Colors.white38),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Dark gradient overlay
+                  // 1. Video Render (Host Video or Placeholder/Status)
                   Positioned.fill(
                     child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
+                      color: Colors.black,
+                      child: _engine != null && _remoteUid != null
+                          ? AgoraVideoView(
+                              controller: VideoViewController.remote(
+                                rtcEngine: _engine!,
+                                canvas: VideoCanvas(uid: _remoteUid!),
+                                connection: RtcConnection(channelId: channelName),
+                              ),
+                            )
+                          : Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                // Thumbnail / Banner
+                                CachedNetworkImage(
+                                  imageUrl: widget.webinar.videoThumbnailUrl,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (_, __, ___) => Container(
+                                    color: const Color(0xFF1E293B),
+                                    child: const Center(
+                                      child: Icon(Icons.videocam_rounded, size: 54, color: Colors.white30),
+                                    ),
+                                  ),
+                                ),
+
+                                // Dark overlay
+                                Container(
+                                  color: Colors.black.withOpacity(0.68),
+                                ),
+
+                                // Status text / Connecting indicator
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (_isJoiningAgora) ...[
+                                          const CupertinoActivityIndicator(color: Colors.white, radius: 13),
+                                          const SizedBox(height: 12),
+                                        ] else if (_joinTokenFailed) ...[
+                                          const Icon(Icons.info_outline_rounded, color: Color(0xFFFBBF24), size: 30),
+                                          const SizedBox(height: 10),
+                                        ] else ...[
+                                          const Icon(Icons.live_tv_rounded, color: Colors.white70, size: 32),
+                                          const SizedBox(height: 10),
+                                        ],
+                                        Text(
+                                          _streamStatusText,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        if (_joinTokenFailed) ...[
+                                          const SizedBox(height: 12),
+                                          GestureDetector(
+                                            onTap: _initAgoraAndJoin,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primary,
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                              child: const Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.refresh_rounded, size: 14, color: Colors.white),
+                                                  SizedBox(width: 4),
+                                                  Text(
+                                                    "Retry Join",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
                   ),
 
-                  // Host / Speaker Badge at bottom-left of video
+                  // 2. Speaker Badge at bottom-left of video
                   Positioned(
                     left: 12,
                     bottom: 12,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
+                        color: Colors.black.withOpacity(0.65),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.mic, color: Color(0xFF10B981), size: 13),
+                          Icon(
+                            _remoteUid != null ? Icons.mic : Icons.mic_off,
+                            color: _remoteUid != null ? const Color(0xFF10B981) : Colors.white60,
+                            size: 13,
+                          ),
                           const SizedBox(width: 5),
                           Text(
                             "${widget.webinar.speaker.name} (Speaker)",
@@ -204,58 +598,154 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                       ),
                     ),
                   ),
+
+                  // 3. Floating Local Camera View (PiP) when Camera is ON
+                  if (_isCameraOn && _engine != null)
+                    Positioned(
+                      right: 12,
+                      bottom: 12,
+                      width: 96,
+                      height: 130,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.5),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              AgoraVideoView(
+                                controller: VideoViewController(
+                                  rtcEngine: _engine!,
+                                  canvas: const VideoCanvas(uid: 0),
+                                ),
+                              ),
+                              // Switch Camera Button
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: _switchCamera,
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.cameraswitch_rounded,
+                                      color: Colors.white,
+                                      size: 13,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // "You" label + mic status
+                              Positioned(
+                                left: 4,
+                                bottom: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.65),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                        "You",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Icon(
+                                        _isMicOn ? Icons.mic : Icons.mic_off,
+                                        size: 10,
+                                        color: _isMicOn ? const Color(0xFF10B981) : Colors.redAccent,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
 
-            // Interactive Controls Bar (Mic, Camera, Chat, Participants, Leave)
+            // Interactive Controls Bar (Mic, Camera, Flip Camera, Chat, Q&A, Leave)
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
               color: const Color(0xFF1E293B),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // 1. Mic
-                  Obx(() {
-                    final isOn = controller.isMicOn.value;
-                    return _buildControlButton(
-                      icon: isOn ? Icons.mic_rounded : Icons.mic_off_rounded,
-                      label: "Mic",
-                      isActive: isOn,
-                      onTap: controller.toggleMic,
-                    );
-                  }),
+                  // 1. Mic Toggle (User can turn Mic ON/OFF)
+                  _buildControlButton(
+                    icon: _isMicOn ? Icons.mic_rounded : Icons.mic_off_rounded,
+                    label: _isMicOn ? "Mic On" : "Mic Off",
+                    isActive: _isMicOn,
+                    activeColor: const Color(0xFF10B981),
+                    onTap: _toggleMic,
+                  ),
 
-                  // 2. Camera
-                  Obx(() {
-                    final isOn = controller.isCameraOn.value;
-                    return _buildControlButton(
-                      icon: isOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
-                      label: "Camera",
-                      isActive: isOn,
-                      onTap: controller.toggleCamera,
-                    );
-                  }),
+                  // 2. Camera Toggle (User can turn Camera ON/OFF)
+                  _buildControlButton(
+                    icon: _isCameraOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
+                    label: _isCameraOn ? "Camera On" : "Camera Off",
+                    isActive: _isCameraOn,
+                    activeColor: AppColors.primary,
+                    onTap: _toggleCamera,
+                  ),
 
-                  // 3. Chat
+                  // 3. Flip Camera (Active only when camera is ON)
+                  if (_isCameraOn)
+                    _buildControlButton(
+                      icon: Icons.cameraswitch_rounded,
+                      label: "Flip",
+                      isActive: true,
+                      activeColor: const Color(0xFF3B82F6),
+                      onTap: _switchCamera,
+                    ),
+
+                  // 4. Chat Tab
                   _buildControlButton(
                     icon: CupertinoIcons.chat_bubble_2_fill,
                     label: "Chat",
-                    isActive: true,
+                    isActive: controller.activeLiveTab.value == 1,
                     onTap: () {
                       controller.activeLiveTab.value = 1;
                     },
                   ),
 
-                  // 4. Participants
+                  // 4. Q&A Tab
                   _buildControlButton(
-                    icon: CupertinoIcons.person_3_fill,
-                    label: "Participants",
-                    isActive: false,
+                    icon: Icons.help_outline_rounded,
+                    label: "Q&A",
+                    isActive: controller.activeLiveTab.value == 0,
                     onTap: () {
-                      CustomSnackBar.showInfo(
-                        message: "${controller.liveViewerCount.value} Community members currently watching",
-                      );
+                      controller.activeLiveTab.value = 0;
                     },
                   ),
 
@@ -266,8 +756,9 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                     isActive: false,
                     isDestructive: true,
                     onTap: () {
+                      _leaveAgora();
                       Get.back();
-                      CustomSnackBar.showInfo(message: "Left webinar session");
+                      CustomSnackBar.showInfo(message: "Left live webinar");
                     },
                   ),
                 ],
@@ -494,12 +985,13 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
     required IconData icon,
     required String label,
     required bool isActive,
+    Color? activeColor,
     bool isDestructive = false,
     required VoidCallback onTap,
   }) {
     final bgColor = isDestructive
         ? const Color(0xFFEF4444)
-        : (isActive ? AppColors.primary : Colors.white.withOpacity(0.12));
+        : (isActive ? (activeColor ?? AppColors.primary) : Colors.white.withOpacity(0.12));
 
     final labelColor = isDestructive ? const Color(0xFFF87171) : Colors.white70;
 

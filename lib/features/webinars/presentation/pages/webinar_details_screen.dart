@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/styles/app_colors.dart';
-import '../../../../widgets/custom_snack_bar.dart';
 import '../../data/models/webinar_model.dart';
 import '../controllers/webinars_controller.dart';
+import '../widgets/webinar_notice_dialog.dart';
 import 'webinar_live_screen.dart';
 
 class WebinarDetailsScreen extends StatefulWidget {
@@ -136,18 +136,23 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
                     child: GestureDetector(
                       onTap: () {
                         if (webinar.isCompleted) {
-                          CustomSnackBar.showInfo(message: "This webinar has already ended.");
+                          WebinarNoticeDialog.showCompleted(context: context);
                           return;
                         }
                         if (!webinar.isLiveSession) {
-                          CustomSnackBar.showInfo(
-                            message: "Webinar will start on ${webinar.dateString} at ${webinar.timeString}. You can join when it goes live.",
+                          WebinarNoticeDialog.showUpcoming(
+                            context: context,
+                            dateString: webinar.dateString,
+                            timeString: webinar.timeString,
                           );
                           return;
                         }
                         final isReg = controller.isWebinarRegistered(webinar.id) || webinar.isRegistered;
                         if (webinar.requireRegistration && !isReg) {
-                          CustomSnackBar.showInfo(message: "Please register first to join this live webinar.");
+                          WebinarNoticeDialog.showRegistrationClosed(
+                            context: context,
+                            message: "This webinar has already started, but you are not registered for it. Registrations are now closed.",
+                          );
                           return;
                         }
                         Get.to(
@@ -405,7 +410,7 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
               buttonColor = const Color(0xFF64748B);
               buttonIcon = Icons.check_circle_outline_rounded;
               onTapAction = () {
-                CustomSnackBar.showInfo(message: "This webinar has already ended.");
+                WebinarNoticeDialog.showCompleted(context: context);
               };
             } else if (needsRegistration) {
               // Registration is required and user has NOT registered yet
@@ -441,8 +446,10 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
               buttonColor = const Color(0xFF10B981);
               buttonIcon = Icons.check_circle_rounded;
               onTapAction = () {
-                CustomSnackBar.showInfo(
-                  message: "You are registered. You can join when the session goes live on ${webinar.dateString} at ${webinar.timeString}.",
+                WebinarNoticeDialog.showUpcoming(
+                  context: context,
+                  dateString: webinar.dateString,
+                  timeString: webinar.timeString,
                 );
               };
             }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,6 +9,8 @@ import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/features/dashboard/presentation/controller/home_controller.dart';
 import '../../data/models/webinar_model.dart';
+import '../../data/models/agora_token_model.dart';
+import '../widgets/webinar_notice_dialog.dart';
 
 class WebinarsController extends GetxController {
   final RxList<Webinar> webinars = <Webinar>[].obs;
@@ -46,6 +49,8 @@ class WebinarsController extends GetxController {
   final RxInt commentsCurrentPage = 1.obs;
   final RxInt commentsLastPage = 1.obs;
   final RxInt commentsTotal = 0.obs;
+  final RxBool isLoadingJoinToken = false.obs;
+  final Rx<AgoraJoinTokenData?> agoraTokenData = Rx<AgoraJoinTokenData?>(null);
 
   ApiClient get _apiClient =>
       Get.isRegistered<ApiClient>() ? Get.find<ApiClient>() : ApiClient();
@@ -303,18 +308,52 @@ class WebinarsController extends GetxController {
           }
         }
 
-        CustomSnackBar.showSuccess(message: msg);
+        WebinarNoticeDialog.show(
+          title: "Registration Successful!",
+          message: msg,
+          type: WebinarNoticeType.success,
+          buttonText: "Awesome",
+        );
         return true;
       } else {
-        CustomSnackBar.showError(message: msg);
+        _handleRegistrationFailure(targetId, msg);
         return false;
       }
     } catch (e) {
       print("ERROR_REGISTER_WEBINAR: $e");
-      CustomSnackBar.showError(message: "Failed to register for webinar. Please try again.");
+      String msg = "Failed to register for webinar. Please try again.";
+      if (e is DioException && e.response?.data != null) {
+        final res = e.response?.data;
+        if (res is Map && res['message'] != null) {
+          msg = res['message'].toString();
+        }
+      }
+      _handleRegistrationFailure(targetId, msg);
       return false;
     } finally {
       isRegistering.value = false;
+    }
+  }
+
+  void _handleRegistrationFailure(int targetId, String msg) {
+    final webinar = webinars.firstWhereOrNull((w) => w.id == targetId) ?? selectedWebinar.value;
+    final lowerMsg = msg.toLowerCase();
+
+    if (lowerMsg.contains("not open") ||
+        lowerMsg.contains("closed") ||
+        lowerMsg.contains("already started") ||
+        lowerMsg.contains("not available") ||
+        (webinar != null && webinar.isLiveSession)) {
+      WebinarNoticeDialog.showRegistrationClosed(
+        message: "This webinar has already started and registration is now closed.\n\nOnly attendees who registered prior to the session can participate.",
+      );
+    } else {
+      WebinarNoticeDialog.show(
+        title: "Registration Notice",
+        message: msg,
+        type: WebinarNoticeType.warning,
+        buttonText: "OK",
+      );
     }
   }
 
@@ -457,5 +496,39 @@ class WebinarsController extends GetxController {
     CustomSnackBar.showInfo(
       message: isCameraOn.value ? "Camera turned on" : "Camera turned off",
     );
+  }
+
+  Future<AgoraJoinTokenData?> getWebinarJoinToken(int webinarId) async {
+    isLoadingJoinToken.value = true;
+    try {
+      final response = await _apiClient.get(
+        "${ApiConstants.getWebinars}/$webinarId/join-token",
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        if (resData is Map<String, dynamic>) {
+          final data = AgoraJoinTokenData.fromJson(resData);
+          agoraTokenData.value = data;
+          return data;
+        }
+      }
+      final msg = response.data?['message']?.toString() ?? "Could not get join token for webinar.";
+      CustomSnackBar.showError(message: msg);
+      return null;
+    } catch (e) {
+      print("ERROR_GET_JOIN_TOKEN: $e");
+      String msg = "Webinar meeting has not started yet or access is restricted.";
+      if (e is DioException && e.response?.data != null) {
+        final res = e.response?.data;
+        if (res is Map && res['message'] != null) {
+          msg = res['message'].toString();
+        }
+      }
+      CustomSnackBar.showError(message: msg);
+      return null;
+    } finally {
+      isLoadingJoinToken.value = false;
+    }
   }
 }
