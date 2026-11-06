@@ -167,9 +167,23 @@ class RegisterController extends GetxController {
   void onInit() {
     super.onInit();
     
-    // Check for email in arguments (passed from Social Login)
-    if (Get.arguments != null && Get.arguments is Map && Get.arguments['email'] != null) {
-      emailCtrl.text = Get.arguments['email'].toString();
+    // Check for arguments (email from Social Login, user_type from Volunteer prompt)
+    if (Get.arguments != null && Get.arguments is Map) {
+      if (Get.arguments['email'] != null) {
+        emailCtrl.text = Get.arguments['email'].toString();
+      }
+      if (Get.arguments['user_type'] != null) {
+        final argType = Get.arguments['user_type'].toString().toLowerCase().trim();
+        if (argType == 'volunteer') {
+          userTypeCtrl.text = 'Volunteer';
+        } else if (argType == 'business') {
+          userTypeCtrl.text = 'Business';
+        } else if (argType == 'matrimony') {
+          userTypeCtrl.text = 'Matrimony';
+        } else if (argType == 'general') {
+          userTypeCtrl.text = 'General(Member Mali Setu)';
+        }
+      }
     }
 
     // Listen to pincode changes for auto-fill

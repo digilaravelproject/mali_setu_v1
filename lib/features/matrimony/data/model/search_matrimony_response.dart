@@ -106,6 +106,7 @@ class MatrimonyProfile {
   String? status;
   String? createdAt;
   String? connectionStatus;
+  String? castCertificate;
   User? user;
 
   MatrimonyProfile({
@@ -128,6 +129,7 @@ class MatrimonyProfile {
     this.status,
     this.createdAt,
     this.connectionStatus,
+    this.castCertificate,
     this.user,
   });
 
@@ -139,6 +141,7 @@ class MatrimonyProfile {
     weight = json['weight'];
     complexion = json['complexion'];
     physicalStatus = json['physical_status'];
+    castCertificate = json['cast_certificate'];
     personalDetails = json['personal_details'] != null
         ? PersonalDetails.fromJson(json['personal_details'])
         : null;

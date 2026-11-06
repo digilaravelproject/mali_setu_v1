@@ -87,6 +87,11 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     onTap: () => Get.toNamed(AppRoutes.profileScreen),
                   ),
                   _SettingsItem(
+                    title: 'refer_and_earn'.tr,
+                    icon: Icons.card_giftcard_rounded,
+                    onTap: () => Get.toNamed(AppRoutes.referral),
+                  ),
+                  _SettingsItem(
                     title: 'app_language'.tr,
                     icon: Icons.language_rounded,
                     onTap: () => Get.to(() => const ChangeLanguagePage()),

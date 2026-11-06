@@ -42,6 +42,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   // Upcoming Webinars (from banner API)
   final RxList<Webinar> upcomingWebinars = <Webinar>[].obs;
+
+  // Leaderboard (from banner API)
+  final RxList<LeaderboardItem> leaderboard = <LeaderboardItem>[].obs;
   
   // Categories
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
@@ -348,6 +351,15 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       } else {
         upcomingWebinars.clear();
         print("DEBUG_BANNERS: No upcoming webinars found in banner API");
+      }
+
+      // Store leaderboard from banner API
+      if (response.leaderboard.isNotEmpty) {
+        leaderboard.assignAll(response.leaderboard);
+        print("DEBUG_BANNERS: Loaded ${response.leaderboard.length} leaderboard items");
+      } else {
+        leaderboard.clear();
+        print("DEBUG_BANNERS: No leaderboard items found in banner API");
       }
       
     } catch (e) {

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/network/multipart.dart';
@@ -10,8 +11,8 @@ import '../model/matrimony_plan_model.dart';
 import '../model/education_model.dart';
 
 abstract class MatrimonyDataSource {
-  Future<MatrimonyResponse> createProfile(Map<String, dynamic> data);
-  Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data);
+  Future<MatrimonyResponse> createProfile(dynamic data);
+  Future<MatrimonyResponse> updateProfile(dynamic data);
   Future<dynamic> getProfiles(int id);
   Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters);
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);
@@ -36,14 +37,16 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   MatrimonyDataSourceImpl({required this.apiClient});
 
   @override
-  Future<MatrimonyResponse> createProfile(Map<String, dynamic> data) async {
+  Future<MatrimonyResponse> createProfile(dynamic data) async {
     final response = await apiClient.post(ApiConstants.matrimonyProfile, data: data);
     return MatrimonyResponse.fromJson(response.data);
   }
 
   @override
-  Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data) async {
-    final response = await apiClient.put(ApiConstants.matrimonyProfile, data: data);
+  Future<MatrimonyResponse> updateProfile(dynamic data) async {
+    final response = data is FormData
+        ? await apiClient.post(ApiConstants.matrimonyProfile, data: data)
+        : await apiClient.put(ApiConstants.matrimonyProfile, data: data);
     return MatrimonyResponse.fromJson(response.data);
   }
 

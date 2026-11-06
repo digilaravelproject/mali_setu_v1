@@ -252,7 +252,7 @@ class User {
 
     castCertificate = json['cast_certificate'];
     occupation = json['occupation'];
-    reffralCode = json['reffral_code'];
+    reffralCode = json['referral_code'] ?? json['reffral_code'];
     address = json['address'];
     nearbyLocation = json['nearby_location'];
     pincode = json['pincode'];

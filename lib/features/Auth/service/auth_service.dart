@@ -14,6 +14,7 @@ import '../login/data/data_source/login_data_source.dart'; // Added
 import '../login/data/repository/login_repository_impl.dart'; // Added
 import '../login/domain/usecase/logout_usecase.dart'; // Added
 import '../../../../core/routes/app_routes.dart'; // Added
+import '../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
 
 class AuthService extends GetxService {
   final ApiClient _apiClient = Get.find<ApiClient>();
@@ -24,7 +25,15 @@ class AuthService extends GetxService {
   final currentUser = Rxn<User>();
 
   /// Get saved referral code
-  String? get referralCode => SharedPrefs.getString(AppConstants.referralCodePref);
+  String? get referralCode {
+    final userCode = currentUser.value?.reffralCode;
+    if (userCode != null && userCode.trim().isNotEmpty) {
+      return userCode.trim();
+    }
+    final code = SharedPrefs.getString(AppConstants.referralCodePref);
+    if (code != null && code.trim().isNotEmpty) return code.trim();
+    return null;
+  }
 
   // Added for logout functionality
   late final LogoutUseCase _logoutUseCase;
@@ -228,7 +237,7 @@ class AuthService extends GetxService {
   }
 
   /// Process user logout
-  Future<void> logout() async {
+  Future<void> logout({String? redirectToRoute, dynamic arguments}) async {
     try {
       // Call Logout API
       await _logoutUseCase();
@@ -237,11 +246,14 @@ class AuthService extends GetxService {
       // Even if API fails, we should clear local data
     } finally {
       // Clear local data
+      VolunteerPromptDialog.resetSession();
       currentUser.value = null;
       isLoggedIn.value = false;
       isCompanyLogin.value = false;
       await TokenManager.clearToken();
       await SharedPrefs.remove(AppConstants.userDataPref);
+      await SharedPrefs.remove(AppConstants.userTypePref);
+      await SharedPrefs.remove(AppConstants.referralCodePref);
       await SharedPrefs.setBool(AppConstants.isLoggedInPref, false);
       await SharedPrefs.setBool(AppConstants.isCompanyLoginPref, false);
       
@@ -257,8 +269,12 @@ class AuthService extends GetxService {
         debugPrint("Error clearing caches: $e");
       }
       
-      // Navigate to Login
-      Get.offAllNamed(AppRoutes.login);
+      // Navigate to destination route or Login
+      if (redirectToRoute != null && redirectToRoute.isNotEmpty) {
+        Get.offAllNamed(redirectToRoute, arguments: arguments);
+      } else {
+        Get.offAllNamed(AppRoutes.login);
+      }
     }
   }
 
@@ -311,6 +327,23 @@ class AuthService extends GetxService {
           AppConstants.profileDataPref,
           jsonEncode(data),
         );
+        if (user.userType != null && user.userType.toString().isNotEmpty) {
+          await SharedPrefs.setString(
+            AppConstants.userTypePref,
+            user.userType.toString(),
+          );
+        }
+        if (user.reffralCode != null && user.reffralCode.toString().isNotEmpty) {
+          await SharedPrefs.setString(
+            AppConstants.referralCodePref,
+            user.reffralCode.toString(),
+          );
+        }
+
+        // Trigger volunteer dialog check once fresh profile data is stored
+        Future.delayed(const Duration(milliseconds: 600), () {
+          VolunteerPromptDialog.checkAndShow();
+        });
         
         return ApiResponse.success(user);
       } else {

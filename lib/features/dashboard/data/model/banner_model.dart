@@ -2,12 +2,14 @@ import '../../../webinars/data/models/webinar_model.dart';
 
 class BannerResponse {
   final List<BannerData> data;
+  final List<LeaderboardItem> leaderboard;
   final List<Webinar> upcomingWebinars;
   final Links? links;
   final Meta? meta;
 
   BannerResponse({
     required this.data,
+    this.leaderboard = const [],
     this.upcomingWebinars = const [],
     this.links,
     this.meta,
@@ -31,11 +33,65 @@ class BannerResponse {
           .toList();
     }
 
+    List<LeaderboardItem> leaderboardList = [];
+    if (json['leaderboard'] != null && json['leaderboard'] is List) {
+      leaderboardList = (json['leaderboard'] as List)
+          .map((item) {
+            try {
+              if (item is Map<String, dynamic>) {
+                return LeaderboardItem.fromJson(item);
+              }
+              return null;
+            } catch (e) {
+              return null;
+            }
+          })
+          .whereType<LeaderboardItem>()
+          .toList();
+    }
+
     return BannerResponse(
       data: json['data'] != null ? (json['data'] as List).map((i) => BannerData.fromJson(i)).toList() : [],
+      leaderboard: leaderboardList,
       upcomingWebinars: webinars,
       links: json['links'] != null ? Links.fromJson(json['links']) : null,
       meta: json['meta'] != null ? Meta.fromJson(json['meta']) : null,
+    );
+  }
+}
+
+class LeaderboardItem {
+  final int rank;
+  final int id;
+  final String name;
+  final String referralCode;
+  final String? photoUrl;
+  final int totalReferrals;
+  final int totalEarnedPoints;
+
+  LeaderboardItem({
+    required this.rank,
+    required this.id,
+    required this.name,
+    required this.referralCode,
+    this.photoUrl,
+    required this.totalReferrals,
+    required this.totalEarnedPoints,
+  });
+
+  factory LeaderboardItem.fromJson(Map<String, dynamic> json) {
+    return LeaderboardItem(
+      rank: json['rank'] is int ? json['rank'] : int.tryParse(json['rank']?.toString() ?? '0') ?? 0,
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      name: json['name']?.toString() ?? '',
+      referralCode: json['referral_code']?.toString() ?? '',
+      photoUrl: json['photo_url']?.toString(),
+      totalReferrals: json['total_referrals'] is int
+          ? json['total_referrals']
+          : int.tryParse(json['total_referrals']?.toString() ?? '0') ?? 0,
+      totalEarnedPoints: json['total_earned_points'] is int
+          ? json['total_earned_points']
+          : int.tryParse(json['total_earned_points']?.toString() ?? '0') ?? 0,
     );
   }
 }

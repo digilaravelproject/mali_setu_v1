@@ -130,4 +130,14 @@ class ApiConstants {
     // Legal URLs
     static const String privacyPolicyUrl = "$baseUrl/privacy-policy";
     static const String termsConditionsUrl = "$baseUrl/terms-condition";
+
+    // Referral Endpoints
+    static String referralEarnings(String code) => "referrals/$code/earnings";
+    static const String referralEarningsFallback = "volunteer/earnings";
+    static String referralReferredUsers(String code) => "referrals/$code/referred-users";
+    static String referralShareLink(String code) => "referrals/$code/share-link";
+    static String referralSendEmail(String code) => "referrals/$code/send-email";
+    static String referralNetwork(String code) => "referrals/$code/network";
+    static const String referralShareableLink = "referral/shareable-link";
+    static const String sendReferralLink = "referral/send";
 }

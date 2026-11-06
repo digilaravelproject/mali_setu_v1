@@ -73,6 +73,9 @@ import '../../features/webinars/presentation/pages/webinars_list_screen.dart';
 import '../../features/webinars/presentation/pages/webinar_details_screen.dart';
 import '../../features/webinars/presentation/pages/webinar_registration_page.dart';
 import '../../features/webinars/presentation/pages/webinar_confirmation_page.dart';
+import '../../features/referral/presentation/binding/referral_binding.dart';
+import '../../features/referral/presentation/pages/referral_main_screen.dart';
+import '../../features/referral/presentation/pages/referral_analytics_screen.dart';
 import '../helper/logger_helper.dart';
 
 class AppRoutes {
@@ -130,6 +133,8 @@ class AppRoutes {
   static const String webinarDetails = '/webinarDetails';
   static const String webinarRegistration = '/webinarRegistration';
   static const String webinarConfirmation = '/webinarConfirmation';
+  static const String referral = '/referral';
+  static const String referralAnalytics = '/referralAnalytics';
 }
 
 class AppPages {
@@ -495,6 +500,20 @@ class AppPages {
       name: AppRoutes.webinarConfirmation,
       page: () => WebinarConfirmationPage(webinar: Get.arguments),
       transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.referral,
+      page: () => const ReferralMainScreen(),
+      binding: ReferralBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.referralAnalytics,
+      page: () => const ReferralAnalyticsScreen(),
+      binding: ReferralBinding(),
+      transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),
     ),
   ];

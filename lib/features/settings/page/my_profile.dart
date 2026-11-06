@@ -36,7 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'age': user?.age != null ? '${user!.age} Years' : '',
     'phoneNumber': user?.phone ?? 'N/A',
     'occupation': user?.occupation.toTitleCase() ?? 'N/A',
-    'referralCode': user?.reffralCode ?? 'N/A',
+    'referralCode': (authService.referralCode != null && authService.referralCode!.isNotEmpty)
+        ? authService.referralCode!
+        : (user?.reffralCode ?? 'N/A'),
     'streetAddress': user?.address ?? 'N/A',
     'nearbyLocation': user?.nearbyLocation ?? 'N/A',
     'roadNumber': user?.roadNumber ?? 'N/A',
@@ -99,7 +101,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
             // Profile Header
             _buildProfileHeader(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
+
+            // Refer & Earn Card
+            _buildReferralCard(userData['referralCode'] ?? ''),
 
             // Basic Information
             _buildSectionCard(
@@ -314,12 +319,150 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: Icons.work_outline,
         ),
         const SizedBox(height: 16),
-        // _buildInfoRow(
-        //   label: 'referral_code'.tr,
-        //   value: userData['referralCode']!,
-        //   icon: Icons.confirmation_number_outlined,
-        // ),
+        if (userData['referralCode'] != null && userData['referralCode'] != 'N/A') ...[
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            label: 'referral_code'.tr,
+            value: userData['referralCode']!,
+            icon: Icons.confirmation_number_outlined,
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildReferralCard(String refCode) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary,
+            AppColors.primaryDark,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.25),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => Get.toNamed(AppRoutes.referral),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.card_giftcard_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'refer_and_earn'.tr,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.white70,
+                      size: 14,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'refer_and_earn_desc'.tr,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.white.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.confirmation_number_outlined, color: Colors.white, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              refCode.isNotEmpty && refCode != 'N/A' ? refCode : 'MSU001',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.hub_rounded, size: 14, color: AppColors.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'view_network'.tr,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

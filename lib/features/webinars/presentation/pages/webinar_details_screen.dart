@@ -27,7 +27,7 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.webinar != null) {
+    if (widget.webinar != null) { 
       webinar = widget.webinar!;
     } else if (Get.arguments is Webinar) {
       webinar = Get.arguments as Webinar;

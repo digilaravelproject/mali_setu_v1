@@ -25,6 +25,8 @@ import '../../../webinars/presentation/pages/webinar_details_screen.dart';
 import '../../../webinars/presentation/pages/webinar_live_screen.dart';
 import '../../../webinars/presentation/widgets/webinar_registration_sheet.dart';
 import '../../../webinars/data/models/webinar_model.dart';
+import '../../data/model/banner_model.dart';
+import '../../../referral/presentation/binding/referral_binding.dart';
 import '../controller/home_controller.dart';
 
 class HomePage extends GetWidget<HomeController> {
@@ -402,8 +404,13 @@ class HomePage extends GetWidget<HomeController> {
                               color1: const Color(0xFFF48FB1),
                               color2: const Color(0xFFE91E63),
                               statusText: user?.matrimonyApprovalStatus ?? "Pending",
-
                             ),
+
+                            // Leaderboard Section (Top Champions from banner API)
+                            if (controller.leaderboard.isNotEmpty) ...[
+                              const SizedBox(height: 22),
+                              _buildLeaderboardSection(context, controller.leaderboard),
+                            ],
 
                             // Upcoming Webinars Section (only shown when banner API returns upcoming webinars)
                             if (controller.upcomingWebinars.isNotEmpty) ...[
@@ -1027,6 +1034,758 @@ class HomePage extends GetWidget<HomeController> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLeaderboardSection(BuildContext context, List<LeaderboardItem> items) {
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    // Sort by rank ascending
+    final sorted = List<LeaderboardItem>.from(items)
+      ..sort((a, b) => a.rank.compareTo(b.rank));
+
+    LeaderboardItem? getRank(int r) {
+      for (final item in sorted) {
+        if (item.rank == r) return item;
+      }
+      return null;
+    }
+
+    final top1 = getRank(1) ?? (sorted.isNotEmpty ? sorted[0] : null);
+    final top2 = getRank(2) ?? (sorted.length > 1 ? sorted[1] : null);
+    final top3 = getRank(3) ?? (sorted.length > 2 ? sorted[2] : null);
+    final others = sorted.where((e) => e != top1 && e != top2 && e != top3).toList();
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.22),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header with Primary Gradient Aura & Trophy
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFFFF0F7),
+                  Colors.white.withValues(alpha: 0.95),
+                  const Color(0xFFFFF5FA),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            ),
+            child: Row(
+              children: [
+                // Primary Gradient Trophy Badge
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFE0409A), Color(0xFF8B185D)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                      const BoxShadow(
+                        color: Colors.white,
+                        blurRadius: 4,
+                        offset: Offset(-1, -1),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.emoji_events_rounded, color: Colors.white, size: 24),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Title & Subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'leaderboard_title'.tr,
+                            style: const TextStyle(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF1E293B),
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFC62D86), Color(0xFF8B185D)],
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              "LIVE",
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'leaderboard_subtitle'.tr,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // View All Button
+                GestureDetector(
+                  onTap: () {
+                    ReferralBinding.init();
+                    Get.toNamed(AppRoutes.referral);
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.35),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'leaderboard_view_all'.tr,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 10,
+                          color: AppColors.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF8E7F1)),
+
+          // 3D Realistic Podium Stage (Primary Themed)
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 16, 10, 0),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFFF9FC), Colors.white],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Rank 2 (Silver - Left)
+                    if (top2 != null)
+                      Expanded(
+                        child: _buildPodiumColumn(
+                          item: top2,
+                          rank: 2,
+                          medalEmoji: "🥈",
+                          pedestalHeight: 74,
+                          avatarSize: 52,
+                          accentColor: const Color(0xFF78909C),
+                          gradientColors: const [Color(0xFFECEFF1), Color(0xFFCFD8DC), Color(0xFF90A4AE)],
+                        ),
+                      )
+                    else
+                      const Expanded(child: SizedBox()),
+
+                    // Rank 1 (Primary Brand Theme - Center)
+                    if (top1 != null)
+                      Expanded(
+                        child: _buildPodiumColumn(
+                          item: top1,
+                          rank: 1,
+                          medalEmoji: "🥇",
+                          pedestalHeight: 102,
+                          avatarSize: 66,
+                          isFirst: true,
+                          accentColor: AppColors.primary,
+                          gradientColors: const [Color(0xFFE8439E), Color(0xFFC62D86), Color(0xFF8B185D)],
+                        ),
+                      ),
+
+                    // Rank 3 (Warm Bronze - Right)
+                    if (top3 != null)
+                      Expanded(
+                        child: _buildPodiumColumn(
+                          item: top3,
+                          rank: 3,
+                          medalEmoji: "🥉",
+                          pedestalHeight: 58,
+                          avatarSize: 48,
+                          accentColor: const Color(0xFF8D6E63),
+                          gradientColors: const [Color(0xFFFFE0B2), Color(0xFFD7CCC8), Color(0xFFA1887F)],
+                        ),
+                      )
+                    else
+                      const Expanded(child: SizedBox()),
+                  ],
+                ),
+
+                // Floor Stage Runner (Harmonized with Primary Palette)
+                Container(
+                  height: 6,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFF3E1EC), Color(0xFFD9B6CB), Color(0xFFF3E1EC)],
+                    ),
+                    borderRadius: BorderRadius.circular(3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+
+          // Additional Ranks (Rank 4, 5...)
+          if (others.isNotEmpty) ...[
+            const Divider(height: 1, thickness: 0.8, color: Color(0xFFEEEEEE)),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              itemCount: others.length.clamp(0, 3),
+              separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF5F5F5)),
+              itemBuilder: (context, index) {
+                final item = others[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF5FA),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.25), width: 1),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "#${item.rank}",
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: CachedNetworkImage(
+                          imageUrl: item.photoUrl ?? '',
+                          width: 34,
+                          height: 34,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => CircleAvatar(
+                            radius: 17,
+                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                            child: Text(
+                              item.name.isNotEmpty ? item.name[0].toUpperCase() : '?',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primary),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black87),
+                            ),
+                            if (item.referralCode.isNotEmpty)
+                              Text(
+                                item.referralCode,
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.stars_rounded, size: 14, color: AppColors.primary),
+                              const SizedBox(width: 3),
+                              Text(
+                                "${item.totalEarnedPoints} ${'points_label'.tr}",
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            "${item.totalReferrals} ${'referrals_label'.tr}",
+                            style: TextStyle(fontSize: 10.5, color: Colors.grey.shade500, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+
+          // Footer Call-to-action
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFFFFF0F7),
+                  Colors.white.withValues(alpha: 0.95),
+                  const Color(0xFFFFF5F9),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(22),
+                bottomRight: Radius.circular(22),
+              ),
+              border: Border(
+                top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12)),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.rocket_launch_rounded, color: AppColors.primary, size: 15),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'refer_and_win'.tr,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    ReferralBinding.init();
+                    Get.toNamed(AppRoutes.referral);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFC62D86), Color(0xFF8B185D)],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFC62D86).withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'refer_now'.tr,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(Icons.arrow_forward_rounded, size: 11, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPodiumColumn({
+    required LeaderboardItem item,
+    required int rank,
+    required String medalEmoji,
+    required double pedestalHeight,
+    required double avatarSize,
+    required Color accentColor,
+    required List<Color> gradientColors,
+    bool isFirst = false,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Top Crown for Rank 1 or Medal emoji
+        if (isFirst)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Icon(Icons.workspace_premium_rounded, color: AppColors.primary, size: 24),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(medalEmoji, style: const TextStyle(fontSize: 18)),
+          ),
+
+        // Avatar with Glowing Metal Ring & Medal Ribbon
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            // Outer Glow ring
+            Container(
+              padding: EdgeInsets.all(isFirst ? 3.5 : 2.5),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: gradientColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: accentColor.withValues(alpha: isFirst ? 0.45 : 0.25),
+                    blurRadius: isFirst ? 14 : 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: item.photoUrl ?? '',
+                    width: avatarSize,
+                    height: avatarSize,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Container(
+                      width: avatarSize,
+                      height: avatarSize,
+                      color: Colors.grey.shade100,
+                      child: Center(
+                        child: Text(
+                          item.name.isNotEmpty ? item.name[0].toUpperCase() : '?',
+                          style: TextStyle(
+                            fontSize: avatarSize * 0.45,
+                            fontWeight: FontWeight.w900,
+                            color: accentColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Pinned Medal Badge at bottom of avatar
+            Positioned(
+              bottom: -6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isFirst
+                        ? [const Color(0xFFE8439E), const Color(0xFF8B185D)]
+                        : [accentColor, accentColor.withValues(alpha: 0.85)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  rank == 1 ? "1st" : (rank == 2 ? "2nd" : "3rd"),
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // Member Name
+        SizedBox(
+          width: isFirst ? 105 : 95,
+          child: Text(
+            item.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: isFirst ? 13 : 11.5,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1E293B),
+            ),
+          ),
+        ),
+
+        // Referral Code Pill
+        if (item.referralCode.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 1, bottom: 3),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF5FA),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isFirst
+                      ? AppColors.primary.withValues(alpha: 0.3)
+                      : Colors.grey.shade200,
+                  width: 0.8,
+                ),
+              ),
+              child: Text(
+                item.referralCode,
+                style: TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w700,
+                  color: isFirst ? AppColors.primary : Colors.blueGrey.shade700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ),
+
+        // Points & Referrals Micro Badges
+        Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: isFirst ? const Color(0xFFFFF0F7) : Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isFirst
+                  ? AppColors.primary.withValues(alpha: 0.25)
+                  : Colors.grey.shade200,
+              width: 0.8,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.stars_rounded, size: 12, color: isFirst ? AppColors.primary : accentColor),
+                  const SizedBox(width: 2),
+                  Text(
+                    "${item.totalEarnedPoints} ${'points_label'.tr}",
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: isFirst ? AppColors.primary : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                "${item.totalReferrals} ${'referrals_label'.tr}",
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 3D Realistic Pedestal Block
+        Container(
+          width: double.infinity,
+          height: pedestalHeight,
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: gradientColors,
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.25),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // 3D Top Bevel Highlight Cap
+              Container(
+                height: 5,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  // Embossed circular medallion for rank number
+                  child: Container(
+                    width: isFirst ? 42 : 36,
+                    height: isFirst ? 42 : 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.28),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        "$rank",
+                        style: TextStyle(
+                          fontSize: isFirst ? 24 : 20,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              offset: const Offset(0, 1.5),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

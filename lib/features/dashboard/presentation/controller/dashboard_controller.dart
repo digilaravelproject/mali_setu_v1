@@ -17,6 +17,7 @@ import '../../../Auth/service/auth_service.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../page/home_page.dart';
 import '../../../blogs/presentation/controller/blog_controller.dart';
+import 'package:edu_cluezer/features/referral/presentation/widgets/volunteer_prompt_dialog.dart';
 
 class DashboardController extends GetxController {
   var currentPage = 0.obs;
@@ -72,9 +73,9 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Check and show business dialog after a short delay
-    Future.delayed(Duration(milliseconds: 800), () {
-      _checkAndShowBusinessDialog();
+    // Check user_type and show volunteer prompt / referral analytics dialog on home screen
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      VolunteerPromptDialog.checkAndShow();
     });
   }
 
