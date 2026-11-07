@@ -284,7 +284,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
                           final resumeUrl = application.resumeUrl!;
                           final isUrlAbsolute = resumeUrl.startsWith('http');
                           final fullUrl = isUrlAbsolute ? resumeUrl : ApiConstants.imageBaseUrl + resumeUrl;
-                          await controller.launchResume(fullUrl);
+                          await controller.viewResume(fullUrl, applicantName: application.jobPosting?.title);
                         } catch (e) {
                           Get.snackbar("Error", "Could not open resume");
                         }

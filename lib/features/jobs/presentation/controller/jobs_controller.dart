@@ -121,21 +121,22 @@ class JobsController extends GetxController {
   void onSearchChanged(String query) {
     searchQuery.value = query;
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 450), () {
-      fetchJobs(isRefresh: true);
+    isLoading.value = true;
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      fetchJobs(isRefresh: true, showLoading: true);
     });
   }
 
   void clearSearch() {
     searchController.clear();
     searchQuery.value = '';
-    fetchJobs(isRefresh: true);
+    fetchJobs(isRefresh: true, showLoading: true);
   }
 
   void setFilter(String filter) {
     selectedFilter.value = filter;
     HapticFeedback.lightImpact();
-    fetchJobs(isRefresh: true);
+    fetchJobs(isRefresh: true, showLoading: true);
   }
 
   Future<bool> toggleFavorite(int? jobId, {bool? currentLiked}) async {
@@ -293,13 +294,13 @@ class JobsController extends GetxController {
     return queryParams;
   }
 
-  Future<void> fetchJobs({bool isRefresh = false}) async {
+  Future<void> fetchJobs({bool isRefresh = false, bool showLoading = false}) async {
     if (isRefresh) {
       _currentPage = 1;
     }
 
     try {
-      if (!isRefresh && jobs.isEmpty) {
+      if (showLoading || (!isRefresh && jobs.isEmpty)) {
         isLoading.value = true;
       }
 
@@ -410,7 +411,7 @@ class JobsController extends GetxController {
   }
 
   void applyFilters() {
-    fetchJobs(isRefresh: true);
+    fetchJobs(isRefresh: true, showLoading: true);
   }
 
   void resetSheetFilters() {
@@ -420,7 +421,7 @@ class JobsController extends GetxController {
     selectedCategory.value = '';
     selectedLocation.value = '';
     selectedExperience.value = '';
-    fetchJobs(isRefresh: true);
+    fetchJobs(isRefresh: true, showLoading: true);
   }
 
   List<Job> _getSampleJobs() {

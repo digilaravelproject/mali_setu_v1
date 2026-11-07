@@ -434,19 +434,25 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
       String msg = isSuccess ? 'OTP sent successfully' : 'Failed to send OTP';
       if (data is Map) {
-        if (data['message'] != null && data['message'].toString().isNotEmpty) {
-          msg = data['message'].toString();
-        } else if (data['error'] != null) {
-          msg = data['error'].toString();
-        } else if (data['errors'] != null && data['errors'] is Map) {
-          final errMap = data['errors'] as Map;
-          if (errMap.isNotEmpty) {
-            final firstErr = errMap.values.first;
-            if (firstErr is List && firstErr.isNotEmpty) {
-              msg = firstErr.first.toString();
-            } else {
-              msg = firstErr.toString();
+        if (!isSuccess) {
+          if (data['error'] != null && data['error'].toString().trim().isNotEmpty) {
+            msg = data['error'].toString().trim();
+          } else if (data['errors'] != null && data['errors'] is Map) {
+            final errMap = data['errors'] as Map;
+            if (errMap.isNotEmpty) {
+              final firstErr = errMap.values.first;
+              if (firstErr is List && firstErr.isNotEmpty) {
+                msg = firstErr.first.toString();
+              } else {
+                msg = firstErr.toString();
+              }
             }
+          } else if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+            msg = data['message'].toString().trim();
+          }
+        } else {
+          if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+            msg = data['message'].toString().trim();
           }
         }
       }
@@ -478,13 +484,28 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
         CustomSnackBar.showError(message: msg);
       }
     } catch (e) {
+      String errText = 'Error sending OTP: $e';
+      if (e is DioException && e.response?.data is Map) {
+        final d = e.response!.data as Map;
+        if (d['error'] != null && d['error'].toString().trim().isNotEmpty) {
+          errText = d['error'].toString().trim();
+        } else if (d['errors'] != null && d['errors'] is Map) {
+          final errMap = d['errors'] as Map;
+          if (errMap.isNotEmpty) {
+            final firstErr = errMap.values.first;
+            errText = (firstErr is List && firstErr.isNotEmpty) ? firstErr.first.toString() : firstErr.toString();
+          }
+        } else if (d['message'] != null && d['message'].toString().trim().isNotEmpty) {
+          errText = d['message'].toString().trim();
+        }
+      }
       if (mounted) {
         setState(() {
           isSendingOtp = false;
-          errorMessage = 'Error sending OTP: $e';
+          errorMessage = errText;
         });
       }
-      CustomSnackBar.showError(message: 'Error sending OTP: $e');
+      CustomSnackBar.showError(message: errText);
     }
   }
 
@@ -560,19 +581,25 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
       String msg = isSuccess ? 'OTP resent successfully' : 'Failed to resend OTP';
       if (data is Map) {
-        if (data['message'] != null && data['message'].toString().isNotEmpty) {
-          msg = data['message'].toString();
-        } else if (data['error'] != null) {
-          msg = data['error'].toString();
-        } else if (data['errors'] != null && data['errors'] is Map) {
-          final errMap = data['errors'] as Map;
-          if (errMap.isNotEmpty) {
-            final firstErr = errMap.values.first;
-            if (firstErr is List && firstErr.isNotEmpty) {
-              msg = firstErr.first.toString();
-            } else {
-              msg = firstErr.toString();
+        if (!isSuccess) {
+          if (data['error'] != null && data['error'].toString().trim().isNotEmpty) {
+            msg = data['error'].toString().trim();
+          } else if (data['errors'] != null && data['errors'] is Map) {
+            final errMap = data['errors'] as Map;
+            if (errMap.isNotEmpty) {
+              final firstErr = errMap.values.first;
+              if (firstErr is List && firstErr.isNotEmpty) {
+                msg = firstErr.first.toString();
+              } else {
+                msg = firstErr.toString();
+              }
             }
+          } else if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+            msg = data['message'].toString().trim();
+          }
+        } else {
+          if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+            msg = data['message'].toString().trim();
           }
         }
       }
@@ -601,12 +628,27 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
         CustomSnackBar.showError(message: msg);
       }
     } catch (e) {
+      String errText = 'Error resending OTP: $e';
+      if (e is DioException && e.response?.data is Map) {
+        final d = e.response!.data as Map;
+        if (d['error'] != null && d['error'].toString().trim().isNotEmpty) {
+          errText = d['error'].toString().trim();
+        } else if (d['errors'] != null && d['errors'] is Map) {
+          final errMap = d['errors'] as Map;
+          if (errMap.isNotEmpty) {
+            final firstErr = errMap.values.first;
+            errText = (firstErr is List && firstErr.isNotEmpty) ? firstErr.first.toString() : firstErr.toString();
+          }
+        } else if (d['message'] != null && d['message'].toString().trim().isNotEmpty) {
+          errText = d['message'].toString().trim();
+        }
+      }
       if (mounted) {
         setState(() {
           isResendingOtp = false;
         });
       }
-      CustomSnackBar.showError(message: 'Error resending OTP: $e');
+      CustomSnackBar.showError(message: errText);
     }
   }
 

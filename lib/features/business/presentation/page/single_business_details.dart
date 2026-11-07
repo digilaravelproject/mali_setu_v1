@@ -109,10 +109,18 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               return Stack(
                 children: [
                   RefreshIndicator(
-                onRefresh: () => controller.fetchBusinessDetails(
-                  argBusiness.id!,
-                  isRefresh: true,
-                ),
+                onRefresh: () async {
+                  final bId = controller.selectedBusiness.value?.id ?? argBusiness.id;
+                  if (bId != null) {
+                    await controller.fetchBusinessDetails(
+                      bId,
+                      isRefresh: true,
+                    );
+                  }
+                  if (Get.isRegistered<JobsController>()) {
+                    Get.find<JobsController>().fetchJobs(isRefresh: true);
+                  }
+                },
                 color: context.theme.primaryColor,
                 backgroundColor: context.theme.scaffoldBackgroundColor,
                 child: NestedScrollView(
@@ -797,15 +805,12 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   Widget _buildStatsRow(Business business, BuildContext context) {
     return Obx(() {
       // Check if current user is the owner
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value;
-      final b = controller.selectedBusiness.value ?? business;
-      final isOwner = currentUser?.id == b.userId;
+      final isOwner = _isCurrentBusinessOwner;
 
       // If owner, show all jobs count. Otherwise, hide pending jobs from count
       final jobCount = isOwner
           ? controller.businessJobs.length
-          : controller.businessJobs.where((j) => j.status != 'pending').length;
+          : controller.businessJobs.where((j) => (j.status ?? '').toLowerCase().trim() != 'pending').length;
 
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -1131,7 +1136,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       }
       if (controller.businessProducts.isEmpty) {
         return CustomScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1143,7 +1150,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         );
       }
       return CustomScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1282,7 +1291,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       }
       if (controller.businessServices.isEmpty) {
         return CustomScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1294,7 +1305,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         );
       }
       return CustomScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1421,10 +1434,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   Widget _buildJobsTab(BuildContext context) {
     return Obx(() {
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value;
       final business = controller.selectedBusiness.value ?? argBusiness;
-      final isOwner = currentUser?.id == business.userId;
+      final isOwner = _isCurrentBusinessOwner;
 
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
@@ -1433,12 +1444,19 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       final displayedJobs = isOwner
           ? controller.businessJobs
           : controller.businessJobs
-                .where((job) => job.status != 'pending')
+                .where((job) {
+                  final status = (job.status ?? '').toLowerCase().trim();
+                  return status == 'approved' ||
+                      status == 'active' ||
+                      (status != 'pending' && status != 'rejected' && status.isNotEmpty);
+                })
                 .toList();
 
       if (displayedJobs.isEmpty) {
         return CustomScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1468,7 +1486,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       }
 
       return CustomScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1660,7 +1680,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          if (job.status == 'pending')
+                          if ((job.status ?? '').toLowerCase().trim() == 'pending')
                             CustomButton(
                               title: "waiting_for_approval".tr,
                               backgroundColor: Colors.orange,
@@ -1819,7 +1839,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   _buildInfoRow(
                     Icons.work_outline,
                     'active_jobs'.tr,
-                    '${controller.businessJobs.where((j) => j.status != 'pending').length}',
+                    '${controller.businessJobs.where((j) => (j.status ?? '').toLowerCase().trim() != 'pending').length}',
                     context,
                   ),
                 ], context),
@@ -2040,24 +2060,40 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   Widget _buildJobStatusBadge(Job job, BuildContext context) {
-    final bool isActive = job.isActive ?? false;
+    final status = (job.status ?? '').toLowerCase().trim();
+    final bool isActive = job.isActive ?? (status == 'approved' || status == 'active');
+
+    Color badgeColor;
+    String badgeText;
+
+    if (status == 'pending') {
+      badgeColor = Colors.orange;
+      badgeText = "Pending Approval";
+    } else if (status == 'rejected') {
+      badgeColor = Colors.red;
+      badgeText = "Rejected";
+    } else if (status == 'approved') {
+      badgeColor = Colors.green;
+      badgeText = isActive ? "Approved" : "Inactive";
+    } else {
+      badgeColor = isActive ? Colors.green : Colors.red;
+      badgeText = isActive ? "Active" : "Inactive";
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive
-            ? Colors.green.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+        color: badgeColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isActive ? Colors.green : Colors.red,
+          color: badgeColor,
           width: 0.5,
         ),
       ),
       child: Text(
-        isActive ? "Active" : "Inactive",
+        badgeText,
         style: context.textTheme.bodySmall?.copyWith(
-          color: isActive ? Colors.green : Colors.red,
+          color: badgeColor,
           fontWeight: FontWeight.bold,
           fontSize: 10,
         ),

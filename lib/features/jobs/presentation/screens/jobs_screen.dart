@@ -159,6 +159,19 @@ class JobsScreen extends StatelessWidget {
                             color: Color(0xFF9CA3AF),
                           ),
                           suffixIcon: Obx(() {
+                            if (controller.isLoading.value) {
+                              return Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CupertinoActivityIndicator(
+                                    radius: 8,
+                                    color: theme.primaryColor,
+                                  ),
+                                ),
+                              );
+                            }
                             if (controller.searchQuery.value.isNotEmpty) {
                               return GestureDetector(
                                 onTap: controller.clearSearch,
@@ -376,72 +389,87 @@ class JobsScreen extends StatelessWidget {
   // ALL JOBS VIEW
   // =========================================================================
   Widget _buildAllJobsView(BuildContext context, JobsController controller, ThemeData theme) {
-    return Obx(() {
-      if (controller.isLoading.value && controller.jobs.isEmpty) {
-        return _buildShimmerLoading();
-      }
+    return RefreshIndicator(
+      color: theme.primaryColor,
+      onRefresh: () => controller.fetchJobs(isRefresh: true),
+      child: Obx(() {
+        if (controller.isLoading.value && controller.jobs.isEmpty) {
+          return _buildShimmerLoading();
+        }
 
-      if (controller.jobs.isEmpty) {
-        return _buildEmptyState(context, controller);
-      }
+        if (controller.jobs.isEmpty) {
+          return _buildEmptyState(context, controller);
+        }
 
-      return RefreshIndicator(
-        color: theme.primaryColor,
-        onRefresh: () => controller.fetchJobs(isRefresh: true),
-        child: ListView.builder(
-          controller: controller.scrollController,
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          padding: const EdgeInsets.only(top: 4, bottom: 85),
-          itemCount: controller.jobs.length + (controller.isMoreLoading.value ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == controller.jobs.length) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: CupertinoActivityIndicator(),
-                ),
-              );
-            }
+        return Stack(
+          children: [
+            ListView.builder(
+              controller: controller.scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: const EdgeInsets.only(top: 4, bottom: 85),
+              itemCount: controller.jobs.length + (controller.isMoreLoading.value ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == controller.jobs.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: CupertinoActivityIndicator(),
+                    ),
+                  );
+                }
 
-            final job = controller.jobs[index];
-            final isFav = controller.favoriteJobIds.contains(job.id);
+                final job = controller.jobs[index];
+                final isFav = controller.favoriteJobIds.contains(job.id);
 
-            return JobCardItem(
-              job: job,
-              isFavorite: isFav,
-              onFavoriteTap: () => controller.toggleFavorite(job.id),
-              onTap: () {
-                Get.toNamed(
-                  AppRoutes.jobDetails,
-                  arguments: job,
+                return JobCardItem(
+                  job: job,
+                  isFavorite: isFav,
+                  onFavoriteTap: () => controller.toggleFavorite(job.id),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.jobDetails,
+                      arguments: job,
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
-      );
-    });
+            ),
+            if (controller.isLoading.value)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: LinearProgressIndicator(
+                  minHeight: 2.5,
+                  color: theme.primaryColor,
+                  backgroundColor: theme.primaryColor.withOpacity(0.12),
+                ),
+              ),
+          ],
+        );
+      }),
+    );
   }
 
   // =========================================================================
   // MY APPLIED JOBS VIEW
   // =========================================================================
   Widget _buildMyAppliedJobsView(BuildContext context, JobsController controller, ThemeData theme) {
-    return Obx(() {
-      if (controller.isMyApplicationsLoading.value && controller.myApplications.isEmpty) {
-        return _buildShimmerLoading();
-      }
+    return RefreshIndicator(
+      color: theme.primaryColor,
+      onRefresh: () => controller.fetchMyApplications(isRefresh: true),
+      child: Obx(() {
+        if (controller.isMyApplicationsLoading.value && controller.myApplications.isEmpty) {
+          return _buildShimmerLoading();
+        }
 
-      if (controller.myApplications.isEmpty) {
-        return _buildEmptyAppliedState(context, controller);
-      }
+        if (controller.myApplications.isEmpty) {
+          return _buildEmptyAppliedState(context, controller);
+        }
 
-      return RefreshIndicator(
-        color: theme.primaryColor,
-        onRefresh: () => controller.fetchMyApplications(isRefresh: true),
-        child: ListView.builder(
+        return ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -451,9 +479,9 @@ class JobsScreen extends StatelessWidget {
             final application = controller.myApplications[index];
             return _buildAppliedJobCard(context, application, theme);
           },
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 
   Widget _buildAppliedJobCard(BuildContext context, JobApplication application, ThemeData theme) {
@@ -769,7 +797,9 @@ class JobsScreen extends StatelessWidget {
 
   Widget _buildShimmerLoading() {
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: 5,
       itemBuilder: (context, index) {

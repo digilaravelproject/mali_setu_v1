@@ -71,6 +71,13 @@ class _JobApplyFormState extends State<JobApplyForm> {
 
     final success = await _controller.applyJob(data);
     _isLoading.value = false;
+    if (success && mounted) {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop(true);
+      } else {
+        Get.back(result: true);
+      }
+    }
   }
 
   final _isLoading = false.obs;

@@ -302,6 +302,71 @@ class NotificationHandlerService extends GetxService {
     navigateFromPayload(data);
   }
 
+  static bool _isGenericWord(String str) {
+    final lower = str.trim().toLowerCase();
+    return lower.isEmpty ||
+        lower == 'chat' ||
+        lower == 'member' ||
+        lower == 'new message' ||
+        lower == 'new messages' ||
+        lower == 'new chat message' ||
+        lower == 'chat message' ||
+        lower == 'message' ||
+        lower == 'messages' ||
+        lower == 'notification' ||
+        lower == 'notifications' ||
+        lower == 'mali setu' ||
+        lower == 'mali_setu' ||
+        lower == 'null';
+  }
+
+  static String _extractSenderNameFromTitle(String rawTitle) {
+    if (rawTitle.isEmpty) return '';
+    final title = rawTitle.trim();
+    final lower = title.toLowerCase();
+
+    if (_isGenericWord(lower)) return '';
+
+    final fromPrefixes = [
+      'new message from ',
+      'message from ',
+      'new chat message from ',
+      'chat message from ',
+    ];
+    for (final prefix in fromPrefixes) {
+      if (lower.startsWith(prefix)) {
+        return title.substring(prefix.length).trim();
+      }
+    }
+
+    final sentSuffixes = [
+      ' sent you a message',
+      ' sent a message',
+      ' has sent you a message',
+    ];
+    for (final suffix in sentSuffixes) {
+      if (lower.endsWith(suffix)) {
+        return title.substring(0, title.length - suffix.length).trim();
+      }
+    }
+
+    if (title.contains(':')) {
+      final parts = title.split(':');
+      if (parts.first.trim().isNotEmpty && parts.first.trim().split(' ').length <= 4) {
+        final candidate = parts.first.trim();
+        if (!_isGenericWord(candidate)) {
+          return candidate;
+        }
+      }
+    }
+
+    if (!lower.contains('message') && !lower.contains('notification') && !lower.contains('mali setu')) {
+      return title;
+    }
+
+    return '';
+  }
+
   /// ══════════════════════════════════════════════════════════════════════════
   /// MASTER ROUTING ENGINE (HANDLES ALL 21+ NOTIFICATION TYPES)
   /// ══════════════════════════════════════════════════════════════════════════
@@ -407,6 +472,30 @@ class NotificationHandlerService extends GetxService {
       for (final key in keys) {
         if (data.containsKey(key) && data[key] != null && data[key].toString().isNotEmpty) {
           return data[key].toString();
+        }
+      }
+      if (data['data'] is Map) {
+        final Map inner = data['data'];
+        for (final key in keys) {
+          if (inner.containsKey(key) && inner[key] != null && inner[key].toString().isNotEmpty) {
+            return inner[key].toString();
+          }
+        }
+      }
+      if (data['sender'] is Map) {
+        final Map s = data['sender'];
+        for (final key in keys) {
+          if (s.containsKey(key) && s[key] != null && s[key].toString().isNotEmpty) {
+            return s[key].toString();
+          }
+        }
+      }
+      if (data['user'] is Map) {
+        final Map u = data['user'];
+        for (final key in keys) {
+          if (u.containsKey(key) && u[key] != null && u[key].toString().isNotEmpty) {
+            return u[key].toString();
+          }
         }
       }
       return defaultVal;
@@ -597,15 +686,28 @@ class NotificationHandlerService extends GetxService {
         break;
 
       case 'connection_accepted':
-        final int? conversationId = getInt(['conversation_id']);
-        final int? otherUserId = getInt(['other_user_id', 'user_id', 'profile_id']);
-        final String userName = getString(['user_name', 'name', 'title'], defaultVal: 'Member');
+        int? myUserIdForConn;
+        if (Get.isRegistered<AuthService>()) {
+          myUserIdForConn = Get.find<AuthService>().currentUser.value?.id;
+        }
+        final int? conversationId = getInt(['conversation_id', 'conv_id']);
+        int? otherUserId = getInt(['other_user_id', 'sender_id', 'user_id', 'profile_id']);
+        if (otherUserId != null && myUserIdForConn != null && otherUserId == myUserIdForConn) {
+          final altId = getInt(['related_id', 'sender_id', 'other_user_id']);
+          otherUserId = (altId != null && altId != myUserIdForConn) ? altId : null;
+        }
+
+        String userName = getString(['user_name', 'sender_name', 'name']);
+        if (userName.trim().isEmpty || _isGenericWord(userName)) {
+          final rawTitle = getString(['title']);
+          userName = _extractSenderNameFromTitle(rawTitle);
+        }
 
         if (conversationId != null || otherUserId != null) {
           Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-            'conversation_id': conversationId,
-            'other_user_id': otherUserId,
-            'user_name': userName,
+            if (conversationId != null) 'conversation_id': conversationId,
+            if (otherUserId != null) 'other_user_id': otherUserId,
+            if (userName.isNotEmpty) 'user_name': userName,
           });
         } else {
           Get.toNamed(AppRoutes.matrimonyMembers);
@@ -715,17 +817,59 @@ class NotificationHandlerService extends GetxService {
       case 'chat':
       case 'message':
       case 'new_message':
-        final int? convId = getInt(['conversation_id', 'conv_id']);
-        final int? senderId = getInt(['other_user_id', 'sender_id', 'sender_user_id', 'user_id']);
-        final String senderName = getString(['user_name', 'sender_name', 'name', 'title'], defaultVal: 'Chat');
+        int? myUserId;
+        if (Get.isRegistered<AuthService>()) {
+          myUserId = Get.find<AuthService>().currentUser.value?.id;
+        }
 
-        // If the chat screen is already open for THIS conversation → just refresh messages
+        final int? convId = getInt(['conversation_id', 'conv_id', 'chat_id']);
+
+        // Priority for sender ID: sender_id, other_user_id, sender_user_id, from_user_id, from_id
+        int? senderId = getInt(['sender_id', 'other_user_id', 'sender_user_id', 'from_user_id', 'from_id']);
+        if (senderId == null || (myUserId != null && senderId == myUserId)) {
+          final candidateId = getInt(['user_id', 'related_id', 'id']);
+          if (candidateId != null && candidateId != myUserId) {
+            senderId = candidateId;
+          } else if (senderId == myUserId) {
+            senderId = null; // Do not use logged-in user ID as other user!
+          }
+        }
+
+        // Priority for sender name: check dedicated sender fields first
+        String senderName = getString([
+          'sender_name',
+          'senderName',
+          'other_user_name',
+          'from_name',
+          'user_name',
+          'userName',
+        ]);
+
+        if (senderName.trim().isEmpty || _isGenericWord(senderName)) {
+          final rawTitle = getString(['title']);
+          final extracted = _extractSenderNameFromTitle(rawTitle);
+          if (extracted.isNotEmpty) {
+            senderName = extracted;
+          } else {
+            senderName = '';
+          }
+        }
+
+        // If the chat screen is already open
         if (Get.currentRoute == AppRoutes.matrimonyChat &&
             Get.isRegistered<MatrimonyChatController>()) {
           final chatCtrl = Get.find<MatrimonyChatController>();
           if (convId != null && chatCtrl.conversationId == convId) {
             // Already on correct chat – just refresh
             chatCtrl.fetchMessages();
+            break;
+          } else {
+            // Chat screen is open but for a DIFFERENT conversation – update it
+            chatCtrl.updateConversation(
+              convId: convId,
+              otherUserId: senderId,
+              userName: senderName.isNotEmpty ? senderName : null,
+            );
             break;
           }
         }
@@ -734,8 +878,8 @@ class NotificationHandlerService extends GetxService {
         if (convId != null) {
           Get.toNamed(AppRoutes.matrimonyChat, arguments: {
             'conversation_id': convId,
-            'other_user_id': senderId,
-            'user_name': senderName,
+            if (senderId != null) 'other_user_id': senderId,
+            if (senderName.isNotEmpty) 'user_name': senderName,
           });
           break;
         }
@@ -744,7 +888,7 @@ class NotificationHandlerService extends GetxService {
         if (senderId != null) {
           Get.toNamed(AppRoutes.matrimonyChat, arguments: {
             'other_user_id': senderId,
-            'user_name': senderName,
+            if (senderName.isNotEmpty) 'user_name': senderName,
           });
         }
         break;

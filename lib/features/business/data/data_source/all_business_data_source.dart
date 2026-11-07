@@ -367,7 +367,10 @@ class BusinessDataSourceImpl implements BusinessDataSource {
 
   @override
   Future<BusinessResponse> getMyJobs(int businessId) async {
-    final response = await apiClient.get('${ApiConstants.jobsByBusinessId}?business_id=$businessId');
+    final response = await apiClient.get(
+      ApiConstants.jobsByBusinessId,
+      queryParameters: {'business_id': businessId},
+    );
     return BusinessResponse.fromJson(response.data);
   }
 

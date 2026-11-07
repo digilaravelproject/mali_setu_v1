@@ -140,4 +140,5 @@ class ApiConstants {
     static String referralNetwork(String code) => "referrals/$code/network";
     static const String referralShareableLink = "referral/shareable-link";
     static const String sendReferralLink = "referral/send";
+    static String referralVolunteer(String code) => "referrals/$code/volunteer";
 }

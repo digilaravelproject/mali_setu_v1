@@ -141,8 +141,14 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
         if (Get.isRegistered<JobsController>()) {
           Get.find<JobsController>().fetchMyApplications(isRefresh: true);
         }
-        await Future.delayed(const Duration(milliseconds: 600));
-        Get.back(result: true);
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (mounted) {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop(true);
+          } else {
+            Get.back(result: true);
+          }
+        }
       }
     } catch (e) {
       CustomSnackBar.showError(message: "Failed to submit application: $e");

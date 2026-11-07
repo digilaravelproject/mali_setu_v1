@@ -45,10 +45,31 @@ class BusinessResponse {
           businessData = BusinessData.fromJson(dataMap);
         }
       } else if (json['data'] is List) {
-        // Direct list of businesses
+        // Direct list
         final list = json['data'] as List;
+        final maps = list.whereType<Map<String, dynamic>>().toList();
+        List<Business> businesses = [];
+        List<Job> jobs = [];
+        List<Product> products = [];
+        List<Service> services = [];
+        
+        if (maps.isNotEmpty) {
+          final first = maps.first;
+          if (first.containsKey('title') || first.containsKey('job_type') || first.containsKey('salary_range')) {
+            jobs = maps.map((x) => Job.fromJson(x)).toList();
+          } else if (first.containsKey('business_name')) {
+            businesses = maps.map((x) => Business.fromJson(x)).toList();
+          } else {
+            products = maps.map((x) => Product.fromJson(x)).toList();
+            services = maps.map((x) => Service.fromJson(x)).toList();
+            businesses = maps.map((x) => Business.fromJson(x)).toList();
+          }
+        }
         businessData = BusinessData(
-          data: list.whereType<Map<String, dynamic>>().map((x) => Business.fromJson(x)).toList(),
+          data: businesses,
+          jobs: jobs.isNotEmpty ? jobs : null,
+          products: products.isNotEmpty ? products : null,
+          services: services.isNotEmpty ? services : null,
         );
       }
     }
@@ -103,18 +124,16 @@ class BusinessData {
     List<Service> servicesList = [];
 
     if (rawData != null && rawData is List && rawData.isNotEmpty) {
-      var item = rawData.first;
-      if (item is Map) {
-        if (item.containsKey('title')) {
-          jobsList = List<Job>.from(rawData.map((x) => Job.fromJson(x)));
+      final maps = rawData.whereType<Map<String, dynamic>>().toList();
+      if (maps.isNotEmpty) {
+        final item = maps.first;
+        if (item.containsKey('title') || item.containsKey('job_type') || item.containsKey('salary_range')) {
+          jobsList = List<Job>.from(maps.map((x) => Job.fromJson(x)));
         } else if (item.containsKey('business_name')) {
-          businesses = List<Business>.from(rawData.map((x) => Business.fromJson(x)));
-        } else if (item.containsKey('cost')) {
-          // It could be either product or service. 
-          // For now, let's treat it as generic data if we can't distinguish.
-          // But usually, they are return in specific keys if not paginated.
-          // In pagination, we'll try to guess or just use the caller's expectation.
-          // For now, let's focus on jobs which we know has 'title'.
+          businesses = List<Business>.from(maps.map((x) => Business.fromJson(x)));
+        } else if (item.containsKey('cost') || item.containsKey('product_name') || item.containsKey('service_name') || item.containsKey('price')) {
+          productsList = List<Product>.from(maps.map((x) => Product.fromJson(x)));
+          servicesList = List<Service>.from(maps.map((x) => Service.fromJson(x)));
         }
       }
     }
@@ -130,17 +149,23 @@ class BusinessData {
       from: _asInt(json['from']),
       to: _asInt(json['to']),
       lastPage: _asInt(json['last_page']),
-      products: json['products'] != null
-          ? List<Product>.from(json['products'].map((x) => Product.fromJson(x)))
-          : null,
-      services: json['services'] != null
-          ? List<Service>.from(json['services'].map((x) => Service.fromJson(x)))
-          : null,
+      products: productsList.isNotEmpty
+          ? productsList
+          : (json['products'] != null
+              ? List<Product>.from(json['products'].map((x) => Product.fromJson(x)))
+              : null),
+      services: servicesList.isNotEmpty
+          ? servicesList
+          : (json['services'] != null
+              ? List<Service>.from(json['services'].map((x) => Service.fromJson(x)))
+              : null),
       jobs: jobsList.isNotEmpty 
           ? jobsList 
           : (json['jobs'] != null
               ? List<Job>.from(json['jobs'].map((x) => Job.fromJson(x)))
-              : null),
+              : (json['job_postings'] != null
+                  ? List<Job>.from(json['job_postings'].map((x) => Job.fromJson(x)))
+                  : null)),
     );
   }
 }
@@ -179,6 +204,7 @@ class Business {
   Category? category;
   List<Product>? products;
   List<Service>? services;
+  List<Job>? jobs;
 
   Business({
     this.id,
@@ -214,6 +240,7 @@ class Business {
     this.category,
     this.products,
     this.services,
+    this.jobs,
   });
 
   factory Business.fromJson(Map<String, dynamic> json) {
@@ -255,6 +282,11 @@ class Business {
       services: json['services'] != null
           ? List<Service>.from(json['services'].map((x) => Service.fromJson(x)))
           : [],
+      jobs: json['jobs'] != null
+          ? List<Job>.from(json['jobs'].map((x) => Job.fromJson(x)))
+          : (json['job_postings'] != null
+              ? List<Job>.from(json['job_postings'].map((x) => Job.fromJson(x)))
+              : []),
     );
   }
 

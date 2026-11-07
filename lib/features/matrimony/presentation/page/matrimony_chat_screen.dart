@@ -51,15 +51,20 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
         icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
         onPressed: () => Get.back(),
       ),
-      title: Text(
-        controller.userName ?? "Chat",
-        style: const TextStyle(
-          color: Colors.black, 
-          fontSize: 18, 
-          fontWeight: FontWeight.bold
-        ),
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: Obx(() {
+        final titleText = controller.rxUserName.value.trim().isNotEmpty
+            ? controller.rxUserName.value.trim()
+            : (controller.userName ?? "Chat");
+        return Text(
+          titleText,
+          style: const TextStyle(
+            color: Colors.black, 
+            fontSize: 18, 
+            fontWeight: FontWeight.bold,
+          ),
+          overflow: TextOverflow.ellipsis,
+        );
+      }),
       // centerTitle: true,
       // actions: [
       //   IconButton(icon: const Icon(Icons.videocam_outlined, color: Colors.purple), onPressed: () {}),

@@ -13,6 +13,7 @@ import 'package:edu_cluezer/core/helper/local_notification_helper.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -747,11 +748,21 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       
       // Fetch related data in parallel if business exists
       if (business != null) {
-          await Future.wait([
-             fetchBusinessProducts(id),
-             fetchBusinessServices(id),
-             fetchBusinessJobs(id),
-          ]);
+        if (business.products != null && business.products!.isNotEmpty) {
+          businessProducts.value = business.products!;
+        }
+        if (business.services != null && business.services!.isNotEmpty) {
+          businessServices.value = business.services!;
+        }
+        if (business.jobs != null && business.jobs!.isNotEmpty) {
+          businessJobs.value = business.jobs!;
+        }
+
+        await Future.wait([
+           fetchBusinessProducts(id),
+           fetchBusinessServices(id),
+           fetchBusinessJobs(id),
+        ]);
       }
 
     } catch (e) {
@@ -764,7 +775,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessProducts(int businessId) async {
       try {
           final products = await getBusinessProductsUseCase(businessId);
-          businessProducts.value = products;
+          if (products.isNotEmpty || businessProducts.isEmpty) {
+            businessProducts.value = products;
+          }
       } catch(e) {
           print('Error fetching products: $e');
       }
@@ -773,7 +786,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessServices(int businessId) async {
       try {
           final services = await getBusinessServicesUseCase(businessId);
-          businessServices.value = services;
+          if (services.isNotEmpty || businessServices.isEmpty) {
+            businessServices.value = services;
+          }
       } catch(e) {
           print('Error fetching services: $e');
       }
@@ -782,7 +797,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessJobs(int businessId) async {
       try {
           final jobs = await getMyJobsUseCase(businessId);
-          businessJobs.value = jobs;
+          if (jobs.isNotEmpty || businessJobs.isEmpty) {
+            businessJobs.value = jobs;
+          }
       } catch(e) {
           print('Error fetching jobs: $e');
       }
@@ -1187,10 +1204,192 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> launchResume(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-       CustomSnackBar.showError(message: "Could not launch resume");
+  Future<void> launchResume(String url, {String? applicantName}) async {
+    await viewResume(url, applicantName: applicantName);
+  }
+
+  Future<void> viewResume(String url, {String? applicantName}) async {
+    if (url.isEmpty) {
+      CustomSnackBar.showError(message: "Resume URL is not available");
+      return;
+    }
+
+    final cleanUrl = url.split('?').first;
+    final extension = cleanUrl.split('.').last.toLowerCase();
+    final name = applicantName ?? 'Candidate';
+
+    if (['jpg', 'jpeg', 'png', 'webp'].contains(extension)) {
+      _showImageResumeDialog(url, name, extension);
+    } else {
+      await _openDocumentResume(url, name, extension);
+    }
+  }
+
+  void _showImageResumeDialog(String url, String name, String extension) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 750),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.94),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 10, 10),
+                child: Row(
+                  children: [
+                    const Icon(Icons.description_outlined, color: Colors.white70, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Resume - $name",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.download_rounded, color: Colors.white, size: 22),
+                      tooltip: "Download Resume",
+                      onPressed: () {
+                        final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+                        final fileName = "Resume_${safeName}_${DateTime.now().millisecondsSinceEpoch}.$extension";
+                        downloadResume(url, fileName);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 24),
+                      onPressed: () => Get.back(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: Colors.white24, height: 1),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                  child: InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 4.0,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.contain,
+                        placeholder: (context, _) => const Center(
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                        ),
+                        errorWidget: (context, _, __) => Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.broken_image_outlined, size: 48, color: Colors.white54),
+                            const SizedBox(height: 12),
+                            const Text(
+                              "Failed to load image",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+                                final fileName = "Resume_$safeName.$extension";
+                                downloadResume(url, fileName);
+                              },
+                              icon: const Icon(Icons.download_rounded, size: 18),
+                              label: const Text("Download Instead"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openDocumentResume(String url, String name, String extension) async {
+    Get.dialog(
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Text(
+                    "Opening ${extension.toUpperCase()} resume...",
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+      final fileName = "Resume_${safeName}_${DateTime.now().millisecondsSinceEpoch}.$extension";
+      final filePath = "${tempDir.path}/$fileName";
+
+      await Dio().download(url, filePath);
+
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+
+      final result = await OpenFilex.open(filePath);
+      if (result.type != ResultType.done) {
+        final uri = Uri.parse(url);
+        final launched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+        if (!launched) {
+          CustomSnackBar.showInfo(
+            message: "No app found to open $extension. Downloading to device...",
+          );
+          downloadResume(url, fileName);
+        }
+      }
+    } catch (e) {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+      debugPrint("Error opening resume document: $e");
+      try {
+        final uri = Uri.parse(url);
+        final launched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+        if (!launched) {
+          final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+          downloadResume(url, "Resume_$safeName.$extension");
+        }
+      } catch (_) {
+        final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+        downloadResume(url, "Resume_$safeName.$extension");
+      }
     }
   }
 
@@ -1223,11 +1422,17 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       Directory? downloadsDir;
       if (Platform.isAndroid) {
         downloadsDir = Directory('/storage/emulated/0/Download');
+        if (!downloadsDir.existsSync()) {
+          try {
+            downloadsDir = await getExternalStorageDirectory();
+          } catch (_) {}
+        }
       } else if (Platform.isIOS) {
         downloadsDir = await getApplicationDocumentsDirectory();
       } else {
         downloadsDir = await getDownloadsDirectory();
       }
+      downloadsDir ??= await getApplicationDocumentsDirectory();
 
       if (downloadsDir == null) {
         CustomSnackBar.showError(message: "Could not find downloads directory");

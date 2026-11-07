@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
-import 'package:edu_cluezer/core/utils/app_assets.dart';
 import 'package:edu_cluezer/features/filter/presentation/page/filter_page.dart';
 import 'package:edu_cluezer/packages/card_swiper/flutter_card_swiper.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
@@ -38,9 +37,24 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
         child: Scaffold(
           extendBodyBehindAppBar: true,
           // backgroundColor: Colors.grey[50],
-          body: NestedScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
+          body: RefreshIndicator(
+            color: theme.primaryColor,
+            backgroundColor: Colors.white,
+            edgeOffset: 60 + topPadding,
+            onRefresh: () async {
+              // 1. Refresh AuthService profile (in case matrimony approval/payment status changed)
+              if (Get.isRegistered<AuthService>()) {
+                await Get.find<AuthService>().refreshProfile();
+              }
+              // 2. Fetch fresh profiles with active filters
+              final filterCtrl = Get.isRegistered<FilterController>() ? Get.find<FilterController>() : null;
+              final filters = filterCtrl?.getFilters() ?? {};
+              controller.currentIndex.value = 0;
+              await controller.fetchProfiles(filters: filters, isSilent: true);
+            },
+            child: NestedScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 Obx(() {
                   final authService = Get.find<AuthService>();
@@ -261,21 +275,29 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                   return Center(child: CircularProgressIndicator(color: theme.primaryColor));
                 }
                 if (controller.profiles.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'no_matches_found'.tr,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                  return LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: constraints.maxHeight,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.style_outlined, size: 80, color: Colors.grey[300]),
+                              const SizedBox(height: 16),
+                              Text(
+                                'no_matches_found'.tr,
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   );
                 }
@@ -288,30 +310,39 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 );
               } catch (e) {
                 print("Error in matrimony page body: $e");
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'error_loading_profiles'.tr,
-                        style: TextStyle(
-                          color: Colors.red[500],
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                return LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: constraints.maxHeight,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'error_loading_profiles'.tr,
+                              style: TextStyle(
+                                color: Colors.red[500],
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => controller.fetchProfiles(),
+                              child: Text('retry'.tr),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => controller.fetchProfiles(),
-                        child: Text('retry'.tr),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               }
             }),
+          ),
           ),
         ),
       ),
@@ -320,171 +351,163 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
   Widget _buildCardList(BuildContext context, List<UserProfile> list) {
     if (list.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children:  [
-            Icon(Icons.people_outline, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'no_more_profiles'.tr,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'seen_all_matches'.tr,
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-    return Column(
-      children: [
-        Expanded(
-          flex: 8,
-          //child: SafeArea(
-          child: CardSwiper(
-            controller: controller.swiperController,
-            padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
-            duration: const Duration(milliseconds: 400),
-            onSwipe: (previousIndex, currentIndex, direction) {
-              if (currentIndex != null) {
-                controller.currentIndex.value = currentIndex;
-              }
-              return true;
-            },
-            cardBuilder: (context, index, dx, dy) {
-              try {
-                return _buildUserCard(context, list[index]);
-              } catch (e) {
-                print("Error building card at index $index: $e");
-                return _buildErrorCard(context);
-              }
-            },
-            cardsCount: list.length,
-            numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
-          ),
-          //),
-        ),
-
-        // ACTION BUTTONS
-        Obx(() {
-          if (controller.profiles.isEmpty || controller.currentIndex.value >= controller.profiles.length) {
-            return const SizedBox(height: 72);
-          }
-
-          final currentProfile = controller.profiles[controller.currentIndex.value];
-          final status = currentProfile.connectionStatus?.toLowerCase();
-          final isAccepted = status == "accepted";
-          final isConnected = status != "not_connected";
-
-          return SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: constraints.maxHeight,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (!isConnected)
-                    _buildActionButton(
-                      onTap: () {
-                        try {
-                          final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
-                          controller.rejectRequest(currentProfileId);
-                          controller.swiperController.swipe(CardSwiperDirection.left);
-                        } catch (e) {
-                          print("Error rejecting request: $e");
-                        }
-                      },
-                      icon: Icons.close_rounded,
-                      color: Colors.redAccent,
-                      size: 30,
-                      elevation: 5,
-                    )
-                  else
-                    const SizedBox(width: 56),
-
-
-                  /*if(isAccepted && currentProfile.conversationId!=null)
-
-                  _buildActionButton(
-                    onTap: isAccepted
-                        ? () {
-                      Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                              // 'conversation_id': null,
-                              // 'other_user_id': currentProfile.user?.id,
-
-                      'conversation_id': currentProfile.conversationId,
-                      'other_user_id': currentProfile.userId,
-                      'user_name': currentProfile.personalDetails?.name.toString(),
-                            });}
-                        : () => Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentProfile.id}),
-                    icon: isAccepted ? Icons.chat_bubble_rounded : Icons.info_rounded,
-                    color: Colors.blueAccent,
-                    size: 24,
-                    elevation: 3,
-                    isSmall: true,
-                  ),*/
-
-
-
-                  _buildActionButton(
-                    onTap: (isAccepted && currentProfile.conversationId != null)
-                        ? () {
-                      Get.toNamed(
-                        AppRoutes.matrimonyChat,
-                        arguments: {
-                          'conversation_id': currentProfile.conversationId,
-                          'other_user_id': currentProfile.userId,
-                          'user_name': currentProfile.personalDetails?.name.toString(),
-                        },
-                      );
-                    }
-                        : () => Get.toNamed(
-                      AppRoutes.matrimonyProfileScreen,
-                      arguments: {
-                        'id': currentProfile.userId,
-                        'connection_status': currentProfile.connectionStatus,
-                        'conversation_id': currentProfile.conversationId,
-                      },
+                  const Icon(Icons.people_outline, size: 80, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    'no_more_profiles'.tr,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
                     ),
-                    icon: (isAccepted && currentProfile.conversationId != null)
-                        ? Icons.chat_bubble_rounded
-                        : Icons.info_rounded,
-                    color: Colors.blueAccent,
-                    size: 24,
-                    elevation: 3,
-                    isSmall: true,
                   ),
-
-                  if (!isConnected)
-                    _buildActionButton(
-                      onTap: () {
-                        try {
-                          controller.sendConnectionRequest(currentProfile.userId);
-                          controller.swiperController.swipe(CardSwiperDirection.right);
-                        } catch (e) {
-                          print("Error sending connection request: $e");
-                        }
-                      },
-                      icon: Icons.check,
-                      color: Colors.green,
-                      size: 32,
-                      elevation: 5,
-                    )
-                  else
-                    const SizedBox(width: 56),
+                  const SizedBox(height: 8),
+                  Text(
+                    'seen_all_matches'.tr,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             ),
-          );
-        }),
-      ],
+          ),
+        ),
+      );
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: constraints.maxHeight,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 8,
+                //child: SafeArea(
+                child: CardSwiper(
+                  controller: controller.swiperController,
+                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
+                  duration: const Duration(milliseconds: 400),
+                  onSwipe: (previousIndex, currentIndex, direction) {
+                    if (currentIndex != null) {
+                      controller.currentIndex.value = currentIndex;
+                    }
+                    return true;
+                  },
+                  cardBuilder: (context, index, dx, dy) {
+                    try {
+                      return _buildUserCard(context, list[index]);
+                    } catch (e) {
+                      print("Error building card at index $index: $e");
+                      return _buildErrorCard(context);
+                    }
+                  },
+                  cardsCount: list.length,
+                  numberOfCardsDisplayed: list.length > 1 ? 2 : 1,
+                ),
+                //),
+              ),
+
+              // ACTION BUTTONS
+              Obx(() {
+                if (controller.profiles.isEmpty || controller.currentIndex.value >= controller.profiles.length) {
+                  return const SizedBox(height: 72);
+                }
+
+                final currentProfile = controller.profiles[controller.currentIndex.value];
+                final status = currentProfile.connectionStatus?.toLowerCase();
+                final isAccepted = status == "accepted";
+                final isConnected = status != "not_connected";
+
+                return SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (!isConnected)
+                          _buildActionButton(
+                            onTap: () {
+                              try {
+                                final currentProfileId = controller.profiles[controller.currentIndex.value].userId;
+                                controller.rejectRequest(currentProfileId);
+                                controller.swiperController.swipe(CardSwiperDirection.left);
+                              } catch (e) {
+                                print("Error rejecting request: $e");
+                              }
+                            },
+                            icon: Icons.close_rounded,
+                            color: Colors.redAccent,
+                            size: 30,
+                            elevation: 5,
+                          )
+                        else
+                          const SizedBox(width: 56),
+
+                        _buildActionButton(
+                          onTap: (isAccepted && currentProfile.conversationId != null)
+                              ? () {
+                            Get.toNamed(
+                              AppRoutes.matrimonyChat,
+                              arguments: {
+                                'conversation_id': currentProfile.conversationId,
+                                'other_user_id': currentProfile.userId,
+                                'user_name': currentProfile.personalDetails?.name.toString(),
+                              },
+                            );
+                          }
+                              : () => Get.toNamed(
+                            AppRoutes.matrimonyProfileScreen,
+                            arguments: {
+                              'id': currentProfile.userId,
+                              'connection_status': currentProfile.connectionStatus,
+                              'conversation_id': currentProfile.conversationId,
+                            },
+                          ),
+                          icon: (isAccepted && currentProfile.conversationId != null)
+                              ? Icons.chat_bubble_rounded
+                              : Icons.info_rounded,
+                          color: Colors.blueAccent,
+                          size: 24,
+                          elevation: 3,
+                          isSmall: true,
+                        ),
+
+                        if (!isConnected)
+                          _buildActionButton(
+                            onTap: () {
+                              try {
+                                controller.sendConnectionRequest(currentProfile.userId);
+                                controller.swiperController.swipe(CardSwiperDirection.right);
+                              } catch (e) {
+                                print("Error sending connection request: $e");
+                              }
+                            },
+                            icon: Icons.check,
+                            color: Colors.green,
+                            size: 32,
+                            elevation: 5,
+                          )
+                        else
+                          const SizedBox(width: 56),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -942,7 +965,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   Widget _buildRestrictedView(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -1006,7 +1030,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   Widget _buildPymentRestrictedView(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -1073,7 +1098,8 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   Widget _buildPendingApprovalView(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -1118,6 +1144,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
   Widget _buildRejectedApprovalView(BuildContext context, {String? reason}) {
     return Center(
       child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

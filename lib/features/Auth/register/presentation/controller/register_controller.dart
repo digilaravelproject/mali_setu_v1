@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -12,9 +13,12 @@ import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/pincode_helper.dart';
 import '../../../../../core/helper/location_helper.dart';
+import '../../../../../core/constent/api_constants.dart';
+import '../../../../../core/network/api_client.dart';
 import '../../../../../core/constent/app_constants.dart';
 import '../../../../../core/storage/shared_prefs.dart';
 import '../../../../../core/storage/token_manger.dart';
+import '../../../../referral/data/models/referral_model.dart';
 import '../../data/model/req_register_model.dart';
 import '../../domain/usecase/register_usecase.dart';
 
@@ -130,6 +134,14 @@ class RegisterController extends GetxController {
   /// PINCODE AUTO-FILL
   final isFetchingPincode = false.obs;
 
+  /// REFERRAL VERIFICATION
+  final isFetchingReferral = false.obs;
+  final referralUserData = Rxn<VolunteerInfo>();
+  final referralError = ''.obs;
+  Timer? _referralDebounce;
+  String _lastCheckedCode = '';
+  final ApiClient _apiClient = Get.isRegistered<ApiClient>() ? Get.find<ApiClient>() : ApiClient();
+
   final usertypeList = [
     'General(Member Mali Setu)',
     'Business',
@@ -184,10 +196,94 @@ class RegisterController extends GetxController {
           userTypeCtrl.text = 'General(Member Mali Setu)';
         }
       }
+      if (Get.arguments['referral_code'] != null) {
+        referralCtrl.text = Get.arguments['referral_code'].toString();
+      }
     }
 
     // Listen to pincode changes for auto-fill
     pinCodeCtrl.addListener(_onPincodeChanged);
+
+    // Listen to referral code changes
+    referralCtrl.addListener(_onReferralCodeChanged);
+    if (referralCtrl.text.trim().isNotEmpty) {
+      fetchReferralUser(referralCtrl.text.trim());
+    }
+  }
+
+  /// Handle referral code typing with debounce
+  void _onReferralCodeChanged() {
+    final code = referralCtrl.text.trim();
+    _referralDebounce?.cancel();
+
+    if (code.isEmpty) {
+      _lastCheckedCode = '';
+      referralUserData.value = null;
+      referralError.value = '';
+      isFetchingReferral.value = false;
+      return;
+    }
+
+    if (code == _lastCheckedCode && referralUserData.value != null) return;
+
+    if (code.length < 3) {
+      referralUserData.value = null;
+      referralError.value = '';
+      isFetchingReferral.value = false;
+      return;
+    }
+
+    _referralDebounce = Timer(const Duration(milliseconds: 450), () {
+      fetchReferralUser(code);
+    });
+  }
+
+  /// Fetch user details of the given referral code
+  Future<void> fetchReferralUser(String code) async {
+    final cleanCode = code.trim();
+    if (cleanCode.isEmpty) return;
+
+    _lastCheckedCode = cleanCode;
+    isFetchingReferral.value = true;
+    referralError.value = '';
+
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.referralVolunteer(cleanCode),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final resData = response.data;
+        if (resData is Map && (resData['success'] == true || resData['data'] != null)) {
+          final data = resData['data'] is Map ? resData['data'] : resData;
+          final volunteer = VolunteerInfo.fromJson(data);
+          referralUserData.value = volunteer;
+          referralError.value = '';
+        } else {
+          referralUserData.value = null;
+          referralError.value = resData['message']?.toString() ?? "Invalid referral code";
+        }
+      } else {
+        referralUserData.value = null;
+        referralError.value = response.data?['message']?.toString() ?? "Invalid referral code";
+      }
+    } catch (e) {
+      debugPrint("Error fetching referral user: $e");
+      referralUserData.value = null;
+      referralError.value = "Referral code not found";
+    } finally {
+      isFetchingReferral.value = false;
+    }
+  }
+
+  /// Clear referral code field and state
+  void clearReferralCode() {
+    referralCtrl.clear();
+    _lastCheckedCode = '';
+    referralUserData.value = null;
+    referralError.value = '';
+    isFetchingReferral.value = false;
+    _referralDebounce?.cancel();
   }
 
   /// Handle pincode changes for auto-fill
@@ -634,6 +730,8 @@ class RegisterController extends GetxController {
 
 
     pinCodeCtrl.removeListener(_onPincodeChanged);
+    referralCtrl.removeListener(_onReferralCodeChanged);
+    _referralDebounce?.cancel();
 
     super.onClose();
   }

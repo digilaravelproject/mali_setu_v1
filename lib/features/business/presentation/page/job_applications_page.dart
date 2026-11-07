@@ -251,7 +251,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                     return Row(
                       children: [
                         TextButton.icon(
-                          onPressed: () => controller.launchResume(fullUrl),
+                          onPressed: () => controller.viewResume(fullUrl, applicantName: application.user?.name),
                           icon: Icon(fileIcon, size: 16, color: iconColor),
                           label: Text('view'.tr, style: TextStyle(fontSize: 12, color: iconColor)),
                           style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),
