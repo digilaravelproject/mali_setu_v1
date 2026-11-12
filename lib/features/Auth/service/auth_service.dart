@@ -340,10 +340,6 @@ class AuthService extends GetxService {
           );
         }
 
-        // Trigger volunteer dialog check once fresh profile data is stored
-        Future.delayed(const Duration(milliseconds: 600), () {
-          VolunteerPromptDialog.checkAndShow();
-        });
         
         return ApiResponse.success(user);
       } else {

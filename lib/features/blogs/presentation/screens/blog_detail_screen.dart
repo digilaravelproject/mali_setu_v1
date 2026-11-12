@@ -37,7 +37,9 @@ class BlogDetailScreen extends StatefulWidget {
 }
 
 class _BlogDetailScreenState extends State<BlogDetailScreen> {
-  final BlogController controller = Get.isRegistered<BlogController>() ? Get.find<BlogController>() : Get.put(BlogController());
+  final BlogController controller = Get.isRegistered<BlogController>()
+      ? Get.find<BlogController>()
+      : Get.put(BlogController(), permanent: true);
 
   int _calculateReadingTime(String? text) {
     if (text == null || text.isEmpty) return 1;
@@ -48,10 +50,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch details when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Immediately set loading to prevent "Blog not found" flash
+    controller.isDetailLoading.value = true;
+    controller.fetchBlogDetail(widget.blogId);
+  }
+
+  @override
+  void didUpdateWidget(covariant BlogDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.blogId != widget.blogId) {
       controller.fetchBlogDetail(widget.blogId);
-    });
+    }
   }
 
   @override
@@ -76,7 +85,29 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
             final blog = controller.selectedBlog.value;
             if (blog == null) {
-              return const Center(child: Text('Blog not found.'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.article_outlined, size: 48, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Blog not found.',
+                      style: TextStyle(fontSize: 15, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () => controller.fetchBlogDetail(widget.blogId),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Retry'),
+                    ),
+                  ],
+                ),
+              );
             }
 
             String categoryName = '';

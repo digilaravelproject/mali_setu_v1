@@ -694,7 +694,7 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
               ),
             ),
 
-            // Interactive Controls Bar (Mic, Camera, Flip Camera, Chat, Q&A, Leave)
+            // Interactive Controls Bar (Mic, Camera, Flip Camera, Chat, Leave)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
               color: const Color(0xFF1E293B),
@@ -729,23 +729,20 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                       onTap: _switchCamera,
                     ),
 
-                  // 4. Chat Tab
+                  // 4. Chat Button
                   _buildControlButton(
                     icon: CupertinoIcons.chat_bubble_2_fill,
                     label: "Chat",
-                    isActive: controller.activeLiveTab.value == 1,
+                    isActive: true,
+                    activeColor: AppColors.primary,
                     onTap: () {
-                      controller.activeLiveTab.value = 1;
-                    },
-                  ),
-
-                  // 4. Q&A Tab
-                  _buildControlButton(
-                    icon: Icons.help_outline_rounded,
-                    label: "Q&A",
-                    isActive: controller.activeLiveTab.value == 0,
-                    onTap: () {
-                      controller.activeLiveTab.value = 0;
+                      if (_commentsScrollController.hasClients) {
+                        _commentsScrollController.animateTo(
+                          _commentsScrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOut,
+                        );
+                      }
                     },
                   ),
 
@@ -765,17 +762,17 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
               ),
             ),
 
-            // Lower Section: Q&A and Live Chat Tabs + Messages List
+            // Lower Section: Live Chat Messages List (with Pull to Refresh)
             Expanded(
               child: Container(
                 color: Colors.white,
                 child: Column(
                   children: [
-                    // Tab Bar: Q&A | Live Chat (with clean underline indicator)
+                    // Header: Live Chat title + count + refresh button
                     Obx(() {
-                      final selected = controller.activeLiveTab.value;
+                      final chatCount = controller.chatMessages.length;
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           border: Border(
@@ -784,105 +781,164 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                         ),
                         child: Row(
                           children: [
-                            _buildTabItem(
-                              title: "Q&A",
-                              count: controller.qaMessages.length,
-                              isSelected: selected == 0,
-                              onTap: () => controller.activeLiveTab.value = 0,
+                            const Icon(
+                              CupertinoIcons.chat_bubble_2_fill,
+                              size: 16,
+                              color: AppColors.primary,
                             ),
                             const SizedBox(width: 8),
-                            _buildTabItem(
-                              title: "Live Chat",
-                              count: controller.chatMessages.length,
-                              isSelected: selected == 1,
-                              onTap: () => controller.activeLiveTab.value = 1,
+                            const Text(
+                              "Live Chat",
+                              style: TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            if (chatCount > 0) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  "$chatCount",
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () => controller.fetchWebinarComments(widget.webinar.id, isRefresh: true),
+                              behavior: HitTestBehavior.opaque,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (controller.isLoadingComments.value)
+                                    const SizedBox(
+                                      width: 13,
+                                      height: 13,
+                                      child: CupertinoActivityIndicator(radius: 6),
+                                    )
+                                  else
+                                    Icon(Icons.refresh_rounded, size: 15, color: Colors.grey.shade500),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "Refresh",
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       );
                     }),
 
-                    // Messages List (Top-to-Bottom display)
+                    // Messages List with Pull-To-Refresh
                     Expanded(
-                      child: Obx(() {
-                        if (controller.isLoadingComments.value && controller.chatMessages.isEmpty) {
-                          return const Center(child: CupertinoActivityIndicator());
-                        }
+                      child: RefreshIndicator(
+                        color: AppColors.primary,
+                        backgroundColor: Colors.white,
+                        onRefresh: () async {
+                          await controller.fetchWebinarComments(widget.webinar.id, isRefresh: true);
+                        },
+                        child: Obx(() {
+                          if (controller.isLoadingComments.value && controller.chatMessages.isEmpty) {
+                            return const Center(child: CupertinoActivityIndicator());
+                          }
 
-                        final isQA = controller.activeLiveTab.value == 0;
-                        final list = isQA ? controller.qaMessages : controller.chatMessages;
+                          final list = controller.chatMessages;
 
-                        if (list.isEmpty) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFF1F5F9),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      isQA ? Icons.help_outline_rounded : Icons.chat_bubble_outline_rounded,
-                                      size: 32,
-                                      color: const Color(0xFF94A3B8),
+                          if (list.isEmpty) {
+                            return ListView(
+                              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.3,
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFFF1F5F9),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.chat_bubble_outline_rounded,
+                                              size: 32,
+                                              color: Color(0xFF94A3B8),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          const Text(
+                                            "No comments yet",
+                                            style: TextStyle(
+                                              color: Color(0xFF475569),
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          const Text(
+                                            "Be the first to comment in this session.\nPull down to refresh messages.",
+                                            style: TextStyle(
+                                              color: Color(0xFF94A3B8),
+                                              fontSize: 12,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    isQA ? "No questions yet" : "No comments yet",
-                                    style: const TextStyle(
-                                      color: Color(0xFF475569),
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    isQA
-                                        ? "Be the first to ask a question!"
-                                        : "Be the first to comment in this session.",
-                                    style: const TextStyle(
-                                      color: Color(0xFF94A3B8),
-                                      fontSize: 12,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-
-                        // Display top to bottom
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (_commentsScrollController.hasClients) {
-                            _commentsScrollController.animateTo(
-                              _commentsScrollController.position.maxScrollExtent,
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeOut,
+                                ),
+                              ],
                             );
                           }
-                        });
 
-                        return ListView.separated(
-                          controller: _commentsScrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          reverse: false,
-                          itemCount: list.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final msg = list[index];
-                            return _buildMessageItem(msg);
-                          },
-                        );
-                      }),
+                          // Display top to bottom
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (_commentsScrollController.hasClients) {
+                              _commentsScrollController.animateTo(
+                                _commentsScrollController.position.maxScrollExtent,
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeOut,
+                              );
+                            }
+                          });
+
+                          return ListView.separated(
+                            controller: _commentsScrollController,
+                            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            reverse: false,
+                            itemCount: list.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final msg = list[index];
+                              return _buildMessageItem(msg);
+                            },
+                          );
+                        }),
+                      ),
                     ),
 
-                    // Bottom Chat / Q&A Input Field
+                    // Bottom Chat Input Field
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
@@ -906,29 +962,27 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                                   color: const Color(0xFFF1F5F9),
                                   borderRadius: BorderRadius.circular(24),
                                 ),
-                                child: Obx(() {
-                                  final isQA = controller.activeLiveTab.value == 0;
-                                  return TextField(
-                                    controller: controller.chatInputController,
-                                    style: const TextStyle(fontSize: 13.5, color: Color(0xFF1E293B)),
-                                    decoration: InputDecoration(
-                                      hintText: isQA ? "Ask a question..." : "Say something...",
-                                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey[500]),
-                                      border: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                      filled: false,
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 11),
-                                    ),
-                                    onSubmitted: (text) {
+                                child: TextField(
+                                  controller: controller.chatInputController,
+                                  style: const TextStyle(fontSize: 13.5, color: Color(0xFF1E293B)),
+                                  decoration: InputDecoration(
+                                    hintText: "Say something...",
+                                    hintStyle: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    filled: false,
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                                  ),
+                                  onSubmitted: (text) {
+                                    if (text.trim().isNotEmpty) {
                                       controller.sendLiveMessage(
                                         widget.webinar.id,
                                         text,
-                                        isQuestion: controller.activeLiveTab.value == 0,
                                       );
-                                    },
-                                  );
-                                }),
+                                    }
+                                  },
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -941,7 +995,6 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                                         controller.sendLiveMessage(
                                           widget.webinar.id,
                                           controller.chatInputController.text,
-                                          isQuestion: controller.activeLiveTab.value == 0,
                                         );
                                       },
                                 child: Container(
@@ -1027,64 +1080,6 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
     );
   }
 
-  Widget _buildTabItem({
-    required String title,
-    required int count,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: isSelected ? AppColors.primaryDark : const Color(0xFF64748B),
-                    fontSize: 13.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                  ),
-                ),
-                if (count > 0) ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                    decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primaryLight : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      "$count",
-                      style: TextStyle(
-                        color: isSelected ? AppColors.primary : const Color(0xFF64748B),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Container(
-            height: 2.5,
-            width: 44,
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildMessageItem(WebinarChatMessage msg) {
     return Row(

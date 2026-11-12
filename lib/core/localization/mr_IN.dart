@@ -1053,6 +1053,7 @@ const Map<String, String> mrIN = {
   'credited': 'जमा झाले',
   'referral_analytics': 'रेफरल विश्लेषण',
   'total_commission_points': 'एकूण कमिशन पॉइंट्स',
+  'total_earned_points': 'एकूण मिळवलेले पॉईंट्स',
   'points_earned': 'पॉइंट्स मिळवले',
   'pending_points': 'प्रलंबित पॉइंट्स',
   'lifetime_earnings': 'लाईफटाईम कमाई',

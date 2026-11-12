@@ -17,8 +17,11 @@ import '../../../../core/helper/pincode_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
+import '../../../../core/constent/api_constants.dart';
 import '../../../../core/constent/app_constants.dart';
 import '../../../../core/storage/shared_prefs.dart';
+import '../../../../core/widgets/full_screen_image_viewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../../features/Auth/service/auth_service.dart';
 import '../page/matrimony_subscription_plan.dart';
@@ -431,6 +434,47 @@ class RegMatrimonyController extends GetxController {
     casteCertificateError.value = '';
     casteCertificateFile = null;
     existingCasteCertificateUrl.value = '';
+  }
+
+  /// View / Preview the selected or existing Caste Certificate
+  void viewCasteCertificate() async {
+    final hasLocal = casteCertificatePath.value.isNotEmpty;
+    final hasExisting = existingCasteCertificateUrl.value.isNotEmpty;
+    final fileName = casteCertificateFileName.value;
+    final isPdf = fileName.toLowerCase().endsWith('.pdf');
+
+    if (hasLocal && casteCertificateFile != null) {
+      if (isPdf) {
+        try {
+          final uri = Uri.file(casteCertificatePath.value);
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } catch (e) {
+          debugPrint("Could not open local PDF: $e");
+        }
+      } else {
+        Get.to(() => FullScreenImageViewer(
+          imageFile: casteCertificateFile,
+          tag: 'matrimony_caste_cert_view',
+        ));
+      }
+    } else if (hasExisting) {
+      final url = existingCasteCertificateUrl.value;
+      if (isPdf) {
+        try {
+          final uri = Uri.tryParse(url);
+          if (uri != null) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        } catch (e) {
+          debugPrint("Could not open remote PDF: $e");
+        }
+      } else {
+        Get.to(() => FullScreenImageViewer(
+          imageUrl: url,
+          tag: 'matrimony_caste_cert_view',
+        ));
+      }
+    }
   }
 
   /// Handle pincode changes for auto-fill
@@ -1288,11 +1332,53 @@ class RegMatrimonyController extends GetxController {
         existingPhotos.assignAll(photos.map((e) => e.toString()).toList());
       }
 
-      // Caste Certificate
-      final cert = profile['cast_certificate']?.toString();
-      if (cert != null && cert.isNotEmpty) {
-        existingCasteCertificateUrl.value = cert;
-        casteCertificateFileName.value = cert.split('/').last;
+      // Caste Certificate extraction from data, profile, and user
+      final dataMap = (data['data'] is Map<String, dynamic>)
+          ? data['data'] as Map<String, dynamic>
+          : data;
+
+      final userMap = profile['user'] as Map<String, dynamic>?;
+
+      final certUrl = dataMap['cast_certificate_url']?.toString() ??
+          dataMap['caste_certificate_url']?.toString() ??
+          data['cast_certificate_url']?.toString() ??
+          profile['cast_certificate_url']?.toString() ??
+          userMap?['cast_certificate_url']?.toString();
+
+      final certPath = dataMap['cast_certificate']?.toString() ??
+          dataMap['caste_certificate']?.toString() ??
+          data['cast_certificate']?.toString() ??
+          userMap?['cast_certificate']?.toString() ??
+          profile['cast_certificate']?.toString() ??
+          (Get.isRegistered<AuthService>()
+              ? Get.find<AuthService>().currentUser.value?.castCertificate
+              : null);
+
+      String? finalCertUrl;
+      if (certUrl != null && certUrl.trim().isNotEmpty) {
+        finalCertUrl = certUrl.trim();
+      } else if (certPath != null && certPath.trim().isNotEmpty) {
+        final trimmed = certPath.trim();
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+          finalCertUrl = trimmed;
+        } else {
+          final cleanBase = ApiConstants.imageBaseUrl.endsWith('/')
+              ? ApiConstants.imageBaseUrl
+              : '${ApiConstants.imageBaseUrl}/';
+          final cleanPath = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
+          finalCertUrl = '$cleanBase$cleanPath';
+        }
+      }
+
+      if (finalCertUrl != null && finalCertUrl.isNotEmpty) {
+        existingCasteCertificateUrl.value = finalCertUrl;
+        final rawFileName = (certPath != null && certPath.isNotEmpty)
+            ? certPath.split('/').last
+            : finalCertUrl.split('/').last.split('?').first;
+        casteCertificateFileName.value =
+            rawFileName.isNotEmpty ? rawFileName : "caste_certificate.png";
+        debugPrint(
+            "DEBUG_MATRIMONY: ✅ Caste certificate successfully prefilled: $finalCertUrl (filename: ${casteCertificateFileName.value})");
       }
     } catch (e) {
       debugPrint('prefillFromApi error: $e');

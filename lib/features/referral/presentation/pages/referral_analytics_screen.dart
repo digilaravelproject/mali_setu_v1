@@ -93,11 +93,18 @@ class ReferralAnalyticsScreen extends StatelessWidget {
           );
         }
 
-        final num totalEarnedPoints = earnings.totalEarnedPoints;
+        final num totalEarnedPoints = earnings.totalEarnedPoints != 0
+            ? earnings.totalEarnedPoints
+            : (vol?.totalEarnedPoints ?? 0);
         final num ptsPerRef = earnings.commissionPointsPerReferral;
-        final int totalReferrals = earnings.totalReferrals;
+        final int totalReferrals = earnings.totalReferrals != 0
+            ? earnings.totalReferrals
+            : (vol?.totalReferrals ?? 0);
         final int activeReferrals = earnings.activeReferrals;
         final num pendingPoints = earnings.pendingPoints;
+        final num commissionPoints = (vol?.commissionPoints != null && vol!.commissionPoints > 0)
+            ? vol.commissionPoints
+            : ptsPerRef;
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -109,7 +116,12 @@ class ReferralAnalyticsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1. Volunteer / User Profile Card
-                _buildProfileCard(vol, controller, context),
+                _buildProfileCard(
+                  vol,
+                  controller,
+                  context,
+                  totalEarnedPoints: totalEarnedPoints,
+                ),
 
                 const SizedBox(height: 16),
 
@@ -159,13 +171,14 @@ class ReferralAnalyticsScreen extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                // 4. Clean 2x2 Metric Grid
+                // 4. Clean Metric Grid (with Total Earned Points)
                 _buildApiMetricsGrid(
                   totalReferrals: totalReferrals,
                   activeReferrals: activeReferrals,
                   totalEarnedPoints: totalEarnedPoints,
                   ptsPerRef: ptsPerRef,
                   pendingPoints: pendingPoints,
+                  commissionPoints: commissionPoints,
                 ),
 
                 const SizedBox(height: 16),
@@ -218,8 +231,9 @@ class ReferralAnalyticsScreen extends StatelessWidget {
   Widget _buildProfileCard(
     VolunteerInfo? vol,
     ReferralController controller,
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    required num totalEarnedPoints,
+  }) {
     final photoUrl = vol?.photoUrl;
     final name = (vol?.name != null && vol!.name!.isNotEmpty) ? vol.name! : 'Member';
     final userType = (vol?.userType != null && vol!.userType!.isNotEmpty)
@@ -344,6 +358,31 @@ class ReferralAnalyticsScreen extends StatelessWidget {
                                     color: isVolunteer
                                         ? const Color(0xFF047857)
                                         : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Total Earned Points Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF3C7),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFFFDE68A)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.monetization_on_rounded, size: 11, color: Color(0xFFD97706)),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '$totalEarnedPoints pts',
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFFB45309),
                                   ),
                                 ),
                               ],
@@ -544,11 +583,11 @@ class ReferralAnalyticsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'total_commission_points'.tr,
+                    'total_earned_points'.tr,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: 0.1,
                     ),
                   ),
@@ -655,7 +694,7 @@ class ReferralAnalyticsScreen extends StatelessWidget {
   }
 
   // --------------------------------------------------------------------------
-  // 3. Exact API Metrics (Clean 2x2 Grid)
+  // 3. Exact API Metrics (Clean Grid with Total Earned Points)
   // --------------------------------------------------------------------------
   Widget _buildApiMetricsGrid({
     required int totalReferrals,
@@ -663,9 +702,36 @@ class ReferralAnalyticsScreen extends StatelessWidget {
     required num totalEarnedPoints,
     required num ptsPerRef,
     required num pendingPoints,
+    required num commissionPoints,
   }) {
     return Column(
       children: [
+        // Row 1: Total Earned Points & Pending Points
+        Row(
+          children: [
+            Expanded(
+              child: _buildMetricTile(
+                title: 'total_earned_points'.tr,
+                value: '$totalEarnedPoints pts',
+                icon: Icons.monetization_on_rounded,
+                iconColor: const Color(0xFFD97706),
+                bgColor: const Color(0xFFFEF3C7),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMetricTile(
+                title: 'pending_points'.tr,
+                value: '$pendingPoints pts',
+                icon: Icons.schedule_rounded,
+                iconColor: const Color(0xFFEA580C),
+                bgColor: const Color(0xFFFFF7ED),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Row 2: Total Referrals & Active Referrals
         Row(
           children: [
             Expanded(
@@ -690,6 +756,7 @@ class ReferralAnalyticsScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
+        // Row 3: Per Referral & Commission Points
         Row(
           children: [
             Expanded(
@@ -704,11 +771,11 @@ class ReferralAnalyticsScreen extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: _buildMetricTile(
-                title: 'pending_points'.tr,
-                value: '$pendingPoints pts',
-                icon: Icons.schedule_rounded,
-                iconColor: const Color(0xFFD97706),
-                bgColor: const Color(0xFFFFFBEB),
+                title: 'commission_points'.tr,
+                value: '$commissionPoints pts',
+                icon: Icons.military_tech_rounded,
+                iconColor: const Color(0xFF7C3AED),
+                bgColor: const Color(0xFFF5F3FF),
               ),
             ),
           ],
@@ -744,16 +811,19 @@ class ReferralAnalyticsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(width: 4),
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(

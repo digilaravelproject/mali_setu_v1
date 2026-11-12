@@ -83,6 +83,10 @@ class BlogController extends GetxController {
     return null;
   }
 
+  void applyFilter() {
+    _applyFilter();
+  }
+
   void _applyFilter() {
     try {
       final myId = _currentUserId();
@@ -115,7 +119,11 @@ class BlogController extends GetxController {
             .toList();
       }
 
-      filteredBlogs.assignAll(list);
+      if (list.isEmpty && blogs.isNotEmpty && selectedCategory.value.id == null && selectedTab.value != 'Mine') {
+        filteredBlogs.assignAll(blogs);
+      } else {
+        filteredBlogs.assignAll(list);
+      }
     } catch (e) {
       debugPrint("Error in _applyFilter: $e");
       filteredBlogs.assignAll(blogs);
@@ -142,8 +150,8 @@ class BlogController extends GetxController {
       );
 
       if (response != null &&
-          response.success == true &&
-          response.data != null) {
+          (response.success == true || response.data != null) &&
+          response.data?.data != null) {
         final newBlogs = response.data?.data ?? [];
 
         if (refresh) {
@@ -158,12 +166,14 @@ class BlogController extends GetxController {
           currentPage.value++;
         }
       } else {
-        if (refresh) blogs.clear();
+        if (refresh && blogs.isEmpty) {
+          blogs.clear();
+        }
         hasMore.value = false;
       }
     } catch (e) {
       debugPrint("fetchBlogs error: $e");
-      if (refresh) blogs.clear();
+      // Do not clear already loaded blogs on network error
     } finally {
       _applyFilter();
       isLoading.value = false;

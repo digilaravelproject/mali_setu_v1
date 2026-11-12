@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
@@ -698,62 +699,123 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     final isPdf = fileName.toLowerCase().endsWith('.pdf');
                     return Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
                         color: context.theme.primaryColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
                           color: context.theme.primaryColor.withValues(alpha: 0.3),
                           width: 1.2,
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isPdf
-                                  ? const Color(0xFFEF4444).withValues(alpha: 0.12)
-                                  : context.theme.primaryColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              isPdf ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
-                              size: 24,
-                              color: isPdf ? const Color(0xFFEF4444) : context.theme.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(14),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: controller.viewCasteCertificate,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
                               children: [
-                                Text(
-                                  fileName.isNotEmpty ? fileName : "caste_certificate".tr,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                // Thumbnail / Icon Preview
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: isPdf
+                                      ? Container(
+                                          width: 48,
+                                          height: 48,
+                                          color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.picture_as_pdf_rounded,
+                                              size: 26,
+                                              color: Color(0xFFEF4444),
+                                            ),
+                                          ),
+                                        )
+                                      : (hasLocalFile && controller.casteCertificateFile != null)
+                                          ? Image.file(
+                                              controller.casteCertificateFile!,
+                                              width: 48,
+                                              height: 48,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => _buildFallbackDocIcon(context, isPdf),
+                                            )
+                                          : CustomImageView(
+                                              url: controller.existingCasteCertificateUrl.value,
+                                              width: 48,
+                                              height: 48,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => _buildFallbackDocIcon(context, isPdf),
+                                            ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Title & Status with Tap hint
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        fileName.isNotEmpty ? fileName : "caste_certificate".tr,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: context.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.verified_rounded,
+                                            size: 13,
+                                            color: Colors.green.shade700,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Flexible(
+                                            child: Text(
+                                              hasLocalFile
+                                                  ? "Selected • Tap to view"
+                                                  : "Uploaded • Tap to view",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                color: Colors.green.shade700,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  hasLocalFile ? "Ready to upload" : "Uploaded",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.green.shade700,
-                                    fontWeight: FontWeight.w500,
+                                const SizedBox(width: 4),
+                                // Eye / View button
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.visibility_outlined,
+                                    size: 21,
+                                    color: AppColors.primary,
                                   ),
+                                  onPressed: controller.viewCasteCertificate,
+                                  tooltip: "View",
+                                ),
+                                // Remove button
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 21,
+                                    color: Color(0xFFEF4444),
+                                  ),
+                                  onPressed: controller.removeCasteCertificate,
+                                  tooltip: "Remove & change",
                                 ),
                               ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 20, color: Colors.red),
-                            onPressed: controller.removeCasteCertificate,
-                            tooltip: "Remove",
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   }
@@ -1114,6 +1176,23 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
           color: Get.theme.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackDocIcon(BuildContext context, bool isPdf) {
+    return Container(
+      width: 48,
+      height: 48,
+      color: isPdf
+          ? const Color(0xFFEF4444).withValues(alpha: 0.12)
+          : context.theme.primaryColor.withValues(alpha: 0.12),
+      child: Center(
+        child: Icon(
+          isPdf ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
+          size: 24,
+          color: isPdf ? const Color(0xFFEF4444) : context.theme.primaryColor,
         ),
       ),
     );

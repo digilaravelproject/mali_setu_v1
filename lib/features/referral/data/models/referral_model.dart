@@ -213,7 +213,12 @@ class VolunteerEarningsData {
           : int.tryParse(json['active_referrals']?.toString() ?? '0') ?? 0,
       totalEarnedPoints: json['total_earned_points'] is num
           ? json['total_earned_points']
-          : num.tryParse(json['total_earned_points']?.toString() ?? '0') ?? 0,
+          : (num.tryParse(json['total_earned_points']?.toString() ?? '') ??
+              (json['volunteer'] is Map && json['volunteer']['total_earned_points'] != null
+                  ? (json['volunteer']['total_earned_points'] is num
+                      ? json['volunteer']['total_earned_points']
+                      : num.tryParse(json['volunteer']['total_earned_points'].toString()) ?? 0)
+                  : 0)),
       pendingPoints: json['pending_points'] is num
           ? json['pending_points']
           : num.tryParse(json['pending_points']?.toString() ?? '0') ?? 0,
@@ -289,7 +294,12 @@ class VolunteerInfo {
           : int.tryParse(json['total_referrals']?.toString() ?? '0') ?? 0,
       totalEarnedPoints: json['total_earned_points'] is num
           ? json['total_earned_points']
-          : num.tryParse(json['total_earned_points']?.toString() ?? '0') ?? 0,
+          : (num.tryParse(json['total_earned_points']?.toString() ?? '') ??
+              (json['volunteer'] is Map && json['volunteer']['total_earned_points'] != null
+                  ? (json['volunteer']['total_earned_points'] is num
+                      ? json['volunteer']['total_earned_points']
+                      : num.tryParse(json['volunteer']['total_earned_points'].toString()) ?? 0)
+                  : 0)),
       location: locString,
     );
   }

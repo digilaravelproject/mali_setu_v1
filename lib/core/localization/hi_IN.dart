@@ -1033,6 +1033,7 @@ const Map<String, String> hiIN = {
   'credited': 'जमा हुए',
   'referral_analytics': 'रेफरल एनालिटिक्स',
   'total_commission_points': 'कुल कमिशन पॉइंट्स',
+  'total_earned_points': 'कुल अर्जित पॉइंट्स',
   'points_earned': 'पॉइंट्स मिले',
   'pending_points': 'प्रलंबित पॉइंट्स',
   'lifetime_earnings': 'लाइफटाइम कमाई',

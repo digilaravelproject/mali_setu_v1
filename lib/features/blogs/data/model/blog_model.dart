@@ -24,12 +24,42 @@ class BlogResponse {
 
   BlogResponse({this.success, this.data});
 
-  factory BlogResponse.fromJson(Map<String, dynamic> json) => BlogResponse(
-        success: json['success'] == true || json['success'] == 1,
-        data: json['data'] != null && json['data'] is Map<String, dynamic>
-            ? BlogData.fromJson(json['data'])
-            : null,
-      );
+  factory BlogResponse.fromJson(Map<String, dynamic> json) {
+    BlogData? parsedData;
+    if (json['data'] != null) {
+      if (json['data'] is Map<String, dynamic>) {
+        parsedData = BlogData.fromJson(json['data']);
+      } else if (json['data'] is List) {
+        parsedData = BlogData(
+          data: (json['data'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map((x) => Blog.fromJson(x))
+              .toList(),
+        );
+      }
+    } else if (json['blogs'] != null) {
+      if (json['blogs'] is Map<String, dynamic>) {
+        parsedData = BlogData.fromJson(json['blogs']);
+      } else if (json['blogs'] is List) {
+        parsedData = BlogData(
+          data: (json['blogs'] as List)
+              .whereType<Map<String, dynamic>>()
+              .map((x) => Blog.fromJson(x))
+              .toList(),
+        );
+      }
+    }
+
+    return BlogResponse(
+      success: json['success'] == true ||
+          json['success'] == 1 ||
+          json['success'] == 'true' ||
+          json['status'] == true ||
+          json['status'] == 'success' ||
+          parsedData != null,
+      data: parsedData,
+    );
+  }
 }
 
 class BlogData {
@@ -331,8 +361,17 @@ class BlogDetailResponse {
   BlogDetailResponse({this.success, this.data});
 
   factory BlogDetailResponse.fromJson(Map<String, dynamic> json) => BlogDetailResponse(
-        success: json['success'],
-        data: json['data'] != null ? BlogDetailData.fromJson(json['data']) : null,
+        success: json['success'] == true ||
+            json['success'] == 1 ||
+            json['success'] == 'true' ||
+            json['status'] == true,
+        data: json['data'] != null && json['data'] is Map<String, dynamic>
+            ? BlogDetailData.fromJson(json['data'])
+            : (json['blog'] != null && json['blog'] is Map<String, dynamic>
+                ? BlogDetailData.fromJson(json)
+                : (json.containsKey('title') || json.containsKey('id')
+                    ? BlogDetailData(blog: Blog.fromJson(json))
+                    : null)),
       );
 }
 
@@ -342,10 +381,32 @@ class BlogDetailData {
 
   BlogDetailData({this.blog, this.related});
 
-  factory BlogDetailData.fromJson(Map<String, dynamic> json) => BlogDetailData(
-        blog: json['blog'] != null ? Blog.fromJson(json['blog']) : null,
-        related: json['related'] != null
-            ? List<Blog>.from(json['related'].map((x) => Blog.fromJson(x)))
-            : null,
+  factory BlogDetailData.fromJson(Map<String, dynamic> json) {
+    Blog? parsedBlog;
+    if (json['blog'] != null && json['blog'] is Map<String, dynamic>) {
+      parsedBlog = Blog.fromJson(json['blog']);
+    } else if (json.containsKey('id') || json.containsKey('title')) {
+      parsedBlog = Blog.fromJson(json);
+    }
+
+    List<Blog>? parsedRelated;
+    if (json['related'] != null && json['related'] is List) {
+      parsedRelated = List<Blog>.from(
+        (json['related'] as List)
+            .whereType<Map<String, dynamic>>()
+            .map((x) => Blog.fromJson(x)),
       );
+    } else if (json['related_blogs'] != null && json['related_blogs'] is List) {
+      parsedRelated = List<Blog>.from(
+        (json['related_blogs'] as List)
+            .whereType<Map<String, dynamic>>()
+            .map((x) => Blog.fromJson(x)),
+      );
+    }
+
+    return BlogDetailData(
+      blog: parsedBlog,
+      related: parsedRelated,
+    );
+  }
 }

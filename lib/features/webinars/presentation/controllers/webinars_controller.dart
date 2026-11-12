@@ -37,7 +37,7 @@ class WebinarsController extends GetxController {
   final RxBool isRegistering = false.obs;
 
   // Live Screen
-  final RxInt activeLiveTab = 0.obs; // 0: Q&A, 1: Live Chat
+  final RxInt activeLiveTab = 1.obs; // Live Chat
   final RxBool isMicOn = false.obs;
   final RxBool isCameraOn = false.obs;
   final RxInt liveViewerCount = 0.obs;

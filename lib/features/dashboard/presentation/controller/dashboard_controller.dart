@@ -73,10 +73,7 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Check user_type and show volunteer prompt / referral analytics dialog on home screen
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      VolunteerPromptDialog.checkAndShow();
-    });
+    // Auto popup dialog moved to dedicated promo card on home screen
   }
 
   void _checkAndShowBusinessDialog() {

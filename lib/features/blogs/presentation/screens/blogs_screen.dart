@@ -33,7 +33,7 @@ class BlogsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.isRegistered<BlogController>()
         ? Get.find<BlogController>()
-        : Get.put(BlogController());
+        : Get.put(BlogController(), permanent: true);
     final primaryColor = context.theme.primaryColor;
     final topPadding = MediaQuery.of(context).padding.top;
 
@@ -585,7 +585,14 @@ class BlogsScreen extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () => Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0)),
+      onTap: () async {
+        await Get.to(() => BlogDetailScreen(blogId: blog.id ?? 0));
+        if (controller.blogs.isEmpty && !controller.isLoading.value) {
+          controller.fetchBlogs(refresh: true);
+        } else {
+          controller.applyFilter();
+        }
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(

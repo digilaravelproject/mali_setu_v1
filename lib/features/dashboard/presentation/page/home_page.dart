@@ -27,6 +27,7 @@ import '../../../webinars/presentation/widgets/webinar_registration_sheet.dart';
 import '../../../webinars/data/models/webinar_model.dart';
 import '../../data/model/banner_model.dart';
 import '../../../referral/presentation/binding/referral_binding.dart';
+import '../../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
 import '../controller/home_controller.dart';
 
 class HomePage extends GetWidget<HomeController> {
@@ -406,6 +407,50 @@ class HomePage extends GetWidget<HomeController> {
                               statusText: user?.matrimonyApprovalStatus ?? "Pending",
                             ),
 
+                            const SizedBox(height: 16),
+
+                            // Volunteer Registration or Referral Analytics Card
+                            Builder(
+                              builder: (context) {
+                                final userType = (user?.userType ?? VolunteerPromptDialog.getUserTypeFromPrefs()).toLowerCase().trim();
+                                final bool isVolunteer = userType == 'volunteer';
+
+                                if (isVolunteer) {
+                                  return _buildPromoCard(
+                                    context,
+                                    title: 'referral_analytics'.tr,
+                                    subtitle: 'volunteer_dialog_desc'.tr,
+                                    icon: Icons.insights_rounded,
+                                    buttonText: 'check_analytics_btn'.tr,
+                                    onTap: () {
+                                      ReferralBinding.init();
+                                      Get.toNamed(AppRoutes.referralAnalytics);
+                                    },
+                                    color1: const Color(0xFF10B981),
+                                    color2: const Color(0xFF059669),
+                                  );
+                                } else {
+                                  return _buildPromoCard(
+                                    context,
+                                    title: 'become_volunteer_title'.tr,
+                                    subtitle: 'become_volunteer_note'.tr,
+                                    icon: Icons.volunteer_activism_rounded,
+                                    buttonText: 'register_volunteer_btn'.tr,
+                                    onTap: () {
+                                      VolunteerPromptDialog.checkAndShow(force: true);
+                                    },
+                                    color1: const Color(0xFFC62D86),
+                                    color2: const Color(0xFF8B185D),
+                                    secondaryText: 'view_analytics_btn'.tr,
+                                    onSecondaryTap: () {
+                                      ReferralBinding.init();
+                                      Get.toNamed(AppRoutes.referralAnalytics);
+                                    },
+                                  );
+                                }
+                              },
+                            ),
+
                             // Leaderboard Section (Top Champions from banner API)
                             if (controller.leaderboard.isNotEmpty) ...[
                               const SizedBox(height: 22),
@@ -591,6 +636,8 @@ class HomePage extends GetWidget<HomeController> {
         required Color color1,
         required Color color2,
         String? statusText,
+        String? secondaryText,
+        VoidCallback? onSecondaryTap,
       }) {
     Color getStatusColor(String status) {
       switch (status.toLowerCase().trim()) {
@@ -649,27 +696,79 @@ class HomePage extends GetWidget<HomeController> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [color1, color2]),
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: color2.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 10,
+                        runSpacing: 8,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(colors: [color1, color2]),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: color2.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          buttonText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            child: Text(
+                              buttonText,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
+                          if (secondaryText != null && onSecondaryTap != null)
+                            GestureDetector(
+                              onTap: onSecondaryTap,
+                              behavior: HitTestBehavior.opaque,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: color1.withOpacity(0.4), width: 1),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.insights_rounded,
+                                      size: 14,
+                                      color: color2,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      secondaryText,
+                                      style: TextStyle(
+                                        color: color2,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 9,
+                                      color: color2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),

@@ -1051,6 +1051,7 @@ const Map<String, String> enUS = {
   'credited': 'Credited',
   'referral_analytics': 'Referral Analytics',
   'total_commission_points': 'Total Commission Points',
+  'total_earned_points': 'Total Earned Points',
   'points_earned': 'Points Earned',
   'pending_points': 'Pending Points',
   'lifetime_earnings': 'Lifetime Earnings',

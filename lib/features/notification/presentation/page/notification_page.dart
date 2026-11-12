@@ -152,8 +152,31 @@ class NotificationPage extends GetView<NotificationController> {
   }) {
     // Determine data from map
     final data = notification.data ?? {};
-    final title = notification.title ?? 'notification'.tr;
-    final message = notification.message ?? 'new_notification_message'.tr;
+    String title = notification.title ?? '';
+    String message = notification.message ?? '';
+
+    // If title is empty or incomplete like "New Blog: "
+    if (title.trim().isEmpty || title.trim() == 'New Blog:' || title.trim() == 'New Blog' || title.endsWith(':')) {
+      final possibleTitle = (data['title'] ?? data['blog_title'] ?? (data['data'] is Map ? data['data']['title'] : null))?.toString();
+      if (possibleTitle != null && possibleTitle.isNotEmpty) {
+        title = title.isNotEmpty ? "${title.trim()} $possibleTitle" : possibleTitle;
+      } else if (title.isEmpty) {
+        title = 'notification'.tr;
+      }
+    }
+
+    // If message has empty placeholder like "       published a new blog."
+    if (message.trim().startsWith('published a new blog') || message.trim().isEmpty) {
+      final possibleAuthor = (data['author'] ?? data['author_name'] ?? data['user_name'] ?? data['name'])?.toString();
+      final innerBody = (data['body'] ?? (data['data'] is Map ? data['data']['body'] : null))?.toString();
+      if (possibleAuthor != null && possibleAuthor.isNotEmpty) {
+        message = "$possibleAuthor published a new blog.";
+      } else if (innerBody != null && innerBody.isNotEmpty) {
+        message = innerBody;
+      } else if (message.isEmpty) {
+        message = 'new_notification_message'.tr;
+      }
+    }
     final isRead = notification.readAt != null;
     
     // Determine visuals based on type or content

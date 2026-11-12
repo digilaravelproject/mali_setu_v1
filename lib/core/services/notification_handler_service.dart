@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../features/blogs/presentation/controller/blog_controller.dart';
 import '../constent/api_constants.dart';
 import '../constent/app_constants.dart';
 import '../network/api_client.dart';
@@ -17,6 +18,8 @@ import '../../features/matrimony/presentation/controller/matrimony_chat_controll
 import '../../features/matrimony/presentation/controller/matrimony_requests_controller.dart';
 import '../../features/notification/data/model/notification_model.dart' hide NotificationResponse;
 import '../../features/notification/presentation/controller/notification_controller.dart';
+import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
+import '../../features/blogs/presentation/screens/blogs_screen.dart';
 
 /// Centralized Notification Handler & Deep Navigation Service for Mali Setu
 /// Handles:
@@ -184,8 +187,44 @@ class NotificationHandlerService extends GetxService {
 
   /// Show a Heads-up Local Notification when app is in the foreground
   Future<void> _showForegroundNotification(RemoteMessage message) async {
-    final title = message.notification?.title ?? message.data['title'] ?? 'Mali Setu';
-    final body = message.notification?.body ?? message.data['message'] ?? '';
+    final Map<String, dynamic> extractedData = _extractRemoteMessageData(message);
+
+    String title = (message.notification?.title ?? extractedData['title'] ?? 'Mali Setu').toString().trim();
+    String body = (message.notification?.body ?? extractedData['message'] ?? extractedData['body'] ?? '').toString().trim();
+
+    try {
+      final dynamic rawInnerData = extractedData['data'];
+      Map<String, dynamic>? innerMap;
+      if (rawInnerData is String && rawInnerData.trim().startsWith('{')) {
+        innerMap = Map<String, dynamic>.from(json.decode(rawInnerData));
+      } else if (rawInnerData is Map) {
+        innerMap = Map<String, dynamic>.from(rawInnerData);
+      }
+
+      final dynamic rawNotif = extractedData['notification'];
+      Map<String, dynamic>? innerNotif;
+      if (rawNotif is String && rawNotif.trim().startsWith('{')) {
+        innerNotif = Map<String, dynamic>.from(json.decode(rawNotif));
+      } else if (rawNotif is Map) {
+        innerNotif = Map<String, dynamic>.from(rawNotif);
+      }
+
+      // If title is "New Blog: " or ends with ':', complete it using inner title
+      if (title.isEmpty || title == 'New Blog:' || title == 'New Blog' || title.endsWith(':')) {
+        final innerTitle = (innerNotif?['title'] ?? innerMap?['title'] ?? extractedData['blog_title'] ?? '')?.toString();
+        if (innerTitle != null && innerTitle.isNotEmpty) {
+          title = title.isNotEmpty ? "$title $innerTitle" : innerTitle;
+        }
+      }
+
+      // If body starts with "published a new blog" or is empty, use inner body
+      if (body.isEmpty || body.startsWith('published a new blog') || body == 'published a new blog.') {
+        final innerBody = (innerNotif?['body'] ?? innerMap?['body'] ?? '')?.toString();
+        if (innerBody != null && innerBody.isNotEmpty) {
+          body = innerBody;
+        }
+      }
+    } catch (_) {}
 
     final androidDetails = AndroidNotificationDetails(
       _fcmChannelId,
@@ -213,7 +252,7 @@ class NotificationHandlerService extends GetxService {
       title,
       body,
       details,
-      payload: json.encode(message.data),
+      payload: json.encode(extractedData),
     );
   }
 
@@ -376,19 +415,49 @@ class NotificationHandlerService extends GetxService {
     debugPrint("🧭 [NotificationHandler] Raw payload received: $data");
 
     // ── NESTED PAYLOAD PARSER ──────────────────────────────────────────────
-    // Backend sometimes sends the actual FCM data payload as a JSON string
-    // inside a 'message' key (e.g., message: '{"data":{"business_id":"337",...}}').
-    // Extract and merge it so our routing logic can find entity IDs directly.
+    // 1. Backend (Laravel FCM) sends the data payload as a JSON string inside 'data' key:
+    // e.g. data['data'] = '{"type":"blog_published","blog_id":"250","action_url":"https://malisetu.com/blogs/250",...}'
+    try {
+      final dynamic rawInnerData = data['data'];
+      if (rawInnerData != null && rawInnerData is String && rawInnerData.trim().startsWith('{')) {
+        final Map<String, dynamic> parsedInner = Map<String, dynamic>.from(json.decode(rawInnerData));
+        data['data'] = parsedInner;
+        // Merge fields into top-level data only as a fallback (never overwrite existing non-empty top-level values)
+        parsedInner.forEach((key, value) {
+          if (!data.containsKey(key) || data[key] == null || data[key].toString().trim().isEmpty) {
+            data[key] = value;
+          }
+        });
+        debugPrint("🔍 [NotificationHandler] Decoded and merged stringified 'data' payload: $parsedInner");
+      }
+    } catch (e) {
+      debugPrint("⚠️ [NotificationHandler] Could not parse nested 'data' string field: $e");
+    }
+
+    // 2. Backend sometimes sends notification as JSON string
+    try {
+      final dynamic rawNotif = data['notification'];
+      if (rawNotif != null && rawNotif is String && rawNotif.trim().startsWith('{')) {
+        final Map<String, dynamic> parsedNotif = Map<String, dynamic>.from(json.decode(rawNotif));
+        data['notification'] = parsedNotif;
+        if (parsedNotif['title'] != null && (!data.containsKey('title') || data['title'] == null || data['title'].toString().isEmpty)) {
+          data['title'] = parsedNotif['title'];
+        }
+        if (parsedNotif['body'] != null && (!data.containsKey('body') || data['body'] == null || data['body'].toString().isEmpty)) {
+          data['body'] = parsedNotif['body'];
+        }
+      }
+    } catch (_) {}
+
+    // 3. Backend sometimes sends nested payload inside 'message' key
     try {
       final dynamic rawMessage = data['message'];
       if (rawMessage != null && rawMessage is String && rawMessage.trim().startsWith('{')) {
         final Map<String, dynamic> parsed = json.decode(rawMessage);
 
-        // If nested 'data' object exists, merge its keys into top-level data
         if (parsed.containsKey('data') && parsed['data'] is Map) {
           final Map<String, dynamic> innerData = Map<String, dynamic>.from(parsed['data']);
           innerData.forEach((key, value) {
-            // Only fill in if the top-level data does NOT already have this key
             if (!data.containsKey(key) || data[key] == null || data[key].toString().isEmpty) {
               data[key] = value;
             }
@@ -419,13 +488,14 @@ class NotificationHandlerService extends GetxService {
 
     // Helper functions to safely extract IDs
     int? getInt(List<String> keys) {
+      // 1. Check top-level keys in data FIRST (top-level holds the actual current event's parameters)
       for (final key in keys) {
         if (data.containsKey(key) && data[key] != null) {
           final parsed = int.tryParse(data[key].toString());
           if (parsed != null) return parsed;
         }
       }
-      // Check inside nested 'data' map if present
+      // 2. Check inside nested 'data' map only as a fallback
       if (data['data'] is Map) {
         final Map inner = data['data'];
         for (final key in keys) {
@@ -434,6 +504,16 @@ class NotificationHandlerService extends GetxService {
             if (parsed != null) return parsed;
           }
         }
+      }
+      // Check inside nested 'blog' map if present
+      if (data['blog'] is Map && data['blog']['id'] != null) {
+        final parsed = int.tryParse(data['blog']['id'].toString());
+        if (parsed != null) return parsed;
+      }
+      // Check inside nested 'post' map if present
+      if (data['post'] is Map && data['post']['id'] != null) {
+        final parsed = int.tryParse(data['post']['id'].toString());
+        if (parsed != null) return parsed;
       }
       // Check inside nested 'job' map if present
       if (data['job'] is Map && data['job']['id'] != null) {
@@ -490,6 +570,22 @@ class NotificationHandlerService extends GetxService {
           }
         }
       }
+      if (data['blog'] is Map) {
+        final Map b = data['blog'];
+        for (final key in keys) {
+          if (b.containsKey(key) && b[key] != null && b[key].toString().isNotEmpty) {
+            return b[key].toString();
+          }
+        }
+      }
+      if (data['post'] is Map) {
+        final Map p = data['post'];
+        for (final key in keys) {
+          if (p.containsKey(key) && p[key] != null && p[key].toString().isNotEmpty) {
+            return p[key].toString();
+          }
+        }
+      }
       if (data['user'] is Map) {
         final Map u = data['user'];
         for (final key in keys) {
@@ -504,6 +600,109 @@ class NotificationHandlerService extends GetxService {
     final String titleLower = getString(['title']).toLowerCase();
     final String messageLower = getString(['message', 'body']).toLowerCase();
     final String relatedType = getString(['related_type']).toLowerCase();
+
+    // ── PRIORITY CHECK: BLOG NOTIFICATIONS (POST, LIKE, COMMENT) ──────────
+    final bool isBlogEvent = 
+        type == 'blog' ||
+        type == 'blogs' ||
+        type == 'new_blog' ||
+        type == 'blog_post' ||
+        type == 'new_blog_posted' ||
+        type == 'blog_posted' ||
+        type == 'blog_created' ||
+        type == 'blog_published' ||
+        type == 'blog_approved' ||
+        type == 'new_blog_post' ||
+        type == 'post_created' ||
+        type == 'new_post' ||
+        type == 'blog_like' ||
+        type == 'blog_liked' ||
+        type == 'like_blog' ||
+        type == 'post_liked' ||
+        type == 'post_like' ||
+        type == 'blog_comment' ||
+        type == 'blog_commented' ||
+        type == 'comment_blog' ||
+        type == 'comment_on_blog' ||
+        type == 'new_comment' ||
+        type == 'post_comment' ||
+        type == 'blog_reply' ||
+        type.contains('blog') ||
+        relatedType == 'blog' ||
+        relatedType == 'blogs' ||
+        relatedType == 'blog_post' ||
+        relatedType == 'post' ||
+        relatedType == 'blog_comment' ||
+        relatedType == 'blog_like' ||
+        titleLower.contains('blog') ||
+        messageLower.contains('blog') ||
+        titleLower.contains('ब्लॉग') ||
+        messageLower.contains('ब्लॉग') ||
+        titleLower.contains('commented on your post') ||
+        messageLower.contains('commented on your post') ||
+        titleLower.contains('liked your post') ||
+        messageLower.contains('liked your post');
+
+    if (isBlogEvent) {
+      // 1. Check direct blog ID keys (top-level first)
+      int? blogId = getInt([
+        'blog_id',
+        'post_id',
+        'article_id',
+      ]);
+
+      // 2. Check top-level action_url (e.g. "/blogs/253" or "https://malisetu.com/blogs/253")
+      if (blogId == null) {
+        final String topActionUrl = (data['action_url'] ?? data['url'] ?? '').toString();
+        if (topActionUrl.isNotEmpty) {
+          final match = RegExp(r'blogs?/(\d+)').firstMatch(topActionUrl);
+          if (match != null) {
+            blogId = int.tryParse(match.group(1)!);
+          }
+        }
+      }
+
+      // 3. Check related_id, entity_id
+      if (blogId == null) {
+        blogId = getInt(['related_id', 'entity_id']);
+      }
+
+      // 4. Check nested action_url as fallback
+      if (blogId == null) {
+        String actionUrl = '';
+        if (data['data'] is Map && (data['data']['action_url'] ?? '').toString().isNotEmpty) {
+          actionUrl = data['data']['action_url'].toString();
+        }
+        if (actionUrl.isNotEmpty) {
+          final match = RegExp(r'blogs?/(\d+)').firstMatch(actionUrl);
+          if (match != null) {
+            blogId = int.tryParse(match.group(1)!);
+          }
+        }
+      }
+
+      // 4. Fallback to 'id' (only if it doesn't match notification_id)
+      if (blogId == null) {
+        final notifId = getInt(['notification_id']);
+        final directId = getInt(['id']);
+        if (directId != null && directId != notifId) {
+          blogId = directId;
+        }
+      }
+
+      if (blogId != null && blogId > 0) {
+        debugPrint("📝 [NotificationHandler] Priority matched Blog event -> Opening BlogDetailScreen for blogId: $blogId (type=$type)");
+        if (Get.isRegistered<BlogController>()) {
+          Get.find<BlogController>().fetchBlogDetail(blogId);
+        }
+        Get.to(() => BlogDetailScreen(blogId: blogId!));
+        return;
+      } else {
+        debugPrint("📝 [NotificationHandler] Blog notification without specific blogId -> Opening BlogsScreen");
+        Get.to(() => const BlogsScreen());
+        return;
+      }
+    }
 
     // ── PRIORITY CHECK 1: CONNECTION REQUEST RECEIVED ─────────────────────
     final bool isConnectionRequest = 
@@ -622,6 +821,77 @@ class NotificationHandlerService extends GetxService {
     }
 
     switch (type) {
+      // ──────────────────────────────────────────────────────────────────────
+      // 0. BLOG NOTIFICATIONS (POST, LIKE, COMMENT, REPLY)
+      // ──────────────────────────────────────────────────────────────────────
+      case 'blog':
+      case 'blogs':
+      case 'new_blog':
+      case 'blog_post':
+      case 'new_blog_posted':
+      case 'blog_posted':
+      case 'blog_created':
+      case 'blog_published':
+      case 'blog_approved':
+      case 'new_blog_post':
+      case 'post_created':
+      case 'new_post':
+      case 'blog_like':
+      case 'blog_liked':
+      case 'like_blog':
+      case 'post_liked':
+      case 'post_like':
+      case 'blog_comment':
+      case 'blog_commented':
+      case 'comment_blog':
+      case 'comment_on_blog':
+      case 'new_comment':
+      case 'post_comment':
+      case 'blog_reply':
+        int? blogId = getInt(['blog_id', 'post_id', 'article_id']);
+        if (blogId == null) {
+          final String topActionUrl = (data['action_url'] ?? data['url'] ?? '').toString();
+          if (topActionUrl.isNotEmpty) {
+            final match = RegExp(r'blogs?/(\d+)').firstMatch(topActionUrl);
+            if (match != null) {
+              blogId = int.tryParse(match.group(1)!);
+            }
+          }
+        }
+        if (blogId == null) {
+          blogId = getInt(['related_id', 'entity_id']);
+        }
+        if (blogId == null) {
+          String actionUrl = '';
+          if (data['data'] is Map && (data['data']['action_url'] ?? '').toString().isNotEmpty) {
+            actionUrl = data['data']['action_url'].toString();
+          }
+          if (actionUrl.isNotEmpty) {
+            final match = RegExp(r'blogs?/(\d+)').firstMatch(actionUrl);
+            if (match != null) {
+              blogId = int.tryParse(match.group(1)!);
+            }
+          }
+        }
+        if (blogId == null) {
+          final notifId = getInt(['notification_id']);
+          final directId = getInt(['id']);
+          if (directId != null && directId != notifId) {
+            blogId = directId;
+          }
+        }
+        if (blogId != null && blogId > 0) {
+          debugPrint("📝 [NotificationHandler] Switch case Blog -> Opening BlogDetailScreen for blogId: $blogId");
+          if (Get.isRegistered<BlogController>()) {
+            Get.find<BlogController>().fetchBlogDetail(blogId);
+          }
+          Get.to(() => BlogDetailScreen(blogId: blogId!));
+        } else {
+          debugPrint("📝 [NotificationHandler] Switch case Blog without ID -> Opening BlogsScreen");
+          Get.to(() => const BlogsScreen());
+        }
+        break;
+
       // ──────────────────────────────────────────────────────────────────────
       // 1. ADMIN ANNOUNCEMENT
       // ──────────────────────────────────────────────────────────────────────
@@ -1031,6 +1301,35 @@ class NotificationHandlerService extends GetxService {
           } else {
             debugPrint("💍 [NotificationHandler] Smart fallback: Matrimony notification without ID, opening members list");
             Get.toNamed(AppRoutes.matrimonyMembers);
+            break;
+          }
+        }
+
+        // Smart fallback 3: Blog / Post notification fallback
+        final int? fallbackBlogId = getInt(['blog_id', 'post_id', 'article_id']);
+        final bool isFallbackBlog = fallbackBlogId != null ||
+            data.containsKey('blog_id') ||
+            data.containsKey('post_id') ||
+            type.contains('blog') ||
+            type.contains('comment') ||
+            type.contains('like') ||
+            relatedType.contains('blog') ||
+            relatedType.contains('post') ||
+            titleLower.contains('blog') ||
+            messageLower.contains('blog');
+
+        if (isFallbackBlog) {
+          final int? finalBlogId = fallbackBlogId ?? getInt(['related_id', 'entity_id', 'id']);
+          if (finalBlogId != null && finalBlogId > 0) {
+            debugPrint("📝 [NotificationHandler] Smart fallback matched Blog ID: $finalBlogId");
+            if (Get.isRegistered<BlogController>()) {
+              Get.find<BlogController>().fetchBlogDetail(finalBlogId);
+            }
+            Get.to(() => BlogDetailScreen(blogId: finalBlogId));
+            break;
+          } else {
+            debugPrint("📝 [NotificationHandler] Smart fallback: Blog notification without ID, opening BlogsScreen");
+            Get.to(() => const BlogsScreen());
             break;
           }
         }

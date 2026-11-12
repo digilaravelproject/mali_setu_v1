@@ -90,7 +90,7 @@ class ReferralHistoryView extends StatelessWidget {
           child: Row(
             children: [
               _buildChip(
-                label: 'all'.tr,
+                label: ('all'.tr.toLowerCase() == 'all') ? 'All' : 'all'.tr,
                 isSelected: currentFilter == 'all' && currentType == 'all',
                 onTap: () {
                   controller.selectedHistoryFilter.value = 'all';
