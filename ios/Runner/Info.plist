@@ -67,6 +67,11 @@
 	<string>Mali Setu needs photo library access to allow you to select and upload photos for your profile and business listings.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Mali Setu needs speech recognition access for voice search.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

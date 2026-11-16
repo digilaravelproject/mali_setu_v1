@@ -1,18 +1,15 @@
+import 'dart:io';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/styles/theme/app_light_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'package:upgrader/upgrader.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/constent/app_constants.dart';
 import 'core/localization/languages.dart';
 import 'core/localization/language_controller.dart';
-import 'core/storage/shared_prefs.dart';
 import 'core/helper/local_notification_helper.dart';
-import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
 import 'core/widgets/whatsapp_support_fab.dart';
 import 'init_app.dart';
 
@@ -33,8 +30,10 @@ Future<void> main() async {
   await initApp();
   await LocalNotificationHelper.init();
   
-  // Register background notification handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Register background notification handler on Android
+  if (Platform.isAndroid) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
   
   // Initialize LanguageController
   Get.put(LanguageController());
@@ -82,10 +81,7 @@ class MyApp extends StatelessWidget {
                 maxScaleFactor: 1.15,
               ),
             ),
-            child: UpgradeAlert(
-              navigatorKey: Get.key,
-              child: child ?? const SizedBox.shrink(),
-            ),
+            child: child ?? const SizedBox.shrink(),
           );
         },
     );

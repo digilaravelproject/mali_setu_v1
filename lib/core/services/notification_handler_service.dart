@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -54,8 +55,16 @@ class NotificationHandlerService extends GetxService {
 
   /// Initialize notification listeners and channels
   Future<NotificationHandlerService> init() async {
-    await _setupLocalNotifications();
-    await _setupFCM();
+    try {
+      await _setupLocalNotifications();
+    } catch (e) {
+      debugPrint("❌ [NotificationHandler] Error in _setupLocalNotifications: $e");
+    }
+    try {
+      await _setupFCM();
+    } catch (e) {
+      debugPrint("❌ [NotificationHandler] Error in _setupFCM: $e");
+    }
     return this;
   }
 
@@ -263,6 +272,13 @@ class NotificationHandlerService extends GetxService {
   /// Sync FCM device token with backend API (PUT /api/auth/fcm-token)
   Future<void> syncFcmToken() async {
     try {
+      if (Platform.isIOS) {
+        final apnsToken = await _fcm.getAPNSToken();
+        if (apnsToken == null) {
+          debugPrint("⚠️ [NotificationHandler] APNs token is not yet ready on iOS. Skipping immediate getToken.");
+          return;
+        }
+      }
       String? token = await _fcm.getToken();
       if (token != null && token.isNotEmpty) {
         await sendFcmTokenToServer(token);

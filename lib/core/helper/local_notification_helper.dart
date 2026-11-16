@@ -6,30 +6,34 @@ class LocalNotificationHelper {
       FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/launcher_icon');
-    
-    const DarwinInitializationSettings initializationSettingsDarwin =
-        DarwinInitializationSettings();
-    
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
+    try {
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/launcher_icon');
+      
+      const DarwinInitializationSettings initializationSettingsDarwin =
+          DarwinInitializationSettings();
+      
+      const InitializationSettings initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsDarwin,
+      );
 
-    await _notificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        final String? payload = response.payload;
-        if (payload != null) {
-          try {
-            await OpenFilex.open(payload);
-          } catch (e) {
-            print("Error opening file: $e");
+      await _notificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) async {
+          final String? payload = response.payload;
+          if (payload != null) {
+            try {
+              await OpenFilex.open(payload);
+            } catch (e) {
+              print("Error opening file: $e");
+            }
           }
-        }
-      },
-    );
+        },
+      );
+    } catch (e) {
+      print("❌ [LocalNotificationHelper] init error: $e");
+    }
   }
 
   static Future<void> showDownloadNotification({
