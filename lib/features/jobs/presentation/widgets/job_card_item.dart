@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../../../business/data/model/res_all_business_model.dart';
@@ -251,6 +252,28 @@ class JobCardItem extends StatelessWidget {
                         ),
                       ),
                     ),
+
+                    if (job.isExpired) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFFFECACA), width: 1.0),
+                        ),
+                        child: Text(
+                          'closed'.tr.isNotEmpty && 'closed'.tr != 'closed'
+                              ? 'closed'.tr
+                              : 'Closed',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFDC2626),
+                          ),
+                        ),
+                      ),
+                    ],
 
                     const Spacer(),
 

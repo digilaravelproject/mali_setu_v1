@@ -49,6 +49,9 @@ const Map<String, String> hiIN = {
   'info': 'जानकारी',
   'cover_letter': 'कवर लेटर',
   'write_cover_letter': 'यहाँ अपना कवर लेटर लिखें (अपने कौशल, उपलब्धियों और अनुभव के बारे में बताएं)...',
+  'job_closed': 'नौकरी बंद हो चुकी है',
+  'application_deadline_expired': 'इस नौकरी के लिए आवेदन की अंतिम तिथि समाप्त हो चुकी है।',
+  'closed': 'बंद',
   'tap_to_upload_resume': 'बायोडाटा अपलोड करने के लिए टैप करें',
   'additional_information': 'अतिरिक्त जानकारी',
 

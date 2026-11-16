@@ -758,6 +758,32 @@ class Job {
     this.isLiked,
   });
 
+  bool get isExpired {
+    if (isActive == false) return true;
+    final s = status?.toLowerCase().trim();
+    if (s == 'closed' || s == 'expired' || s == 'rejected') return true;
+
+    final now = DateTime.now();
+
+    // Check application deadline
+    if (applicationDeadline != null && applicationDeadline!.trim().isNotEmpty) {
+      try {
+        final deadline = DateTime.parse(applicationDeadline!.trim());
+        if (now.isAfter(deadline)) return true;
+      } catch (_) {}
+    }
+
+    // Check expiresAt
+    if (expiresAt != null && expiresAt!.trim().isNotEmpty) {
+      try {
+        final expiry = DateTime.parse(expiresAt!.trim());
+        if (now.isAfter(expiry)) return true;
+      } catch (_) {}
+    }
+
+    return false;
+  }
+
   factory Job.fromJson(Map<String, dynamic> json) {
     return Job(
       id: _asInt(json['id']),

@@ -702,11 +702,14 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
         height: 52,
         child: Obx(() {
           final isSubmitting = _isSubmitting.value;
+          final isClosed = _job.isExpired;
 
           return ElevatedButton(
-            onPressed: isSubmitting ? null : _submitApplication,
+            onPressed: (isSubmitting || isClosed) ? null : _submitApplication,
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
+              backgroundColor: isClosed ? const Color(0xFFE5E7EB) : primaryColor,
+              disabledBackgroundColor: const Color(0xFFE5E7EB),
+              disabledForegroundColor: const Color(0xFF6B7280),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -735,17 +738,24 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                       ),
                     ],
                   )
-                : const Row(
+                : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.send_rounded, size: 19, color: Colors.white),
-                      SizedBox(width: 8),
+                      if (isClosed) ...[
+                        const Icon(Icons.lock_clock_outlined, size: 19, color: Color(0xFF6B7280)),
+                        const SizedBox(width: 8),
+                      ] else ...[
+                        const Icon(Icons.send_rounded, size: 19, color: Colors.white),
+                        const SizedBox(width: 8),
+                      ],
                       Text(
-                        "Submit Application",
+                        isClosed
+                            ? ('job_closed'.tr.isNotEmpty && 'job_closed'.tr != 'job_closed' ? 'job_closed'.tr : 'Job Closed')
+                            : "Submit Application",
                         style: TextStyle(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: isClosed ? const Color(0xFF6B7280) : Colors.white,
                           letterSpacing: 0.2,
                         ),
                       ),

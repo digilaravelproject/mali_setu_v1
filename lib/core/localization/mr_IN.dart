@@ -376,6 +376,9 @@ const Map<String, String> mrIN = {
   "info" :"माहिती",
   "cover_letter" :"कव्हर लेटर",
   "write_cover_letter" : "येथे आपले कव्हर लेटर लिहा (आपली कौशल्ये, उपलब्धी आणि अनुभवाबद्दल सांगा)...",
+  "job_closed" : "नोकरी बंद झाली आहे",
+  "application_deadline_expired" : "या नोकरीसाठी अर्जाची अंतिम मुदत संपली आहे.",
+  "closed" : "बंद",
   'tap_to_upload_resume': 'रेझ्युमे अपलोड करण्यासाठी टॅप करा',
   'additional_information': 'अतिरिक्त माहिती',
 

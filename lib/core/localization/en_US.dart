@@ -49,6 +49,9 @@ const Map<String, String> enUS = {
   'info': 'Info',
   'cover_letter': 'Cover Letter',
   'write_cover_letter': 'Describe your relevant skills, recent achievements, and why you are excited about this opportunity...',
+  'job_closed': 'Job Closed',
+  'application_deadline_expired': 'Application deadline for this job has passed.',
+  'closed': 'Closed',
   'tap_to_upload_resume': 'Tap to Upload Resume',
   'additional_information': 'Additional Information',
 

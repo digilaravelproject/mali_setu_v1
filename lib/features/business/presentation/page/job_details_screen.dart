@@ -313,6 +313,38 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Warning Banner if Job is Expired/Closed
+                    if (job.isExpired && !isMyJob) ...[
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFFECACA), width: 1.2),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline_rounded, color: Color(0xFFDC2626), size: 20),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'application_deadline_expired'.tr.isNotEmpty && 'application_deadline_expired'.tr != 'application_deadline_expired'
+                                    ? 'application_deadline_expired'.tr
+                                    : 'Application deadline has passed. This job is closed.',
+                                style: const TextStyle(
+                                  color: Color(0xFF991B1B),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // Quick Stats Row
                     Row(
                       children: [
@@ -592,59 +624,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     );
   }
 
-  Widget _buildBottomAction1(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
-    return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.theme.scaffoldBackgroundColor,
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
-          ],
-        ),
-        child: Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: isMyJob 
-                    ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
-                    : (hasApplied ? null : () async {
-                        final res = await Get.toNamed(AppRoutes.applyJob, arguments: job);
-                        if (res == true && job.id != null) {
-                          controller.fetchJobDetails(job.id!);
-                        }
-                      }),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isMyJob ? Colors.orange : context.theme.primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    isMyJob ? 'view_appliers'.tr : (hasApplied ? 'applied'.tr : 'apply_now'.tr),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
-              ),
-              // if (!isMyJob) ...[
-              //   const SizedBox(width: 12),
-              //   Container(
-              //     decoration: BoxDecoration(
-              //       color: context.theme.primaryColor.withOpacity(0.1),
-              //       borderRadius: BorderRadius.circular(12),
-              //     ),
-              //     child: IconButton(
-              //       onPressed: () {},
-              //       icon: Icon(Icons.bookmark_border, color: context.theme.primaryColor),
-              //     ),
-              //   ),
-              // ],
-            ],
-          ),
-    );
-  }
-
   Widget _buildBottomAction(BuildContext context, bool hasApplied, Job job, bool isMyJob) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bool isClosed = job.isExpired;
 
     return Container(
       padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
@@ -664,31 +646,54 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
             child: ElevatedButton(
               onPressed: isMyJob
                   ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
-                  : (hasApplied
-                  ? null
-                  : () async {
-                final res = await Get.toNamed(AppRoutes.applyJob, arguments: job);
-                if (res == true && job.id != null) {
-                  controller.fetchJobDetails(job.id!);
-                }
-              }),
+                  : (hasApplied || isClosed
+                      ? null
+                      : () async {
+                          final res = await Get.toNamed(AppRoutes.applyJob, arguments: job);
+                          if (res == true && job.id != null) {
+                            controller.fetchJobDetails(job.id!);
+                          }
+                        }),
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                isMyJob ? Colors.orange : context.theme.primaryColor,
+                backgroundColor: isMyJob
+                    ? Colors.orange
+                    : (isClosed && !hasApplied
+                        ? const Color(0xFFE5E7EB)
+                        : (hasApplied ? const Color(0xFFE5E7EB) : context.theme.primaryColor)),
+                disabledBackgroundColor: const Color(0xFFE5E7EB),
+                disabledForegroundColor: const Color(0xFF6B7280),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
-              child: Text(
-                isMyJob
-                    ? 'view_appliers'.tr
-                    : (hasApplied ? 'applied'.tr : 'apply_now'.tr),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isClosed && !isMyJob && !hasApplied) ...[
+                    const Icon(Icons.lock_clock_outlined, size: 18, color: Color(0xFF6B7280)),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    isMyJob
+                        ? 'view_appliers'.tr
+                        : (hasApplied
+                            ? 'applied'.tr
+                            : (isClosed
+                                ? ('job_closed'.tr.isNotEmpty && 'job_closed'.tr != 'job_closed'
+                                    ? 'job_closed'.tr
+                                    : 'Job Closed')
+                                : 'apply_now'.tr)),
+                    style: TextStyle(
+                      color: isMyJob
+                          ? Colors.white
+                          : (hasApplied || isClosed ? const Color(0xFF6B7280) : Colors.white),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
