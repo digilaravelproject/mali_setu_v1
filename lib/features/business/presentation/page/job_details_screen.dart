@@ -115,7 +115,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       }
 
       return Scaffold(
-        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 65),
+        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 85),
         body: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [

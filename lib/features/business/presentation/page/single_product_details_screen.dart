@@ -236,7 +236,7 @@ class SingleProductDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 65),
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 85),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

@@ -45,7 +45,8 @@ class WhatsAppRouteObserver extends NavigatorObserver {
 class _WhatsAppFabOverlayManager {
   static OverlayEntry? _entry;
   static final List<State<WhatsAppSupportFab>> _activeFabStates = [];
-  static Offset? _currentPosition;
+  static bool _hasUserDragged = false;
+  static Offset? _userPosition;
   static bool _isDragging = false;
   static double _dragDistance = 0.0;
 
@@ -58,29 +59,43 @@ class _WhatsAppFabOverlayManager {
   }
 
   static void update(State<WhatsAppSupportFab> state) {
-    _entry?.markNeedsBuild();
+    scheduleRebuild();
   }
 
   static void unregister(State<WhatsAppSupportFab> state) {
     _activeFabStates.remove(state);
-    _activeFabStates.removeWhere((s) => !s.mounted);
-    if (_activeFabStates.isEmpty) {
-      _removeOverlay();
-    } else {
-      scheduleRebuild();
-    }
+    // Defer any unmount and rebuild logic safely to post-frame to NEVER trigger
+    // "setState() or markNeedsBuild() called when widget tree was locked."
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _activeFabStates.removeWhere((s) => !s.mounted);
+      if (_activeFabStates.isEmpty) {
+        _removeOverlay();
+      } else {
+        _ensureOverlay();
+      }
+    });
   }
 
   static void scheduleRebuild() {
-    _entry?.markNeedsBuild();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _entry?.markNeedsBuild();
+      _activeFabStates.removeWhere((s) => !s.mounted);
+      if (_activeFabStates.isNotEmpty) {
+        _ensureOverlay();
+      } else {
+        _removeOverlay();
+      }
     });
     Future.delayed(const Duration(milliseconds: 150), () {
-      _entry?.markNeedsBuild();
+      _activeFabStates.removeWhere((s) => !s.mounted);
+      if (_activeFabStates.isNotEmpty) {
+        _ensureOverlay();
+      }
     });
     Future.delayed(const Duration(milliseconds: 350), () {
-      _entry?.markNeedsBuild();
+      _activeFabStates.removeWhere((s) => !s.mounted);
+      if (_activeFabStates.isNotEmpty) {
+        _ensureOverlay();
+      }
     });
   }
 
@@ -91,11 +106,27 @@ class _WhatsAppFabOverlayManager {
     _entry = null;
   }
 
-  static void _ensureOverlay(State<WhatsAppSupportFab> state) {
-    if (!state.mounted || _activeFabStates.isEmpty) return;
+  static void _ensureOverlay([State<WhatsAppSupportFab>? preferredState]) {
+    _activeFabStates.removeWhere((s) => !s.mounted);
+    if (_activeFabStates.isEmpty) {
+      _removeOverlay();
+      return;
+    }
 
-    final context = state.context;
-    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    State<WhatsAppSupportFab>? targetState = preferredState;
+    if (targetState == null || !targetState.mounted) {
+      for (int i = _activeFabStates.length - 1; i >= 0; i--) {
+        if (_activeFabStates[i].mounted) {
+          targetState = _activeFabStates[i];
+          break;
+        }
+      }
+    }
+    if (targetState == null || !targetState.mounted) return;
+
+    final context = targetState.context;
+    final overlay = Overlay.maybeOf(context, rootOverlay: true) ??
+        (Get.overlayContext != null ? Overlay.maybeOf(Get.overlayContext!, rootOverlay: true) : null);
     if (overlay == null) return;
 
     if (_entry == null || !_entry!.mounted) {
@@ -103,9 +134,13 @@ class _WhatsAppFabOverlayManager {
         _entry?.remove();
       } catch (_) {}
       _entry = OverlayEntry(builder: (ctx) => _buildOverlayContent(ctx));
-      overlay.insert(_entry!);
+      try {
+        overlay.insert(_entry!);
+      } catch (_) {}
     } else {
-      _entry?.markNeedsBuild();
+      try {
+        _entry?.markNeedsBuild();
+      } catch (_) {}
     }
   }
 
@@ -164,25 +199,35 @@ class _WhatsAppFabOverlayManager {
     final double maxX = screenSize.width - padding.right - fabSize - 8.0;
     final double minY = padding.top + 8.0;
 
+    final String currentRoute = (Get.currentRoute).toLowerCase();
+    final String? routeSettingName = ModalRoute.of(activeState.context)?.settings.name?.toLowerCase();
+    final bool isDashboard = currentRoute.contains('dashboard') ||
+        (routeSettingName != null && routeSettingName.contains('dashboard'));
+
     // Use widget.bottomPadding (e.g. 85.0 on bottom nav pages) so the FAB always stays strictly ABOVE bottom nav bar
-    final double effectiveBottomPadding = (widget.bottomPadding > 0.0)
+    double effectiveBottomPadding = (widget.bottomPadding > 0.0)
         ? widget.bottomPadding
         : 16.0;
+
+    // On Dashboard (all bottom nav bar tabs), bottom padding MUST be at least 85.0
+    if (isDashboard && effectiveBottomPadding < 85.0) {
+      effectiveBottomPadding = 85.0;
+    }
 
     final double maxY = screenSize.height - padding.bottom - viewInsets.bottom - fabSize - effectiveBottomPadding;
     final double safeMinY = minY;
     final double safeMaxY = maxY > safeMinY ? maxY : safeMinY;
     final double safeMaxX = maxX > minX ? maxX : minX;
 
-    if (_currentPosition == null) {
-      final double initialX = safeMaxX;
-      final double initialY = safeMaxY;
-      _currentPosition = Offset(initialX, initialY);
+    final double x;
+    final double y;
+    if (_hasUserDragged && _userPosition != null) {
+      x = _userPosition!.dx.clamp(minX, safeMaxX);
+      y = _userPosition!.dy.clamp(safeMinY, safeMaxY);
+    } else {
+      x = safeMaxX;
+      y = safeMaxY;
     }
-
-    // Clamp coordinates safely within the visible screen area (and strictly above bottom nav bar!)
-    final double x = _currentPosition!.dx.clamp(minX, safeMaxX);
-    final double y = _currentPosition!.dy.clamp(safeMinY, safeMaxY);
 
     return Positioned(
       left: x,
@@ -200,11 +245,14 @@ class _WhatsAppFabOverlayManager {
             if (_dragDistance > 3.0) {
               if (!_isDragging) {
                 _isDragging = true;
+                _hasUserDragged = true;
                 HapticFeedback.selectionClick();
               }
-              final newX = (_currentPosition!.dx + details.delta.dx).clamp(minX, safeMaxX);
-              final newY = (_currentPosition!.dy + details.delta.dy).clamp(safeMinY, safeMaxY);
-              _currentPosition = Offset(newX, newY);
+              final currentX = _userPosition?.dx ?? safeMaxX;
+              final currentY = _userPosition?.dy ?? safeMaxY;
+              final newX = (currentX + details.delta.dx).clamp(minX, safeMaxX);
+              final newY = (currentY + details.delta.dy).clamp(safeMinY, safeMaxY);
+              _userPosition = Offset(newX, newY);
               _entry?.markNeedsBuild();
             }
           },
@@ -306,10 +354,20 @@ class _WhatsAppFabOverlayManager {
   }
 
   static bool _isPreLoginOrAuthRoute(String? routeName) {
-    if (routeName == null) return false;
+    final bool isLoggedIn = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
+    if (isLoggedIn) {
+      if (routeName == null) return false;
+      final r = routeName.toLowerCase().trim();
+      return r == '/splash' ||
+          r == '/login' ||
+          r == '/register' ||
+          r == '/emailpasswordreset' ||
+          r == '/resetpasswordscreen';
+    }
+
+    if (routeName == null || routeName.isEmpty) return true;
     final r = routeName.toLowerCase().trim();
     if (r == '/' ||
-        r.isEmpty ||
         r == '/splash' ||
         r == '/intro' ||
         r == '/languageselection' ||
@@ -323,10 +381,6 @@ class _WhatsAppFabOverlayManager {
         r.contains('register') ||
         r.contains('resetpassword') ||
         r.contains('passwordreset')) {
-      if (r == '/changepassword' || r == '/languageselection') {
-        final bool isLoggedIn = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
-        return !isLoggedIn;
-      }
       return true;
     }
     return false;
