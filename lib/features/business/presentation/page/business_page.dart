@@ -18,6 +18,7 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart' as model;
 import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
+import 'package:edu_cluezer/core/widgets/profile_app_bar_button.dart';
 
 import '../../../../core/constent/api_constants.dart';
 
@@ -65,6 +66,14 @@ class BusinessScreen extends GetView<BusinessController> {
                   ),
                 ),
                 centerTitle: false,
+                actions: const [
+                  Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Center(
+                      child: ProfileAppBarButton(),
+                    ),
+                  ),
+                ],
               ),
             
             SliverToBoxAdapter(

@@ -14,6 +14,7 @@ import '../../../Auth/service/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
+import '../../../../core/widgets/profile_app_bar_button.dart';
 
 String _formatDate(String? dateStr) {
   if (dateStr == null || dateStr.isEmpty) return '';
@@ -93,25 +94,31 @@ class BlogsScreen extends StatelessWidget {
                                 letterSpacing: -0.5,
                               ),
                             )),
-                            Obx(() {
-                              int count = 0;
-                              try {
-                                final notificationController = Get.find<NotificationController>();
-                                count = notificationController.unreadCount.value;
-                              } catch (e) { count = 0; }
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: InkWell(
-                                  onTap: () => Get.toNamed(AppRoutes.notification),
-                                  child: Badge(
-                                    label: Text(count > 99 ? '99+' : count.toString()),
-                                    isLabelVisible: count > 0,
-                                    backgroundColor: Colors.redAccent,
-                                    child: const Icon(CupertinoIcons.bell, color: Colors.black87, size: 24),
-                                  ),
-                                ),
-                              );
-                            }),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Obx(() {
+                                  int count = 0;
+                                  try {
+                                    final notificationController = Get.find<NotificationController>();
+                                    count = notificationController.unreadCount.value;
+                                  } catch (e) { count = 0; }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 16.0),
+                                    child: InkWell(
+                                      onTap: () => Get.toNamed(AppRoutes.notification),
+                                      child: Badge(
+                                        label: Text(count > 99 ? '99+' : count.toString()),
+                                        isLabelVisible: count > 0,
+                                        backgroundColor: Colors.redAccent,
+                                        child: const Icon(CupertinoIcons.bell, color: Colors.black87, size: 24),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                                const ProfileAppBarButton(),
+                              ],
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),

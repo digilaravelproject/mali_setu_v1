@@ -19,6 +19,7 @@ import '../../../business/presentation/page/business_page.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
+import '../../../../core/widgets/profile_app_bar_button.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import '../../../webinars/presentation/controllers/webinars_controller.dart';
 import '../../../webinars/presentation/pages/webinar_details_screen.dart';
@@ -153,48 +154,7 @@ class HomePage extends GetWidget<HomeController> {
                             }),
                             const SizedBox(width: 24),
                             // Profile Avatar
-                            InkWell(
-                              onTap: () => Get.toNamed(AppRoutes.settings),
-                              child: Hero(
-                                tag: 'profile_avatar',
-                                child: Container(
-                                  width: 34,
-                                  height: 34,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.grey[200],
-                                    border: Border.all(
-                                      color: Colors.grey[300]!,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: ClipOval(
-                                    child: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
-                                        ? CachedNetworkImage(
-                                            imageUrl: user!.profileImage!.startsWith('http')
-                                                ? user!.profileImage!
-                                                : "${ApiConstants.imageBaseUrl}${user!.profileImage}",
-                                            fit: BoxFit.cover,
-                                            width: 34,
-                                            height: 34,
-                                            placeholder: (context, url) => Container(
-                                              color: Colors.grey[200],
-                                            ),
-                                            errorWidget: (context, url, error) => const Icon(
-                                              CupertinoIcons.person_fill,
-                                              color: Colors.grey,
-                                              size: 20,
-                                            ),
-                                          )
-                                        : const Icon(
-                                            CupertinoIcons.person_fill,
-                                            color: Colors.grey,
-                                            size: 20,
-                                          ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            const ProfileAppBarButton(),
                           ],
                         ),
                       ),
