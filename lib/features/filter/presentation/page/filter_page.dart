@@ -690,8 +690,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SelectableChipGroup(
           title: 'marital_status'.tr,
           items: ['any'.tr, 'divorced'.tr, 'widow'.tr, 'single'.tr, 'awaiting_divorce'.tr],
+          initialSelected: widget.controller.maritalStatus,
+          isSingleSelect: true,
           onSelectionChanged: (selected) {
-            print(selected);
+            widget.controller.maritalStatus = selected;
           },
         ),
         SizedBox(height: 16),
@@ -706,8 +708,8 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         _buildRangeFilter(
           title: 'height'.tr,
           range: widget.controller.heightRange,
-          min: 4.0,
-          max: 7.0,
+          min: 0.0,
+          max: 20.0,
           unit: 'ft'.tr,
           isDecimal: true,
           onChanged: (range) {
@@ -721,8 +723,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SelectableChipGroup(
           title: 'physical_status'.tr,
           items: ['normal'.tr, 'doesnt_matter'.tr, 'physically_challenged'.tr],
+          initialSelected: widget.controller.physicalStatus,
+          isSingleSelect: true,
           onSelectionChanged: (selected) {
-            print(selected);
+            widget.controller.physicalStatus = selected;
           },
         ),
       ],
@@ -764,8 +768,9 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             'private_sector'.tr,
             'self_employed'.tr,
           ],
+          initiallySelected: widget.controller.workingWith,
           onSelectionChanged: (selectedList) {
-            print(selectedList);
+            widget.controller.workingWith = selectedList;
           },
         ),
 
@@ -780,8 +785,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             'it_software'.tr,
             'civil_services'.tr,
           ],
+          initialSelected: widget.controller.profession,
+          isSingleSelect: true,
           onSelectionChanged: (selected) {
-            print(selected);
+            widget.controller.profession = selected;
           },
         ),
       ],
@@ -858,8 +865,14 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         SelectableChipGroup(
           title: 'manglik'.tr,
           items: ['dont_know'.tr, 'yes'.tr, 'doesnt_matter'.tr, 'no'.tr],
+          initialSelected: widget.controller.manglik != "Doesn't Matter" ? [widget.controller.manglik] : [],
+          isSingleSelect: true,
           onSelectionChanged: (selected) {
-            print(selected);
+            if (selected.isNotEmpty) {
+              widget.controller.manglik = selected.first;
+            } else {
+              widget.controller.manglik = "Doesn't Matter";
+            }
           },
         ),
       ],
@@ -882,60 +895,79 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             Text('family_type'.tr, style: Get.textTheme.titleMedium),
             const SizedBox(height: 16),
 
-            Obx(
-                  () => Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.start,
-                children: [
-                  _buildCircleOption(
-                    title: 'nuclear'.tr,
-                    icon: AppAssets.imgnuclearFamily,
-                    isSelected:
-                    widget.controller.selectedDontShowOption.value ==
-                        "ignored",
-                    onTap: () {
-                      widget.controller.selectedDontShowOption.value =
-                      "ignored";
-                    },
-                  ),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.start,
+              children: [
+                _buildCircleOption(
+                  title: 'nuclear'.tr,
+                  icon: AppAssets.imgnuclearFamily,
+                  isSelected: widget.controller.familyType.contains('nuclear'.tr) ||
+                      widget.controller.familyType.contains('Nuclear'),
+                  onTap: () {
+                    setState(() {
+                      if (widget.controller.familyType.contains('nuclear'.tr) ||
+                          widget.controller.familyType.contains('Nuclear')) {
+                        widget.controller.familyType.clear();
+                      } else {
+                        widget.controller.familyType = ['nuclear'.tr];
+                      }
+                    });
+                  },
+                ),
 
-                  _buildCircleOption(
-                    title: 'joint'.tr,
-                    icon: AppAssets.imgjointFamily,
-                    isSelected:
-                    widget.controller.selectedDontShowOption.value ==
-                        "shortlisted",
-                    onTap: () {
-                      widget.controller.selectedDontShowOption.value =
-                      "shortlisted";
-                    },
-                  ),
+                _buildCircleOption(
+                  title: 'joint'.tr,
+                  icon: AppAssets.imgjointFamily,
+                  isSelected: widget.controller.familyType.contains('joint'.tr) ||
+                      widget.controller.familyType.contains('Joint'),
+                  onTap: () {
+                    setState(() {
+                      if (widget.controller.familyType.contains('joint'.tr) ||
+                          widget.controller.familyType.contains('Joint')) {
+                        widget.controller.familyType.clear();
+                      } else {
+                        widget.controller.familyType = ['joint'.tr];
+                      }
+                    });
+                  },
+                ),
 
-                  _buildCircleOption(
-                    title: 'doesnt_matter'.tr,
-                    icon: AppAssets.imgNull,
-                    isSelected:
-                    widget.controller.selectedDontShowOption.value ==
-                        "viewed",
-                    onTap: () {
-                      widget.controller.selectedDontShowOption.value = "viewed";
-                    },
-                  ),
+                _buildCircleOption(
+                  title: 'doesnt_matter'.tr,
+                  icon: AppAssets.imgNull,
+                  isSelected: widget.controller.familyType.contains('doesnt_matter'.tr) ||
+                      widget.controller.familyType.contains("Doesn't Matter"),
+                  onTap: () {
+                    setState(() {
+                      if (widget.controller.familyType.contains('doesnt_matter'.tr) ||
+                          widget.controller.familyType.contains("Doesn't Matter")) {
+                        widget.controller.familyType.clear();
+                      } else {
+                        widget.controller.familyType = ['doesnt_matter'.tr];
+                      }
+                    });
+                  },
+                ),
 
-                  _buildCircleOption(
-                    title: 'not_specified'.tr,
-                    icon: AppAssets.imgAppLogo,
-                    isSelected:
-                    widget.controller.selectedDontShowOption.value ==
-                        "contacted",
-                    onTap: () {
-                      widget.controller.selectedDontShowOption.value =
-                      "contacted";
-                    },
-                  ),
-                ],
-              ),
+                _buildCircleOption(
+                  title: 'not_specified'.tr,
+                  icon: AppAssets.imgAppLogo,
+                  isSelected: widget.controller.familyType.contains('not_specified'.tr) ||
+                      widget.controller.familyType.contains('Not Specified'),
+                  onTap: () {
+                    setState(() {
+                      if (widget.controller.familyType.contains('not_specified'.tr) ||
+                          widget.controller.familyType.contains('Not Specified')) {
+                        widget.controller.familyType.clear();
+                      } else {
+                        widget.controller.familyType = ['not_specified'.tr];
+                      }
+                    });
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -951,8 +983,10 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
             'orthodox'.tr,
             'not_specified'.tr,
           ],
+          initialSelected: widget.controller.familyValues,
+          isSingleSelect: true,
           onSelectionChanged: (selected) {
-            print(selected);
+            widget.controller.familyValues = selected;
           },
         ),
       ],
@@ -1011,7 +1045,6 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
   }
 
   Widget _buildLocationDetailsSection() {
-    List<String> selectedHobbies = [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1068,19 +1101,17 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
           title: '${'citizenship'.tr}:',
           items: [
             'any'.tr,
-            'Antarctica',
-            'Armenia',
-            'Vanuatu',
-            'Turks and Caicos Islands',
-            'Northern Mariana Islands',
-            'Netherlands Antilles',
-            'Netherlands Antilles',
+            'India',
+            'UK',
+            'USA',
+            'Canada',
+            'Australia',
+            'UAE',
+            'Other',
           ],
+          initiallySelected: widget.controller.citizenship,
           onSelectionChanged: (selected) {
-            setState(() {
-              selectedHobbies = selected;
-            });
-            print('Selected hobbies: $selected');
+            widget.controller.citizenship = selected;
           },
         ),
       ],
@@ -1089,79 +1120,50 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
 
   Widget _buildLifestyleSection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        customToggleTile(
-          title: 'any'.tr,
-          initialValue: widget.controller.isPrivate.value,
-          onChanged: (val) => widget.controller.isPrivate.value = val,
+        SelectableChipGroup(
+          title: 'diet'.tr,
+          items: [
+            'any'.tr,
+            'vegetarian'.tr,
+            'non_vegetarian'.tr,
+            'eggetarian'.tr,
+            'not_specified'.tr,
+          ],
+          initialSelected: widget.controller.diet,
+          isSingleSelect: true,
+          onSelectionChanged: (selected) {
+            widget.controller.diet = selected;
+          },
         ),
 
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Divider(),
-        ),
-
-        customToggleTile(
-          title: 'eggetarian'.tr,
-          initialValue: widget.controller.isPrivate.value,
-          onChanged: (val) => widget.controller.isPrivate.value = val,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Divider(),
-        ),
-
-        customToggleTile(
-          title: 'vegetarian'.tr,
-          initialValue: widget.controller.isPrivate.value,
-          onChanged: (val) => widget.controller.isPrivate.value = val,
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Divider(),
-        ),
-        customToggleTile(
-          title: 'non_vegetarian'.tr,
-          initialValue: widget.controller.isPrivate.value,
-          onChanged: (val) => widget.controller.isPrivate.value = val,
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Divider(),
-        ),
-        customToggleTile(
-          title: 'not_specified'.tr,
-          initialValue: widget.controller.isPrivate.value,
-          onChanged: (val) => widget.controller.isPrivate.value = val,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Divider(),
-        ),
+        const SizedBox(height: 16),
         SingleDropdown(
           label: 'smoking_habits'.tr,
           controller: widget.controller.smokingCtrl,
           items: widget.controller.smokingHabits,
         ),
 
-        SizedBox(height: 16),
-
-        MultiCheckboxList(
-          title: '${'drinking_habits'.tr}:',
+        const SizedBox(height: 16),
+        SelectableChipGroup(
+          title: 'drinking_habits'.tr,
           items: [
+            'any'.tr,
             'never'.tr,
             'socially'.tr,
             'regularly'.tr,
             'not_specified'.tr,
             'doesnt_matter'.tr,
           ],
+          initialSelected: widget.controller.drinking != 'Any' ? [widget.controller.drinking] : [],
+          isSingleSelect: true,
           onSelectionChanged: (selected) {
-            setState(() {
-              //  selectedHobbies = selected;
-            });
-            print('Selected hobbies: $selected');
+            if (selected.isNotEmpty) {
+              widget.controller.drinking = selected.first;
+            } else {
+              widget.controller.drinking = 'Any';
+            }
           },
         ),
       ],
@@ -1371,7 +1373,6 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
         const SizedBox(height: 12),
         ...options.entries.map((entry) {
           return Obx(() {
-            final isSelected = widget.controller.recentlyCreated.value == entry.key;
             return RadioListTile<String>(
               title: Text(entry.value),
               value: entry.key,
@@ -1674,12 +1675,14 @@ class _FilterCriteriaSectionState extends State<FilterCriteriaSection> {
 class RadioCheckboxList extends StatefulWidget {
   final String title;
   final List<String> items;
+  final List<String>? initiallySelected;
   final Function(List<String>) onSelectionChanged;
 
   const RadioCheckboxList({
     super.key,
     required this.title,
     required this.items,
+    this.initiallySelected,
     required this.onSelectionChanged,
   });
 
@@ -1688,7 +1691,15 @@ class RadioCheckboxList extends StatefulWidget {
 }
 
 class _RadioCheckboxListState extends State<RadioCheckboxList> {
-  final List<String> _selectedItems = [];
+  late final List<String> _selectedItems;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedItems = widget.initiallySelected != null
+        ? List<String>.from(widget.initiallySelected!)
+        : [];
+  }
 
   void _toggleSelection(String item) {
     setState(() {
@@ -1711,10 +1722,6 @@ class _RadioCheckboxListState extends State<RadioCheckboxList> {
         Text(
           widget.title,
           style: context.textTheme.titleMedium,
-          // const TextStyle(
-          //   fontSize: 16,
-          //   fontWeight: FontWeight.bold,
-          // ),
         ),
         const SizedBox(height: 8),
 
@@ -1748,7 +1755,6 @@ class _RadioCheckboxListState extends State<RadioCheckboxList> {
                         style: context.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
-                        //const TextStyle(fontSize: 14),
                       ),
                     ),
                   ],
@@ -1765,13 +1771,17 @@ class _RadioCheckboxListState extends State<RadioCheckboxList> {
 class SelectableChipGroup extends StatefulWidget {
   final String title;
   final List<String> items;
+  final List<String>? initialSelected;
   final Function(List<String>) onSelectionChanged;
+  final bool isSingleSelect;
 
   const SelectableChipGroup({
     super.key,
     required this.title,
     required this.items,
+    this.initialSelected,
     required this.onSelectionChanged,
+    this.isSingleSelect = false,
   });
 
   @override
@@ -1779,14 +1789,31 @@ class SelectableChipGroup extends StatefulWidget {
 }
 
 class _SelectableChipGroupState extends State<SelectableChipGroup> {
-  final List<String> _selectedItems = [];
+  late final List<String> _selectedItems;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedItems = widget.initialSelected != null
+        ? List<String>.from(widget.initialSelected!)
+        : [];
+  }
 
   void _onChipTap(String item) {
     setState(() {
-      if (_selectedItems.contains(item)) {
-        _selectedItems.remove(item);
+      if (widget.isSingleSelect) {
+        if (_selectedItems.contains(item)) {
+          _selectedItems.clear();
+        } else {
+          _selectedItems.clear();
+          _selectedItems.add(item);
+        }
       } else {
-        _selectedItems.add(item);
+        if (_selectedItems.contains(item)) {
+          _selectedItems.remove(item);
+        } else {
+          _selectedItems.add(item);
+        }
       }
     });
 

@@ -863,6 +863,7 @@ const Map<String, String> hiIN = {
   'received': 'प्राप्त',
   'sent': 'भेजा गया',
   'no_received_requests': 'कोई प्राप्त अनुरोध नहीं',
+  'no_sent_requests': 'कोई भेजे गए अनुरोध नहीं',
   'send_connection_request': 'कनेक्शन अनुरोध भेजें',
   'partner_preferences': 'साथी प्राथमिकताएं',
   'personal_details': 'व्यक्तिगत विवरण',

@@ -884,6 +884,7 @@ const Map<String, String> enUS = {
   'received': 'Received',
   'sent': 'Sent',
   'no_received_requests': 'No Received Requests',
+  'no_sent_requests': 'No Sent Requests',
   'send_connection_request': 'Send Connection Request',
   'partner_preferences': 'Partner Preferences',
   'personal_details': 'Personal Details',

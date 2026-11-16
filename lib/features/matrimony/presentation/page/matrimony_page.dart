@@ -83,10 +83,59 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Row(
                                 children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (currentUser?.id != null) {
+                                        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
+                                      }
+                                    },
+                                    child: Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                        border: Border.all(color: Colors.white, width: 2),
+                                      ),
+                                      child: ClipOval(
+                                        child: (currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty)
+                                            ? CachedNetworkImage(
+                                                imageUrl: currentUser!.profileImage!.startsWith('http')
+                                                    ? currentUser!.profileImage!
+                                                    : "${ApiConstants.imageBaseUrl}${currentUser!.profileImage}",
+                                                width: 40,
+                                                height: 40,
+                                                fit: BoxFit.cover,
+                                                placeholder: (context, url) => Container(color: Colors.grey[100]),
+                                                errorWidget: (context, url, error) => Center(
+                                                  child: Icon(
+                                                    CupertinoIcons.person_fill,
+                                                    size: 22,
+                                                    color: Colors.grey[400],
+                                                  ),
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Icon(
+                                                  CupertinoIcons.person_fill,
+                                                  size: 22,
+                                                  color: Colors.grey[400],
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
                                   Text(
                                     'discover'.tr,
                                     style: TextStyle(
-                                      fontSize: 22,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.w800,
                                       color: theme.primaryColor,
                                       letterSpacing: -0.5,
@@ -151,7 +200,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(width: 14),
+                                    const SizedBox(width: 8),
                                   ],
                                   const ProfileAppBarButton(),
                                 ],
