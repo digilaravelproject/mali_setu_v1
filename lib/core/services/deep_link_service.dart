@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../core/constent/app_constants.dart';
 import '../../core/routes/app_routes.dart';
@@ -113,66 +115,77 @@ class DeepLinkService extends GetxService {
     print('DeepLinkService: Navigating to URI: $uri');
     if (uri.pathSegments.isEmpty) return;
 
-    final firstSegment = uri.pathSegments.first.toLowerCase();
-    if (firstSegment == 'blog' || firstSegment == 'blogs') {
-      final int? blogId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
-      if (blogId != null && blogId > 0) {
-        Get.to(() => BlogDetailScreen(blogId: blogId), preventDuplicates: false);
-      } else {
-        Get.to(() => const BlogsScreen());
-      }
-    } else if (firstSegment == 'business' || firstSegment == 'businesses') {
-      final int? businessId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
-      if (businessId != null && businessId > 0) {
-        Get.toNamed(
-          AppRoutes.businessDetails,
-          arguments: Business(id: businessId),
-        );
-      } else {
-        Get.toNamed(AppRoutes.myBusiness);
-      }
-    } else if (firstSegment == 'job' || firstSegment == 'jobs') {
-      final int? jobId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
-      if (jobId != null && jobId > 0) {
-        Get.toNamed(AppRoutes.jobDetails, arguments: Job(id: jobId));
-      } else {
-        Get.toNamed(AppRoutes.jobs);
-      }
-    } else if (firstSegment == 'matrimony') {
-      int? profileId;
-      for (final segment in uri.pathSegments) {
-        final parsed = int.tryParse(segment);
-        if (parsed != null && parsed > 0) {
-          profileId = parsed;
-          break;
+    void execute() {
+      final firstSegment = uri.pathSegments.first.toLowerCase();
+      if (firstSegment == 'blog' || firstSegment == 'blogs') {
+        final int? blogId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
+        if (blogId != null && blogId > 0) {
+          Get.to(() => BlogDetailScreen(blogId: blogId), preventDuplicates: false);
+        } else {
+          Get.to(() => const BlogsScreen());
+        }
+      } else if (firstSegment == 'business' || firstSegment == 'businesses') {
+        final int? businessId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
+        if (businessId != null && businessId > 0) {
+          Get.toNamed(
+            AppRoutes.businessDetails,
+            arguments: Business(id: businessId),
+            preventDuplicates: false,
+          );
+        } else {
+          Get.toNamed(AppRoutes.myBusiness);
+        }
+      } else if (firstSegment == 'job' || firstSegment == 'jobs') {
+        final int? jobId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
+        if (jobId != null && jobId > 0) {
+          Get.toNamed(AppRoutes.jobDetails, arguments: Job(id: jobId), preventDuplicates: false);
+        } else {
+          Get.toNamed(AppRoutes.jobs);
+        }
+      } else if (firstSegment == 'matrimony') {
+        int? profileId;
+        for (final segment in uri.pathSegments) {
+          final parsed = int.tryParse(segment);
+          if (parsed != null && parsed > 0) {
+            profileId = parsed;
+            break;
+          }
+        }
+        if (profileId != null && profileId > 0) {
+          Get.to(
+            () => MatrimonyProfileScreen(profileId: profileId),
+            binding: MatrimonyDetailsBinding(),
+            arguments: {'id': profileId},
+            preventDuplicates: false,
+          );
+        } else {
+          Get.toNamed(AppRoutes.matrimonyMembers);
+        }
+      } else if (firstSegment == 'webinar' || firstSegment == 'webinars') {
+        final int? webinarId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
+        if (webinarId != null && webinarId > 0) {
+          Get.toNamed(AppRoutes.webinarDetails, arguments: Webinar.fromApiJson({'id': webinarId}), preventDuplicates: false);
+        } else {
+          Get.toNamed(AppRoutes.webinars);
+        }
+      } else if (firstSegment == 'register') {
+        final String? referralCode = uri.queryParameters['referral_code'];
+        if (isUserLoggedIn) {
+          Get.toNamed(AppRoutes.referral);
+        } else {
+          Get.toNamed(AppRoutes.register, arguments: {
+            if (referralCode != null && referralCode.isNotEmpty) 'referral_code': referralCode,
+          });
         }
       }
-      if (profileId != null && profileId > 0) {
-        Get.to(
-          () => MatrimonyProfileScreen(profileId: profileId),
-          binding: MatrimonyDetailsBinding(),
-          arguments: {'id': profileId},
-          preventDuplicates: false,
-        );
-      } else {
-        Get.toNamed(AppRoutes.matrimonyMembers);
-      }
-    } else if (firstSegment == 'webinar' || firstSegment == 'webinars') {
-      final int? webinarId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
-      if (webinarId != null && webinarId > 0) {
-        Get.toNamed(AppRoutes.webinarDetails, arguments: Webinar.fromApiJson({'id': webinarId}));
-      } else {
-        Get.toNamed(AppRoutes.webinars);
-      }
-    } else if (firstSegment == 'register') {
-      final String? referralCode = uri.queryParameters['referral_code'];
-      if (isUserLoggedIn) {
-        Get.toNamed(AppRoutes.referral);
-      } else {
-        Get.toNamed(AppRoutes.register, arguments: {
-          if (referralCode != null && referralCode.isNotEmpty) 'referral_code': referralCode,
-        });
-      }
+    }
+
+    if (WidgetsBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+      execute();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        execute();
+      });
     }
   }
 

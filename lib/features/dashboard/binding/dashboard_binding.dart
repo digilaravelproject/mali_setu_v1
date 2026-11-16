@@ -54,7 +54,7 @@ class DashboardBinding extends Bindings {
 
     Get.lazyPut(() => DashboardController());
     Get.lazyPut(() => JobsController(), fenix: true);
-    Get.lazyPut(() => BlogController());
+    Get.lazyPut(() => BlogController(), fenix: true);
     Get.lazyPut(() => HomeController(
       getBusinessCategoriesUseCase: Get.find(),
       getBannersUseCase: Get.find(),

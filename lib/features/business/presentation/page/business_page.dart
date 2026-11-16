@@ -451,7 +451,9 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
     
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
+      floatingActionButton: Navigator.canPop(context)
+          ? const WhatsAppSupportFab(bottomPadding: 16)
+          : null,
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(

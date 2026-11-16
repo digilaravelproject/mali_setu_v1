@@ -54,9 +54,10 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     }
     _outerScrollController.addListener(_onScroll);
     if (argBusiness.id != null) {
-      controller.isDetailsLoading.value = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.fetchBusinessDetails(argBusiness.id!);
+        if (mounted) {
+          controller.fetchBusinessDetails(argBusiness.id!);
+        }
       });
     }
   }

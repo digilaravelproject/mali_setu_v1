@@ -20,7 +20,16 @@ class BlogController extends GetxController {
   final RxInt currentPage = 1.obs;
   final RxBool hasMore = true.obs;
   final RxString searchQuery = ''.obs;
-  final searchTextController = TextEditingController();
+  TextEditingController _searchTextController = TextEditingController();
+  TextEditingController get searchTextController {
+    try {
+      _searchTextController.value;
+      return _searchTextController;
+    } catch (_) {
+      _searchTextController = TextEditingController();
+      return _searchTextController;
+    }
+  }
   final RxString selectedTab = 'Others'.obs; // 'Mine' or 'Others'
 
   final BlogCategory allCategory = BlogCategory(id: null, name: 'All');
@@ -42,7 +51,16 @@ class BlogController extends GetxController {
   final RxBool isVideoInitialized = false.obs;
 
   // Comment State
-  final commentTextController = TextEditingController();
+  TextEditingController _commentTextController = TextEditingController();
+  TextEditingController get commentTextController {
+    try {
+      _commentTextController.value;
+      return _commentTextController;
+    } catch (_) {
+      _commentTextController = TextEditingController();
+      return _commentTextController;
+    }
+  }
   final RxBool isCommentPosting = false.obs;
   final Rxn<BlogComment> replyToComment = Rxn<BlogComment>();
   final RxBool showAllComments = false.obs;
@@ -517,8 +535,6 @@ class BlogController extends GetxController {
   @override
   void onClose() {
     _disposeVideo();
-    commentTextController.dispose();
-    searchTextController.dispose();
     super.onClose();
   }
 }
