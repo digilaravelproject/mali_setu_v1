@@ -765,19 +765,19 @@ class Job {
 
     final now = DateTime.now();
 
-    // Check application deadline
+    // Check application deadline ("apply ki date")
     if (applicationDeadline != null && applicationDeadline!.trim().isNotEmpty) {
       try {
         final deadline = DateTime.parse(applicationDeadline!.trim());
-        if (now.isAfter(deadline)) return true;
+        return now.isAfter(deadline);
       } catch (_) {}
     }
 
-    // Check expiresAt
+    // Fallback only if applicationDeadline is not provided
     if (expiresAt != null && expiresAt!.trim().isNotEmpty) {
       try {
         final expiry = DateTime.parse(expiresAt!.trim());
-        if (now.isAfter(expiry)) return true;
+        return now.isAfter(expiry);
       } catch (_) {}
     }
 

@@ -202,18 +202,49 @@ class JobCardItem extends StatelessWidget {
                       ),
                     ),
 
-                    // Heart / Favorite Icon
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: onFavoriteTap,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 6, bottom: 6),
-                        child: Icon(
-                          isFavorite ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                          size: 21,
-                          color: isFavorite ? const Color(0xFFE11D48) : const Color(0xFF9CA3AF),
+                    // Status Badge (if expired) & Favorite Icon
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (job.isExpired) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                            margin: const EdgeInsets.only(right: 6, bottom: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF2F2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFFFECACA),
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Text(
+                              'closed'.tr.isNotEmpty && 'closed'.tr != 'closed'
+                                  ? 'closed'.tr
+                                  : 'Closed',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFDC2626),
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                        ],
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: onFavoriteTap,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 2, bottom: 6),
+                            child: Icon(
+                              isFavorite ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+                              size: 21,
+                              color: isFavorite ? const Color(0xFFE11D48) : const Color(0xFF9CA3AF),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -252,28 +283,6 @@ class JobCardItem extends StatelessWidget {
                         ),
                       ),
                     ),
-
-                    if (job.isExpired) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF2F2),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFFECACA), width: 1.0),
-                        ),
-                        child: Text(
-                          'closed'.tr.isNotEmpty && 'closed'.tr != 'closed'
-                              ? 'closed'.tr
-                              : 'Closed',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFDC2626),
-                          ),
-                        ),
-                      ),
-                    ],
 
                     const Spacer(),
 
