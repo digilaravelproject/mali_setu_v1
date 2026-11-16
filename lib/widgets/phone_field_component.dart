@@ -206,6 +206,25 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
   bool get isMobileVerified => isVerified;
   bool get isOtpSentState => isOtpSent;
 
+  void reset() {
+    if (mounted) {
+      setState(() {
+        isVerified = false;
+        isOtpSent = false;
+        isSendingOtp = false;
+        isVerifyingOtp = false;
+        sessionInfo = null;
+        errorMessage = null;
+        phoneCtrl.clear();
+        for (var c in otpControllers) {
+          c.clear();
+        }
+      });
+      widget.onVerificationChanged?.call(false);
+      _notifyChange();
+    }
+  }
+
   void sendOtp() {
     if (!isVerified && !isSendingOtp) {
       _handleVerifyClick();
@@ -1109,16 +1128,18 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
           children: [
             // Country Code Box
             InkWell(
-              onTap: () => _showCountryPicker(context),
+              onTap: isVerified ? null : () => _showCountryPicker(context),
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 height: 50,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isVerified ? const Color(0xFFF9FAFB) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppColors.lightBorder,
+                    color: isVerified
+                        ? const Color(0xFF10B981).withValues(alpha: 0.35)
+                        : AppColors.lightBorder,
                     width: 1.0,
                   ),
                 ),
@@ -1128,17 +1149,19 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                   children: [
                     Text(
                       countryCodeCtrl.text,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F2937),
+                        color: isVerified
+                            ? const Color(0xFF4B5563)
+                            : const Color(0xFF1F2937),
                       ),
                     ),
                     const SizedBox(width: 4),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 20,
-                      color: primaryColor,
+                      color: isVerified ? Colors.grey.shade400 : primaryColor,
                     ),
                   ],
                 ),
@@ -1152,15 +1175,19 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                 height: 50,
                 child: TextField(
                   controller: phoneCtrl,
+                  enabled: !isVerified,
+                  readOnly: isVerified,
                   keyboardType: TextInputType.phone,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
                   ],
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14.5,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF1F2937),
+                    fontWeight: isVerified ? FontWeight.w600 : FontWeight.w500,
+                    color: isVerified
+                        ? const Color(0xFF374151)
+                        : const Color(0xFF1F2937),
                   ),
                   decoration: InputDecoration(
                     hintText: 'Enter Your Mobile number',
@@ -1170,7 +1197,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                       fontWeight: FontWeight.w400,
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: isVerified ? const Color(0xFFF9FAFB) : Colors.white,
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -1187,6 +1214,15 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
                         color: hasErr ? Colors.red.shade400 : AppColors.lightBorder,
+                        width: 1.0,
+                      ),
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: isVerified
+                            ? const Color(0xFF10B981).withValues(alpha: 0.35)
+                            : AppColors.lightBorder,
                         width: 1.0,
                       ),
                     ),
@@ -1282,8 +1318,8 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
           ),
         ],
 
-        // 3. Enter OTP Card (6-digit OTP boxes layout)
-        if (widget.showOtpSection && isOtpSent) ...[
+        // 3. Enter OTP Card (6-digit OTP boxes layout) - hides when verified
+        if (widget.showOtpSection && isOtpSent && !isVerified) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,

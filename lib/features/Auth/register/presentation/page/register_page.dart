@@ -45,7 +45,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      onTap: controller.handleBack,
+                      onTap: () => Get.back(),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
