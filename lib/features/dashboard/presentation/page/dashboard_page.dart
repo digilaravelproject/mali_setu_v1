@@ -18,6 +18,8 @@ class DashboardPage extends GetWidget<DashboardController> {
   Widget build(BuildContext context) {
     return CustomScaffold(
       enableDoubleTapExit: true,
+      whatsAppFabBottomPadding: 85.0,
+      showWhatsAppFab: true,
       onWillPop: () async {
         if (controller.isBlogger) {
           CustomConfirmDialog.show(

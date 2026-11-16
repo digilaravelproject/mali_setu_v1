@@ -8,12 +8,40 @@ import '../controllers/support_controller.dart';
 
 export '../controllers/support_controller.dart';
 
+/// Global RouteObserver that informs WhatsAppSupportFab of navigation transitions.
+class WhatsAppRouteObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    WhatsAppSupportFab.refresh();
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    WhatsAppSupportFab.refresh();
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    WhatsAppSupportFab.refresh();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didRemove(route, previousRoute);
+    WhatsAppSupportFab.refresh();
+  }
+}
+
 /// Global overlay manager for WhatsApp Floating Support Action Button.
 /// Ensures that the FAB:
 /// 1. Is placed in the root Overlay, allowing it to receive touches ANYWHERE on screen.
 /// 2. Can be dragged repeatedly across the screen without ever getting stuck.
 /// 3. Retains its position across screen transitions.
 /// 4. Does not block touches to underlying form fields/buttons when not being dragged.
+/// 5. Automatically stays above the bottom navigation bar and any bottom action buttons.
 class _WhatsAppFabOverlayManager {
   static OverlayEntry? _entry;
   static final List<State<WhatsAppSupportFab>> _activeFabStates = [];
@@ -35,11 +63,25 @@ class _WhatsAppFabOverlayManager {
 
   static void unregister(State<WhatsAppSupportFab> state) {
     _activeFabStates.remove(state);
+    _activeFabStates.removeWhere((s) => !s.mounted);
     if (_activeFabStates.isEmpty) {
       _removeOverlay();
     } else {
-      _entry?.markNeedsBuild();
+      scheduleRebuild();
     }
+  }
+
+  static void scheduleRebuild() {
+    _entry?.markNeedsBuild();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _entry?.markNeedsBuild();
+    });
+    Future.delayed(const Duration(milliseconds: 150), () {
+      _entry?.markNeedsBuild();
+    });
+    Future.delayed(const Duration(milliseconds: 350), () {
+      _entry?.markNeedsBuild();
+    });
   }
 
   static void _removeOverlay() {
@@ -56,40 +98,62 @@ class _WhatsAppFabOverlayManager {
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return;
 
-    if (_entry == null) {
+    if (_entry == null || !_entry!.mounted) {
+      try {
+        _entry?.remove();
+      } catch (_) {}
       _entry = OverlayEntry(builder: (ctx) => _buildOverlayContent(ctx));
       overlay.insert(_entry!);
     } else {
-      try {
-        _entry!.remove();
-        overlay.insert(_entry!);
-      } catch (_) {
-        _entry?.markNeedsBuild();
-      }
+      _entry?.markNeedsBuild();
     }
   }
 
   static Widget _buildOverlayContent(BuildContext context) {
+    _activeFabStates.removeWhere((s) => !s.mounted);
     if (_activeFabStates.isEmpty) return const SizedBox.shrink();
 
-    final topState = _activeFabStates.last;
-    if (!topState.mounted) {
-      return const SizedBox.shrink();
-    }
-
-    // Hide FAB if the route containing the top FAB is covered by another route
-    final route = ModalRoute.of(topState.context);
-    if (route != null && !route.isCurrent) {
-      return const SizedBox.shrink();
-    }
-
     // Hide FAB on pre-login / auth screens (splash, language selection, login, register, reset password, etc.)
-    final routeName = route?.settings.name ?? Get.currentRoute;
-    if (_isPreLoginOrAuthRoute(routeName)) {
+    final currentRouteName = Get.currentRoute;
+    if (_isPreLoginOrAuthRoute(currentRouteName)) {
       return const SizedBox.shrink();
     }
 
-    final widget = topState.widget;
+    // Find the topmost mounted FAB state whose route is currently visible or becoming visible
+    State<WhatsAppSupportFab>? activeState;
+    for (int i = _activeFabStates.length - 1; i >= 0; i--) {
+      final s = _activeFabStates[i];
+      if (!s.mounted) continue;
+      final route = ModalRoute.of(s.context);
+      final isVisibleRoute = route == null ||
+          route.isCurrent ||
+          route.secondaryAnimation?.status == AnimationStatus.reverse ||
+          route.secondaryAnimation?.status == AnimationStatus.dismissed;
+      if (isVisibleRoute) {
+        activeState = s;
+        break;
+      }
+    }
+
+    // Fallback while popping / transitioning: pick any active mounted state
+    if (activeState == null) {
+      for (int i = _activeFabStates.length - 1; i >= 0; i--) {
+        final s = _activeFabStates[i];
+        if (!s.mounted) continue;
+        final route = ModalRoute.of(s.context);
+        if (route != null && route.isActive) {
+          activeState = s;
+          break;
+        }
+      }
+    }
+
+    activeState ??= _activeFabStates.isNotEmpty ? _activeFabStates.last : null;
+    if (activeState == null || !activeState.mounted) {
+      return const SizedBox.shrink();
+    }
+
+    final widget = activeState.widget;
     final mediaQuery = MediaQuery.of(context);
     final screenSize = mediaQuery.size;
     final padding = mediaQuery.padding;
@@ -99,17 +163,26 @@ class _WhatsAppFabOverlayManager {
     final double minX = padding.left + 8.0;
     final double maxX = screenSize.width - padding.right - fabSize - 8.0;
     final double minY = padding.top + 8.0;
-    final double maxY = screenSize.height - padding.bottom - viewInsets.bottom - fabSize - 8.0;
+
+    // Use widget.bottomPadding (e.g. 85.0 on bottom nav pages) so the FAB always stays strictly ABOVE bottom nav bar
+    final double effectiveBottomPadding = (widget.bottomPadding > 0.0)
+        ? widget.bottomPadding
+        : 16.0;
+
+    final double maxY = screenSize.height - padding.bottom - viewInsets.bottom - fabSize - effectiveBottomPadding;
+    final double safeMinY = minY;
+    final double safeMaxY = maxY > safeMinY ? maxY : safeMinY;
+    final double safeMaxX = maxX > minX ? maxX : minX;
 
     if (_currentPosition == null) {
-      final double initialX = maxX;
-      final double initialY = (maxY - widget.bottomPadding).clamp(minY, maxY);
+      final double initialX = safeMaxX;
+      final double initialY = safeMaxY;
       _currentPosition = Offset(initialX, initialY);
     }
 
-    // Clamp coordinates safely within the visible screen area
-    final double x = _currentPosition!.dx.clamp(minX, maxX);
-    final double y = _currentPosition!.dy.clamp(minY, maxY);
+    // Clamp coordinates safely within the visible screen area (and strictly above bottom nav bar!)
+    final double x = _currentPosition!.dx.clamp(minX, safeMaxX);
+    final double y = _currentPosition!.dy.clamp(safeMinY, safeMaxY);
 
     return Positioned(
       left: x,
@@ -129,8 +202,8 @@ class _WhatsAppFabOverlayManager {
                 _isDragging = true;
                 HapticFeedback.selectionClick();
               }
-              final newX = (_currentPosition!.dx + details.delta.dx).clamp(minX, maxX);
-              final newY = (_currentPosition!.dy + details.delta.dy).clamp(minY, maxY);
+              final newX = (_currentPosition!.dx + details.delta.dx).clamp(minX, safeMaxX);
+              final newY = (_currentPosition!.dy + details.delta.dy).clamp(safeMinY, safeMaxY);
               _currentPosition = Offset(newX, newY);
               _entry?.markNeedsBuild();
             }
@@ -277,6 +350,12 @@ class WhatsAppSupportFab extends StatefulWidget {
     this.customSupportMessage,
     this.customTechSupportMessage,
   }) : super(key: key);
+
+  static final WhatsAppRouteObserver routeObserver = WhatsAppRouteObserver();
+
+  static void refresh() {
+    _WhatsAppFabOverlayManager.scheduleRebuild();
+  }
 
   static Future<void> launchWhatsApp({
     String phoneNumber = "8828287535",

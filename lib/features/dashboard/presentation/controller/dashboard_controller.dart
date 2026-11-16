@@ -18,6 +18,7 @@ import '../../../../core/routes/app_routes.dart';
 import '../page/home_page.dart';
 import '../../../blogs/presentation/controller/blog_controller.dart';
 import 'package:edu_cluezer/features/referral/presentation/widgets/volunteer_prompt_dialog.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 
 class DashboardController extends GetxController {
   var currentPage = 0.obs;
@@ -331,6 +332,7 @@ class DashboardController extends GetxController {
       }
     }
     currentPage.value = index;
+    WhatsAppSupportFab.refresh();
   }
 
   // Method to manually trigger business dialog check

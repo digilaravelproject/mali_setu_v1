@@ -13,6 +13,7 @@ import 'core/localization/language_controller.dart';
 import 'core/storage/shared_prefs.dart';
 import 'core/helper/local_notification_helper.dart';
 import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
+import 'core/widgets/whatsapp_support_fab.dart';
 import 'init_app.dart';
 
 @pragma('vm:entry-point')
@@ -66,6 +67,12 @@ class MyApp extends StatelessWidget {
         scaffoldMessengerKey: rootScaffoldMessengerKey,
         getPages: AppPages.getPages,
         initialRoute: AppRoutes.splash,
+        navigatorObservers: [
+          WhatsAppSupportFab.routeObserver,
+        ],
+        routingCallback: (routing) {
+          WhatsAppSupportFab.refresh();
+        },
         builder: (context, child) {
           final mediaQuery = MediaQuery.of(context);
           return MediaQuery(
