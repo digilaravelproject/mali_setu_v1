@@ -1,4 +1,6 @@
+import 'package:edu_cluezer/core/controllers/support_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../../core/utils/location_helper.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart' as coord_helper;
 import 'package:get/get.dart';
@@ -16,7 +18,13 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_business_catego
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/dashboard/domain/usecase/get_banners_usecase.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/banner_model.dart';
+import 'package:edu_cluezer/features/webinars/data/models/webinar_model.dart';
+import 'package:edu_cluezer/features/webinars/presentation/controllers/webinars_controller.dart';
 import 'package:edu_cluezer/features/notification/presentation/controller/notification_controller.dart';
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/network/api_client.dart';
+import 'package:edu_cluezer/core/storage/token_manger.dart';
+import 'package:edu_cluezer/core/services/notification_handler_service.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final RxInt currentIndex = 0.obs;
@@ -31,6 +39,12 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   final GetBannersUseCase getBannersUseCase;
   final RxList<BannerData> banners = <BannerData>[].obs;
   final RxBool isLoadingBanners = false.obs;
+
+  // Upcoming Webinars (from banner API)
+  final RxList<Webinar> upcomingWebinars = <Webinar>[].obs;
+
+  // Leaderboard (from banner API)
+  final RxList<LeaderboardItem> leaderboard = <LeaderboardItem>[].obs;
   
   // Categories
   final GetBusinessCategoriesUseCase getBusinessCategoriesUseCase;
@@ -40,6 +54,9 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   // Location
   final RxString currentLocation = "Detecting...".obs;
+
+  // Firebase Messaging Token
+  final RxString firebaseToken = ''.obs;
 
   HomeController({
     required this.getBusinessCategoriesUseCase,
@@ -53,6 +70,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     
     print("DEBUG_HOME: onInit() called");
     
+    // Sync FCM token via centralized NotificationHandlerService (listeners are already registered there)
+    if (Get.isRegistered<NotificationHandlerService>()) {
+      NotificationHandlerService.to.syncFcmToken();
+    }
+
     if (Get.isRegistered<AuthService>()) {
       Get.find<AuthService>().refreshProfile();
     }
@@ -64,6 +86,14 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     updateLocation();
     fetchCategories();
     fetchBanners();
+    SupportController.to.fetchSupportNumbers();
+  }
+
+  /// Backward-compatible method delegating to centralized NotificationHandlerService
+  Future<void> getFirebaseTokenAndToast() async {
+    if (Get.isRegistered<NotificationHandlerService>()) {
+      await NotificationHandlerService.to.syncFcmToken();
+    }
   }
 
   // Cache key constants
@@ -153,6 +183,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         updateLocation(),
         fetchBanners(),
         fetchCategories(),
+        SupportController.to.fetchSupportNumbers(),
       ];
 
       if (Get.isRegistered<AuthService>()) {
@@ -189,6 +220,29 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         print("DEBUG_BANNERS: Successfully loaded ${response.data.length} banners");
       } else {
         print("DEBUG_BANNERS: API returned empty list");
+      }
+
+      // Store upcoming webinars from banner API
+      if (response.upcomingWebinars.isNotEmpty) {
+        upcomingWebinars.assignAll(response.upcomingWebinars);
+        print("DEBUG_BANNERS: Loaded ${response.upcomingWebinars.length} upcoming webinars");
+
+        // Sync to WebinarsController if registered
+        if (Get.isRegistered<WebinarsController>()) {
+          Get.find<WebinarsController>().setWebinarsFromApi(response.upcomingWebinars);
+        }
+      } else {
+        upcomingWebinars.clear();
+        print("DEBUG_BANNERS: No upcoming webinars found in banner API");
+      }
+
+      // Store leaderboard from banner API
+      if (response.leaderboard.isNotEmpty) {
+        leaderboard.assignAll(response.leaderboard);
+        print("DEBUG_BANNERS: Loaded ${response.leaderboard.length} leaderboard items");
+      } else {
+        leaderboard.clear();
+        print("DEBUG_BANNERS: No leaderboard items found in banner API");
       }
       
     } catch (e) {

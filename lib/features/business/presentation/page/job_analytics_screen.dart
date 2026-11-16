@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -18,9 +19,18 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
   @override
   void initState() {
     super.initState();
+    controller.isJobAnalyticsLoading.value = true;
+    controller.jobAnalytics.value = null;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = Get.arguments ?? {};
-      final int businessId = args["business_id"] ?? 0;
+      final args = Get.arguments;
+      int businessId = 0;
+      if (args is Map && args["business_id"] != null) {
+        businessId = int.tryParse(args["business_id"].toString()) ?? 0;
+      } else if (args is int) {
+        businessId = args;
+      } else if (controller.myBusinesses.isNotEmpty) {
+        businessId = controller.myBusinesses.first.id ?? 0;
+      }
       controller.fetchJobAnalytics(businessId);
     });
   }
@@ -28,10 +38,11 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: Obx(() {
         final analytics = controller.jobAnalytics.value;
         
-        if (controller.isLoading.value && analytics == null) {
+        if (controller.isJobAnalyticsLoading.value && analytics == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -378,11 +389,11 @@ class _JobAnalysisPageState extends State<JobAnalysisPage> {
   }
 
   Widget _buildApplicationCard(dynamic application) {
-    // Assuming application structure from API or placeholder
-    final String name = application['user']['name'] ?? 'Unknown Applicant';
-    final String jobTitle = application['user']['company_name'] ?? 'Job Application';
-    final String status = application['status'] ?? 'Pending';
-    final String time = application['user']['address'] ?? 'Address';
+    final Map userMap = (application is Map && application['user'] is Map) ? application['user'] : {};
+    final String name = (userMap['name'] ?? 'Unknown Applicant').toString();
+    final String jobTitle = (userMap['company_name'] ?? 'Job Application').toString();
+    final String status = (application is Map ? application['status'] : null ?? 'Pending').toString();
+    final String time = (userMap['address'] ?? '').toString();
     final String avatarText = name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'A';
     
     Color statusColor = Colors.orange;

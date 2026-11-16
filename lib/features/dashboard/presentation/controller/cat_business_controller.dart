@@ -26,9 +26,17 @@ class CatBusinessController extends GetxController {
   void onInit() {
     super.onInit();
     final dynamic args = Get.arguments;
-    if (args != null && args is Category) {
-      if (args.id != null) {
-        fetchBusinesses(args.id!);
+    if (args is Category && args.id != null) {
+      isLoading.value = true;
+      fetchBusinesses(args.id!);
+    } else if (args is int) {
+      isLoading.value = true;
+      fetchBusinesses(args);
+    } else if (args is Map && args['id'] != null) {
+      final parsedId = int.tryParse(args['id'].toString());
+      if (parsedId != null) {
+        isLoading.value = true;
+        fetchBusinesses(parsedId);
       }
     }
   }

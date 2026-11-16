@@ -22,6 +22,10 @@ class ApiConstants {
     static const String forgotPassword = "auth/password/forgot";
     static const String resetPassword = "auth/password/reset";
     static const String authDeleteAccount = "auth/delete-account";
+    static const String updateFcmToken = "auth/fcm-token"; // PUT update FCM token
+    static const String authPhoneSendOtp = "auth/phone/send-otp"; // POST send OTP
+    static const String authPhoneResendOtp = "auth/phone/resend-otp"; // POST resend OTP
+    static const String authPhoneVerifyOtp = "auth/phone/verify-otp"; // POST verify OTP
 
 
     // Bussiness Api
@@ -90,6 +94,7 @@ class ApiConstants {
     static const String toggleJobStatus = "jobs";
     static const String jobAnalytics = "jobs/analytics";
     static const String applyJob = "jobs/apply";
+    static String jobLikeToggle(int id) => "jobs/$id/like-toggle";
     static const String myApplications = "jobs/my-applications";
     static const String getJobApplications = "jobs"; // jobs/{id}/applications
     static const String updateApplicationStatus = "jobs/applications"; // jobs/applications/{id}/status
@@ -104,6 +109,9 @@ class ApiConstants {
     // Banner Api
     static const String getBanner = "banner";
 
+    // Webinars Api
+    static const String getWebinars = "webinars";
+
     static const String matrimonyPymentOrder = "payment/create-order/matrimony";
     static const String paymentVerify = "payment/verify";
     static const String businessPymentOrder = "payment/create-order/business";
@@ -117,7 +125,21 @@ class ApiConstants {
     static const String searchBlogs = "blogs/search";
     static const String blogCategories = "blogs/categories";
 
+    // Support Numbers Endpoint
+    static const String supportNumbers = "support-numbers";
+
     // Legal URLs
     static const String privacyPolicyUrl = "$baseUrl/privacy-policy";
     static const String termsConditionsUrl = "$baseUrl/terms-condition";
+
+    // Referral Endpoints
+    static String referralEarnings(String code) => "referrals/$code/earnings";
+    static const String referralEarningsFallback = "volunteer/earnings";
+    static String referralReferredUsers(String code) => "referrals/$code/referred-users";
+    static String referralShareLink(String code) => "referrals/$code/share-link";
+    static String referralSendEmail(String code) => "referrals/$code/send-email";
+    static String referralNetwork(String code) => "referrals/$code/network";
+    static const String referralShareableLink = "referral/shareable-link";
+    static const String sendReferralLink = "referral/send";
+    static String referralVolunteer(String code) => "referrals/$code/volunteer";
 }

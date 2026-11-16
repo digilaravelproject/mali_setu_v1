@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 import 'custom_snack_bar.dart';
 
@@ -15,6 +16,7 @@ class CustomScaffold extends StatefulWidget {
   final bool extendBodyBehindAppBar;
   final bool enableDoubleTapExit;
   final Future<bool> Function()? onWillPop;
+  final bool showWhatsAppFab;
 
   const CustomScaffold({
     super.key,
@@ -28,6 +30,7 @@ class CustomScaffold extends StatefulWidget {
     this.extendBodyBehindAppBar = false,
     this.enableDoubleTapExit = false,
     this.onWillPop,
+    this.showWhatsAppFab = true,
   });
 
   @override
@@ -88,7 +91,12 @@ class _CustomScaffoldState extends State<CustomScaffold> {
         drawer: widget.drawer,
         floatingActionButtonLocation: widget.floatingActionButtonLocation,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-        floatingActionButton: widget.floatingActionButton,
+        floatingActionButton: widget.floatingActionButton ??
+            (widget.showWhatsAppFab
+                ? const WhatsAppSupportFab(
+                    bottomPadding: 0.0,
+                  )
+                : null),
         bottomNavigationBar: widget.bottomNavigationBar,
         extendBody: widget.extendBody ?? true,
         body: widget.body,

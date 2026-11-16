@@ -8,16 +8,38 @@ import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../../data/model/blog_model.dart';
 import '../../../../features/Auth/service/auth_service.dart';
 
-class CreateBlogScreen extends StatelessWidget {
+class CreateBlogScreen extends StatefulWidget {
   final Blog? blog;
   const CreateBlogScreen({super.key, this.blog});
 
   @override
-  Widget build(BuildContext context) {
+  State<CreateBlogScreen> createState() => _CreateBlogScreenState();
+}
+
+class _CreateBlogScreenState extends State<CreateBlogScreen> {
+  late final CreateBlogController controller;
+
+  @override
+  void initState() {
+    super.initState();
     if (Get.isRegistered<CreateBlogController>()) {
       Get.delete<CreateBlogController>();
     }
-    final controller = Get.put(CreateBlogController(blogToEdit: blog));
+    controller = Get.put(CreateBlogController(blogToEdit: widget.blog));
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<CreateBlogController>()) {
+      Get.delete<CreateBlogController>();
+    }
+    super.dispose();
+  }
+
+  Blog? get blog => widget.blog;
+
+  @override
+  Widget build(BuildContext context) {
     final primaryColor = context.theme.primaryColor;
 
     return Obx(() {

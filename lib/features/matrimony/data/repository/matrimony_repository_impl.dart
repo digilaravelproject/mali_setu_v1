@@ -16,12 +16,12 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   MatrimonyRepositoryImpl({required this.dataSource});
 
   @override
-  Future<MatrimonyResponse> createProfile(Map<String, dynamic> data) async {
+  Future<MatrimonyResponse> createProfile(dynamic data) async {
     return await dataSource.createProfile(data);
   }
 
   @override
-  Future<MatrimonyResponse> updateProfile(Map<String, dynamic> data) async {
+  Future<MatrimonyResponse> updateProfile(dynamic data) async {
     return await dataSource.updateProfile(data);
   }
 

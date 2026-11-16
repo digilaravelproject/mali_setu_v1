@@ -1,9 +1,16 @@
+import 'package:edu_cluezer/features/business/presentation/page/apply_job_screen.dart';
+import 'package:edu_cluezer/features/jobs/presentation/screens/jobs_screen.dart';
+import 'package:edu_cluezer/features/jobs/binding/jobs_binding.dart';
+import '../../features/settings/page/settings_screen.dart';
 import 'dart:async';
 
 import 'package:app_links/app_links.dart';
 import 'package:edu_cluezer/features/business/binding/business_binding.dart';
 import 'package:edu_cluezer/features/business/presentation/page/add_product_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/add_service_page.dart';
+import 'package:edu_cluezer/features/business/presentation/page/my_products_services_screen.dart';
+import 'package:edu_cluezer/features/business/presentation/page/edit_product_screen.dart';
+import 'package:edu_cluezer/features/business/presentation/page/edit_service_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/create_job_post_page.dart';
 import 'package:edu_cluezer/features/business/presentation/page/job_analytics_screen.dart';
 import 'package:edu_cluezer/features/business/presentation/page/job_details_screen.dart';
@@ -61,6 +68,15 @@ import '../../features/search/presentation/page/search_page.dart';
 import '../../features/settings/binding/profile_binding.dart';
 import '../../features/settings/page/update_profile_page.dart';
 import '../../features/volunteer/pages/opportunity_details_page.dart';
+import '../../features/webinars/binding/webinars_binding.dart';
+import '../../features/webinars/data/models/webinar_model.dart';
+import '../../features/webinars/presentation/pages/webinars_list_screen.dart';
+import '../../features/webinars/presentation/pages/webinar_details_screen.dart';
+import '../../features/webinars/presentation/pages/webinar_registration_page.dart';
+import '../../features/webinars/presentation/pages/webinar_confirmation_page.dart';
+import '../../features/referral/presentation/binding/referral_binding.dart';
+import '../../features/referral/presentation/pages/referral_main_screen.dart';
+import '../../features/referral/presentation/pages/referral_analytics_screen.dart';
 import '../helper/logger_helper.dart';
 
 class AppRoutes {
@@ -79,12 +95,18 @@ class AppRoutes {
   static const String regMatrimony = '/regMatrimony';
   static const String addProduct = '/addProduct';
   static const String addService = "/addService";
+  static const String myProductsServices = "/myProductsServices";
+  static const String editProduct = "/editProduct";
+  static const String editService = "/editService";
   static const String createJob = "/createJob";
   static const String jobAnalytics = "/jobAnalytics";
   static const String myBusiness = "/myBusiness";
   static const String regBusiness = "/regBusiness";
   static const String businessDetails = "/businessDetails";
+  static const String jobs = "/jobs";
+  static const String applyJob = "/applyJob";
   static const String jobDetails = "/jobDetails";
+  static const String settings = "/settings";
   static const String profileScreen = "/profileScreen";
   static const String updateProfile = "/update_Profile";
   static const String changePassword = "/changePassword";
@@ -108,6 +130,12 @@ class AppRoutes {
   static const String singleProductDetails = "/singleProductDetails";
   static const String singleServiceDetails = "/singleServiceDetails";
   static const String notificationDetails = '/notificationDetails';
+  static const String webinars = '/webinars';
+  static const String webinarDetails = '/webinarDetails';
+  static const String webinarRegistration = '/webinarRegistration';
+  static const String webinarConfirmation = '/webinarConfirmation';
+  static const String referral = '/referral';
+  static const String referralAnalytics = '/referralAnalytics';
 }
 
 class AppPages {
@@ -208,14 +236,35 @@ class AppPages {
     GetPage(
       name: AppRoutes.addProduct,
       page: () => const AddProductScreen(),
-      binding: MatrimonyBinding(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
       name: AppRoutes.addService,
       page: () => const AddServiceScreen(),
-      binding: MatrimonyBinding(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.myProductsServices,
+      page: () => const MyProductsServicesScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.editProduct,
+      page: () => const EditProductScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.editService,
+      page: () => const EditServiceScreen(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -255,6 +304,20 @@ class AppPages {
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
+      name: AppRoutes.applyJob,
+      page: () => const ApplyJobScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.jobs,
+      page: () => const JobsScreen(),
+      binding: JobsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
       name: AppRoutes.jobDetails,
       page: () => JobDetailsScreen(),
       binding: BusinessBinding(),
@@ -262,9 +325,16 @@ class AppPages {
       transitionDuration: const Duration(milliseconds: 500),
     ),
     GetPage(
+      name: AppRoutes.settings,
+      page: () => const SettingsScreen(),
+      binding: SettingsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
       name: AppRoutes.profileScreen,
       page: () => ProfileScreen(),
-      binding: BusinessBinding(),
+      binding: ProfileBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -405,6 +475,49 @@ class AppPages {
       page: () => const NotificationDetailsPage(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.webinars,
+      page: () => const WebinarsListScreen(),
+      binding: WebinarsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.webinarDetails,
+      page: () => const WebinarDetailsScreen(),
+      binding: WebinarsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.webinarRegistration,
+      page: () => const WebinarRegistrationPage(),
+      binding: WebinarsBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.webinarConfirmation,
+      page: () => WebinarConfirmationPage(
+        webinar: Get.arguments is Webinar ? Get.arguments as Webinar : Webinar.fromApiJson(const {}),
+      ),
+      transition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.referral,
+      page: () => const ReferralMainScreen(),
+      binding: ReferralBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
+    ),
+    GetPage(
+      name: AppRoutes.referralAnalytics,
+      page: () => const ReferralAnalyticsScreen(),
+      binding: ReferralBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
   ];
 }

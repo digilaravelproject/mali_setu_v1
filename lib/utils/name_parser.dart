@@ -9,6 +9,17 @@ class NameParser {
     'Ms', 'Ms.',
     'Dr', 'Dr.',
     'Prof', 'Prof.',
+    'CA', 'CA.',
+    'Adv', 'Adv.',
+    'श्री.', 'श्री',
+    'श्रीमती.', 'श्रीमती',
+    'सुश्री.', 'सुश्री',
+    'डॉ.', 'डॉ',
+    'प्रो.', 'प्रो',
+    'प्रा.', 'प्रा',
+    'सी.ए.', 'सीए',
+    'एड.', 'एड',
+    'ॲड.', 'ॲड',
   ];
 
   /// Parses a combined name string into title, firstName, and lastName

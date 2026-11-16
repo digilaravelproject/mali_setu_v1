@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/constent/api_constants.dart';
+
 class BusinessResponse {
   bool? success;
   BusinessData? data;
@@ -43,10 +45,31 @@ class BusinessResponse {
           businessData = BusinessData.fromJson(dataMap);
         }
       } else if (json['data'] is List) {
-        // Direct list of businesses
+        // Direct list
         final list = json['data'] as List;
+        final maps = list.whereType<Map<String, dynamic>>().toList();
+        List<Business> businesses = [];
+        List<Job> jobs = [];
+        List<Product> products = [];
+        List<Service> services = [];
+        
+        if (maps.isNotEmpty) {
+          final first = maps.first;
+          if (first.containsKey('title') || first.containsKey('job_type') || first.containsKey('salary_range')) {
+            jobs = maps.map((x) => Job.fromJson(x)).toList();
+          } else if (first.containsKey('business_name')) {
+            businesses = maps.map((x) => Business.fromJson(x)).toList();
+          } else {
+            products = maps.map((x) => Product.fromJson(x)).toList();
+            services = maps.map((x) => Service.fromJson(x)).toList();
+            businesses = maps.map((x) => Business.fromJson(x)).toList();
+          }
+        }
         businessData = BusinessData(
-          data: list.whereType<Map<String, dynamic>>().map((x) => Business.fromJson(x)).toList(),
+          data: businesses,
+          jobs: jobs.isNotEmpty ? jobs : null,
+          products: products.isNotEmpty ? products : null,
+          services: services.isNotEmpty ? services : null,
         );
       }
     }
@@ -101,18 +124,16 @@ class BusinessData {
     List<Service> servicesList = [];
 
     if (rawData != null && rawData is List && rawData.isNotEmpty) {
-      var item = rawData.first;
-      if (item is Map) {
-        if (item.containsKey('title')) {
-          jobsList = List<Job>.from(rawData.map((x) => Job.fromJson(x)));
+      final maps = rawData.whereType<Map<String, dynamic>>().toList();
+      if (maps.isNotEmpty) {
+        final item = maps.first;
+        if (item.containsKey('title') || item.containsKey('job_type') || item.containsKey('salary_range')) {
+          jobsList = List<Job>.from(maps.map((x) => Job.fromJson(x)));
         } else if (item.containsKey('business_name')) {
-          businesses = List<Business>.from(rawData.map((x) => Business.fromJson(x)));
-        } else if (item.containsKey('cost')) {
-          // It could be either product or service. 
-          // For now, let's treat it as generic data if we can't distinguish.
-          // But usually, they are return in specific keys if not paginated.
-          // In pagination, we'll try to guess or just use the caller's expectation.
-          // For now, let's focus on jobs which we know has 'title'.
+          businesses = List<Business>.from(maps.map((x) => Business.fromJson(x)));
+        } else if (item.containsKey('cost') || item.containsKey('product_name') || item.containsKey('service_name') || item.containsKey('price')) {
+          productsList = List<Product>.from(maps.map((x) => Product.fromJson(x)));
+          servicesList = List<Service>.from(maps.map((x) => Service.fromJson(x)));
         }
       }
     }
@@ -128,17 +149,23 @@ class BusinessData {
       from: _asInt(json['from']),
       to: _asInt(json['to']),
       lastPage: _asInt(json['last_page']),
-      products: json['products'] != null
-          ? List<Product>.from(json['products'].map((x) => Product.fromJson(x)))
-          : null,
-      services: json['services'] != null
-          ? List<Service>.from(json['services'].map((x) => Service.fromJson(x)))
-          : null,
+      products: productsList.isNotEmpty
+          ? productsList
+          : (json['products'] != null
+              ? List<Product>.from(json['products'].map((x) => Product.fromJson(x)))
+              : null),
+      services: servicesList.isNotEmpty
+          ? servicesList
+          : (json['services'] != null
+              ? List<Service>.from(json['services'].map((x) => Service.fromJson(x)))
+              : null),
       jobs: jobsList.isNotEmpty 
           ? jobsList 
           : (json['jobs'] != null
               ? List<Job>.from(json['jobs'].map((x) => Job.fromJson(x)))
-              : null),
+              : (json['job_postings'] != null
+                  ? List<Job>.from(json['job_postings'].map((x) => Job.fromJson(x)))
+                  : null)),
     );
   }
 }
@@ -161,7 +188,7 @@ class Business {
   String? subscriptionStatus;
   String? subscriptionExpiresAt;
   int? jobPostingLimit;
-  int? KMfromuser;
+  double? KMfromuser;
   String? createdAt;
   String? updatedAt;
   String? status;
@@ -177,6 +204,7 @@ class Business {
   Category? category;
   List<Product>? products;
   List<Service>? services;
+  List<Job>? jobs;
 
   Business({
     this.id,
@@ -212,6 +240,7 @@ class Business {
     this.category,
     this.products,
     this.services,
+    this.jobs,
   });
 
   factory Business.fromJson(Map<String, dynamic> json) {
@@ -233,7 +262,7 @@ class Business {
       subscriptionStatus: json['subscription_status'],
       subscriptionExpiresAt: json['subscription_expires_at'],
       jobPostingLimit: _asInt(json['job_posting_limit']),
-      KMfromuser: _asInt(json['KMfromuser']),
+      KMfromuser: _asDouble(json['KMfromuser']),
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       status: json['status'],
@@ -253,6 +282,11 @@ class Business {
       services: json['services'] != null
           ? List<Service>.from(json['services'].map((x) => Service.fromJson(x)))
           : [],
+      jobs: json['jobs'] != null
+          ? List<Job>.from(json['jobs'].map((x) => Job.fromJson(x)))
+          : (json['job_postings'] != null
+              ? List<Job>.from(json['job_postings'].map((x) => Job.fromJson(x)))
+              : []),
     );
   }
 
@@ -393,6 +427,25 @@ class Category {
   }
 }
 
+class ProductImage {
+  final String? path;
+  final String? url;
+
+  ProductImage({this.path, this.url});
+
+  factory ProductImage.fromJson(Map<String, dynamic> json) {
+    return ProductImage(
+      path: json['path']?.toString(),
+      url: json['url']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'path': path,
+    'url': url,
+  };
+}
+
 class Product {
   int? id;
   int? businessId;
@@ -400,7 +453,11 @@ class Product {
   String? description;
   String? cost;
   String? imagePath;
+  List<String>? imagePaths;
+  List<ProductImage>? images;
   String? status;
+  String? createdAt;
+  String? updatedAt;
   Business? business;
 
   Product({
@@ -410,19 +467,64 @@ class Product {
     this.description,
     this.cost,
     this.imagePath,
+    this.imagePaths,
+    this.images,
     this.status,
+    this.createdAt,
+    this.updatedAt,
     this.business,
   });
 
+  List<String> get allImages {
+    final List<String> list = [];
+    if (images != null && images!.isNotEmpty) {
+      for (final img in images!) {
+        if (img.url != null && img.url!.isNotEmpty) {
+          list.add(img.url!);
+        } else if (img.path != null && img.path!.isNotEmpty) {
+          final p = img.path!;
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePaths != null && imagePaths!.isNotEmpty) {
+      for (final p in imagePaths!) {
+        if (p.isNotEmpty) {
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePath != null && imagePath!.isNotEmpty) {
+      list.add(imagePath!.startsWith('http') ? imagePath! : '${ApiConstants.imageBaseUrl}/$imagePath');
+    }
+    return list;
+  }
+
   factory Product.fromJson(Map<String, dynamic> json) {
+    List<String>? paths;
+    if (json['image_paths'] is List) {
+      paths = (json['image_paths'] as List).map((e) => e.toString()).toList();
+    }
+    List<ProductImage>? imageList;
+    if (json['images'] is List) {
+      imageList = (json['images'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((e) => ProductImage.fromJson(e))
+          .toList();
+    }
+
     return Product(
       id: _asInt(json['id']),
       businessId: _asInt(json['business_id']),
       name: json['name'],
       description: json['description'],
-      cost: json['cost'],
+      cost: json['cost']?.toString(),
       imagePath: json['image_path'],
+      imagePaths: paths,
+      images: imageList,
       status: json['status'],
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
       business: json['business'] != null ? Business.fromJson(json['business']) : null,
     );
   }
@@ -435,7 +537,11 @@ class Product {
       'description': description,
       'cost': cost,
       'image_path': imagePath,
+      'image_paths': imagePaths,
+      'images': images?.map((x) => x.toJson()).toList(),
       'status': status,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
       if (business != null) 'business': business!.toJson(),
     };
   }
@@ -448,7 +554,11 @@ class Service {
   String? description;
   String? cost;
   String? imagePath;
+  List<String>? imagePaths;
+  List<ProductImage>? images;
   String? status;
+  String? createdAt;
+  String? updatedAt;
   Business? business;
 
   Service({
@@ -458,19 +568,64 @@ class Service {
     this.description,
     this.cost,
     this.imagePath,
+    this.imagePaths,
+    this.images,
     this.status,
+    this.createdAt,
+    this.updatedAt,
     this.business,
   });
 
+  List<String> get allImages {
+    final List<String> list = [];
+    if (images != null && images!.isNotEmpty) {
+      for (final img in images!) {
+        if (img.url != null && img.url!.isNotEmpty) {
+          list.add(img.url!);
+        } else if (img.path != null && img.path!.isNotEmpty) {
+          final p = img.path!;
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePaths != null && imagePaths!.isNotEmpty) {
+      for (final p in imagePaths!) {
+        if (p.isNotEmpty) {
+          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        }
+      }
+    }
+    if (list.isEmpty && imagePath != null && imagePath!.isNotEmpty) {
+      list.add(imagePath!.startsWith('http') ? imagePath! : '${ApiConstants.imageBaseUrl}/$imagePath');
+    }
+    return list;
+  }
+
   factory Service.fromJson(Map<String, dynamic> json) {
+    List<String>? paths;
+    if (json['image_paths'] is List) {
+      paths = (json['image_paths'] as List).map((e) => e.toString()).toList();
+    }
+    List<ProductImage>? imageList;
+    if (json['images'] is List) {
+      imageList = (json['images'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((e) => ProductImage.fromJson(e))
+          .toList();
+    }
+
     return Service(
       id: _asInt(json['id']),
       businessId: _asInt(json['business_id']),
       name: json['name'],
       description: json['description'],
-      cost: json['cost'],
+      cost: json['cost']?.toString(),
       imagePath: json['image_path'],
+      imagePaths: paths,
+      images: imageList,
       status: json['status'],
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
       business: json['business'] != null ? Business.fromJson(json['business']) : null,
     );
   }
@@ -483,7 +638,11 @@ class Service {
       'description': description,
       'cost': cost,
       'image_path': imagePath,
+      'image_paths': imagePaths,
+      'images': images?.map((x) => x.toJson()).toList(),
       'status': status,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
       if (business != null) 'business': business!.toJson(),
     };
   }
@@ -571,6 +730,8 @@ class Job {
   String? updatedAt;
   String? createdAt;
   Business? business;
+  int? applicationsCount;
+  bool? isLiked;
 
   Job({
     this.id,
@@ -593,6 +754,8 @@ class Job {
     this.updatedAt,
     this.createdAt,
     this.business,
+    this.applicationsCount,
+    this.isLiked,
   });
 
   factory Job.fromJson(Map<String, dynamic> json) {
@@ -623,6 +786,8 @@ class Job {
       business: json['business'] != null
           ? Business.fromJson(json['business'])
           : null,
+      applicationsCount: _asInt(json['applications_count']),
+      isLiked: json['is_liked'] == 1 || json['is_liked'] == true,
     );
   }
 }
@@ -863,6 +1028,15 @@ class JobApplicationsPagination {
       total: _asInt(json['total']),
     );
   }
+}
+
+double? _asDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) return double.tryParse(value);
+  if (value is List && value.isNotEmpty) return _asDouble(value.first);
+  return null;
 }
 
 int? _asInt(dynamic value) {

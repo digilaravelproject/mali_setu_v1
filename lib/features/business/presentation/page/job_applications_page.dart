@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class JobApplicationsPage extends StatefulWidget {
   const JobApplicationsPage({super.key});
@@ -15,12 +16,24 @@ class JobApplicationsPage extends StatefulWidget {
 
 class _JobApplicationsPageState extends State<JobApplicationsPage> {
   final BusinessController controller = Get.find<BusinessController>();
-  final Job job = Get.arguments ?? Job();
+  late final Job job;
 
   @override
   void initState() {
     super.initState();
+    final args = Get.arguments;
+    if (args is Job) {
+      job = args;
+    } else if (args is int) {
+      job = Job(id: args);
+    } else if (args is Map && args['id'] != null) {
+      job = Job(id: int.tryParse(args['id'].toString()));
+    } else {
+      job = Job();
+    }
     if (job.id != null) {
+      controller.isJobApplicationsLoading.value = true;
+      controller.selectedJobApplications.clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.fetchJobApplications(job.id!);
       });
@@ -65,6 +78,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: InkWell(
           onTap: () => Navigator.of(context).pop(),
@@ -88,7 +102,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
         foregroundColor: context.theme.textTheme.bodyLarge?.color,
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.selectedJobApplications.isEmpty) {
+        if (controller.isJobApplicationsLoading.value && controller.selectedJobApplications.isEmpty) {
           return _buildShimmerLoading();
         }
 
@@ -249,7 +263,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
                     return Row(
                       children: [
                         TextButton.icon(
-                          onPressed: () => controller.launchResume(fullUrl),
+                          onPressed: () => controller.viewResume(fullUrl, applicantName: application.user?.name),
                           icon: Icon(fileIcon, size: 16, color: iconColor),
                           label: Text('view'.tr, style: TextStyle(fontSize: 12, color: iconColor)),
                           style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),

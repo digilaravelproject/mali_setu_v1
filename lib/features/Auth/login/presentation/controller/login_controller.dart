@@ -18,6 +18,8 @@ import '../../data/model/req_login_model.dart';
 import '../../domain/usecase/login_usecase.dart';
 import '../../../../business/presentation/controller/business_controller.dart';
 import '../../../../../core/services/deep_link_service.dart';
+import '../../../../../core/services/notification_handler_service.dart';
+import '../../../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
 
 
 class LoginController extends GetxController {
@@ -81,6 +83,18 @@ class LoginController extends GetxController {
             AppConstants.userDataPref,
             jsonEncode(user.toJson()),
           );
+
+          // Save Referral Code & User Type to SharedPreferences
+          final refCode = user.reffralCode;
+          if (refCode != null && refCode.toString().isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.referralCodePref, refCode.toString());
+            debugPrint("DEBUG_LOGIN: Saved referral code to SharedPreferences: $refCode");
+          }
+          final uType = user.userType;
+          if (uType != null && uType.toString().isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.userTypePref, uType.toString());
+            debugPrint("DEBUG_LOGIN: Saved user_type to SharedPreferences: $uType");
+          }
         }
 
         print("usertype : "+AppConstants.userTypeUser);
@@ -159,6 +173,18 @@ class LoginController extends GetxController {
             AppConstants.userDataPref,
             jsonEncode(user.toJson()),
           );
+
+          // Save Referral Code & User Type to SharedPreferences
+          final refCode = user.reffralCode;
+          if (refCode != null && refCode.toString().isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.referralCodePref, refCode.toString());
+            debugPrint("DEBUG_LOGIN: Saved referral code to SharedPreferences: $refCode");
+          }
+          final uType = user.userType;
+          if (uType != null && uType.toString().isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.userTypePref, uType.toString());
+            debugPrint("DEBUG_LOGIN: Saved user_type to SharedPreferences: $uType");
+          }
         }
 
         // Set Logged In
@@ -234,6 +260,18 @@ class LoginController extends GetxController {
             AppConstants.userDataPref,
             jsonEncode(user.toJson()),
           );
+
+          // Save Referral Code & User Type to SharedPreferences
+          final refCode = user.reffralCode;
+          if (refCode != null && refCode.toString().isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.referralCodePref, refCode.toString());
+            debugPrint("DEBUG_LOGIN: Saved referral code to SharedPreferences: $refCode");
+          }
+          final uType = user.userType;
+          if (uType != null && uType.toString().isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.userTypePref, uType.toString());
+            debugPrint("DEBUG_LOGIN: Saved user_type to SharedPreferences: $uType");
+          }
         }
 
         // Set Logged In
@@ -266,12 +304,17 @@ class LoginController extends GetxController {
   }
 
   void _navigateToDashboardOrDeepLink() {
+    // Reset session flag so new login immediately prompts volunteer dialog on dashboard
+    VolunteerPromptDialog.resetSession();
     if (Get.isRegistered<AuthService>()) {
       Get.find<AuthService>().isLoggedIn.value = true;
     }
     Get.offAllNamed(AppRoutes.dashboard);
     if (DeepLinkService.hasPendingDeepLink) {
       DeepLinkService.executePendingDeepLink();
+    } else {
+      NotificationHandlerService.isAppReady = true;
+      NotificationHandlerService.executePendingNotification();
     }
   }
 }

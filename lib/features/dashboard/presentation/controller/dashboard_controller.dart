@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/features/jobs/presentation/screens/jobs_screen.dart';
+import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/btm_nav_model.dart';
 import 'package:edu_cluezer/features/dashboard/presentation/page/more_page.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/page/matrimony_page.dart';
@@ -15,6 +17,7 @@ import '../../../Auth/service/auth_service.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../page/home_page.dart';
 import '../../../blogs/presentation/controller/blog_controller.dart';
+import 'package:edu_cluezer/features/referral/presentation/widgets/volunteer_prompt_dialog.dart';
 
 class DashboardController extends GetxController {
   var currentPage = 0.obs;
@@ -46,35 +49,31 @@ class DashboardController extends GetxController {
       return <Widget>[
         HomePage(),
         BusinessScreen(),
+        JobsScreen(),
         MatrimonyPage(),
         BlogsScreen(),
         BlogsScreen(),
-        SettingsScreen(),
       ];
     }
     if (isBlogger) {
       return <Widget>[
         BlogsScreen(),
         BlogsScreen(),
-        SettingsScreen(),
       ];
     }
     return <Widget>[
       HomePage(),
       BusinessScreen(),
+      JobsScreen(),
       MatrimonyPage(),
       BlogsScreen(),
-      SettingsScreen(),
     ];
   }
 
   @override
   void onInit() {
     super.onInit();
-    // Check and show business dialog after a short delay
-    Future.delayed(Duration(milliseconds: 800), () {
-      _checkAndShowBusinessDialog();
-    });
+    // Auto popup dialog moved to dedicated promo card on home screen
   }
 
   void _checkAndShowBusinessDialog() {
@@ -287,14 +286,21 @@ class DashboardController extends GetxController {
     final blogController = Get.isRegistered<BlogController>()
         ? Get.find<BlogController>()
         : null;
+    final jobsController = Get.isRegistered<JobsController>()
+        ? Get.find<JobsController>()
+        : null;
 
     if (hasBlogAccess) {
-      if (index == 3) {
+      if (index == 2) {
+        if (jobsController != null && jobsController.jobs.isEmpty && !jobsController.isLoading.value) {
+          jobsController.fetchJobs();
+        }
+      } else if (index == 4) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
           blogController.fetchBlogs();
         }
-      } else if (index == 4) {
+      } else if (index == 5) {
         blogController?.filterByTab('Mine');
         if (blogController != null && blogController.myBlogs.isEmpty && !blogController.isMyBlogsLoading.value) {
           blogController.fetchMyBlogs();
@@ -313,7 +319,11 @@ class DashboardController extends GetxController {
         }
       }
     } else {
-      if (index == 3) {
+      if (index == 2) {
+        if (jobsController != null && jobsController.jobs.isEmpty && !jobsController.isLoading.value) {
+          jobsController.fetchJobs();
+        }
+      } else if (index == 4) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
           blogController.fetchBlogs();
@@ -349,6 +359,13 @@ class DashboardController extends GetxController {
           unselectedColor: theme.onSurfaceVariant,
         ),
         BtmNavModel(
+          title: "jobs".tr,
+          icon: CupertinoIcons.briefcase,
+          selectedIcon: CupertinoIcons.briefcase_fill,
+          selectedColor: theme.primary,
+          unselectedColor: theme.onSurfaceVariant,
+        ),
+        BtmNavModel(
           title: "matrimony".tr,
           icon: CupertinoIcons.heart,
           selectedIcon: CupertinoIcons.heart_fill,
@@ -366,12 +383,6 @@ class DashboardController extends GetxController {
           title: "my_blogs".tr,
           icon: Icons.library_books_outlined,
           selectedIcon: Icons.library_books,
-          selectedColor: theme.primary,
-          unselectedColor: theme.onSurfaceVariant,
-        ),
-        BtmNavModel(
-          title: "more".tr,
-          icon: Icons.more_vert,
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
@@ -393,12 +404,6 @@ class DashboardController extends GetxController {
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
-        BtmNavModel(
-          title: "more".tr,
-          icon: Icons.more_vert,
-          selectedColor: theme.primary,
-          unselectedColor: theme.onSurfaceVariant,
-        ),
       ];
     }
     return [
@@ -417,6 +422,13 @@ class DashboardController extends GetxController {
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
+        title: "jobs".tr,
+        icon: CupertinoIcons.briefcase,
+        selectedIcon: CupertinoIcons.briefcase_fill,
+        selectedColor: theme.primary,
+        unselectedColor: theme.onSurfaceVariant,
+      ),
+      BtmNavModel(
         title: "matrimony".tr,
         icon: CupertinoIcons.heart,
         selectedIcon: CupertinoIcons.heart_fill,
@@ -427,12 +439,6 @@ class DashboardController extends GetxController {
         title: "blogs".tr,
         icon: Icons.article_outlined,
         selectedIcon: Icons.article,
-        selectedColor: theme.primary,
-        unselectedColor: theme.onSurfaceVariant,
-      ),
-      BtmNavModel(
-        title: "more".tr,
-        icon: Icons.more_vert,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),

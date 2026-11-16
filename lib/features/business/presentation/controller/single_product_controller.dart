@@ -16,8 +16,16 @@ class SingleProductController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args != null && args is int) {
-      fetchProductDetails(args);
+    if (args != null) {
+      if (args is int) {
+        fetchProductDetails(args);
+      } else if (args is Product && args.id != null) {
+        product.value = args;
+        fetchProductDetails(args.id!);
+      } else if (args is Map && args['id'] != null) {
+        final id = int.tryParse(args['id'].toString());
+        if (id != null) fetchProductDetails(id);
+      }
     }
   }
 

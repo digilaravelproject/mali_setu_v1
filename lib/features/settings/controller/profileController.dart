@@ -83,7 +83,7 @@ class UpProfileController extends GetxController {
       countryCtrl.text =user.country ?? "";
       sectorCtrl.text = user.sector ?? "";
       destinationCtrl.text = user.destination ?? "";
-      villageCtrl.text = user.village ?? "villagewkdnsa";
+      villageCtrl.text = user.village ?? "";
     }
   }
 

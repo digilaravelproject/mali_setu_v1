@@ -13,6 +13,7 @@ import 'package:edu_cluezer/core/helper/local_notification_helper.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:edu_cluezer/core/helper/location_helper.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
@@ -24,6 +25,10 @@ import 'package:edu_cluezer/features/business/domain/usecase/get_business_servic
 import 'dart:io';
 import 'package:edu_cluezer/features/business/domain/usecase/get_my_businesses_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/add_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_product_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/update_business_service_usecase.dart';
+import 'package:edu_cluezer/features/business/domain/usecase/delete_business_service_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/delete_business_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_job_details_usecase.dart';
@@ -50,7 +55,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   final GetBusinessProductsUseCase getBusinessProductsUseCase;
   final GetBusinessServicesUseCase getBusinessServicesUseCase;
   final AddBusinessProductUseCase addBusinessProductUseCase;
+  final UpdateBusinessProductUseCase? updateBusinessProductUseCase;
+  final DeleteBusinessProductUseCase? deleteBusinessProductUseCase;
   final AddBusinessServiceUseCase addBusinessServiceUseCase;
+  final UpdateBusinessServiceUseCase? updateBusinessServiceUseCase;
+  final DeleteBusinessServiceUseCase? deleteBusinessServiceUseCase;
   final UpdateBusinessUseCase updateBusinessUseCase;
   final DeleteBusinessUseCase deleteBusinessUseCase;
   final GetMyJobsUseCase getMyJobsUseCase;
@@ -73,7 +82,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     required this.getBusinessProductsUseCase,
     required this.getBusinessServicesUseCase,
     required this.addBusinessProductUseCase,
+    this.updateBusinessProductUseCase,
+    this.deleteBusinessProductUseCase,
     required this.addBusinessServiceUseCase,
+    this.updateBusinessServiceUseCase,
+    this.deleteBusinessServiceUseCase,
     required this.updateBusinessUseCase,
     required this.deleteBusinessUseCase,
     required this.getMyJobsUseCase,
@@ -115,6 +128,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   var isSearching = false.obs;
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
+  var isJobDetailsLoading = false.obs;
+  var isJobAnalyticsLoading = false.obs;
+  var isJobApplicationsLoading = false.obs;
+  var isMyApplicationsLoading = false.obs;
+  var isApplyingJob = false.obs;
   var voiceSearchError = "".obs;
   var applicationLoadingStates = <int, String?>{}.obs;
 
@@ -565,16 +583,10 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
 
       print("DEBUG_BUSINESSES: Fetching... Search: '$searchQuery', Page: ${currentPage.value}");
 
-      // Get location with a strict timeout to avoid hanging
+      // Get live real-time location
       Map<String, double>? location;
       try {
-        location = await LocationHelper.getCurrentLocation().timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            print("DEBUG_LOCATION: Location fetch timed out in fetchAllBusinesses");
-            return null;
-          },
-        );
+        location = await LocationHelper.getCurrentLocation();
       } catch (e) {
         print("DEBUG_LOCATION: Error fetching location: $e");
       }
@@ -741,11 +753,21 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       
       // Fetch related data in parallel if business exists
       if (business != null) {
-          await Future.wait([
-             fetchBusinessProducts(id),
-             fetchBusinessServices(id),
-             fetchBusinessJobs(id),
-          ]);
+        if (business.products != null && business.products!.isNotEmpty) {
+          businessProducts.value = business.products!;
+        }
+        if (business.services != null && business.services!.isNotEmpty) {
+          businessServices.value = business.services!;
+        }
+        if (business.jobs != null && business.jobs!.isNotEmpty) {
+          businessJobs.value = business.jobs!;
+        }
+
+        await Future.wait([
+           fetchBusinessProducts(id),
+           fetchBusinessServices(id),
+           fetchBusinessJobs(id),
+        ]);
       }
 
     } catch (e) {
@@ -758,7 +780,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessProducts(int businessId) async {
       try {
           final products = await getBusinessProductsUseCase(businessId);
-          businessProducts.value = products;
+          if (products.isNotEmpty || businessProducts.isEmpty) {
+            businessProducts.value = products;
+          }
       } catch(e) {
           print('Error fetching products: $e');
       }
@@ -767,7 +791,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessServices(int businessId) async {
       try {
           final services = await getBusinessServicesUseCase(businessId);
-          businessServices.value = services;
+          if (services.isNotEmpty || businessServices.isEmpty) {
+            businessServices.value = services;
+          }
       } catch(e) {
           print('Error fetching services: $e');
       }
@@ -776,7 +802,9 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessJobs(int businessId) async {
       try {
           final jobs = await getMyJobsUseCase(businessId);
-          businessJobs.value = jobs;
+          if (jobs.isNotEmpty || businessJobs.isEmpty) {
+            businessJobs.value = jobs;
+          }
       } catch(e) {
           print('Error fetching jobs: $e');
       }
@@ -785,7 +813,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<bool> addProduct(Map<String, dynamic> data, List<File> images) async {
     try {
       isLoading.value = true;
-      await addBusinessProductUseCase(data, images);
+      final res = await addBusinessProductUseCase(data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to add product');
+        return false;
+      }
       
       // Refresh products if adding for current business
       if (selectedBusiness.value != null && data['business_id'].toString() == selectedBusiness.value!.id.toString()) {
@@ -793,7 +825,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       }
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
@@ -803,15 +835,132 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<bool> addService(Map<String, dynamic> data, List<File> images) async {
     try {
       isLoading.value = true;
-      await addBusinessServiceUseCase(data, images);
+      final res = await addBusinessServiceUseCase(data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to add service');
+        return false;
+      }
       
       // Refresh services if adding for current business
       if (selectedBusiness.value != null && data['business_id'].toString() == selectedBusiness.value!.id.toString()) {
          await fetchBusinessServices(int.parse(data['business_id'].toString()));
       }
+      await fetchMyBusinesses();
       return true;
     } catch (e) {
-      CustomSnackBar.showError(message: e.toString());
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateProduct(int id, Map<String, dynamic> data, List<File> images) async {
+    try {
+      isLoading.value = true;
+      final usecase = updateBusinessProductUseCase ?? Get.find<UpdateBusinessProductUseCase>();
+      final res = await usecase(id, data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to update product');
+        return false;
+      }
+      
+      // Refresh products if editing for current business
+      if (selectedBusiness.value != null && data['business_id'] != null) {
+        await fetchBusinessProducts(int.parse(data['business_id'].toString()));
+      }
+      await fetchMyBusinesses();
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteProduct(int id, {int? businessId, bool showSuccessSnackbar = true}) async {
+    try {
+      isLoading.value = true;
+      final usecase = deleteBusinessProductUseCase ?? Get.find<DeleteBusinessProductUseCase>();
+      final res = await usecase(id);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to delete product');
+        return false;
+      }
+      
+      // Remove locally from list
+      businessProducts.removeWhere((p) => p.id == id);
+      if (selectedBusiness.value != null) {
+        selectedBusiness.value!.products?.removeWhere((p) => p.id == id);
+        selectedBusiness.refresh();
+      }
+      if (businessId != null) {
+        await fetchBusinessProducts(businessId);
+      }
+      await fetchMyBusinesses();
+      if (showSuccessSnackbar) {
+        CustomSnackBar.showSuccess(message: res.message ?? 'Product deleted successfully!');
+      }
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateService(int id, Map<String, dynamic> data, List<File> images) async {
+    try {
+      isLoading.value = true;
+      final usecase = updateBusinessServiceUseCase ?? Get.find<UpdateBusinessServiceUseCase>();
+      final res = await usecase(id, data, images);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to update service');
+        return false;
+      }
+      
+      // Refresh services if editing for current business
+      if (selectedBusiness.value != null && data['business_id'] != null) {
+        await fetchBusinessServices(int.parse(data['business_id'].toString()));
+      }
+      await fetchMyBusinesses();
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteService(int id, {int? businessId, bool showSuccessSnackbar = true}) async {
+    try {
+      isLoading.value = true;
+      final usecase = deleteBusinessServiceUseCase ?? Get.find<DeleteBusinessServiceUseCase>();
+      final res = await usecase(id);
+      if (res.success == false) {
+        CustomSnackBar.showError(message: res.message ?? 'Failed to delete service');
+        return false;
+      }
+      
+      // Remove locally from list
+      businessServices.removeWhere((s) => s.id == id);
+      if (selectedBusiness.value != null) {
+        selectedBusiness.value!.services?.removeWhere((s) => s.id == id);
+        selectedBusiness.refresh();
+      }
+      if (businessId != null) {
+        await fetchBusinessServices(businessId);
+      }
+      await fetchMyBusinesses();
+      if (showSuccessSnackbar) {
+        CustomSnackBar.showSuccess(message: res.message ?? 'Service deleted successfully!');
+      }
+      return true;
+    } catch (e) {
+      CustomSnackBar.showError(message: e.toString().replaceAll('Exception: ', ''));
       return false;
     } finally {
       isLoading.value = false;
@@ -837,23 +986,26 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       await deleteBusinessUseCase(id);
       await fetchMyBusinesses(); // Refresh list
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showSuccess(message: "Business deleted successfully");
     } catch (e) {
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showError(message: e.toString());
     }
   }
 
-  Future<void> fetchJobDetails(int jobId) async {
+  Future<void> fetchJobDetails(int jobId, {bool isRefresh = false}) async {
     try {
-      isLoading.value = true;
+      if (!isRefresh) {
+        isJobDetailsLoading.value = true;
+        selectedJobDetail.value = null;
+      }
       final detail = await getJobDetailsUseCase(jobId);
       selectedJobDetail.value = detail;
     } catch (e) {
       print('Error fetching job details: $e');
     } finally {
-      isLoading.value = false;
+      isJobDetailsLoading.value = false;
     }
   }
 
@@ -861,7 +1013,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       final response = await deleteJobUseCase(jobId);
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       
       if (response.success == true) {
         Get.back(); // Back from details screen
@@ -875,7 +1027,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         CustomSnackBar.showError(message: response.message ?? "Failed to delete job");
       }
     } catch (e) {
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showError(message: e.toString());
     }
   }
@@ -884,12 +1036,12 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       final response = await toggleJobStatusUseCase(jobId);
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       
       if (response.success == true) {
         CustomSnackBar.showSuccess(message: response.message ?? "Job status updated successfully");
         // Refresh job details
-        fetchJobDetails(jobId);
+        fetchJobDetails(jobId, isRefresh: true);
         // Refresh business jobs if we have a selected business
         if (selectedBusiness.value != null) {
           fetchBusinessJobs(selectedBusiness.value!.id!);
@@ -898,14 +1050,15 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         CustomSnackBar.showError(message: response.message ?? "Failed to update job status");
       }
     } catch (e) {
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showError(message: e.toString());
     }
   }
 
   Future<void> fetchJobAnalytics(int businessId) async {
     try {
-      isLoading.value = true;
+      isJobAnalyticsLoading.value = true;
+      jobAnalytics.value = null;
       final response = await getJobAnalyticsUseCase(businessId);
       if (response.success == true) {
         jobAnalytics.value = response.data;
@@ -915,32 +1068,34 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       CustomSnackBar.showError(message: e.toString());
     } finally {
-      isLoading.value = false;
+      isJobAnalyticsLoading.value = false;
     }
   }
 
   Future<bool> applyJob(Map<String, dynamic> data) async {
     try {
-      isLoading.value = true;
+      isApplyingJob.value = true;
       final response = await applyJobUseCase(data);
-      
-      if (Get.isBottomSheetOpen == true) {
-        Get.back();
-      }
 
       if (response.success == true) {
+        if (Get.isBottomSheetOpen == true) {
+          Get.back();
+        }
         CustomSnackBar.showSuccess(message: response.message ?? "Applied successfully");
         // Refresh job details to update hasApplied status
         if (data['job_posting_id'] != null) {
-          fetchJobDetails(int.parse(data['job_posting_id'].toString()));
+          fetchJobDetails(int.parse(data['job_posting_id'].toString()), isRefresh: true);
         }
         return true;
       } else {
         // Handle "already applied" case specifically
         if (response.message != null && response.message!.toLowerCase().contains("already applied")) {
+           if (Get.isBottomSheetOpen == true) {
+             Get.back();
+           }
            CustomSnackBar.showInfo(message: "You have already applied for this job");
            if (data['job_posting_id'] != null) {
-             fetchJobDetails(int.parse(data['job_posting_id'].toString()));
+             fetchJobDetails(int.parse(data['job_posting_id'].toString()), isRefresh: true);
            }
            return true; // Return true to close the form
         }
@@ -948,8 +1103,6 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         // Handle validation errors specifically
         String errorMessage = response.message ?? "Failed to apply";
         if (response.errors != null && response.errors!.isNotEmpty) {
-          // Extract the first error message from the errors map
-          // e.g., {resume: [The resume failed to upload.]}
           var firstError = response.errors!.values.first;
           if (firstError is List && firstError.isNotEmpty) {
             errorMessage = firstError.first.toString();
@@ -962,10 +1115,6 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         return false;
       }
     } catch (e) {
-      if (Get.isBottomSheetOpen == true) {
-        Get.back();
-      }
-      
       String errorMessage = "Failed to apply";
       if (e is DioException && e.response?.data != null) {
         final errorData = e.response!.data;
@@ -980,29 +1129,27 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       CustomSnackBar.showError(message: errorMessage);
       return false;
     } finally {
-      isLoading.value = false;
+      isApplyingJob.value = false;
     }
   }
 
   Future<void> fetchMyApplications() async {
     try {
-      isLoading.value = true;
+      isMyApplicationsLoading.value = true;
       final response = await getMyApplicationsUseCase();
       if (response.success == true && response.data != null) {
         myApplications.value = response.data!.data ?? [];
-      } else {
-        // Handle failure if needed
       }
     } catch (e) {
       print('Error fetching applications: $e');
     } finally {
-      isLoading.value = false;
+      isMyApplicationsLoading.value = false;
     }
   }
 
   Future<void> fetchJobApplications(int jobId) async {
     try {
-      isLoading.value = true;
+      isJobApplicationsLoading.value = true;
       selectedJobApplications.clear();
       final response = await getJobApplicationsUseCase(jobId);
       if (response.success == true && response.data != null && response.data!.applications != null) {
@@ -1013,7 +1160,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       print('Error fetching job applications: $e');
     } finally {
-      isLoading.value = false;
+      isJobApplicationsLoading.value = false;
     }
   }
 
@@ -1060,10 +1207,192 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> launchResume(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-       CustomSnackBar.showError(message: "Could not launch resume");
+  Future<void> launchResume(String url, {String? applicantName}) async {
+    await viewResume(url, applicantName: applicantName);
+  }
+
+  Future<void> viewResume(String url, {String? applicantName}) async {
+    if (url.isEmpty) {
+      CustomSnackBar.showError(message: "Resume URL is not available");
+      return;
+    }
+
+    final cleanUrl = url.split('?').first;
+    final extension = cleanUrl.split('.').last.toLowerCase();
+    final name = applicantName ?? 'Candidate';
+
+    if (['jpg', 'jpeg', 'png', 'webp'].contains(extension)) {
+      _showImageResumeDialog(url, name, extension);
+    } else {
+      await _openDocumentResume(url, name, extension);
+    }
+  }
+
+  void _showImageResumeDialog(String url, String name, String extension) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 20),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 750),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.94),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 10, 10),
+                child: Row(
+                  children: [
+                    const Icon(Icons.description_outlined, color: Colors.white70, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Resume - $name",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.download_rounded, color: Colors.white, size: 22),
+                      tooltip: "Download Resume",
+                      onPressed: () {
+                        final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+                        final fileName = "Resume_${safeName}_${DateTime.now().millisecondsSinceEpoch}.$extension";
+                        downloadResume(url, fileName);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 24),
+                      onPressed: () => Get.back(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: Colors.white24, height: 1),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                  child: InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 4.0,
+                    child: Center(
+                      child: CachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.contain,
+                        placeholder: (context, _) => const Center(
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                        ),
+                        errorWidget: (context, _, __) => Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.broken_image_outlined, size: 48, color: Colors.white54),
+                            const SizedBox(height: 12),
+                            const Text(
+                              "Failed to load image",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+                                final fileName = "Resume_$safeName.$extension";
+                                downloadResume(url, fileName);
+                              },
+                              icon: const Icon(Icons.download_rounded, size: 18),
+                              label: const Text("Download Instead"),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openDocumentResume(String url, String name, String extension) async {
+    Get.dialog(
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+                const SizedBox(width: 18),
+                Expanded(
+                  child: Text(
+                    "Opening ${extension.toUpperCase()} resume...",
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+      final fileName = "Resume_${safeName}_${DateTime.now().millisecondsSinceEpoch}.$extension";
+      final filePath = "${tempDir.path}/$fileName";
+
+      await Dio().download(url, filePath);
+
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+
+      final result = await OpenFilex.open(filePath);
+      if (result.type != ResultType.done) {
+        final uri = Uri.parse(url);
+        final launched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+        if (!launched) {
+          CustomSnackBar.showInfo(
+            message: "No app found to open $extension. Downloading to device...",
+          );
+          downloadResume(url, fileName);
+        }
+      }
+    } catch (e) {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+      debugPrint("Error opening resume document: $e");
+      try {
+        final uri = Uri.parse(url);
+        final launched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+        if (!launched) {
+          final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+          downloadResume(url, "Resume_$safeName.$extension");
+        }
+      } catch (_) {
+        final safeName = name.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
+        downloadResume(url, "Resume_$safeName.$extension");
+      }
     }
   }
 
@@ -1096,11 +1425,17 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       Directory? downloadsDir;
       if (Platform.isAndroid) {
         downloadsDir = Directory('/storage/emulated/0/Download');
+        if (!downloadsDir.existsSync()) {
+          try {
+            downloadsDir = await getExternalStorageDirectory();
+          } catch (_) {}
+        }
       } else if (Platform.isIOS) {
         downloadsDir = await getApplicationDocumentsDirectory();
       } else {
         downloadsDir = await getDownloadsDirectory();
       }
+      downloadsDir ??= await getApplicationDocumentsDirectory();
 
       if (downloadsDir == null) {
         CustomSnackBar.showError(message: "Could not find downloads directory");
