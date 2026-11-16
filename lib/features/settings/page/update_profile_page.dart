@@ -111,6 +111,8 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                       key: controller.phoneFieldKey,
                       initialPhone: Get.find<AuthService>().currentUser.value?.phone,
                       isRequired: true,
+                      requireOtpVerification: false,
+                      showVerifyButton: false,
                     ),
                     AppInputTextField(
                       label: "occupation".tr,

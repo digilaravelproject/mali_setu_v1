@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import '../../../../core/styles/app_colors.dart';
+import 'package:intl/intl.dart';
 import '../controller/jobs_controller.dart';
 
 class JobFilterSheet extends StatefulWidget {
@@ -24,20 +23,33 @@ class JobFilterSheet extends StatefulWidget {
 }
 
 class _JobFilterSheetState extends State<JobFilterSheet> {
-  // Local state for filters so user can tweak and then tap "Apply Filters" or "Reset"
+  // Local state for all 8 job filter fields
   late Set<String> _selectedLocations;
   late Set<String> _selectedCategories;
-  late Set<String> _selectedJobTypes;
+  late Set<String> _selectedJobTypes; // Workplace: On-site, Remote, Hybrid
+  late Set<String> _selectedEmploymentTypes; // Full-time, Part-time, Internship, Freelance, Contract
+  late Set<String> _selectedExperienceLevels; // Entry, Mid, Senior, Expert
+  late Set<String> _selectedSkills; // Skills Required
+  late Set<String> _selectedBenefits; // Benefits & Perks
+  late RangeValues _salaryRange;
 
   // Search & custom input controllers
   final TextEditingController _locationSearchController = TextEditingController();
   final TextEditingController _categorySearchController = TextEditingController();
+  final TextEditingController _skillInputController = TextEditingController();
+  final TextEditingController _benefitInputController = TextEditingController();
 
   String _locationSearchQuery = '';
   String _categorySearchQuery = '';
   bool _isLocationExpanded = false;
 
-  // Pre-defined locations matching user mockup
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'en_IN',
+    symbol: '₹',
+    decimalDigits: 0,
+  );
+
+  // Pre-defined locations matching mockup and database
   final List<Map<String, dynamic>> _allLocations = [
     {'name': 'Pune', 'count': 120},
     {'name': 'Kolhapur', 'count': 32},
@@ -54,26 +66,68 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
     {'name': 'Ahmednagar', 'count': 14},
   ];
 
-  // Pre-defined categories matching user mockup
+  // Pre-defined categories matching job creation
   final List<Map<String, dynamic>> _categories = [
-    {'name': 'IT & Software', 'count': 125},
-    {'name': 'Sales & Marketing', 'count': 84},
-    {'name': 'Education', 'count': 56},
-    {'name': 'Healthcare', 'count': 42},
-    {'name': 'Finance & Accounts', 'count': 39},
-    {'name': 'Others', 'count': 120},
+    {'name': 'Software Development', 'count': 125},
+    {'name': 'Marketing', 'count': 84},
+    {'name': 'Sales', 'count': 56},
+    {'name': 'Design', 'count': 42},
+    {'name': 'Finance', 'count': 39},
+    {'name': 'Human Resources', 'count': 28},
+    {'name': 'Other', 'count': 120},
   ];
 
-  final List<String> _jobTypesCol1 = [
-    'Full Time',
-    'Part Time',
+  // 1. Workplace Type options (matches create job dropdown)
+  final List<String> _workplaceJobTypes = [
+    'On-site',
+    'Remote',
+    'Hybrid',
+  ];
+
+  // 2. Employment Type options (matches create job dropdown)
+  final List<String> _employmentTypes = [
+    'Full-time',
+    'Part-time',
+    'Internship',
+    'Freelance',
     'Contract',
   ];
 
-  final List<String> _jobTypesCol2 = [
-    'Freelance',
-    'Internship',
-    'Remote',
+  // 3. Experience Level options (matches create job dropdown)
+  final List<String> _experienceLevels = [
+    'Entry',
+    'Mid',
+    'Senior',
+    'Expert',
+  ];
+
+  // 4. Popular skills (matches create job post page)
+  final List<String> _popularSkills = [
+    'PHP',
+    'Laravel',
+    'MySQL',
+    'REST API',
+    'Flutter',
+    'Dart',
+    'Android',
+    'React Native',
+    'Java',
+    'Python',
+    'Node.js',
+    'UI/UX Design',
+  ];
+
+  // 5. Popular benefits (matches create job post page)
+  final List<String> _popularBenefits = [
+    'Health Insurance',
+    'Flexible Working Hours',
+    'Paid Time Off',
+    'Remote Work Options',
+    'Professional Development',
+    'Stock Options',
+    'Performance Bonus',
+    'Gym Membership',
+    'Free Meals',
   ];
 
   @override
@@ -82,6 +136,11 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
     _selectedLocations = Set<String>.from(widget.controller.selectedLocations);
     _selectedCategories = Set<String>.from(widget.controller.selectedCategories);
     _selectedJobTypes = Set<String>.from(widget.controller.selectedJobTypes);
+    _selectedEmploymentTypes = Set<String>.from(widget.controller.selectedEmploymentTypes);
+    _selectedExperienceLevels = Set<String>.from(widget.controller.selectedExperienceLevels);
+    _selectedSkills = Set<String>.from(widget.controller.selectedSkills);
+    _selectedBenefits = Set<String>.from(widget.controller.selectedBenefits);
+    _salaryRange = widget.controller.selectedSalaryRange.value;
 
     // Merge locations from server filters if available
     for (var loc in widget.controller.locations) {
@@ -106,7 +165,24 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
   void dispose() {
     _locationSearchController.dispose();
     _categorySearchController.dispose();
+    _skillInputController.dispose();
+    _benefitInputController.dispose();
     super.dispose();
+  }
+
+  int get _currentActiveCount {
+    int count = 0;
+    count += _selectedLocations.length;
+    count += _selectedCategories.length;
+    count += _selectedJobTypes.length;
+    count += _selectedEmploymentTypes.length;
+    count += _selectedExperienceLevels.length;
+    count += _selectedSkills.length;
+    count += _selectedBenefits.length;
+    if (_salaryRange.start > 0 || _salaryRange.end < 200000) {
+      count += 1;
+    }
+    return count;
   }
 
   void _onReset() {
@@ -115,8 +191,15 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
       _selectedLocations.clear();
       _selectedCategories.clear();
       _selectedJobTypes.clear();
+      _selectedEmploymentTypes.clear();
+      _selectedExperienceLevels.clear();
+      _selectedSkills.clear();
+      _selectedBenefits.clear();
+      _salaryRange = const RangeValues(0, 200000);
       _locationSearchController.clear();
       _categorySearchController.clear();
+      _skillInputController.clear();
+      _benefitInputController.clear();
       _locationSearchQuery = '';
       _categorySearchQuery = '';
     });
@@ -127,7 +210,7 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
   void _onApply() {
     HapticFeedback.mediumImpact();
 
-    // If user typed custom text in location or category but didn't tap add button, include it automatically
+    // Auto-include typed query if user forgot to tap add
     final typedLocation = _locationSearchController.text.trim();
     if (typedLocation.isNotEmpty) {
       _selectedLocations.add(typedLocation);
@@ -138,9 +221,39 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
       _selectedCategories.add(typedCategory);
     }
 
-    widget.controller.selectedLocations.value = _selectedLocations;
-    widget.controller.selectedCategories.value = _selectedCategories;
-    widget.controller.selectedJobTypes.value = _selectedJobTypes;
+    final typedSkill = _skillInputController.text.trim();
+    if (typedSkill.isNotEmpty) {
+      _selectedSkills.add(typedSkill);
+    }
+
+    final typedBenefit = _benefitInputController.text.trim();
+    if (typedBenefit.isNotEmpty) {
+      _selectedBenefits.add(typedBenefit);
+    }
+
+    widget.controller.selectedLocations
+      ..clear()
+      ..addAll(_selectedLocations);
+    widget.controller.selectedCategories
+      ..clear()
+      ..addAll(_selectedCategories);
+    widget.controller.selectedJobTypes
+      ..clear()
+      ..addAll(_selectedJobTypes);
+    widget.controller.selectedEmploymentTypes
+      ..clear()
+      ..addAll(_selectedEmploymentTypes);
+    widget.controller.selectedExperienceLevels
+      ..clear()
+      ..addAll(_selectedExperienceLevels);
+    widget.controller.selectedSkills
+      ..clear()
+      ..addAll(_selectedSkills);
+    widget.controller.selectedBenefits
+      ..clear()
+      ..addAll(_selectedBenefits);
+    widget.controller.selectedSalaryRange.value = _salaryRange;
+
     widget.controller.applyFilters();
     Navigator.of(context).pop();
   }
@@ -165,6 +278,32 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
       _categorySearchController.clear();
       _categorySearchQuery = '';
     });
+  }
+
+  void _addCustomSkill() {
+    final skill = _skillInputController.text.trim();
+    if (skill.isEmpty) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedSkills.add(skill);
+      _skillInputController.clear();
+    });
+  }
+
+  void _addCustomBenefit() {
+    final benefit = _benefitInputController.text.trim();
+    if (benefit.isEmpty) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedBenefits.add(benefit);
+      _benefitInputController.clear();
+    });
+  }
+
+  String _formatCurrency(double val) {
+    final rounded = val.round();
+    if (rounded >= 200000) return '₹2,00,000+';
+    return _currencyFormat.format(rounded);
   }
 
   @override
@@ -197,7 +336,56 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+
+            // Sheet Header with Title & Reset Link
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  const Text(
+                    'Filters',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF111827),
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  if (_currentActiveCount > 0) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$_currentActiveCount',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _onReset,
+                    child: Text(
+                      'Reset',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: Color(0xFFF3F4F6), height: 1, thickness: 1),
 
             // Scrollable Filter Sections
             Flexible(
@@ -206,19 +394,18 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                 padding: EdgeInsets.only(
                   left: 20,
                   right: 20,
-                  top: 4,
+                  top: 14,
                   bottom: bottomInset + 16,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ==========================================
-                    // 1. JOB LOCATION SECTION
+                    // 1. JOB LOCATION
                     // ==========================================
-                    _buildSectionHeader('Job Location'),
+                    _buildSectionHeader('Job Location', 'Filter by location or city'),
                     const SizedBox(height: 12),
 
-                    // Search & Type Location Input Field
                     _buildInputField(
                       controller: _locationSearchController,
                       hintText: 'Search or enter location...',
@@ -237,7 +424,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                       },
                     ),
 
-                    // If user typed a custom location not in pre-defined list, show "+ Add" button
                     if (_locationSearchQuery.isNotEmpty &&
                         !_allLocations.any((loc) =>
                             (loc['name'] as String).toLowerCase() == _locationSearchQuery) &&
@@ -274,13 +460,9 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                       ),
 
                     const SizedBox(height: 14),
-
-                    // Location Checkboxes (2 Columns)
                     _buildLocationGrid(primaryColor),
 
                     const SizedBox(height: 10),
-
-                    // "View More" / "View Less" Link
                     Center(
                       child: InkWell(
                         onTap: () {
@@ -291,10 +473,7 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                         },
                         borderRadius: BorderRadius.circular(6),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           child: Text(
                             _isLocationExpanded ? 'View Less' : 'View More',
                             style: TextStyle(
@@ -309,15 +488,14 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                       ),
                     ),
 
-                    const SizedBox(height: 22),
+                    _buildSectionDivider(),
 
                     // ==========================================
-                    // 2. JOB CATEGORY SECTION
+                    // 2. JOB CATEGORY
                     // ==========================================
-                    _buildSectionHeader('Job Category'),
+                    _buildSectionHeader('Job Category', 'Select relevant industries or departments'),
                     const SizedBox(height: 12),
 
-                    // Search & Type Category Input Field
                     _buildInputField(
                       controller: _categorySearchController,
                       hintText: 'Search or enter category...',
@@ -336,7 +514,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                       },
                     ),
 
-                    // If user typed a custom category not in pre-defined list, show "+ Add" button
                     if (_categorySearchQuery.isNotEmpty &&
                         !_categories.any((cat) =>
                             (cat['name'] as String).toLowerCase() == _categorySearchQuery) &&
@@ -373,27 +550,456 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                       ),
 
                     const SizedBox(height: 14),
-
-                    // Category Checkboxes (Single Column)
                     _buildCategoryList(primaryColor),
 
-                    const SizedBox(height: 8),
+                    _buildSectionDivider(),
 
-                    // Thin Divider below Job Category
-                    const Divider(
-                      color: Color(0xFFF1F2F4),
-                      thickness: 1.2,
-                      height: 24,
+                    // ==========================================
+                    // 3. WORKPLACE / JOB TYPE (On-site, Remote, Hybrid)
+                    // ==========================================
+                    _buildSectionHeader('Workplace Type', 'On-site, Remote, or Hybrid'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _workplaceJobTypes.map((type) {
+                        final isSelected = _selectedJobTypes.contains(type);
+                        return FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          selectedColor: primaryColor.withOpacity(0.16),
+                          checkmarkColor: primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? primaryColor : const Color(0xFF374151),
+                          ),
+                          backgroundColor: const Color(0xFFF9FAFB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? primaryColor : const Color(0xFFE5E7EB),
+                              width: isSelected ? 1.4 : 1.0,
+                            ),
+                          ),
+                          onSelected: (selected) {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              if (selected) {
+                                _selectedJobTypes.add(type);
+                              } else {
+                                _selectedJobTypes.remove(type);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
 
-                    // ==========================================
-                    // 3. JOB TYPE SECTION
-                    // ==========================================
-                    _buildSectionHeader('Job Type'),
-                    const SizedBox(height: 14),
+                    _buildSectionDivider(),
 
-                    // Job Type Checkboxes (2 Columns)
-                    _buildJobTypeGrid(primaryColor),
+                    // ==========================================
+                    // 4. EMPLOYMENT TYPE (Full-time, Part-time, Internship, etc.)
+                    // ==========================================
+                    _buildSectionHeader('Employment Type', 'Full-time, Part-time, Internship, Freelance, Contract'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _employmentTypes.map((type) {
+                        final isSelected = _selectedEmploymentTypes.contains(type);
+                        return FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          selectedColor: primaryColor.withOpacity(0.16),
+                          checkmarkColor: primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? primaryColor : const Color(0xFF374151),
+                          ),
+                          backgroundColor: const Color(0xFFF9FAFB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? primaryColor : const Color(0xFFE5E7EB),
+                              width: isSelected ? 1.4 : 1.0,
+                            ),
+                          ),
+                          onSelected: (selected) {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              if (selected) {
+                                _selectedEmploymentTypes.add(type);
+                              } else {
+                                _selectedEmploymentTypes.remove(type);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+
+                    _buildSectionDivider(),
+
+                    // ==========================================
+                    // 5. EXPERIENCE LEVEL (Entry, Mid, Senior, Expert)
+                    // ==========================================
+                    _buildSectionHeader('Experience Level', 'Entry, Mid level, Senior, or Expert'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _experienceLevels.map((exp) {
+                        final isSelected = _selectedExperienceLevels.contains(exp);
+                        return FilterChip(
+                          label: Text(exp),
+                          selected: isSelected,
+                          selectedColor: primaryColor.withOpacity(0.16),
+                          checkmarkColor: primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? primaryColor : const Color(0xFF374151),
+                          ),
+                          backgroundColor: const Color(0xFFF9FAFB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? primaryColor : const Color(0xFFE5E7EB),
+                              width: isSelected ? 1.4 : 1.0,
+                            ),
+                          ),
+                          onSelected: (selected) {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              if (selected) {
+                                _selectedExperienceLevels.add(exp);
+                              } else {
+                                _selectedExperienceLevels.remove(exp);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+
+                    _buildSectionDivider(),
+
+                    // ==========================================
+                    // 6. SALARY RANGE (₹ Min - ₹ Max)
+                    // ==========================================
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildSectionHeader('Salary Range', 'Monthly / Annual Compensation'),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: primaryColor.withOpacity(0.25)),
+                          ),
+                          child: Text(
+                            '${_formatCurrency(_salaryRange.start)} - ${_formatCurrency(_salaryRange.end)}',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    RangeSlider(
+                      values: _salaryRange,
+                      min: 0,
+                      max: 200000,
+                      divisions: 40,
+                      activeColor: primaryColor,
+                      inactiveColor: const Color(0xFFE5E7EB),
+                      labels: RangeLabels(
+                        _formatCurrency(_salaryRange.start),
+                        _formatCurrency(_salaryRange.end),
+                      ),
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          _salaryRange = newValues;
+                        });
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text('₹0', style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
+                          Text('₹1,00,000', style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
+                          Text('₹2,00,000+', style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF))),
+                        ],
+                      ),
+                    ),
+
+                    _buildSectionDivider(),
+
+                    // ==========================================
+                    // 7. SKILLS REQUIRED (Chips + Custom Add)
+                    // ==========================================
+                    _buildSectionHeader('Skills Required', 'Technical and professional skills'),
+                    const SizedBox(height: 12),
+
+                    // Add custom skill input
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _skillInputController,
+                            style: const TextStyle(fontSize: 13.5, color: Color(0xFF1F2937)),
+                            decoration: InputDecoration(
+                              hintText: 'Add skill (e.g. Flutter, SEO, Sales)...',
+                              hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                              filled: true,
+                              fillColor: Colors.white,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: primaryColor, width: 1.4),
+                              ),
+                            ),
+                            onSubmitted: (_) => _addCustomSkill(),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          height: 42,
+                          width: 44,
+                          child: ElevatedButton(
+                            onPressed: _addCustomSkill,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              padding: EdgeInsets.zero,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Icon(Icons.add, color: Colors.white, size: 22),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Popular skills chips
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _popularSkills.map((skill) {
+                        final isSelected = _selectedSkills.contains(skill);
+                        return FilterChip(
+                          label: Text(skill),
+                          selected: isSelected,
+                          selectedColor: primaryColor.withOpacity(0.16),
+                          checkmarkColor: primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? primaryColor : const Color(0xFF374151),
+                          ),
+                          backgroundColor: const Color(0xFFF9FAFB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? primaryColor : const Color(0xFFE5E7EB),
+                              width: isSelected ? 1.4 : 1.0,
+                            ),
+                          ),
+                          onSelected: (selected) {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              if (selected) {
+                                _selectedSkills.add(skill);
+                              } else {
+                                _selectedSkills.remove(skill);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+
+                    // Selected custom skills (if any not in popular list)
+                    if (_selectedSkills.any((s) => !_popularSkills.contains(s))) ...[
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _selectedSkills
+                            .where((s) => !_popularSkills.contains(s))
+                            .map((customSkill) {
+                          return Chip(
+                            label: Text(
+                              customSkill,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                            ),
+                            backgroundColor: primaryColor.withOpacity(0.12),
+                            deleteIcon: Icon(Icons.close_rounded, size: 16, color: primaryColor),
+                            onDeleted: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedSkills.remove(customSkill);
+                              });
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(color: primaryColor.withOpacity(0.4)),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+
+                    _buildSectionDivider(),
+
+                    // ==========================================
+                    // 8. BENEFITS & PERKS (Chips + Custom Add)
+                    // ==========================================
+                    _buildSectionHeader('Benefits & Perks', 'Work amenities, perks, and incentives'),
+                    const SizedBox(height: 12),
+
+                    // Add custom benefit input
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _benefitInputController,
+                            style: const TextStyle(fontSize: 13.5, color: Color(0xFF1F2937)),
+                            decoration: InputDecoration(
+                              hintText: 'Add benefit (e.g. Free Meals, Gym)...',
+                              hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9CA3AF)),
+                              filled: true,
+                              fillColor: Colors.white,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: primaryColor, width: 1.4),
+                              ),
+                            ),
+                            onSubmitted: (_) => _addCustomBenefit(),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          height: 42,
+                          width: 44,
+                          child: ElevatedButton(
+                            onPressed: _addCustomBenefit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              padding: EdgeInsets.zero,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Icon(Icons.add, color: Colors.white, size: 22),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Popular benefits chips
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _popularBenefits.map((benefit) {
+                        final isSelected = _selectedBenefits.contains(benefit);
+                        return FilterChip(
+                          label: Text(benefit),
+                          selected: isSelected,
+                          selectedColor: primaryColor.withOpacity(0.16),
+                          checkmarkColor: primaryColor,
+                          labelStyle: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected ? primaryColor : const Color(0xFF374151),
+                          ),
+                          backgroundColor: const Color(0xFFF9FAFB),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected ? primaryColor : const Color(0xFFE5E7EB),
+                              width: isSelected ? 1.4 : 1.0,
+                            ),
+                          ),
+                          onSelected: (selected) {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              if (selected) {
+                                _selectedBenefits.add(benefit);
+                              } else {
+                                _selectedBenefits.remove(benefit);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+
+                    // Selected custom benefits (if any not in popular list)
+                    if (_selectedBenefits.any((b) => !_popularBenefits.contains(b))) ...[
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _selectedBenefits
+                            .where((b) => !_popularBenefits.contains(b))
+                            .map((customBenefit) {
+                          return Chip(
+                            label: Text(
+                              customBenefit,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                            ),
+                            backgroundColor: primaryColor.withOpacity(0.12),
+                            deleteIcon: Icon(Icons.close_rounded, size: 16, color: primaryColor),
+                            onDeleted: () {
+                              HapticFeedback.selectionClick();
+                              setState(() {
+                                _selectedBenefits.remove(customBenefit);
+                              });
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(color: primaryColor.withOpacity(0.4)),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
 
                     const SizedBox(height: 24),
                   ],
@@ -402,7 +1008,7 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
             ),
 
             // ==========================================
-            // 4. BOTTOM ACTION BUTTONS
+            // BOTTOM ACTION BUTTONS
             // ==========================================
             _buildBottomButtons(context, primaryColor),
           ],
@@ -411,15 +1017,42 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 16.5,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFF111827),
-        letterSpacing: -0.2,
+  Widget _buildSectionDivider() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 18),
+      child: Divider(
+        color: Color(0xFFF3F4F6),
+        thickness: 1.2,
+        height: 1.2,
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, [String? subtitle]) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF111827),
+            letterSpacing: -0.2,
+          ),
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -483,10 +1116,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: primaryColor, width: 1.4),
         ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.0),
-        ),
       ),
     );
   }
@@ -500,20 +1129,16 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
               (item['name'] as String).toLowerCase().contains(_locationSearchQuery))
           .toList();
     } else if (!_isLocationExpanded) {
-      // Top 6 matching the mockup (Pune, Kolhapur, Mumbai, Satara, Nashik, Other)
       filteredList = _allLocations.take(6).toList();
     }
 
-    // Include custom typed locations that are selected and not in _allLocations
     final customLocations = _selectedLocations
         .where((loc) => !_allLocations.any((item) => item['name'] == loc))
         .toList();
 
-    // Split into 2 columns
     final List<Widget> col1 = [];
     final List<Widget> col2 = [];
 
-    // Add custom locations first if any
     int indexCounter = 0;
     for (var customLoc in customLocations) {
       final widgetItem = Padding(
@@ -611,7 +1236,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
           .toList();
     }
 
-    // Include custom typed categories that are selected and not in _categories
     final customCategories = _selectedCategories
         .where((cat) => !_categories.any((item) => item['name'] == cat))
         .toList();
@@ -619,7 +1243,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Custom added categories
         ...customCategories.map((customCat) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 14),
@@ -636,8 +1259,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
             ),
           );
         }),
-
-        // Pre-defined categories
         ...filteredList.map((cat) {
           final name = cat['name'] as String;
           final count = cat['count'] as int?;
@@ -663,7 +1284,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
             ),
           );
         }),
-
         if (filteredList.isEmpty && customCategories.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
@@ -672,70 +1292,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
               style: TextStyle(fontSize: 12.5, color: Color(0xFF9CA3AF)),
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildJobTypeGrid(Color primaryColor) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Col 1: Full Time, Part Time, Contract
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _jobTypesCol1.map((type) {
-              final isChecked = _selectedJobTypes.contains(type);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _buildCheckboxRow(
-                  label: type,
-                  isChecked: isChecked,
-                  primaryColor: primaryColor,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() {
-                      if (isChecked) {
-                        _selectedJobTypes.remove(type);
-                      } else {
-                        _selectedJobTypes.add(type);
-                      }
-                    });
-                  },
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        const SizedBox(width: 14),
-
-        // Col 2: Freelance, Internship, Remote
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _jobTypesCol2.map((type) {
-              final isChecked = _selectedJobTypes.contains(type);
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _buildCheckboxRow(
-                  label: type,
-                  isChecked: isChecked,
-                  primaryColor: primaryColor,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() {
-                      if (isChecked) {
-                        _selectedJobTypes.remove(type);
-                      } else {
-                        _selectedJobTypes.add(type);
-                      }
-                    });
-                  },
-                ),
-              );
-            }).toList(),
-          ),
-        ),
       ],
     );
   }
@@ -753,7 +1309,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Custom Checkbox
           AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             width: 22,
@@ -775,8 +1330,6 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                 : null,
           ),
           const SizedBox(width: 10),
-
-          // Label text
           Flexible(
             child: Text(
               label,
@@ -847,9 +1400,11 @@ class _JobFilterSheetState extends State<JobFilterSheet> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Apply Filters',
-                  style: TextStyle(
+                child: Text(
+                  _currentActiveCount > 0
+                      ? 'Apply Filters ($_currentActiveCount)'
+                      : 'Apply Filters',
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,

@@ -14,6 +14,7 @@ import 'package:edu_cluezer/packages/card_swiper/src/direction/card_swiper_direc
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/user_profile_data.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/get_business_categories_usecase.dart';
 import 'package:edu_cluezer/features/business/domain/repository/all_business_repository.dart';
 import 'package:edu_cluezer/features/dashboard/domain/usecase/get_banners_usecase.dart';
@@ -25,6 +26,7 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/network/api_client.dart';
 import 'package:edu_cluezer/core/storage/token_manger.dart';
 import 'package:edu_cluezer/core/services/notification_handler_service.dart';
+import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   final RxInt currentIndex = 0.obs;
@@ -77,6 +79,10 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
     if (Get.isRegistered<AuthService>()) {
       Get.find<AuthService>().refreshProfile();
+    }
+
+    if (Get.isRegistered<BusinessController>()) {
+      Get.find<BusinessController>().fetchMyBusinesses();
     }
 
     // Load cached data immediately for instant display
@@ -188,6 +194,10 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
       if (Get.isRegistered<AuthService>()) {
         futures.add(Get.find<AuthService>().refreshProfile());
+      }
+
+      if (Get.isRegistered<BusinessController>()) {
+        futures.add(Get.find<BusinessController>().fetchMyBusinesses());
       }
 
       if (Get.isRegistered<NotificationController>()) {
@@ -334,14 +344,34 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  void _openBannerImagePreview(int index) {
+    if (banners.isEmpty) return;
+    final allUrls = banners.map((b) {
+      final img = b.imageUrl.trim();
+      if (img.startsWith('http')) return img;
+      return "${ApiConstants.imageBaseUrl}/$img";
+    }).toList();
+    final allTitles = banners.map((b) => b.title).toList();
+
+    Get.to(
+      () => FullScreenImageViewer(
+        imageUrls: allUrls,
+        initialIndex: index,
+        titles: allTitles,
+      ),
+      transition: Transition.fadeIn,
+    );
+  }
+
   Future<void> onBannerTap(int index) async {
     if (index < 0 || index >= banners.length) return;
     
     final banner = banners[index];
     final bizId = banner.businessId;
     
+    // If no business ID found, open full-screen preview with zoom and scroll support
     if (bizId == null) {
-      print("No business ID found in banner URL: ${banner.url}");
+      _openBannerImagePreview(index);
       return;
     }
 
@@ -357,13 +387,13 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         final business = response.data!.data!.first;
         Get.toNamed(AppRoutes.businessDetails, arguments: business);
       } else {
-        print("Business Details not found for ID: $bizId");
-        CustomSnackBar.showError(message: "Business details not found.");
+        // Fallback: if business details not found, open banner image preview
+        _openBannerImagePreview(index);
       }
     } catch (e) {
       if (Get.isDialogOpen == true) Get.back();
-      print("Error fetching business details from banner: $e");
-      CustomSnackBar.showError(message: "Failed to fetch business details: $e");
+      // On error, fallback to banner image preview so user gets a great experience
+      _openBannerImagePreview(index);
     }
   }
 

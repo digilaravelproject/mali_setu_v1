@@ -43,13 +43,30 @@ class JobsController extends GetxController {
   // Filter selections in modal sheet
   final RxSet<String> selectedLocations = <String>{}.obs;
   final RxSet<String> selectedCategories = <String>{}.obs;
-  final RxSet<String> selectedJobTypes = <String>{}.obs;
+  final RxSet<String> selectedJobTypes = <String>{}.obs; // Workplace Type: On-site, Remote, Hybrid
+  final RxSet<String> selectedEmploymentTypes = <String>{}.obs; // Employment Type: Full-time, Part-time, Internship, Freelance, Contract
+  final RxSet<String> selectedExperienceLevels = <String>{}.obs; // Entry, Mid, Senior, Expert
+  final RxSet<String> selectedSkills = <String>{}.obs; // Skills Required
+  final RxSet<String> selectedBenefits = <String>{}.obs; // Benefits & Perks
+  final Rx<RangeValues> selectedSalaryRange = const RangeValues(0, 200000).obs;
   final RxString selectedCategory = ''.obs;
   final RxString selectedLocation = ''.obs;
   final RxString selectedExperience = ''.obs;
 
-  int get activeFiltersCount =>
-      selectedLocations.length + selectedCategories.length + selectedJobTypes.length;
+  int get activeFiltersCount {
+    int count = 0;
+    count += selectedLocations.length;
+    count += selectedCategories.length;
+    count += selectedJobTypes.length;
+    count += selectedEmploymentTypes.length;
+    count += selectedExperienceLevels.length;
+    count += selectedSkills.length;
+    count += selectedBenefits.length;
+    if (selectedSalaryRange.value.start > 0 || selectedSalaryRange.value.end < 200000) {
+      count += 1;
+    }
+    return count;
+  }
 
   @override
   void onInit() {
@@ -279,16 +296,57 @@ class JobsController extends GetxController {
       queryParams['location'] = selectedLocation.value.trim();
     }
 
-    // 4. Employment Type Filter (from bottom sheet and/or horizontal tabs)
+    // 4. Workplace / Job Type Filter (On-site, Remote, Hybrid)
+    if (selectedJobTypes.isNotEmpty) {
+      queryParams['job_type'] = selectedJobTypes
+          .map((t) => t.toLowerCase().replaceAll(' ', '-'))
+          .join(',');
+    }
+
+    // 5. Employment Type Filter (from bottom sheet and/or horizontal tabs)
     final Set<String> activeTypes = <String>{};
-    for (var t in selectedJobTypes) {
+    for (var t in selectedEmploymentTypes) {
       activeTypes.add(t.toLowerCase().replaceAll(' ', '-'));
+    }
+    // Also include old selectedJobTypes if any passed from legacy/external
+    for (var t in selectedJobTypes) {
+      final normalized = t.toLowerCase().replaceAll(' ', '-');
+      if (normalized == 'full-time' || normalized == 'part-time' || normalized == 'contract' || normalized == 'internship' || normalized == 'freelance') {
+        activeTypes.add(normalized);
+      }
     }
     if (selectedFilter.value != 'All' && !selectedFilter.value.startsWith('All')) {
       activeTypes.add(selectedFilter.value.toLowerCase().replaceAll(' ', '-'));
     }
     if (activeTypes.isNotEmpty) {
       queryParams['employment_type'] = activeTypes.join(',');
+    }
+
+    // 6. Experience Level Filter
+    if (selectedExperienceLevels.isNotEmpty) {
+      queryParams['experience_level'] = selectedExperienceLevels
+          .map((e) => e.toLowerCase().replaceAll(' ', '-').replaceAll('/', '-'))
+          .join(',');
+    } else if (selectedExperience.value.trim().isNotEmpty) {
+      queryParams['experience_level'] = selectedExperience.value.trim().toLowerCase();
+    }
+
+    // 7. Salary Range Filter
+    if (selectedSalaryRange.value.start > 0 || selectedSalaryRange.value.end < 200000) {
+      queryParams['salary_min'] = selectedSalaryRange.value.start.round();
+      queryParams['salary_max'] = selectedSalaryRange.value.end.round();
+      queryParams['salary_range'] = "${selectedSalaryRange.value.start.round()}-${selectedSalaryRange.value.end.round()}";
+    }
+
+    // 8. Skills Filter
+    if (selectedSkills.isNotEmpty) {
+      queryParams['skills'] = selectedSkills.join(',');
+      queryParams['skills_required'] = selectedSkills.join(',');
+    }
+
+    // 9. Benefits Filter
+    if (selectedBenefits.isNotEmpty) {
+      queryParams['benefits'] = selectedBenefits.join(',');
     }
 
     return queryParams;
@@ -410,6 +468,11 @@ class JobsController extends GetxController {
     selectedLocations.clear();
     selectedCategories.clear();
     selectedJobTypes.clear();
+    selectedEmploymentTypes.clear();
+    selectedExperienceLevels.clear();
+    selectedSkills.clear();
+    selectedBenefits.clear();
+    selectedSalaryRange.value = const RangeValues(0, 200000);
     selectedCategory.value = '';
     selectedLocation.value = '';
     selectedExperience.value = '';
