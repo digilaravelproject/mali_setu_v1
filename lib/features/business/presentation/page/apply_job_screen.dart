@@ -216,7 +216,7 @@ class _ApplyJobScreenState extends State<ApplyJobScreen> {
                           height: 1.4,
                         ),
                         decoration: InputDecoration(
-                          hintText: "write_cover_letter".tr.isNotEmpty
+                          hintText: "write_cover_letter".tr.isNotEmpty && "write_cover_letter".tr != "write_cover_letter"
                               ? "write_cover_letter".tr
                               : "Describe your relevant skills, recent achievements, and why you are excited about this opportunity...",
                           hintStyle: const TextStyle(

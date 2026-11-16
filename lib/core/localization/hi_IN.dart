@@ -48,6 +48,7 @@ const Map<String, String> hiIN = {
   'resume': 'बायोडाटा',
   'info': 'जानकारी',
   'cover_letter': 'कवर लेटर',
+  'write_cover_letter': 'यहाँ अपना कवर लेटर लिखें (अपने कौशल, उपलब्धियों और अनुभव के बारे में बताएं)...',
   'tap_to_upload_resume': 'बायोडाटा अपलोड करने के लिए टैप करें',
   'additional_information': 'अतिरिक्त जानकारी',
 

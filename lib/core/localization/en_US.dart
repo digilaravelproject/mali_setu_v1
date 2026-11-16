@@ -48,6 +48,7 @@ const Map<String, String> enUS = {
   'resume': 'Resume',
   'info': 'Info',
   'cover_letter': 'Cover Letter',
+  'write_cover_letter': 'Describe your relevant skills, recent achievements, and why you are excited about this opportunity...',
   'tap_to_upload_resume': 'Tap to Upload Resume',
   'additional_information': 'Additional Information',
 

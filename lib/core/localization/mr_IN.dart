@@ -375,6 +375,7 @@ const Map<String, String> mrIN = {
   "resume" :"बायोडाटा",
   "info" :"माहिती",
   "cover_letter" :"कव्हर लेटर",
+  "write_cover_letter" : "येथे आपले कव्हर लेटर लिहा (आपली कौशल्ये, उपलब्धी आणि अनुभवाबद्दल सांगा)...",
   'tap_to_upload_resume': 'रेझ्युमे अपलोड करण्यासाठी टॅप करा',
   'additional_information': 'अतिरिक्त माहिती',
 
