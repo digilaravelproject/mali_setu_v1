@@ -16,6 +16,7 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import '../../../../widgets/category_paginated_bottom_sheet.dart';
 import '../../../../widgets/language_selection_dialog.dart';
 import '../../../business/presentation/page/business_page.dart';
+import '../../../business/presentation/controller/business_controller.dart';
 import '../../../notification/presentation/controller/notification_controller.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
@@ -55,6 +56,9 @@ class HomePage extends GetWidget<HomeController> {
           final hasPayment = Get.find<AuthService>().hasPaymentForMatrimony();
           final hasMatrimony = Get.find<AuthService>().hasMatrimony();
           final user = authService.currentUser.value;
+          final businessCtrl = Get.isRegistered<BusinessController>() ? Get.find<BusinessController>() : null;
+          final bool hasBusiness = (user?.isBusiness == true) ||
+              (businessCtrl != null && (businessCtrl.myBusinesses.isNotEmpty || businessCtrl.myBusiness.value != null));
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -324,50 +328,63 @@ class HomePage extends GetWidget<HomeController> {
                               );
                             }),
 
-                            const SizedBox(height: 48),
-                            //const SizedBox(height: 20),
-                            _buildPromoCard(
-                              context,
-                              title: 'register_your_business'.tr,
-                              subtitle: 'showcase_ideas'.tr,
-                              icon: Icons.store_rounded,
-                              buttonText: 'start_now'.tr,
-                              onTap: () => Get.toNamed(AppRoutes.regBusiness),
-                              color1: const Color(0xFF6B8EFF),
-                              color2: const Color(0xFF536DFE),
-                            ),
-
                             const SizedBox(height: 16),
+                            hasBusiness
+                                ? _buildPromoCard(
+                                    context,
+                                    tag: 'business'.tr,
+                                    title: 'my_business'.tr,
+                                    subtitle: 'showcase_ideas'.tr,
+                                    icon: Icons.storefront_rounded,
+                                    buttonText: 'view_business'.tr,
+                                    onTap: () => Get.toNamed(AppRoutes.myBusiness),
+                                    color1: const Color(0xFF3B82F6),
+                                    color2: const Color(0xFF1D4ED8),
+                                  )
+                                : _buildPromoCard(
+                                    context,
+                                    tag: 'business'.tr,
+                                    title: 'register_your_business'.tr,
+                                    subtitle: 'showcase_ideas'.tr,
+                                    icon: Icons.storefront_rounded,
+                                    buttonText: 'start_now'.tr,
+                                    onTap: () => Get.toNamed(AppRoutes.regBusiness),
+                                    color1: const Color(0xFF3B82F6),
+                                    color2: const Color(0xFF1D4ED8),
+                                  ),
+
+                            const SizedBox(height: 12),
 
                             (!hasMatrimony)
                                 ? _buildPromoCard(
-                              context,
-                              title: 'register_matrimony'.tr,
-                              subtitle: 'find_soulmate'.tr,
-                              icon: Icons.favorite_rounded,
-                              buttonText: 'join_now'.tr,
-                              onTap: () => Get.toNamed(AppRoutes.regMatrimony),
-                              color1: const Color(0xFFF48FB1),
-                              color2: const Color(0xFFE91E63),
-                            )
+                                    context,
+                                    tag: 'matrimony'.tr,
+                                    title: 'register_matrimony'.tr,
+                                    subtitle: 'find_soulmate'.tr,
+                                    icon: Icons.favorite_rounded,
+                                    buttonText: 'join_now'.tr,
+                                    onTap: () => Get.toNamed(AppRoutes.regMatrimony),
+                                    color1: const Color(0xFFF43F5E),
+                                    color2: const Color(0xFFE11D48),
+                                  )
                                 : _buildPromoCard(
-                              context,
-                              title: 'view_profile'.tr,
-                              subtitle: 'find_soulmate'.tr,
-                              icon: Icons.favorite_rounded,
-                              buttonText: "view_profile".tr,
-                              onTap: () {
-                                if (currentUser?.id != null) {
-                                  Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
-                                }
-                              },
-                             // onTap: () => Get.toNamed(AppRoutes.regMatrimony, arguments: true),
-                              color1: const Color(0xFFF48FB1),
-                              color2: const Color(0xFFE91E63),
-                              statusText: user?.matrimonyApprovalStatus ?? "Pending",
-                            ),
+                                    context,
+                                    tag: 'matrimony'.tr,
+                                    title: 'view_profile'.tr,
+                                    subtitle: 'find_soulmate'.tr,
+                                    icon: Icons.favorite_rounded,
+                                    buttonText: "view_profile".tr,
+                                    onTap: () {
+                                      if (currentUser?.id != null) {
+                                        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
+                                      }
+                                    },
+                                    color1: const Color(0xFFF43F5E),
+                                    color2: const Color(0xFFE11D48),
+                                    statusText: user?.matrimonyApprovalStatus ?? "Pending",
+                                  ),
 
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
 
                             // Volunteer Registration or Referral Analytics Card
                             Builder(
@@ -378,6 +395,7 @@ class HomePage extends GetWidget<HomeController> {
                                 if (isVolunteer) {
                                   return _buildPromoCard(
                                     context,
+                                    tag: 'referral_analytics'.tr,
                                     title: 'referral_analytics'.tr,
                                     subtitle: 'volunteer_dialog_desc'.tr,
                                     icon: Icons.insights_rounded,
@@ -387,11 +405,12 @@ class HomePage extends GetWidget<HomeController> {
                                       Get.toNamed(AppRoutes.referralAnalytics);
                                     },
                                     color1: const Color(0xFF10B981),
-                                    color2: const Color(0xFF059669),
+                                    color2: const Color(0xFF047857),
                                   );
                                 } else {
                                   return _buildPromoCard(
                                     context,
+                                    tag: 'volunteer'.tr,
                                     title: 'become_volunteer_title'.tr,
                                     subtitle: 'become_volunteer_note'.tr,
                                     icon: Icons.volunteer_activism_rounded,
@@ -399,8 +418,8 @@ class HomePage extends GetWidget<HomeController> {
                                     onTap: () {
                                       VolunteerPromptDialog.checkAndShow(force: true);
                                     },
-                                    color1: const Color(0xFFC62D86),
-                                    color2: const Color(0xFF8B185D),
+                                    color1: const Color(0xFF8B5CF6),
+                                    color2: const Color(0xFF6D28D9),
                                     secondaryText: 'view_analytics_btn'.tr,
                                     onSecondaryTap: () {
                                       ReferralBinding.init();
@@ -411,15 +430,9 @@ class HomePage extends GetWidget<HomeController> {
                               },
                             ),
 
-                            // Leaderboard Section (Top Champions from banner API)
-                            if (controller.leaderboard.isNotEmpty) ...[
-                              const SizedBox(height: 22),
-                              _buildLeaderboardSection(context, controller.leaderboard),
-                            ],
-
-                            // Upcoming Webinars Section (only shown when banner API returns upcoming webinars)
+                            // Upcoming Webinars Section (placed above Top Champions)
                             if (controller.upcomingWebinars.isNotEmpty) ...[
-                              const SizedBox(height: 22),
+                              const SizedBox(height: 18),
                               // Section Heading: Upcoming Webinars | See All
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -464,6 +477,12 @@ class HomePage extends GetWidget<HomeController> {
                               ),
                               const SizedBox(height: 10),
                               _buildWebinarPromoCard(context, controller.upcomingWebinars),
+                            ],
+
+                            // Leaderboard Section (Top Champions from banner API)
+                            if (controller.leaderboard.isNotEmpty) ...[
+                              const SizedBox(height: 22),
+                              _buildLeaderboardSection(context, controller.leaderboard),
                             ],
 
                             const SizedBox(height: 120),
@@ -599,6 +618,7 @@ class HomePage extends GetWidget<HomeController> {
         required VoidCallback onTap,
         required Color color1,
         required Color color2,
+        String? tag,
         String? statusText,
         String? secondaryText,
         VoidCallback? onSecondaryTap,
@@ -607,126 +627,262 @@ class HomePage extends GetWidget<HomeController> {
       switch (status.toLowerCase().trim()) {
         case 'approved':
         case 'active':
-          return Colors.green;
+          return const Color(0xFF16A34A);
         case 'pending':
-          return Colors.orange;
+          return const Color(0xFFEA580C);
         case 'rejected':
         case 'inactive':
-          return Colors.red;
+          return const Color(0xFFDC2626);
         default:
           return Colors.grey;
       }
     }
+
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        color: color1.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
-          colors: [color1.withOpacity(0.1), color2.withOpacity(0.05)],
+          colors: [
+            color1.withValues(alpha: 0.09),
+            color1.withValues(alpha: 0.04),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: color1.withOpacity(0.3), width: 1),
+        border: Border.all(color: color1.withValues(alpha: 0.22), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: color1.withValues(alpha: 0.06),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Left vertical accent stripe
+            Positioned(
+              left: 0,
+              top: 12,
+              bottom: 12,
+              child: Container(
+                width: 3.5,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [color1, color2],
+                  ),
+                  borderRadius: const BorderRadius.horizontal(right: Radius.circular(3)),
+                ),
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 12.0, 14.0, 12.0),
+                  child: Row(
                     children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 10,
-                        runSpacing: 8,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(colors: [color1, color2]),
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: color2.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (tag != null && tag.isNotEmpty) ...[
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: color1.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
+                                child: Text(
+                                  tag.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.6,
+                                    color: color1,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A),
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey.shade600,
+                                height: 1.25,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(colors: [color1, color2]),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: color1.withValues(alpha: 0.25),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        buttonText,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 11,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (secondaryText != null && onSecondaryTap != null)
+                                  GestureDetector(
+                                    onTap: onSecondaryTap,
+                                    behavior: HitTestBehavior.opaque,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: color1.withValues(alpha: 0.25), width: 0.8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: 0.02),
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 1),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.insights_rounded,
+                                            size: 12,
+                                            color: color1,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            secondaryText,
+                                            style: TextStyle(
+                                              color: color1,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
+                                          Icon(
+                                            Icons.arrow_forward_ios_rounded,
+                                            size: 8,
+                                            color: color1,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
-                            child: Text(
-                              buttonText,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: color1.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: color1.withValues(alpha: 0.2), width: 1),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                icon,
+                                size: 26,
+                                color: color1,
                               ),
                             ),
                           ),
-                          if (secondaryText != null && onSecondaryTap != null)
-                            GestureDetector(
-                              onTap: onSecondaryTap,
-                              behavior: HitTestBehavior.opaque,
+                          if (statusText != null && statusText.isNotEmpty)
+                            Positioned(
+                              top: -5,
+                              right: -4,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.9),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: color1.withOpacity(0.4), width: 1),
+                                  color: getStatusColor(statusText),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.white, width: 1.5),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.04),
+                                      color: getStatusColor(statusText).withValues(alpha: 0.3),
                                       blurRadius: 4,
-                                      offset: const Offset(0, 2),
+                                      offset: const Offset(0, 1),
                                     ),
                                   ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      Icons.insights_rounded,
-                                      size: 14,
-                                      color: color2,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      secondaryText,
-                                      style: TextStyle(
-                                        color: color2,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
+                                    Container(
+                                      width: 4,
+                                      height: 4,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
                                       ),
                                     ),
-                                    const SizedBox(width: 2),
-                                    Icon(
-                                      Icons.arrow_forward_ios_rounded,
-                                      size: 9,
-                                      color: color2,
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      statusText.toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.3,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -737,60 +893,9 @@ class HomePage extends GetWidget<HomeController> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [color1.withOpacity(0.2), color2.withOpacity(0.1)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(
-                        icon,
-                        size: 60,
-                        color: color1,
-                      ),
-                    ),
-                    if (statusText != null && statusText.isNotEmpty)
-                      Positioned(
-                        top: -4,
-                        right: -4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: getStatusColor(statusText),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white, width: 2.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            statusText.toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -802,301 +907,44 @@ class HomePage extends GetWidget<HomeController> {
     final featured = webinars.first;
     final isLive = featured.isLive;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryLight.withOpacity(0.55),
-            Colors.white,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.28),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          onTap: () {
-            Get.toNamed(AppRoutes.webinarDetails, arguments: featured);
-          },
-          borderRadius: BorderRadius.circular(18),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Top Row: LIVE/UPCOMING Badge + Category Chip + View All
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                      decoration: BoxDecoration(
-                        color: isLive ? const Color(0xFFEF4444) : const Color(0xFFEF4444).withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleAvatar(
-                            radius: 3,
-                            backgroundColor: isLive ? Colors.white : const Color(0xFFEF4444),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            isLive ? "LIVE NOW" : "UPCOMING WEBINAR",
-                            style: TextStyle(
-                              color: isLive ? Colors.white : const Color(0xFFEF4444),
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
+    const color1 = Color(0xFFC62D86);
+    const color2 = Color(0xFF9E1F68);
 
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        featured.category,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+    final String tag = isLive
+        ? "LIVE WEBINAR"
+        : (featured.category.isNotEmpty ? featured.category.toUpperCase() : "WEBINAR");
 
-                    const Spacer(),
+    final List<String> details = [];
+    if (featured.speaker.name.isNotEmpty) {
+      details.add(featured.speaker.name);
+    }
+    if (featured.dateString.isNotEmpty) {
+      details.add(featured.dateString);
+    }
+    if (featured.duration.isNotEmpty) {
+      details.add(featured.duration);
+    }
+    final String subtitle = details.isNotEmpty
+        ? details.join(' • ')
+        : (featured.description.isNotEmpty ? featured.description : "Join our community webinar");
 
-                    // Duration chip
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.access_time_rounded,
-                            size: 11,
-                            color: Color(0xFF64748B),
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            featured.duration,
-                            style: const TextStyle(
-                              color: Color(0xFF64748B),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                // Middle Row: Dynamic Title & Speaker + Video Badge
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            featured.title,
-                            style: const TextStyle(
-                              fontSize: 15.5,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.lightTextPrimary,
-                              letterSpacing: -0.2,
-                              height: 1.25,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(
-                                CupertinoIcons.person_crop_circle_fill,
-                                size: 14,
-                                color: AppColors.primary,
-                              ),
-                              const SizedBox(width: 5),
-                              Expanded(
-                                child: Text(
-                                  featured.speaker.name,
-                                  style: const TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF475569),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: AppColors.primary.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.videocam_rounded,
-                              color: AppColors.primary,
-                              size: 26,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: -3,
-                          right: -3,
-                          child: Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFEF4444),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.play_arrow_rounded, size: 8, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                // Divider
-                Container(
-                  height: 1,
-                  color: AppColors.primary.withOpacity(0.12),
-                ),
-
-                const SizedBox(height: 10),
-
-                // Bottom Row: Date/Time + Registrations Count + Action Button
-                Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today_rounded,
-                            size: 13,
-                            color: Color(0xFF64748B),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            featured.dateString,
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          const Icon(
-                            Icons.people_alt_outlined,
-                            size: 13,
-                            color: Color(0xFF64748B),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "${featured.registeredCount} joined",
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryDark],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.28),
-                            blurRadius: 5,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            isLive ? "Join Now" : "Register Now",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            size: 12,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return _buildPromoCard(
+      context,
+      tag: tag,
+      title: featured.title,
+      subtitle: subtitle,
+      icon: Icons.videocam_rounded,
+      buttonText: isLive ? "Join Now" : "Register Now",
+      onTap: () {
+        Get.toNamed(AppRoutes.webinarDetails, arguments: featured);
+      },
+      color1: color1,
+      color2: color2,
+      statusText: isLive ? "LIVE" : null,
+      secondaryText: "See All",
+      onSecondaryTap: () {
+        Get.toNamed(AppRoutes.webinars);
+      },
     );
   }
 

@@ -103,6 +103,11 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     onTap: () => Get.toNamed(AppRoutes.referral),
                   ),
                   _SettingsItem(
+                    title: 'webinars'.tr,
+                    icon: Icons.videocam_outlined,
+                    onTap: () => Get.toNamed(AppRoutes.webinars),
+                  ),
+                  _SettingsItem(
                     title: 'app_language'.tr,
                     icon: Icons.language_rounded,
                     onTap: () => Get.to(() => const ChangeLanguagePage()),

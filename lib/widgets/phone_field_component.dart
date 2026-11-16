@@ -31,6 +31,8 @@ class CountryCode {
 class PhoneFieldComponent extends StatefulWidget {
   final String? initialPhone;
   final bool isRequired;
+  final bool requireOtpVerification;
+  final bool showVerifyButton;
   final ValueChanged<String>? onChanged;
   final ValueChanged<bool>? onVerificationChanged;
   final String? errorText;
@@ -41,6 +43,8 @@ class PhoneFieldComponent extends StatefulWidget {
     super.key,
     this.initialPhone,
     this.isRequired = false,
+    this.requireOtpVerification = true,
+    this.showVerifyButton = true,
     this.onChanged,
     this.onVerificationChanged,
     this.errorText,
@@ -203,7 +207,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
   Timer? _resendTimer;
   int _resendCountdown = 0;
 
-  bool get isMobileVerified => isVerified;
+  bool get isMobileVerified => !widget.requireOtpVerification || isVerified;
   bool get isOtpSentState => isOtpSent;
 
   void reset() {
@@ -562,7 +566,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       if (mounted) setState(() => errorMessage = 'phone_min_digits'.tr);
       return 'phone_min_digits'.tr;
     }
-    if (widget.isRequired && !isVerified) {
+    if (widget.isRequired && widget.requireOtpVerification && !isVerified) {
       const msg = 'Please verify your mobile number with OTP';
       if (mounted) setState(() => errorMessage = msg);
       return msg;
@@ -1246,63 +1250,65 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            if (widget.showVerifyButton) ...[
+              const SizedBox(width: 8),
 
-            // Verify Button
-            InkWell(
-              onTap: (isVerified || isSendingOtp) ? null : _handleVerifyClick,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                height: 50,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                decoration: BoxDecoration(
-                  color: isVerified ? const Color(0xFF10B981) : primaryColor,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isVerified ? const Color(0xFF10B981) : primaryColor)
-                          .withOpacity(0.25),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: isSendingOtp
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : isVerified
-                        ? const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.check_rounded, color: Colors.white, size: 18),
-                              SizedBox(width: 4),
-                              Text(
-                                'Verified',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          )
-                        : const Text(
-                            'Verify',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                            ),
+              // Verify Button
+              InkWell(
+                onTap: (isVerified || isSendingOtp) ? null : _handleVerifyClick,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  decoration: BoxDecoration(
+                    color: isVerified ? const Color(0xFF10B981) : primaryColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isVerified ? const Color(0xFF10B981) : primaryColor)
+                            .withOpacity(0.25),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: isSendingOtp
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
                           ),
+                        )
+                      : isVerified
+                          ? const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Verified',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const Text(
+                              'Verify',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                ),
               ),
-            ),
+            ],
           ],
         ),
 
@@ -1319,7 +1325,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
         ],
 
         // 3. Enter OTP Card (6-digit OTP boxes layout) - hides when verified
-        if (widget.showOtpSection && isOtpSent && !isVerified) ...[
+        if (widget.showVerifyButton && widget.showOtpSection && isOtpSent && !isVerified) ...[
           const SizedBox(height: 12),
           Container(
             width: double.infinity,

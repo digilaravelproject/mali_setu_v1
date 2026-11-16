@@ -50,8 +50,8 @@ class DashboardController extends GetxController {
       return <Widget>[
         HomePage(),
         BusinessScreen(),
-        JobsScreen(),
         MatrimonyPage(),
+        JobsScreen(),
         BlogsScreen(),
         BlogsScreen(),
       ];
@@ -65,8 +65,8 @@ class DashboardController extends GetxController {
     return <Widget>[
       HomePage(),
       BusinessScreen(),
-      JobsScreen(),
       MatrimonyPage(),
+      JobsScreen(),
       BlogsScreen(),
     ];
   }
@@ -102,7 +102,7 @@ class DashboardController extends GetxController {
       }
       
       // IMPORTANT: Only check for "general" user type
-      final userType = user.userType?.toLowerCase()?.trim() ?? '';
+      final userType = user.userType?.toLowerCase().trim() ?? '';
       print("DEBUG_DASHBOARD: User type (normalized): '$userType'");
       
       // Only show dialog if user type is exactly "general"
@@ -292,7 +292,7 @@ class DashboardController extends GetxController {
         : null;
 
     if (hasBlogAccess) {
-      if (index == 2) {
+      if (index == 3) {
         if (jobsController != null && jobsController.jobs.isEmpty && !jobsController.isLoading.value) {
           jobsController.fetchJobs();
         }
@@ -320,7 +320,7 @@ class DashboardController extends GetxController {
         }
       }
     } else {
-      if (index == 2) {
+      if (index == 3) {
         if (jobsController != null && jobsController.jobs.isEmpty && !jobsController.isLoading.value) {
           jobsController.fetchJobs();
         }
@@ -361,16 +361,16 @@ class DashboardController extends GetxController {
           unselectedColor: theme.onSurfaceVariant,
         ),
         BtmNavModel(
-          title: "jobs".tr,
-          icon: CupertinoIcons.briefcase,
-          selectedIcon: CupertinoIcons.briefcase_fill,
+          title: "matrimony".tr,
+          icon: CupertinoIcons.heart,
+          selectedIcon: CupertinoIcons.heart_fill,
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
         BtmNavModel(
-          title: "matrimony".tr,
-          icon: CupertinoIcons.heart,
-          selectedIcon: CupertinoIcons.heart_fill,
+          title: "jobs".tr,
+          icon: CupertinoIcons.briefcase,
+          selectedIcon: CupertinoIcons.briefcase_fill,
           selectedColor: theme.primary,
           unselectedColor: theme.onSurfaceVariant,
         ),
@@ -424,16 +424,16 @@ class DashboardController extends GetxController {
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "jobs".tr,
-        icon: CupertinoIcons.briefcase,
-        selectedIcon: CupertinoIcons.briefcase_fill,
+        title: "matrimony".tr,
+        icon: CupertinoIcons.heart,
+        selectedIcon: CupertinoIcons.heart_fill,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),
       BtmNavModel(
-        title: "matrimony".tr,
-        icon: CupertinoIcons.heart,
-        selectedIcon: CupertinoIcons.heart_fill,
+        title: "jobs".tr,
+        icon: CupertinoIcons.briefcase,
+        selectedIcon: CupertinoIcons.briefcase_fill,
         selectedColor: theme.primary,
         unselectedColor: theme.onSurfaceVariant,
       ),
