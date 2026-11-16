@@ -4,7 +4,6 @@ import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../widgets/custom_image_view.dart';
-import '../../../../core/styles/app_decoration.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
 
 class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
@@ -12,27 +11,87 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
         floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
         appBar: AppBar(
-          title:  Text("connection_requests".tr, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+          title: Text(
+            "connection_requests".tr,
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 18),
+          ),
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
             onPressed: () => Get.back(),
           ),
-          bottom:  TabBar(
-            labelColor: Colors.purple,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.purple,
-            tabs: [
-              Tab(text: "received".tr),
-              Tab(text: "sent".tr),
-            ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(58),
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFE5E7EB), width: 0.8),
+              ),
+              child: TabBar(
+                dividerColor: Colors.transparent,
+                dividerHeight: 0,
+                indicatorSize: TabBarIndicatorSize.tab,
+                indicator: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1.5),
+                    ),
+                  ],
+                ),
+                labelColor: primaryColor,
+                unselectedLabelColor: const Color(0xFF6B7280),
+                labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13.5),
+                tabs: [
+                  Obx(() {
+                    final count = controller.receivedRequests.length;
+                    final text = count > 0 ? "${'received'.tr} ($count)" : 'received'.tr;
+                    return Tab(
+                      height: 38,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.call_received_rounded, size: 16),
+                          const SizedBox(width: 6),
+                          Text(text),
+                        ],
+                      ),
+                    );
+                  }),
+                  Obx(() {
+                    final count = controller.sentRequests.length;
+                    final text = count > 0 ? "${'sent'.tr} ($count)" : 'sent'.tr;
+                    return Tab(
+                      height: 38,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.call_made_rounded, size: 16),
+                          const SizedBox(width: 6),
+                          Text(text),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
           ),
         ),
         body: TabBarView(
@@ -52,7 +111,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
       }
       return RefreshIndicator(
         onRefresh: controller.fetchRequests,
-        color: Colors.purple,
+        color: Get.theme.primaryColor,
         child: controller.receivedRequests.isEmpty
             ? _buildEmptyState("no_received_requests".tr)
             : ListView.builder(
@@ -73,7 +132,7 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
       }
       return RefreshIndicator(
         onRefresh: controller.fetchRequests,
-        color: Colors.purple,
+        color: Get.theme.primaryColor,
         child: controller.sentRequests.isEmpty
             ? _buildEmptyState("no_sent_requests".tr)
             : ListView.builder(
@@ -250,8 +309,8 @@ class MatrimonyRequestsScreen extends GetWidget<MatrimonyRequestsController> {
   }
 
   Widget _buildLoading() {
-    return const Center(
-      child: CircularProgressIndicator(color: Colors.purple),
+    return Center(
+      child: CircularProgressIndicator(color: Get.theme.primaryColor),
     );
   }
 
