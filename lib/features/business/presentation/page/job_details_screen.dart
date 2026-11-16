@@ -1,14 +1,18 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/binding/business_binding.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
+import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/core/routes/app_routes.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/features/business/presentation/widget/job_apply_form.dart';
 
 class JobDetailsScreen extends StatefulWidget {
@@ -19,13 +23,32 @@ class JobDetailsScreen extends StatefulWidget {
 }
 
 class _JobDetailsScreenState extends State<JobDetailsScreen> {
-  final BusinessController controller = Get.find<BusinessController>();
-  final Job initialJob = Get.arguments ?? Job();
+  final BusinessController controller = Get.isRegistered<BusinessController>()
+      ? Get.find<BusinessController>()
+      : (() {
+          BusinessBinding().dependencies();
+          return Get.find<BusinessController>();
+        })();
+
+  late final Job initialJob;
 
   @override
   void initState() {
     super.initState();
+    final args = Get.arguments;
+    if (args is Job) {
+      initialJob = args;
+    } else if (args is int) {
+      initialJob = Job(id: args);
+    } else if (args is Map && args['id'] != null) {
+      initialJob = Job(id: int.tryParse(args['id'].toString()));
+    } else {
+      initialJob = Job();
+    }
+
     if (initialJob.id != null) {
+      controller.isJobDetailsLoading.value = true;
+      controller.selectedJobDetail.value = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.fetchJobDetails(initialJob.id!);
       });
@@ -33,6 +56,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   }
 
   void _handleEdit(Job job) {
+    if (!Get.isRegistered<CreateJobController>()) {
+      BusinessBinding().dependencies();
+    }
     if (Get.isRegistered<CreateJobController>()) {
       final createJobCtrl = Get.find<CreateJobController>();
       createJobCtrl.populateFields(job);
@@ -82,13 +108,14 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
       debugPrint("isMyJob value: $isMyJob, JobBusinessID: ${job.businessId ?? job.business?.id}");
 
-      if (controller.isLoading.value && controller.selectedJobDetail.value == null) {
+      if (controller.isJobDetailsLoading.value && controller.selectedJobDetail.value == null) {
         return Scaffold(
           body: _buildShimmerLoading(context),
         );
       }
 
       return Scaffold(
+        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 65),
         body: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
@@ -111,6 +138,38 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                 ),
               ),
               actions: [
+                if (!isMyJob && job.id != null)
+                  IconButton(
+                    onPressed: () async {
+                      if (!Get.isRegistered<JobsController>()) {
+                        Get.put(JobsController());
+                      }
+                      final jobsCtrl = Get.find<JobsController>();
+                      await jobsCtrl.toggleFavorite(job.id);
+                      setState(() {
+                        job.isLiked = jobsCtrl.favoriteJobIds.contains(job.id);
+                      });
+                    },
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Builder(
+                        builder: (_) {
+                          final isFav = (Get.isRegistered<JobsController>() &&
+                                  Get.find<JobsController>().favoriteJobIds.contains(job.id)) ||
+                              job.isLiked == true;
+                          return Icon(
+                            isFav ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+                            size: 18,
+                            color: isFav ? const Color(0xFFE11D48) : Colors.white,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 if (isMyJob)
                   PopupMenuButton<String>(
                     onSelected: (value) {
@@ -493,8 +552,11 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   Widget _buildSimilarJobCard(BuildContext context, Job job) {
     return InkWell(
       onTap: () {
-        Get.back();
-        Get.toNamed(Get.currentRoute, arguments: job, preventDuplicates: false);
+        Get.off(
+          () => const JobDetailsScreen(),
+          arguments: job,
+          preventDuplicates: false,
+        );
       },
       child: Container(
         width: 220,
@@ -545,12 +607,10 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                 child: ElevatedButton(
                   onPressed: isMyJob 
                     ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
-                    : (hasApplied ? null : () {
-                        if (job.id != null) {
-                          Get.bottomSheet(
-                            JobApplyForm(jobId: job.id!),
-                            isScrollControlled: true,
-                          );
+                    : (hasApplied ? null : () async {
+                        final res = await Get.toNamed(AppRoutes.applyJob, arguments: job);
+                        if (res == true && job.id != null) {
+                          controller.fetchJobDetails(job.id!);
                         }
                       }),
                   style: ElevatedButton.styleFrom(
@@ -606,12 +666,10 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                   ? () => Get.toNamed(AppRoutes.jobAppliers, arguments: job)
                   : (hasApplied
                   ? null
-                  : () {
-                if (job.id != null) {
-                  Get.bottomSheet(
-                    JobApplyForm(jobId: job.id!),
-                    isScrollControlled: true,
-                  );
+                  : () async {
+                final res = await Get.toNamed(AppRoutes.applyJob, arguments: job);
+                if (res == true && job.id != null) {
+                  controller.fetchJobDetails(job.id!);
                 }
               }),
               style: ElevatedButton.styleFrom(

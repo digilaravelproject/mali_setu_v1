@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../../core/utils/app_assets.dart';
 import '../../../../widgets/custom_image_view.dart';
 import '../controller/profile_controller.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class ProfilePage extends GetWidget<ProfileController> {
   const ProfilePage({super.key});
@@ -14,6 +15,7 @@ class ProfilePage extends GetWidget<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         title: Text(
           "Profile",

@@ -7,15 +7,45 @@ import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
-import 'package:edu_cluezer/core/widgets/screen_capture_protector.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
-class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
-  const MatrimonyProfileScreen({super.key});
+class MatrimonyProfileScreen extends StatefulWidget {
+  final int? profileId;
+  const MatrimonyProfileScreen({super.key, this.profileId});
+
+  @override
+  State<MatrimonyProfileScreen> createState() => _MatrimonyProfileScreenState();
+}
+
+class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
+  late final MatrimonyDetailsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<MatrimonyDetailsController>()
+        ? Get.find<MatrimonyDetailsController>()
+        : Get.put(MatrimonyDetailsController());
+
+    final args = Get.arguments;
+    final int? targetId = widget.profileId ??
+        (args is Map
+            ? (args['id'] is int ? args['id'] as int : int.tryParse(args['id']?.toString() ?? ''))
+            : (args is int ? args : null));
+
+    if (targetId != null) {
+      if (controller.profile.value == null ||
+          (controller.profile.value!.userId != targetId && controller.profile.value!.id != targetId)) {
+        controller.fetchProfileDetails(targetId);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 75),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -511,14 +541,14 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
               }
 
               return ElevatedButton(
-                onPressed: controller.isLoading.value ? null : onPressed,
+                onPressed: controller.isSendingRequest.value ? null : onPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: controller.isLoading.value
+                child: controller.isSendingRequest.value
                     ? const SizedBox(
                   height: 20,
                   width: 20,
@@ -606,7 +636,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                         }
 
                         return ElevatedButton(
-                          onPressed: controller.isLoading.value ? null : onPressed,
+                          onPressed: controller.isSendingRequest.value ? null : onPressed,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: buttonColor,
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -614,7 +644,7 @@ class MatrimonyProfileScreen extends GetView<MatrimonyDetailsController> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: controller.isLoading.value
+                          child: controller.isSendingRequest.value
                               ? const SizedBox(
                             height: 20,
                             width: 20,

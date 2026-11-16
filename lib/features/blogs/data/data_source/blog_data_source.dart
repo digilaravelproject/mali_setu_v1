@@ -109,7 +109,9 @@ class BlogRepository {
 
 
 
-   import '../../../../core/network/api_client.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/constent/api_constants.dart';
 import '../model/blog_model.dart';
 import 'package:get/get.dart' as getx;
@@ -185,11 +187,17 @@ class BlogRepository {
     try {
       final response = await _apiClient.get("${ApiConstants.getBlogDetail}/$id");
 
-      if (response.statusCode == 200) {
-        return BlogDetailResponse.fromJson(response.data);
+      if (response.statusCode == 200 && response.data != null) {
+        final dynamic raw = response.data;
+        final Map<String, dynamic> dataMap = raw is String
+            ? json.decode(raw)
+            : (raw is Map<String, dynamic> ? raw : Map<String, dynamic>.from(raw as Map));
+        return BlogDetailResponse.fromJson(dataMap);
+      } else {
+        debugPrint('⚠️ [BlogRepository] getBlogDetail failed: status=${response.statusCode}, body=${response.data}');
       }
     } catch (e) {
-      print('Error fetching blog detail: $e');
+      debugPrint('❌ [BlogRepository] Error fetching blog detail for id $id: $e');
     }
     return null;
   }

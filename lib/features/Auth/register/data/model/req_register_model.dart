@@ -19,7 +19,7 @@ class ReqRegisterModel {
   String? password;
   String? passwordConfirmation;
   String? userType;
-  // String? castCertificate;
+  String? castCertificate;
   bool? termCondition;
   String? company_name;
   String? dept_name;
@@ -50,7 +50,7 @@ class ReqRegisterModel {
       this.password,
       this.passwordConfirmation,
       this.userType,
-      // this.castCertificate,
+      this.castCertificate,
       this.termCondition,
       this.company_name,
       this.dept_name,
@@ -70,7 +70,7 @@ class ReqRegisterModel {
     }
     phone = json['phone'];
     occupation = json['occupation'];
-    reffralCode = json['reffral_code'];
+    reffralCode = json['referral_code'] ?? json['reffral_code'];
     address = json['address'];
     nearbyLocation = json['nearby_location'];
     pincode = json['pincode'];
@@ -84,7 +84,7 @@ class ReqRegisterModel {
     password = json['password'];
     passwordConfirmation = json['password_confirmation'];
     userType = json['user_type'];
-    // castCertificate = json['cast_certificate'];
+    castCertificate = json['cast_certificate'];
     termCondition = json['term_condition'];
     company_name = json['company_name'];
     dept_name = json['dept_name'];
@@ -101,7 +101,10 @@ class ReqRegisterModel {
     data['age'] = age;
     data['phone'] = phone;
     data['occupation'] = occupation;
-    data['reffral_code'] = reffralCode;
+    if (reffralCode != null && reffralCode!.isNotEmpty) {
+      data['referral_code'] = reffralCode;
+      data['reffral_code'] = reffralCode;
+    }
     data['address'] = address;
     data['nearby_location'] = nearbyLocation;
     data['pincode'] = pincode;
@@ -115,7 +118,7 @@ class ReqRegisterModel {
     data['password'] = password;
     data['password_confirmation'] = passwordConfirmation;
     data['user_type'] = userType;
-    // data['cast_certificate'] = castCertificate;
+    if (castCertificate != null) data['cast_certificate'] = castCertificate;
     data['term_condition'] = termCondition;
     data['company_name'] = company_name;
     data['dept_name'] = dept_name;

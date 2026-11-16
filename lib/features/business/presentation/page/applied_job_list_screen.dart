@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
+import 'package:edu_cluezer/features/business/binding/business_binding.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class AppliedJobsScreen extends StatefulWidget {
   @override
@@ -12,11 +14,19 @@ class AppliedJobsScreen extends StatefulWidget {
 }
 
 class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
-  final BusinessController controller = Get.find<BusinessController>();
+  BusinessController get controller {
+    if (!Get.isRegistered<BusinessController>()) {
+      BusinessBinding().dependencies();
+    }
+    return Get.find<BusinessController>();
+  }
 
   @override
   void initState() {
     super.initState();
+    if (controller.myApplications.isEmpty) {
+      controller.isMyApplicationsLoading.value = true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchMyApplications();
     });
@@ -25,6 +35,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -39,7 +50,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
         backgroundColor: Colors.transparent,
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.myApplications.isEmpty) {
+        if (controller.isMyApplicationsLoading.value && controller.myApplications.isEmpty) {
           return _buildShimmerLoading();
         }
 
@@ -276,7 +287,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
                           final resumeUrl = application.resumeUrl!;
                           final isUrlAbsolute = resumeUrl.startsWith('http');
                           final fullUrl = isUrlAbsolute ? resumeUrl : ApiConstants.imageBaseUrl + resumeUrl;
-                          await controller.launchResume(fullUrl);
+                          await controller.viewResume(fullUrl, applicantName: application.jobPosting?.title);
                         } catch (e) {
                           Get.snackbar("Error", "Could not open resume");
                         }

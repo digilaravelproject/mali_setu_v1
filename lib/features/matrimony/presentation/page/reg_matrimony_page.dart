@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
@@ -21,6 +22,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.checkAndPrefill();
     return Obx(() {
       controller.canExit.value; // Dummy read for Obx
       return CustomScaffold(
@@ -273,7 +275,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 Obx(() {
                   final _ = controller.nameWidgetKey.value;
                   return NameFieldComponent(
-                    key: controller.nameFieldKey,
+                    key: ValueKey('name_field_${controller.nameWidgetKey.value}'),
                     showTitle: false,
                     externalTitleCtrl: controller.titleCtrl,
                     externalFirstNameCtrl: controller.firstNameCtrl,
@@ -450,7 +452,9 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 Obx(() => SelectionTile(
                   label: "subcaste".tr, // Formerly Caste
-                  value: controller.casteCtrl.text, // Using controller text
+                  value: controller.rxSubCaste.value.isNotEmpty
+                      ? controller.rxSubCaste.value
+                      : (controller.casteCtrl.text.isNotEmpty ? controller.casteCtrl.text : null),
                   icon: Icons.subdirectory_arrow_right,
                   isRequired: true,
                   errorText: controller.errors['caste'],
@@ -678,6 +682,201 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                           ],
                         );
                       },
+                    ),
+                  );
+                }),
+                const SizedBox(height: 24),
+
+                // Caste Certificate Section (Optional)
+                _buildSectionHeader("${'upload_caste_certificate'.tr} ${'optional_tag'.tr}"),
+                const SizedBox(height: 10),
+                Obx(() {
+                  final hasLocalFile = controller.casteCertificatePath.value.isNotEmpty;
+                  final hasExistingFile = controller.existingCasteCertificateUrl.value.isNotEmpty;
+                  final fileName = controller.casteCertificateFileName.value;
+
+                  if (hasLocalFile || hasExistingFile) {
+                    final isPdf = fileName.toLowerCase().endsWith('.pdf');
+                    return Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: context.theme.primaryColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: context.theme.primaryColor.withValues(alpha: 0.3),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(14),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: controller.viewCasteCertificate,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
+                              children: [
+                                // Thumbnail / Icon Preview
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: isPdf
+                                      ? Container(
+                                          width: 48,
+                                          height: 48,
+                                          color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.picture_as_pdf_rounded,
+                                              size: 26,
+                                              color: Color(0xFFEF4444),
+                                            ),
+                                          ),
+                                        )
+                                      : (hasLocalFile && controller.casteCertificateFile != null)
+                                          ? Image.file(
+                                              controller.casteCertificateFile!,
+                                              width: 48,
+                                              height: 48,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => _buildFallbackDocIcon(context, isPdf),
+                                            )
+                                          : CustomImageView(
+                                              url: controller.existingCasteCertificateUrl.value,
+                                              width: 48,
+                                              height: 48,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => _buildFallbackDocIcon(context, isPdf),
+                                            ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Title & Status with Tap hint
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        fileName.isNotEmpty ? fileName : "caste_certificate".tr,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: context.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.verified_rounded,
+                                            size: 13,
+                                            color: Colors.green.shade700,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Flexible(
+                                            child: Text(
+                                              hasLocalFile
+                                                  ? "Selected • Tap to view"
+                                                  : "Uploaded • Tap to view",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 11.5,
+                                                color: Colors.green.shade700,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                // Eye / View button
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.visibility_outlined,
+                                    size: 21,
+                                    color: AppColors.primary,
+                                  ),
+                                  onPressed: controller.viewCasteCertificate,
+                                  tooltip: "View",
+                                ),
+                                // Remove button
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    size: 21,
+                                    color: Color(0xFFEF4444),
+                                  ),
+                                  onPressed: controller.removeCasteCertificate,
+                                  tooltip: "Remove & change",
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return GestureDetector(
+                    onTap: controller.pickCasteCertificate,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: context.theme.primaryColor.withValues(alpha: 0.04),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: context.theme.primaryColor.withValues(alpha: 0.25),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.upload_file_rounded,
+                            size: 34,
+                            color: context.theme.primaryColor,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "upload_caste_certificate".tr,
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              color: context.theme.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "caste_certificate_criteria".tr,
+                            textAlign: TextAlign.center,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: Colors.grey.shade600,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: context.theme.primaryColor.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              "caste_certificate_note".tr,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: context.theme.primaryColor,
+                                fontWeight: FontWeight.w500,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }),
@@ -977,6 +1176,23 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
           color: Get.theme.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackDocIcon(BuildContext context, bool isPdf) {
+    return Container(
+      width: 48,
+      height: 48,
+      color: isPdf
+          ? const Color(0xFFEF4444).withValues(alpha: 0.12)
+          : context.theme.primaryColor.withValues(alpha: 0.12),
+      child: Center(
+        child: Icon(
+          isPdf ? Icons.picture_as_pdf_rounded : Icons.image_rounded,
+          size: 24,
+          color: isPdf ? const Color(0xFFEF4444) : context.theme.primaryColor,
         ),
       ),
     );

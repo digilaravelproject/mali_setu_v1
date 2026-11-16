@@ -16,8 +16,16 @@ class SingleServiceController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args != null && args is int) {
-      fetchServiceDetails(args);
+    if (args != null) {
+      if (args is int) {
+        fetchServiceDetails(args);
+      } else if (args is Service && args.id != null) {
+        service.value = args;
+        fetchServiceDetails(args.id!);
+      } else if (args is Map && args['id'] != null) {
+        final id = int.tryParse(args['id'].toString());
+        if (id != null) fetchServiceDetails(id);
+      }
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,6 +15,7 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         leading: GestureDetector(
           onTap: Get.back,
@@ -131,9 +133,11 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
         ],
       ),
       child: Obx(() {
-        // Listen to form changes
-        controller.checkFormValidity();
-  
+        // Reactively observe visibility toggles while checkFormValidity runs from onChanged
+        controller.isCurrentPasswordVisible.value;
+        controller.isNewPasswordVisible.value;
+        controller.isConfirmPasswordVisible.value;
+
         return Column(
           children: [
             // Current Password

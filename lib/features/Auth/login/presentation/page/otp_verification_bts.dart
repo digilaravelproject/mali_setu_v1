@@ -42,7 +42,78 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
   @override
   void initState() {
     super.initState();
+    for (int i = 0; i < 6; i++) {
+      final index = i;
+      otpFocusNodes[index].onKeyEvent = (focusNode, event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.backspace) {
+          if (otpControllers[index].text.isEmpty && index > 0) {
+            otpControllers[index - 1].clear();
+            otpFocusNodes[index - 1].requestFocus();
+            if (mounted) setState(() {});
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      };
+    }
     startCountdown();
+  }
+
+  void _onOtpDigitChanged(int index, String val) {
+    final cleanDigits = val.replaceAll(RegExp(r'\D'), '');
+
+    // 1. Multi-digit paste or autofill (e.g. 6-digit OTP copied/autofilled)
+    if (cleanDigits.length >= 6 || cleanDigits.length >= 4) {
+      for (int i = 0; i < 6; i++) {
+        if (i < cleanDigits.length) {
+          otpControllers[i].text = cleanDigits[i];
+        }
+      }
+      if (cleanDigits.length >= 6) {
+        otpFocusNodes[5].unfocus();
+      } else {
+        otpFocusNodes[cleanDigits.length].requestFocus();
+      }
+      if (mounted) setState(() {});
+      return;
+    }
+
+    // 2. Typing into an already filled box (replace digit and advance)
+    if (cleanDigits.length > 1) {
+      final newChar = cleanDigits[cleanDigits.length - 1];
+      otpControllers[index].value = TextEditingValue(
+        text: newChar,
+        selection: const TextSelection.collapsed(offset: 1),
+      );
+      if (index < 5) {
+        otpFocusNodes[index + 1].requestFocus();
+      } else {
+        otpFocusNodes[index].unfocus();
+      }
+      if (mounted) setState(() {});
+      return;
+    }
+
+    // 3. Normal single digit entry
+    if (cleanDigits.isNotEmpty) {
+      if (otpControllers[index].text != cleanDigits) {
+        otpControllers[index].value = TextEditingValue(
+          text: cleanDigits,
+          selection: const TextSelection.collapsed(offset: 1),
+        );
+      }
+      if (index < 5) {
+        otpFocusNodes[index + 1].requestFocus();
+      } else {
+        otpFocusNodes[index].unfocus();
+      }
+    } else {
+      if (index > 0) {
+        otpFocusNodes[index - 1].requestFocus();
+      }
+    }
+    if (mounted) setState(() {});
   }
 
   void startCountdown() {
@@ -76,8 +147,6 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -144,42 +213,66 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
 
                 const SizedBox(height: 40),
 
-                /// OTP Boxes
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(6, (index) {
-                    return TextFormField(
-                      controller: otpControllers[index],
-                      focusNode: otpFocusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      cursorHeight: 20,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.zero,
-                        counterText: '',
-                        constraints: const BoxConstraints.tightFor(
-                          height: 50,
-                          width: 50,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        if (value.isNotEmpty && index < 5) {
-                          otpFocusNodes[index + 1].requestFocus();
-                        } else if (value.isEmpty && index > 0) {
-                          otpFocusNodes[index - 1].requestFocus();
-                        }
-                      },
+                /// OTP Boxes (6 boxes)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double totalWidth = constraints.maxWidth;
+                    const double spacing = 6.0;
+                    const int count = 6;
+                    final double boxWidth =
+                        ((totalWidth - (spacing * (count - 1))) / count)
+                            .clamp(36.0, 48.0);
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(count, (index) {
+                        return SizedBox(
+                          width: boxWidth,
+                          height: 48,
+                          child: TextFormField(
+                            controller: otpControllers[index],
+                            focusNode: otpFocusNodes[index],
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            cursorHeight: 20,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.zero,
+                              counterText: '',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFD9D9D9),
+                                  width: 1.2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: Color(0xFFD9D9D9),
+                                  width: 1.2,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: context.theme.primaryColor,
+                                  width: 1.8,
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) => _onOtpDigitChanged(index, value),
+                          ),
+                        );
+                      }),
                     );
-                  }),
+                  },
                 ),
 
                 const SizedBox(height: 32),

@@ -166,6 +166,8 @@ class NameFieldComponentState extends State<NameFieldComponent> {
                       'ms'.tr,
                       'dr'.tr,
                       'prof'.tr,
+                      'ca'.tr,
+                      'adv'.tr,
                     ],
                     onDropdownChanged: (value) {
                       titleCtrl.text = value;

@@ -11,6 +11,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/constent/app_constants.dart';
 import '../../../../core/storage/shared_prefs.dart';
 import '../../../../core/services/deep_link_service.dart';
+import '../../../../core/services/notification_handler_service.dart';
 
 class InitController extends GetxController
     implements GetTickerProviderStateMixin {
@@ -37,6 +38,10 @@ class InitController extends GetxController
 
     // Mark app as ready for deep link handling
     DeepLinkService.isAppReady = true;
+
+    // Mark app as ready for push notification deep navigation and execute pending notification
+    NotificationHandlerService.isAppReady = true;
+    NotificationHandlerService.executePendingNotification();
   }
 
   Future<bool> _checkForUpdate() async {

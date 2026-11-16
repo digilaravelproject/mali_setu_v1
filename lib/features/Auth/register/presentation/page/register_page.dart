@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,9 +12,9 @@ import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_scaffold.dart';
 import '../../../../../widgets/language_selection_dialog.dart';
 import 'package:flutter/gestures.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../../core/constent/api_constants.dart';
 import '../../../../../widgets/webview_page.dart';
-import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
 import '../controller/register_controller.dart';
 
 class RegisterPage extends GetWidget<RegisterController> {
@@ -170,23 +169,12 @@ class RegisterPage extends GetWidget<RegisterController> {
                     PhoneFieldComponent(
                       key: controller.phoneFieldKey,
                       isRequired: true,
+                      onVerificationChanged: (val) {
+                        controller.isPhoneVerified.value = val;
+                      },
                     ),
                   ],
                 ),
-  
-                // const SizedBox(height: 8),
-  
-                // // Caste Certificate Section
-                // _buildFormSection(
-                //   context,
-                //   title: "caste_certificate".tr,
-                //   icon: CupertinoIcons.doc_plaintext,
-                //   isRequired: true,
-                //   titleSize: 12,
-                //   children: [
-                //     Obx(() => _buildCasteCertificateUpload(context)),
-                //   ],
-                // ),
   
                 const SizedBox(height: 8),
   
@@ -349,12 +337,40 @@ class RegisterPage extends GetWidget<RegisterController> {
                      // validator: (v) => FormValidator.emptycheck(v, "designation".tr),
                       topPadding: 0,
                     ),
-                    // AppInputTextField(
-                    //   label: "referral_code".tr,
-                    //   controller: controller.referralCtrl,
-                    //   iconData: CupertinoIcons.tag_fill,
-                    //   topPadding: 0,
-                    // ),
+                    Obx(() {
+                      Widget? suffix;
+                      if (controller.isFetchingReferral.value) {
+                        suffix = const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      } else if (controller.referralUserData.value != null) {
+                        suffix = const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 22),
+                        );
+                      } else if (controller.referralCtrl.text.isNotEmpty) {
+                        suffix = IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 18, color: Colors.grey),
+                          onPressed: controller.clearReferralCode,
+                        );
+                      }
+
+                      return AppInputTextField(
+                        label: "referral_code".tr,
+                        controller: controller.referralCtrl,
+                        hintText: "enter_referral_code".tr,
+                        iconData: CupertinoIcons.tag_fill,
+                        isRequired: false,
+                        topPadding: 0,
+                        suffixWidget: suffix,
+                      );
+                    }),
+                    Obx(() => _buildReferralCard(context, controller)),
                   ],
                 ),
   
@@ -537,11 +553,34 @@ class RegisterPage extends GetWidget<RegisterController> {
 
                 const SizedBox(height: 20),
   
-                Obx(() => CustomButton(
-                      title: "register_button".tr,
-                      onPressed: controller.onRegister,
-                      isLoading: controller.isLoading.value,
-                    )),
+                Obx(() {
+                  final bool isVerified = controller.isPhoneVerified.value;
+                  return CustomButton(
+                    title: "register_button".tr,
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : (isVerified
+                            ? controller.onRegister
+                            : () {
+                                if (Get.context != null) {
+                                  PhoneFieldComponent.showNotVerifiedDialog(
+                                    context: Get.context!,
+                                    onVerifyTap: () {
+                                      controller.scrollToKey(controller.phoneFieldKey);
+                                      if (controller.phoneFieldKey.currentState?.isOtpSentState == true) {
+                                        controller.phoneFieldKey.currentState?.focusFirstOtpBox();
+                                      } else {
+                                        controller.phoneFieldKey.currentState?.sendOtp();
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  controller.onRegister();
+                                }
+                              }),
+                    isLoading: controller.isLoading.value,
+                  );
+                }),
   
                 const SizedBox(height: 24),
   
@@ -655,6 +694,7 @@ class RegisterPage extends GetWidget<RegisterController> {
 
   Widget _buildFormSection(
       BuildContext context, {
+        Key? key,
         required String title,
         required IconData icon,
         required List<Widget> children,
@@ -667,6 +707,7 @@ class RegisterPage extends GetWidget<RegisterController> {
     final theme = Theme.of(context);
 
     return Container(
+      key: key,
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
@@ -734,149 +775,318 @@ class RegisterPage extends GetWidget<RegisterController> {
         ],
       ),
     );
-  // }
-  // );
   }
 
-  Widget _buildCasteCertificateUpload(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: controller.pickCasteCertificate,
+  Widget _buildReferralCard(BuildContext context, RegisterController controller) {
+    if (controller.isFetchingReferral.value) {
+      return Container(
+        margin: const EdgeInsets.only(top: 8, bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              vertical: controller.casteCertificatePath.value.isEmpty ? 24 : 8,
-              horizontal: 16,
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: const Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: controller.casteCertificateError.value.isNotEmpty
-                    ? theme.colorScheme.error
-                    : controller.casteCertificatePath.value.isEmpty
-                        ? theme.dividerColor
-                        : Colors.transparent,
-                width: 1.5,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              color: controller.casteCertificatePath.value.isEmpty
-                  ? theme.colorScheme.surface
-                  : Colors.transparent,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Center(
-                  child: controller.casteCertificatePath.value.isEmpty
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              size: 40,
-                              color: theme.primaryColor,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "upload_caste_certificate".tr,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: theme.hintColor,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "caste_certificate_criteria".tr,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                if (controller.casteCertificatePath.value.toLowerCase().endsWith('.pdf'))
-                                  const Icon(
-                                    Icons.picture_as_pdf_rounded,
-                                    size: 60,
-                                    color: Colors.red,
-                                  )
-                                else
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.to(() => FullScreenImageViewer(
-                                        imageFile: File(controller.casteCertificatePath.value),
-                                        tag: 'caste_certificate',
-                                      ));
-                                    },
-                                    child: Hero(
-                                      tag: 'caste_certificate',
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Image.file(
-                                          File(controller.casteCertificatePath.value),
-                                          height: 120,
-                                          width: 120,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                Positioned(
-                                  top: -8,
-                                  right: -8,
-                                  child: GestureDetector(
-                                    onTap: controller.removeCasteCertificate,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.white, width: 2),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Verifying referral code...",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF475569),
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+      );
+    }
+
+    if (controller.referralError.value.isNotEmpty && controller.referralCtrl.text.isNotEmpty) {
+      return Container(
+        margin: const EdgeInsets.only(top: 8, bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEF2F2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFFECACA)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.info_outline_rounded, color: Color(0xFFDC2626), size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                controller.referralError.value,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  color: Color(0xFFDC2626),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final user = controller.referralUserData.value;
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 4),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF86EFAC), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF16A34A).withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3), width: 1.5),
+                ),
+                child: ClipOval(
+                  child: (user.photoUrl != null &&
+                          user.photoUrl!.isNotEmpty &&
+                          !user.photoUrl!.contains("default-avatar.png"))
+                      ? CachedNetworkImage(
+                          imageUrl: user.photoUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => _buildInitialsAvatar(user.name ?? 'M'),
+                          errorWidget: (_, __, ___) => _buildInitialsAvatar(user.name ?? 'M'),
+                        )
+                      : _buildInitialsAvatar(user.name ?? 'M'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user.name ?? 'User',
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 16,
+                          color: Color(0xFF16A34A),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: user.isVolunteer
+                                ? const Color(0xFFEFF6FF)
+                                : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            user.isVolunteer ? "Volunteer" : (user.userType?.capitalizeFirst ?? "Member"),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: user.isVolunteer
+                                  ? const Color(0xFF2563EB)
+                                  : const Color(0xFF475569),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          user.referralCode ?? '',
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF059669),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 18, color: Color(0xFF94A3B8)),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: controller.clearReferralCode,
+                tooltip: "Clear Referral",
+              ),
+            ],
+          ),
+
+          if (user.location != null && user.location!.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: Color(0xFF64748B),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      user.location!,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF334155),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: Color(0xFFF1F5F9)),
+          const SizedBox(height: 10),
+
+          Row(
+            children: [
+              Expanded(
+                child: _buildReferralMetric(
+                  title: "Total Referrals",
+                  value: "${user.totalReferrals}",
+                  icon: CupertinoIcons.person_2_fill,
+                  color: const Color(0xFF2563EB),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildReferralMetric(
+                  title: "Comm. Points",
+                  value: "${user.commissionPoints}",
+                  icon: CupertinoIcons.sparkles,
+                  color: const Color(0xFFD97706),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildReferralMetric(
+                  title: "Total Earned",
+                  value: "${user.totalEarnedPoints} pts",
+                  icon: CupertinoIcons.star_fill,
+                  color: const Color(0xFF16A34A),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInitialsAvatar(String name) {
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'M';
+    return Container(
+      color: const Color(0xFFDCFCE7),
+      child: Center(
+        child: Text(
+          initial,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF16A34A),
           ),
         ),
-        if (controller.casteCertificateError.value.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8, left: 4),
-            child: Text(
-              controller.casteCertificateError.value,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+      ),
+    );
+  }
+
+  Widget _buildReferralMetric({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.8),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(height: 3),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: color,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF64748B),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

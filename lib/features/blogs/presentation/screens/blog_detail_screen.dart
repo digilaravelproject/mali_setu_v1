@@ -16,6 +16,7 @@ import 'package:chewie/chewie.dart';
 import '../../../Auth/service/auth_service.dart';
 import 'create_blogs.dart';
 import '../../../../widgets/clickable_url_text.dart';
+import '../../../../core/widgets/whatsapp_support_fab.dart';
 String _formatDate(String? dateStr) {
   if (dateStr == null || dateStr.isEmpty) return '';
   try {
@@ -36,7 +37,9 @@ class BlogDetailScreen extends StatefulWidget {
 }
 
 class _BlogDetailScreenState extends State<BlogDetailScreen> {
-  final BlogController controller = Get.isRegistered<BlogController>() ? Get.find<BlogController>() : Get.put(BlogController());
+  final BlogController controller = Get.isRegistered<BlogController>()
+      ? Get.find<BlogController>()
+      : Get.put(BlogController(), permanent: true);
 
   int _calculateReadingTime(String? text) {
     if (text == null || text.isEmpty) return 1;
@@ -44,13 +47,29 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     return (wordCount / 200).ceil().clamp(1, 60);
   }
 
+  final RxInt _activeMediaIndex = 0.obs;
+  final PageController _mediaPageController = PageController();
+
   @override
   void initState() {
     super.initState();
-    // Fetch details when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Immediately set loading to prevent "Blog not found" flash
+    controller.isDetailLoading.value = true;
+    controller.fetchBlogDetail(widget.blogId);
+  }
+
+  @override
+  void dispose() {
+    _mediaPageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant BlogDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.blogId != widget.blogId) {
       controller.fetchBlogDetail(widget.blogId);
-    });
+    }
   }
 
   @override
@@ -67,6 +86,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
         ),
         child: Scaffold(
           backgroundColor: Colors.white,
+          floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
           body: Obx(() {
             if (controller.isDetailLoading.value) {
               return Center(child: CircularProgressIndicator(color: primaryColor));
@@ -74,7 +94,29 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
             final blog = controller.selectedBlog.value;
             if (blog == null) {
-              return const Center(child: Text('Blog not found.'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.article_outlined, size: 48, color: Colors.grey.shade400),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Blog not found.',
+                      style: TextStyle(fontSize: 15, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () => controller.fetchBlogDetail(widget.blogId),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Retry'),
+                    ),
+                  ],
+                ),
+              );
             }
 
             String categoryName = '';
@@ -230,8 +272,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     final mediaList = blog.mediaPaths ?? [];
     final mediaType = blog.mediaType;
     
-    final RxInt activeIndex = 0.obs;
-    final PageController pageController = PageController();
+    final RxInt activeIndex = _activeMediaIndex;
+    final PageController pageController = _mediaPageController;
 
     if (mediaList.isEmpty) {
       final isVideo = mediaType == 'video';
@@ -434,12 +476,16 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
             children: [
               Row(
                 children: [
-                  Text(
-                    'By $author',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Color(0xFF1D1D1D),
+                  Flexible(
+                    child: Text(
+                      'By $author',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF1D1D1D),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 4),

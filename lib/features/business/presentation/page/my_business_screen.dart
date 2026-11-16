@@ -9,6 +9,7 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 import 'package:edu_cluezer/features/business/presentation/controller/reg_business_controller.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import '../../../../core/constent/api_constants.dart';
 
 
@@ -19,6 +20,7 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: Obx(() {
         final businesses = controller.myBusinesses;
 
@@ -340,6 +342,13 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       label: 'products'.tr,
                       value: '${business.products?.length ?? 0}',
                       color: const Color(0xFF3B82F6),
+                      onTap: () {
+                        Get.toNamed(AppRoutes.myProductsServices, arguments: {
+                          'business': business,
+                          'businessId': business.id,
+                          'initialTab': 0,
+                        });
+                      },
                     ),
                     const SizedBox(width: 12),
                     _buildMetricPill(
@@ -348,6 +357,13 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                       label: 'services'.tr,
                       value: '${business.services?.length ?? 0}',
                       color: const Color(0xFF8B5CF6),
+                      onTap: () {
+                        Get.toNamed(AppRoutes.myProductsServices, arguments: {
+                          'business': business,
+                          'businessId': business.id,
+                          'initialTab': 1,
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -417,6 +433,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
           case 'edit':
             Get.toNamed(AppRoutes.regBusiness, arguments: business);
             break;
+          case 'products_services':
+            Get.toNamed(AppRoutes.myProductsServices, arguments: {
+              'business': business,
+              'businessId': business.id,
+            });
+            break;
           case 'delete':
             _showDeleteConfirmation(context, business);
             break;
@@ -440,6 +462,12 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
             icon: Icons.edit_note_outlined,
             label: 'edit'.tr,
             color: const Color(0xFF10B981),
+          ),
+          _buildPopupMenuItem(
+            value: 'products_services',
+            icon: Icons.inventory_2_outlined,
+            label: 'Products & Services',
+            color: const Color(0xFF6366F1),
           ),
           _buildPopupMenuItem(
             value: 'delete',
@@ -483,51 +511,59 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
     required String label,
     required String value,
     required Color color,
+    VoidCallback? onTap,
   }) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withOpacity(0.12)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: color.withOpacity(0.12)),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    value,
-                    style: context.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: color,
-                    ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                    shape: BoxShape.circle,
                   ),
-                  Text(
-                    label,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: color.withOpacity(0.8),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Icon(icon, color: color, size: 16),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        value,
+                        style: context.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: color,
+                        ),
+                      ),
+                      Text(
+                        label,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: color.withOpacity(0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

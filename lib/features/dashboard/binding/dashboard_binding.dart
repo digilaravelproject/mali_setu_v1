@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/settings/controller/settings_controller.dart';
 import 'package:edu_cluezer/features/settings/domain/usecase/delete_account_usecase.dart';
@@ -52,7 +53,8 @@ class DashboardBinding extends Bindings {
     Get.lazyPut(() => GetBannersUseCase(repository: Get.find()));
 
     Get.lazyPut(() => DashboardController());
-    Get.lazyPut(() => BlogController());
+    Get.lazyPut(() => JobsController(), fenix: true);
+    Get.lazyPut(() => BlogController(), fenix: true);
     Get.lazyPut(() => HomeController(
       getBusinessCategoriesUseCase: Get.find(),
       getBannersUseCase: Get.find(),

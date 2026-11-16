@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../../../../../core/network/api_client.dart';
 import '../../../../../../core/constent/api_constants.dart';
@@ -21,6 +22,22 @@ class RegisterDataSourceImpl implements RegisterDataSource {
       // Ensure term_condition is 1 for Laravel "accepted" validation
       if (data['term_condition'] == true) {
         data['term_condition'] = 1;
+      }
+
+      // Handle cast_certificate file upload as multipart/form-data
+      if (reqModel.castCertificate != null && reqModel.castCertificate!.isNotEmpty) {
+        final filePath = reqModel.castCertificate!;
+        final file = File(filePath);
+        if (await file.exists()) {
+          data['cast_certificate'] = await MultipartFile.fromFile(
+            filePath,
+            filename: filePath.split('/').last,
+          );
+        } else {
+          data.remove('cast_certificate');
+        }
+      } else {
+        data.remove('cast_certificate');
       }
 
       print("DEBUG_REGISTER: Sending request body (as FormData): $data");

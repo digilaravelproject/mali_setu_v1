@@ -22,6 +22,9 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/core/widgets/shimmer_loading.dart';
 import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
+import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
+import 'package:edu_cluezer/features/business/presentation/widget/product_service_action_sheet.dart';
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
   const BusinessDetailScreen({Key? key}) : super(key: key);
@@ -42,8 +45,21 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     controller = Get.find<BusinessController>();
     // Store argBusiness once — safe from route argument changes on back navigation
     final args = Get.arguments;
-    argBusiness = args is Business ? args : controller.selectedBusiness.value!;
+    if (args is Business) {
+      argBusiness = args;
+    } else if (controller.selectedBusiness.value != null) {
+      argBusiness = controller.selectedBusiness.value!;
+    } else {
+      argBusiness = Business();
+    }
     _outerScrollController.addListener(_onScroll);
+    if (argBusiness.id != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          controller.fetchBusinessDetails(argBusiness.id!);
+        }
+      });
+    }
   }
 
   void _onScroll() {
@@ -61,15 +77,23 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
     super.dispose();
   }
 
+  bool get _isCurrentBusinessOwner {
+    final business = controller.selectedBusiness.value ?? argBusiness;
+    final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+    final currentUser = authService?.currentUser.value;
+    if (currentUser?.id != null && business.userId != null && currentUser!.id == business.userId) {
+      return true;
+    }
+    if (business.id != null && controller.myBusinesses.any((b) => b.id != null && b.id == business.id)) {
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (argBusiness.id != null) {
-        controller.fetchBusinessDetails(argBusiness.id!);
-      }
-    });
-
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 75),
       body: Stack(
         children: [
           DefaultTabController(
@@ -86,10 +110,18 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               return Stack(
                 children: [
                   RefreshIndicator(
-                onRefresh: () => controller.fetchBusinessDetails(
-                  argBusiness.id!,
-                  isRefresh: true,
-                ),
+                onRefresh: () async {
+                  final bId = controller.selectedBusiness.value?.id ?? argBusiness.id;
+                  if (bId != null) {
+                    await controller.fetchBusinessDetails(
+                      bId,
+                      isRefresh: true,
+                    );
+                  }
+                  if (Get.isRegistered<JobsController>()) {
+                    Get.find<JobsController>().fetchJobs(isRefresh: true);
+                  }
+                },
                 color: context.theme.primaryColor,
                 backgroundColor: context.theme.scaffoldBackgroundColor,
                 child: NestedScrollView(
@@ -159,12 +191,20 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   Get.toNamed(
                                     AppRoutes.addProduct,
                                     arguments: business.id,
-                                  );
+                                  )?.then((res) {
+                                    if (res == true && business.id != null) {
+                                      controller.fetchBusinessProducts(business.id!);
+                                    }
+                                  });
                                 } else if (value == 'add_service') {
                                   Get.toNamed(
                                     AppRoutes.addService,
                                     arguments: business.id,
-                                  );
+                                  )?.then((res) {
+                                    if (res == true && business.id != null) {
+                                      controller.fetchBusinessServices(business.id!);
+                                    }
+                                  });
                                 } else if (value == 'create_job') {
                                   Get.toNamed(
                                     AppRoutes.createJob,
@@ -336,7 +376,32 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 ),
               ),
               if (controller.selectedBusiness.value == null && (argBusiness.businessName == null || argBusiness.businessName!.isEmpty))
-                _buildDetailShimmer(context),
+                controller.isDetailsLoading.value
+                    ? _buildDetailShimmer(context)
+                    : Container(
+                        color: context.theme.scaffoldBackgroundColor,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.storefront_outlined, size: 52, color: Colors.grey.shade400),
+                              const SizedBox(height: 12),
+                              Text(
+                                'business_not_found'.tr == 'business_not_found'
+                                    ? 'Could not load business details.'
+                                    : 'business_not_found'.tr,
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                              ),
+                              const SizedBox(height: 14),
+                              if (argBusiness.id != null)
+                                ElevatedButton(
+                                  onPressed: () => controller.fetchBusinessDetails(argBusiness.id!),
+                                  child: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Retry'),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
             ],
           );
         }),
@@ -524,11 +589,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     const SizedBox(height: 6),
                     _buildHeaderIconLabel(
                       Icons.location_on_outlined,
-                      business.state.toString() +
-                          ', ' +
-                          business.city.toString() +
-                          ', ' +
-                          business.pincode.toString(),
+                      [business.state, business.city, business.pincode]
+                          .where((s) => s != null && s.trim().isNotEmpty && s.trim() != 'null')
+                          .join(', '),
                       context,
                     ),
                     // const SizedBox(height: 6),
@@ -638,8 +701,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: Icons.email_outlined,
               label: 'email'.tr,
               color: Colors.red.shade400,
-              onTap: () =>
-                  controller.launchEmail(business.user!.email.toString()),
+              onTap: () => controller.launchEmail(
+                (business.contactEmail ?? business.user?.email ?? '').toString(),
+              ),
             ),
           ),
           _buildVerticalDivider(context, height: 30),
@@ -648,8 +712,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: FontAwesomeIcons.whatsapp,
               label: 'whatsapp'.tr,
               color: Colors.green,
-              onTap: () =>
-                  controller.launchWhatsApp(business.user!.phone.toString()),
+              onTap: () => controller.launchWhatsApp(
+                (business.contactPhone ?? business.user?.phone ?? '').toString(),
+              ),
             ),
           ),
           _buildVerticalDivider(context, height: 30),
@@ -766,15 +831,12 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   Widget _buildStatsRow(Business business, BuildContext context) {
     return Obx(() {
       // Check if current user is the owner
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value;
-      final b = controller.selectedBusiness.value ?? business;
-      final isOwner = currentUser?.id == b.userId;
+      final isOwner = _isCurrentBusinessOwner;
 
       // If owner, show all jobs count. Otherwise, hide pending jobs from count
       final jobCount = isOwner
           ? controller.businessJobs.length
-          : controller.businessJobs.where((j) => j.status != 'pending').length;
+          : controller.businessJobs.where((j) => (j.status ?? '').toLowerCase().trim() != 'pending').length;
 
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -953,7 +1015,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
                   onTap: () {
-                    Get.toNamed(AppRoutes.addService, arguments: business.id);
+                    Get.toNamed(AppRoutes.addService, arguments: business.id)?.then((res) {
+                      if (res == true && business.id != null) {
+                        controller.fetchBusinessServices(business.id!);
+                      }
+                    });
                   },
                   child: _buildActionButton(
                     'add_service'.tr,
@@ -1096,7 +1162,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       }
       if (controller.businessProducts.isEmpty) {
         return CustomScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1108,7 +1176,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         );
       }
       return CustomScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1119,14 +1189,18 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final product = controller.businessProducts[index];
                 return InkWell(
-                  onTap: () {
-                    Get.toNamed(
+                  onTap: () async {
+                    final res = await Get.toNamed(
                       AppRoutes.singleProductDetails,
                       arguments: product.id,
                     );
+                    final bId = product.businessId ?? controller.selectedBusiness.value?.id;
+                    if (res == true && bId != null) {
+                      controller.fetchBusinessProducts(bId);
+                    }
                   },
                   child: Card(
-                    margin: const EdgeInsets.only(bottom: 12),
+                    margin:  const EdgeInsets.only(bottom: 12),
                     elevation: 1,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1207,6 +1281,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                               ],
                             ),
                           ),
+                          if (_isCurrentBusinessOwner)
+                            IconButton(
+                              icon: const Icon(Icons.more_vert, size: 20),
+                              onPressed: () {
+                                ProductServiceActionSheet.show(
+                                  context,
+                                  product: product,
+                                  businessId: controller.selectedBusiness.value?.id,
+                                  onRefresh: () {
+                                    if (controller.selectedBusiness.value?.id != null) {
+                                      controller.fetchBusinessProducts(controller.selectedBusiness.value!.id!);
+                                    }
+                                  },
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),
@@ -1227,7 +1317,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       }
       if (controller.businessServices.isEmpty) {
         return CustomScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1239,7 +1331,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
         );
       }
       return CustomScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1250,11 +1344,15 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               delegate: SliverChildBuilderDelegate((context, index) {
                 final service = controller.businessServices[index];
                 return InkWell(
-                  onTap: () {
-                    Get.toNamed(
+                  onTap: () async {
+                    final res = await Get.toNamed(
                       AppRoutes.singleServiceDetails,
                       arguments: service.id,
                     );
+                    final bId = service.businessId ?? controller.selectedBusiness.value?.id;
+                    if (res == true && bId != null) {
+                      controller.fetchBusinessServices(bId);
+                    }
                   },
                   child: Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -1318,6 +1416,22 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   ],
                                 ),
                               ),
+                              if (_isCurrentBusinessOwner)
+                                IconButton(
+                                  icon: const Icon(Icons.more_vert, size: 20),
+                                  onPressed: () {
+                                    ProductServiceActionSheet.show(
+                                      context,
+                                      service: service,
+                                      businessId: controller.selectedBusiness.value?.id,
+                                      onRefresh: () {
+                                        if (controller.selectedBusiness.value?.id != null) {
+                                          controller.fetchBusinessServices(controller.selectedBusiness.value!.id!);
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
                             ],
                           ),
                           if (service.description != null &&
@@ -1346,10 +1460,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   Widget _buildJobsTab(BuildContext context) {
     return Obx(() {
-      final authService = Get.find<AuthService>();
-      final currentUser = authService.currentUser.value;
       final business = controller.selectedBusiness.value ?? argBusiness;
-      final isOwner = currentUser?.id == business.userId;
+      final isOwner = _isCurrentBusinessOwner;
 
       if (controller.isDetailsLoading.isTrue) {
         return _buildShimmerList(context);
@@ -1358,12 +1470,19 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       final displayedJobs = isOwner
           ? controller.businessJobs
           : controller.businessJobs
-                .where((job) => job.status != 'pending')
+                .where((job) {
+                  final status = (job.status ?? '').toLowerCase().trim();
+                  return status == 'approved' ||
+                      status == 'active' ||
+                      (status != 'pending' && status != 'rejected' && status.isNotEmpty);
+                })
                 .toList();
 
       if (displayedJobs.isEmpty) {
         return CustomScrollView(
-          physics: const ClampingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             SliverOverlapInjector(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1393,7 +1512,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       }
 
       return CustomScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
         slivers: [
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1474,6 +1595,37 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                         _buildJobStatusBadge(job, context),
+                                        if (job.id != null) ...[
+                                          const SizedBox(width: 6),
+                                          Obx(() {
+                                            final jobsCtrl = Get.isRegistered<JobsController>()
+                                                ? Get.find<JobsController>()
+                                                : Get.put(JobsController());
+                                            final isFav = jobsCtrl.favoriteJobIds.contains(job.id) ||
+                                                job.isLiked == true;
+                                            return GestureDetector(
+                                              behavior: HitTestBehavior.opaque,
+                                              onTap: () {
+                                                jobsCtrl.toggleFavorite(
+                                                  job.id,
+                                                  currentLiked: job.isLiked,
+                                                );
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(4.0),
+                                                child: Icon(
+                                                  isFav
+                                                      ? CupertinoIcons.heart_fill
+                                                      : CupertinoIcons.heart,
+                                                  size: 22,
+                                                  color: isFav
+                                                      ? const Color(0xFFE11D48)
+                                                      : const Color(0xFF9CA3AF),
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                        ],
                                       ],
                                     ),
                                     Text(
@@ -1554,7 +1706,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          if (job.status == 'pending')
+                          if ((job.status ?? '').toLowerCase().trim() == 'pending')
                             CustomButton(
                               title: "waiting_for_approval".tr,
                               backgroundColor: Colors.orange,
@@ -1713,7 +1865,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   _buildInfoRow(
                     Icons.work_outline,
                     'active_jobs'.tr,
-                    '${controller.businessJobs.where((j) => j.status != 'pending').length}',
+                    '${controller.businessJobs.where((j) => (j.status ?? '').toLowerCase().trim() != 'pending').length}',
                     context,
                   ),
                 ], context),
@@ -1934,24 +2086,40 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   Widget _buildJobStatusBadge(Job job, BuildContext context) {
-    final bool isActive = job.isActive ?? false;
+    final status = (job.status ?? '').toLowerCase().trim();
+    final bool isActive = job.isActive ?? (status == 'approved' || status == 'active');
+
+    Color badgeColor;
+    String badgeText;
+
+    if (status == 'pending') {
+      badgeColor = Colors.orange;
+      badgeText = "Pending Approval";
+    } else if (status == 'rejected') {
+      badgeColor = Colors.red;
+      badgeText = "Rejected";
+    } else if (status == 'approved') {
+      badgeColor = Colors.green;
+      badgeText = isActive ? "Approved" : "Inactive";
+    } else {
+      badgeColor = isActive ? Colors.green : Colors.red;
+      badgeText = isActive ? "Active" : "Inactive";
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive
-            ? Colors.green.withOpacity(0.1)
-            : Colors.red.withOpacity(0.1),
+        color: badgeColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isActive ? Colors.green : Colors.red,
+          color: badgeColor,
           width: 0.5,
         ),
       ),
       child: Text(
-        isActive ? "Active" : "Inactive",
+        badgeText,
         style: context.textTheme.bodySmall?.copyWith(
-          color: isActive ? Colors.green : Colors.red,
+          color: badgeColor,
           fontWeight: FontWeight.bold,
           fontSize: 10,
         ),

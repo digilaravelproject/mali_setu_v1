@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/volunteer/controller/all_volunteer_controller.dart';
@@ -15,15 +16,15 @@ class VolunteerSearchPage extends StatelessWidget {
     
     return GetBuilder<AllVolunteerController>(
       init: Get.find<AllVolunteerController>(),
+      initState: (_) {
+        final ctrl = Get.find<AllVolunteerController>();
+        ctrl.searchText.value = "";
+        ctrl.searchResults.clear();
+      },
       builder: (controller) {
-        // Clear search text when entering this page
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.searchText.value = "";
-          controller.searchResults.clear();
-        });
-
         return Scaffold(
           backgroundColor: Colors.white,
+          floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 0,

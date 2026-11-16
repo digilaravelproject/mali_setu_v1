@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /*class NotificationResponse {
   final bool? success;
   final NotificationData? data;
@@ -194,26 +196,50 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic>? parsedData;
+    if (json['data'] != null) {
+      if (json['data'] is Map) {
+        parsedData = Map<String, dynamic>.from(json['data']);
+      } else if (json['data'] is String) {
+        try {
+          final decoded = jsonDecode(json['data']);
+          if (decoded is Map) {
+            parsedData = Map<String, dynamic>.from(decoded);
+          }
+        } catch (_) {}
+      }
+    }
+
+    bool? parseBool(dynamic val) {
+      if (val == null) return null;
+      if (val is bool) return val;
+      if (val is int) return val == 1;
+      final str = val.toString().toLowerCase();
+      if (str == '1' || str == 'true') return true;
+      if (str == '0' || str == 'false') return false;
+      return null;
+    }
+
     return NotificationModel(
       id: json['id']?.toString(),
       userId: json['user_id']?.toString(),
-      type: json['type'],
-      title: json['title'],
-      message: json['message'],
-      data: json['data'],
-      actionUrl: json['action_url'],
-      priority: json['priority'],
-      channel: json['channel'],
-      isRead: json['is_read'],
-      readAt: json['read_at'],
-      emailSent: json['email_sent'],
-      emailSentAt: json['email_sent_at'],
-      pushSent: json['push_sent'],
-      pushSentAt: json['push_sent_at'],
-      relatedType: json['related_type'],
-      relatedId: json['related_id'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      type: json['type']?.toString(),
+      title: json['title']?.toString(),
+      message: json['message']?.toString(),
+      data: parsedData ?? (json['data'] is Map ? Map<String, dynamic>.from(json['data']) : null),
+      actionUrl: json['action_url']?.toString(),
+      priority: json['priority']?.toString(),
+      channel: json['channel']?.toString(),
+      isRead: parseBool(json['is_read']),
+      readAt: json['read_at']?.toString(),
+      emailSent: parseBool(json['email_sent']),
+      emailSentAt: json['email_sent_at']?.toString(),
+      pushSent: parseBool(json['push_sent']),
+      pushSentAt: json['push_sent_at']?.toString(),
+      relatedType: json['related_type']?.toString(),
+      relatedId: json['related_id'] is int ? json['related_id'] : int.tryParse(json['related_id']?.toString() ?? ''),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
     );
   }
 }

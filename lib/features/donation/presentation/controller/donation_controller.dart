@@ -37,6 +37,7 @@ class DonationController extends GetxController {
       }
     } catch (e) {
       debugPrint("DonationController: Exception: $e");
+      CustomSnackBar.showError(message: "Failed to load donation causes. Please try again.");
     } finally {
       isLoading.value = false;
     }

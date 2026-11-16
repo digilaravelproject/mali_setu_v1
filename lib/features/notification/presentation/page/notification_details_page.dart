@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +9,10 @@ class NotificationDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NotificationModel notification = Get.arguments;
+    final args = Get.arguments;
+    final NotificationModel notification = args is NotificationModel
+        ? args
+        : NotificationModel(title: 'Notification'.tr, message: '');
     final theme = Theme.of(context);
     
     String timeString = "";
@@ -22,6 +26,7 @@ class NotificationDetailsPage extends StatelessWidget {
     }
 
     return Scaffold(
+      floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       appBar: AppBar(
         title: Text('Notification Details'.tr),
         centerTitle: true,

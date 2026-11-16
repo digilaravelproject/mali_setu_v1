@@ -1,3 +1,5 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/features/blogs/presentation/screens/blogs_screen.dart';
 import 'package:edu_cluezer/features/Auth/login/data/model/res_login_model.dart';
@@ -37,6 +39,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.grey[50],
+        floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -45,13 +48,26 @@ class SettingsScreen extends GetWidget<SettingsController> {
             children: [
               SizedBox(height: topPadding + 16),
 
-              // Custom Header instead of AppBar for full-screen feel
-              Text(
-                "profile & settings".tr,
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
-                ),
+              // Custom Header with back button if opened from navigation
+              Row(
+                children: [
+                  if (Navigator.of(context).canPop()) ...[
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => Get.back(),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Text(
+                    "profile & settings".tr,
+                    style: context.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 20),
@@ -69,6 +85,11 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     title: 'my_profile'.tr,
                     icon: Icons.person_outline_rounded,
                     onTap: () => Get.toNamed(AppRoutes.profileScreen),
+                  ),
+                  _SettingsItem(
+                    title: 'refer_and_earn'.tr,
+                    icon: Icons.card_giftcard_rounded,
+                    onTap: () => Get.toNamed(AppRoutes.referral),
                   ),
                   _SettingsItem(
                     title: 'app_language'.tr,
@@ -210,6 +231,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
               ),
 
               // Add Business Button
+/*
               if (authService.currentUser.value?.userType?.toLowerCase().trim() != 'bloger') ...[
                 const SizedBox(height: 32),
                 Container(
@@ -247,6 +269,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                   ),
                 ),
               ],
+*/
 
               const SizedBox(height: 40),
               Align(
@@ -317,17 +340,40 @@ class SettingsScreen extends GetWidget<SettingsController> {
             InkWell(
               onTap: () => Get.toNamed(AppRoutes.profileScreen),
               child: Container(
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   border: Border.all(color: context.theme.primaryColor.withOpacity(0.2), width: 2),
-                  borderRadius: BorderRadius.circular(30),
+                  shape: BoxShape.circle,
+                  color: Colors.grey[100],
                 ),
-                child: CustomImageView(
-                  url: user?.profileImage,
-                  height: 60,
-                  width: 60,
-                  radius: BorderRadius.circular(30),
-                  imagePath: AppAssets.getAppLogo(),
-                  fit: BoxFit.cover,
+                child: ClipOval(
+                  child: (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+                      ? CachedNetworkImage(
+                          imageUrl: user!.profileImage!.startsWith('http')
+                              ? user!.profileImage!
+                              : "${ApiConstants.imageBaseUrl}${user!.profileImage}",
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey[100],
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Icon(
+                              CupertinoIcons.person_fill,
+                              size: 32,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Icon(
+                            CupertinoIcons.person_fill,
+                            size: 32,
+                            color: Colors.grey[400],
+                          ),
+                        ),
                 ),
               ),
             ),

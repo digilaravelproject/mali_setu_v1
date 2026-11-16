@@ -1,3 +1,4 @@
+import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 import 'package:edu_cluezer/core/constent/app_constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
@@ -50,26 +51,17 @@ class BusinessScreen extends GetView<BusinessController> {
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               slivers: [
               SliverAppBar(
-                expandedHeight: 50 + topPadding,
-                toolbarHeight: 50 + topPadding,
                 pinned: false,
                 floating: true,
                 backgroundColor: theme.scaffoldBackgroundColor,
                 elevation: 0,
                 automaticallyImplyLeading: false,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Padding(
-                    padding: EdgeInsets.only(top: topPadding, left: 16, right: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'business_dashboard'.tr,
-                        style: context.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
+                title: Text(
+                  'business_dashboard'.tr,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    color: Colors.black87,
                   ),
                 ),
                 centerTitle: false,
@@ -459,6 +451,9 @@ class AllBusinessesScreen extends GetWidget<BusinessController> {
     
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      floatingActionButton: Navigator.canPop(context)
+          ? const WhatsAppSupportFab(bottomPadding: 16)
+          : null,
       appBar: AppBar(
         automaticallyImplyLeading: true, // Show back button
         leading: IconButton(
