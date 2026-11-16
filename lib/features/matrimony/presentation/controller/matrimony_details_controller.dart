@@ -140,20 +140,26 @@ class MatrimonyDetailsController extends GetxController {
 
   Future<void> sendRequest() async {
     if (profile.value == null || isSendingRequest.value) return;
-    
+
+    final targetUserId = profile.value!.userId ?? profile.value!.user?.id ?? profile.value!.id;
+    if (targetUserId == null) {
+      CustomSnackBar.showError(message: "Invalid profile user ID");
+      return;
+    }
+
     isSendingRequest.value = true;
     try {
       final data = {
-        "receiver_id": profile.value!.userId.toString(),
+        "receiver_id": targetUserId.toString(),
         "message": "Hello, I would like to connect with you!"
       };
       final response = await _repository.sendConnectionRequest(data);
-      if (response['success'] == true) {
+      if (response != null && (response['success'] == true || response['status'] == true)) {
         profile.value!.connectionStatus = "pending";
         profile.refresh();
         CustomSnackBar.showSuccess(message: response['message'] ?? "Connection request sent successfully");
       } else {
-        CustomSnackBar.showError(message: response['message'] ?? "Failed to send connection request");
+        CustomSnackBar.showError(message: response?['message'] ?? "Failed to send connection request");
       }
     } catch (e) {
       CustomSnackBar.showError(message: "Something went wrong: $e");

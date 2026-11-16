@@ -487,91 +487,13 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
     );
   }
 
-  Widget _buildBottomBar1(BuildContext context, MatrimonyProfile profile) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Expanded(
-          //   child: OutlinedButton(
-          //     onPressed: () {},
-          //     style: OutlinedButton.styleFrom(
-          //       padding: const EdgeInsets.symmetric(vertical: 16),
-          //       side: const BorderSide(color: Colors.purple),
-          //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          //     ),
-          //     child: const Text("Shortlist", style: TextStyle(color: Colors.purple, fontWeight: FontWeight.bold)),
-          //   ),
-          // ),
-          // const SizedBox(width: 16),
-          Expanded(
-            flex: 2,
-            child: Obx(() {
-              final status = profile.connectionStatus?.toLowerCase();
-              String buttonText = "send_connection_request".tr;
-              bool isActionable = true;
-              Color buttonColor = Colors.purple;
-              VoidCallback? onPressed = controller.sendRequest;
-
-              if (status == "pending") {
-                buttonText = "request_sent".tr;
-                isActionable = false;
-                buttonColor = Colors.grey;
-                onPressed = null;
-              } else if (status == "accepted") {
-                buttonText = "start_chat".tr;
-                isActionable = true;
-                buttonColor = Colors.green;
-                onPressed = () {
-                  Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                    'conversation_id': null,
-                    'other_user_id': profile.user?.id,
-                  });
-                };
-              }
-
-              return ElevatedButton(
-                onPressed: controller.isSendingRequest.value ? null : onPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: controller.isSendingRequest.value
-                    ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                )
-                    : Text(buttonText, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
   Widget _buildBottomBar(BuildContext context, MatrimonyProfile profile) {
     return Obx(() {
       final authService = Get.find<AuthService>();
       final currentUser = authService.currentUser.value;
       final isOwnProfile = profile.user?.id == currentUser?.id || profile.userId == currentUser?.id;
-
-      // Removed the condition that prevented editing when approved
+      final isSending = controller.isSendingRequest.value;
+      final currentProfile = controller.profile.value ?? profile;
 
       return SafeArea(
         top: false, // only care about bottom
@@ -592,29 +514,28 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
               Expanded(
                 flex: 2,
                 child: isOwnProfile
-                  ? ElevatedButton(
-                      onPressed: () {
-                        Get.toNamed(AppRoutes.regMatrimony, arguments: true);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    ? ElevatedButton(
+                        onPressed: () {
+                          Get.toNamed(AppRoutes.regMatrimony, arguments: true);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        "edit_profile".tr,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                        child: Text(
+                          "edit_profile".tr,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                    )
-                  : Builder(
-                      builder: (context) {
-                        final status = profile.connectionStatus?.toLowerCase();
+                      )
+                    : () {
+                        final status = currentProfile.connectionStatus?.toLowerCase();
                         String buttonText = "send_connection_request".tr;
                         Color buttonColor = Colors.purple;
                         VoidCallback? onPressed = controller.sendRequest;
@@ -626,44 +547,45 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
                         } else if (status == "accepted") {
                           buttonText = "start_chat".tr;
                           buttonColor = Colors.green;
-                            onPressed = () {
+                          onPressed = () {
                             Get.toNamed(AppRoutes.matrimonyChat, arguments: {
-                              'conversation_id': profile.conversationId,
-                              'other_user_id': profile.user?.id ?? profile.userId,
-                              'user_name': profile.personalDetails?.name?.toString() ?? '',
+                              'conversation_id': currentProfile.conversationId,
+                              'other_user_id': currentProfile.user?.id ?? currentProfile.userId,
+                              'user_name': currentProfile.personalDetails?.name?.toString() ?? '',
                             });
                           };
                         }
 
                         return ElevatedButton(
-                          onPressed: controller.isSendingRequest.value ? null : onPressed,
+                          onPressed: (isSending || status == "pending") ? null : onPressed,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: buttonColor,
+                            disabledBackgroundColor: isSending ? buttonColor : Colors.grey.shade400,
                             padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: controller.isSendingRequest.value
+                          child: isSending
                               ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
                               : Text(
-                            buttonText,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
+                                  buttonText,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                         );
-                      }
-                    ),
+                      }(),
               ),
             ],
           ),
