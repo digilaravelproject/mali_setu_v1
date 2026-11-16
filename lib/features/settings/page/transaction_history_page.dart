@@ -372,7 +372,11 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
             itemCount: controller.transactions.length + (controller.hasNextPage ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == controller.transactions.length) {
-                controller.loadMore();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (controller.hasNextPage && !controller.isMoreLoading.value) {
+                    controller.loadMore();
+                  }
+                });
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
@@ -442,8 +446,9 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
   }
 
   Widget _buildTransactionCard(TransactionItem transaction) {
-    final bool isSuccess = transaction.status?.toLowerCase() == 'success';
-    final bool isPending = transaction.status?.toLowerCase() == 'pending';
+    final statusLower = transaction.status?.toLowerCase() ?? '';
+    final bool isSuccess = statusLower == 'success' || statusLower == 'completed';
+    final bool isPending = statusLower == 'pending';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -610,7 +615,7 @@ class TransactionHistoryPage extends GetView<TransactionHistoryController> {
     IconData icon;
     Color backgroundColor;
 
-    if (status == 'completed') {
+    if (status == 'completed' || status == 'success' || status == 'paid') {
       color = const Color(0xFF00BFA6);
       label = "Completed";
       icon = Icons.check_circle_rounded;

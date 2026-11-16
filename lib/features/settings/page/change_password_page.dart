@@ -133,9 +133,11 @@ class ChangePasswordScreen extends GetWidget<ChangePasswordController> {
         ],
       ),
       child: Obx(() {
-        // Listen to form changes
-        controller.checkFormValidity();
-  
+        // Reactively observe visibility toggles while checkFormValidity runs from onChanged
+        controller.isCurrentPasswordVisible.value;
+        controller.isNewPasswordVisible.value;
+        controller.isConfirmPasswordVisible.value;
+
         return Column(
           children: [
             // Current Password

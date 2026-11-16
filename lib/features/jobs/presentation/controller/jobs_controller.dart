@@ -352,20 +352,12 @@ class JobsController extends GetxController {
         allJobsList.value = fetchedJobs;
         jobs.value = fetchedJobs;
       } else {
-        // Fallback to sample jobs if initial load fails
         if (jobs.isEmpty && allJobsList.isEmpty) {
-          allJobsList.value = _getSampleJobs();
-          jobs.value = _getSampleJobs();
-          totalJobsCount.value = 520;
+          totalJobsCount.value = 0;
         }
       }
     } catch (e) {
-      // In case of network error on first launch
-      if (jobs.isEmpty && allJobsList.isEmpty) {
-        allJobsList.value = _getSampleJobs();
-        jobs.value = _getSampleJobs();
-        totalJobsCount.value = 520;
-      }
+      debugPrint("Error fetching jobs: $e");
     } finally {
       isLoading.value = false;
     }

@@ -9,8 +9,23 @@ import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/services/notification_handler_service.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
 
-class NotificationPage extends GetView<NotificationController> {
+class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
+
+  @override
+  State<NotificationPage> createState() => _NotificationPageState();
+}
+
+class _NotificationPageState extends State<NotificationPage> {
+  final NotificationController controller = Get.find<NotificationController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.onNotificationPageOpened();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,34 +45,47 @@ class NotificationPage extends GetView<NotificationController> {
               // Notifications List
               Expanded(
                 child: Obx(() {
-                  if (controller.isLoading.value) {
+                  if (controller.isLoading.value && controller.notifications.isEmpty) {
                     return _buildShimmerLoading();
                   }
 
                   if (controller.notifications.isEmpty) {
-                    return _buildEmptyState(theme);
+                    return RefreshIndicator(
+                      onRefresh: controller.loadNotifications,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.7,
+                          child: _buildEmptyState(theme),
+                        ),
+                      ),
+                    );
                   }
 
-                  return ListView.builder(
-                    controller: controller.scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 100), // Bottom padding for FAB/Action bar
-                    itemCount: controller.notifications.length + (controller.isMoreLoading.value ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == controller.notifications.length) {
-                        return const Center(child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: CircularProgressIndicator(),
-                        ));
-                      }
-                      
-                      final notification = controller.notifications[index];
-                      return _buildNotificationCard(
-                        context: context,
-                        notification: notification,
-                        theme: theme,
-                        isDarkMode: isDarkMode,
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: controller.loadNotifications,
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: controller.scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 100), // Bottom padding for FAB/Action bar
+                      itemCount: controller.notifications.length + (controller.isMoreLoading.value ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == controller.notifications.length) {
+                          return const Center(child: Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: CircularProgressIndicator(),
+                          ));
+                        }
+                        
+                        final notification = controller.notifications[index];
+                        return _buildNotificationCard(
+                          context: context,
+                          notification: notification,
+                          theme: theme,
+                          isDarkMode: isDarkMode,
+                        );
+                      },
+                    ),
                   );
                 }),
               ),
@@ -118,7 +146,7 @@ class NotificationPage extends GetView<NotificationController> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${controller.unreadCount.value} new'.tr,
+                            '${controller.unreadCount.value} ${'new'.tr}',
                             style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                           ),
                         ) 
@@ -177,41 +205,56 @@ class NotificationPage extends GetView<NotificationController> {
         message = 'new_notification_message'.tr;
       }
     }
-    final isRead = notification.readAt != null;
+    final isRead = notification.isRead == true || notification.readAt != null;
     
-    // Determine visuals based on type or content
+    // Determine visuals based on normalized type or title content
     IconData icon = Icons.notifications_outlined;
     Color iconColor = Colors.blue;
     
-    // Example logic based on hypothetical types (adjust as needed)
-    final type = notification.title ?? '';
-    if (type.contains('Order')) {
-      icon = Icons.shopping_bag_outlined;
-      iconColor = Colors.green;
-    } else if (type.contains('Payment')) {
+    final typeLower = (notification.type ?? '').toLowerCase();
+    final titleKeyLower = title.toLowerCase();
+    if (typeLower.contains('blog') || titleKeyLower.contains('blog')) {
+      icon = Icons.article_outlined;
+      iconColor = const Color(0xFFC0227B);
+    } else if (typeLower.contains('message') || typeLower.contains('chat')) {
+      icon = Icons.chat_bubble_outline_rounded;
+      iconColor = Colors.indigo;
+    } else if (typeLower.contains('payment') || typeLower.contains('subscription') || titleKeyLower.contains('payment')) {
       icon = Icons.payment_outlined;
       iconColor = Colors.purple;
-    } else if (type.contains('Alert')) {
+    } else if (typeLower.contains('reject') || typeLower.contains('failed') || typeLower.contains('alert')) {
       icon = Icons.warning_amber_rounded;
       iconColor = Colors.red;
-    } else if (type.contains('Matrimony')) {
-      icon = Icons.favorite_border; // heart icon
-      iconColor = Colors.pink;
-    } else if (type.contains('Job')) {
-      icon = Icons.work_outline;
-      iconColor = Colors.blue;
-    } else if (type.contains('Business')) {
-      icon = Icons.business_center_outlined;
-      iconColor = Colors.teal;
-    } else if (type.contains('Connections')) {
+    } else if (typeLower.contains('connection') || titleKeyLower.contains('connection')) {
       icon = Icons.people_outline;
       iconColor = Colors.orange;
-    } else if (type.contains('Service')) {
+    } else if (typeLower.contains('matrimony') || titleKeyLower.contains('matrimony')) {
+      icon = Icons.favorite_border;
+      iconColor = Colors.pink;
+    } else if (typeLower.contains('job') || titleKeyLower.contains('job')) {
+      icon = Icons.work_outline;
+      iconColor = Colors.blue;
+    } else if (typeLower.contains('business') || titleKeyLower.contains('business')) {
+      icon = Icons.business_center_outlined;
+      iconColor = Colors.teal;
+    } else if (typeLower.contains('webinar') || titleKeyLower.contains('webinar')) {
+      icon = Icons.video_camera_front_outlined;
+      iconColor = Colors.deepPurple;
+    } else if (typeLower.contains('volunteer') || titleKeyLower.contains('volunteer')) {
+      icon = Icons.volunteer_activism_outlined;
+      iconColor = Colors.green;
+    } else if (typeLower.contains('referral') || titleKeyLower.contains('referral')) {
+      icon = Icons.card_giftcard_outlined;
+      iconColor = Colors.amber.shade800;
+    } else if (typeLower.contains('service') || titleKeyLower.contains('service')) {
       icon = Icons.build_outlined;
       iconColor = Colors.brown;
-    } else if (type.contains('Product')) {
+    } else if (typeLower.contains('product') || titleKeyLower.contains('product')) {
       icon = Icons.inventory_2_outlined;
       iconColor = Colors.deepPurple;
+    } else if (typeLower.contains('order') || titleKeyLower.contains('order')) {
+      icon = Icons.shopping_bag_outlined;
+      iconColor = Colors.green;
     }
 
     // Format Date

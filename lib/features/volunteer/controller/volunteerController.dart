@@ -42,44 +42,39 @@ class VolunteerProfileController extends GetxController {
   Map<String, String> get volunteerData => {
     'name': authService.currentUser.value?.name.toTitleCase() ?? 'Volunteer',
     'role': profileData.value?.skills?.split(',').first ?? authService.currentUser.value?.occupation.toTitleCase() ?? 'Community Volunteer',
-    'profileImage': 'https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg',
-    'joinDate': authService.currentUser.value?.createdAt ?? 'Jan 2024',
-    'totalHours': '245',
-    'completedProjects': '18',
-    'rating': '4.8',
+    'profileImage': authService.currentUser.value?.profileImage ?? '',
+    'joinDate': authService.currentUser.value?.createdAt ?? '',
+    'totalHours': '0',
+    'completedProjects': '0',
+    'rating': '-',
   };
 
   // About Me
-  String get aboutMe => profileData.value?.bio ?? '''
-Experienced social worker with 5+ years in community service. Passionate about education and environmental conservation. Strong communication skills and team leadership experience. Fluent in Hindi, English, and Punjabi.
-''';
+  String get aboutMe => profileData.value?.bio ?? '';
 
   // Skills
-  List<String> get skillList => profileData.value?.skills?.split(',').map((e) => e.trim()).toList() ?? [
-    'Community Outreach',
-    'Event Management',
-    'Teaching/Tutoring',
-    'First Aid Certified',
-    'Fundraising',
-    'Public Speaking',
-    'Social Media Management',
-    'Data Collection',
-  ];
+  List<String> get skillList => profileData.value?.skills
+      ?.split(',')
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList() ?? [];
 
   // Experience
-  List<Map<String, String>> get experiences => [
-    {
-      'title': profileData.value?.skills?.split(',').first ?? 'Education Volunteer',
-      'organization': 'Teach India Foundation',
-      'duration': profileData.value?.experience ?? 'Jan 2021 - Present',
-      'description': profileData.value?.bio ?? 'Teaching underprivileged children in rural areas',
-    },
-  ];
+  List<Map<String, String>> get experiences => profileData.value != null
+      ? [
+          {
+            'title': profileData.value?.skills?.split(',').first ?? 'Volunteer',
+            'organization': '',
+            'duration': profileData.value?.experience ?? '',
+            'description': profileData.value?.bio ?? '',
+          },
+        ]
+      : [];
 
   // Availability
   Map<String, String> get availability => {
-    'weekdays': 'Evenings (6 PM - 9 PM)',
-    'weekends': 'Full Day',
+    'weekdays': profileData.value?.availability ?? 'Not specified',
+    'weekends': profileData.value?.availability ?? 'Not specified',
     'remote': 'Available',
     'onSite': 'Available',
     'availability': profileData.value?.availability ?? 'Not specified',
@@ -87,23 +82,14 @@ Experienced social worker with 5+ years in community service. Passionate about e
   };
 
   // Interests
-  List<String> get interestList => profileData.value?.interests ?? [
-    'Education',
-    'Environment',
-    'Healthcare',
-    'Child Welfare',
-    'Animal Welfare',
-    'Women Empowerment',
-    'Digital Literacy',
-    'Senior Citizen Care',
-  ];
+  List<String> get interestList => profileData.value?.interests ?? [];
 
   // Profile Status
   final profileStatus = {
     'status': 'Active',
-    'lastActive': '2 hours ago',
-    'verified': true,
-    'badges': ['Gold Volunteer', 'Top Performer', 'Mentor'],
+    'lastActive': '',
+    'verified': false,
+    'badges': <String>[],
   };
 
   // Method to toggle status

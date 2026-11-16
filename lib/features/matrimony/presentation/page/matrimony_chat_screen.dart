@@ -273,7 +273,7 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
           const SizedBox(width: 12),
           GestureDetector(
             onTap: () {
-              if (!controller.isLoading.value) {
+              if (!controller.isSending.value) {
                 controller.sendMessage();
               }
             },
@@ -290,7 +290,7 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
                   ),
                 ],
               ),
-              child: controller.isLoading.value
+              child: controller.isSending.value
                   ? const SizedBox(
                       height: 20,
                       width: 20,

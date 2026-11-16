@@ -50,10 +50,14 @@ class AddServiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments != null) {
-      businessId = Get.arguments as int;
+    final args = Get.arguments;
+    if (args is int) {
+      businessId = args;
+    } else if (args is Map && args['businessId'] != null) {
+      businessId = int.tryParse(args['businessId'].toString()) ?? 0;
     } else {
-      Get.back();
+      businessId = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) => Get.back());
     }
     nameController.addListener(() => errors.remove('name'));
     descriptionController.addListener(() => errors.remove('description'));
@@ -133,26 +137,54 @@ class AddServiceController extends GetxController {
     if (errors.isNotEmpty) return;
 
     isLoading.value = true;
-    final data = {
-      'business_id': businessId,
-      'name': nameController.text.trim(),
-      'description': descriptionController.text.trim(),
-      'cost': priceController.text.trim(),
-    };
-    final success = await Get.find<BusinessController>().addService(
-      data,
-      selectedImages.toList(),
-    );
-    isLoading.value = false;
-    if (success) {
-      Get.back(result: true);
-      CustomSnackBar.showSuccess(message: 'Service created successfully!');
+    try {
+      final data = {
+        'business_id': businessId,
+        'name': nameController.text.trim(),
+        'description': descriptionController.text.trim(),
+        'cost': priceController.text.trim(),
+      };
+      final success = await Get.find<BusinessController>().addService(
+        data,
+        selectedImages.toList(),
+      );
+      if (success) {
+        Get.back(result: true);
+        CustomSnackBar.showSuccess(message: 'Service created successfully!');
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: 'Error creating service: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 }
 
-class AddServiceScreen extends StatelessWidget {
+class AddServiceScreen extends StatefulWidget {
   const AddServiceScreen({Key? key}) : super(key: key);
+
+  @override
+  State<AddServiceScreen> createState() => _AddServiceScreenState();
+}
+
+class _AddServiceScreenState extends State<AddServiceScreen> {
+  late final AddServiceController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<AddServiceController>()
+        ? Get.find<AddServiceController>()
+        : Get.put(AddServiceController());
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<AddServiceController>()) {
+      Get.delete<AddServiceController>();
+    }
+    super.dispose();
+  }
 
   void _showImageSourceDialog(BuildContext context, AddServiceController controller) {
     showModalBottomSheet(
@@ -372,7 +404,6 @@ class AddServiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AddServiceController());
     final screenWidth = MediaQuery.of(context).size.width;
     final itemSize = (screenWidth - 40 - 20) / 3;
 

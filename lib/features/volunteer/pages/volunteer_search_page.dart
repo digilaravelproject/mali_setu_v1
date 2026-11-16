@@ -16,13 +16,12 @@ class VolunteerSearchPage extends StatelessWidget {
     
     return GetBuilder<AllVolunteerController>(
       init: Get.find<AllVolunteerController>(),
+      initState: (_) {
+        final ctrl = Get.find<AllVolunteerController>();
+        ctrl.searchText.value = "";
+        ctrl.searchResults.clear();
+      },
       builder: (controller) {
-        // Clear search text when entering this page
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.searchText.value = "";
-          controller.searchResults.clear();
-        });
-
         return Scaffold(
           backgroundColor: Colors.white,
           floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),

@@ -19,6 +19,7 @@ import 'dart:convert';
 import 'dart:io';
 import '../../../../core/constent/api_constants.dart';
 import '../../../../core/constent/app_constants.dart';
+import '../../../../core/routes/app_routes.dart';
 import '../../../../core/storage/shared_prefs.dart';
 import '../../../../core/widgets/full_screen_image_viewer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1534,7 +1535,7 @@ class RegMatrimonyController extends GetxController {
         barrierDismissible: false,
       );
       final response = await _repository.getMatrimonyPlans();
-      Get.back(); // Close Loading
+      if (Get.isDialogOpen == true) Get.back(); // Close Loading
       await Future.delayed(const Duration(milliseconds: 300)); // Allow pop animation to finish
 
       if (response.success == true && response.data?.plans != null) {
@@ -1544,16 +1545,21 @@ class RegMatrimonyController extends GetxController {
 
         if (selectedPlan != null) {
           await initiateMatrimonyPayment(selectedPlan);
-        } else {
+        } else if (Get.currentRoute == AppRoutes.regMatrimony) {
           // User closed the bottom sheet without selecting
-          Get.back(); // Close Registration Screen
+          Get.back(); // Close Registration Screen only if currently on it
         }
       } else {
-        Get.back(); // Close Registration Screen if no plans
+        CustomSnackBar.showError(message: 'No subscription plans available right now.');
+        if (Get.currentRoute == AppRoutes.regMatrimony) {
+          Get.back();
+        }
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back();
-      Get.back(); // Close Registration Screen
+      if (Get.currentRoute == AppRoutes.regMatrimony) {
+        Get.back();
+      }
       print("Error fetching plans: $e");
     }
   }

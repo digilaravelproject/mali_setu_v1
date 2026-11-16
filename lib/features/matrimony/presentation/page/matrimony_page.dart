@@ -544,7 +544,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       onTap: (){
         try {
           Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {
-            'id': controller.profiles[controller.currentIndex.value].userId,
+            'id': user.userId ?? controller.profiles[controller.currentIndex.value].userId,
             'connection_status': user.connectionStatus,
           });
         } catch (e) {
@@ -1235,6 +1235,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       if (data is MatrimonyProfile) {
         return UserProfile(
           id: data.id,
+          userId: data.userId,
           name: data.personalDetails?.name ?? 'no_name'.tr,
           age: data.age ?? 0,
           location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
@@ -1310,6 +1311,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
 class UserProfile {
   final int? id;
+  final int? userId;
   final String name;
   final int age;
   final String location;
@@ -1325,6 +1327,7 @@ class UserProfile {
 
   UserProfile({
     required this.id,
+    this.userId,
     required this.name,
     required this.age,
     required this.location,

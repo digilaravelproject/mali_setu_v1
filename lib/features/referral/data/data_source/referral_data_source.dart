@@ -82,15 +82,14 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       return directPref.trim();
     }
 
-    return fallbackCode ?? 'MSUQMI6BV4';
+    return fallbackCode ?? '';
   }
 
   @override
   Future<VolunteerEarningsData> getVolunteerEarnings({String? referralCode}) async {
-    final rawCode = (referralCode != null && referralCode.trim().isNotEmpty)
+    final code = (referralCode != null && referralCode.trim().isNotEmpty)
         ? referralCode.trim()
-        : _getReferralCodeFromPrefs('MSU0001326');
-    final code = rawCode.isNotEmpty ? rawCode : _getReferralCodeFromPrefs('MSU0001326');
+        : _getReferralCodeFromPrefs();
 
     // 1. Primary: GET /api/referrals/{code}/earnings
     if (code.isNotEmpty) {
@@ -137,24 +136,24 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       debugPrint("⚠️ ReferralDataSource.getVolunteerEarnings fallback error: $e");
     }
 
-    // Fallback: Populate with logged in user
+    // Fallback: Populate from real logged-in user (no hardcoded dummy values)
     final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
     final currentUser = authService?.currentUser.value;
-    final fallbackCode = code.isNotEmpty ? code : (authService?.referralCode ?? currentUser?.reffralCode ?? 'MSU0001326');
-    final link = "https://malisetu.com/register?referral_code=$fallbackCode";
+    final fallbackCode = code.isNotEmpty ? code : (authService?.referralCode ?? currentUser?.reffralCode ?? '');
+    final link = fallbackCode.isNotEmpty ? "https://malisetu.com/register?referral_code=$fallbackCode" : "";
 
     return VolunteerEarningsData(
       volunteer: VolunteerInfo(
-        id: currentUser?.id ?? 1326,
-        name: currentUser?.name ?? 'Mrs. Test test',
+        id: currentUser?.id ?? 0,
+        name: currentUser?.name ?? '',
         referralCode: fallbackCode,
         referralLink: link,
         photoUrl: currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty
             ? (currentUser.profileImage!.startsWith('http')
                 ? currentUser.profileImage!
                 : "${ApiConstants.imageBaseUrl}${currentUser.profileImage}")
-            : "https://malisetu.com/storage/profile/photos/6ae5d88ba71ce.jpg",
-        userType: currentUser?.userType ?? 'business',
+            : "",
+        userType: currentUser?.userType ?? 'general',
         isVolunteer: currentUser?.userType?.toLowerCase() == 'volunteer',
         commissionPoints: 0,
         totalReferrals: 0,
@@ -177,10 +176,10 @@ class ReferralDataSourceImpl implements ReferralDataSource {
     int page = 1,
     int perPage = 20,
   }) async {
-    final rawCode = (referralCode != null && referralCode.trim().isNotEmpty)
+    final code = (referralCode != null && referralCode.trim().isNotEmpty)
         ? referralCode.trim()
-        : _getReferralCodeFromPrefs('MSUQMI6BV4');
-    final code = rawCode.isNotEmpty ? rawCode : 'MSUQMI6BV4';
+        : _getReferralCodeFromPrefs();
+    if (code.isEmpty) return [];
 
     final queryParams = <String, dynamic>{
       if (userType != null && userType.isNotEmpty && userType != 'all') 'user_type': userType,
@@ -189,7 +188,6 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       'page': page,
     };
 
-    // Primary & Exclusive: GET /api/referrals/{code}/referred-users
     try {
       final endpoint = ApiConstants.referralReferredUsers(code);
       final response = await apiClient.get(endpoint, queryParameters: queryParams);
@@ -203,27 +201,7 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       debugPrint("⚠️ ReferralDataSource.getReferredUsers ($code) error: $e");
     }
 
-    // Fallback matching sample JSON
-    return [
-      ReferredUserItem(
-        id: 5,
-        referralCodeUsed: code,
-        commissionPoints: 0,
-        status: "active",
-        referredAt: "2026-11-05T11:46:03.000000Z",
-        user: ReferralUserInfo(
-          id: 1734,
-          name: "Mr. teet teet",
-          email: "teet@gmail.com",
-          phone: "+919651017089",
-          userType: "matrimony",
-          status: "active",
-          photoUrl: "https://malisetu.com/default-avatar.png",
-          location: "Lucknow, India",
-          registeredAt: "2026-11-05T11:46:03.000000Z",
-        ),
-      ),
-    ];
+    return [];
   }
 
   @override
@@ -234,10 +212,10 @@ class ReferralDataSourceImpl implements ReferralDataSource {
     int page = 1,
     int perPage = 20,
   }) async {
-    final rawCode = (referralCode != null && referralCode.trim().isNotEmpty)
+    final code = (referralCode != null && referralCode.trim().isNotEmpty)
         ? referralCode.trim()
-        : _getReferralCodeFromPrefs('MSUQMI6BV4');
-    final code = rawCode.isNotEmpty ? rawCode : 'MSUQMI6BV4';
+        : _getReferralCodeFromPrefs();
+    if (code.isEmpty) return [];
 
     final queryParams = <String, dynamic>{
       if (userType != null && userType.isNotEmpty && userType != 'all') 'user_type': userType,
@@ -246,7 +224,6 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       'page': page,
     };
 
-    // Primary & Exclusive: GET /api/referrals/{code}/referred-users
     try {
       final endpoint = ApiConstants.referralReferredUsers(code);
       final response = await apiClient.get(endpoint, queryParameters: queryParams);
@@ -260,27 +237,7 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       debugPrint("⚠️ ReferralDataSource.getReferralHistory ($code) error: $e");
     }
 
-    // Fallback matching sample JSON
-    return [
-      ReferredUserItem(
-        id: 5,
-        referralCodeUsed: code,
-        commissionPoints: 0,
-        status: "active",
-        referredAt: "2026-11-05T11:46:03.000000Z",
-        user: ReferralUserInfo(
-          id: 1734,
-          name: "Mr. teet teet",
-          email: null,
-          phone: "+919651017089",
-          userType: "matrimony",
-          status: "active",
-          photoUrl: "https://malisetu.com/default-avatar.png",
-          location: "Lucknow, India",
-          registeredAt: "2026-11-05T11:46:03.000000Z",
-        ),
-      ),
-    ];
+    return [];
   }
 
   @override
@@ -291,10 +248,9 @@ class ReferralDataSourceImpl implements ReferralDataSource {
     String? taluka,
     String? cityVillage,
   }) async {
-    final rawCode = (referralCode != null && referralCode.trim().isNotEmpty)
+    final code = (referralCode != null && referralCode.trim().isNotEmpty)
         ? referralCode.trim()
-        : _getReferralCodeFromPrefs('MSUQMI6BV4');
-    final code = rawCode.isNotEmpty ? rawCode : 'MSUQMI6BV4';
+        : _getReferralCodeFromPrefs();
 
     final queryParams = <String, dynamic>{
       'depth': depth,
@@ -303,40 +259,30 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       if (cityVillage != null && cityVillage.trim().isNotEmpty) 'city_village': cityVillage.trim(),
     };
 
-    try {
-      final endpoint = ApiConstants.referralNetwork(code);
-      final response = await apiClient.get(endpoint, queryParameters: queryParams);
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data['data'] ?? response.data;
-        return ReferralNetworkNode.fromJson(data);
+    if (code.isNotEmpty) {
+      try {
+        final endpoint = ApiConstants.referralNetwork(code);
+        final response = await apiClient.get(endpoint, queryParameters: queryParams);
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data['data'] ?? response.data;
+          return ReferralNetworkNode.fromJson(data);
+        }
+      } catch (e) {
+        debugPrint("⚠️ ReferralDataSource.getReferralNetwork ($code) error: $e");
       }
-    } catch (e) {
-      debugPrint("⚠️ ReferralDataSource.getReferralNetwork ($code) error: $e");
     }
 
-    // Fallback matching sample tree JSON
     final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
     final currentUser = authService?.currentUser.value;
 
     return ReferralNetworkNode(
-      userId: currentUser?.id ?? 1729,
-      name: currentUser?.name ?? "Darshan Kondekar",
+      userId: currentUser?.id ?? 0,
+      name: currentUser?.name ?? '',
       referralCode: code,
       level: 0,
-      userType: currentUser?.userType ?? "general",
+      userType: currentUser?.userType ?? 'general',
       commissionPoints: 0,
-      children: [
-        ReferralNetworkNode(
-          userId: 1734,
-          name: "Mr. teet teet",
-          referralCode: "MSUTARHJMM",
-          userType: "matrimony",
-          level: 1,
-          commissionPoints: 0,
-          location: "Lucknow, India",
-          children: [],
-        ),
-      ],
+      children: [],
     );
   }
 
@@ -344,25 +290,26 @@ class ReferralDataSourceImpl implements ReferralDataSource {
   Future<ShareableLinkData> getShareableLink({String? referralCode}) async {
     final code = (referralCode != null && referralCode.isNotEmpty)
         ? referralCode
-        : _getReferralCodeFromPrefs('MSUQMI6BV4');
+        : _getReferralCodeFromPrefs();
 
     // 1. Primary: Dynamic code endpoint -> /api/referrals/{code}/share-link
-    try {
-      final endpoint = ApiConstants.referralShareLink(code);
-      final response = await apiClient.get(endpoint);
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data['data'] ?? response.data;
-        final result = ShareableLinkData.fromJson(data);
+    if (code.isNotEmpty) {
+      try {
+        final endpoint = ApiConstants.referralShareLink(code);
+        final response = await apiClient.get(endpoint);
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data['data'] ?? response.data;
+          final result = ShareableLinkData.fromJson(data);
 
-        // Store into SharedPreferences
-        if (result.referralCode.isNotEmpty) {
-          await SharedPrefs.setString(AppConstants.referralCodePref, result.referralCode);
+          if (result.referralCode.isNotEmpty) {
+            await SharedPrefs.setString(AppConstants.referralCodePref, result.referralCode);
+          }
+
+          return result;
         }
-
-        return result;
+      } catch (e) {
+        debugPrint("⚠️ ReferralDataSource.getShareableLink ($code) error: $e");
       }
-    } catch (e) {
-      debugPrint("⚠️ ReferralDataSource.getShareableLink ($code) error: $e");
     }
 
     // 2. Fallback: Generic endpoint -> /api/referral/shareable-link
@@ -376,12 +323,11 @@ class ReferralDataSourceImpl implements ReferralDataSource {
       debugPrint("⚠️ ReferralDataSource.getShareableLink fallback error: $e");
     }
 
-    // 3. Fallback mock data
-    final link = "https://malisetu.com/register?referral_code=$code";
+    final link = code.isNotEmpty ? "https://malisetu.com/register?referral_code=$code" : "";
     return ShareableLinkData(
       referralCode: code,
       referralLink: link,
-      shareMessage: "Join Mali Setu using my referral link: $link",
+      shareMessage: link.isNotEmpty ? "Join Mali Setu using my referral link: $link" : "",
     );
   }
 
@@ -394,7 +340,7 @@ class ReferralDataSourceImpl implements ReferralDataSource {
   }) async {
     final code = (referralCode != null && referralCode.isNotEmpty)
         ? referralCode
-        : _getReferralCodeFromPrefs('MSUQMI6BV4');
+        : _getReferralCodeFromPrefs();
 
     final body = <String, dynamic>{
       'email': email.trim(),
@@ -406,33 +352,29 @@ class ReferralDataSourceImpl implements ReferralDataSource {
     };
 
     // 1. Primary: POST /api/referrals/{code}/send-email
-    try {
-      final endpoint = ApiConstants.referralSendEmail(code);
-      final response = await apiClient.post(endpoint, data: body);
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data['data'] ?? response.data;
-        return SendReferralResult.fromJson(data);
+    if (code.isNotEmpty) {
+      try {
+        final endpoint = ApiConstants.referralSendEmail(code);
+        final response = await apiClient.post(endpoint, data: body);
+        if (response.statusCode == 200 && response.data != null) {
+          final data = response.data['data'] ?? response.data;
+          return SendReferralResult.fromJson(data);
+        }
+      } catch (e) {
+        debugPrint("⚠️ ReferralDataSource.sendReferralLink ($code) error: $e");
       }
-    } catch (e) {
-      debugPrint("⚠️ ReferralDataSource.sendReferralLink ($code) error: $e");
     }
 
     // 2. Fallback: Generic POST /api/referral/send
-    try {
-      final response = await apiClient.post(ApiConstants.sendReferralLink, data: body);
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data['data'] ?? response.data;
-        return SendReferralResult.fromJson(data);
-      }
-    } catch (e) {
-      debugPrint("⚠️ ReferralDataSource.sendReferralLink fallback error: $e");
+    final response = await apiClient.post(ApiConstants.sendReferralLink, data: body);
+    if (response.statusCode == 200 && response.data != null) {
+      final data = response.data['data'] ?? response.data;
+      return SendReferralResult.fromJson(data);
     }
 
-    // Mock successful response if API offline
-    return SendReferralResult(
-      email: email,
-      referralCode: code,
-      referralLink: "https://malisetu.com/register?referral_code=$code",
+    throw Exception(
+      (response.data is Map ? response.data['message'] : null) ??
+          'Failed to send referral email. Please try again.',
     );
   }
 }

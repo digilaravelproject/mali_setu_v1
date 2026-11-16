@@ -32,6 +32,7 @@ class PhoneFieldComponent extends StatefulWidget {
   final String? initialPhone;
   final bool isRequired;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<bool>? onVerificationChanged;
   final String? errorText;
   final bool showOtpSection;
   final int otpLength;
@@ -41,10 +42,145 @@ class PhoneFieldComponent extends StatefulWidget {
     this.initialPhone,
     this.isRequired = false,
     this.onChanged,
+    this.onVerificationChanged,
     this.errorText,
     this.showOtpSection = true,
-    this.otpLength = 4,
+    this.otpLength = 6,
   });
+
+  /// Displays a user-friendly dialog informing the user that mobile verification is required
+  static Future<void> showNotVerifiedDialog({
+    required BuildContext context,
+    VoidCallback? onVerifyTap,
+  }) async {
+    final locale = Get.locale?.languageCode ?? 'en';
+    final isMr = locale == 'mr';
+    final isHi = locale == 'hi';
+
+    final String title = isMr
+        ? "मोबाईल पडताळणी आवश्यक"
+        : (isHi ? "मोबाइल सत्यापन आवश्यक" : "Mobile Verification Required");
+
+    final String message = isMr
+        ? "आपला मोबाईल नंबर OTP द्वारे सत्यापित केलेला नाही. नोंदणी पूर्ण करण्यासाठी कृपया OTP प्रविष्ट करून मोबाईल नंबर सत्यापित करा."
+        : (isHi
+            ? "आपका मोबाइल नंबर OTP द्वारा सत्यापित नहीं है। रजिस्ट्रेशन पूरा करने के लिए कृपया OTP दर्ज करके मोबाइल नंबर सत्यापित करें।"
+            : "Your mobile number is not verified with OTP. Please enter the OTP to verify your mobile number before proceeding.");
+
+    final String verifyBtnText = isMr
+        ? "OTP ने सत्यापित करा"
+        : (isHi ? "OTP से सत्यापित करें" : "Verify with OTP");
+
+    final String cancelText = isMr ? "रद्द करा" : (isHi ? "रद्द करें" : "Cancel");
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final primaryColor = theme.primaryColor;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 6,
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF0F3),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFFFD1DC), width: 1.5),
+                  ),
+                  child: Icon(
+                    Icons.mobile_friendly_rounded,
+                    color: primaryColor,
+                    size: 34,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    color: Color(0xFF4B5563),
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          cancelText,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          onVerifyTap?.call();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          verifyBtnText,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   State<PhoneFieldComponent> createState() => PhoneFieldComponentState();
@@ -59,11 +195,28 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
 
   bool isSendingOtp = false;
   bool isResendingOtp = false;
+  bool isVerifyingOtp = false;
   bool isOtpSent = false;
   bool isVerified = false;
+  String? sessionInfo;
   String? errorMessage;
   Timer? _resendTimer;
   int _resendCountdown = 0;
+
+  bool get isMobileVerified => isVerified;
+  bool get isOtpSentState => isOtpSent;
+
+  void sendOtp() {
+    if (!isVerified && !isSendingOtp) {
+      _handleVerifyClick();
+    }
+  }
+
+  void focusFirstOtpBox() {
+    if (otpFocusNodes.isNotEmpty) {
+      otpFocusNodes[0].requestFocus();
+    }
+  }
 
   // All countries with codes
   static const List<CountryCode> allCountries = [
@@ -243,9 +396,41 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
     phoneCtrl = TextEditingController(text: parsed['number']);
 
     otpControllers = List.generate(widget.otpLength, (_) => TextEditingController());
-    otpFocusNodes = List.generate(widget.otpLength, (_) => FocusNode());
+    otpFocusNodes = List.generate(widget.otpLength, (index) {
+      final node = FocusNode();
+      node.onKeyEvent = (focusNode, event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.backspace) {
+          if (otpControllers[index].text.isEmpty && index > 0) {
+            otpControllers[index - 1].clear();
+            otpFocusNodes[index - 1].requestFocus();
+            if (mounted) setState(() {});
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      };
+      return node;
+    });
 
-    phoneCtrl.addListener(_notifyChange);
+    phoneCtrl.addListener(_onPhoneChanged);
+  }
+
+  void _onPhoneChanged() {
+    if (isVerified || isOtpSent) {
+      if (mounted) {
+        setState(() {
+          isVerified = false;
+          isOtpSent = false;
+          sessionInfo = null;
+          for (var c in otpControllers) {
+            c.clear();
+          }
+        });
+      }
+      widget.onVerificationChanged?.call(false);
+    }
+    _notifyChange();
   }
 
   @override
@@ -347,7 +532,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
     return otpControllers.map((c) => c.text.trim()).join();
   }
 
-  /// Validates that phone number is not empty and has valid digits
+  /// Validates that phone number is not empty, has valid digits, and is verified with OTP
   String? validate() {
     final text = phoneCtrl.text.trim();
     if (widget.isRequired && text.isEmpty) {
@@ -357,6 +542,11 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
     if (text.isNotEmpty && text.length < 10) {
       if (mounted) setState(() => errorMessage = 'phone_min_digits'.tr);
       return 'phone_min_digits'.tr;
+    }
+    if (widget.isRequired && !isVerified) {
+      const msg = 'Please verify your mobile number with OTP';
+      if (mounted) setState(() => errorMessage = msg);
+      return msg;
     }
     if (mounted && errorMessage != null) {
       setState(() => errorMessage = null);
@@ -458,6 +648,11 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       }
 
       if (isSuccess) {
+        if (data is Map) {
+          sessionInfo = data['session_info']?.toString() ??
+              data['sessionInfo']?.toString() ??
+              data['data']?['session_info']?.toString();
+        }
         CustomSnackBar.showSuccess(message: msg);
         if (mounted) {
           setState(() {
@@ -605,6 +800,11 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
       }
 
       if (isSuccess) {
+        if (data is Map) {
+          sessionInfo = data['session_info']?.toString() ??
+              data['sessionInfo']?.toString() ??
+              data['data']?['session_info']?.toString();
+        }
         CustomSnackBar.showSuccess(message: msg);
         if (mounted) {
           setState(() {
@@ -666,28 +866,203 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
   }
 
   void _onOtpDigitChanged(int index, String val) {
-    if (val.isNotEmpty) {
+    final cleanDigits = val.replaceAll(RegExp(r'\D'), '');
+
+    // 1. Multi-digit paste or autofill (e.g. 6-digit OTP copied/autofilled)
+    if (cleanDigits.length >= widget.otpLength || cleanDigits.length >= 4) {
+      for (int i = 0; i < widget.otpLength; i++) {
+        if (i < cleanDigits.length) {
+          otpControllers[i].text = cleanDigits[i];
+        }
+      }
+      if (cleanDigits.length >= widget.otpLength) {
+        otpFocusNodes[widget.otpLength - 1].unfocus();
+        _verifyEnteredOtp();
+      } else {
+        otpFocusNodes[cleanDigits.length].requestFocus();
+      }
+      if (mounted) setState(() {});
+      return;
+    }
+
+    // 2. Typing into an already filled box (replace digit and advance)
+    if (cleanDigits.length > 1) {
+      final newChar = cleanDigits[cleanDigits.length - 1];
+      otpControllers[index].value = TextEditingValue(
+        text: newChar,
+        selection: const TextSelection.collapsed(offset: 1),
+      );
       if (index < widget.otpLength - 1) {
         otpFocusNodes[index + 1].requestFocus();
       } else {
         otpFocusNodes[index].unfocus();
-        _checkAndVerifyOtp();
+        _verifyEnteredOtp();
+      }
+      if (mounted) setState(() {});
+      return;
+    }
+
+    // 3. Normal single digit entry
+    if (cleanDigits.isNotEmpty) {
+      if (otpControllers[index].text != cleanDigits) {
+        otpControllers[index].value = TextEditingValue(
+          text: cleanDigits,
+          selection: const TextSelection.collapsed(offset: 1),
+        );
+      }
+      if (index < widget.otpLength - 1) {
+        otpFocusNodes[index + 1].requestFocus();
+      } else {
+        otpFocusNodes[index].unfocus();
+        _verifyEnteredOtp();
       }
     } else {
+      // Digit cleared
       if (index > 0) {
         otpFocusNodes[index - 1].requestFocus();
       }
     }
+    if (mounted) setState(() {});
   }
 
-  void _checkAndVerifyOtp() {
+  Future<void> _verifyEnteredOtp() async {
     final otp = getEnteredOtp();
-    if (otp.length == widget.otpLength) {
-      HapticFeedback.mediumImpact();
+    if (otp.length != widget.otpLength) {
+      CustomSnackBar.showError(
+        message: 'Please enter valid ${widget.otpLength}-digit OTP',
+      );
+      return;
+    }
+
+    if (isVerifyingOtp || isVerified) return;
+
+    if (mounted) {
       setState(() {
-        isVerified = true;
+        isVerifyingOtp = true;
+        errorMessage = null;
       });
-      CustomSnackBar.showSuccess(message: 'Mobile number verified successfully!');
+    }
+
+    try {
+      ApiClient apiClient;
+      if (Get.isRegistered<ApiClient>()) {
+        apiClient = Get.find<ApiClient>();
+      } else {
+        apiClient = ApiClient();
+        Get.put<ApiClient>(apiClient, permanent: true);
+      }
+
+      final fullPhoneNumber = getCombinedPhone();
+      final token = await TokenManager.getToken();
+      final headers = <String, dynamic>{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token ?? ''}',
+      };
+
+      final payload = <String, dynamic>{
+        "phone_number": fullPhoneNumber,
+        "otp": otp,
+        if (sessionInfo != null && sessionInfo!.isNotEmpty)
+          "session_info": sessionInfo,
+      };
+
+      final response = await apiClient.post(
+        ApiConstants.authPhoneVerifyOtp,
+        data: payload,
+        options: Options(headers: headers),
+      );
+
+      final data = response.data;
+      final int statusCode = response.statusCode ?? 500;
+      final bool isSuccess = (statusCode == 200 || statusCode == 201) &&
+          (data is Map
+              ? (data['success'] == true ||
+                  data['success'] == 1 ||
+                  data['status'] == true ||
+                  (data['error'] == null && data['errors'] == null))
+              : true);
+
+      String msg = isSuccess
+          ? 'Mobile number verified successfully!'
+          : 'OTP verification failed';
+      if (data is Map) {
+        if (!isSuccess) {
+          if (data['error'] != null &&
+              data['error'].toString().trim().isNotEmpty) {
+            msg = data['error'].toString().trim();
+          } else if (data['errors'] != null && data['errors'] is Map) {
+            final errMap = data['errors'] as Map;
+            if (errMap.isNotEmpty) {
+              final firstErr = errMap.values.first;
+              if (firstErr is List && firstErr.isNotEmpty) {
+                msg = firstErr.first.toString();
+              } else {
+                msg = firstErr.toString();
+              }
+            }
+          } else if (data['message'] != null &&
+              data['message'].toString().trim().isNotEmpty) {
+            msg = data['message'].toString().trim();
+          }
+        } else {
+          if (data['message'] != null &&
+              data['message'].toString().trim().isNotEmpty) {
+            msg = data['message'].toString().trim();
+          }
+        }
+      }
+
+      if (isSuccess) {
+        HapticFeedback.mediumImpact();
+        if (mounted) {
+          setState(() {
+            isVerified = true;
+            isVerifyingOtp = false;
+            errorMessage = null;
+          });
+          widget.onVerificationChanged?.call(true);
+        }
+        CustomSnackBar.showSuccess(message: msg);
+      } else {
+        if (mounted) {
+          setState(() {
+            isVerified = false;
+            isVerifyingOtp = false;
+            errorMessage = msg;
+          });
+          widget.onVerificationChanged?.call(false);
+        }
+        CustomSnackBar.showError(message: msg);
+      }
+    } catch (e) {
+      String errText = 'OTP verification failed';
+      if (e is DioException && e.response?.data is Map) {
+        final d = e.response!.data as Map;
+        if (d['error'] != null && d['error'].toString().trim().isNotEmpty) {
+          errText = d['error'].toString().trim();
+        } else if (d['errors'] != null && d['errors'] is Map) {
+          final errMap = d['errors'] as Map;
+          if (errMap.isNotEmpty) {
+            final firstErr = errMap.values.first;
+            errText = (firstErr is List && firstErr.isNotEmpty)
+                ? firstErr.first.toString()
+                : firstErr.toString();
+          }
+        } else if (d['message'] != null &&
+            d['message'].toString().trim().isNotEmpty) {
+          errText = d['message'].toString().trim();
+        }
+      }
+      if (mounted) {
+        setState(() {
+          isVerified = false;
+          isVerifyingOtp = false;
+          errorMessage = errText;
+        });
+        widget.onVerificationChanged?.call(false);
+      }
+      CustomSnackBar.showError(message: errText);
     }
   }
 
@@ -907,7 +1282,7 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
           ),
         ],
 
-        // 3. Enter OTP Card (matching exact screenshot layout)
+        // 3. Enter OTP Card (6-digit OTP boxes layout)
         if (widget.showOtpSection && isOtpSent) ...[
           const SizedBox(height: 12),
           Container(
@@ -925,57 +1300,134 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // "Enter OTP *"
+                // "Enter OTP *" with Verified badge or 6-digit indicator
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Enter OTP',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
+                    Row(
+                      children: [
+                        Text(
+                          'Enter OTP',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
+                                color: const Color(0xFF111827),
+                              ) ??
+                              const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13.5,
+                                color: Color(0xFF111827),
+                              ),
+                        ),
+                        const Text(
+                          ' *',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
                             fontSize: 13.5,
-                            color: const Color(0xFF111827),
-                          ) ??
-                          const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13.5,
-                            color: Color(0xFF111827),
                           ),
+                        ),
+                      ],
                     ),
-                    const Text(
-                      ' *',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13.5,
+                    if (isVerified)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F8F0),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: const Color(0xFF10B981),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: Color(0xFF10B981),
+                              size: 14,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Verified',
+                              style: TextStyle(
+                                color: Color(0xFF10B981),
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (isVerifyingOtp)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 13,
+                            height: 13,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: primaryColor,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Verifying...',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Text(
+                        '${widget.otpLength}-digit code',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                // Row with 4 Single-Bordered OTP boxes + "Didn't receive OTP? Resend"
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // 4 Clean OTP digit boxes (single crisp border, NO double borders)
-                    ...List.generate(widget.otpLength, (index) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          right: index < widget.otpLength - 1 ? 8 : 0,
-                        ),
-                        child: SizedBox(
-                          width: 44,
+                // 6 Clean OTP digit boxes (evenly spaced, responsive, crisp border)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double totalWidth = constraints.maxWidth;
+                    const double spacing = 6.0;
+                    final double totalSpacing = spacing * (widget.otpLength - 1);
+                    final double boxWidth =
+                        ((totalWidth - totalSpacing) / widget.otpLength)
+                            .clamp(34.0, 48.0);
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(widget.otpLength, (index) {
+                        final bool hasVal =
+                            otpControllers[index].text.isNotEmpty;
+                        return SizedBox(
+                          width: boxWidth,
                           height: 48,
                           child: TextField(
                             controller: otpControllers[index],
                             focusNode: otpFocusNodes[index],
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
-                            maxLength: 1,
-                            style: const TextStyle(
-                              fontSize: 20,
+                            style: TextStyle(
+                              fontSize: 19,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF111827),
+                              color: isVerified
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFF111827),
                             ),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
@@ -997,8 +1449,12 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFD9D9D9),
+                                borderSide: BorderSide(
+                                  color: isVerified
+                                      ? const Color(0xFF10B981)
+                                      : (hasVal
+                                          ? primaryColor.withOpacity(0.5)
+                                          : const Color(0xFFD9D9D9)),
                                   width: 1.2,
                                 ),
                               ),
@@ -1010,54 +1466,98 @@ class PhoneFieldComponentState extends State<PhoneFieldComponent> {
                                 ),
                               ),
                             ),
-                            onChanged: (val) => _onOtpDigitChanged(index, val),
+                            onChanged: (val) =>
+                                _onOtpDigitChanged(index, val),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                    );
+                  },
+                ),
 
-                    const Spacer(),
+                const SizedBox(height: 12),
 
-                    // "Didn't receive OTP? Resend" on right side
+                // "Didn't receive OTP? Resend" Row below the 6 boxes
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Didn't receive OTP?",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF6B7280),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     InkWell(
                       onTap: (_resendCountdown > 0 || isResendingOtp)
                           ? null
                           : _handleResendOtp,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            "Didn't receive OTP?",
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Color(0xFF6B7280),
-                              fontWeight: FontWeight.w500,
-                            ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 2,
+                          horizontal: 4,
+                        ),
+                        child: Text(
+                          isResendingOtp
+                              ? 'Resending...'
+                              : _resendCountdown > 0
+                                  ? 'Resend (${_resendCountdown}s)'
+                                  : 'Resend OTP',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: (_resendCountdown > 0 || isResendingOtp)
+                                ? const Color(0xFF9CA3AF)
+                                : primaryColor,
+                            fontWeight: FontWeight.w700,
+                            decoration:
+                                (_resendCountdown > 0 || isResendingOtp)
+                                    ? TextDecoration.none
+                                    : TextDecoration.underline,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            isResendingOtp
-                                ? 'Resending...'
-                                : _resendCountdown > 0
-                                    ? 'Resend (${_resendCountdown}s)'
-                                    : 'Resend',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: (_resendCountdown > 0 || isResendingOtp)
-                                  ? const Color(0xFF9CA3AF)
-                                  : primaryColor,
-                              fontWeight: FontWeight.w700,
-                              decoration: (_resendCountdown > 0 || isResendingOtp)
-                                  ? TextDecoration.none
-                                  : TextDecoration.underline,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
                 ),
+
+                if (!isVerified) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 42,
+                    child: ElevatedButton(
+                      onPressed: (isVerifyingOtp || getEnteredOtp().length != widget.otpLength)
+                          ? null
+                          : _verifyEnteredOtp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: isVerifyingOtp
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Verify OTP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.5,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

@@ -274,7 +274,7 @@ class ReferralController extends GetxController {
       return shareableLink.value!.referralCode.trim();
     }
 
-    return 'MSUQMI6BV4';
+    return '';
   }
 
   String getReferralLink() {
@@ -284,7 +284,8 @@ class ReferralController extends GetxController {
     if (earnings.value?.volunteer?.referralLink?.isNotEmpty == true) {
       return earnings.value!.volunteer!.referralLink!;
     }
-    return "https://malisetu.com/register?referral_code=${getReferralCode()}";
+    final code = getReferralCode();
+    return code.isNotEmpty ? "https://malisetu.com/register?referral_code=$code" : "";
   }
 
   void copyReferralCode(BuildContext context) {

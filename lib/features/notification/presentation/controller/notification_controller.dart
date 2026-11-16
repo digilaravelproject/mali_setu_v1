@@ -17,6 +17,7 @@ class NotificationController extends GetxController {
   var lastPage = 1.obs;
   var isLoading = false.obs;
   var isMoreLoading = false.obs;
+  var isActionLoading = false.obs;
 
   // Unread Count
   var unreadCount = 0.obs;
@@ -34,15 +35,21 @@ class NotificationController extends GetxController {
     super.onInit();
     loadNotifications();
     loadUnreadCount();
-    readAllNotifications();
     
     scrollController.addListener(() {
-      if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
-        if (currentPage.value < lastPage.value && !isMoreLoading.value) {
+      if (scrollController.hasClients &&
+          scrollController.position.pixels >= scrollController.position.maxScrollExtent - 100) {
+        if (currentPage.value < lastPage.value && !isMoreLoading.value && !isLoading.value) {
           loadMoreNotifications();
         }
       }
     });
+  }
+
+  /// Called when NotificationPage is opened so unread notifications are only cleared when viewed
+  Future<void> onNotificationPageOpened() async {
+    await loadNotifications();
+    await readAllNotifications();
   }
 
   @override
@@ -122,6 +129,8 @@ class NotificationController extends GetxController {
   }
 
   Future<void> deleteNotification(String id) async {
+    if (isActionLoading.value) return;
+    isActionLoading.value = true;
     try {
       await repository.deleteNotification(id);
       // Refresh list from server to ensure sync
@@ -129,12 +138,14 @@ class NotificationController extends GetxController {
       CustomSnackBar.showSuccess(message: 'Notification deleted successfully');
     } catch (e) {
       CustomSnackBar.showError(message: 'Failed to delete notification');
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
   Future<void> deleteSelected() async {
-    if (selectedNotifications.isEmpty) return;
-
+    if (selectedNotifications.isEmpty || isActionLoading.value) return;
+    isActionLoading.value = true;
     try {
       List<String> idsToDelete = List.from(selectedNotifications);
       await repository.deleteMultipleNotifications(idsToDelete);
@@ -148,6 +159,8 @@ class NotificationController extends GetxController {
       CustomSnackBar.showSuccess(message: 'Selected notifications deleted');
     } catch (e) {
       CustomSnackBar.showError(message: 'Failed to delete notifications');
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
@@ -160,8 +173,11 @@ class NotificationController extends GetxController {
   }
 
   void selectAll() {
-    // Only select currently loaded notifications
-    selectedNotifications.value = notifications.map((n) => n.id!).cast<String>().toList();
+    // Only select currently loaded notifications that have valid IDs
+    selectedNotifications.value = notifications
+        .where((n) => n.id != null && n.id!.isNotEmpty)
+        .map((n) => n.id!)
+        .toList();
   }
 
   void clearSelection() {

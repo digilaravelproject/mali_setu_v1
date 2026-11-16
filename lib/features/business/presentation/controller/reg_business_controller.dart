@@ -45,6 +45,7 @@ class RegBusinessController extends GetxController {
   /// PHONE FIELD COMPONENT KEY
   final GlobalKey<PhoneFieldComponentState> phoneFieldKey =
       GlobalKey<PhoneFieldComponentState>();
+  final RxBool isPhoneVerified = false.obs;
 
   /// Text Controllers
   final bNameCtrl = TextEditingController();
@@ -527,6 +528,23 @@ class RegBusinessController extends GetxController {
       errors['phone'] = phoneValidationError;
     } else {
       errors.remove('phone');
+    }
+
+    final bool isPhoneOtpVerified = isEditMode || phoneFieldKey.currentState?.isVerified == true || isPhoneVerified.value;
+    if (!isPhoneOtpVerified) {
+      if (Get.context != null) {
+        PhoneFieldComponent.showNotVerifiedDialog(
+          context: Get.context!,
+          onVerifyTap: () {
+            if (phoneFieldKey.currentState?.isOtpSentState == true) {
+              phoneFieldKey.currentState?.focusFirstOtpBox();
+            } else {
+              phoneFieldKey.currentState?.sendOtp();
+            }
+          },
+        );
+      }
+      return false;
     }
 
     if (emailCtrl.text.trim().isEmpty) {

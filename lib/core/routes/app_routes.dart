@@ -69,6 +69,7 @@ import '../../features/settings/binding/profile_binding.dart';
 import '../../features/settings/page/update_profile_page.dart';
 import '../../features/volunteer/pages/opportunity_details_page.dart';
 import '../../features/webinars/binding/webinars_binding.dart';
+import '../../features/webinars/data/models/webinar_model.dart';
 import '../../features/webinars/presentation/pages/webinars_list_screen.dart';
 import '../../features/webinars/presentation/pages/webinar_details_screen.dart';
 import '../../features/webinars/presentation/pages/webinar_registration_page.dart';
@@ -235,7 +236,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.addProduct,
       page: () => const AddProductScreen(),
-      binding: MatrimonyBinding(),
+      binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -333,7 +334,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.profileScreen,
       page: () => ProfileScreen(),
-      binding: BusinessBinding(),
+      binding: ProfileBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
     ),
@@ -491,14 +492,16 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.webinarRegistration,
-      page: () => const WebinarDetailsScreen(),
+      page: () => const WebinarRegistrationPage(),
       binding: WebinarsBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: AppRoutes.webinarConfirmation,
-      page: () => WebinarConfirmationPage(webinar: Get.arguments),
+      page: () => WebinarConfirmationPage(
+        webinar: Get.arguments is Webinar ? Get.arguments as Webinar : Webinar.fromApiJson(const {}),
+      ),
       transition: Transition.fadeIn,
       transitionDuration: const Duration(milliseconds: 400),
     ),

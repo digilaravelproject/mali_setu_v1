@@ -15,6 +15,7 @@ class MatrimonyChatController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
 
   final RxBool isLoading = false.obs;
+  final RxBool isSending = false.obs;
   final RxList<MatrimonyMessage> messages = <MatrimonyMessage>[].obs;
   final Rx<MatrimonyConversation?> conversation = Rx<MatrimonyConversation?>(null);
   
@@ -215,7 +216,7 @@ class MatrimonyChatController extends GetxController {
         );
         if (existing != null) {
           conversationId = existing.id;
-          fetchMessages();
+          await fetchMessages();
         } else {
           // If no conversation exists, it will be created on first message
           // Or we could have an explicit create conversation API
@@ -230,9 +231,9 @@ class MatrimonyChatController extends GetxController {
 
   Future<void> sendMessage() async {
     final text = messageController.text.trim();
-    if (text.isEmpty && selectedFiles.isEmpty) return;
+    if ((text.isEmpty && selectedFiles.isEmpty) || isSending.value) return;
 
-    isLoading.value = true;
+    isSending.value = true;
     try {
       if (selectedFiles.isNotEmpty) {
         // Send each image as a separate message
@@ -261,7 +262,7 @@ class MatrimonyChatController extends GetxController {
               conversationId = newMsg.conversationId;
             }
           } else {
-            // Handle specific failure if needed
+            CustomSnackBar.showError(message: response['message'] ?? "Failed to send attachment");
           }
         }
         _handleSendMessageSuccess(null); // Clear everything
@@ -282,12 +283,14 @@ class MatrimonyChatController extends GetxController {
         final response = await _repository.sendMessage(data);
         if (response['success'] == true) {
           _handleSendMessageSuccess(response);
+        } else {
+          CustomSnackBar.showError(message: response['message'] ?? "Failed to send message");
         }
       }
     } catch (e) {
       CustomSnackBar.showError(message: "Failed to send message: $e");
     } finally {
-      isLoading.value = false;
+      isSending.value = false;
     }
   }
 

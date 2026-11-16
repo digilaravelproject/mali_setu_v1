@@ -5,7 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../features/blogs/presentation/controller/blog_controller.dart';
+import '../../features/webinars/data/models/webinar_model.dart';
+import 'deep_link_service.dart';
 import '../constent/api_constants.dart';
 import '../constent/app_constants.dart';
 import '../network/api_client.dart';
@@ -16,6 +17,9 @@ import '../../features/Auth/service/auth_service.dart';
 import '../../features/business/data/model/res_all_business_model.dart';
 import '../../features/matrimony/presentation/controller/matrimony_chat_controller.dart';
 import '../../features/matrimony/presentation/controller/matrimony_requests_controller.dart';
+import '../../features/matrimony/presentation/page/matrimony_profile_screen.dart';
+import '../../features/matrimony/presentation/controller/matrimony_details_controller.dart';
+import '../../features/matrimony/binding/matrimony_details_binding.dart';
 import '../../features/notification/data/model/notification_model.dart' hide NotificationResponse;
 import '../../features/notification/presentation/controller/notification_controller.dart';
 import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
@@ -331,11 +335,14 @@ class NotificationHandlerService extends GetxService {
     if (!data.containsKey('notification_id') && notification.id != null) {
       data['notification_id'] = notification.id;
     }
-    if (notification.relatedId != null) {
+    if ((!data.containsKey('related_id') || data['related_id'] == null || data['related_id'].toString().isEmpty) && notification.relatedId != null) {
       data['related_id'] = notification.relatedId.toString();
     }
-    if (notification.relatedType != null) {
+    if ((!data.containsKey('related_type') || data['related_type'] == null || data['related_type'].toString().isEmpty) && notification.relatedType != null) {
       data['related_type'] = notification.relatedType;
+    }
+    if (!data.containsKey('created_at') && notification.createdAt != null) {
+      data['created_at'] = notification.createdAt;
     }
 
     navigateFromPayload(data);
@@ -486,13 +493,17 @@ class NotificationHandlerService extends GetxService {
         .toLowerCase();
     final String type = rawType.replaceAll(' ', '_').replaceAll('-', '_');
 
-    // Helper functions to safely extract IDs
+    // Helper functions to safely extract IDs (guards generic 'id' against colliding with 'notification_id')
+    final int? _notifRecordId = int.tryParse((data['notification_id'] ?? '').toString());
     int? getInt(List<String> keys) {
       // 1. Check top-level keys in data FIRST (top-level holds the actual current event's parameters)
       for (final key in keys) {
         if (data.containsKey(key) && data[key] != null) {
           final parsed = int.tryParse(data[key].toString());
-          if (parsed != null) return parsed;
+          if (parsed != null) {
+            if (key == 'id' && _notifRecordId != null && parsed == _notifRecordId) continue;
+            return parsed;
+          }
         }
       }
       // 2. Check inside nested 'data' map only as a fallback
@@ -501,7 +512,10 @@ class NotificationHandlerService extends GetxService {
         for (final key in keys) {
           if (inner.containsKey(key) && inner[key] != null) {
             final parsed = int.tryParse(inner[key].toString());
-            if (parsed != null) return parsed;
+            if (parsed != null) {
+              if (key == 'id' && _notifRecordId != null && parsed == _notifRecordId) continue;
+              return parsed;
+            }
           }
         }
       }
@@ -692,10 +706,7 @@ class NotificationHandlerService extends GetxService {
 
       if (blogId != null && blogId > 0) {
         debugPrint("📝 [NotificationHandler] Priority matched Blog event -> Opening BlogDetailScreen for blogId: $blogId (type=$type)");
-        if (Get.isRegistered<BlogController>()) {
-          Get.find<BlogController>().fetchBlogDetail(blogId);
-        }
-        Get.to(() => BlogDetailScreen(blogId: blogId!));
+        Get.to(() => BlogDetailScreen(blogId: blogId!), preventDuplicates: false);
         return;
       } else {
         debugPrint("📝 [NotificationHandler] Blog notification without specific blogId -> Opening BlogsScreen");
@@ -731,23 +742,168 @@ class NotificationHandlerService extends GetxService {
       return;
     }
 
+    // Helper to safely navigate to MatrimonyProfileScreen
+    void navigateToMatrimonyProfile(int profileId) {
+      debugPrint("💍 [NotificationHandler] Navigating to MatrimonyProfileScreen for profile ID: $profileId");
+      if (Get.isRegistered<MatrimonyDetailsController>()) {
+        Get.find<MatrimonyDetailsController>().fetchProfileDetails(profileId);
+      }
+      Get.to(
+        () => MatrimonyProfileScreen(profileId: profileId),
+        binding: MatrimonyDetailsBinding(),
+        arguments: {'id': profileId},
+        preventDuplicates: false,
+      );
+    }
+
+    // Helper to extract the newly created/target matrimony profile ID (never the logged-in recipient's ID)
+    int? extractMatrimonyTargetId() {
+      int? myUserId;
+      if (Get.isRegistered<AuthService>()) {
+        myUserId = Get.find<AuthService>().currentUser.value?.id;
+      }
+
+      // 1. Try extracting from action_url (e.g. /matrimony/253, /matrimony/profile/253, /matrimony/profile_user_id/1733)
+      final String topActionUrl = (data['action_url'] ?? data['url'] ?? '').toString();
+      final String nestedActionUrl = (data['data'] is Map ? (data['data']['action_url'] ?? data['data']['url'] ?? '') : '').toString();
+      for (final url in [topActionUrl, nestedActionUrl]) {
+        if (url.isNotEmpty) {
+          final match = RegExp(r'matrimony/(?:profile_user_id/|profile/)?(\d+)').firstMatch(url);
+          if (match != null) {
+            final parsed = int.tryParse(match.group(1)!);
+            if (parsed != null && (myUserId == null || parsed != myUserId)) {
+              return parsed;
+            }
+          }
+        }
+      }
+
+      // 2. Specific keys representing the newly created profile / target user
+      final specificProfileKeys = [
+        'profile_id',
+        'matrimony_profile_id',
+        'matrimony_id',
+        'new_user_id',
+        'created_user_id',
+        'profile_user_id',
+        'matrimony_user_id',
+        'target_user_id',
+        'member_id',
+        'creator_id',
+        'author_id',
+        'related_id',
+        'entity_id',
+      ];
+
+      for (final key in specificProfileKeys) {
+        final val = getInt([key]);
+        if (val != null && (myUserId == null || val != myUserId)) {
+          return val;
+        }
+      }
+
+      // 3. Check inside nested maps: 'profile', 'matrimony', 'user', 'data'
+      if (data['profile'] is Map) {
+        final p = data['profile'];
+        for (final k in ['id', 'user_id', 'profile_id', 'profile_user_id']) {
+          if (p[k] != null) {
+            final parsed = int.tryParse(p[k].toString());
+            if (parsed != null && (myUserId == null || parsed != myUserId)) {
+              return parsed;
+            }
+          }
+        }
+      }
+
+      if (data['matrimony'] is Map) {
+        final m = data['matrimony'];
+        for (final k in ['id', 'user_id', 'profile_id', 'profile_user_id']) {
+          if (m[k] != null) {
+            final parsed = int.tryParse(m[k].toString());
+            if (parsed != null && (myUserId == null || parsed != myUserId)) {
+              return parsed;
+            }
+          }
+        }
+      }
+
+      // 4. Check 'id' if not notification_id and not myUserId
+      final notifId = getInt(['notification_id']);
+      final directId = getInt(['id']);
+      if (directId != null && directId != notifId && (myUserId == null || directId != myUserId)) {
+        return directId;
+      }
+
+      // 5. Check 'user_id' ONLY IF it is different from myUserId
+      final uid = getInt(['user_id']);
+      if (uid != null && (myUserId == null || uid != myUserId)) {
+        return uid;
+      }
+
+      return null;
+    }
+
     // ── PRIORITY CHECK 2: MATRIMONY OWN PROFILE STATUS (APPROVED, PENDING, REJECTED) ──
     final bool isMatrimonyProfileEvent = 
         type.contains('matrimony') ||
         relatedType.contains('matrimony') ||
         titleLower.contains('matrimony') ||
-        messageLower.contains('matrimony');
+        messageLower.contains('matrimony') ||
+        titleLower.contains('विवाह') ||
+        messageLower.contains('विवाह') ||
+        titleLower.contains('मॅट्रिमोनी') ||
+        messageLower.contains('मॅट्रिमोनी') ||
+        type == 'new_profile' ||
+        type == 'new_profile_created';
 
-    final bool isOwnProfileStatusEvent = 
-        type.contains('pending') ||
-        type.contains('reject') ||
-        type.contains('approv') ||
-        titleLower.contains('approved') ||
-        titleLower.contains('pending') ||
-        titleLower.contains('rejected') ||
-        messageLower.contains('approved') ||
-        messageLower.contains('pending') ||
-        messageLower.contains('rejected');
+    final bool isChatOrRequestEvent =
+        type.contains('request') ||
+        type.contains('chat') ||
+        type.contains('message') ||
+        type.contains('connect') ||
+        type.contains('accept') ||
+        type.contains('interest');
+
+    final bool hasNewProfileIndicator =
+        type.contains('created') ||
+        type.contains('create') ||
+        type.contains('new_') ||
+        type.contains('_new') ||
+        type.contains('match') ||
+        type.contains('register') ||
+        titleLower.contains('new ') ||
+        titleLower.contains('नवीन ') ||
+        titleLower.contains('नया ') ||
+        titleLower.contains('created') ||
+        titleLower.contains('registered') ||
+        titleLower.contains('तयार') ||
+        messageLower.contains('new ') ||
+        messageLower.contains('नवीन ') ||
+        messageLower.contains('नया ') ||
+        messageLower.contains('created') ||
+        messageLower.contains('registered');
+
+    final bool isExplicitOwnProfileNotification =
+        titleLower.contains('your matrimony') ||
+        titleLower.contains('your profile') ||
+        messageLower.contains('your matrimony') ||
+        messageLower.contains('your profile') ||
+        titleLower.contains('तुमचे प्रोफाइल') ||
+        titleLower.contains('तुमचे मॅट्रिमोनी') ||
+        messageLower.contains('तुमचे प्रोफाइल') ||
+        messageLower.contains('तुमचे मॅट्रिमोनी') ||
+        titleLower.contains('आपका प्रोफाइल') ||
+        titleLower.contains('आपका वैवाहिक') ||
+        messageLower.contains('आपका प्रोफाइल') ||
+        messageLower.contains('आपका वैवाहिक') ||
+        type == 'my_matrimony_profile' ||
+        type == 'matrimony_profile_rejected' ||
+        type == 'matrimony_rejected' ||
+        type == 'profile_rejected';
+
+    final bool isOwnProfileStatusEvent = !isChatOrRequestEvent &&
+        !hasNewProfileIndicator &&
+        isExplicitOwnProfileNotification;
 
     if (isMatrimonyProfileEvent && isOwnProfileStatusEvent) {
       int? myUserId;
@@ -756,65 +912,25 @@ class NotificationHandlerService extends GetxService {
       }
       final int? ownId = getInt(['user_id', 'profile_user_id']) ??
           myUserId ??
-          getInt(['profile_id', 'id', 'related_id']);
+          getInt(['profile_id', 'related_id', 'id']);
 
       if (ownId != null) {
         debugPrint("💍 [NotificationHandler] Opening own matrimony profile (status event): $ownId");
-        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': ownId});
+        navigateToMatrimonyProfile(ownId);
         return;
       }
     }
 
     // ── PRIORITY CHECK 3: NEW MATRIMONY PROFILE CREATION (OTHER USER) ───────
-    if (isMatrimonyProfileEvent && !isOwnProfileStatusEvent && !type.contains('request') && !type.contains('chat') && !type.contains('connect')) {
-      int? myUserId;
-      if (Get.isRegistered<AuthService>()) {
-        myUserId = Get.find<AuthService>().currentUser.value?.id;
-      }
-
-      // 1. Check specific keys first that represent the newly registered user (NEVER the logged in recipient)
-      int? targetProfileId = getInt([
-        'new_user_id',
-        'created_user_id',
-        'profile_user_id',
-        'matrimony_user_id',
-        'related_id',
-        'profile_id',
-        'matrimony_id',
-        'matrimony_profile_id',
-        'entity_id',
-        'target_user_id',
-      ]);
-
-      // If the specific key found matches my own ID, look for an alternative ID in other keys
-      if (targetProfileId != null && myUserId != null && targetProfileId == myUserId) {
-        final altId = getInt(['related_id', 'profile_id', 'profile_user_id', 'matrimony_id', 'entity_id', 'id']);
-        if (altId != null && altId != myUserId) {
-          targetProfileId = altId;
-        }
-      }
-
-      // 2. If no specific key found, check 'user_id' and 'id'
-      if (targetProfileId == null) {
-        final candidateId = getInt(['user_id', 'id']);
-        if (candidateId != null && (myUserId == null || candidateId != myUserId)) {
-          targetProfileId = candidateId;
-        } else if (candidateId != null && myUserId != null && candidateId == myUserId) {
-          final altId = getInt(['related_id', 'profile_id', 'entity_id', 'id']);
-          if (altId != null && altId != myUserId) {
-            targetProfileId = altId;
-          } else {
-            targetProfileId = candidateId;
-          }
-        }
-      }
+    if (isMatrimonyProfileEvent && !isOwnProfileStatusEvent && !isChatOrRequestEvent && !type.contains('reject')) {
+      final targetProfileId = extractMatrimonyTargetId();
 
       if (targetProfileId != null) {
-        debugPrint("💍 [NotificationHandler] Opening MatrimonyProfileScreen for target user: $targetProfileId (myUserId=$myUserId)");
-        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': targetProfileId});
+        debugPrint("💍 [NotificationHandler] Priority matched new Matrimony profile for user: $targetProfileId");
+        navigateToMatrimonyProfile(targetProfileId);
         return;
       } else {
-        debugPrint("💍 [NotificationHandler] Matrimony profile notification without ID, opening members screen");
+        debugPrint("💍 [NotificationHandler] Matrimony profile notification without other ID, opening members screen (never own profile)");
         Get.toNamed(AppRoutes.matrimonyMembers);
         return;
       }
@@ -882,10 +998,7 @@ class NotificationHandlerService extends GetxService {
         }
         if (blogId != null && blogId > 0) {
           debugPrint("📝 [NotificationHandler] Switch case Blog -> Opening BlogDetailScreen for blogId: $blogId");
-          if (Get.isRegistered<BlogController>()) {
-            Get.find<BlogController>().fetchBlogDetail(blogId);
-          }
-          Get.to(() => BlogDetailScreen(blogId: blogId!));
+          Get.to(() => BlogDetailScreen(blogId: blogId!), preventDuplicates: false);
         } else {
           debugPrint("📝 [NotificationHandler] Switch case Blog without ID -> Opening BlogsScreen");
           Get.to(() => const BlogsScreen());
@@ -900,27 +1013,34 @@ class NotificationHandlerService extends GetxService {
       case 'broadcast':
         final String actionUrl = getString(['action_url', 'url']);
         if (actionUrl.isNotEmpty && (actionUrl.startsWith('http://') || actionUrl.startsWith('https://'))) {
-          try {
-            launchUrl(Uri.parse(actionUrl), mode: LaunchMode.externalApplication);
+          final uri = Uri.tryParse(actionUrl);
+          if (uri != null && uri.host.contains('malisetu.com') && DeepLinkService.canHandleUri(uri)) {
+            DeepLinkService.navigateToUri(uri);
             return;
-          } catch (e) {
-            debugPrint("Could not open action_url: $e");
+          }
+          if (uri != null) {
+            launchUrl(uri, mode: LaunchMode.externalApplication).catchError((e) {
+              debugPrint("Could not open action_url: $e");
+              return false;
+            });
+            return;
           }
         }
         final notificationModel = NotificationModel(
           id: getString(['notification_id', 'id']),
           title: getString(['title'], defaultVal: 'Announcement'.tr),
           message: getString(['message', 'body'], defaultVal: ''),
-          createdAt: DateTime.now().toIso8601String(),
+          createdAt: getString(['created_at'], defaultVal: DateTime.now().toIso8601String()),
         );
         Get.toNamed(AppRoutes.notificationDetails, arguments: notificationModel);
         break;
 
       // ──────────────────────────────────────────────────────────────────────
-      // 2 & 3. BUSINESS NOTIFICATIONS (VERIFIED / REJECTED)
+      // 2 & 3. BUSINESS NOTIFICATIONS (VERIFIED / APPROVED / REJECTED)
       // ──────────────────────────────────────────────────────────────────────
       case 'business_verified':
-        final int? businessId = getInt(['business_id', 'id', 'related_id']);
+      case 'business_approved':
+        final int? businessId = getInt(['business_id', 'related_id', 'id']);
         if (businessId != null) {
           Get.toNamed(
             AppRoutes.businessDetails,
@@ -997,7 +1117,7 @@ class NotificationHandlerService extends GetxService {
         break;
 
       // ──────────────────────────────────────────────────────────────────────
-      // 8 & 9. JOBS (NEW JOB / JOB DETAILS FULL VIEW)
+      // 8 & 9. JOBS (NEW JOB / JOB DETAILS / JOB APPLICATIONS)
       // ──────────────────────────────────────────────────────────────────────
       case 'new_job':
       case 'new_job_posted':
@@ -1007,37 +1127,39 @@ class NotificationHandlerService extends GetxService {
       case 'job_details':
       case 'job':
       case 'jobs':
-      case 'job_application_received':
-      case 'new_job_application':
-      case 'job_application':
       case 'job_applied':
       case 'job_apply':
-      case 'application_received':
-      case 'job_received':
-      case 'job_applicant':
-        // Priority: job_id -> job_posting_id -> related_id -> id
         final int? jobId = getInt(['job_id', 'job_posting_id', 'related_id', 'id']);
-        final String jobTitle = getString(['job_title', 'title']);
+        final String jobTitle = getString(['job_title']);
         if (jobId != null) {
           Get.toNamed(
             AppRoutes.jobDetails,
             arguments: Job(
               id: jobId,
-              title: (jobTitle.isNotEmpty && jobTitle != 'Notification') ? jobTitle : null,
+              title: jobTitle.isNotEmpty ? jobTitle : null,
             ),
           );
         } else {
-          Get.toNamed(AppRoutes.myBusiness);
+          Get.toNamed(AppRoutes.jobs);
         }
         break;
 
+      case 'job_application_received':
+      case 'new_job_application':
+      case 'job_application':
+      case 'application_received':
+      case 'job_received':
+      case 'job_applicant':
       case 'job_appliers':
       case 'view_applications':
         final int? appliersJobId = getInt(['job_id', 'job_posting_id', 'related_id']);
+        final int? appliersBusinessId = getInt(['business_id']);
         if (appliersJobId != null) {
           Get.toNamed(AppRoutes.jobAppliers, arguments: Job(id: appliersJobId));
+        } else if (appliersBusinessId != null) {
+          Get.toNamed(AppRoutes.jobAnalytics, arguments: {'business_id': appliersBusinessId});
         } else {
-          Get.toNamed(AppRoutes.jobAnalytics);
+          Get.toNamed(AppRoutes.myBusiness);
         }
         break;
 
@@ -1061,21 +1183,23 @@ class NotificationHandlerService extends GetxService {
       case 'matrimony_profile_rejected':
       case 'matrimony_rejected':
       case 'profile_rejected':
-        // Note: Matrimony profile details API is /matrimony/profile_user_id/{user_id}, so user_id is required
         int? myUserId;
         if (Get.isRegistered<AuthService>()) {
           myUserId = Get.find<AuthService>().currentUser.value?.id;
         }
-        final int? profileId = getInt(['user_id', 'profile_user_id']) ??
-            myUserId ??
-            getInt(['profile_id', 'id', 'related_id']);
 
-        if (profileId != null) {
-          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': profileId});
-        } else if (myUserId != null) {
-          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': myUserId});
+        // Check if this notification refers to another user's profile
+        final int? targetOtherId = extractMatrimonyTargetId();
+        if (targetOtherId != null) {
+          navigateToMatrimonyProfile(targetOtherId);
+          break;
+        }
+
+        // Only if it's explicitly own profile event, use myUserId
+        if (isOwnProfileStatusEvent && myUserId != null) {
+          navigateToMatrimonyProfile(myUserId);
         } else {
-          Get.toNamed(AppRoutes.regMatrimony);
+          Get.toNamed(AppRoutes.matrimonyMembers);
         }
         break;
 
@@ -1129,7 +1253,8 @@ class NotificationHandlerService extends GetxService {
         if (Get.currentRoute == AppRoutes.matrimonyChat &&
             Get.isRegistered<MatrimonyChatController>()) {
           final chatCtrl = Get.find<MatrimonyChatController>();
-          if (convId != null && chatCtrl.conversationId == convId) {
+          if ((convId != null && chatCtrl.conversationId == convId) ||
+              (convId == null && senderId != null && chatCtrl.otherUserId == senderId)) {
             // Already on correct chat – just refresh
             chatCtrl.fetchMessages();
             break;
@@ -1160,6 +1285,8 @@ class NotificationHandlerService extends GetxService {
             'other_user_id': senderId,
             if (senderName.isNotEmpty) 'user_name': senderName,
           });
+        } else {
+          Get.toNamed(AppRoutes.matrimonyMembers);
         }
         break;
 
@@ -1178,21 +1305,10 @@ class NotificationHandlerService extends GetxService {
       case 'matrimony_match':
       case 'matrimony_user':
       case 'create_matrimony_profile':
-        final int? matchId = getInt([
-          'user_id',
-          'profile_user_id',
-          'profile_id',
-          'matrimony_id',
-          'matrimony_profile_id',
-          'created_user_id',
-          'target_user_id',
-          'member_id',
-          'related_id',
-          'id',
-        ]);
+        final int? matchId = extractMatrimonyTargetId();
         if (matchId != null) {
           debugPrint("💍 [NotificationHandler] Opening MatrimonyProfileScreen for user_id: $matchId");
-          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': matchId});
+          navigateToMatrimonyProfile(matchId);
         } else {
           debugPrint("💍 [NotificationHandler] No specific profile ID found, opening matrimony members");
           Get.toNamed(AppRoutes.matrimonyMembers);
@@ -1202,12 +1318,51 @@ class NotificationHandlerService extends GetxService {
       // ──────────────────────────────────────────────────────────────────────
       // 15, 16, 17. PAYMENTS & TRANSACTIONS
       // ──────────────────────────────────────────────────────────────────────
+      case 'payment_success':
       case 'payment_successful':
+      case 'payment_completed':
       case 'payment_failed':
       case 'payment_pending_reminder':
       case 'payment_pending':
       case 'transaction':
         Get.toNamed(AppRoutes.transactionHistory);
+        break;
+
+      // ──────────────────────────────────────────────────────────────────────
+      // WEBINARS / VOLUNTEER / REFERRAL
+      // ──────────────────────────────────────────────────────────────────────
+      case 'webinar':
+      case 'webinar_started':
+      case 'webinar_reminder':
+      case 'new_webinar':
+      case 'webinar_live':
+        final int? webinarId = getInt(['webinar_id', 'related_id', 'id']);
+        if (webinarId != null) {
+          Get.toNamed(AppRoutes.webinarDetails, arguments: Webinar.fromApiJson({'id': webinarId}));
+        } else {
+          Get.toNamed(AppRoutes.webinars);
+        }
+        break;
+
+      case 'volunteer':
+      case 'volunteer_opportunity':
+      case 'new_volunteer_opportunity':
+      case 'volunteer_approved':
+      case 'volunteer_rejected':
+        final int? oppId = getInt(['opportunity_id', 'volunteer_opportunity_id']);
+        if (oppId != null) {
+          Get.toNamed(AppRoutes.volunteerOpportunityDetails, arguments: {'id': oppId});
+        } else {
+          Get.toNamed(AppRoutes.volunteer);
+        }
+        break;
+
+      case 'referral':
+      case 'referral_reward':
+      case 'referral_joined':
+      case 'new_referral':
+      case 'commission_earned':
+        Get.toNamed(AppRoutes.referral);
         break;
 
       // ──────────────────────────────────────────────────────────────────────
@@ -1281,22 +1436,11 @@ class NotificationHandlerService extends GetxService {
             messageLower.contains('matrimony');
 
         if (isMatrimonyRelated) {
-          final int? fallbackMatrimonyId = getInt([
-            'user_id',
-            'profile_user_id',
-            'profile_id',
-            'matrimony_id',
-            'matrimony_profile_id',
-            'created_user_id',
-            'target_user_id',
-            'member_id',
-            'related_id',
-            'id',
-          ]);
+          final int? fallbackMatrimonyId = extractMatrimonyTargetId();
 
           if (fallbackMatrimonyId != null) {
             debugPrint("💍 [NotificationHandler] Smart fallback matched Matrimony Profile ID: $fallbackMatrimonyId");
-            Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': fallbackMatrimonyId});
+            navigateToMatrimonyProfile(fallbackMatrimonyId);
             break;
           } else {
             debugPrint("💍 [NotificationHandler] Smart fallback: Matrimony notification without ID, opening members list");
@@ -1322,10 +1466,7 @@ class NotificationHandlerService extends GetxService {
           final int? finalBlogId = fallbackBlogId ?? getInt(['related_id', 'entity_id', 'id']);
           if (finalBlogId != null && finalBlogId > 0) {
             debugPrint("📝 [NotificationHandler] Smart fallback matched Blog ID: $finalBlogId");
-            if (Get.isRegistered<BlogController>()) {
-              Get.find<BlogController>().fetchBlogDetail(finalBlogId);
-            }
-            Get.to(() => BlogDetailScreen(blogId: finalBlogId));
+            Get.to(() => BlogDetailScreen(blogId: finalBlogId), preventDuplicates: false);
             break;
           } else {
             debugPrint("📝 [NotificationHandler] Smart fallback: Blog notification without ID, opening BlogsScreen");
@@ -1338,7 +1479,7 @@ class NotificationHandlerService extends GetxService {
           id: getString(['notification_id', 'id']),
           title: getString(['title'], defaultVal: 'Notification'.tr),
           message: getString(['message', 'body'], defaultVal: ''),
-          createdAt: DateTime.now().toIso8601String(),
+          createdAt: getString(['created_at'], defaultVal: DateTime.now().toIso8601String()),
         );
         Get.toNamed(AppRoutes.notificationDetails, arguments: fallbackModel);
         break;

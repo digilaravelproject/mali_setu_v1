@@ -316,6 +316,9 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                     isRequired: true,
                     initialPhone: controller.phoneCtrl.text,
                     errorText: controller.errors['phone'],
+                    onVerificationChanged: (val) {
+                      controller.isPhoneVerified.value = val;
+                    },
                     onChanged: (val) {
                       controller.errors.remove('phone');
                     },
@@ -363,13 +366,35 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
 
                   const SizedBox(height: 30),
 
-                  Obx(() => CustomButton(
-                    title: controller.isRegistering.value
-                        ? 'please_wait'.tr
-                        : (controller.isEditMode ? 'update_business'.tr : 'register_business'.tr),
-                    onPressed: controller.isRegistering.value ? null : controller.onRegister,
-                    isLoading: controller.isRegistering.value,
-                  )),
+                  Obx(() {
+                    final bool isVerified = controller.isEditMode || controller.isPhoneVerified.value;
+                    return CustomButton(
+                      title: controller.isRegistering.value
+                          ? 'please_wait'.tr
+                          : (controller.isEditMode ? 'update_business'.tr : 'register_business'.tr),
+                      onPressed: controller.isRegistering.value
+                          ? null
+                          : (isVerified
+                              ? controller.onRegister
+                              : () {
+                                  if (Get.context != null) {
+                                    PhoneFieldComponent.showNotVerifiedDialog(
+                                      context: Get.context!,
+                                      onVerifyTap: () {
+                                        if (controller.phoneFieldKey.currentState?.isOtpSentState == true) {
+                                          controller.phoneFieldKey.currentState?.focusFirstOtpBox();
+                                        } else {
+                                          controller.phoneFieldKey.currentState?.sendOtp();
+                                        }
+                                      },
+                                    );
+                                  } else {
+                                    controller.onRegister();
+                                  }
+                                }),
+                      isLoading: controller.isRegistering.value,
+                    );
+                  }),
 
                   const SizedBox(height: 40),
                 ],

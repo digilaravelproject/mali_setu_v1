@@ -20,14 +20,24 @@ class CategoryDetailsScreen extends GetWidget<CatBusinessController> {
 
   @override
   Widget build(BuildContext context) {
-    final Category category = Get.arguments;
+    final args = Get.arguments;
+    final Category category = args is Category
+        ? args
+        : Category(
+            id: args is int ? args : (args is Map ? int.tryParse(args['id']?.toString() ?? '') : null),
+            name: args is Map ? args['name']?.toString() : null,
+          );
     final theme = context.theme;
 
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
       body: RefreshIndicator(
-        onRefresh: () => controller.fetchBusinesses(category.id!),
+        onRefresh: () async {
+          if (category.id != null) {
+            await controller.fetchBusinesses(category.id!);
+          }
+        },
         color: theme.primaryColor,
         backgroundColor: Colors.white,
         child: CustomScrollView(
@@ -368,6 +378,11 @@ class BusinessListCard extends StatelessWidget {
                 contactPhone: business.contactPhone,
                 contactEmail: business.contactEmail,
                 website: business.website,
+                photo: business.photo,
+                state: business.state,
+                district: business.district,
+                city: business.city,
+                pincode: business.pincode,
                 verificationStatus: business.verificationStatus,
                 status: business.verificationStatus,
                 user: business.user != null

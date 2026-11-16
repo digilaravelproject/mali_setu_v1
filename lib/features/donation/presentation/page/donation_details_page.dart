@@ -173,16 +173,31 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
-class DonationDetailsPage extends GetView<DonationController> {
+class DonationDetailsPage extends StatefulWidget {
   const DonationDetailsPage({super.key});
 
   @override
+  State<DonationDetailsPage> createState() => _DonationDetailsPageState();
+}
+
+class _DonationDetailsPageState extends State<DonationDetailsPage> {
+  final DonationController controller = Get.find<DonationController>();
+  final TextEditingController amountController = TextEditingController();
+
+  @override
+  void dispose() {
+    amountController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final DonationCauseItem cause = Get.arguments;
+    final args = Get.arguments;
+    final DonationCauseItem cause = args is DonationCauseItem
+        ? args
+        : (controller.selectedCause.value ?? DonationCauseItem());
     final authService = Get.find<AuthService>();
     final user = authService.currentUser.value;
-
-    final TextEditingController amountController = TextEditingController();
 
     final double target =
         double.tryParse(cause.targetAmount ?? "0") ?? 0;
@@ -192,8 +207,13 @@ class DonationDetailsPage extends GetView<DonationController> {
     target == 0 ? 0 : (raised / target);
 
     Map<String, dynamic>? contact;
-    if (cause.contactInfo != null) {
-      contact = jsonDecode(cause.contactInfo!);
+    if (cause.contactInfo != null && cause.contactInfo!.trim().startsWith('{')) {
+      try {
+        final decoded = jsonDecode(cause.contactInfo!);
+        if (decoded is Map) {
+          contact = Map<String, dynamic>.from(decoded);
+        }
+      } catch (_) {}
     }
 
     return Scaffold(
@@ -399,8 +419,7 @@ class DonationDetailsPage extends GetView<DonationController> {
                             const SizedBox(
                                 width: 8),
                             Text(
-                                contact["phone"]
-                                    .toString()),
+                                (contact["phone"] ?? '').toString()),
                           ],
                         ),
 

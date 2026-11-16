@@ -47,12 +47,21 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     return (wordCount / 200).ceil().clamp(1, 60);
   }
 
+  final RxInt _activeMediaIndex = 0.obs;
+  final PageController _mediaPageController = PageController();
+
   @override
   void initState() {
     super.initState();
     // Immediately set loading to prevent "Blog not found" flash
     controller.isDetailLoading.value = true;
     controller.fetchBlogDetail(widget.blogId);
+  }
+
+  @override
+  void dispose() {
+    _mediaPageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -263,8 +272,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     final mediaList = blog.mediaPaths ?? [];
     final mediaType = blog.mediaType;
     
-    final RxInt activeIndex = 0.obs;
-    final PageController pageController = PageController();
+    final RxInt activeIndex = _activeMediaIndex;
+    final PageController pageController = _mediaPageController;
 
     if (mediaList.isEmpty) {
       final isVideo = mediaType == 'video';

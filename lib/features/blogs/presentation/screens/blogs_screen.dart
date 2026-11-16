@@ -137,9 +137,8 @@ class BlogsScreen extends StatelessWidget {
                 Obx(() {
                   final isMine = controller.selectedTab.value == 'Mine';
                   final loading = isMine ? controller.isMyBlogsLoading.value : controller.isLoading.value;
-                  final empty = isMine ? controller.myBlogs.isEmpty : controller.blogs.isEmpty;
 
-                  if (loading && empty) {
+                  if (loading && controller.filteredBlogs.isEmpty) {
                     return SliverPadding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                       sliver: SliverList(

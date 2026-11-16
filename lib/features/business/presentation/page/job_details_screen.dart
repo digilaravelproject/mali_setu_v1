@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
+import 'package:edu_cluezer/features/business/binding/business_binding.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
@@ -22,13 +23,32 @@ class JobDetailsScreen extends StatefulWidget {
 }
 
 class _JobDetailsScreenState extends State<JobDetailsScreen> {
-  final BusinessController controller = Get.find<BusinessController>();
-  final Job initialJob = Get.arguments ?? Job();
+  final BusinessController controller = Get.isRegistered<BusinessController>()
+      ? Get.find<BusinessController>()
+      : (() {
+          BusinessBinding().dependencies();
+          return Get.find<BusinessController>();
+        })();
+
+  late final Job initialJob;
 
   @override
   void initState() {
     super.initState();
+    final args = Get.arguments;
+    if (args is Job) {
+      initialJob = args;
+    } else if (args is int) {
+      initialJob = Job(id: args);
+    } else if (args is Map && args['id'] != null) {
+      initialJob = Job(id: int.tryParse(args['id'].toString()));
+    } else {
+      initialJob = Job();
+    }
+
     if (initialJob.id != null) {
+      controller.isJobDetailsLoading.value = true;
+      controller.selectedJobDetail.value = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.fetchJobDetails(initialJob.id!);
       });
@@ -36,6 +56,9 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   }
 
   void _handleEdit(Job job) {
+    if (!Get.isRegistered<CreateJobController>()) {
+      BusinessBinding().dependencies();
+    }
     if (Get.isRegistered<CreateJobController>()) {
       final createJobCtrl = Get.find<CreateJobController>();
       createJobCtrl.populateFields(job);
@@ -85,7 +108,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
 
       debugPrint("isMyJob value: $isMyJob, JobBusinessID: ${job.businessId ?? job.business?.id}");
 
-      if (controller.isLoading.value && controller.selectedJobDetail.value == null) {
+      if (controller.isJobDetailsLoading.value && controller.selectedJobDetail.value == null) {
         return Scaffold(
           body: _buildShimmerLoading(context),
         );
@@ -529,8 +552,11 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   Widget _buildSimilarJobCard(BuildContext context, Job job) {
     return InkWell(
       onTap: () {
-        Get.back();
-        Get.toNamed(Get.currentRoute, arguments: job, preventDuplicates: false);
+        Get.off(
+          () => const JobDetailsScreen(),
+          arguments: job,
+          preventDuplicates: false,
+        );
       },
       child: Container(
         width: 220,

@@ -25,6 +25,7 @@ class ApiConstants {
     static const String updateFcmToken = "auth/fcm-token"; // PUT update FCM token
     static const String authPhoneSendOtp = "auth/phone/send-otp"; // POST send OTP
     static const String authPhoneResendOtp = "auth/phone/resend-otp"; // POST resend OTP
+    static const String authPhoneVerifyOtp = "auth/phone/verify-otp"; // POST verify OTP
 
 
     // Bussiness Api

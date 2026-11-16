@@ -128,6 +128,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   var isSearching = false.obs;
   var isLoading = false.obs;
   var isDetailsLoading = false.obs;
+  var isJobDetailsLoading = false.obs;
+  var isJobAnalyticsLoading = false.obs;
+  var isJobApplicationsLoading = false.obs;
+  var isMyApplicationsLoading = false.obs;
+  var isApplyingJob = false.obs;
   var voiceSearchError = "".obs;
   var applicationLoadingStates = <int, String?>{}.obs;
 
@@ -981,23 +986,26 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       await deleteBusinessUseCase(id);
       await fetchMyBusinesses(); // Refresh list
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showSuccess(message: "Business deleted successfully");
     } catch (e) {
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showError(message: e.toString());
     }
   }
 
-  Future<void> fetchJobDetails(int jobId) async {
+  Future<void> fetchJobDetails(int jobId, {bool isRefresh = false}) async {
     try {
-      isLoading.value = true;
+      if (!isRefresh) {
+        isJobDetailsLoading.value = true;
+        selectedJobDetail.value = null;
+      }
       final detail = await getJobDetailsUseCase(jobId);
       selectedJobDetail.value = detail;
     } catch (e) {
       print('Error fetching job details: $e');
     } finally {
-      isLoading.value = false;
+      isJobDetailsLoading.value = false;
     }
   }
 
@@ -1005,7 +1013,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       final response = await deleteJobUseCase(jobId);
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       
       if (response.success == true) {
         Get.back(); // Back from details screen
@@ -1019,7 +1027,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         CustomSnackBar.showError(message: response.message ?? "Failed to delete job");
       }
     } catch (e) {
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showError(message: e.toString());
     }
   }
@@ -1028,12 +1036,12 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     try {
       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
       final response = await toggleJobStatusUseCase(jobId);
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       
       if (response.success == true) {
         CustomSnackBar.showSuccess(message: response.message ?? "Job status updated successfully");
         // Refresh job details
-        fetchJobDetails(jobId);
+        fetchJobDetails(jobId, isRefresh: true);
         // Refresh business jobs if we have a selected business
         if (selectedBusiness.value != null) {
           fetchBusinessJobs(selectedBusiness.value!.id!);
@@ -1042,14 +1050,15 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         CustomSnackBar.showError(message: response.message ?? "Failed to update job status");
       }
     } catch (e) {
-      Get.back(); // Close dialog
+      if (Get.isDialogOpen == true) Get.back(); // Close dialog
       CustomSnackBar.showError(message: e.toString());
     }
   }
 
   Future<void> fetchJobAnalytics(int businessId) async {
     try {
-      isLoading.value = true;
+      isJobAnalyticsLoading.value = true;
+      jobAnalytics.value = null;
       final response = await getJobAnalyticsUseCase(businessId);
       if (response.success == true) {
         jobAnalytics.value = response.data;
@@ -1059,32 +1068,34 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       CustomSnackBar.showError(message: e.toString());
     } finally {
-      isLoading.value = false;
+      isJobAnalyticsLoading.value = false;
     }
   }
 
   Future<bool> applyJob(Map<String, dynamic> data) async {
     try {
-      isLoading.value = true;
+      isApplyingJob.value = true;
       final response = await applyJobUseCase(data);
-      
-      if (Get.isBottomSheetOpen == true) {
-        Get.back();
-      }
 
       if (response.success == true) {
+        if (Get.isBottomSheetOpen == true) {
+          Get.back();
+        }
         CustomSnackBar.showSuccess(message: response.message ?? "Applied successfully");
         // Refresh job details to update hasApplied status
         if (data['job_posting_id'] != null) {
-          fetchJobDetails(int.parse(data['job_posting_id'].toString()));
+          fetchJobDetails(int.parse(data['job_posting_id'].toString()), isRefresh: true);
         }
         return true;
       } else {
         // Handle "already applied" case specifically
         if (response.message != null && response.message!.toLowerCase().contains("already applied")) {
+           if (Get.isBottomSheetOpen == true) {
+             Get.back();
+           }
            CustomSnackBar.showInfo(message: "You have already applied for this job");
            if (data['job_posting_id'] != null) {
-             fetchJobDetails(int.parse(data['job_posting_id'].toString()));
+             fetchJobDetails(int.parse(data['job_posting_id'].toString()), isRefresh: true);
            }
            return true; // Return true to close the form
         }
@@ -1092,8 +1103,6 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         // Handle validation errors specifically
         String errorMessage = response.message ?? "Failed to apply";
         if (response.errors != null && response.errors!.isNotEmpty) {
-          // Extract the first error message from the errors map
-          // e.g., {resume: [The resume failed to upload.]}
           var firstError = response.errors!.values.first;
           if (firstError is List && firstError.isNotEmpty) {
             errorMessage = firstError.first.toString();
@@ -1106,10 +1115,6 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         return false;
       }
     } catch (e) {
-      if (Get.isBottomSheetOpen == true) {
-        Get.back();
-      }
-      
       String errorMessage = "Failed to apply";
       if (e is DioException && e.response?.data != null) {
         final errorData = e.response!.data;
@@ -1124,29 +1129,27 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       CustomSnackBar.showError(message: errorMessage);
       return false;
     } finally {
-      isLoading.value = false;
+      isApplyingJob.value = false;
     }
   }
 
   Future<void> fetchMyApplications() async {
     try {
-      isLoading.value = true;
+      isMyApplicationsLoading.value = true;
       final response = await getMyApplicationsUseCase();
       if (response.success == true && response.data != null) {
         myApplications.value = response.data!.data ?? [];
-      } else {
-        // Handle failure if needed
       }
     } catch (e) {
       print('Error fetching applications: $e');
     } finally {
-      isLoading.value = false;
+      isMyApplicationsLoading.value = false;
     }
   }
 
   Future<void> fetchJobApplications(int jobId) async {
     try {
-      isLoading.value = true;
+      isJobApplicationsLoading.value = true;
       selectedJobApplications.clear();
       final response = await getJobApplicationsUseCase(jobId);
       if (response.success == true && response.data != null && response.data!.applications != null) {
@@ -1157,7 +1160,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       print('Error fetching job applications: $e');
     } finally {
-      isLoading.value = false;
+      isJobApplicationsLoading.value = false;
     }
   }
 

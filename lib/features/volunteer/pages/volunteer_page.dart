@@ -284,7 +284,9 @@ class VolunteerPage extends GetWidget<AllVolunteerController> {
               return RefreshIndicator(
                 onRefresh: () => controller.refreshVolunteers(),
                 child: ListView.builder(
-                  physics: const BouncingScrollPhysics(),
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
                   padding: const EdgeInsets.all(20),
                   itemCount:
                       controller.filteredVolunteerList.length +

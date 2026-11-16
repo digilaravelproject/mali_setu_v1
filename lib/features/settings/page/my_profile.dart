@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'village': user?.village ?? 'N/A',
     'accountStatus': user?.status ?? 'Active',
     'joinedDate': user?.createdAt ?? 'N/A',
-    'membershipType': 'Premium',
+    'membershipType': (user?.userType ?? 'General').toTitleCase(),
   };
 
   @override
@@ -422,7 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const Icon(Icons.confirmation_number_outlined, color: Colors.white, size: 16),
                             const SizedBox(width: 8),
                             Text(
-                              refCode.isNotEmpty && refCode != 'N/A' ? refCode : 'MSU001',
+                              refCode.isNotEmpty && refCode != 'N/A' ? refCode : 'N/A',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

@@ -250,14 +250,19 @@ class BlogController extends GetxController {
 
   Future<void> _performSearch(String query) async {
     isLoading.value = true;
-    final response = await _repository.searchBlogs(query);
+    try {
+      final response = await _repository.searchBlogs(query);
 
-    if (response != null && response.success == true && response.data != null) {
-      filteredBlogs.assignAll(response.data?.data ?? []);
-    } else {
-      filteredBlogs.clear();
+      if (response != null && response.success == true && response.data != null) {
+        filteredBlogs.assignAll(response.data?.data ?? []);
+      } else {
+        filteredBlogs.clear();
+      }
+    } catch (e) {
+      debugPrint("_performSearch error: $e");
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
   final Set<int> _likingBlogIds = <int>{};
@@ -386,16 +391,20 @@ class BlogController extends GetxController {
     relatedBlogs.clear();
     showAllComments.value = false;
 
-    final response = await _repository.getBlogDetail(id);
+    try {
+      final response = await _repository.getBlogDetail(id);
 
-    if (response != null && response.success == true && response.data != null) {
-      selectedBlog.value = response.data?.blog;
-      relatedBlogs.assignAll(response.data?.related ?? []);
+      if (response != null && response.success == true && response.data != null) {
+        selectedBlog.value = response.data?.blog;
+        relatedBlogs.assignAll(response.data?.related ?? []);
 
-      _initializeDetailVideo();
+        _initializeDetailVideo();
+      }
+    } catch (e) {
+      debugPrint("fetchBlogDetail error: $e");
+    } finally {
+      isDetailLoading.value = false;
     }
-
-    isDetailLoading.value = false;
   }
 
   void _initializeDetailVideo() {
@@ -438,20 +447,25 @@ class BlogController extends GetxController {
 
   Future<bool> deleteBlog(int id) async {
     isLoading.value = true;
-    final success = await _repository.deleteBlog(id);
-    if (success) {
-      // Remove from locally loaded lists
-      blogs.removeWhere((b) => b.id == id);
-      myBlogs.removeWhere((b) => b.id == id); // Also remove from My Blogs tab
-      filteredBlogs.removeWhere((b) => b.id == id);
-      _applyFilter();
-      CustomSnackBar.showSuccess(message: "Blog deleted successfully");
-      isLoading.value = false;
-      return true;
-    } else {
+    try {
+      final success = await _repository.deleteBlog(id);
+      if (success) {
+        // Remove from locally loaded lists
+        blogs.removeWhere((b) => b.id == id);
+        myBlogs.removeWhere((b) => b.id == id); // Also remove from My Blogs tab
+        filteredBlogs.removeWhere((b) => b.id == id);
+        _applyFilter();
+        CustomSnackBar.showSuccess(message: "Blog deleted successfully");
+        return true;
+      } else {
+        CustomSnackBar.showError(message: "Failed to delete blog");
+        return false;
+      }
+    } catch (e) {
       CustomSnackBar.showError(message: "Failed to delete blog");
-      isLoading.value = false;
       return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -461,28 +475,33 @@ class BlogController extends GetxController {
 
   Future<void> postComment(int blogId) async {
     final text = commentTextController.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || isCommentPosting.value) return;
 
     isCommentPosting.value = true;
-    final parentId = replyToComment.value?.id;
+    try {
+      final parentId = replyToComment.value?.id;
 
-    final response = await _repository.addComment(
-      blogId,
-      text,
-      parentId: parentId,
-    );
-    if (response != null && response['success'] == true) {
-      CustomSnackBar.showSuccess(
-        message: response['message'] ?? 'Comment posted',
+      final response = await _repository.addComment(
+        blogId,
+        text,
+        parentId: parentId,
       );
-      commentTextController.clear();
-      replyToComment.value = null;
-      // Refresh the blog details to get updated comments
-      fetchBlogDetail(blogId);
-    } else {
+      if (response != null && response['success'] == true) {
+        CustomSnackBar.showSuccess(
+          message: response['message'] ?? 'Comment posted',
+        );
+        commentTextController.clear();
+        replyToComment.value = null;
+        // Refresh the blog details to get updated comments
+        fetchBlogDetail(blogId);
+      } else {
+        CustomSnackBar.showError(message: 'Failed to post comment');
+      }
+    } catch (e) {
       CustomSnackBar.showError(message: 'Failed to post comment');
+    } finally {
+      isCommentPosting.value = false;
     }
-    isCommentPosting.value = false;
   }
 
   Future<void> deleteComment(int commentId, int blogId) async {
@@ -499,6 +518,7 @@ class BlogController extends GetxController {
   void onClose() {
     _disposeVideo();
     commentTextController.dispose();
+    searchTextController.dispose();
     super.onClose();
   }
 }

@@ -24,6 +24,9 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
   @override
   void initState() {
     super.initState();
+    if (controller.myApplications.isEmpty) {
+      controller.isMyApplicationsLoading.value = true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchMyApplications();
     });
@@ -47,7 +50,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
         backgroundColor: Colors.transparent,
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.myApplications.isEmpty) {
+        if (controller.isMyApplicationsLoading.value && controller.myApplications.isEmpty) {
           return _buildShimmerLoading();
         }
 

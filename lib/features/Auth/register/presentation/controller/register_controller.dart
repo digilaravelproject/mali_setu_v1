@@ -53,6 +53,7 @@ class RegisterController extends GetxController {
   
   /// PHONE FIELD COMPONENT KEY
   final GlobalKey<PhoneFieldComponentState> phoneFieldKey = GlobalKey<PhoneFieldComponentState>();
+  final RxBool isPhoneVerified = false.obs;
 
   /// FIELD KEYS FOR AUTO-SCROLL ON VALIDATION ERROR
   final GlobalKey casteCertificateKey = GlobalKey();
@@ -486,6 +487,28 @@ class RegisterController extends GetxController {
       CustomSnackBar.showError(
         message: phoneValidationError,
       );
+      return;
+    }
+
+    // 4.1 Mobile OTP Verification Check
+    final bool isVerified = phoneFieldKey.currentState?.isVerified == true || isPhoneVerified.value;
+    if (!isVerified) {
+      scrollToKey(phoneFieldKey);
+      if (Get.context != null) {
+        PhoneFieldComponent.showNotVerifiedDialog(
+          context: Get.context!,
+          onVerifyTap: () {
+            scrollToKey(phoneFieldKey);
+            if (phoneFieldKey.currentState?.isOtpSentState == true) {
+              phoneFieldKey.currentState?.focusFirstOtpBox();
+            } else {
+              phoneFieldKey.currentState?.sendOtp();
+            }
+          },
+        );
+      } else {
+        CustomSnackBar.showError(message: "Please verify your mobile number with OTP");
+      }
       return;
     }
 

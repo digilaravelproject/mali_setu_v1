@@ -18,6 +18,7 @@ import '../../data/model/req_login_model.dart';
 import '../../domain/usecase/login_usecase.dart';
 import '../../../../business/presentation/controller/business_controller.dart';
 import '../../../../../core/services/deep_link_service.dart';
+import '../../../../../core/services/notification_handler_service.dart';
 import '../../../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
 
 
@@ -311,6 +312,9 @@ class LoginController extends GetxController {
     Get.offAllNamed(AppRoutes.dashboard);
     if (DeepLinkService.hasPendingDeepLink) {
       DeepLinkService.executePendingDeepLink();
+    } else {
+      NotificationHandlerService.isAppReady = true;
+      NotificationHandlerService.executePendingNotification();
     }
   }
 }

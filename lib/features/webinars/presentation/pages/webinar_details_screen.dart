@@ -27,17 +27,26 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.webinar != null) { 
+    final args = Get.arguments;
+    if (widget.webinar != null) {
       webinar = widget.webinar!;
-    } else if (Get.arguments is Webinar) {
-      webinar = Get.arguments as Webinar;
+    } else if (args is Webinar) {
+      webinar = args;
+    } else if (args is int) {
+      webinar = Webinar.fromApiJson({'id': args});
+    } else if (args is Map && args['id'] != null) {
+      webinar = Webinar.fromApiJson({'id': int.tryParse(args['id'].toString()) ?? 0});
     } else if (controller.selectedWebinar.value != null) {
       webinar = controller.selectedWebinar.value!;
-    } else {
+    } else if (controller.webinars.isNotEmpty) {
       webinar = controller.webinars.first;
+    } else {
+      webinar = Webinar.fromApiJson(const {});
     }
 
-    _fetchLatestDetails();
+    if (webinar.id > 0) {
+      _fetchLatestDetails();
+    }
   }
 
   Future<void> _fetchLatestDetails() async {

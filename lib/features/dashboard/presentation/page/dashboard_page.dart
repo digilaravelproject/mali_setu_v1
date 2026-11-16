@@ -83,18 +83,19 @@ class DashboardPage extends GetWidget<DashboardController> {
         ),
         child: BottomAppBar(
           elevation: 0,
-          // padding: EdgeInsets.only(
-          //   bottom: MediaQuery.of(context).padding.bottom,
-          // ),
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: controller.navList(context).asMap().entries.map((entry) {
-              final index = entry.key;
-              final e = entry.value;
-              return _buildNavItems(e, index);
-            }).toList(),
-          ),
+          child: Obx(() {
+            // Observe auth/screenList dependencies so bottom nav stays synced with IndexedStack
+            controller.screenList;
+            return Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: controller.navList(context).asMap().entries.map((entry) {
+                final index = entry.key;
+                final e = entry.value;
+                return _buildNavItems(e, index);
+              }).toList(),
+            );
+          }),
         ),
       ),
     );

@@ -36,12 +36,15 @@ class EditServiceController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args is Map) {
+    if (args is Map && args['service'] is Service) {
       service = args['service'] as Service;
-      businessId = args['businessId'] as int? ?? service.businessId;
+      businessId = args['businessId'] is int ? args['businessId'] as int : int.tryParse(args['businessId']?.toString() ?? '') ?? service.businessId;
     } else if (args is Service) {
       service = args;
       businessId = service.businessId;
+    } else {
+      service = Service();
+      businessId = 0;
     }
 
     nameController.text = service.name ?? '';
@@ -175,7 +178,6 @@ class EditServiceController extends GetxController {
         newImages.toList(),
       );
 
-      isLoading.value = false;
       if (success) {
         service.name = nameController.text.trim();
         service.cost = priceController.text.trim();
@@ -193,14 +195,38 @@ class EditServiceController extends GetxController {
         CustomSnackBar.showSuccess(message: 'Service updated successfully!');
       }
     } catch (e) {
-      isLoading.value = false;
       CustomSnackBar.showError(message: 'Failed to update service: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 }
 
-class EditServiceScreen extends StatelessWidget {
+class EditServiceScreen extends StatefulWidget {
   const EditServiceScreen({Key? key}) : super(key: key);
+
+  @override
+  State<EditServiceScreen> createState() => _EditServiceScreenState();
+}
+
+class _EditServiceScreenState extends State<EditServiceScreen> {
+  late final EditServiceController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<EditServiceController>()
+        ? Get.find<EditServiceController>()
+        : Get.put(EditServiceController());
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<EditServiceController>()) {
+      Get.delete<EditServiceController>();
+    }
+    super.dispose();
+  }
 
   void _showImageSourceDialog(BuildContext context, EditServiceController controller) {
     showModalBottomSheet(
@@ -420,7 +446,6 @@ class EditServiceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(EditServiceController());
     final screenWidth = MediaQuery.of(context).size.width;
     final itemSize = (screenWidth - 40 - 20) / 3;
 

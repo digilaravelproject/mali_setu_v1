@@ -50,10 +50,14 @@ class AddProductController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments != null) {
-      businessId = Get.arguments as int;
+    final args = Get.arguments;
+    if (args is int) {
+      businessId = args;
+    } else if (args is Map && args['businessId'] != null) {
+      businessId = int.tryParse(args['businessId'].toString()) ?? 0;
     } else {
-      Get.back();
+      businessId = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) => Get.back());
     }
     nameController.addListener(() => errors.remove('name'));
     descriptionController.addListener(() => errors.remove('description'));
@@ -133,26 +137,54 @@ class AddProductController extends GetxController {
     if (errors.isNotEmpty) return;
 
     isLoading.value = true;
-    final data = {
-      'business_id': businessId,
-      'name': nameController.text.trim(),
-      'description': descriptionController.text.trim(),
-      'cost': priceController.text.trim(),
-    };
-    final success = await Get.find<BusinessController>().addProduct(
-      data,
-      selectedImages.toList(),
-    );
-    isLoading.value = false;
-    if (success) {
-      Get.back();
-      CustomSnackBar.showSuccess(message: 'Product created successfully!');
+    try {
+      final data = {
+        'business_id': businessId,
+        'name': nameController.text.trim(),
+        'description': descriptionController.text.trim(),
+        'cost': priceController.text.trim(),
+      };
+      final success = await Get.find<BusinessController>().addProduct(
+        data,
+        selectedImages.toList(),
+      );
+      if (success) {
+        Get.back();
+        CustomSnackBar.showSuccess(message: 'Product created successfully!');
+      }
+    } catch (e) {
+      CustomSnackBar.showError(message: 'Error creating product: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 }
 
-class AddProductScreen extends StatelessWidget {
+class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);
+
+  @override
+  State<AddProductScreen> createState() => _AddProductScreenState();
+}
+
+class _AddProductScreenState extends State<AddProductScreen> {
+  late final AddProductController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<AddProductController>()
+        ? Get.find<AddProductController>()
+        : Get.put(AddProductController());
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<AddProductController>()) {
+      Get.delete<AddProductController>();
+    }
+    super.dispose();
+  }
 
   void _showImageSourceDialog(BuildContext context, AddProductController controller) {
     showModalBottomSheet(
@@ -372,7 +404,6 @@ class AddProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AddProductController());
     final screenWidth = MediaQuery.of(context).size.width;
     final itemSize = (screenWidth - 40 - 20) / 3;
 

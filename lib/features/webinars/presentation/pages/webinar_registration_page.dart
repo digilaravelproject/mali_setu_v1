@@ -24,9 +24,11 @@ class _WebinarRegistrationPageState extends State<WebinarRegistrationPage> {
   @override
   void initState() {
     super.initState();
+    final args = Get.arguments;
     webinar = widget.webinar ??
+        (args is Webinar ? args : null) ??
         controller.selectedWebinar.value ??
-        controller.webinars.first;
+        (controller.webinars.isNotEmpty ? controller.webinars.first : Webinar.fromApiJson(const {}));
   }
 
   @override

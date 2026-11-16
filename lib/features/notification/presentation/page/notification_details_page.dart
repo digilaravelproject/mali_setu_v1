@@ -9,7 +9,10 @@ class NotificationDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NotificationModel notification = Get.arguments;
+    final args = Get.arguments;
+    final NotificationModel notification = args is NotificationModel
+        ? args
+        : NotificationModel(title: 'Notification'.tr, message: '');
     final theme = Theme.of(context);
     
     String timeString = "";

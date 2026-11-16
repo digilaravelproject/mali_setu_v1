@@ -143,12 +143,34 @@ class MyProductsServicesController extends GetxController with GetSingleTickerPr
   }
 }
 
-class MyProductsServicesScreen extends StatelessWidget {
+class MyProductsServicesScreen extends StatefulWidget {
   const MyProductsServicesScreen({Key? key}) : super(key: key);
 
   @override
+  State<MyProductsServicesScreen> createState() => _MyProductsServicesScreenState();
+}
+
+class _MyProductsServicesScreenState extends State<MyProductsServicesScreen> {
+  late final MyProductsServicesController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<MyProductsServicesController>()
+        ? Get.find<MyProductsServicesController>()
+        : Get.put(MyProductsServicesController());
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<MyProductsServicesController>()) {
+      Get.delete<MyProductsServicesController>();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MyProductsServicesController());
     final theme = Theme.of(context);
     final primaryColor = theme.primaryColor;
 

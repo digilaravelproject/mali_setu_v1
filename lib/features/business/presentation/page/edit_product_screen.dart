@@ -36,12 +36,15 @@ class EditProductController extends GetxController {
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args is Map) {
+    if (args is Map && args['product'] is Product) {
       product = args['product'] as Product;
-      businessId = args['businessId'] as int? ?? product.businessId;
+      businessId = args['businessId'] is int ? args['businessId'] as int : int.tryParse(args['businessId']?.toString() ?? '') ?? product.businessId;
     } else if (args is Product) {
       product = args;
       businessId = product.businessId;
+    } else {
+      product = Product();
+      businessId = 0;
     }
 
     nameController.text = product.name ?? '';
@@ -175,7 +178,6 @@ class EditProductController extends GetxController {
         newImages.toList(),
       );
 
-      isLoading.value = false;
       if (success) {
         product.name = nameController.text.trim();
         product.cost = priceController.text.trim();
@@ -193,14 +195,38 @@ class EditProductController extends GetxController {
         CustomSnackBar.showSuccess(message: 'Product updated successfully!');
       }
     } catch (e) {
-      isLoading.value = false;
       CustomSnackBar.showError(message: 'Failed to update product: $e');
+    } finally {
+      isLoading.value = false;
     }
   }
 }
 
-class EditProductScreen extends StatelessWidget {
+class EditProductScreen extends StatefulWidget {
   const EditProductScreen({Key? key}) : super(key: key);
+
+  @override
+  State<EditProductScreen> createState() => _EditProductScreenState();
+}
+
+class _EditProductScreenState extends State<EditProductScreen> {
+  late final EditProductController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.isRegistered<EditProductController>()
+        ? Get.find<EditProductController>()
+        : Get.put(EditProductController());
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<EditProductController>()) {
+      Get.delete<EditProductController>();
+    }
+    super.dispose();
+  }
 
   void _showImageSourceDialog(BuildContext context, EditProductController controller) {
     showModalBottomSheet(
@@ -398,7 +424,6 @@ class EditProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(EditProductController());
     final screenWidth = MediaQuery.of(context).size.width;
     final itemSize = (screenWidth - 40 - 20) / 3;
 

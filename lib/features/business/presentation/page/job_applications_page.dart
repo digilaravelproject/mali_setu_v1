@@ -16,12 +16,24 @@ class JobApplicationsPage extends StatefulWidget {
 
 class _JobApplicationsPageState extends State<JobApplicationsPage> {
   final BusinessController controller = Get.find<BusinessController>();
-  final Job job = Get.arguments ?? Job();
+  late final Job job;
 
   @override
   void initState() {
     super.initState();
+    final args = Get.arguments;
+    if (args is Job) {
+      job = args;
+    } else if (args is int) {
+      job = Job(id: args);
+    } else if (args is Map && args['id'] != null) {
+      job = Job(id: int.tryParse(args['id'].toString()));
+    } else {
+      job = Job();
+    }
     if (job.id != null) {
+      controller.isJobApplicationsLoading.value = true;
+      controller.selectedJobApplications.clear();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.fetchJobApplications(job.id!);
       });
@@ -90,7 +102,7 @@ class _JobApplicationsPageState extends State<JobApplicationsPage> {
         foregroundColor: context.theme.textTheme.bodyLarge?.color,
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.selectedJobApplications.isEmpty) {
+        if (controller.isJobApplicationsLoading.value && controller.selectedJobApplications.isEmpty) {
           return _buildShimmerLoading();
         }
 

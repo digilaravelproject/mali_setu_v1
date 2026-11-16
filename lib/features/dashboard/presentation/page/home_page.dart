@@ -537,14 +537,18 @@ class HomePage extends GetWidget<HomeController> {
             //   shape: BoxShape.circle,
             //   color: Theme.of(context).primaryColor.withOpacity(0.08),
             // ),
-            child: CustomImageView(
-              height: 32,
-              width: 32,
-              url: category.photo != null && category.photo!.isNotEmpty
-                  ? category.photo
-                  : "https://cdn-icons-png.freepik.com/512/10416/10416308.png",
-              fit: BoxFit.contain,
-            ),
+            child: category.photo != null && category.photo!.isNotEmpty
+                ? CustomImageView(
+                    height: 32,
+                    width: 32,
+                    url: category.photo,
+                    fit: BoxFit.contain,
+                  )
+                : Icon(
+                    Icons.category_outlined,
+                    size: 26,
+                    color: Theme.of(context).primaryColor,
+                  ),
           ),
           const SizedBox(height: 2),
           Flexible(

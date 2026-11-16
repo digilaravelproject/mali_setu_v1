@@ -53,6 +53,12 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       argBusiness = Business();
     }
     _outerScrollController.addListener(_onScroll);
+    if (argBusiness.id != null) {
+      controller.isDetailsLoading.value = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.fetchBusinessDetails(argBusiness.id!);
+      });
+    }
   }
 
   void _onScroll() {
@@ -85,12 +91,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (argBusiness.id != null) {
-        controller.fetchBusinessDetails(argBusiness.id!);
-      }
-    });
-
     return Scaffold(
       floatingActionButton: const WhatsAppSupportFab(bottomPadding: 75),
       body: Stack(
@@ -375,7 +375,32 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 ),
               ),
               if (controller.selectedBusiness.value == null && (argBusiness.businessName == null || argBusiness.businessName!.isEmpty))
-                _buildDetailShimmer(context),
+                controller.isDetailsLoading.value
+                    ? _buildDetailShimmer(context)
+                    : Container(
+                        color: context.theme.scaffoldBackgroundColor,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.storefront_outlined, size: 52, color: Colors.grey.shade400),
+                              const SizedBox(height: 12),
+                              Text(
+                                'business_not_found'.tr == 'business_not_found'
+                                    ? 'Could not load business details.'
+                                    : 'business_not_found'.tr,
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                              ),
+                              const SizedBox(height: 14),
+                              if (argBusiness.id != null)
+                                ElevatedButton(
+                                  onPressed: () => controller.fetchBusinessDetails(argBusiness.id!),
+                                  child: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Retry'),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
             ],
           );
         }),
@@ -563,11 +588,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                     const SizedBox(height: 6),
                     _buildHeaderIconLabel(
                       Icons.location_on_outlined,
-                      business.state.toString() +
-                          ', ' +
-                          business.city.toString() +
-                          ', ' +
-                          business.pincode.toString(),
+                      [business.state, business.city, business.pincode]
+                          .where((s) => s != null && s.trim().isNotEmpty && s.trim() != 'null')
+                          .join(', '),
                       context,
                     ),
                     // const SizedBox(height: 6),
@@ -677,8 +700,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: Icons.email_outlined,
               label: 'email'.tr,
               color: Colors.red.shade400,
-              onTap: () =>
-                  controller.launchEmail(business.user!.email.toString()),
+              onTap: () => controller.launchEmail(
+                (business.contactEmail ?? business.user?.email ?? '').toString(),
+              ),
             ),
           ),
           _buildVerticalDivider(context, height: 30),
@@ -687,8 +711,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
               icon: FontAwesomeIcons.whatsapp,
               label: 'whatsapp'.tr,
               color: Colors.green,
-              onTap: () =>
-                  controller.launchWhatsApp(business.user!.phone.toString()),
+              onTap: () => controller.launchWhatsApp(
+                (business.contactPhone ?? business.user?.phone ?? '').toString(),
+              ),
             ),
           ),
           _buildVerticalDivider(context, height: 30),

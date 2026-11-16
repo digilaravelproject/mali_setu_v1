@@ -169,6 +169,9 @@ class RegisterPage extends GetWidget<RegisterController> {
                     PhoneFieldComponent(
                       key: controller.phoneFieldKey,
                       isRequired: true,
+                      onVerificationChanged: (val) {
+                        controller.isPhoneVerified.value = val;
+                      },
                     ),
                   ],
                 ),
@@ -550,11 +553,34 @@ class RegisterPage extends GetWidget<RegisterController> {
 
                 const SizedBox(height: 20),
   
-                Obx(() => CustomButton(
-                      title: "register_button".tr,
-                      onPressed: controller.onRegister,
-                      isLoading: controller.isLoading.value,
-                    )),
+                Obx(() {
+                  final bool isVerified = controller.isPhoneVerified.value;
+                  return CustomButton(
+                    title: "register_button".tr,
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : (isVerified
+                            ? controller.onRegister
+                            : () {
+                                if (Get.context != null) {
+                                  PhoneFieldComponent.showNotVerifiedDialog(
+                                    context: Get.context!,
+                                    onVerifyTap: () {
+                                      controller.scrollToKey(controller.phoneFieldKey);
+                                      if (controller.phoneFieldKey.currentState?.isOtpSentState == true) {
+                                        controller.phoneFieldKey.currentState?.focusFirstOtpBox();
+                                      } else {
+                                        controller.phoneFieldKey.currentState?.sendOtp();
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  controller.onRegister();
+                                }
+                              }),
+                    isLoading: controller.isLoading.value,
+                  );
+                }),
   
                 const SizedBox(height: 24),
   
