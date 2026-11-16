@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,7 @@ import '../../../../business/presentation/controller/business_controller.dart';
 import '../../../../../core/services/deep_link_service.dart';
 import '../../../../../core/services/notification_handler_service.dart';
 import '../../../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
+import '../widgets/account_inactive_bottom_sheet.dart';
 
 
 class LoginController extends GetxController {
@@ -116,10 +118,26 @@ class LoginController extends GetxController {
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         _navigateToDashboardOrDeepLink();
       } else {
-        CustomSnackBar.showError(message: response.message ?? "Login failed");
+        if (_isInactiveAccount(response.message)) {
+          _showInactiveAccountSheet(response.message, emailController.text.trim());
+        } else {
+          CustomSnackBar.showError(message: response.message ?? "Login failed");
+        }
       }
     } catch (e) {
+      if (e is DioException && e.response?.data is Map) {
+        final d = e.response!.data as Map;
+        final msg = d['message']?.toString() ?? d['error']?.toString();
+        if (_isInactiveAccount(msg)) {
+          _showInactiveAccountSheet(msg, emailController.text.trim());
+          return;
+        }
+      }
       String errorMessage = e.toString();
+      if (_isInactiveAccount(errorMessage)) {
+        _showInactiveAccountSheet(errorMessage, emailController.text.trim());
+        return;
+      }
       if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
         errorMessage = 'Connection timeout. Please check your internet and try again.';
       } else if (errorMessage.contains('SocketException')) {
@@ -195,7 +213,9 @@ class LoginController extends GetxController {
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         _navigateToDashboardOrDeepLink();
       } else {
-        if (response.message == "No account found. Please register first.") {
+        if (_isInactiveAccount(response.message)) {
+          _showInactiveAccountSheet(response.message, googleUser.email);
+        } else if (response.message == "No account found. Please register first.") {
           Get.toNamed(AppRoutes.register, arguments: {"email": googleUser.email});
         } else {
           CustomSnackBar.showError(message: response.message ?? "Login failed");
@@ -203,7 +223,19 @@ class LoginController extends GetxController {
       }
     } catch (e) {
       print("googlelogincatch : "+e.toString());
+      if (e is DioException && e.response?.data is Map) {
+        final d = e.response!.data as Map;
+        final msg = d['message']?.toString() ?? d['error']?.toString();
+        if (_isInactiveAccount(msg)) {
+          _showInactiveAccountSheet(msg, googleUser.email);
+          return;
+        }
+      }
       String errorMessage = e.toString();
+      if (_isInactiveAccount(errorMessage)) {
+        _showInactiveAccountSheet(errorMessage, googleUser.email);
+        return;
+      }
       if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
         errorMessage = 'Connection timeout. Please check your internet and try again.';
       } else if (errorMessage.contains('SocketException')) {
@@ -280,7 +312,9 @@ class LoginController extends GetxController {
         CustomSnackBar.showSuccess(message: response.message ?? "Login successful");
         _navigateToDashboardOrDeepLink();
       } else {
-        if (response.message == "No account found. Please register first.") {
+        if (_isInactiveAccount(response.message)) {
+          _showInactiveAccountSheet(response.message, email);
+        } else if (response.message == "No account found. Please register first.") {
           Get.toNamed(AppRoutes.register, arguments: {"email": email});
         } else {
           CustomSnackBar.showError(message: response.message ?? "Login failed");
@@ -292,6 +326,18 @@ class LoginController extends GetxController {
         // User canceled the sign-in flow, do not show error.
         return;
       }
+      if (e is DioException && e.response?.data is Map) {
+        final d = e.response!.data as Map;
+        final msg = d['message']?.toString() ?? d['error']?.toString();
+        if (_isInactiveAccount(msg)) {
+          _showInactiveAccountSheet(msg);
+          return;
+        }
+      }
+      if (_isInactiveAccount(errorMessage)) {
+        _showInactiveAccountSheet(errorMessage);
+        return;
+      }
       if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
         errorMessage = 'Connection timeout. Please check your internet and try again.';
       } else if (errorMessage.contains('SocketException')) {
@@ -301,6 +347,26 @@ class LoginController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Checks if message indicates an inactive account waiting for administrator activation
+  bool _isInactiveAccount(String? message) {
+    if (message == null) return false;
+    final m = message.toLowerCase();
+    return m.contains('inactive') ||
+        m.contains('administrator activation') ||
+        m.contains('wait for administrator') ||
+        m.contains('not active') ||
+        m.contains('pending activation') ||
+        m.contains('निष्क्रिय');
+  }
+
+  /// Displays the Account Inactive bottom sheet
+  void _showInactiveAccountSheet(String? message, [String? userEmail]) {
+    AccountInactiveBottomSheet.show(
+      message: message,
+      userEmail: userEmail ?? emailController.text.trim(),
+    );
   }
 
   void _navigateToDashboardOrDeepLink() {
