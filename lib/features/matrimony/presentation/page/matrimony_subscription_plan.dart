@@ -25,6 +25,14 @@ class _MatrimonyBottomSheetState extends State<_MatrimonyBottomSheet> {
   MatrimonyPlan? selectedPlan;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.plans.isNotEmpty) {
+      selectedPlan = widget.plans.first;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(

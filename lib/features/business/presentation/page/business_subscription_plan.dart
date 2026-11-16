@@ -26,13 +26,9 @@ class _BusinessBottomSheetState extends State<_BusinessBottomSheet> {
   @override
   void initState() {
     super.initState();
-    // Select the highest price plan by default
+    // Select the first plan by default
     if (widget.plans.isNotEmpty) {
-      selectedPlan = widget.plans.reduce((current, next) {
-        final currentPrice = double.tryParse(current.price ?? '0') ?? 0;
-        final nextPrice = double.tryParse(next.price ?? '0') ?? 0;
-        return currentPrice > nextPrice ? current : next;
-      });
+      selectedPlan = widget.plans.first;
     }
   }
 
