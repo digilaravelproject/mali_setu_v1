@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import '../constent/app_constants.dart';
+import '../storage/shared_prefs.dart';
 import '../controllers/support_controller.dart';
 
 export '../controllers/support_controller.dart';
@@ -77,6 +80,12 @@ class _WhatsAppFabOverlayManager {
     // Hide FAB if the route containing the top FAB is covered by another route
     final route = ModalRoute.of(topState.context);
     if (route != null && !route.isCurrent) {
+      return const SizedBox.shrink();
+    }
+
+    // Hide FAB on pre-login / auth screens (splash, language selection, login, register, reset password, etc.)
+    final routeName = route?.settings.name ?? Get.currentRoute;
+    if (_isPreLoginOrAuthRoute(routeName)) {
       return const SizedBox.shrink();
     }
 
@@ -221,6 +230,33 @@ class _WhatsAppFabOverlayManager {
         ),
       ),
     );
+  }
+
+  static bool _isPreLoginOrAuthRoute(String? routeName) {
+    if (routeName == null) return false;
+    final r = routeName.toLowerCase().trim();
+    if (r == '/' ||
+        r.isEmpty ||
+        r == '/splash' ||
+        r == '/intro' ||
+        r == '/languageselection' ||
+        r == '/login' ||
+        r == '/register' ||
+        r == '/emailpasswordreset' ||
+        r == '/resetpasswordscreen' ||
+        r.contains('splash') ||
+        r.contains('intro') ||
+        r.contains('login') ||
+        r.contains('register') ||
+        r.contains('resetpassword') ||
+        r.contains('passwordreset')) {
+      if (r == '/changepassword' || r == '/languageselection') {
+        final bool isLoggedIn = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
+        return !isLoggedIn;
+      }
+      return true;
+    }
+    return false;
   }
 }
 

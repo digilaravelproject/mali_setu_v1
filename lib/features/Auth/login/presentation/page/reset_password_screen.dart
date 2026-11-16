@@ -20,6 +20,7 @@ class EmailResetPasswordScreen extends GetWidget<ResetPasswordController> {
     final theme = Theme.of(context);
 
     return CustomScaffold(
+      showWhatsAppFab: false,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -96,6 +97,7 @@ class ResetPasswordScreen extends GetWidget<ResetPasswordController> {
     final theme = Theme.of(context);
 
     return CustomScaffold(
+      showWhatsAppFab: false,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(

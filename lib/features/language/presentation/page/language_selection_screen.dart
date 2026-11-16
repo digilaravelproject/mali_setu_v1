@@ -109,6 +109,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     final primaryColor = theme.primaryColor;
 
     return CustomScaffold(
+      showWhatsAppFab: widget.isFromSettings,
       body: SafeArea(
         child: Column(
           children: [
