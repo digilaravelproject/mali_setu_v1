@@ -9,6 +9,7 @@ import '../../../../core/constent/api_constants.dart';
 import '../../../../core/styles/app_colors.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
+import '../../../../core/widgets/profile_app_bar_button.dart';
 import '../../../business/data/model/res_all_business_model.dart';
 import '../controller/jobs_controller.dart';
 import '../widgets/job_card_item.dart';
@@ -109,6 +110,8 @@ class JobsScreen extends StatelessWidget {
                       );
                     }
                   }),
+                  const SizedBox(width: 14),
+                  const ProfileAppBarButton(),
                 ],
               ),
             ),
