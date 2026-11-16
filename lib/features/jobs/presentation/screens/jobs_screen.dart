@@ -501,23 +501,46 @@ class JobsScreen extends StatelessWidget {
     Color statusBgColor;
     String statusText;
     switch (status) {
+      case 'reviewed':
+        statusColor = const Color(0xFF2563EB);
+        statusBgColor = const Color(0xFFEFF6FF);
+        statusText = 'reviewed'.tr.isNotEmpty && 'reviewed'.tr != 'reviewed'
+            ? 'reviewed'.tr
+            : 'Reviewed';
+        break;
+      case 'shortlisted':
+        statusColor = const Color(0xFF7C3AED);
+        statusBgColor = const Color(0xFFF5F3FF);
+        statusText = 'shortlisted'.tr.isNotEmpty && 'shortlisted'.tr != 'shortlisted'
+            ? 'shortlisted'.tr
+            : 'Shortlisted';
+        break;
       case 'approved':
       case 'accepted':
-      case 'shortlisted':
+      case 'selected':
+      case 'hired':
         statusColor = const Color(0xFF059669);
         statusBgColor = const Color(0xFFECFDF5);
-        statusText = 'Shortlisted';
+        statusText = 'accepted'.tr.isNotEmpty && 'accepted'.tr != 'accepted'
+            ? 'accepted'.tr
+            : 'Accepted';
         break;
       case 'rejected':
       case 'declined':
         statusColor = const Color(0xFFDC2626);
         statusBgColor = const Color(0xFFFEF2F2);
-        statusText = 'Rejected';
+        statusText = 'rejected'.tr.isNotEmpty && 'rejected'.tr != 'rejected'
+            ? 'rejected'.tr
+            : 'Rejected';
         break;
+      case 'pending':
+      case 'submitted':
       default:
         statusColor = const Color(0xFFD97706);
         statusBgColor = const Color(0xFFFFFBEB);
-        statusText = 'Pending';
+        statusText = 'pending'.tr.isNotEmpty && 'pending'.tr != 'pending'
+            ? 'pending'.tr
+            : (status.isNotEmpty ? status[0].toUpperCase() + status.substring(1) : 'Pending');
         break;
     }
 

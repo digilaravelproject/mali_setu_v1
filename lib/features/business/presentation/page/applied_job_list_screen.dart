@@ -157,8 +157,16 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
   Widget _buildStatusBadge(String status) {
     Color color;
     switch (status.toLowerCase()) {
+      case 'reviewed':
+        color = Colors.blue;
+        break;
+      case 'shortlisted':
+        color = Colors.purple;
+        break;
       case 'accepted':
       case 'approved':
+      case 'selected':
+      case 'hired':
         color = Colors.green;
         break;
       case 'rejected':
@@ -169,6 +177,12 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
         color = Colors.orange;
     }
 
+    final rawStatus = status.toLowerCase();
+    final localized = rawStatus.tr;
+    final displayText = (localized.isNotEmpty && localized != rawStatus)
+        ? localized
+        : (rawStatus.isNotEmpty ? rawStatus[0].toUpperCase() + rawStatus.substring(1) : 'Pending');
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -176,7 +190,7 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        status.toLowerCase().tr,
+        displayText,
         style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
       ),
     );
