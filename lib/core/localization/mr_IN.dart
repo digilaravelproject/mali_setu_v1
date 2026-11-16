@@ -878,6 +878,7 @@ const Map<String, String> mrIN = {
   'received': 'प्राप्त झालेले',
   'sent': 'पाठवलेले',
   'no_received_requests': 'प्राप्त विनंत्या नाहीत',
+  'no_sent_requests': 'कोणत्याही पाठवलेल्या विनंत्या नाहीत',
   'send_connection_request': 'संपर्क विनंती पाठवा',
   'partner_preferences': 'जोडीदाराच्या अपेक्षा',
   'request_sent': 'विनंती पाठवली',

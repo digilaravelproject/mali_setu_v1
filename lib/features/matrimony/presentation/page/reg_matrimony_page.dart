@@ -331,7 +331,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                     Expanded(
                       child: AppInputTextField(
                         controller: controller.heightCtrl,
-                        textInputType: TextInputType.number,
+                        textInputType: const TextInputType.numberWithOptions(decimal: true),
                         label: "height".tr,
                         hintText: "Enter height",
                         inputFormatters: [_HeightInputFormatter()],
@@ -1430,12 +1430,40 @@ class _HeightInputFormatter extends TextInputFormatter {
       return newValue;
     }
 
+    // Allow deleting smoothly
+    if (newText.length < oldValue.text.length) {
+      return newValue;
+    }
+
+    // If user explicitly typed a dot
+    if (newText.contains('.')) {
+      final parts = newText.split('.');
+      if (parts.length > 2) {
+        return oldValue;
+      }
+      String beforeDot = parts[0].replaceAll(RegExp(r'[^\d]'), '');
+      String afterDot = parts[1].replaceAll(RegExp(r'[^\d]'), '');
+
+      if (beforeDot.length > 1) {
+        beforeDot = beforeDot.substring(0, 1);
+      }
+      if (afterDot.length > 2) {
+        afterDot = afterDot.substring(0, 2);
+      }
+
+      String formatted = beforeDot.isEmpty ? '0.' : '$beforeDot.$afterDot';
+      return TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+
     // Remove any characters other than digits
     String digitsOnly = newText.replaceAll(RegExp(r'[^\d]'), '');
 
-    // Limit to 2 digits
-    if (digitsOnly.length > 2) {
-      digitsOnly = digitsOnly.substring(0, 2);
+    // Limit to 3 digits (1 digit for feet, up to 2 digits for inches e.g. 5.10, 5.11)
+    if (digitsOnly.length > 3) {
+      digitsOnly = digitsOnly.substring(0, 3);
     }
 
     String formatted = digitsOnly;
