@@ -34,7 +34,6 @@ class AccountInactiveBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final locale = Get.locale?.languageCode ?? 'en';
     final isMr = locale == 'mr';
     final isHi = locale == 'hi';
@@ -209,7 +208,7 @@ class AccountInactiveBottomSheet extends StatelessWidget {
               final emailText = (userEmail != null && userEmail!.trim().isNotEmpty)
                   ? " (Email: ${userEmail!.trim()})"
                   : "";
-              SupportController.launchWhatsApp(
+              SupportController.to.openSupportChat(
                 message:
                     "Hello Mali Setu Support Team, my account$emailText is inactive. Please activate my account.",
               );
@@ -227,7 +226,7 @@ class AccountInactiveBottomSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF25D366).withOpacity(0.3),
+                    color: const Color(0xFF25D366).withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../../../../core/constent/app_constants.dart';
@@ -14,10 +13,8 @@ import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/storage/shared_prefs.dart';
 import '../../../../../core/storage/token_manger.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
-import '../../data/model/res_login_model.dart' hide User;
 import '../../data/model/req_login_model.dart';
 import '../../domain/usecase/login_usecase.dart';
-import '../../../../business/presentation/controller/business_controller.dart';
 import '../../../../../core/services/deep_link_service.dart';
 import '../../../../../core/services/notification_handler_service.dart';
 import '../../../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
@@ -151,6 +148,7 @@ class LoginController extends GetxController {
 
 
   Future<void> googleSignIn() async {
+    GoogleSignInAccount? googleUser;
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         clientId: Platform.isIOS
@@ -159,7 +157,7 @@ class LoginController extends GetxController {
       );
       // Force sign out to ensure account selector shows up every time
       await googleSignIn.signOut();
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      googleUser = await googleSignIn.signIn();
       if (googleUser == null) return; // User canceled the sign-in
 
       // We have the googleUser, now call our backend API
@@ -227,13 +225,13 @@ class LoginController extends GetxController {
         final d = e.response!.data as Map;
         final msg = d['message']?.toString() ?? d['error']?.toString();
         if (_isInactiveAccount(msg)) {
-          _showInactiveAccountSheet(msg, googleUser.email);
+          _showInactiveAccountSheet(msg, googleUser?.email);
           return;
         }
       }
       String errorMessage = e.toString();
       if (_isInactiveAccount(errorMessage)) {
-        _showInactiveAccountSheet(errorMessage, googleUser.email);
+        _showInactiveAccountSheet(errorMessage, googleUser?.email);
         return;
       }
       if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
@@ -248,6 +246,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> appleSignIn() async {
+    String? email;
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -257,7 +256,7 @@ class LoginController extends GetxController {
       );
 
       // We have the credential, now call our backend API
-      String? email = credential.email;
+      email = credential.email;
       
       // If email is null (happens on subsequent logins), try to decode it from Identity Token
       if ((email == null || email.isEmpty) && credential.identityToken != null) {
@@ -330,12 +329,12 @@ class LoginController extends GetxController {
         final d = e.response!.data as Map;
         final msg = d['message']?.toString() ?? d['error']?.toString();
         if (_isInactiveAccount(msg)) {
-          _showInactiveAccountSheet(msg);
+          _showInactiveAccountSheet(msg, email);
           return;
         }
       }
       if (_isInactiveAccount(errorMessage)) {
-        _showInactiveAccountSheet(errorMessage);
+        _showInactiveAccountSheet(errorMessage, email);
         return;
       }
       if (errorMessage.contains('DioException') || errorMessage.contains('connection timeout')) {
