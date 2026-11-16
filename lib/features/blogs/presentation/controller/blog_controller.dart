@@ -43,6 +43,7 @@ class BlogController extends GetxController {
   final Rxn<Blog> selectedBlog = Rxn<Blog>();
   final RxList<Blog> relatedBlogs = <Blog>[].obs;
   final RxBool isDetailLoading = false.obs;
+  final RxMap<int, Blog> blogDetailCache = <int, Blog>{}.obs;
 
   // Video State for detail screen
   final Rxn<VideoPlayerController> detailVideoController =
@@ -301,6 +302,10 @@ class BlogController extends GetxController {
     final rIdx = relatedBlogs.indexWhere((b) => b.id == id);
     if (rIdx != -1) relatedBlogs[rIdx] = updated;
 
+    if (blogDetailCache.containsKey(id)) {
+      blogDetailCache[id] = updated;
+    }
+
     if (selectedBlog.value?.id == id) {
       selectedBlog.value = selectedBlog.value!.copyWith(
         isLiked: updated.isLiked,
@@ -405,15 +410,23 @@ class BlogController extends GetxController {
 
   Future<void> fetchBlogDetail(int id) async {
     isDetailLoading.value = true;
-    selectedBlog.value = null;
-    relatedBlogs.clear();
+    if (blogDetailCache.containsKey(id)) {
+      selectedBlog.value = blogDetailCache[id];
+    } else {
+      selectedBlog.value = null;
+      relatedBlogs.clear();
+    }
     showAllComments.value = false;
 
     try {
       final response = await _repository.getBlogDetail(id);
 
       if (response != null && response.success == true && response.data != null) {
-        selectedBlog.value = response.data?.blog;
+        final blog = response.data?.blog;
+        selectedBlog.value = blog;
+        if (blog != null && blog.id != null) {
+          blogDetailCache[blog.id!] = blog;
+        }
         relatedBlogs.assignAll(response.data?.related ?? []);
 
         _initializeDetailVideo();
@@ -423,6 +436,10 @@ class BlogController extends GetxController {
     } finally {
       isDetailLoading.value = false;
     }
+  }
+
+  void disposeDetailVideo() {
+    _disposeVideo();
   }
 
   void _initializeDetailVideo() {

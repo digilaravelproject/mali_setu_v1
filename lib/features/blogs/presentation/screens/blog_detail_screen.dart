@@ -49,18 +49,27 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
   final RxInt _activeMediaIndex = 0.obs;
   final PageController _mediaPageController = PageController();
+  bool _initialLoadRequested = false;
 
   @override
   void initState() {
     super.initState();
-    // Immediately set loading to prevent "Blog not found" flash
-    controller.isDetailLoading.value = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadBlogDetail();
+      }
+    });
+  }
+
+  void _loadBlogDetail() {
+    _initialLoadRequested = true;
     controller.fetchBlogDetail(widget.blogId);
   }
 
   @override
   void dispose() {
     _mediaPageController.dispose();
+    controller.disposeDetailVideo();
     super.dispose();
   }
 
@@ -68,7 +77,11 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   void didUpdateWidget(covariant BlogDetailScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.blogId != widget.blogId) {
-      controller.fetchBlogDetail(widget.blogId);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _loadBlogDetail();
+        }
+      });
     }
   }
 
@@ -88,12 +101,23 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
           backgroundColor: Colors.white,
           floatingActionButton: const WhatsAppSupportFab(bottomPadding: 16),
           body: Obx(() {
-            if (controller.isDetailLoading.value) {
+            final Blog? cachedBlog = controller.selectedBlog.value?.id == widget.blogId
+                ? controller.selectedBlog.value
+                : controller.blogDetailCache[widget.blogId];
+
+            final bool isThisBlogLoading = controller.isDetailLoading.value &&
+                (controller.selectedBlog.value?.id == widget.blogId || controller.selectedBlog.value == null);
+
+            if ((!_initialLoadRequested || isThisBlogLoading) && cachedBlog == null) {
               return Center(child: CircularProgressIndicator(color: primaryColor));
             }
 
-            final blog = controller.selectedBlog.value;
-            if (blog == null) {
+            final Blog? resolvedBlog = cachedBlog ??
+                (controller.selectedBlog.value?.id == widget.blogId
+                    ? controller.selectedBlog.value
+                    : null);
+
+            if (resolvedBlog == null) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +130,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                     ),
                     const SizedBox(height: 12),
                     ElevatedButton(
-                      onPressed: () => controller.fetchBlogDetail(widget.blogId),
+                      onPressed: () => _loadBlogDetail(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
@@ -118,6 +142,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
                 ),
               );
             }
+
+            final Blog blog = resolvedBlog;
 
             String categoryName = '';
             if (blog.category != null && blog.category!.name != null) {
@@ -868,10 +894,6 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
 
   Widget _buildCommentsSection(BuildContext context, Color primaryColor, Blog blog, BlogController controller) {
     final comments = blog.comments ?? [];
-    final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
-    final currentUser = authService?.currentUser.value;
-    final userName = currentUser?.name ?? '';
-    final userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
