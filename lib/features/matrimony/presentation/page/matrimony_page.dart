@@ -17,6 +17,7 @@ import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
 import '../../data/model/search_matrimony_response.dart';
 import 'package:edu_cluezer/features/filter/presentation/controller/filter_controller.dart';
+import '../../../../core/widgets/profile_app_bar_button.dart';
 
 class MatrimonyPage extends GetWidget<MatrimonyController> {
   const MatrimonyPage({super.key});
@@ -82,61 +83,15 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Row(
                                 children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      if (currentUser?.id != null) {
-                                        Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {'id': currentUser?.id});
-                                      }
-                                    },
-                                    child: Container(
-                                      height: 44,
-                                      width: 44,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset:const Offset(0, 2)),
-                                        ],
-                                        border: Border.all(color: Colors.white, width: 2),
-                                      ),
-                                      child: ClipOval(
-                                        child: (currentUser?.profileImage != null && currentUser!.profileImage!.isNotEmpty)
-                                            ? CachedNetworkImage(
-                                                imageUrl: currentUser!.profileImage!.startsWith('http')
-                                                    ? currentUser!.profileImage!
-                                                    : "${ApiConstants.imageBaseUrl}${currentUser!.profileImage}",
-                                                width: 44,
-                                                height: 44,
-                                                fit: BoxFit.cover,
-                                                placeholder: (context, url) => Container(color: Colors.grey[100]),
-                                                errorWidget: (context, url, error) => Center(
-                                                  child: Icon(
-                                                    CupertinoIcons.person_fill,
-                                                    size: 24,
-                                                    color: Colors.grey[400],
-                                                  ),
-                                                ),
-                                              )
-                                            : Center(
-                                                child: Icon(
-                                                  CupertinoIcons.person_fill,
-                                                  size: 24,
-                                                  color: Colors.grey[400],
-                                                ),
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                  const Spacer(),
                                   Text(
                                     'discover'.tr,
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.w800,
                                       color: theme.primaryColor,
-                                      letterSpacing: 1.2,
+                                      letterSpacing: -0.5,
                                     ),
                                   ),
-                                  const Spacer(),
                                   const Spacer(),
 
                                   if (hasMatrimony && hasPayment) ...[
@@ -196,7 +151,9 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                         ],
                                       ),
                                     ),
-                                  ]
+                                    const SizedBox(width: 14),
+                                  ],
+                                  const ProfileAppBarButton(),
                                 ],
                               ),
                             ),
@@ -962,265 +919,284 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
 
 
-  Widget _buildRestrictedView(BuildContext context) {
+  Widget _buildRefreshableRestrictedContainer({
+    required BuildContext context,
+    required Widget child,
+  }) {
     final theme = Theme.of(context);
-    return Center(
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40), // More compact spacing from top bar
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.lock_person_rounded,
-                size: 80,
-                color: theme.primaryColor,
-              ),
+    return RefreshIndicator(
+      color: theme.primaryColor,
+      backgroundColor: Colors.white,
+      onRefresh: () async {
+        if (Get.isRegistered<AuthService>()) {
+          await Get.find<AuthService>().refreshProfile();
+        }
+        if (Get.isRegistered<MatrimonyController>()) {
+          final filterCtrl = Get.isRegistered<FilterController>() ? Get.find<FilterController>() : null;
+          final filters = filterCtrl?.getFilters() ?? {};
+          controller.currentIndex.value = 0;
+          await controller.fetchProfiles(filters: filters, isSilent: true);
+        }
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          padding: const EdgeInsets.all(32.0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
             ),
-            const SizedBox(height: 24),
-            Text(
-              "Access Restricted",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            child: Center(
+              child: child,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "Register yourself on matrimony and payment also",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Get.toNamed(AppRoutes.regMatrimony),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Register Now",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-
+  Widget _buildRestrictedView(BuildContext context) {
+    final theme = Theme.of(context);
+    return _buildRefreshableRestrictedContainer(
+      context: context,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.lock_person_rounded,
+              size: 80,
+              color: theme.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "Access Restricted",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Register yourself on matrimony and payment also",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Get.toNamed(AppRoutes.regMatrimony),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "Register Now",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildPymentRestrictedView(BuildContext context) {
     final theme = Theme.of(context);
-    return Center(
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40), // More compact spacing from top bar
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.lock_person_rounded,
-                size: 80,
-                color: theme.primaryColor,
-              ),
+    return _buildRefreshableRestrictedContainer(
+      context: context,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 24),
-            Text(
-              "Access Restricted",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            child: Icon(
+              Icons.lock_person_rounded,
+              size: 80,
+              color: theme.primaryColor,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "First Purchase membership for matrimony",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "Access Restricted",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
             ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final regCtrl = Get.isRegistered<RegMatrimonyController>()
-                      ? Get.find<RegMatrimonyController>()
-                      : Get.put(RegMatrimonyController());
-                  regCtrl.fetchAndShowPlans();
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Purchase Now",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "First Purchase membership for matrimony",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                final regCtrl = Get.isRegistered<RegMatrimonyController>()
+                    ? Get.find<RegMatrimonyController>()
+                    : Get.put(RegMatrimonyController());
+                regCtrl.fetchAndShowPlans();
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              child: const Text(
+                "Purchase Now",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildPendingApprovalView(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40),
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.hourglass_empty_rounded,
-                size: 80,
-                color: Colors.orange,
-              ),
+    return _buildRefreshableRestrictedContainer(
+      context: context,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 24),
-            Text(
-              "pending_approval".tr,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            child: const Icon(
+              Icons.hourglass_empty_rounded,
+              size: 80,
+              color: Colors.orange,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "pending_approval_desc".tr,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "pending_approval".tr,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "pending_approval_desc".tr,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildRejectedApprovalView(BuildContext context, {String? reason}) {
-    return Center(
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40),
+    return _buildRefreshableRestrictedContainer(
+      context: context,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.cancel_outlined,
+              size: 80,
+              color: Colors.red,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "profile_rejected".tr,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "profile_rejected_desc".tr,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          if (reason != null && reason.trim().isNotEmpty) ...[
+            const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(24),
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                shape: BoxShape.circle,
+                color: Colors.red.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.withOpacity(0.2)),
               ),
-              child: const Icon(
-                Icons.cancel_outlined,
-                size: 80,
-                color: Colors.red,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              "profile_rejected".tr,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "profile_rejected_desc".tr,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
-            ),
-            if (reason != null && reason.trim().isNotEmpty) ...[
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red.withOpacity(0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.info_outline_rounded, color: Colors.red, size: 18),
-                        const SizedBox(width: 6),
-                        Text(
-                          "rejection_reason".tr,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Colors.red, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        "rejection_reason".tr,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      reason,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[800],
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    reason,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[800],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
