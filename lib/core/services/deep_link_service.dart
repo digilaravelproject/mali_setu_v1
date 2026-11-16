@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import '../../core/constent/app_constants.dart';
@@ -8,7 +9,6 @@ import '../../core/storage/shared_prefs.dart';
 import '../../features/Auth/service/auth_service.dart';
 import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
 import '../../features/blogs/presentation/screens/blogs_screen.dart';
-import '../../features/blogs/presentation/controller/blog_controller.dart';
 import '../../features/business/data/model/res_all_business_model.dart';
 import '../../features/webinars/data/models/webinar_model.dart';
 import '../../features/matrimony/presentation/page/matrimony_profile_screen.dart';
@@ -69,7 +69,21 @@ class DeepLinkService extends GetxService {
         first == 'register';
   }
 
+  static String? _lastHandledUriString;
+  static DateTime? _lastHandledTime;
+
   Future<void> _handleDeepLink(Uri uri) async {
+    final String uriStr = uri.toString();
+    final now = DateTime.now();
+    if (_lastHandledUriString == uriStr &&
+        _lastHandledTime != null &&
+        now.difference(_lastHandledTime!).inMilliseconds < 1500) {
+      print('DeepLinkService: Debouncing duplicate URI event within 1.5s: $uri');
+      return;
+    }
+    _lastHandledUriString = uriStr;
+    _lastHandledTime = now;
+
     print('DeepLinkService: Received URI: $uri');
 
     // Check if we need to wait for app initialization (bounded timeout to prevent infinite wait)
@@ -100,14 +114,21 @@ class DeepLinkService extends GetxService {
       return;
     }
 
-    // If user is NOT logged in: Save pending deep link for after login
-    if (!isUserLoggedIn) {
-      print('DeepLinkService: User NOT logged in. Storing pending deep link: $uri');
+    // Public routes (blogs, business, register) can be viewed directly even if auth is still settling
+    final bool isPublicRoute = firstSeg == 'blog' ||
+        firstSeg == 'blogs' ||
+        firstSeg == 'business' ||
+        firstSeg == 'businesses' ||
+        firstSeg == 'register';
+
+    // If user is NOT logged in for a private route: Save pending deep link for after login
+    if (!isUserLoggedIn && !isPublicRoute) {
+      print('DeepLinkService: User NOT logged in for private route. Storing pending deep link: $uri');
       pendingDeepLinkUri = uri;
       return;
     }
 
-    // If user IS logged in: Navigate directly to deep link destination
+    // Navigate directly to deep link destination
     navigateToUri(uri);
   }
 
@@ -116,18 +137,15 @@ class DeepLinkService extends GetxService {
     if (uri.pathSegments.isEmpty) return;
 
     void execute() {
+      if (Get.context == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => execute());
+        return;
+      }
+
       final firstSegment = uri.pathSegments.first.toLowerCase();
       if (firstSegment == 'blog' || firstSegment == 'blogs') {
         final int? blogId = uri.pathSegments.length > 1 ? int.tryParse(uri.pathSegments[1]) : null;
         if (blogId != null && blogId > 0) {
-          if (Get.isRegistered<BlogController>()) {
-            final blogCtrl = Get.find<BlogController>();
-            // If already viewing this exact blog and it's loaded, skip redundant navigation
-            if (blogCtrl.selectedBlog.value?.id == blogId && !blogCtrl.isDetailLoading.value) {
-              print('DeepLinkService: Already viewing Blog $blogId. Skipping redundant navigation.');
-              return;
-            }
-          }
           Get.to(() => BlogDetailScreen(blogId: blogId), preventDuplicates: false);
         } else {
           Get.to(() => const BlogsScreen());
@@ -188,9 +206,13 @@ class DeepLinkService extends GetxService {
       }
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (WidgetsBinding.instance.schedulerPhase == SchedulerPhase.idle) {
       execute();
-    });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        execute();
+      });
+    }
   }
 
   static void executePendingDeepLink() {

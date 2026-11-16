@@ -36,8 +36,11 @@ class InitController extends GetxController
     // Wait for the transition to fully complete before unblocking DeepLinkService
     await Future.delayed(const Duration(milliseconds: 600));
 
-    // Mark app as ready for deep link handling
+    // Mark app as ready for deep link handling and execute pending deep link if any
     DeepLinkService.isAppReady = true;
+    if (DeepLinkService.hasPendingDeepLink) {
+      DeepLinkService.executePendingDeepLink();
+    }
 
     // Mark app as ready for push notification deep navigation and execute pending notification
     NotificationHandlerService.isAppReady = true;
