@@ -183,7 +183,9 @@ const Map<String, String> mrIN = {
   'forget_password': 'पासवर्ड विसरलात?',
   'login_button': 'लॉगिन',
   'or': 'किंवा',
-  'sign_in_with_google': 'Google सह साइन इन करा',
+  'sign_in_with_google': 'Google सह पुढे सुरू ठेवा',
+  'continue_with_google': 'Google सह पुढे सुरू ठेवा',
+  'continue_with_mobile_otp': 'मोबाईल नंबर (OTP) सह पुढे सुरू ठेवा',
   'sign_in_with_apple': 'Apple सह साइन इन करा',
   'dont_have_account': 'खाते नाही? ',
   'register': 'नोंदणी करा',
@@ -213,11 +215,13 @@ const Map<String, String> mrIN = {
   'email_id': 'ईमेल आयडी',
   'date_of_birth': 'जन्मतारीख',
   'mobile_number': 'मोबाइल नंबर',
-  'caste_certificate': "जात प्रमाणपत्र / इतर पुरावा / वडिलांची जात",
-  'tap_to_upload': 'जात प्रमाणपत्र अपलोड करण्यासाठी टॅप करा',
-  'certificate_uploaded': 'जात प्रमाणपत्र अपलोड केले',
+  'certificate': 'प्रमाणपत्र',
+  'upload_certificate': 'प्रमाणपत्र अपलोड करा',
+  'caste_certificate': "प्रमाणपत्र / इतर पुरावा / वडिलांची जात",
+  'tap_to_upload': 'प्रमाणपत्र अपलोड करण्यासाठी टॅप करा',
+  'certificate_uploaded': 'प्रमाणपत्र अपलोड केले',
   'caste_certificate_criteria': 'फाईल स्वरूप: .jpg, .jpeg, .png, .pdf | कमाल फाईल आकार: 5MB',
-  'caste_certificate_note': '(टीप: शाळा सोडल्याचा दाखला (Leaving Certificate), जात प्रमाणपत्र, किंवा विवाह नोंदणी प्रमाणपत्र — यांपैकी जे तुमच्याकडे उपलब्ध असेल ते कोणतेही एक अपलोड करू शकता)',
+  'caste_certificate_note': '(टीप: शाळा सोडल्याचा दाखला (Leaving Certificate), जात प्रमाणपत्र (स्वतःचे किंवा पालकांचे), किंवा विवाह नोंदणी प्रमाणपत्र — यांपैकी जे तुमच्याकडे उपलब्ध असेल ते कोणतेही एक अपलोड करू शकता)',
   'address_details': 'पत्ता तपशील',
   'address': 'पत्ता',
   'nearby_location': 'जवळचे स्थान',
@@ -661,7 +665,7 @@ const Map<String, String> mrIN = {
 
 
 
-  "upload_caste_certificate": "जात प्रमाणपत्र अपलोड करा",
+  "upload_caste_certificate": "प्रमाणपत्र अपलोड करा",
   "referral_code_optional": "रेफरल कोड (ऐच्छिक)",
   "referral_code_note": "* रेफरल कोड ऐच्छिक आहे",
 

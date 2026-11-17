@@ -47,7 +47,10 @@ class FilterBottomSheet extends GetWidget<FilterController> {
                   }
               ),
               TextButton(
-                onPressed: controller.resetFilters,
+                onPressed: () {
+                  controller.resetFilters();
+                  Get.back(result: <String, dynamic>{});
+                },
                 child: Text(
                   'reset'.tr,
                   style: TextStyle(color: context.theme.primaryColor),

@@ -170,6 +170,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                                               onPressed: () async {
                                                 var result = await FilterBottomSheet.show();
                                                 if (result != null) {
+                                                  controller.currentIndex.value = 0;
                                                   controller.fetchProfiles(filters: result);
                                                 }
                                               },
@@ -277,7 +278,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 return _buildPendingApprovalView(context);
               }
               try {
-                if (controller.isLoading.value) {
+                if (controller.isLoading.value && controller.profiles.isEmpty) {
                   return Center(child: CircularProgressIndicator(color: theme.primaryColor));
                 }
                 if (controller.profiles.isEmpty) {
@@ -307,11 +308,26 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                     ),
                   );
                 }
-                return TabBarView(
-                  physics: const NeverScrollableScrollPhysics(),
+                return Stack(
                   children: [
-                    _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
-                    _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+                    TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+                        _buildCardList(context, controller.profiles.map((e) => _mapToUserProfile(e)).toList()),
+                      ],
+                    ),
+                    if (controller.isLoading.value)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: LinearProgressIndicator(
+                          minHeight: 3,
+                          color: theme.primaryColor,
+                          backgroundColor: Colors.transparent,
+                        ),
+                      ),
                   ],
                 );
               } catch (e) {
@@ -399,6 +415,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                 flex: 8,
                 //child: SafeArea(
                 child: CardSwiper(
+                  key: ValueKey('matrimony_swiper_${list.length}_${list.isNotEmpty ? list.first.id : 0}'),
                   controller: controller.swiperController,
                   padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
                   duration: const Duration(milliseconds: 400),

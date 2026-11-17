@@ -14,7 +14,7 @@ abstract class MatrimonyDataSource {
   Future<MatrimonyResponse> createProfile(dynamic data);
   Future<MatrimonyResponse> updateProfile(dynamic data);
   Future<dynamic> getProfiles(int id);
-  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters);
+  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters, {CancelToken? cancelToken});
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);
   Future<dynamic> sendConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectionRequests();
@@ -57,8 +57,16 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   }
 
   @override
-  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters) async {
-    final response = await apiClient.post(ApiConstants.searchMatrimony, data: filters);
+  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters, {CancelToken? cancelToken}) async {
+    final response = await apiClient.post(
+      ApiConstants.searchMatrimony,
+      data: filters,
+      cancelToken: cancelToken,
+      options: Options(
+        sendTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+      ),
+    );
     return SearchMatrimonyResponse.fromJson(response.data);
   }
 

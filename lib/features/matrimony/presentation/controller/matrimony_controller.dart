@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
 import 'package:edu_cluezer/packages/card_swiper/flutter_card_swiper.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
@@ -11,6 +12,7 @@ class MatrimonyController extends GetxController {
   final RxList<MatrimonyProfile> profiles = <MatrimonyProfile>[].obs;
   final RxBool isLoading = false.obs;
   final RxInt currentIndex = 0.obs;
+  CancelToken? _cancelToken;
 
   @override
   void onInit() {
@@ -20,21 +22,28 @@ class MatrimonyController extends GetxController {
 
   Future<void> fetchProfiles({Map<String, dynamic> filters = const {}, bool isSilent = false}) async {
     try {
+      _cancelToken?.cancel("New search initiated");
+      _cancelToken = CancelToken();
+
       if (!isSilent) isLoading.value = true;
-      final response = await _repository.searchMatrimony(filters);
+      currentIndex.value = 0;
+      final response = await _repository.searchMatrimony(filters, cancelToken: _cancelToken);
       
-      if (response.data != null && response.data!.data != null) {
-        // If it's a pagination or refresh, you might want to append or replace wisely.
-        // For now, replacing logic but keeping it simple.
-        profiles.value = response.data!.data!;
+      if (response.data != null) {
+        profiles.value = response.data!.data;
       } else {
-        if (!isSilent) profiles.clear(); // Only clear if explicit reload, or handle empty state better
+        if (!isSilent) profiles.clear();
       }
       
     } catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        return;
+      }
       print("Error fetching profiles: $e");
     } finally {
-      isLoading.value = false;
+      if (_cancelToken == null || !_cancelToken!.isCancelled) {
+        isLoading.value = false;
+      }
     }
   }
 

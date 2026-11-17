@@ -306,6 +306,10 @@ class FilterController extends GetxController {
     lastActive = ['Any'];
     updatedProfiles = 'Any';
     recentlyCreated.value = 'all';
+    isProfileWithPhoto.value = false;
+    isPrivate.value = false;
+    isNearbyChecked.value = false;
+    selectedDontShowOption.value = "";
 
     // Clear text controllers
     educationCtrl.clear();

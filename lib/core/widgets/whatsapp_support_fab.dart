@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import '../constent/app_constants.dart';
-import '../storage/shared_prefs.dart';
 import '../controllers/support_controller.dart';
 
 export '../controllers/support_controller.dart';
@@ -354,33 +352,13 @@ class _WhatsAppFabOverlayManager {
   }
 
   static bool _isPreLoginOrAuthRoute(String? routeName) {
-    final bool isLoggedIn = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
-    if (isLoggedIn) {
-      if (routeName == null) return false;
-      final r = routeName.toLowerCase().trim();
-      return r == '/splash' ||
-          r == '/login' ||
-          r == '/register' ||
-          r == '/emailpasswordreset' ||
-          r == '/resetpasswordscreen';
-    }
-
-    if (routeName == null || routeName.isEmpty) return true;
+    if (routeName == null || routeName.isEmpty) return false;
     final r = routeName.toLowerCase().trim();
     if (r == '/' ||
         r == '/splash' ||
         r == '/intro' ||
-        r == '/languageselection' ||
-        r == '/login' ||
-        r == '/register' ||
-        r == '/emailpasswordreset' ||
-        r == '/resetpasswordscreen' ||
         r.contains('splash') ||
-        r.contains('intro') ||
-        r.contains('login') ||
-        r.contains('register') ||
-        r.contains('resetpassword') ||
-        r.contains('passwordreset')) {
+        r.contains('intro')) {
       return true;
     }
     return false;

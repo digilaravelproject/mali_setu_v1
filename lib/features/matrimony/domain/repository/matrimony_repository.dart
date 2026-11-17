@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../data/model/matrimony_cast_model.dart';
 import '../../data/model/matrimony_chat_response.dart';
 import 'package:edu_cluezer/core/network/multipart.dart';
@@ -12,7 +13,7 @@ abstract class MatrimonyRepository {
   Future<MatrimonyResponse> createProfile(dynamic data);
   Future<MatrimonyResponse> updateProfile(dynamic data);
   Future<dynamic> getProfiles(int id);
-  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters);
+  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters, {CancelToken? cancelToken});
   Future<MatrimonyProfileDetailResponse> getProfileDetails(int id);
   Future<dynamic> sendConnectionRequest(Map<String, dynamic> data);
   Future<ConnectionRequestsResponse> getConnectionRequests();
