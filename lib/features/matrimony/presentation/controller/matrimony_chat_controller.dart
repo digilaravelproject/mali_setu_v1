@@ -75,6 +75,14 @@ class MatrimonyChatController extends GetxController {
     }
   }
 
+  Future<void> refreshChat() async {
+    if (conversationId != null) {
+      await fetchMessages();
+    } else if (otherUserId != null) {
+      await fetchConversationsAndFindOne();
+    }
+  }
+
   Future<void> fetchMessages() async {
     if (conversationId == null) return;
     isLoading.value = true;
