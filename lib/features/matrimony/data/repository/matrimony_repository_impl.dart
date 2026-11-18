@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../data/data_source/matrimony_data_source.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../domain/repository/matrimony_repository.dart';
@@ -31,8 +32,8 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   }
 
   @override
-  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters) async {
-    return await dataSource.searchMatrimony(filters);
+  Future<SearchMatrimonyResponse> searchMatrimony(Map<String, dynamic> filters, {CancelToken? cancelToken}) async {
+    return await dataSource.searchMatrimony(filters, cancelToken: cancelToken);
   }
 
   @override

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
@@ -510,14 +509,52 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                 const SizedBox(height: 24),
 
                 // Photos Section
-                _buildSectionHeader("Photos (Min 2, Max 5)"),
                 Obx(() {
                   final totalExisting = controller.existingPhotos.length;
                   final totalSelected = controller.selectedPhotos.length;
                   final totalPhotos = totalExisting + totalSelected;
+                  final hasMinPhotos = totalPhotos >= 2;
 
-                  if (totalPhotos == 0) {
-                    return GestureDetector(
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionHeader(
+                        "Photos (Min 2, Max 5)",
+                        isRequired: true,
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: hasMinPhotos
+                                ? Colors.green.withValues(alpha: 0.1)
+                                : (totalPhotos > 0
+                                    ? Colors.amber.withValues(alpha: 0.15)
+                                    : Colors.red.withValues(alpha: 0.08)),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: hasMinPhotos
+                                  ? Colors.green.withValues(alpha: 0.4)
+                                  : (totalPhotos > 0
+                                      ? Colors.amber.withValues(alpha: 0.5)
+                                      : Colors.red.withValues(alpha: 0.3)),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            "$totalPhotos/5 uploaded",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: hasMinPhotos
+                                  ? Colors.green.shade700
+                                  : (totalPhotos > 0
+                                      ? Colors.amber.shade900
+                                      : Colors.red.shade700),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (totalPhotos == 0)
+                        GestureDetector(
                       onTap: controller.pickPhotos,
                       child: Container(
                         width: double.infinity,
@@ -553,10 +590,9 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                           ],
                         ),
                       ),
-                    );
-                  }
-
-                  return SizedBox(
+                    )
+                  else ...[
+                    SizedBox(
                     height: 100,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
@@ -683,12 +719,33 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                         );
                       },
                     ),
-                  );
-                }),
-                const SizedBox(height: 24),
+                  ),
+                  if (totalPhotos < 2)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, size: 14, color: Colors.amber.shade800),
+                          const SizedBox(width: 6),
+                          Text(
+                            "Please upload at least 2 photos ($totalPhotos of 2 added)",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            );
+          }),
+          const SizedBox(height: 24),
 
-                // Caste Certificate Section (Optional)
-                _buildSectionHeader("${'upload_caste_certificate'.tr} ${'optional_tag'.tr}"),
+          // Certificate Section (Optional)
+          _buildSectionHeader("${'upload_certificate'.tr} ${'optional_tag'.tr}"),
                 const SizedBox(height: 10),
                 Obx(() {
                   final hasLocalFile = controller.casteCertificatePath.value.isNotEmpty;
@@ -756,7 +813,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        fileName.isNotEmpty ? fileName : "caste_certificate".tr,
+                                        fileName.isNotEmpty ? fileName : "certificate".tr,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: context.textTheme.bodyMedium?.copyWith(
@@ -842,7 +899,7 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            "upload_caste_certificate".tr,
+                            "upload_certificate".tr,
                             style: context.textTheme.bodyMedium?.copyWith(
                               color: context.theme.primaryColor,
                               fontWeight: FontWeight.w600,
@@ -1167,16 +1224,35 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, {bool isRequired = false, Widget? trailing}) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(
-        title.toUpperCase(),
-        style: Get.textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-          color: Get.theme.primaryColor,
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: title.toUpperCase(),
+              style: Get.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+                color: Get.theme.primaryColor,
+              ),
+              children: [
+                if (isRequired)
+                  const TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
       ),
     );
   }

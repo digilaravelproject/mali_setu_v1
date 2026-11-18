@@ -27,7 +27,7 @@ class RegisterPage extends GetWidget<RegisterController> {
     return Obx(() {
       controller.canExit.value; // Dummy read for Obx
       return CustomScaffold(
-        showWhatsAppFab: false,
+        showWhatsAppFab: true,
         onWillPop: () async {
           if (controller.canExit.value) return true;
           controller.handleBack();

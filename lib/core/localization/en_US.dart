@@ -192,7 +192,9 @@ const Map<String, String> enUS = {
   'forget_password': 'Forget Password',
   'login_button': 'Login',
   'or': 'OR',
-  'sign_in_with_google': 'Sign in with Google',
+  'sign_in_with_google': 'Continue with Google',
+  'continue_with_google': 'Continue with Google',
+  'continue_with_mobile_otp': 'Continue with mobile number(otp)',
   'sign_in_with_apple': 'Sign in with Apple',
   'dont_have_account': "Don't have an account? ",
   'register': 'Register',
@@ -223,11 +225,13 @@ const Map<String, String> enUS = {
   'email_id': 'Email ID',
   'date_of_birth': 'Date of Birth',
   'mobile_number': 'Mobile Number',
-  'caste_certificate': "Caste Certificate / Other Proof / Father's Caste",
-  'tap_to_upload': 'Tap to upload caste certificate',
-  'certificate_uploaded': 'Caste certificate uploaded',
+  'certificate': 'Certificate',
+  'upload_certificate': 'Upload Certificate',
+  'caste_certificate': "Certificate / Other Proof / Father's Caste",
+  'tap_to_upload': 'Tap to upload certificate',
+  'certificate_uploaded': 'Certificate uploaded',
   'caste_certificate_criteria': 'File format: .jpg, .jpeg, .png, .pdf | Max file size: 5MB',
-  'caste_certificate_note': '(Note: Leaving Certificate, Caste Certificate, or Marriage Certificate — you can upload whichever you have)',
+  'caste_certificate_note': '(Note: Leaving Certificate, Caste Certificate (Self or Parents), or Marriage Certificate — you can upload whichever you have)',
   'address_details': 'Address Details',
   'address': 'Address',
   'nearby_location': 'Nearby Location',
@@ -615,7 +619,7 @@ const Map<String, String> enUS = {
 
 
 
-  "upload_caste_certificate": "Upload Caste Certificate",
+  "upload_caste_certificate": "Upload Certificate",
   "referral_code_optional": "Referral Code (Optional)",
   "referral_code_note": "* Referral code is optional",
 

@@ -19,23 +19,30 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
       body: Column(
         children: [
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value && controller.messages.isEmpty) {
-                return const Center(child: CircularProgressIndicator(color: Colors.purple));
-              }
-              if (controller.messages.isEmpty) {
-                return _buildEmptyState();
-              }
-              return ListView.builder(
-                controller: controller.scrollController,
-                padding: const EdgeInsets.all(16),
-                reverse: true, // Show latest messages at bottom
-                itemCount: controller.messages.length,
-                itemBuilder: (context, index) {
-                  return _buildMessageBubble(controller.messages[index]);
-                },
-              );
-            }),
+            child: RefreshIndicator(
+              color: Colors.purple,
+              onRefresh: () async {
+                await controller.refreshChat();
+              },
+              child: Obx(() {
+                if (controller.isLoading.value && controller.messages.isEmpty) {
+                  return const Center(child: CircularProgressIndicator(color: Colors.purple));
+                }
+                if (controller.messages.isEmpty) {
+                  return _buildEmptyState();
+                }
+                return ListView.builder(
+                  controller: controller.scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  reverse: true, // Show latest messages at bottom
+                  itemCount: controller.messages.length,
+                  itemBuilder: (context, index) {
+                    return _buildMessageBubble(controller.messages[index]);
+                  },
+                );
+              }),
+            ),
           ),
           _buildMessageInput(),
         ],
@@ -65,12 +72,14 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
           overflow: TextOverflow.ellipsis,
         );
       }),
-      // centerTitle: true,
-      // actions: [
-      //   IconButton(icon: const Icon(Icons.videocam_outlined, color: Colors.purple), onPressed: () {}),
-      //   IconButton(icon: const Icon(Icons.call_outlined, color: Colors.purple), onPressed: () {}),
-      //   const SizedBox(width: 4),
-      // ],
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.black87),
+          tooltip: 'Refresh',
+          onPressed: () => controller.refreshChat(),
+        ),
+        const SizedBox(width: 4),
+      ],
     );
   }
 
@@ -379,29 +388,37 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.purple.withOpacity(0.1),
-              shape: BoxShape.circle,
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline, size: 60, color: Colors.purple),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "no_messages_yet".tr,
+                  style: const TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "start_conversation".tr,
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ],
             ),
-            child: const Icon(Icons.chat_bubble_outline, size: 60, color: Colors.purple),
           ),
-          const SizedBox(height: 16),
-           Text(
-            "no_messages_yet".tr,
-            style: TextStyle(color: Colors.grey, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "start_conversation".tr,
-            style: TextStyle(color: Colors.grey, fontSize: 14),
-          ),
-        ],
+        ),
       ),
     );
   }
