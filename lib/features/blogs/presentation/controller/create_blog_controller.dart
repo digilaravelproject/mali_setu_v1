@@ -5,8 +5,8 @@ import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:file_picker/file_picker.dart';
 import '../../../../core/constent/api_constants.dart';
+import '../../../../core/helper/img_picker_helper.dart';
 import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import 'blog_controller.dart';
@@ -17,6 +17,8 @@ class CreateBlogController extends GetxController {
   final Blog? blogToEdit;
 
   CreateBlogController({this.blogToEdit});
+
+  CancelToken? _cancelToken;
 
   /// For Double Back Exit
   DateTime? lastPressedTime;
@@ -260,6 +262,8 @@ class CreateBlogController extends GetxController {
   }
 
   Future<void> createBlog() async {
+    if (isSubmitting.value) return;
+
     final title = titleCtrl.text.trim();
     final content = descriptionCtrl.text.trim();
     final type = blogTypeCtrl.text.trim();
@@ -418,30 +422,48 @@ class CreateBlogController extends GetxController {
           }
         }
 
-        // 2. Newly selected files attach karo
+        // 2. Newly selected files attach karo (with automatic image compression)
         for (final file in selectedFiles) {
           final fileName = file.path.split('/').last;
+          final ext = fileName.split('.').last.toLowerCase();
+          final isImage = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'].contains(ext);
 
+          File fileToUpload = file;
+          if (isImage) {
+            try {
+              fileToUpload = await ImagePickerHelper.compressImage(file, maxMb: 0.8);
+            } catch (e) {
+              debugPrint("Image compression fallback: $e");
+              fileToUpload = file;
+            }
+          }
+
+          final uploadName = fileToUpload.path.split('/').last;
           formData.files.add(
             MapEntry(
               "media[]",
-              await MultipartFile.fromFile(file.path, filename: fileName),
+              await MultipartFile.fromFile(fileToUpload.path, filename: uploadName),
             ),
           );
 
-          debugPrint("New media attached: $fileName");
+          debugPrint("New media attached: $uploadName");
         }
       }
 
       await _attachMedia(formData);
 
       debugPrint("Submitting blog multipart request...");
+      _cancelToken = CancelToken();
       final response = blogToEdit != null
           ? await _repository.updateBlog(
               blogToEdit!.id ?? 0,
               formData,
+              cancelToken: _cancelToken,
             ) // POST /blogs/{id} with _method=PUT
-          : await _repository.createBlog(formData);
+          : await _repository.createBlog(
+              formData,
+              cancelToken: _cancelToken,
+            );
 
       final String successMessage = blogToEdit != null
           ? "Blog updated successfully!"
@@ -514,6 +536,9 @@ class CreateBlogController extends GetxController {
 
   @override
   void onClose() {
+    try {
+      _cancelToken?.cancel('Cancelled because user closed create blog screen');
+    } catch (_) {}
     titleCtrl.dispose();
     descriptionCtrl.dispose();
     tagInputCtrl.dispose();

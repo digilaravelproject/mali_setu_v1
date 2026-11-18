@@ -206,6 +206,16 @@ class DefaultRetryEvaluator {
         shouldRetry = true;
       }
     } else {
+      // Never retry non-idempotent operations (POST, PUT, PATCH, DELETE) on timeout
+      // because the server may already be processing the mutation.
+      final method = error.requestOptions.method.toUpperCase();
+      final isIdempotent = method == 'GET' || method == 'HEAD' || method == 'OPTIONS';
+      if (!isIdempotent &&
+          (error.type == DioExceptionType.receiveTimeout ||
+              error.type == DioExceptionType.sendTimeout)) {
+        return false;
+      }
+
       shouldRetry =
           error.type != DioExceptionType.cancel &&
           error.error is! FormatException;
