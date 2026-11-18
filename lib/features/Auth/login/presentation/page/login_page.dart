@@ -19,6 +19,7 @@ class LoginPage extends GetWidget<LoginController> {
   Widget build(BuildContext context) {
     return CustomScaffold(
       showWhatsAppFab: true,
+      enableDoubleTapExit: true,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),

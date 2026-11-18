@@ -222,6 +222,24 @@ class Blog {
         category: category ?? this.category,
         comments: comments ?? this.comments, // 🆕 Added
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'user_id': userId,
+        'title': title,
+        'description': description,
+        'tags': tags,
+        'media_path': mediaPaths ?? (mediaPath != null ? [mediaPath!] : null),
+        'media_type': mediaType,
+        'blog_type': blogType,
+        'is_active': isActive,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+        'likes_count': likesCount,
+        'is_liked': isLiked,
+        'user': user?.toJson(),
+        'category': category?.toJson(),
+      };
 }
 
 class BlogComment {
@@ -280,6 +298,13 @@ class BlogCategory {
         description: json['description']?.toString(),
         isActive: json['is_active'] == 1 || json['is_active'] == true || json['is_active'] == '1',
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'is_active': isActive,
+      };
 }
 
 class BlogCategoryResponse {
@@ -353,6 +378,25 @@ class BlogUser {
         userType: json['user_type']?.toString(),
         status: json['status']?.toString(),
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'google_id': googleId,
+        'name': name,
+        'email': email,
+        'photo': photo,
+        'phone': phone,
+        'age': age,
+        'occupation': occupation,
+        'address': address,
+        'nearby_location': nearbyLocation,
+        'pincode': pincode,
+        'state': state,
+        'city': city,
+        'district': district,
+        'user_type': userType,
+        'status': status,
+      };
 }
 class BlogDetailResponse {
   final bool? success;

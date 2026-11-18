@@ -24,27 +24,29 @@ class LocationHelper {
         return null;
       }
 
-      // Always fetch fresh real-time current position where the app is currently opened
+      // 1. Try instant last known position first (fastest, takes <50ms)
+      try {
+        final lastKnown = await Geolocator.getLastKnownPosition();
+        if (lastKnown != null) {
+          print("DEBUG_LOCATION: Instant last known location acquired: ${lastKnown.latitude}, ${lastKnown.longitude}");
+          return {
+            'latitude': lastKnown.latitude,
+            'longitude': lastKnown.longitude,
+          };
+        }
+      } catch (_) {}
+
+      // 2. Otherwise request live position with a short 3-second timeout so UI is never blocked
       Position? position;
       try {
         position = await Geolocator.getCurrentPosition(
           locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 10),
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 3),
           ),
         );
       } catch (e) {
-        print("DEBUG_LOCATION: High accuracy position fetch failed ($e), trying balanced accuracy...");
-        try {
-          position = await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.medium,
-              timeLimit: Duration(seconds: 5),
-            ),
-          );
-        } catch (e2) {
-          print("DEBUG_LOCATION: Medium accuracy fallback also failed: $e2");
-        }
+        print("DEBUG_LOCATION: Live location fetch timed out or failed ($e), proceeding without coordinates.");
       }
 
       if (position != null) {

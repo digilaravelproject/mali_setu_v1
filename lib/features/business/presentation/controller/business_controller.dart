@@ -550,10 +550,11 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
     }
     
     try {
-      // 3. Fetch fresh data
-      // We don't use Future.wait here to avoid blocking everything if one fails
-      await fetchAllBusinesses(isRefresh: true);
-      await fetchMyBusinesses();
+      // 3. Fetch fresh data in parallel so they don't block each other
+      await Future.wait([
+        fetchAllBusinesses(isRefresh: true),
+        fetchMyBusinesses(),
+      ]);
       
       print("DEBUG_BUSINESS: fetchData() completed");
     } catch (e) {
@@ -596,6 +597,18 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
         search: searchQuery.isNotEmpty ? searchQuery : null,
         lat: location?['latitude'],
         long: location?['longitude'],
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint("getAllBusinessesUseCase: request timed out after 15s");
+          return BusinessPaginationResult(
+            businesses: businesses.toList(),
+            currentPage: currentPage.value,
+            lastPage: totalPages.value,
+            hasNextPage: false,
+            total: businesses.length,
+          );
+        },
       );
 
       if (isRefresh || searchQuery.isNotEmpty) {
@@ -780,9 +793,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessProducts(int businessId) async {
       try {
           final products = await getBusinessProductsUseCase(businessId);
-          if (products.isNotEmpty || businessProducts.isEmpty) {
-            businessProducts.value = products;
-          }
+          businessProducts.assignAll(products);
       } catch(e) {
           print('Error fetching products: $e');
       }
@@ -791,9 +802,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessServices(int businessId) async {
       try {
           final services = await getBusinessServicesUseCase(businessId);
-          if (services.isNotEmpty || businessServices.isEmpty) {
-            businessServices.value = services;
-          }
+          businessServices.assignAll(services);
       } catch(e) {
           print('Error fetching services: $e');
       }
@@ -802,9 +811,7 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
   Future<void> fetchBusinessJobs(int businessId) async {
       try {
           final jobs = await getMyJobsUseCase(businessId);
-          if (jobs.isNotEmpty || businessJobs.isEmpty) {
-            businessJobs.value = jobs;
-          }
+          businessJobs.assignAll(jobs);
       } catch(e) {
           print('Error fetching jobs: $e');
       }

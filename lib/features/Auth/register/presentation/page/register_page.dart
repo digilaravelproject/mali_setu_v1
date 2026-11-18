@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/routes/app_routes.dart';
+import '../../../../../core/services/deep_link_service.dart';
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/date_input_formatter.dart';
 import '../../../../../widgets/basic_text_field.dart';
@@ -22,6 +24,17 @@ class RegisterPage extends GetWidget<RegisterController> {
 
   @override
   Widget build(BuildContext context) {
+    if (DeepLinkService.isUserLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRoutes.splash);
+      });
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final theme = Theme.of(context);
 
     return Obx(() {
@@ -29,7 +42,14 @@ class RegisterPage extends GetWidget<RegisterController> {
       return CustomScaffold(
         showWhatsAppFab: true,
         onWillPop: () async {
-          if (controller.canExit.value) return true;
+          if (controller.canExit.value) {
+            if (Navigator.of(context).canPop()) {
+              return true;
+            } else {
+              Get.offAllNamed(AppRoutes.login);
+              return false;
+            }
+          }
           controller.handleBack();
           return false;
         },
@@ -46,7 +66,13 @@ class RegisterPage extends GetWidget<RegisterController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      onTap: () => Get.back(),
+                      onTap: () {
+                        if (Navigator.of(context).canPop()) {
+                          Get.back();
+                        } else {
+                          Get.offAllNamed(AppRoutes.login);
+                        }
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(

@@ -382,10 +382,8 @@ class WebinarsController extends GetxController {
         commentsTotal.value = parsed.total;
 
         if (isRefresh) {
-          if (parsed.data.isNotEmpty) {
-            chatMessages.assignAll(parsed.data);
-            qaMessages.assignAll(parsed.data.where((m) => m.isQuestion).toList());
-          }
+          chatMessages.assignAll(parsed.data);
+          qaMessages.assignAll(parsed.data.where((m) => m.isQuestion).toList());
         } else {
           for (final msg in parsed.data) {
             if (!chatMessages.any((m) => m.id == msg.id)) {
@@ -396,9 +394,16 @@ class WebinarsController extends GetxController {
             }
           }
         }
+      } else if (isRefresh) {
+        chatMessages.clear();
+        qaMessages.clear();
       }
     } catch (e) {
       print("ERROR_FETCH_COMMENTS: $e");
+      if (isRefresh) {
+        chatMessages.clear();
+        qaMessages.clear();
+      }
     } finally {
       isLoadingComments.value = false;
     }

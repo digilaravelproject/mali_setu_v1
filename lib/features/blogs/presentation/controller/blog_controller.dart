@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
@@ -5,6 +6,8 @@ import 'package:chewie/chewie.dart';
 import '../../data/data_source/blog_data_source.dart';
 import '../../data/model/blog_model.dart';
 import '../../../../core/constent/api_constants.dart';
+import '../../../../core/constent/app_constants.dart';
+import '../../../../core/storage/shared_prefs.dart';
 import '../../../Auth/service/auth_service.dart';
 import '../../../../widgets/custom_snack_bar.dart';
 
@@ -66,10 +69,58 @@ class BlogController extends GetxController {
   final Rxn<BlogComment> replyToComment = Rxn<BlogComment>();
   final RxBool showAllComments = false.obs;
 
+  static const String _blogsCacheKey = 'cached_blogs_feed';
+  static const String _myBlogsCacheKey = 'cached_my_blogs_feed';
+
+  Future<void> _loadCachedBlogs() async {
+    try {
+      final cachedJson = SharedPrefs.getString(_blogsCacheKey);
+      if (cachedJson != null && cachedJson.isNotEmpty) {
+        final List<dynamic> jsonList = json.decode(cachedJson);
+        final cached = jsonList.map((j) => Blog.fromJson(j)).toList();
+        if (cached.isNotEmpty) {
+          blogs.assignAll(cached);
+        }
+      }
+
+      final cachedMyBlogsJson = SharedPrefs.getString(_myBlogsCacheKey);
+      if (cachedMyBlogsJson != null && cachedMyBlogsJson.isNotEmpty) {
+        final List<dynamic> myJsonList = json.decode(cachedMyBlogsJson);
+        final cachedMy = myJsonList.map((j) => Blog.fromJson(j)).toList();
+        if (cachedMy.isNotEmpty) {
+          myBlogs.assignAll(cachedMy);
+        }
+      }
+
+      _applyFilter();
+    } catch (e) {
+      debugPrint("Error loading cached blogs: $e");
+    }
+  }
+
+  Future<void> _saveBlogsCache(List<Blog> list) async {
+    try {
+      final jsonList = list.map((b) => b.toJson()).toList();
+      await SharedPrefs.setString(_blogsCacheKey, json.encode(jsonList));
+    } catch (e) {
+      debugPrint("Error saving blogs cache: $e");
+    }
+  }
+
+  Future<void> _saveMyBlogsCache(List<Blog> list) async {
+    try {
+      final jsonList = list.map((b) => b.toJson()).toList();
+      await SharedPrefs.setString(_myBlogsCacheKey, json.encode(jsonList));
+    } catch (e) {
+      debugPrint("Error saving my blogs cache: $e");
+    }
+  }
+
   @override
   void onInit() {
     super.onInit();
     categories.assignAll([allCategory]);
+    _loadCachedBlogs(); // Instant load from cache (0ms shimmer)
     fetchCategories();
     fetchBlogs(refresh: true);
     fetchMyBlogs(); // Pre-load my blogs in parallel
@@ -96,8 +147,19 @@ class BlogController extends GetxController {
   int? _currentUserId() {
     try {
       if (Get.isRegistered<AuthService>()) {
-        return Get.find<AuthService>().currentUser.value?.id;
+        final id = Get.find<AuthService>().currentUser.value?.id;
+        if (id != null) return id;
       }
+      final userJson = SharedPrefs.getString(AppConstants.userDataPref);
+      if (userJson != null) {
+        final map = jsonDecode(userJson);
+        final id = map['id'] ?? map['user_id'];
+        if (id != null) return int.tryParse(id.toString());
+      }
+      final prefId = SharedPrefs.getInt(AppConstants.userIdPref);
+      if (prefId != null && prefId > 0) return prefId;
+      final strId = SharedPrefs.getString(AppConstants.userIdPref);
+      if (strId != null) return int.tryParse(strId);
     } catch (_) {}
     return null;
   }
@@ -112,13 +174,13 @@ class BlogController extends GetxController {
       List<Blog> list;
 
       if (selectedTab.value == 'Mine') {
-        // Show only the logged-in user's blogs
-        list = myBlogs.toList();
-        // Fallback: If myBlogs is empty but main blogs list contains the user's blogs
-        if (list.isEmpty && myId != null) {
-          list = blogs
+        // Show ONLY the logged-in user's blogs strictly from myBlogs
+        if (myId != null) {
+          list = myBlogs
               .where((b) => b.userId?.toString() == myId.toString())
               .toList();
+        } else {
+          list = myBlogs.toList();
         }
       } else {
         // General Blogs feed: Show ALL blogs (do NOT exclude the user's own blogs)
@@ -145,17 +207,28 @@ class BlogController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error in _applyFilter: $e");
-      filteredBlogs.assignAll(blogs);
+      if (selectedTab.value == 'Mine') {
+        filteredBlogs.clear();
+      } else {
+        filteredBlogs.assignAll(blogs);
+      }
     }
   }
 
   Future<void> fetchBlogs({bool refresh = false}) async {
     if (isLoading.value || isMoreLoading.value) return;
 
+    // If currently empty, always force refresh mode to ensure page 1 is loaded
+    if (!refresh && blogs.isEmpty) {
+      refresh = true;
+    }
+
     if (refresh) {
       currentPage.value = 1;
       hasMore.value = true;
-      isLoading.value = true;
+      if (blogs.isEmpty) {
+        isLoading.value = true;
+      }
     } else {
       if (!hasMore.value) return;
       isMoreLoading.value = true;
@@ -166,6 +239,12 @@ class BlogController extends GetxController {
         page: currentPage.value,
         perPage: 10,
         categoryId: selectedCategory.value.id,
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint("getBlogs: request timed out after 15s");
+          return null;
+        },
       );
 
       if (response != null &&
@@ -175,6 +254,9 @@ class BlogController extends GetxController {
 
         if (refresh) {
           blogs.assignAll(newBlogs);
+          if (newBlogs.isNotEmpty && selectedCategory.value.id == null) {
+            _saveBlogsCache(newBlogs);
+          }
         } else {
           blogs.addAll(newBlogs);
         }
@@ -217,10 +299,15 @@ class BlogController extends GetxController {
           final userBlogs = fetched
               .where((b) => b.userId?.toString() == myId.toString())
               .toList();
-          myBlogs.assignAll(userBlogs.isNotEmpty ? userBlogs : fetched);
+          myBlogs.assignAll(userBlogs);
+          _saveMyBlogsCache(userBlogs);
         } else {
           myBlogs.assignAll(fetched);
+          _saveMyBlogsCache(fetched);
         }
+      } else {
+        myBlogs.clear();
+        _saveMyBlogsCache([]);
       }
     } catch (e) {
       debugPrint('fetchMyBlogs error: $e');
@@ -252,17 +339,17 @@ class BlogController extends GetxController {
     selectedTab.value = tab;
     searchTextController.clear();
     searchQuery.value = '';
+
+    // Immediately apply filter so filteredBlogs switches to the new tab with 0ms lag
+    _applyFilter();
+
     if (tab == 'Mine') {
       if (myBlogs.isEmpty && !isMyBlogsLoading.value) {
         fetchMyBlogs();
-      } else {
-        _applyFilter();
       }
     } else {
       if (blogs.isEmpty && !isLoading.value) {
-        fetchBlogs();
-      } else {
-        _applyFilter();
+        fetchBlogs(refresh: true);
       }
     }
   }
@@ -489,6 +576,8 @@ class BlogController extends GetxController {
         blogs.removeWhere((b) => b.id == id);
         myBlogs.removeWhere((b) => b.id == id); // Also remove from My Blogs tab
         filteredBlogs.removeWhere((b) => b.id == id);
+        _saveBlogsCache(blogs);
+        _saveMyBlogsCache(myBlogs);
         _applyFilter();
         CustomSnackBar.showSuccess(message: "Blog deleted successfully");
         return true;

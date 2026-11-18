@@ -1478,40 +1478,38 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                 })
                 .toList();
 
-      if (displayedJobs.isEmpty) {
-        return CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: [
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-            ),
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.work_off_outlined,
-                      size: 64,
-                      color: context.theme.disabledColor,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "No jobs posted yet",
-                      style: context.textTheme.titleMedium,
-                    ),
-                  ],
-                ),
+      final Widget content = displayedJobs.isEmpty
+          ? CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-            ),
-          ],
-        );
-      }
-
-      return CustomScrollView(
+              slivers: [
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                ),
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.work_off_outlined,
+                          size: 64,
+                          color: context.theme.disabledColor,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No jobs posted yet",
+                          style: context.textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
@@ -1734,6 +1732,21 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             ),
           ),
         ],
+      );
+
+      return RefreshIndicator(
+        color: context.theme.primaryColor,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
+        onRefresh: () async {
+          final bId = controller.selectedBusiness.value?.id ?? argBusiness.id;
+          if (bId != null) {
+            await controller.fetchBusinessJobs(bId);
+          }
+          if (Get.isRegistered<JobsController>()) {
+            Get.find<JobsController>().fetchJobs(isRefresh: true);
+          }
+        },
+        child: content,
       );
     });
   }

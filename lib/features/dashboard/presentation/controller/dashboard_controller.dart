@@ -290,6 +290,15 @@ class DashboardController extends GetxController {
     final jobsController = Get.isRegistered<JobsController>()
         ? Get.find<JobsController>()
         : null;
+    final businessController = Get.isRegistered<BusinessController>()
+        ? Get.find<BusinessController>()
+        : null;
+
+    if (index == 1) {
+      if (businessController != null && businessController.businesses.isEmpty && !businessController.isLoading.value) {
+        businessController.fetchData();
+      }
+    }
 
     if (hasBlogAccess) {
       if (index == 3) {
@@ -299,7 +308,7 @@ class DashboardController extends GetxController {
       } else if (index == 4) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
-          blogController.fetchBlogs();
+          blogController.fetchBlogs(refresh: true);
         }
       } else if (index == 5) {
         blogController?.filterByTab('Mine');
@@ -311,7 +320,7 @@ class DashboardController extends GetxController {
       if (index == 0) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
-          blogController.fetchBlogs();
+          blogController.fetchBlogs(refresh: true);
         }
       } else if (index == 1) {
         blogController?.filterByTab('Mine');
@@ -327,7 +336,7 @@ class DashboardController extends GetxController {
       } else if (index == 4) {
         blogController?.filterByTab('Others');
         if (blogController != null && blogController.blogs.isEmpty && !blogController.isLoading.value) {
-          blogController.fetchBlogs();
+          blogController.fetchBlogs(refresh: true);
         }
       }
     }
