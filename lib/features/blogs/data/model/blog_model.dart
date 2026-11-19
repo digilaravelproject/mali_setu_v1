@@ -153,7 +153,7 @@ class Blog {
 
   factory Blog.fromJson(Map<String, dynamic> json) => Blog(
         id: _asInt(json['id']),
-        userId: _asInt(json['user_id']),
+        userId: _asInt(json['user_id']) ?? _asInt(json['user'] is Map ? json['user']['id'] : null),
         title: json['title']?.toString(),
         description: json['description']?.toString(),
         tags: _parseTags(json['tags']),

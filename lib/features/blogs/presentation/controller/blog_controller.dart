@@ -276,9 +276,9 @@ class BlogController extends GetxController {
       debugPrint("fetchBlogs error: $e");
       // Do not clear already loaded blogs on network error
     } finally {
-      _applyFilter();
       isLoading.value = false;
       isMoreLoading.value = false;
+      _applyFilter();
     }
   }
 
@@ -288,7 +288,13 @@ class BlogController extends GetxController {
     if (isMyBlogsLoading.value) return;
     isMyBlogsLoading.value = true;
     try {
-      final response = await _repository.getMyBlogs();
+      final response = await _repository.getMyBlogs().timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint("getMyBlogs: request timed out after 15s");
+          return null;
+        },
+      );
       if (response != null &&
           response.success == true &&
           response.data != null) {
@@ -299,21 +305,26 @@ class BlogController extends GetxController {
           final userBlogs = fetched
               .where((b) => b.userId?.toString() == myId.toString())
               .toList();
-          myBlogs.assignAll(userBlogs);
-          _saveMyBlogsCache(userBlogs);
+          final finalBlogs = userBlogs.isNotEmpty ? userBlogs : fetched;
+          myBlogs.assignAll(finalBlogs);
+          _saveMyBlogsCache(finalBlogs);
         } else {
           myBlogs.assignAll(fetched);
           _saveMyBlogsCache(fetched);
         }
       } else {
-        myBlogs.clear();
-        _saveMyBlogsCache([]);
+        // If response is explicit success with empty data, clear cache.
+        // But on error or timeout (response == null), preserve existing cache so shimmer doesn't hang!
+        if (response != null) {
+          myBlogs.clear();
+          _saveMyBlogsCache([]);
+        }
       }
     } catch (e) {
       debugPrint('fetchMyBlogs error: $e');
     } finally {
-      if (selectedTab.value == 'Mine') _applyFilter();
       isMyBlogsLoading.value = false;
+      if (selectedTab.value == 'Mine') _applyFilter();
     }
   }
 

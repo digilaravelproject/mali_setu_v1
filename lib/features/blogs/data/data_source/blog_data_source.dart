@@ -37,11 +37,20 @@ class BlogRepository {
     try {
       final response = await _apiClient.get(
         ApiConstants.getBlogs,
-        queryParameters: {'page': page, 'per_page': 500, 'my_blogs': 1},
+        queryParameters: {'page': page, 'per_page': 50, 'my_blogs': 1},
+        enableRetry: false,
+        options: Options(
+          receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 15),
+        ),
       );
 
-      if (response.statusCode == 200) {
-        return BlogResponse.fromJson(response.data);
+      if (response.statusCode == 200 && response.data != null) {
+        final dynamic raw = response.data;
+        final Map<String, dynamic> dataMap = raw is String
+            ? json.decode(raw)
+            : (raw is Map<String, dynamic> ? raw : Map<String, dynamic>.from(raw as Map));
+        return BlogResponse.fromJson(dataMap);
       }
     } catch (e) {
       print('Error fetching my blogs: $e');

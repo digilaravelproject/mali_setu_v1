@@ -554,7 +554,13 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       await Future.wait([
         fetchAllBusinesses(isRefresh: true),
         fetchMyBusinesses(),
-      ]);
+      ]).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          debugPrint("fetchData timeout after 15s");
+          return [];
+        },
+      );
       
       print("DEBUG_BUSINESS: fetchData() completed");
     } catch (e) {
@@ -584,10 +590,13 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
 
       print("DEBUG_BUSINESSES: Fetching... Search: '$searchQuery', Page: ${currentPage.value}");
 
-      // Get live real-time location
+      // Get live real-time location with a 3s timeout guard
       Map<String, double>? location;
       try {
-        location = await LocationHelper.getCurrentLocation();
+        location = await LocationHelper.getCurrentLocation().timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => null,
+        );
       } catch (e) {
         print("DEBUG_LOCATION: Error fetching location: $e");
       }
@@ -660,7 +669,10 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       }
       
       final query = activeFilters.join(" ");
-      final location = await LocationHelper.getCurrentLocation();
+      final location = await LocationHelper.getCurrentLocation().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => null,
+      );
       final response = await searchBusinessUseCase(
         query,
         lat: location?['latitude'],
@@ -701,7 +713,10 @@ class BusinessController extends GetxController with WidgetsBindingObserver {
       print("DEBUG_PAGINATION: Loading page ${currentPage.value}");
       
       final searchQuery = searchText.value.trim();
-      final location = await LocationHelper.getCurrentLocation();
+      final location = await LocationHelper.getCurrentLocation().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => null,
+      );
       BusinessPaginationResult response;
 
       if (searchQuery.isNotEmpty) {
