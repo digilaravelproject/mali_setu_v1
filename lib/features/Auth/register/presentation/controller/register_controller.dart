@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../../../core/routes/app_routes.dart';
+import '../../../../../core/services/deep_link_service.dart';
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/helper/pincode_helper.dart';
 import '../../../../../core/helper/location_helper.dart';
@@ -42,7 +43,11 @@ class RegisterController extends GetxController {
       });
       return;
     }
-    Get.back();
+    if (Get.key.currentState?.canPop() == true) {
+      Get.back();
+    } else {
+      Get.offAllNamed(AppRoutes.login);
+    }
   }
 
   /// FORM KEY
@@ -179,6 +184,15 @@ class RegisterController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // If user is already logged in, they should never land on Register screen
+    if (DeepLinkService.isUserLoggedIn) {
+      debugPrint("DEBUG_REGISTER: User already logged in, redirecting to Splash");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(AppRoutes.splash);
+      });
+      return;
+    }
     
     // Check for arguments (email from Social Login, user_type from Volunteer prompt)
     if (Get.arguments != null && Get.arguments is Map) {
@@ -199,6 +213,20 @@ class RegisterController extends GetxController {
       }
       if (Get.arguments['referral_code'] != null) {
         referralCtrl.text = Get.arguments['referral_code'].toString();
+      }
+    }
+
+    // Check for referral code from arguments, query parameters, or pending storage
+    if (referralCtrl.text.trim().isEmpty) {
+      String? incomingRefCode;
+      if (Get.arguments is Map && Get.arguments['referral_code'] != null) {
+        incomingRefCode = Get.arguments['referral_code']?.toString();
+      }
+      incomingRefCode ??= Get.parameters['referral_code'];
+      incomingRefCode ??= SharedPrefs.getString(AppConstants.pendingReferralCodePref);
+
+      if (incomingRefCode != null && incomingRefCode.trim().isNotEmpty) {
+        referralCtrl.text = incomingRefCode.trim();
       }
     }
 
@@ -691,6 +719,7 @@ class RegisterController extends GetxController {
           await SharedPrefs.setString(AppConstants.referralCodePref, refCode);
           debugPrint("DEBUG_REGISTER: Saved referral_code to SharedPreferences: $refCode");
         }
+        await SharedPrefs.remove(AppConstants.pendingReferralCodePref);
 
         // Save token if available
         if (response.data?.token != null && response.data!.token!.isNotEmpty) {

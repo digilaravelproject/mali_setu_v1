@@ -38,6 +38,15 @@ class BlogsScreen extends StatelessWidget {
     final primaryColor = context.theme.primaryColor;
     final topPadding = MediaQuery.of(context).padding.top;
 
+    // Auto-fetch if screen opens with 0 blogs and not loading
+    if (controller.blogs.isEmpty && !controller.isLoading.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (controller.blogs.isEmpty && !controller.isLoading.value) {
+          controller.fetchBlogs(refresh: true);
+        }
+      });
+    }
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -892,26 +901,47 @@ class BlogsScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               isMine ? 'No blogs posted by you yet' : 'No blogs found',
-              style: TextStyle(fontSize: 15, color: Colors.grey[600], fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 15, color: Colors.grey[700], fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 4),
-            Text('Pull down to refresh', style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+            const SizedBox(height: 6),
+            Text(
+              isMine ? 'You haven\'t posted any blogs yet.\nTap below to create one or pull down to refresh.' : 'Pull down to refresh',
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                if (isMine) {
-                  controller.fetchMyBlogs();
-                } else {
-                  controller.fetchBlogs(refresh: true);
-                }
-              },
-              icon: const Icon(Icons.refresh, size: 18),
-              label: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Refresh'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+            Wrap(
+              spacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                if (isMine)
+                  ElevatedButton.icon(
+                    onPressed: () => Get.to(() => const CreateBlogScreen()),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Create Blog'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    if (isMine) {
+                      controller.fetchMyBlogs();
+                    } else {
+                      controller.fetchBlogs(refresh: true);
+                    }
+                  },
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: Text('retry'.tr.isNotEmpty ? 'retry'.tr : 'Refresh'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    side: BorderSide(color: primaryColor),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

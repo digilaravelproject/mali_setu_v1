@@ -11,6 +11,9 @@ import 'core/localization/languages.dart';
 import 'core/localization/language_controller.dart';
 import 'core/helper/local_notification_helper.dart';
 import 'core/widgets/whatsapp_support_fab.dart';
+import 'core/services/notification_handler_service.dart';
+import 'features/_init/binding/init_binding.dart';
+import 'features/_init/presentation/page/splash_page.dart';
 import 'init_app.dart';
 
 @pragma('vm:entry-point')
@@ -23,6 +26,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("   Body:       ${message.notification?.body}");
   print("   Data:       ${message.data}");
   print("════════════════════════════════════════════════════════════");
+
+  // If this is a data-only notification payload (no automatic system tray display by FCM),
+  // show the rich local notification with expandable big picture image!
+  if (message.notification == null) {
+    try {
+      await NotificationHandlerService.showBackgroundNotification(message);
+    } catch (e) {
+      print("❌ [BackgroundHandler] Error showing notification: $e");
+    }
+  }
 }
 
 Future<void> main() async {
@@ -66,6 +79,15 @@ class MyApp extends StatelessWidget {
         scaffoldMessengerKey: rootScaffoldMessengerKey,
         getPages: AppPages.getPages,
         initialRoute: AppRoutes.splash,
+        onGenerateInitialRoutes: (String initialRouteName) {
+          return [
+            GetPageRoute(
+              page: () => const SplashPage(),
+              binding: InitBinding(),
+              routeName: AppRoutes.splash,
+            ),
+          ];
+        },
         navigatorObservers: [
           WhatsAppSupportFab.routeObserver,
         ],

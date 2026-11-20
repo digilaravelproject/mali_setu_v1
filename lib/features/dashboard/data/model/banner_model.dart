@@ -100,7 +100,12 @@ class BannerData {
   final int id;
   final String title;
   final String url; // URL to navigate (e.g., "/api/business/41")
+  final String? effectiveUrl;
+  final String? externalUrl;
+  final String? functionalityName;
+  final String? eventName;
   final String imageUrl;
+  final String? webImageUrl;
   final String createdAt;
   final String updatedAt;
 
@@ -108,28 +113,43 @@ class BannerData {
     required this.id,
     required this.title,
     required this.url,
+    this.effectiveUrl,
+    this.externalUrl,
+    this.functionalityName,
+    this.eventName,
     required this.imageUrl,
+    this.webImageUrl,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory BannerData.fromJson(Map<String, dynamic> json) {
     return BannerData(
-      id: json['id'],
-      title: json['title'],
-      url: json['url'] ?? '',
-      imageUrl: json['image_url'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      title: json['title']?.toString() ?? '',
+      url: json['url']?.toString() ?? '',
+      effectiveUrl: json['effective_url']?.toString(),
+      externalUrl: json['external_url']?.toString(),
+      functionalityName: json['functionality_name']?.toString(),
+      eventName: json['event_name']?.toString(),
+      imageUrl: json['image_url']?.toString() ?? '',
+      webImageUrl: json['web_image_url']?.toString(),
+      createdAt: json['created_at']?.toString() ?? '',
+      updatedAt: json['updated_at']?.toString() ?? '',
     );
   }
   
-  /// Extract business ID from URL like "/api/business/41"
+  /// Extract business ID from URL or effective_url like "/api/business/138"
   int? get businessId {
     try {
-      final parts = url.split('/');
-      if (parts.length >= 3 && parts[parts.length - 2] == 'business') {
-        return int.tryParse(parts.last);
+      final candidates = [url, effectiveUrl ?? ''];
+      for (final rawUrl in candidates) {
+        if (rawUrl.isEmpty) continue;
+        final match = RegExp(r'business\/(\d+)', caseSensitive: false).firstMatch(rawUrl);
+        if (match != null) {
+          final parsed = int.tryParse(match.group(1)!);
+          if (parsed != null && parsed > 0) return parsed;
+        }
       }
       return null;
     } catch (e) {

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../core/constent/app_constants.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/storage/shared_prefs.dart';
+import '../../core/storage/token_manger.dart';
 import '../../features/Auth/service/auth_service.dart';
 import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
 import '../../features/blogs/presentation/screens/blogs_screen.dart';
@@ -13,6 +14,7 @@ import '../../features/business/data/model/res_all_business_model.dart';
 import '../../features/webinars/data/models/webinar_model.dart';
 import '../../features/matrimony/presentation/page/matrimony_profile_screen.dart';
 import '../../features/matrimony/binding/matrimony_details_binding.dart';
+import '../../features/Auth/register/presentation/controller/register_controller.dart';
 
 class DeepLinkService extends GetxService {
   static bool isAppReady = false;
@@ -23,9 +25,32 @@ class DeepLinkService extends GetxService {
 
   static bool get isUserLoggedIn {
     if (Get.isRegistered<AuthService>()) {
-      return Get.find<AuthService>().isLoggedIn.value;
+      final auth = Get.find<AuthService>();
+      if (auth.isLoggedIn.value || auth.currentUser.value != null) {
+        return true;
+      }
     }
-    return SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
+    if (SharedPrefs.getBool(AppConstants.isLoggedInPref) == true) {
+      return true;
+    }
+    final token = SharedPrefs.getString(AppConstants.tokenPref);
+    if (token != null && token.trim().isNotEmpty) {
+      return true;
+    }
+    final userData = SharedPrefs.getString(AppConstants.userDataPref);
+    if (userData != null && userData.trim().isNotEmpty) {
+      return true;
+    }
+    return false;
+  }
+
+  static Future<bool> checkUserLoggedInAsync() async {
+    if (isUserLoggedIn) return true;
+    try {
+      final token = await TokenManager.getToken();
+      if (token.trim().isNotEmpty) return true;
+    } catch (_) {}
+    return false;
   }
 
   static bool get hasPendingDeepLink => pendingDeepLinkUri != null;
@@ -54,7 +79,78 @@ class DeepLinkService extends GetxService {
     return this;
   }
 
+  static bool isRegisterUri(Uri uri) {
+    if (uri.pathSegments.isNotEmpty && uri.pathSegments.first.toLowerCase() == 'register') {
+      return true;
+    }
+    if (uri.host.toLowerCase() == 'register') {
+      return true;
+    }
+    return false;
+  }
+
+  static String? extractReferralCode(Uri uri) {
+    final code = uri.queryParameters['referral_code'] ??
+        uri.queryParameters['code'] ??
+        uri.queryParameters['ref'] ??
+        uri.queryParameters['referralCode'] ??
+        uri.queryParameters['reffral_code'];
+    return code?.trim();
+  }
+
+  static void navigateToRegister({String? referralCode}) {
+    final code = referralCode?.trim();
+    if (!isUserLoggedIn && code != null && code.isNotEmpty) {
+      SharedPrefs.setString(AppConstants.pendingReferralCodePref, code);
+    }
+
+    void execute() async {
+      if (Get.context == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => execute());
+        return;
+      }
+
+      // If user is already logged in, do not open register page; open normally from splash
+      final bool isLogged = await checkUserLoggedInAsync();
+      if (isLogged) {
+        print('DeepLinkService: User is already logged in, opening normally from splash.');
+        Get.offAllNamed(AppRoutes.splash);
+        return;
+      }
+
+      // If RegisterController is already in memory, update field and verify code immediately
+      if (Get.isRegistered<RegisterController>()) {
+        final regCtrl = Get.find<RegisterController>();
+        if (code != null && code.isNotEmpty) {
+          regCtrl.referralCtrl.text = code;
+          regCtrl.fetchReferralUser(code);
+        }
+      }
+
+      // If not currently on register page, navigate there with LoginPage as the base route
+      if (Get.currentRoute != AppRoutes.register) {
+        Get.offAllNamed(AppRoutes.login);
+        Get.toNamed(
+          AppRoutes.register,
+          arguments: {
+            if (code != null && code.isNotEmpty) 'referral_code': code,
+          },
+          preventDuplicates: false,
+        );
+      }
+    }
+
+    if (WidgetsBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+      execute();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        execute();
+      });
+    }
+  }
+
   static bool canHandleUri(Uri uri) {
+    if (isRegisterUri(uri)) return true;
     if (uri.pathSegments.isEmpty) return false;
     final first = uri.pathSegments.first.toLowerCase();
     return first == 'blog' ||
@@ -86,6 +182,14 @@ class DeepLinkService extends GetxService {
 
     print('DeepLinkService: Received URI: $uri');
 
+    // If it's a register / referral link, store pending code immediately if user is not logged in
+    if (isRegisterUri(uri)) {
+      final refCode = extractReferralCode(uri);
+      if (!isUserLoggedIn && refCode != null && refCode.isNotEmpty) {
+        await SharedPrefs.setString(AppConstants.pendingReferralCodePref, refCode);
+      }
+    }
+
     // Check if we need to wait for app initialization (bounded timeout to prevent infinite wait)
     bool wasWaiting = false;
     int waitIterations = 0;
@@ -104,22 +208,35 @@ class DeepLinkService extends GetxService {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    // Allow referral registration links even if user is NOT logged in
-    final firstSeg = uri.pathSegments.isNotEmpty ? uri.pathSegments.first.toLowerCase() : '';
-    final String? referralCode = uri.queryParameters['referral_code'];
-    if (!isUserLoggedIn && firstSeg == 'register') {
-      Get.toNamed(AppRoutes.register, arguments: {
-        if (referralCode != null && referralCode.isNotEmpty) 'referral_code': referralCode,
-      });
+    // Direct registration link with referral code:
+    if (isRegisterUri(uri)) {
+      final bool loggedIn = await checkUserLoggedInAsync();
+      if (loggedIn) {
+        print('DeepLinkService: User already logged in, opening normally through splash.');
+        if (!wasWaiting) {
+          // Warm start: reset to splash so app opens properly through splash
+          Get.offAllNamed(AppRoutes.splash);
+        } else {
+          // Cold start: Splash is already playing naturally into dashboard
+          if (Get.currentRoute == AppRoutes.login ||
+              Get.currentRoute == AppRoutes.register) {
+            Get.offAllNamed(AppRoutes.dashboard);
+          }
+        }
+        return;
+      }
+      final refCode = extractReferralCode(uri);
+      navigateToRegister(referralCode: refCode);
       return;
     }
 
-    // Public routes (blogs, business, register) can be viewed directly even if auth is still settling
+    final firstSeg = uri.pathSegments.isNotEmpty ? uri.pathSegments.first.toLowerCase() : '';
+
+    // Public routes (blogs, business) can be viewed directly even if auth is still settling
     final bool isPublicRoute = firstSeg == 'blog' ||
         firstSeg == 'blogs' ||
         firstSeg == 'business' ||
-        firstSeg == 'businesses' ||
-        firstSeg == 'register';
+        firstSeg == 'businesses';
 
     // If user is NOT logged in for a private route: Save pending deep link for after login
     if (!isUserLoggedIn && !isPublicRoute) {
@@ -136,7 +253,7 @@ class DeepLinkService extends GetxService {
     print('DeepLinkService: Navigating to URI: $uri');
     if (uri.pathSegments.isEmpty) return;
 
-    void execute() {
+    void execute() async {
       if (Get.context == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) => execute());
         return;
@@ -194,15 +311,15 @@ class DeepLinkService extends GetxService {
         } else {
           Get.toNamed(AppRoutes.webinars);
         }
-      } else if (firstSegment == 'register') {
-        final String? referralCode = uri.queryParameters['referral_code'];
-        if (isUserLoggedIn) {
-          Get.toNamed(AppRoutes.referral);
-        } else {
-          Get.toNamed(AppRoutes.register, arguments: {
-            if (referralCode != null && referralCode.isNotEmpty) 'referral_code': referralCode,
-          });
+      } else if (firstSegment == 'register' || isRegisterUri(uri)) {
+        final bool loggedIn = await checkUserLoggedInAsync();
+        if (loggedIn) {
+          print('DeepLinkService: User already logged in, opening normally through splash.');
+          Get.offAllNamed(AppRoutes.splash);
+          return;
         }
+        final String? referralCode = extractReferralCode(uri);
+        navigateToRegister(referralCode: referralCode);
       }
     }
 

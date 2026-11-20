@@ -23,8 +23,8 @@ class ApiClient {
   void _initializeDio() {
     _dio.options = BaseOptions(
       baseUrl: ApiConstants.apiBaseUrl,
-      connectTimeout: const Duration(milliseconds: 60000),
-      receiveTimeout: const Duration(milliseconds: 60000),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 20),
       contentType: 'application/json',
       validateStatus: (status) => status != null && status < 600, // Accept all responses
     );
@@ -122,11 +122,10 @@ class ApiClient {
       RetryInterceptor(
         dio: _dio,
         logPrint: (message) => Logger.w(message),
-        retries: 3,
+        retries: 2,
         retryDelays: const [
           Duration(seconds: 1),
           Duration(seconds: 2),
-          Duration(seconds: 3),
         ],
       ),
     );

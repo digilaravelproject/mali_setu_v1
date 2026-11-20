@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
@@ -77,7 +78,7 @@ class _CustomScaffoldState extends State<CustomScaffold> {
               setState(() {
                 _canPop = true;
               });
-              Navigator.of(context).pop();
+              SystemNavigator.pop();
             }
           } else {
             setState(() {

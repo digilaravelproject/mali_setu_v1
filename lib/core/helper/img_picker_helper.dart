@@ -205,8 +205,8 @@ class ImagePickerHelper {
 
   /// -------------------- Image Compression --------------------
 
-  Future<File> _compressImage(File originalFile) async {
-    final targetSize = (maxFileSizeInMB * 1024 * 1024).toInt();
+  static Future<File> compressImage(File originalFile, {double? maxMb}) async {
+    final targetSize = ((maxMb ?? maxFileSizeInMB) * 1024 * 1024).toInt();
 
     if (!await originalFile.exists()) return originalFile;
 
@@ -245,6 +245,10 @@ class ImagePickerHelper {
     }
 
     return resultFile ?? originalFile;
+  }
+
+  Future<File> _compressImage(File originalFile) async {
+    return compressImage(originalFile);
   }
 
   /// -------------------- Permission Dialog --------------------

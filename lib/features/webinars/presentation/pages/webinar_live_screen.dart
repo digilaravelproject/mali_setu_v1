@@ -42,6 +42,8 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
   @override
   void initState() {
     super.initState();
+    controller.chatMessages.clear();
+    controller.qaMessages.clear();
     controller.liveViewerCount.value = widget.webinar.registeredCount;
     controller.fetchWebinarComments(widget.webinar.id, isRefresh: true);
     controller.isMicOn.value = false;
@@ -349,6 +351,8 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
 
   @override
   void dispose() {
+    controller.chatMessages.clear();
+    controller.qaMessages.clear();
     _leaveAgora();
     _commentsScrollController.dispose();
     super.dispose();
@@ -886,7 +890,7 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                                           ),
                                           const SizedBox(height: 10),
                                           const Text(
-                                            "No comments yet",
+                                            "No messages yet",
                                             style: TextStyle(
                                               color: Color(0xFF475569),
                                               fontWeight: FontWeight.w700,
@@ -895,7 +899,7 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           const Text(
-                                            "Be the first to comment in this session.\nPull down to refresh messages.",
+                                            "Be the first to send a message in this session.\nPull down to refresh messages.",
                                             style: TextStyle(
                                               color: Color(0xFF94A3B8),
                                               fontSize: 12,

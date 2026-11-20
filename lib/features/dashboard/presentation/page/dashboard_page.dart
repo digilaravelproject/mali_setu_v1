@@ -71,7 +71,7 @@ class DashboardPage extends GetWidget<DashboardController> {
           color: AppColors.white,
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withOpacity(0.06),
+              color: AppColors.black.withValues(alpha: 0.06),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -85,6 +85,8 @@ class DashboardPage extends GetWidget<DashboardController> {
         ),
         child: BottomAppBar(
           elevation: 0,
+          height: 58,
+          padding: EdgeInsets.zero,
           child: Obx(() {
             // Observe auth/screenList dependencies so bottom nav stays synced with IndexedStack
             controller.screenList;
@@ -107,57 +109,52 @@ class DashboardPage extends GetWidget<DashboardController> {
     return Obx(() {
       final isSelected = controller.currentPage.value == index;
 
-      return GestureDetector(
-        onTap: () => controller.changePage(index),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 4,
-          ),
+      return Expanded(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => controller.changePage(index),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TweenAnimationBuilder<double>(
-                duration: Duration(milliseconds: 400),
-                curve: isSelected ? Curves.elasticOut : Curves.easeInOut,
-                tween: Tween(begin: 0.0, end: isSelected ? 1.0 : 0.0),
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: 1.0 + (value * 0.1),
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? e.selectedColor
-                            : e.unselectedColor.withAlpha(15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isSelected ? (e.selectedIcon ?? e.icon) : e.icon,
-                        color: isSelected ? Colors.white : e.unselectedColor,
-                        size: 16,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  e.title,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: isSelected ? e.selectedColor : e.unselectedColor,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    fontSize: 10,
-                    letterSpacing: 0.2,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                width: isSelected ? 32 : 30,
+                height: isSelected ? 32 : 30,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? e.selectedColor
+                      : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    isSelected ? (e.selectedIcon ?? e.icon) : e.icon,
+                    color: isSelected ? Colors.white : e.unselectedColor,
+                    size: isSelected ? 18 : 23,
                   ),
                 ),
               ),
+              if (isSelected)
+                Padding(
+                  padding: const EdgeInsets.only(top: 1.5),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      e.title,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: e.selectedColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 10.5,
+                        letterSpacing: 0.1,
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

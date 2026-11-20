@@ -242,6 +242,48 @@ class NotificationModel {
       updatedAt: json['updated_at']?.toString(),
     );
   }
+
+  /// Extract image URL if provided in notification payload/data
+  String? get imageUrl {
+    if (data != null) {
+      const keys = [
+        'image',
+        'image_url',
+        'imageUrl',
+        'media_path',
+        'mediaPath',
+        'media',
+        'media_url',
+        'picture',
+        'picture_url',
+        'photo',
+        'photo_url',
+        'banner',
+        'banner_url',
+        'thumbnail',
+        'featured_image',
+      ];
+      for (final key in keys) {
+        final val = data![key]?.toString();
+        if (val != null && val.isNotEmpty && val != 'null') {
+          return val;
+        }
+      }
+      // Check inside nested data/blog/post
+      for (final nestedKey in ['data', 'blog', 'post']) {
+        if (data![nestedKey] is Map) {
+          final Map m = data![nestedKey];
+          for (final key in keys) {
+            final val = m[key]?.toString();
+            if (val != null && val.isNotEmpty && val != 'null') {
+              return val;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
 }
 
 class Pagination {

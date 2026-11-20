@@ -199,7 +199,6 @@ class CreateJobController extends GetxController {
       'entry'.tr,
       'mid'.tr,
       'senior'.tr,
-      'expert'.tr,
     ];
   }
 

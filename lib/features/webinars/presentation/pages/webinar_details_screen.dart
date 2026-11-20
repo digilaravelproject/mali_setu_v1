@@ -45,12 +45,15 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
     }
 
     if (webinar.id > 0) {
-      _fetchLatestDetails();
+      final needsLoader = webinar.description.isEmpty && webinar.speaker.name.isEmpty;
+      _fetchLatestDetails(showTabLoader: needsLoader);
     }
   }
 
-  Future<void> _fetchLatestDetails() async {
-    setState(() => _isLoadingDetails = true);
+  Future<void> _fetchLatestDetails({bool showTabLoader = false}) async {
+    if (showTabLoader) {
+      setState(() => _isLoadingDetails = true);
+    }
     final fresh = await controller.fetchWebinarDetail(webinar.id);
     if (mounted && fresh != null) {
       setState(() {
@@ -66,8 +69,12 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: () => _fetchLatestDetails(showTabLoader: false),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
           // Banner App Bar (Matching reference Image 2)
           SliverAppBar(
             expandedHeight: 230,
@@ -384,6 +391,7 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
           ),
         ],
       ),
+    ),
 
       // Bottom Sticky Button (Matching Image 2)
       bottomNavigationBar: Container(

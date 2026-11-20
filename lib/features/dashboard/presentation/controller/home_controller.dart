@@ -369,32 +369,19 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     final banner = banners[index];
     final bizId = banner.businessId;
     
-    // If no business ID found, open full-screen preview with zoom and scroll support
-    if (bizId == null) {
-      _openBannerImagePreview(index);
+    // If banner has a business URL/ID, navigate directly to that business profile!
+    // Agar business URL aa raha hai, to banner preview full view me nahi dikhega.
+    if (bizId != null) {
+      Get.toNamed(
+        AppRoutes.businessDetails,
+        arguments: Business(id: bizId),
+        preventDuplicates: false,
+      );
       return;
     }
 
-    try {
-      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
-      
-      final repository = Get.find<BusinessRepository>();
-      final response = await repository.getBusinessDetails(bizId);
-      
-      Get.back(); // Close loading dialog
-
-      if (response.success == true && response.data?.data != null && response.data!.data!.isNotEmpty) {
-        final business = response.data!.data!.first;
-        Get.toNamed(AppRoutes.businessDetails, arguments: business);
-      } else {
-        // Fallback: if business details not found, open banner image preview
-        _openBannerImagePreview(index);
-      }
-    } catch (e) {
-      if (Get.isDialogOpen == true) Get.back();
-      // On error, fallback to banner image preview so user gets a great experience
-      _openBannerImagePreview(index);
-    }
+    // Agar URL nahi aa raha hai (e.g. url is null), to full-screen image preview open hoga
+    _openBannerImagePreview(index);
   }
 
   final List<UserProfile> users = [
