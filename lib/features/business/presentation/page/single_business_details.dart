@@ -1803,7 +1803,9 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   _buildInfoRow(
                     Icons.access_time_filled_rounded,
                     'business_hours'.tr,
-                    "${_formatTimeString(b.opening_time)} - ${_formatTimeString(b.closing_time)}",
+                    (b.is_24_7 == true)
+                        ? 'open_24_7'.tr
+                        : "${_formatTimeString(b.opening_time)} - ${_formatTimeString(b.closing_time)}",
                     context,
                   ),
                 ], context),
@@ -2194,9 +2196,10 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   }
 
   Widget _buildTimingHighlight(Business business, BuildContext context) {
+    final bool is24 = business.is_24_7 == true;
     final openTime = _formatTimeString(business.opening_time);
     final closeTime = _formatTimeString(business.closing_time);
-    final bool isOpen = _isOpen(business.opening_time, business.closing_time);
+    final bool isOpen = is24 || _isOpen(business.opening_time, business.closing_time);
 
     return Expanded(
       child: Container(
@@ -2219,7 +2222,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                "$openTime - $closeTime",
+                is24 ? 'open_24_7'.tr : "$openTime - $closeTime",
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.theme.primaryColor,
                   fontWeight: FontWeight.w700,

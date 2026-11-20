@@ -41,36 +41,166 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SectionTitle('business_information'.tr),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: AppInputTextField(
-                          label: 'opening_time'.tr,
-                          isRequired: true,
-                          controller: controller.openingTimeCtrl,
-                          textInputType: TextInputType.none,
-                          iconData: Icons.access_time,
-                          readOnly: true,
-                          onTap: () => _selectTime(context, controller.openingTimeCtrl, true),
-                          errorText: controller.errors['openingTime'],
+
+                  // 24*7 Attractive Toggle Card
+                  Obx(() {
+                    final isOpen24x7 = controller.isOpen24x7.value;
+                    final primaryColor = Theme.of(context).primaryColor;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      decoration: BoxDecoration(
+                        color: isOpen24x7
+                            ? primaryColor.withValues(alpha: 0.08)
+                            : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isOpen24x7
+                              ? primaryColor.withValues(alpha: 0.7)
+                              : Colors.grey.shade300,
+                          width: isOpen24x7 ? 1.6 : 1.0,
+                        ),
+                        boxShadow: isOpen24x7
+                            ? [
+                                BoxShadow(
+                                  color: primaryColor.withValues(alpha: 0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ]
+                            : null,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => controller.toggleOpen24x7(!isOpen24x7),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    color: isOpen24x7
+                                        ? primaryColor
+                                        : Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.all_inclusive_rounded,
+                                    color: isOpen24x7 ? Colors.white : Colors.grey.shade600,
+                                    size: 22,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'open_24_7'.tr,
+                                            style: TextStyle(
+                                              fontSize: 14.5,
+                                              fontWeight: FontWeight.w600,
+                                              color: isOpen24x7
+                                                  ? primaryColor
+                                                  : Colors.black87,
+                                            ),
+                                          ),
+                                          if (isOpen24x7) ...[
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: primaryColor.withValues(alpha: 0.15),
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                "Active",
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: primaryColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        isOpen24x7
+                                            ? 'open_24_7_active_desc'.tr
+                                            : 'open_24_7_desc'.tr,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isOpen24x7
+                                              ? primaryColor.withValues(alpha: 0.8)
+                                              : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Checkbox(
+                                  value: isOpen24x7,
+                                  onChanged: (val) => controller.toggleOpen24x7(val),
+                                  activeColor: primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: AppInputTextField(
-                          label: 'closing_time'.tr,
-                          isRequired: true,
-                          controller: controller.closingTimeCtrl,
-                          textInputType: TextInputType.none,
-                          iconData: Icons.access_time,
-                          readOnly: true,
-                          onTap: () => _selectTime(context, controller.closingTimeCtrl, false),
-                          errorText: controller.errors['closingTime'],
-                        ),
+                    );
+                  }),
+
+                  // Custom Timing Fields (Hidden when 24*7 is selected)
+                  Obx(() {
+                    if (controller.isOpen24x7.value) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: AppInputTextField(
+                              label: 'opening_time'.tr,
+                              isRequired: false,
+                              controller: controller.openingTimeCtrl,
+                              textInputType: TextInputType.none,
+                              iconData: Icons.access_time,
+                              readOnly: true,
+                              onTap: () => _selectTime(context, controller.openingTimeCtrl, true),
+                              errorText: controller.errors['openingTime'],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: AppInputTextField(
+                              label: 'closing_time'.tr,
+                              isRequired: false,
+                              controller: controller.closingTimeCtrl,
+                              textInputType: TextInputType.none,
+                              iconData: Icons.access_time,
+                              readOnly: true,
+                              onTap: () => _selectTime(context, controller.closingTimeCtrl, false),
+                              errorText: controller.errors['closingTime'],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  }),
                   // const SizedBox(height: 20),
 
                   AppInputTextField(
