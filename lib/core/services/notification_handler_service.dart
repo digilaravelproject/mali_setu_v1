@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../features/webinars/data/models/webinar_model.dart';
@@ -97,6 +98,22 @@ class NotificationHandlerService extends GetxService {
       },
     );
 
+    // Check if app was launched by tapping a local notification (e.g. from killed state)
+    try {
+      final NotificationAppLaunchDetails? launchDetails =
+          await _localNotifications.getNotificationAppLaunchDetails();
+      if (launchDetails != null && launchDetails.didNotificationLaunchApp) {
+        final String? payloadStr = launchDetails.notificationResponse?.payload;
+        if (payloadStr != null && payloadStr.isNotEmpty) {
+          debugPrint("🚀 [NotificationHandler] App launched from KILLED state via local notification");
+          final Map<String, dynamic> data = json.decode(payloadStr);
+          _handleIncomingPayload(data);
+        }
+      }
+    } catch (e) {
+      debugPrint("⚠️ [NotificationHandler] Error checking launch notification details: $e");
+    }
+
     // Create Android High Importance Notification Channels
     final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
@@ -153,6 +170,15 @@ class NotificationHandlerService extends GetxService {
 
       // Retrieve device FCM Token and sync with backend
       await syncFcmToken();
+
+      // Subscribe to global topics for broadcast notifications
+      try {
+        await _fcm.subscribeToTopic('all_users');
+        await _fcm.subscribeToTopic('general');
+        debugPrint("🔔 [NotificationHandler] Subscribed to topics: all_users, general");
+      } catch (e) {
+        debugPrint("⚠️ [NotificationHandler] Failed to subscribe to topic: $e");
+      }
 
       // Listen for token refreshes
       _fcm.onTokenRefresh.listen((newToken) {
@@ -239,21 +265,57 @@ class NotificationHandlerService extends GetxService {
       }
     } catch (_) {}
 
-    final androidDetails = AndroidNotificationDetails(
-      _fcmChannelId,
-      _fcmChannelName,
-      channelDescription: _fcmChannelDescription,
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      icon: '@mipmap/launcher_icon',
-    );
+    final String? imageUrl = _extractImageUrl(message, extractedData);
+    String? localImagePath;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      localImagePath = await _downloadAndSaveImage(imageUrl);
+    }
 
-    const darwinDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
+    AndroidNotificationDetails androidDetails;
+    if (localImagePath != null && localImagePath.isNotEmpty) {
+      final bigPicture = BigPictureStyleInformation(
+        FilePathAndroidBitmap(localImagePath),
+        largeIcon: FilePathAndroidBitmap(localImagePath),
+        contentTitle: title,
+        summaryText: body,
+      );
+      androidDetails = AndroidNotificationDetails(
+        _fcmChannelId,
+        _fcmChannelName,
+        channelDescription: _fcmChannelDescription,
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        styleInformation: bigPicture,
+        icon: '@mipmap/launcher_icon',
+      );
+    } else {
+      androidDetails = const AndroidNotificationDetails(
+        _fcmChannelId,
+        _fcmChannelName,
+        channelDescription: _fcmChannelDescription,
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        icon: '@mipmap/launcher_icon',
+      );
+    }
+
+    DarwinNotificationDetails darwinDetails;
+    if (localImagePath != null && localImagePath.isNotEmpty) {
+      darwinDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        attachments: [DarwinNotificationAttachment(localImagePath)],
+      );
+    } else {
+      darwinDetails = const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+    }
 
     final details = NotificationDetails(
       android: androidDetails,
@@ -267,6 +329,259 @@ class NotificationHandlerService extends GetxService {
       details,
       payload: json.encode(extractedData),
     );
+  }
+
+  /// Normalize image URL by prepending base URL if path is relative
+  static String? _normalizeImageUrl(String? rawUrl) {
+    if (rawUrl == null) return null;
+    final trimmed = rawUrl.trim();
+    if (trimmed.isEmpty || trimmed == 'null') return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/storage/')) {
+      return '${ApiConstants.baseUrl}$trimmed';
+    }
+    if (trimmed.startsWith('storage/')) {
+      return '${ApiConstants.baseUrl}/$trimmed';
+    }
+    return '${ApiConstants.imageBaseUrl}${trimmed.replaceFirst(RegExp(r'^\/+'), '')}';
+  }
+
+  /// Extract image URL from FCM RemoteMessage or payload data
+  static String? _extractImageUrl(RemoteMessage message, Map<String, dynamic> extractedData) {
+    if (message.notification?.android?.imageUrl != null &&
+        message.notification!.android!.imageUrl!.isNotEmpty) {
+      return _normalizeImageUrl(message.notification!.android!.imageUrl);
+    }
+    if (message.notification?.apple?.imageUrl != null &&
+        message.notification!.apple!.imageUrl!.isNotEmpty) {
+      return _normalizeImageUrl(message.notification!.apple!.imageUrl);
+    }
+
+    const imageKeys = [
+      'image',
+      'image_url',
+      'imageUrl',
+      'media_path',
+      'mediaPath',
+      'media',
+      'media_url',
+      'picture',
+      'picture_url',
+      'photo',
+      'photo_url',
+      'banner',
+      'banner_url',
+      'thumbnail',
+      'featured_image',
+    ];
+
+    for (final key in imageKeys) {
+      final val = extractedData[key]?.toString();
+      if (val != null && val.isNotEmpty && val != 'null') {
+        return _normalizeImageUrl(val);
+      }
+    }
+
+    try {
+      final dynamic rawInner = extractedData['data'];
+      Map<String, dynamic>? innerMap;
+      if (rawInner is String && rawInner.trim().startsWith('{')) {
+        innerMap = Map<String, dynamic>.from(json.decode(rawInner));
+      } else if (rawInner is Map) {
+        innerMap = Map<String, dynamic>.from(rawInner);
+      }
+      if (innerMap != null) {
+        for (final key in imageKeys) {
+          final val = innerMap[key]?.toString();
+          if (val != null && val.isNotEmpty && val != 'null') {
+            return _normalizeImageUrl(val);
+          }
+        }
+      }
+    } catch (_) {}
+
+    // Check inside nested 'blog' map if present
+    if (extractedData['blog'] is Map) {
+      final Map b = extractedData['blog'];
+      for (final key in imageKeys) {
+        final val = b[key]?.toString();
+        if (val != null && val.isNotEmpty && val != 'null') {
+          return _normalizeImageUrl(val);
+        }
+      }
+    }
+
+    // Check inside nested 'post' map if present
+    if (extractedData['post'] is Map) {
+      final Map p = extractedData['post'];
+      for (final key in imageKeys) {
+        final val = p[key]?.toString();
+        if (val != null && val.isNotEmpty && val != 'null') {
+          return _normalizeImageUrl(val);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /// Download notification image from URL and save to a local temp file for BigPicture display
+  static Future<String?> _downloadAndSaveImage(String? url) async {
+    if (url == null || url.trim().isEmpty) return null;
+    final normalizedUrl = _normalizeImageUrl(url);
+    if (normalizedUrl == null) return null;
+
+    try {
+      final Uri? uri = Uri.tryParse(normalizedUrl);
+      if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) return null;
+
+      debugPrint("🖼️ [NotificationHandler] Downloading notification image: $normalizedUrl");
+      final HttpClient client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+      final HttpClientRequest request = await client.getUrl(uri);
+      final HttpClientResponse response = await request.close().timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<int> bytes = await response.fold<List<int>>(<int>[], (List<int> prev, List<int> elem) => prev..addAll(elem));
+        if (bytes.isNotEmpty) {
+          final Directory dir = await getTemporaryDirectory();
+          final String filePath = '${dir.path}/fcm_${DateTime.now().millisecondsSinceEpoch}.png';
+          final File file = File(filePath);
+          await file.writeAsBytes(bytes, flush: true);
+          debugPrint("✅ [NotificationHandler] Image saved successfully to $filePath (${bytes.length} bytes)");
+          return filePath;
+        }
+      } else {
+        debugPrint("⚠️ [NotificationHandler] Image download failed with status: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("⚠️ [NotificationHandler] Failed to download notification image: $e");
+    }
+    return null;
+  }
+
+  /// Show rich notification when app is in Background or Terminated for data-only messages
+  static Future<void> showBackgroundNotification(RemoteMessage message) async {
+    try {
+      final Map<String, dynamic> extractedData = _extractRemoteMessageData(message);
+
+      String title = (message.notification?.title ?? extractedData['title'] ?? 'Mali Setu').toString().trim();
+      String body = (message.notification?.body ?? extractedData['message'] ?? extractedData['body'] ?? '').toString().trim();
+
+      try {
+        final dynamic rawInnerData = extractedData['data'];
+        Map<String, dynamic>? innerMap;
+        if (rawInnerData is String && rawInnerData.trim().startsWith('{')) {
+          innerMap = Map<String, dynamic>.from(json.decode(rawInnerData));
+        } else if (rawInnerData is Map) {
+          innerMap = Map<String, dynamic>.from(rawInnerData);
+        }
+
+        final dynamic rawNotif = extractedData['notification'];
+        Map<String, dynamic>? innerNotif;
+        if (rawNotif is String && rawNotif.trim().startsWith('{')) {
+          innerNotif = Map<String, dynamic>.from(json.decode(rawNotif));
+        } else if (rawNotif is Map) {
+          innerNotif = Map<String, dynamic>.from(rawNotif);
+        }
+
+        if (title.isEmpty || title == 'New Blog:' || title == 'New Blog' || title.endsWith(':')) {
+          final innerTitle = (innerNotif?['title'] ?? innerMap?['title'] ?? extractedData['blog_title'] ?? '')?.toString();
+          if (innerTitle != null && innerTitle.isNotEmpty) {
+            title = title.isNotEmpty ? "$title $innerTitle" : innerTitle;
+          }
+        }
+
+        if (body.isEmpty || body.startsWith('published a new blog') || body == 'published a new blog.') {
+          final innerBody = (innerNotif?['body'] ?? innerMap?['body'] ?? '')?.toString();
+          if (innerBody != null && innerBody.isNotEmpty) {
+            body = innerBody;
+          }
+        }
+      } catch (_) {}
+
+      if (title.isEmpty && body.isEmpty) {
+        return;
+      }
+
+      final String? imageUrl = _extractImageUrl(message, extractedData);
+      String? localImagePath;
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        localImagePath = await _downloadAndSaveImage(imageUrl);
+      }
+
+      final FlutterLocalNotificationsPlugin localPlugin = FlutterLocalNotificationsPlugin();
+      const androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
+      const darwinSettings = DarwinInitializationSettings();
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: darwinSettings,
+      );
+      await localPlugin.initialize(initSettings);
+
+      AndroidNotificationDetails androidDetails;
+      if (localImagePath != null && localImagePath.isNotEmpty) {
+        final bigPicture = BigPictureStyleInformation(
+          FilePathAndroidBitmap(localImagePath),
+          largeIcon: FilePathAndroidBitmap(localImagePath),
+          contentTitle: title,
+          summaryText: body,
+        );
+        androidDetails = AndroidNotificationDetails(
+          _fcmChannelId,
+          _fcmChannelName,
+          channelDescription: _fcmChannelDescription,
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          styleInformation: bigPicture,
+          icon: '@mipmap/launcher_icon',
+        );
+      } else {
+        androidDetails = const AndroidNotificationDetails(
+          _fcmChannelId,
+          _fcmChannelName,
+          channelDescription: _fcmChannelDescription,
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          icon: '@mipmap/launcher_icon',
+        );
+      }
+
+      DarwinNotificationDetails darwinDetails;
+      if (localImagePath != null && localImagePath.isNotEmpty) {
+        darwinDetails = DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          attachments: [DarwinNotificationAttachment(localImagePath)],
+        );
+      } else {
+        darwinDetails = const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        );
+      }
+
+      final NotificationDetails details = NotificationDetails(
+        android: androidDetails,
+        iOS: darwinDetails,
+      );
+
+      final int notifId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await localPlugin.show(
+        notifId,
+        title,
+        body,
+        details,
+        payload: json.encode(extractedData),
+      );
+    } catch (e) {
+      debugPrint("❌ [NotificationHandler] Error in showBackgroundNotification: $e");
+    }
   }
 
   /// Sync FCM device token with backend API (PUT /api/auth/fcm-token)
