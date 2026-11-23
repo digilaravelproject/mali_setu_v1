@@ -32,6 +32,8 @@ class LoginController extends GetxController {
   var isRemember = true.obs;
   var isPasswordVisible = false.obs;
   var isLoading = false.obs;
+  var isAcceptedTerms = false.obs;
+  final termsError = false.obs;
   
   final formKey = GlobalKey<FormState>();
 
@@ -56,6 +58,15 @@ class LoginController extends GetxController {
   }
 
   Future<void> performLogin() async {
+    if (!isAcceptedTerms.value) {
+      termsError.value = true;
+      CustomSnackBar.showError(
+        message: 'terms_and_privacy_required'.tr,
+      );
+      return;
+    }
+    termsError.value = false;
+
     if (!formKey.currentState!.validate()) return;
 
     try {
@@ -148,6 +159,15 @@ class LoginController extends GetxController {
 
 
   Future<void> googleSignIn() async {
+    if (!isAcceptedTerms.value) {
+      termsError.value = true;
+      CustomSnackBar.showError(
+        message: 'terms_and_privacy_required'.tr,
+      );
+      return;
+    }
+    termsError.value = false;
+
     GoogleSignInAccount? googleUser;
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
@@ -246,6 +266,15 @@ class LoginController extends GetxController {
   }
 
   Future<void> appleSignIn() async {
+    if (!isAcceptedTerms.value) {
+      termsError.value = true;
+      CustomSnackBar.showError(
+        message: 'terms_and_privacy_required'.tr,
+      );
+      return;
+    }
+    termsError.value = false;
+
     String? email;
     try {
       final credential = await SignInWithApple.getAppleIDCredential(

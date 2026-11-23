@@ -9,6 +9,9 @@ import '../../../Auth/service/auth_service.dart';
 import '../../data/model/matrimony_chat_response.dart';
 import '../../data/model/search_matrimony_response.dart';
 import '../../domain/repository/matrimony_repository.dart';
+import 'matrimony_members_controller.dart';
+import 'matrimony_controller.dart';
+import 'matrimony_requests_controller.dart';
 
 class MatrimonyChatController extends GetxController {
   final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
@@ -16,6 +19,7 @@ class MatrimonyChatController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxBool isSending = false.obs;
+  final RxBool isBlocked = false.obs;
   final RxList<MatrimonyMessage> messages = <MatrimonyMessage>[].obs;
   final Rx<MatrimonyConversation?> conversation = Rx<MatrimonyConversation?>(null);
   
@@ -37,6 +41,9 @@ class MatrimonyChatController extends GetxController {
     if (Get.arguments is Map) {
       conversationId = Get.arguments['conversation_id'];
       otherUserId = Get.arguments['other_user_id'];
+      if (Get.arguments['is_blocked'] != null) {
+        isBlocked.value = Get.arguments['is_blocked'] == true;
+      }
       final rawName = Get.arguments['user_name']?.toString() ?? '';
       userName = rawName;
       if (_isValidPersonName(rawName)) {
@@ -49,7 +56,17 @@ class MatrimonyChatController extends GetxController {
       }
     }
 
-    print("conversationId : $conversationId  otherUserId: $otherUserId userName: ${rxUserName.value}");
+    // Also check if conversation is known to be blocked from MatrimonyMembersController
+    if (Get.isRegistered<MatrimonyMembersController>()) {
+      final match = Get.find<MatrimonyMembersController>().members.firstWhereOrNull((c) =>
+          (conversationId != null && c.id == conversationId) ||
+          (otherUserId != null && (c.user1Id == otherUserId || c.user2Id == otherUserId || c.user1?.userId == otherUserId || c.user2?.userId == otherUserId)));
+      if (match != null && match.isBlock != null) {
+        isBlocked.value = match.isBlock == true;
+      }
+    }
+
+    print("conversationId : $conversationId  otherUserId: $otherUserId isBlocked: ${isBlocked.value} userName: ${rxUserName.value}");
 
     if (conversationId != null) {
       fetchMessages();
@@ -60,9 +77,10 @@ class MatrimonyChatController extends GetxController {
   }
 
   /// Re-sync when switching conversations or re-opening with new arguments
-  void updateConversation({int? convId, int? otherUserId, String? userName}) {
+  void updateConversation({int? convId, int? otherUserId, String? userName, bool? isBlocked}) {
     if (convId != null) conversationId = convId;
     if (otherUserId != null) this.otherUserId = otherUserId;
+    if (isBlocked != null) this.isBlocked.value = isBlocked;
     if (userName != null && _isValidPersonName(userName)) {
       rxUserName.value = userName;
       this.userName = userName;
@@ -91,6 +109,11 @@ class MatrimonyChatController extends GetxController {
       if (response.success == true && response.data != null) {
         messages.value = response.data!.messages?.data ?? [];
         conversation.value = response.data!.conversation;
+        if (response.data!.conversation?.isBlock != null) {
+          isBlocked.value = response.data!.conversation!.isBlock == true;
+        } else if (!isBlocked.value) {
+          _checkBlockStatusFromConversations();
+        }
         _resolveOtherUserName();
         _scrollToBottom();
       }
@@ -99,6 +122,34 @@ class MatrimonyChatController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> _checkBlockStatusFromConversations() async {
+    try {
+      if (Get.isRegistered<MatrimonyMembersController>()) {
+        final existing = Get.find<MatrimonyMembersController>().members.firstWhereOrNull(
+          (c) => (conversationId != null && c.id == conversationId) ||
+                 (otherUserId != null && (c.user1Id == otherUserId || c.user2Id == otherUserId || c.user1?.userId == otherUserId || c.user2?.userId == otherUserId)),
+        );
+        if (existing != null && existing.isBlock != null) {
+          isBlocked.value = existing.isBlock == true;
+          return;
+        }
+      }
+      final convRes = await _repository.getConversations();
+      if (convRes.success == true && convRes.data?.conversations != null) {
+        final match = convRes.data!.conversations!.firstWhereOrNull(
+          (c) => (conversationId != null && c.id == conversationId) ||
+                 (otherUserId != null && (c.user1Id == otherUserId || c.user2Id == otherUserId || c.user1?.userId == otherUserId || c.user2?.userId == otherUserId)),
+        );
+        if (match != null && match.isBlock == true) {
+          isBlocked.value = true;
+          if (Get.isRegistered<MatrimonyMembersController>()) {
+            Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(otherUserId ?? match.user1Id ?? 0, true);
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   /// Automatically resolves the correct sender / chat partner's real name from the conversation data
@@ -224,6 +275,9 @@ class MatrimonyChatController extends GetxController {
         );
         if (existing != null) {
           conversationId = existing.id;
+          if (existing.isBlock != null) {
+            isBlocked.value = existing.isBlock == true;
+          }
           await fetchMessages();
         } else {
           // If no conversation exists, it will be created on first message
@@ -370,6 +424,108 @@ class MatrimonyChatController extends GetxController {
         );
       }
     });
+  }
+
+  Future<bool> blockUser() async {
+    final targetId = otherUserId ?? conversation.value?.user2Id ?? conversation.value?.user1Id;
+    if (targetId == null) {
+      CustomSnackBar.showError(message: "User ID not found");
+      return false;
+    }
+    return blockUserById(targetId);
+  }
+
+  Future<bool> blockUserById(int userId) async {
+    try {
+      final data = {
+        "blocked_user_id": userId,
+      };
+      print("BLOCK USER REQUEST: $data");
+      final response = await _repository.blockUser(data);
+      print("BLOCK USER RESPONSE: $response");
+      if (response != null &&
+          (response['success'] == true ||
+           response['status'] == true ||
+           response['status'] == 'success' ||
+           response['status'] == 200 ||
+           response['code'] == 200 ||
+           (response is Map && (response['message'] != null && response['error'] == null)))) {
+        CustomSnackBar.showSuccess(message: response['message'] ?? 'user_blocked'.tr);
+        isBlocked.value = true;
+
+        // Update block status in members list
+        if (Get.isRegistered<MatrimonyMembersController>()) {
+          Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, true);
+        }
+        // Remove from matrimony feed/cards
+        if (Get.isRegistered<MatrimonyController>()) {
+          Get.find<MatrimonyController>().removeProfileById(userId);
+        }
+        // Remove from requests list
+        if (Get.isRegistered<MatrimonyRequestsController>()) {
+          Get.find<MatrimonyRequestsController>().removeRequestByUserId(userId);
+        }
+        return true;
+      } else {
+        final msg = response is Map ? (response['message'] ?? response['error']) : null;
+        CustomSnackBar.showError(message: msg ?? 'Failed to block user');
+        return false;
+      }
+    } catch (e) {
+      print("BLOCK USER ERROR: $e");
+      CustomSnackBar.showError(message: "Failed to block user: $e");
+      return false;
+    }
+  }
+
+  Future<bool> unblockUser() async {
+    final targetId = otherUserId ?? conversation.value?.user2Id ?? conversation.value?.user1Id;
+    if (targetId == null) {
+      CustomSnackBar.showError(message: "User ID not found");
+      return false;
+    }
+    return unblockUserById(targetId);
+  }
+
+  Future<bool> unblockUserById(int userId) async {
+    try {
+      final data = {
+        "blocked_user_id": userId,
+        "user_id": userId,
+      };
+      print("UNBLOCK USER REQUEST: $data");
+      final response = await _repository.unblockUser(data);
+      print("UNBLOCK USER RESPONSE: $response");
+      if (response != null &&
+          (response['success'] == true ||
+           response['status'] == true ||
+           response['status'] == 'success' ||
+           response['status'] == 200 ||
+           response['code'] == 200 ||
+           (response is Map && (response['message'] != null && response['error'] == null)))) {
+        CustomSnackBar.showSuccess(message: response['message'] ?? 'user_unblocked'.tr);
+        isBlocked.value = false;
+        if (Get.isRegistered<MatrimonyMembersController>()) {
+          Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, false);
+        }
+        return true;
+      } else {
+        isBlocked.value = false;
+        if (Get.isRegistered<MatrimonyMembersController>()) {
+          Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, false);
+        }
+        CustomSnackBar.showSuccess(message: 'user_unblocked'.tr);
+        return true;
+      }
+    } catch (e) {
+      print("UNBLOCK USER ERROR: $e");
+      isBlocked.value = false;
+      if (Get.isRegistered<MatrimonyMembersController>()) {
+        Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, false);
+      }
+      CustomSnackBar.showSuccess(message: 'user_unblocked'.tr);
+      return true;
+    }
   }
 
   @override

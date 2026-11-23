@@ -182,6 +182,7 @@ class Business {
   String? website;
   String? opening_time;
   String? closing_time;
+  bool? is_24_7;
   String? verificationStatus;
   String? verifiedAt;
   String? photo;
@@ -218,6 +219,7 @@ class Business {
     this.website,
     this.opening_time,
     this.closing_time,
+    this.is_24_7,
     this.verificationStatus,
     this.verifiedAt,
     this.photo,
@@ -256,6 +258,10 @@ class Business {
       website: json['website'],
       opening_time: json['opening_time'],
       closing_time: json['closing_time'],
+      is_24_7: json['is_24_7'] == true ||
+          json['is_24_7'] == 1 ||
+          json['is_24_7'] == 'true' ||
+          json['is_24_7'] == '1',
       verificationStatus: json['verification_status'],
       verifiedAt: json['verified_at'],
       photo: json['photo'],
@@ -303,6 +309,7 @@ class Business {
       'website': website,
       'opening_time': opening_time,
       'closing_time': closing_time,
+      'is_24_7': is_24_7,
       'verification_status': verificationStatus,
       'verified_at': verifiedAt,
       'photo': photo,

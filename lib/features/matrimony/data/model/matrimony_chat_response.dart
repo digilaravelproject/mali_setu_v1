@@ -38,6 +38,7 @@ class MatrimonyConversation {
   MatrimonyProfile? user1;
   MatrimonyProfile? user2;
   List<MatrimonyMessage>? messages;
+  bool? isBlock;
 
   MatrimonyConversation({
     this.id,
@@ -49,6 +50,7 @@ class MatrimonyConversation {
     this.user1,
     this.user2,
     this.messages,
+    this.isBlock,
   });
 
   MatrimonyConversation.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,14 @@ class MatrimonyConversation {
     lastMessageAt = json['last_message_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    if (json.containsKey('is_block') && json['is_block'] != null) {
+      isBlock = json['is_block'] == true ||
+          json['is_block'] == 1 ||
+          json['is_block'].toString() == 'true' ||
+          json['is_block'].toString() == '1';
+    } else {
+      isBlock = null;
+    }
     user1 = json['user1'] != null ? MatrimonyProfile.fromJson(json['user1']) : null;
     user2 = json['user2'] != null ? MatrimonyProfile.fromJson(json['user2']) : null;
     if (json['messages'] != null) {

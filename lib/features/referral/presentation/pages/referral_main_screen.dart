@@ -123,24 +123,60 @@ class _ReferralMainScreenState extends State<ReferralMainScreen> with SingleTick
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: _SliverAppBarDelegate(
-                    TabBar(
-                      controller: _tabController,
-                      indicatorColor: AppColors.primary,
-                      indicatorWeight: 3,
-                      labelColor: AppColors.primary,
-                      unselectedLabelColor: Colors.grey.shade600,
-                      labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                      tabs: [
-                        Tab(
-                          icon: const Icon(Icons.people_alt_outlined, size: 18),
-                          text: 'referral_network'.tr,
+                    Container(
+                      height: 44,
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE5E7EB), width: 0.8),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        dividerColor: Colors.transparent,
+                        dividerHeight: 0,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1.5),
+                            ),
+                          ],
                         ),
-                        Tab(
-                          icon: const Icon(Icons.history_rounded, size: 18),
-                          text: 'points_history'.tr,
-                        ),
-                      ],
+                        labelColor: AppColors.primary,
+                        unselectedLabelColor: const Color(0xFF6B7280),
+                        labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                        tabs: [
+                          Tab(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.people_alt_outlined, size: 16),
+                                const SizedBox(width: 6),
+                                Text('referral_network'.tr),
+                              ],
+                            ),
+                          ),
+                          Tab(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.history_rounded, size: 16),
+                                const SizedBox(width: 6),
+                                Text('points_history'.tr),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                    height: 56,
                   ),
                 ),
               ];
@@ -722,20 +758,22 @@ class _ReferralMainScreenState extends State<ReferralMainScreen> with SingleTick
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
+  _SliverAppBarDelegate(this._widget, {this.height = 56});
 
-  final TabBar _tabBar;
+  final Widget _widget;
+  final double height;
 
   @override
-  double get minExtent => _tabBar.preferredSize.height;
+  double get minExtent => height;
   @override
-  double get maxExtent => _tabBar.preferredSize.height;
+  double get maxExtent => height;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.white,
-      child: _tabBar,
+      alignment: Alignment.center,
+      child: _widget,
     );
   }
 

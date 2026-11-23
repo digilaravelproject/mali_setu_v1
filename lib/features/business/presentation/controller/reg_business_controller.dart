@@ -73,6 +73,17 @@ class RegBusinessController extends GetxController {
   TextEditingController closingTimeCtrl = TextEditingController();
   TimeOfDay? openingTime;
   TimeOfDay? closingTime;
+  final RxBool isOpen24x7 = false.obs;
+
+  void toggleOpen24x7([bool? value]) {
+    isOpen24x7.value = value ?? !isOpen24x7.value;
+    openingTime = null;
+    closingTime = null;
+    openingTimeCtrl.clear();
+    closingTimeCtrl.clear();
+    errors.remove('openingTime');
+    errors.remove('closingTime');
+  }
 
   /// Dropdown DataContainer
   // var businessTypes = <String>["Product", "Service"].obs;
@@ -501,10 +512,7 @@ class RegBusinessController extends GetxController {
     }
     if (bDescCtrl.text.trim().isEmpty)
       errors['description'] = "Please enter business description";
-    if (openingTimeCtrl.text.trim().isEmpty)
-      errors['openingTime'] = "Please select opening time";
-    if (closingTimeCtrl.text.trim().isEmpty)
-      errors['closingTime'] = "Please select closing time";
+    // Opening and closing time are optional
 
     // Location
     if (addressCtrl.text.trim().isEmpty)
@@ -610,12 +618,17 @@ class RegBusinessController extends GetxController {
         "village": villageCtrl.text,
         "city": cityCtrl.text,
         "pincode": pinCodeCtrl.text,
-        "opening_time": openingTime == null
+        "is_24_7": isOpen24x7.value,
+        "opening_time": isOpen24x7.value
             ? ""
-            : "${openingTime!.hour.toString().padLeft(2, '0')}:${openingTime!.minute.toString().padLeft(2, '0')}",
-        "closing_time": closingTime == null
+            : (openingTime == null
+                ? ""
+                : "${openingTime!.hour.toString().padLeft(2, '0')}:${openingTime!.minute.toString().padLeft(2, '0')}"),
+        "closing_time": isOpen24x7.value
             ? ""
-            : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}",
+            : (closingTime == null
+                ? ""
+                : "${closingTime!.hour.toString().padLeft(2, '0')}:${closingTime!.minute.toString().padLeft(2, '0')}"),
         // Adding nested location details as a fallback for Laravel/Matrimony-style endpoints
         "location_details": {
           "address": addressCtrl.text.trim(),
@@ -968,37 +981,56 @@ class RegBusinessController extends GetxController {
     stateCtrl.text = business.state ?? "";
     countryCtrl.text = business.country ?? "India";
 
-    // Handle Time (Supports HH:mm:ss from API)
-    if (business.opening_time != null && business.opening_time!.isNotEmpty) {
-      try {
-        // Use HH:mm:ss to match your provided JSON "09:00:00"
-        String timeStr = business.opening_time!;
-        DateTime openTime;
-        if (timeStr.split(':').length == 3) {
-          openTime = DateFormat("HH:mm:ss").parse(timeStr);
-        } else {
-          openTime = DateFormat("HH:mm").parse(timeStr);
-        }
-        openingTime = TimeOfDay.fromDateTime(openTime);
-        openingTimeCtrl.text = DateFormat.jm().format(openTime);
-      } catch (e) {
-        debugPrint("Error parsing opening time ($business.opening_time): $e");
-      }
-    }
+    // Handle Time (Supports HH:mm:ss from API & 24/7 check)
+    final opTime = business.opening_time?.trim() ?? '';
+    final clTime = business.closing_time?.trim() ?? '';
+    final is24Hours = (business.is_24_7 == true) ||
+        (opTime.startsWith("00:00") &&
+            (clTime.startsWith("23:59") ||
+                clTime.startsWith("24:00") ||
+                clTime.startsWith("00:00"))) ||
+        opTime.contains("24/7") ||
+        opTime.contains("24*7");
 
-    if (business.closing_time != null && business.closing_time!.isNotEmpty) {
-      try {
-        String timeStr = business.closing_time!;
-        DateTime closeTime;
-        if (timeStr.split(':').length == 3) {
-          closeTime = DateFormat("HH:mm:ss").parse(timeStr);
-        } else {
-          closeTime = DateFormat("HH:mm").parse(timeStr);
+    if (is24Hours) {
+      isOpen24x7.value = true;
+      openingTime = null;
+      closingTime = null;
+      openingTimeCtrl.clear();
+      closingTimeCtrl.clear();
+    } else {
+      isOpen24x7.value = false;
+      if (business.opening_time != null && business.opening_time!.isNotEmpty) {
+        try {
+          // Use HH:mm:ss to match your provided JSON "09:00:00"
+          String timeStr = business.opening_time!;
+          DateTime openTime;
+          if (timeStr.split(':').length == 3) {
+            openTime = DateFormat("HH:mm:ss").parse(timeStr);
+          } else {
+            openTime = DateFormat("HH:mm").parse(timeStr);
+          }
+          openingTime = TimeOfDay.fromDateTime(openTime);
+          openingTimeCtrl.text = DateFormat.jm().format(openTime);
+        } catch (e) {
+          debugPrint("Error parsing opening time ($business.opening_time): $e");
         }
-        closingTime = TimeOfDay.fromDateTime(closeTime);
-        closingTimeCtrl.text = DateFormat.jm().format(closeTime);
-      } catch (e) {
-        debugPrint("Error parsing closing time ($business.closing_time): $e");
+      }
+
+      if (business.closing_time != null && business.closing_time!.isNotEmpty) {
+        try {
+          String timeStr = business.closing_time!;
+          DateTime closeTime;
+          if (timeStr.split(':').length == 3) {
+            closeTime = DateFormat("HH:mm:ss").parse(timeStr);
+          } else {
+            closeTime = DateFormat("HH:mm").parse(timeStr);
+          }
+          closingTime = TimeOfDay.fromDateTime(closeTime);
+          closingTimeCtrl.text = DateFormat.jm().format(closeTime);
+        } catch (e) {
+          debugPrint("Error parsing closing time ($business.closing_time): $e");
+        }
       }
     }
 
@@ -1053,6 +1085,8 @@ class RegBusinessController extends GetxController {
     countryCtrl.dispose();
     talukaCtrl.dispose();
     villageCtrl.dispose();
+    openingTimeCtrl.dispose();
+    closingTimeCtrl.dispose();
     customCategoryCtrl.dispose();
     super.onClose();
   }

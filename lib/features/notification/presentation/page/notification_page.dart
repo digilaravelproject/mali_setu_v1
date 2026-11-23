@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/services/notification_handler_service.dart';
 import '../controller/notification_controller.dart';
 import '../../../../core/widgets/custom_confirm_dialog.dart';
 import '../../data/model/notification_model.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
-import '../../../../core/services/notification_handler_service.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
+import '../../../../core/constent/api_constants.dart';
+import '../../../../widgets/custom_image_view.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -390,6 +392,20 @@ class _NotificationPageState extends State<NotificationPage> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        if (notification.imageUrl != null && notification.imageUrl!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: CustomImageView(
+                              url: notification.imageUrl!.startsWith('http')
+                                  ? notification.imageUrl!
+                                  : "${ApiConstants.imageBaseUrl}${notification.imageUrl!.replaceFirst(RegExp(r'^\/+'), '')}",
+                              height: 140,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

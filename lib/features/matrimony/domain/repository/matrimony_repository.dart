@@ -5,6 +5,7 @@ import 'package:edu_cluezer/core/network/multipart.dart';
 import '../../data/model/matrimony_response.dart';
 import '../../data/model/matrimony_plan_model.dart';
 import '../../data/model/education_model.dart';
+import '../../data/model/blocked_users_response.dart';
 
 import '../../data/model/search_matrimony_response.dart';
 import '../../data/model/connection_requests_response.dart';
@@ -28,4 +29,8 @@ abstract class MatrimonyRepository {
   Future<SubCastResponse> getSubCasts(int castId);
   Future<MatrimonyPlanResponse> getMatrimonyPlans();
   Future<EducationResponse> getEducations();
+  Future<dynamic> reportUser(Map<String, dynamic> data);
+  Future<dynamic> blockUser(Map<String, dynamic> data);
+  Future<dynamic> unblockUser(Map<String, dynamic> data);
+  Future<BlockedUsersResponse> getBlockedUsers();
 }

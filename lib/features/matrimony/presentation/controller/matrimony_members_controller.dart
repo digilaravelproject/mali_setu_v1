@@ -69,4 +69,30 @@ class MatrimonyMembersController extends GetxController {
       }).toList();
     }
   }
+
+  void updateBlockStatusByUserId(int userId, bool isBlocked) {
+    for (var m in members) {
+      if (m.user1Id == userId ||
+          m.user2Id == userId ||
+          m.user1?.userId == userId ||
+          m.user2?.userId == userId ||
+          m.user1?.id == userId ||
+          m.user2?.id == userId) {
+        m.isBlock = isBlocked;
+      }
+    }
+    members.refresh();
+    filterMembers(searchQuery.value);
+  }
+
+  void removeMemberByUserId(int userId) {
+    members.removeWhere((m) =>
+        m.user1Id == userId ||
+        m.user2Id == userId ||
+        m.user1?.userId == userId ||
+        m.user2?.userId == userId ||
+        m.user1?.id == userId ||
+        m.user2?.id == userId);
+    filterMembers(searchQuery.value);
+  }
 }

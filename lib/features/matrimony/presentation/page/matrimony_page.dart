@@ -488,14 +488,22 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                               },
                             );
                           }
-                              : () => Get.toNamed(
-                            AppRoutes.matrimonyProfileScreen,
-                            arguments: {
-                              'id': currentProfile.userId,
-                              'connection_status': currentProfile.connectionStatus,
-                              'conversation_id': currentProfile.conversationId,
-                            },
-                          ),
+                              : () async {
+                            final result = await Get.toNamed(
+                              AppRoutes.matrimonyProfileScreen,
+                              arguments: {
+                                'id': currentProfile.userId,
+                                'connection_status': currentProfile.connectionStatus,
+                                'conversation_id': currentProfile.conversationId,
+                              },
+                            );
+                            if (result is Map && (result['reported'] == true || result['blocked'] == true) && result['userId'] != null) {
+                              try {
+                                controller.swiperController.swipe(CardSwiperDirection.left);
+                              } catch (_) {}
+                              controller.removeProfileById(result['userId'] as int);
+                            }
+                          },
                           icon: (isAccepted && currentProfile.conversationId != null)
                               ? Icons.chat_bubble_rounded
                               : Icons.info_rounded,
@@ -564,12 +572,19 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
   Widget _buildUserCard(BuildContext context, UserProfile user) {
     return GestureDetector(
-      onTap: (){
+      onTap: () async {
         try {
-          Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {
-            'id': user.userId ?? controller.profiles[controller.currentIndex.value].userId,
+          final targetId = user.userId ?? controller.profiles[controller.currentIndex.value].userId;
+          final result = await Get.toNamed(AppRoutes.matrimonyProfileScreen, arguments: {
+            'id': targetId,
             'connection_status': user.connectionStatus,
           });
+          if (result is Map && (result['reported'] == true || result['blocked'] == true) && result['userId'] != null) {
+            try {
+              controller.swiperController.swipe(CardSwiperDirection.left);
+            } catch (_) {}
+            controller.removeProfileById(result['userId'] as int);
+          }
         } catch (e) {
           print("Error navigating to profile: $e");
           CustomSnackBar.showError(message: 'Error opening profile');
@@ -633,12 +648,39 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
                             color: Theme.of(context).primaryColor,
                           ),
                         const Spacer(),
-                        if (user.distance > 0)
+                        if (user.distance > 0) ...[
                           _buildGlassChip(
                             context,
                             icon: Icons.near_me_rounded,
                             text: "${user.distance.toStringAsFixed(1)} KM",
                           ),
+                          const SizedBox(width: 8),
+                        ],
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            _showReportBottomSheet(context, user);
+                          },
+                          child: _buildGlassChip(
+                            context,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.flag_outlined, color: Colors.white, size: 12),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'report'.tr,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            color: Colors.black.withOpacity(0.4),
+                          ),
+                        ),
                       ],
                     ),
 
@@ -983,7 +1025,198 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
     );
   }
 
+  void _showReportBottomSheet(BuildContext context, UserProfile user) {
+    final reasons = [
+      {'key': 'fake_profile', 'title': 'report_reason_fake'.tr},
+      {'key': 'inappropriate_content', 'title': 'report_reason_inappropriate'.tr},
+      {'key': 'harassment', 'title': 'report_reason_harassment'.tr},
+      {'key': 'spam', 'title': 'report_reason_spam'.tr},
+      {'key': 'other', 'title': 'report_reason_other'.tr},
+    ];
+    String selectedReasonKey = 'fake_profile';
+    final detailsController = TextEditingController();
+    bool isSubmitting = false;
 
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          return Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.flag_rounded, color: Colors.red, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${'report_profile'.tr} (${user.name})',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: isSubmitting ? null : () => Navigator.of(sheetContext).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'report_reason_prompt'.tr,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...reasons.map((item) {
+                    final isSelected = selectedReasonKey == item['key'];
+                    return InkWell(
+                      onTap: isSubmitting ? null : () {
+                        setSheetState(() {
+                          selectedReasonKey = item['key']!;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                              color: isSelected ? Colors.red : Colors.grey.shade400,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                item['title']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  color: isSelected ? Colors.black87 : Colors.grey.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: detailsController,
+                    enabled: !isSubmitting,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: 'report_details_optional'.tr,
+                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.red),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              final targetId = user.userId ?? user.id;
+                              if (targetId == null) {
+                                CustomSnackBar.showError(message: "User ID not found");
+                                return;
+                              }
+                              setSheetState(() => isSubmitting = true);
+                              final success = await controller.reportUser(
+                                reportedUserId: targetId,
+                                reasonKey: selectedReasonKey,
+                                details: detailsController.text.trim(),
+                              );
+                              setSheetState(() => isSubmitting = false);
+                              if (success) {
+                                Navigator.of(sheetContext).pop();
+                                try {
+                                  controller.swiperController.swipe(CardSwiperDirection.left);
+                                } catch (_) {}
+                                controller.removeProfileById(targetId);
+                                if (user.id != null) controller.removeProfileById(user.id!);
+                                if (user.userId != null) controller.removeProfileById(user.userId!);
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: isSubmitting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'submit_report'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      isScrollControlled: true,
+    );
+  }
 
   Widget _buildRefreshableRestrictedContainer({
     required BuildContext context,
@@ -1277,7 +1510,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
       if (data is MatrimonyProfile) {
         return UserProfile(
           id: data.id,
-          userId: data.userId,
+          userId: data.userId ?? data.user?.id ?? data.id,
           name: data.personalDetails?.name ?? 'no_name'.tr,
           age: data.age ?? 0,
           location: "${data.locationDetails?.city ?? 'unknown_city'.tr}, ${data.locationDetails?.state ?? ''}",
@@ -1305,6 +1538,7 @@ class MatrimonyPage extends GetWidget<MatrimonyController> {
 
       return UserProfile(
         id: data['id'],
+        userId: data['user_id'] ?? data['userId'] ?? data['user']?['id'] ?? data['id'],
         //  name: personal[''] ?? data['name'] ?? 'no_name'.tr,
         name: [
           personal['title'],

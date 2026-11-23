@@ -26,9 +26,12 @@ class InitController extends GetxController
     await Future.delayed(const Duration(seconds: 2));
 
     final bool isLoggedIn = SharedPrefs.getBool(AppConstants.isLoggedInPref) ?? false;
+    final bool hasSelectedLanguage = SharedPrefs.getBool(AppConstants.hasSelectedLanguagePref) ?? false;
     
     if (isLoggedIn) {
       Get.offAllNamed(AppRoutes.dashboard);
+    } else if (hasSelectedLanguage) {
+      Get.offAllNamed(AppRoutes.login);
     } else {
       Get.offAllNamed(AppRoutes.languageSelection);
     }

@@ -71,4 +71,9 @@ class MatrimonyRequestsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  void removeRequestByUserId(int userId) {
+    sentRequests.removeWhere((r) => r.receiverId == userId || r.receiver?.id == userId);
+    receivedRequests.removeWhere((r) => r.senderId == userId || r.sender?.id == userId);
+  }
 }

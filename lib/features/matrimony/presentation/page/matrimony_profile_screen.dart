@@ -3,11 +3,15 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/features/matrimony/data/model/search_matrimony_response.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_details_controller.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_controller.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_members_controller.dart';
+import 'package:edu_cluezer/features/matrimony/presentation/controller/matrimony_requests_controller.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
+import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 
 class MatrimonyProfileScreen extends StatefulWidget {
   final int? profileId;
@@ -97,7 +101,7 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
       actions: [
         if (images.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(right: 14),
+            padding: const EdgeInsets.only(right: 8),
             child: Center(
               child: GestureDetector(
                 onTap: () {
@@ -148,6 +152,36 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
               ),
             ),
           ),
+        Padding(
+          padding: const EdgeInsets.only(right: 6),
+          child: Center(
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.45),
+              radius: 17,
+              child: IconButton(
+                icon: const Icon(Icons.flag_outlined, color: Colors.white, size: 18),
+                tooltip: 'report_profile'.tr,
+                padding: EdgeInsets.zero,
+                onPressed: () => _showReportBottomSheet(context, profile),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 12),
+          child: Center(
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.45),
+              radius: 17,
+              child: IconButton(
+                icon: const Icon(Icons.block_outlined, color: Colors.white, size: 18),
+                tooltip: 'block_user'.tr,
+                padding: EdgeInsets.zero,
+                onPressed: () => _showBlockDialog(context, profile),
+              ),
+            ),
+          ),
+        ),
       ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
@@ -592,5 +626,324 @@ class _MatrimonyProfileScreenState extends State<MatrimonyProfileScreen> {
         ),
       );
     });
+  }
+
+  void _showReportBottomSheet(BuildContext context, MatrimonyProfile profile) {
+    final reasons = [
+      {'key': 'fake_profile', 'title': 'report_reason_fake'.tr},
+      {'key': 'inappropriate_content', 'title': 'report_reason_inappropriate'.tr},
+      {'key': 'harassment', 'title': 'report_reason_harassment'.tr},
+      {'key': 'spam', 'title': 'report_reason_spam'.tr},
+      {'key': 'other', 'title': 'report_reason_other'.tr},
+    ];
+    String selectedReasonKey = 'fake_profile';
+    final detailsController = TextEditingController();
+    bool isSubmitting = false;
+
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (sheetContext, setSheetState) {
+          return Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.flag_rounded, color: Colors.red, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          profile.personalDetails?.name != null
+                              ? '${'report_profile'.tr} (${profile.personalDetails!.name})'
+                              : 'report_profile'.tr,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: isSubmitting ? null : () => Navigator.of(sheetContext).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'report_reason_prompt'.tr,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ...reasons.map((item) {
+                    final isSelected = selectedReasonKey == item['key'];
+                    return InkWell(
+                      onTap: isSubmitting ? null : () {
+                        setSheetState(() {
+                          selectedReasonKey = item['key']!;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                              color: isSelected ? Colors.red : Colors.grey.shade400,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                item['title']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  color: isSelected ? Colors.black87 : Colors.grey.shade700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: detailsController,
+                    enabled: !isSubmitting,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: 'report_details_optional'.tr,
+                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.red),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: isSubmitting
+                          ? null
+                          : () async {
+                              final targetId = profile.userId ?? profile.user?.id ?? profile.id;
+                              if (targetId == null) {
+                                CustomSnackBar.showError(message: "User ID not found");
+                                return;
+                              }
+                              setSheetState(() => isSubmitting = true);
+                              final success = await controller.reportUser(
+                                reportedUserId: targetId,
+                                reasonKey: selectedReasonKey,
+                                details: detailsController.text.trim(),
+                              );
+                              setSheetState(() => isSubmitting = false);
+                              if (success) {
+                                Navigator.of(sheetContext).pop();
+                                if (Get.isRegistered<MatrimonyController>()) {
+                                  Get.find<MatrimonyController>().removeProfileById(targetId);
+                                }
+                                if (Get.isRegistered<MatrimonyMembersController>()) {
+                                  Get.find<MatrimonyMembersController>().removeMemberByUserId(targetId);
+                                }
+                                if (Get.isRegistered<MatrimonyRequestsController>()) {
+                                  Get.find<MatrimonyRequestsController>().removeRequestByUserId(targetId);
+                                }
+                                Navigator.of(context).pop({'reported': true, 'userId': targetId});
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: isSubmitting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'submit_report'.tr,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showBlockDialog(BuildContext context, MatrimonyProfile profile) {
+    final titleText = profile.personalDetails?.name?.trim() ?? "User";
+    final targetId = profile.userId ?? profile.user?.id ?? profile.id;
+    if (targetId == null) {
+      CustomSnackBar.showError(message: "User ID not found");
+      return;
+    }
+    bool isSubmitting = false;
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.block_rounded, color: Colors.red, size: 36),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "${'block_user'.tr} - $titleText",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'block_confirm_message'.tr,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            side: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          child: Text(
+                            'cancel'.tr,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isSubmitting
+                              ? null
+                              : () async {
+                                  setDialogState(() => isSubmitting = true);
+                                  final success = await controller.blockUser(targetId);
+                                  setDialogState(() => isSubmitting = false);
+                                  if (success) {
+                                    Navigator.of(dialogContext).pop();
+                                    Navigator.of(context).pop({'blocked': true, 'userId': targetId});
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'block_user'.tr,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

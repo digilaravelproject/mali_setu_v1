@@ -47,7 +47,7 @@ class BusinessScreen extends GetView<BusinessController> {
           }
 
           return RefreshIndicator(
-            onRefresh: () => controller.fetchAllBusinesses(isRefresh: true),
+            onRefresh: () => controller.fetchData(),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
               slivers: [
