@@ -1026,8 +1026,14 @@ const Map<String, String> mrIN = {
 "rejection_reason": "नाकारण्याचे कारण",
 "terms_and_community_prefix": "मी पुष्टी करतो/करते की मी ",
 "terms_and_community_link": "अटी व शर्ती",
-"terms_and_community_suffix": " वाचल्या आहेत आणि मी माळी समाजातील आहे.",
+"terms_and_community_suffix": " मान्य करतो/करते आणि पुष्टी करतो/करते की मी माळी समाजातील आहे.",
 "terms_and_community_acceptance_required": "कृपया अटी व शर्ती वाचल्याची आणि माळी समाजातील असल्याची पुष्टी करा.",
+"terms_and_privacy_prefix": "मी ",
+"terms_and_conditions": "अटी व शर्ती",
+"terms_and_privacy_middle": " आणि ",
+"terms_and_privacy_login_suffix": " मान्य करतो/करते.",
+"terms_and_privacy_required": "पुढे जाण्यासाठी कृपया अटी व शर्ती आणि गोपनीयता धोरण मान्य करा.",
+"reg_terms_and_privacy_required": "कृपया अटी व शर्ती, गोपनीयता धोरण आणि माळी समाजातील असल्याची पुष्टी मान्य करा.",
 "full_view": "पूर्ण फोटो",
 
   // Referral & Commission System

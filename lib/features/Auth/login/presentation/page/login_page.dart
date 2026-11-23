@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/constent/api_constants.dart';
 import '../../../../../core/helper/form_validator.dart';
 import '../../../../../core/routes/app_routes.dart';
 import '../../../../../core/utils/app_assets.dart';
@@ -10,6 +12,7 @@ import '../../../../../widgets/custom_buttons.dart';
 import '../../../../../widgets/custom_image_view.dart';
 import '../../../../../widgets/custom_scaffold.dart';
 import '../../../../../widgets/language_selection_dialog.dart';
+import '../../../../../widgets/webview_page.dart';
 import '../controller/login_controller.dart';
 
 class LoginPage extends GetWidget<LoginController> {
@@ -318,7 +321,117 @@ class LoginPage extends GetWidget<LoginController> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 14),
+
+                      // Terms & Conditions and Privacy Policy Checkbox
+                      Obx(() {
+                        final isChecked = controller.isAcceptedTerms.value;
+                        final hasError = controller.termsError.value;
+                        final primaryColor = context.theme.primaryColor;
+
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: hasError
+                                ? Colors.red.withValues(alpha: 0.05)
+                                : isChecked
+                                    ? primaryColor.withValues(alpha: 0.04)
+                                    : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: hasError
+                                  ? Colors.red.shade400
+                                  : isChecked
+                                      ? primaryColor.withValues(alpha: 0.3)
+                                      : Colors.transparent,
+                              width: hasError ? 1.2 : 1.0,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: Checkbox(
+                                  value: isChecked,
+                                  activeColor: primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  side: BorderSide(
+                                    color: hasError ? Colors.red : Colors.grey.shade400,
+                                    width: 1.5,
+                                  ),
+                                  onChanged: (val) {
+                                    controller.isAcceptedTerms.value = val ?? false;
+                                    if (controller.isAcceptedTerms.value) {
+                                      controller.termsError.value = false;
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    controller.isAcceptedTerms.toggle();
+                                    if (controller.isAcceptedTerms.value) {
+                                      controller.termsError.value = false;
+                                    }
+                                  },
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: context.textTheme.bodyMedium?.copyWith(
+                                        fontSize: 12.5,
+                                        height: 1.4,
+                                        color: context.theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                                      ),
+                                      children: [
+                                        TextSpan(text: "terms_and_privacy_prefix".tr),
+                                        TextSpan(
+                                          text: "terms_and_conditions".tr,
+                                          style: TextStyle(
+                                            color: primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Get.to(() => WebViewPage(
+                                                title: 'terms_and_conditions'.tr,
+                                                url: ApiConstants.termsConditionsUrl,
+                                              ));
+                                            },
+                                        ),
+                                        TextSpan(text: "terms_and_privacy_middle".tr),
+                                        TextSpan(
+                                          text: "privacy_policy".tr,
+                                          style: TextStyle(
+                                            color: primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              Get.to(() => WebViewPage(
+                                                title: 'privacy_policy'.tr,
+                                                url: ApiConstants.privacyPolicyUrl,
+                                              ));
+                                            },
+                                        ),
+                                        TextSpan(text: "terms_and_privacy_login_suffix".tr),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+
+                      const SizedBox(height: 18),
                       Obx(
                         () => CustomButton(
                           title: 'login_button'.tr,

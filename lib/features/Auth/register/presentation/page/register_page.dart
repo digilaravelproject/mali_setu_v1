@@ -551,7 +551,7 @@ class RegisterPage extends GetWidget<RegisterController> {
                                   color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                                 ),
                                 children: [
-                                  TextSpan(text: "terms_and_community_prefix".tr),
+                                  TextSpan(text: "terms_and_privacy_prefix".tr),
                                   TextSpan(
                                     text: "terms_and_community_link".tr,
                                     style: TextStyle(
@@ -564,6 +564,22 @@ class RegisterPage extends GetWidget<RegisterController> {
                                         Get.to(() => WebViewPage(
                                           title: 'terms & conditions'.tr,
                                           url: ApiConstants.termsConditionsUrl,
+                                        ));
+                                      },
+                                  ),
+                                  TextSpan(text: "terms_and_privacy_middle".tr),
+                                  TextSpan(
+                                    text: "privacy_policy".tr,
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Get.to(() => WebViewPage(
+                                          title: 'privacy_policy'.tr,
+                                          url: ApiConstants.privacyPolicyUrl,
                                         ));
                                       },
                                   ),

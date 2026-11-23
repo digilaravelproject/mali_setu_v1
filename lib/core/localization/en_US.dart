@@ -1024,8 +1024,14 @@ const Map<String, String> enUS = {
   "rejection_reason": "Rejection Reason",
   "terms_and_community_prefix": "I confirm I have read the ",
   "terms_and_community_link": "Terms & Conditions",
-  "terms_and_community_suffix": " and I am from the Mali community.",
+  "terms_and_community_suffix": ", and confirm I am from the Mali community.",
   "terms_and_community_acceptance_required": "Please confirm that you have read the Terms & Conditions and are from the Mali community.",
+  "terms_and_privacy_prefix": "I agree to the ",
+  "terms_and_conditions": "Terms & Conditions",
+  "terms_and_privacy_middle": " and ",
+  "terms_and_privacy_login_suffix": ".",
+  "terms_and_privacy_required": "Please accept the Terms & Conditions and Privacy Policy to continue.",
+  "reg_terms_and_privacy_required": "Please accept the Terms & Conditions, Privacy Policy and confirm Mali community to proceed.",
   "full_view": "Full View",
 
   // Referral & Commission System

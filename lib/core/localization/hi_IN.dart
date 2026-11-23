@@ -1006,8 +1006,14 @@ const Map<String, String> hiIN = {
   "rejection_reason": "अस्वीकृति का कारण",
   "terms_and_community_prefix": "मैं पुष्टि करता/करती हूँ कि मैंने ",
   "terms_and_community_link": "नियम और शर्तें",
-  "terms_and_community_suffix": " पढ़ ली हैं और मैं माली समाज से हूँ।",
+  "terms_and_community_suffix": " से सहमत हूँ और पुष्टि करता/करती हूँ कि मैं माली समाज से हूँ।",
   "terms_and_community_acceptance_required": "कृपया नियम और शर्तें पढ़ने तथा माली समाज से होने की पुष्टि करें।",
+  "terms_and_privacy_prefix": "मैं ",
+  "terms_and_conditions": "नियम और शर्तें",
+  "terms_and_privacy_middle": " तथा ",
+  "terms_and_privacy_login_suffix": " से सहमत हूँ।",
+  "terms_and_privacy_required": "जारी रखने के लिए कृपया नियम और शर्तें तथा गोपनीयता नीति स्वीकार करें।",
+  "reg_terms_and_privacy_required": "कृपया नियम और शर्तें, गोपनीयता नीति और माली समाज से होने की पुष्टि स्वीकार करें।",
   "full_view": "पूरा फोटो",
 
   // Referral & Commission System

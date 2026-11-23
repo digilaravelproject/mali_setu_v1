@@ -633,12 +633,12 @@ class RegisterController extends GetxController {
       return;
     }
 
-    // 16. Terms & Conditions and Mali Community Acceptance
+    // 16. Terms & Conditions, Privacy Policy and Mali Community Acceptance
     if (!isAcceptedTerms.value) {
       termsError.value = true;
       scrollToKey(termsKey);
       CustomSnackBar.showError(
-        message: "terms_and_community_acceptance_required".tr,
+        message: "reg_terms_and_privacy_required".tr,
       );
       return;
     }
