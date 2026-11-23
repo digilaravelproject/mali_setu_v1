@@ -125,8 +125,9 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
 
     // Correct image logic
     String? imageUrl;
-    if (userProfile?.personalDetails?.photos != null && userProfile!.personalDetails!.photos!.isNotEmpty) {
-      imageUrl = ApiConstants.imageBaseUrl + userProfile.personalDetails!.photos![0];
+    final photos = userProfile?.personalDetails?.photos;
+    if (photos != null && photos.isNotEmpty) {
+      imageUrl = ApiConstants.imageBaseUrl + photos[0];
     }
 
     // Fallback widget
@@ -140,12 +141,15 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
       );
     }
 
+    final isBlocked = conversation.isBlock == true;
+
     return GestureDetector(
       onTap: () {
         Get.toNamed(AppRoutes.matrimonyChat, arguments: {
           'conversation_id': conversation.id,
           'other_user_id': userProfile?.userId ?? userProfile?.user?.id,
           'user_name': name,
+          'is_blocked': isBlocked,
         });
       },
       child: Container(
@@ -187,7 +191,44 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InkWell(child: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isBlocked) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.red.shade200, width: 0.8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.block, size: 11, color: Colors.red.shade700),
+                              const SizedBox(width: 3),
+                              Text(
+                                'blocked'.tr,
+                                style: TextStyle(
+                                  color: Colors.red.shade700,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                   const SizedBox(height: 4),
                   Text(profession, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                   const SizedBox(height: 2),
@@ -209,12 +250,16 @@ class MatrimonyMembersScreen extends GetWidget<MatrimonyMembersController> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.chat_bubble_outline, color: Colors.purple),
+              icon: Icon(
+                isBlocked ? Icons.block : Icons.chat_bubble_outline,
+                color: isBlocked ? Colors.red.shade400 : Colors.purple,
+              ),
               onPressed: () {
                 Get.toNamed(AppRoutes.matrimonyChat, arguments: {
                   'conversation_id': conversation.id,
                   'other_user_id': userProfile?.userId ?? userProfile?.user?.id,
                   'user_name': name,
+                  'is_blocked': isBlocked,
                 });
               },
             ),

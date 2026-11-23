@@ -10,6 +10,7 @@ import '../../data/model/connection_requests_response.dart';
 import '../model/matrimony_cast_model.dart';
 import '../model/matrimony_chat_response.dart';
 import '../model/education_model.dart';
+import '../model/blocked_users_response.dart';
 
 class MatrimonyRepositoryImpl implements MatrimonyRepository {
   final MatrimonyDataSource dataSource;
@@ -104,5 +105,25 @@ class MatrimonyRepositoryImpl implements MatrimonyRepository {
   @override
   Future<EducationResponse> getEducations() async {
     return await dataSource.getEducations();
+  }
+
+  @override
+  Future<dynamic> reportUser(Map<String, dynamic> data) async {
+    return await dataSource.reportUser(data);
+  }
+
+  @override
+  Future<dynamic> blockUser(Map<String, dynamic> data) async {
+    return await dataSource.blockUser(data);
+  }
+
+  @override
+  Future<dynamic> unblockUser(Map<String, dynamic> data) async {
+    return await dataSource.unblockUser(data);
+  }
+
+  @override
+  Future<BlockedUsersResponse> getBlockedUsers() async {
+    return await dataSource.getBlockedUsers();
   }
 }

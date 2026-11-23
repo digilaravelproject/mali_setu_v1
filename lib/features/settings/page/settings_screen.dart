@@ -86,7 +86,7 @@ class SettingsScreen extends GetWidget<SettingsController> {
                     icon: Icons.person_outline_rounded,
                     onTap: () => Get.toNamed(AppRoutes.profileScreen),
                   ),
-                  if (authService.hasMatrimony())
+                  if (authService.hasMatrimony()) ...[
                     _SettingsItem(
                       title: 'edit_matrimony_profile'.tr,
                       icon: Icons.favorite_border_rounded,
@@ -97,6 +97,12 @@ class SettingsScreen extends GetWidget<SettingsController> {
                         }
                       },
                     ),
+                    _SettingsItem(
+                      title: 'blocked_users'.tr,
+                      icon: Icons.block_rounded,
+                      onTap: () => Get.toNamed(AppRoutes.matrimonyBlockedUsers),
+                    ),
+                  ],
                   _SettingsItem(
                     title: 'refer_and_earn'.tr,
                     icon: Icons.card_giftcard_rounded,

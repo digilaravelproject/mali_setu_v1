@@ -9,6 +9,7 @@ import '../model/connection_requests_response.dart';
 import '../model/matrimony_cast_model.dart';
 import '../model/matrimony_plan_model.dart';
 import '../model/education_model.dart';
+import '../model/blocked_users_response.dart';
 
 abstract class MatrimonyDataSource {
   Future<MatrimonyResponse> createProfile(dynamic data);
@@ -29,6 +30,10 @@ abstract class MatrimonyDataSource {
   Future<SubCastResponse> getSubCasts(int castId);
   Future<MatrimonyPlanResponse> getMatrimonyPlans();
   Future<EducationResponse> getEducations();
+  Future<dynamic> reportUser(Map<String, dynamic> data);
+  Future<dynamic> blockUser(Map<String, dynamic> data);
+  Future<dynamic> unblockUser(Map<String, dynamic> data);
+  Future<BlockedUsersResponse> getBlockedUsers();
 }
 
 class MatrimonyDataSourceImpl implements MatrimonyDataSource {
@@ -157,5 +162,31 @@ class MatrimonyDataSourceImpl implements MatrimonyDataSource {
   Future<EducationResponse> getEducations() async {
     final response = await apiClient.get(ApiConstants.education);
     return EducationResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<dynamic> reportUser(Map<String, dynamic> data) async {
+    final response = await apiClient.post(ApiConstants.matrimonyReportUser, data: data);
+    return response.data;
+  }
+
+  @override
+  Future<dynamic> blockUser(Map<String, dynamic> data) async {
+    final response = await apiClient.post(ApiConstants.matrimonyBlockUser, data: data);
+    return response.data;
+  }
+
+  @override
+  Future<dynamic> unblockUser(Map<String, dynamic> data) async {
+    final payload = Map<String, dynamic>.from(data);
+    payload['is_block'] = false;
+    final response = await apiClient.post(ApiConstants.matrimonyBlockUser, data: payload);
+    return response.data;
+  }
+
+  @override
+  Future<BlockedUsersResponse> getBlockedUsers() async {
+    final response = await apiClient.get(ApiConstants.matrimonyBlockedUsers);
+    return BlockedUsersResponse.fromJson(response.data);
   }
 }

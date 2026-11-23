@@ -34,9 +34,11 @@ import '../../features/matrimony/binding/matrimony_details_binding.dart';
 import '../../features/matrimony/binding/matrimony_requests_binding.dart';
 import '../../features/matrimony/binding/matrimony_members_binding.dart';
 import '../../features/matrimony/binding/matrimony_chat_binding.dart';
+import '../../features/matrimony/binding/blocked_users_binding.dart';
 import '../../features/matrimony/presentation/page/matrimony_requests_screen.dart';
 import '../../features/matrimony/presentation/page/matrimony_members_screen.dart';
 import '../../features/matrimony/presentation/page/matrimony_chat_screen.dart';
+import '../../features/matrimony/presentation/page/blocked_users_screen.dart';
 import '../../features/settings/page/contact_support.dart';
 
 import '../../features/Auth/login/binding/login_binding.dart';
@@ -120,6 +122,7 @@ class AppRoutes {
   static const String matrimonyRequests = '/matrimonyRequests';
   static const String matrimonyMembers = '/matrimonyMembers';
   static const String matrimonyChat = '/matrimonyChat';
+  static const String matrimonyBlockedUsers = '/matrimonyBlockedUsers';
   static const String categoryDetails = "/categoryDetails";
   static const String jobAppliers = "/jobAppliers";
   static const String volunteerOpportunityDetails = "/volunteerOpportunityDetails";
@@ -407,6 +410,13 @@ class AppPages {
       binding: MatrimonyChatBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.matrimonyBlockedUsers,
+      page: () => const BlockedUsersScreen(),
+      binding: BlockedUsersBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 400),
     ),
     GetPage(
       name: AppRoutes.categoryDetails,
