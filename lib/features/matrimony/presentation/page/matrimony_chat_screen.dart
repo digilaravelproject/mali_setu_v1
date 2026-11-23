@@ -44,7 +44,12 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
               }),
             ),
           ),
-          _buildMessageInput(),
+          Obx(() {
+            if (controller.isBlocked.value) {
+              return _buildBlockedBottomBar();
+            }
+            return _buildMessageInput();
+          }),
         ],
       ),
     );
@@ -73,12 +78,364 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
         );
       }),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh, color: Colors.black87),
-          tooltip: 'Refresh',
-          onPressed: () => controller.refreshChat(),
+        // IconButton(
+        //   icon: const Icon(Icons.refresh, color: Colors.black87),
+        //   tooltip: 'Refresh',
+        //   onPressed: () => controller.refreshChat(),
+        // ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, color: Colors.black87),
+          tooltip: 'Options',
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          onSelected: (value) {
+            if (value == 'block') {
+              _showBlockDialog();
+            } else if (value == 'unblock') {
+              _showUnblockDialog();
+            }
+          },
+          itemBuilder: (context) => [
+            if (controller.isBlocked.value)
+              PopupMenuItem(
+                value: 'unblock',
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_open_rounded, color: Color(0xFF00A884), size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      'unblock_user'.tr,
+                      style: const TextStyle(
+                        color: Color(0xFF00A884),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              PopupMenuItem(
+                value: 'block',
+                child: Row(
+                  children: [
+                    const Icon(Icons.block, color: Colors.red, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      'block_user'.tr,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
         const SizedBox(width: 4),
+      ],
+    );
+  }
+
+  void _showBlockDialog() {
+    final titleText = controller.rxUserName.value.trim().isNotEmpty
+        ? controller.rxUserName.value.trim()
+        : (controller.userName ?? "User");
+    bool isSubmitting = false;
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.block_rounded, color: Colors.red, size: 36),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    titleText.isNotEmpty ? "${'block_user'.tr} - $titleText" : 'block_confirm_title'.tr,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'block_confirm_message'.tr,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            side: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          child: Text(
+                            'cancel'.tr,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isSubmitting
+                              ? null
+                              : () async {
+                                  setDialogState(() => isSubmitting = true);
+                                  final success = await controller.blockUser();
+                                  setDialogState(() => isSubmitting = false);
+                                  if (success) {
+                                    Navigator.of(dialogContext).pop();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'block_user'.tr,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showUnblockDialog() {
+    final titleText = controller.rxUserName.value.trim().isNotEmpty
+        ? controller.rxUserName.value.trim()
+        : (controller.userName ?? "User");
+    bool isSubmitting = false;
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (dialogContext, setDialogState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF00A884).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.lock_open_rounded, color: Color(0xFF00A884), size: 36),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    titleText.isNotEmpty ? "${'unblock_user'.tr} - $titleText" : 'unblock_confirm_title'.tr,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'unblock_confirm_message'.tr,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            side: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          child: Text(
+                            'cancel'.tr,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isSubmitting
+                              ? null
+                              : () async {
+                                  setDialogState(() => isSubmitting = true);
+                                  final success = await controller.unblockUser();
+                                  setDialogState(() => isSubmitting = false);
+                                  if (success) {
+                                    Navigator.of(dialogContext).pop();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00A884),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: isSubmitting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  'unblock'.tr,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBlockedBottomBar() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // System message pill: "You blocked this user. Tap to unblock."
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: () => _showUnblockDialog(),
+            borderRadius: BorderRadius.circular(10),
+            child: Text(
+              'you_blocked_user_tap_to_unblock'.tr,
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        // WhatsApp style bottom bar: Unblock
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 6,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 52,
+              child: InkWell(
+                onTap: () => _showUnblockDialog(),
+                child: Center(
+                  child: Text(
+                    'unblock'.tr,
+                    style: const TextStyle(
+                      color: Color(0xFF00A884),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

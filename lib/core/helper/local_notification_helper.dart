@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:open_filex/open_filex.dart';
+import '../services/notification_handler_service.dart';
 
 class LocalNotificationHelper {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
@@ -18,15 +20,38 @@ class LocalNotificationHelper {
         iOS: initializationSettingsDarwin,
       );
 
+      // Create download channel on Android
+      final androidPlugin = _notificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'download_channel',
+            'Downloads',
+            description: 'Notifications for file downloads',
+            importance: Importance.low,
+          ),
+        );
+      }
+
       await _notificationsPlugin.initialize(
         initializationSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) async {
           final String? payload = response.payload;
-          if (payload != null) {
-            try {
-              await OpenFilex.open(payload);
-            } catch (e) {
-              print("Error opening file: $e");
+          if (payload != null && payload.isNotEmpty) {
+            if (payload.trim().startsWith('{')) {
+              try {
+                final Map<String, dynamic> data = json.decode(payload);
+                NotificationHandlerService.navigateFromPayload(data);
+              } catch (e) {
+                print("❌ [LocalNotificationHelper] Error navigating from payload: $e");
+              }
+            } else {
+              try {
+                await OpenFilex.open(payload);
+              } catch (e) {
+                print("Error opening file: $e");
+              }
             }
           }
         },

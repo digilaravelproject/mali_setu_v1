@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../features/webinars/data/models/webinar_model.dart';
 import 'deep_link_service.dart';
@@ -26,6 +27,17 @@ import '../../features/notification/data/model/notification_model.dart' hide Not
 import '../../features/notification/presentation/controller/notification_controller.dart';
 import '../../features/blogs/presentation/screens/blog_detail_screen.dart';
 import '../../features/blogs/presentation/screens/blogs_screen.dart';
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  final String? payloadStr = response.payload;
+  if (payloadStr != null && payloadStr.trim().startsWith('{')) {
+    try {
+      final Map<String, dynamic> data = json.decode(payloadStr);
+      NotificationHandlerService.navigateFromPayload(data);
+    } catch (_) {}
+  }
+}
 
 /// Centralized Notification Handler & Deep Navigation Service for Mali Setu
 /// Handles:
@@ -87,31 +99,41 @@ class NotificationHandlerService extends GetxService {
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         final String? payloadStr = response.payload;
+        debugPrint("📲 [NotificationHandler] Foreground notification TAPPED. Payload: $payloadStr");
         if (payloadStr != null && payloadStr.isNotEmpty) {
-          try {
-            final Map<String, dynamic> data = json.decode(payloadStr);
-            navigateFromPayload(data);
-          } catch (e) {
-            debugPrint("❌ [NotificationHandler] Failed to parse local notification payload: $e");
+          if (payloadStr.trim().startsWith('{')) {
+            try {
+              final Map<String, dynamic> data = json.decode(payloadStr);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                navigateFromPayload(data);
+              });
+            } catch (e) {
+              debugPrint("❌ [NotificationHandler] Failed to parse local notification payload: $e");
+            }
+          } else {
+            try {
+              OpenFilex.open(payloadStr);
+            } catch (e) {
+              debugPrint("❌ [NotificationHandler] Failed to open file: $e");
+            }
           }
         }
       },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
-    // Check if app was launched by tapping a local notification (e.g. from killed state)
+    // Check if a local notification launched the app from killed state
     try {
-      final NotificationAppLaunchDetails? launchDetails =
-          await _localNotifications.getNotificationAppLaunchDetails();
+      final launchDetails = await _localNotifications.getNotificationAppLaunchDetails();
       if (launchDetails != null && launchDetails.didNotificationLaunchApp) {
-        final String? payloadStr = launchDetails.notificationResponse?.payload;
-        if (payloadStr != null && payloadStr.isNotEmpty) {
-          debugPrint("🚀 [NotificationHandler] App launched from KILLED state via local notification");
+        final payloadStr = launchDetails.notificationResponse?.payload;
+        if (payloadStr != null && payloadStr.trim().startsWith('{')) {
           final Map<String, dynamic> data = json.decode(payloadStr);
           _handleIncomingPayload(data);
         }
       }
     } catch (e) {
-      debugPrint("⚠️ [NotificationHandler] Error checking launch notification details: $e");
+      debugPrint("⚠️ [NotificationHandler] Error checking launch details: $e");
     }
 
     // Create Android High Importance Notification Channels
@@ -468,38 +490,6 @@ class NotificationHandlerService extends GetxService {
 
       String title = (message.notification?.title ?? extractedData['title'] ?? 'Mali Setu').toString().trim();
       String body = (message.notification?.body ?? extractedData['message'] ?? extractedData['body'] ?? '').toString().trim();
-
-      try {
-        final dynamic rawInnerData = extractedData['data'];
-        Map<String, dynamic>? innerMap;
-        if (rawInnerData is String && rawInnerData.trim().startsWith('{')) {
-          innerMap = Map<String, dynamic>.from(json.decode(rawInnerData));
-        } else if (rawInnerData is Map) {
-          innerMap = Map<String, dynamic>.from(rawInnerData);
-        }
-
-        final dynamic rawNotif = extractedData['notification'];
-        Map<String, dynamic>? innerNotif;
-        if (rawNotif is String && rawNotif.trim().startsWith('{')) {
-          innerNotif = Map<String, dynamic>.from(json.decode(rawNotif));
-        } else if (rawNotif is Map) {
-          innerNotif = Map<String, dynamic>.from(rawNotif);
-        }
-
-        if (title.isEmpty || title == 'New Blog:' || title == 'New Blog' || title.endsWith(':')) {
-          final innerTitle = (innerNotif?['title'] ?? innerMap?['title'] ?? extractedData['blog_title'] ?? '')?.toString();
-          if (innerTitle != null && innerTitle.isNotEmpty) {
-            title = title.isNotEmpty ? "$title $innerTitle" : innerTitle;
-          }
-        }
-
-        if (body.isEmpty || body.startsWith('published a new blog') || body == 'published a new blog.') {
-          final innerBody = (innerNotif?['body'] ?? innerMap?['body'] ?? '')?.toString();
-          if (innerBody != null && innerBody.isNotEmpty) {
-            body = innerBody;
-          }
-        }
-      } catch (_) {}
 
       if (title.isEmpty && body.isEmpty) {
         return;

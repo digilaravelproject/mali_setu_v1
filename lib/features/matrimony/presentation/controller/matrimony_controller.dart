@@ -4,6 +4,8 @@ import 'package:edu_cluezer/packages/card_swiper/flutter_card_swiper.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:get/get.dart';
 import '../../data/model/search_matrimony_response.dart';
+import 'matrimony_members_controller.dart';
+import 'matrimony_requests_controller.dart';
 
 class MatrimonyController extends GetxController {
   final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
@@ -86,6 +88,89 @@ class MatrimonyController extends GetxController {
       }
     } catch (e) {
       CustomSnackBar.showError(message: "Something went wrong: $e");
+    }
+  }
+
+  void removeProfileById(int id) {
+    profiles.removeWhere((p) =>
+        p.userId == id ||
+        p.user?.id == id ||
+        p.id == id);
+    if (currentIndex.value >= profiles.length && profiles.isNotEmpty) {
+      currentIndex.value = profiles.length - 1;
+    }
+    profiles.refresh();
+  }
+
+  Future<bool> reportUser({
+    required int reportedUserId,
+    required String reasonKey,
+    String? details,
+  }) async {
+    try {
+      final data = {
+        "reported_user_id": reportedUserId,
+        "reason_key": reasonKey,
+        "details": details ?? "",
+      };
+      print("REPORT USER REQUEST: $data");
+      final response = await _repository.reportUser(data);
+      print("REPORT USER RESPONSE: $response");
+      if (response != null &&
+          (response['success'] == true ||
+           response['status'] == true ||
+           response['status'] == 'success' ||
+           response['status'] == 200 ||
+           response['code'] == 200 ||
+           (response is Map && (response['message'] != null && response['error'] == null)))) {
+        CustomSnackBar.showSuccess(message: response['message'] ?? 'report_submitted'.tr);
+        removeProfileById(reportedUserId);
+        return true;
+      } else {
+        final msg = response is Map ? (response['message'] ?? response['error']) : null;
+        CustomSnackBar.showError(message: msg ?? 'Failed to submit report');
+        return false;
+      }
+    } catch (e) {
+      print("REPORT USER ERROR: $e");
+      CustomSnackBar.showError(message: "Failed to submit report: $e");
+      return false;
+    }
+  }
+
+  Future<bool> blockUser(int blockedUserId) async {
+    try {
+      final data = {
+        "blocked_user_id": blockedUserId,
+      };
+      print("BLOCK USER REQUEST: $data");
+      final response = await _repository.blockUser(data);
+      print("BLOCK USER RESPONSE: $response");
+      if (response != null &&
+          (response['success'] == true ||
+           response['status'] == true ||
+           response['status'] == 'success' ||
+           response['status'] == 200 ||
+           response['code'] == 200 ||
+           (response is Map && (response['message'] != null && response['error'] == null)))) {
+        CustomSnackBar.showSuccess(message: response['message'] ?? 'user_blocked'.tr);
+        removeProfileById(blockedUserId);
+        if (Get.isRegistered<MatrimonyMembersController>()) {
+          Get.find<MatrimonyMembersController>().removeMemberByUserId(blockedUserId);
+        }
+        if (Get.isRegistered<MatrimonyRequestsController>()) {
+          Get.find<MatrimonyRequestsController>().removeRequestByUserId(blockedUserId);
+        }
+        return true;
+      } else {
+        final msg = response is Map ? (response['message'] ?? response['error']) : null;
+        CustomSnackBar.showError(message: msg ?? 'Failed to block user');
+        return false;
+      }
+    } catch (e) {
+      print("BLOCK USER ERROR: $e");
+      CustomSnackBar.showError(message: "Failed to block user: $e");
+      return false;
     }
   }
 }
