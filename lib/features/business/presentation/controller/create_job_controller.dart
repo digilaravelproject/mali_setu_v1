@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/features/business/domain/usecase/create_job_usecase.dart';
+import '../../../../core/services/google_places_service.dart';
 import 'package:edu_cluezer/features/business/domain/usecase/update_job_usecase.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
@@ -57,6 +58,32 @@ class CreateJobController extends GetxController {
   final countryCtrl = TextEditingController();
   final stateCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
+
+  /// Google Places Location Coordinates
+  final RxnDouble selectedLatitude = RxnDouble();
+  final RxnDouble selectedLongitude = RxnDouble();
+  final RxString selectedLocationName = "".obs;
+
+  void onGooglePlaceSelected(PlaceDetails details) {
+    selectedLatitude.value = details.latitude;
+    selectedLongitude.value = details.longitude;
+    selectedLocationName.value = details.displayName.isNotEmpty ? details.displayName : details.city;
+
+    locationCtrl.text = details.formattedAddress.isNotEmpty
+        ? details.formattedAddress
+        : (details.displayName.isNotEmpty ? "${details.displayName}, ${details.city}" : details.city);
+    if (details.city.isNotEmpty) {
+      cityCtrl.text = details.city;
+    }
+    if (details.state.isNotEmpty) {
+      stateCtrl.text = details.state;
+    }
+    if (details.country.isNotEmpty) {
+      countryCtrl.text = details.country;
+    }
+    errors.remove('location');
+    CustomSnackBar.showSuccess(message: "location_autofill_success".tr);
+  }
   
   final jobTypeCtrl = TextEditingController();
   final experienceCtrl = TextEditingController();
@@ -492,6 +519,11 @@ class CreateJobController extends GetxController {
       "salary_range": salaryRangeCtrl.text.trim(),
       "job_type": jobTypeCtrl.text.trim(),
       "location": locationCtrl.text.trim(),
+      if (selectedLatitude.value != null) "latitude": selectedLatitude.value.toString(),
+      if (selectedLongitude.value != null) "longitude": selectedLongitude.value.toString(),
+      if (cityCtrl.text.trim().isNotEmpty) "city": cityCtrl.text.trim(),
+      if (stateCtrl.text.trim().isNotEmpty) "state": stateCtrl.text.trim(),
+      if (countryCtrl.text.trim().isNotEmpty) "country": countryCtrl.text.trim(),
       "experience_level": experienceCtrl.text.trim().toLowerCase(),
       "employment_type": employmentCtrl.text.trim().toLowerCase().replaceAll(' ', '-'),
       "category": categoryCtrl.text.trim(),

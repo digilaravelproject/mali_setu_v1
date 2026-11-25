@@ -1155,6 +1155,13 @@ const Map<String, String> enUS = {
   'birthday_wish_main': 'Wishing you a very Happy Birthday from the Mali Setu Family! 🌸',
   'birthday_wish_sub': 'May your year ahead be blessed with good health, happiness, prosperity, and grand success!',
   'birthday_thank_you': 'Thank You',
+
+  // Location Search
+  'search_location_map': 'Search Location (Google Maps)',
+  'search_location_hint': 'Search area, shop, street, or city...',
+  'location_pinned': 'Location Pinned & Coordinates Saved',
+  'change_location': 'Change',
+  'location_autofill_success': 'Address and location coordinates auto-filled successfully!',
 };
 
 

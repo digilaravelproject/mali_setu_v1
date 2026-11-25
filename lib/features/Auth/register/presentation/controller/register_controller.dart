@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../../../../../core/services/google_places_service.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
 import 'package:edu_cluezer/widgets/phone_field_component.dart';
@@ -117,6 +118,43 @@ class RegisterController extends GetxController {
   final TextEditingController sectorCtrl = TextEditingController();
   final TextEditingController destinationCtrl = TextEditingController();
   final TextEditingController villageCtrl = TextEditingController();
+
+  /// Google Places Location Coordinates
+  final RxnDouble selectedLatitude = RxnDouble();
+  final RxnDouble selectedLongitude = RxnDouble();
+  final RxString selectedLocationName = "".obs;
+
+  void onGooglePlaceSelected(PlaceDetails details) {
+    pinCodeCtrl.removeListener(_onPincodeChanged);
+    selectedLatitude.value = details.latitude;
+    selectedLongitude.value = details.longitude;
+    selectedLocationName.value = details.displayName.isNotEmpty ? details.displayName : details.city;
+
+    if (details.formattedAddress.isNotEmpty) {
+      addressCtrl.text = details.formattedAddress;
+    }
+    if (details.postalCode.isNotEmpty) {
+      pinCodeCtrl.text = details.postalCode;
+    }
+    if (details.state.isNotEmpty) {
+      stateCtrl.text = details.state;
+    }
+    if (details.district.isNotEmpty) {
+      districtCtrl.text = details.district;
+    }
+    if (details.city.isNotEmpty) {
+      cityCtrl.text = details.city;
+    }
+    if (details.taluka.isNotEmpty) {
+      destinationCtrl.text = details.taluka;
+      sectorCtrl.text = details.taluka;
+    }
+    if (details.village.isNotEmpty) {
+      villageCtrl.text = details.village;
+    }
+    pinCodeCtrl.addListener(_onPincodeChanged);
+    CustomSnackBar.showSuccess(message: "location_autofill_success".tr);
+  }
 
   /// PROFESSIONAL DETAILS
   final TextEditingController occupationCtrl = TextEditingController();
@@ -697,8 +735,8 @@ class RegisterController extends GetxController {
         company_name: companynameCtrl.text.trim(),
         dept_name: deptCtrl.text.trim(),
         designation: designationCtrl.text.trim(),
-        latitude: location?['latitude'],
-        longitude: location?['longitude'],
+        latitude: selectedLatitude.value ?? location?['latitude'],
+        longitude: selectedLongitude.value ?? location?['longitude'],
         respectedPersonName: respectedPersonNameCtrl.text.trim(),
         respectedPersonMobileNumber: respectedPersonMobileCtrl.text.trim(),
       );

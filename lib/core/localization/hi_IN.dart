@@ -1137,6 +1137,13 @@ const Map<String, String> hiIN = {
   'birthday_wish_main': 'माली सेतु परिवार की ओर से आपको जन्मदिन की हार्दिक शुभकामनाएं! 🌸',
   'birthday_wish_sub': 'ईश्वर आपको उत्तम स्वास्थ्य, सुख, समृद्धि और अपार सफलता प्रदान करें!',
   'birthday_thank_you': 'धन्यवाद',
+
+  // Location Search
+  'search_location_map': 'लोकेशन खोजें (गूगल मैप्स)',
+  'search_location_hint': 'दुकान, क्षेत्र, लैंडमार्क या शहर खोजें...',
+  'location_pinned': 'लोकेशन और कोऑर्डिनेट्स पिन हो गए',
+  'change_location': 'बदलें',
+  'location_autofill_success': 'पता और लोकेशन कोऑर्डिनेट्स सफलतापूर्वक भर गए!',
 };
 
 

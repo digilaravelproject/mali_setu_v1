@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/styles/app_colors.dart';
+import '../../../../core/widgets/location_search_field.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/core/widgets/full_screen_image_viewer.dart';
@@ -1133,6 +1134,17 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
 
                 // Location
                 _buildSectionHeader("location".tr),
+                Obx(() => LocationSearchField(
+                  initialLatitude: controller.selectedLatitude.value,
+                  initialLongitude: controller.selectedLongitude.value,
+                  initialLocationName: controller.selectedLocationName.value,
+                  onLocationSelected: controller.onGooglePlaceSelected,
+                  onCleared: () {
+                    controller.selectedLatitude.value = null;
+                    controller.selectedLongitude.value = null;
+                    controller.selectedLocationName.value = "";
+                  },
+                )),
                 AppInputTextField(
                   controller: controller.addressCtrl,
                   label: "address".tr,

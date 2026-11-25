@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import '../../../core/services/google_places_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../data/model/volunteer_profile_model.dart';
@@ -24,6 +25,23 @@ class VoluntProfileUpdateController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isEdit = false.obs;
   final RxMap<String, String?> errors = <String, String?>{}.obs;
+
+  /// Google Places Location Coordinates
+  final RxnDouble selectedLatitude = RxnDouble();
+  final RxnDouble selectedLongitude = RxnDouble();
+  final RxString selectedLocationName = "".obs;
+
+  void onGooglePlaceSelected(PlaceDetails details) {
+    selectedLatitude.value = details.latitude;
+    selectedLongitude.value = details.longitude;
+    selectedLocationName.value = details.displayName.isNotEmpty ? details.displayName : details.city;
+
+    locationCtrl.text = details.formattedAddress.isNotEmpty
+        ? details.formattedAddress
+        : (details.displayName.isNotEmpty ? "${details.displayName}, ${details.city}" : details.city);
+    errors.remove('location');
+    CustomSnackBar.showSuccess(message: "location_autofill_success".tr);
+  }
 
   @override
   void onInit() {
@@ -156,6 +174,8 @@ class VoluntProfileUpdateController extends GetxController {
       "experience": experienceCtrl.text.trim(),
       "availability": availabilityCtrl.text.trim(),
       "location": locationCtrl.text.trim(),
+      if (selectedLatitude.value != null) "latitude": selectedLatitude.value.toString(),
+      if (selectedLongitude.value != null) "longitude": selectedLongitude.value.toString(),
       "bio": bioCtrl.text.trim(),
       "interests": selectedInterests,
     };

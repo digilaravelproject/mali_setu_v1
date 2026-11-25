@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../../core/services/google_places_service.dart';
 import 'package:edu_cluezer/core/helper/string_extensions.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
@@ -12,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:image_picker/image_picker.dart';
 import '../../../../widgets/category_paginated_bottom_sheet.dart';
-import '../../../../widgets/custom_snack_bar.dart';
 import '../../../payment/presentation/page/ccavenue_payment_screen.dart';
 import 'package:edu_cluezer/features/business/data/model/res_all_business_model.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
@@ -65,6 +66,16 @@ class RegBusinessController extends GetxController {
   final countryCtrl = TextEditingController(text: "India");
   final talukaCtrl = TextEditingController();
   final villageCtrl = TextEditingController();
+
+  /// Google Places Location Search
+  final locationSearchCtrl = TextEditingController();
+  final RxList<PlaceSuggestion> locationSuggestions = <PlaceSuggestion>[].obs;
+  final RxBool isSearchingLocation = false.obs;
+  final RxBool isFetchingLocationDetails = false.obs;
+  final RxnDouble selectedLatitude = RxnDouble();
+  final RxnDouble selectedLongitude = RxnDouble();
+  final RxString selectedLocationName = "".obs;
+  Timer? _locationDebounceTimer;
 
   final isFetchingPincode = false.obs;
   final isDetailsLoading = false.obs;
@@ -274,6 +285,102 @@ class RegBusinessController extends GetxController {
     } finally {
       isFetchingPincode.value = false;
     }
+  }
+
+  /// Triggered whenever user types in Google Places search bar
+  void onLocationSearchChanged(String query) {
+    _locationDebounceTimer?.cancel();
+    final trimmed = query.trim();
+    if (trimmed.length < 2) {
+      locationSuggestions.clear();
+      isSearchingLocation.value = false;
+      return;
+    }
+    isSearchingLocation.value = true;
+    _locationDebounceTimer = Timer(const Duration(milliseconds: 350), () async {
+      try {
+        final results = await GooglePlacesService.getAutocompleteSuggestions(trimmed);
+        locationSuggestions.assignAll(results);
+      } catch (e) {
+        debugPrint("[RegBusinessController] Error searching location: $e");
+      } finally {
+        isSearchingLocation.value = false;
+      }
+    });
+  }
+
+  /// When user selects a location from autocomplete suggestions
+  Future<void> selectLocation(PlaceSuggestion suggestion) async {
+    try {
+      isFetchingLocationDetails.value = true;
+      locationSuggestions.clear();
+      locationSearchCtrl.text = suggestion.mainText;
+
+      final details = await GooglePlacesService.getPlaceDetails(suggestion.placeId);
+      if (details != null) {
+        _ignorePincodeChange = true;
+
+        selectedLatitude.value = details.latitude;
+        selectedLongitude.value = details.longitude;
+        selectedLocationName.value = details.displayName.isNotEmpty
+            ? details.displayName
+            : suggestion.mainText;
+
+        if (details.formattedAddress.isNotEmpty) {
+          addressCtrl.text = details.formattedAddress;
+          errors.remove('address');
+        }
+        if (details.postalCode.isNotEmpty) {
+          pinCodeCtrl.text = details.postalCode;
+          errors.remove('pincode');
+        }
+        if (details.city.isNotEmpty) {
+          cityCtrl.text = details.city;
+          errors.remove('city');
+        }
+        if (details.state.isNotEmpty) {
+          stateCtrl.text = details.state;
+          errors.remove('state');
+        }
+        if (details.district.isNotEmpty) {
+          districtCtrl.text = details.district;
+          errors.remove('district');
+        }
+        if (details.taluka.isNotEmpty) {
+          talukaCtrl.text = details.taluka;
+        }
+        if (details.village.isNotEmpty) {
+          villageCtrl.text = details.village;
+        }
+        if (details.country.isNotEmpty) {
+          countryCtrl.text = details.country;
+          errors.remove('country');
+        }
+
+        _ignorePincodeChange = false;
+
+        CustomSnackBar.showSuccess(
+          message: "location_autofill_success".tr,
+        );
+      } else {
+        CustomSnackBar.showError(
+          message: "Could not fetch details for selected location.",
+        );
+      }
+    } catch (e) {
+      debugPrint("[RegBusinessController] Error selecting location: $e");
+    } finally {
+      isFetchingLocationDetails.value = false;
+    }
+  }
+
+  /// Clear the selected location coordinates & search bar
+  void clearSelectedLocation() {
+    selectedLatitude.value = null;
+    selectedLongitude.value = null;
+    selectedLocationName.value = "";
+    locationSearchCtrl.clear();
+    locationSuggestions.clear();
   }
 
   void openCategorySelection(BuildContext context) {
@@ -644,28 +751,43 @@ class RegBusinessController extends GetxController {
       };
       print("registerbusiness : " + body.toString());
 
-      // Fetch location from Nominatim using pincode / postalcode
-      try {
-        final pincode = pinCodeCtrl.text.trim();
-        final dio = Dio();
-        final response = await dio.get(
-          'https://nominatim.openstreetmap.org/search',
-          queryParameters: {
-            'postalcode': pincode,
-            'country': countryCtrl.text.trim().isNotEmpty ? countryCtrl.text.trim() : 'India',
-            'format': 'jsonv2',
-            'limit': '1',
-          },
-          options: Options(
-            headers: {'User-Agent': 'MaliSetuApp/1.0'},
-          ),
-        );
-        if (response.statusCode == 200 && response.data != null && response.data is List && response.data.isNotEmpty) {
-          final lat = response.data[0]['lat'];
-          final lon = response.data[0]['lon'];
-          body['latitude'] = lat.toString();
-          body['longitude'] = lon.toString();
-        } else {
+      // Fetch location coordinates: prioritize Google Places exact coordinates
+      if (selectedLatitude.value != null && selectedLongitude.value != null) {
+        body['latitude'] = selectedLatitude.value.toString();
+        body['longitude'] = selectedLongitude.value.toString();
+        print("Using selected Google Places coordinates: ${body['latitude']}, ${body['longitude']}");
+      } else {
+        // Fallback to Nominatim using pincode / postalcode
+        try {
+          final pincode = pinCodeCtrl.text.trim();
+          final dio = Dio();
+          final response = await dio.get(
+            'https://nominatim.openstreetmap.org/search',
+            queryParameters: {
+              'postalcode': pincode,
+              'country': countryCtrl.text.trim().isNotEmpty ? countryCtrl.text.trim() : 'India',
+              'format': 'jsonv2',
+              'limit': '1',
+            },
+            options: Options(
+              headers: {'User-Agent': 'MaliSetuApp/1.0'},
+            ),
+          );
+          if (response.statusCode == 200 && response.data != null && response.data is List && response.data.isNotEmpty) {
+            final lat = response.data[0]['lat'];
+            final lon = response.data[0]['lon'];
+            body['latitude'] = lat.toString();
+            body['longitude'] = lon.toString();
+          } else {
+            // Fallback to current location
+            final location = await LocationHelper.getCurrentLocation();
+            if (location != null) {
+              body['latitude'] = location['latitude'];
+              body['longitude'] = location['longitude'];
+            }
+          }
+        } catch (e) {
+          print("Nominatim API error: $e");
           // Fallback to current location
           final location = await LocationHelper.getCurrentLocation();
           if (location != null) {
@@ -673,14 +795,11 @@ class RegBusinessController extends GetxController {
             body['longitude'] = location['longitude'];
           }
         }
-      } catch (e) {
-        print("Nominatim API error: $e");
-        // Fallback to current location
-        final location = await LocationHelper.getCurrentLocation();
-        if (location != null) {
-          body['latitude'] = location['latitude'];
-          body['longitude'] = location['longitude'];
-        }
+      }
+
+      if (body['latitude'] != null && body['longitude'] != null) {
+        (body['location_details'] as Map<String, dynamic>)['latitude'] = body['latitude'];
+        (body['location_details'] as Map<String, dynamic>)['longitude'] = body['longitude'];
       }
 
       Future<FormData> buildFormData({bool isUpdate = false}) async {
@@ -981,6 +1100,17 @@ class RegBusinessController extends GetxController {
     stateCtrl.text = business.state ?? "";
     countryCtrl.text = business.country ?? "India";
 
+    // Populate coordinates if present
+    if (business.latitude != null) {
+      selectedLatitude.value = business.latitude;
+    }
+    if (business.longitude != null) {
+      selectedLongitude.value = business.longitude;
+    }
+    if (business.city != null && business.city!.isNotEmpty) {
+      selectedLocationName.value = business.city!;
+    }
+
     // Handle Time (Supports HH:mm:ss from API & 24/7 check)
     final opTime = business.opening_time?.trim() ?? '';
     final clTime = business.closing_time?.trim() ?? '';
@@ -1088,6 +1218,8 @@ class RegBusinessController extends GetxController {
     openingTimeCtrl.dispose();
     closingTimeCtrl.dispose();
     customCategoryCtrl.dispose();
+    locationSearchCtrl.dispose();
+    _locationDebounceTimer?.cancel();
     super.onClose();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart' as dio;
 import 'package:file_picker/file_picker.dart';
+import '../../../../core/services/google_places_service.dart';
 import 'package:edu_cluezer/features/matrimony/domain/repository/matrimony_repository.dart';
 import 'package:edu_cluezer/features/razorpay/payment_repository.dart';
 import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
@@ -73,6 +74,53 @@ class RegMatrimonyController extends GetxController {
   final ref_nameCtrl = TextEditingController();
   final countryCtrl = TextEditingController(text: 'India');
   final stateCtrl = TextEditingController();
+
+  /// Google Places Location Coordinates
+  final RxnDouble selectedLatitude = RxnDouble();
+  final RxnDouble selectedLongitude = RxnDouble();
+  final RxString selectedLocationName = "".obs;
+
+  void onGooglePlaceSelected(PlaceDetails details) {
+    isPreFilling.value = true;
+    selectedLatitude.value = details.latitude;
+    selectedLongitude.value = details.longitude;
+    selectedLocationName.value = details.displayName.isNotEmpty ? details.displayName : details.city;
+
+    if (details.formattedAddress.isNotEmpty) {
+      addressCtrl.text = details.formattedAddress;
+      errors.remove('address');
+    }
+    if (details.postalCode.isNotEmpty) {
+      pinCodeCtrl.text = details.postalCode;
+      errors.remove('pincode');
+    }
+    if (details.city.isNotEmpty) {
+      cityCtrl.text = details.city;
+      errors.remove('city');
+    }
+    if (details.state.isNotEmpty) {
+      if (!stateList.contains(details.state)) {
+        stateList.add(details.state);
+      }
+      state.value = details.state;
+      stateCtrl.text = details.state;
+      errors.remove('state');
+    }
+    if (details.country.isNotEmpty) {
+      country.value = details.country;
+      countryCtrl.text = details.country;
+      errors.remove('country');
+    }
+    if (details.taluka.isNotEmpty) {
+      talukaCtrl.text = details.taluka;
+    }
+    if (details.village.isNotEmpty) {
+      villageCtrl.text = details.village;
+    }
+
+    isPreFilling.value = false;
+    CustomSnackBar.showSuccess(message: "location_autofill_success".tr);
+  }
 
   // Keep some old ones if needed or reuse
   final casteCtrl = TextEditingController();
@@ -909,7 +957,11 @@ class RegMatrimonyController extends GetxController {
           "taluka": talukaCtrl.text,
           "village": villageCtrl.text,
           "address": addressCtrl.text,
+          if (selectedLatitude.value != null) "latitude": selectedLatitude.value.toString(),
+          if (selectedLongitude.value != null) "longitude": selectedLongitude.value.toString(),
         },
+        if (selectedLatitude.value != null) "latitude": selectedLatitude.value.toString(),
+        if (selectedLongitude.value != null) "longitude": selectedLongitude.value.toString(),
         "partner_preferences": {
           "age_range": "20-30",
           "education": education.value.isNotEmpty ? education.value : "Any",

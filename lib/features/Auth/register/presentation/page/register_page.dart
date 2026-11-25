@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../../../../../core/widgets/location_search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -211,6 +212,17 @@ class RegisterPage extends GetWidget<RegisterController> {
                   title: "address_details".tr,
                   icon: CupertinoIcons.location_circle_fill,
                   children: [
+                    Obx(() => LocationSearchField(
+                      initialLatitude: controller.selectedLatitude.value,
+                      initialLongitude: controller.selectedLongitude.value,
+                      initialLocationName: controller.selectedLocationName.value,
+                      onLocationSelected: controller.onGooglePlaceSelected,
+                      onCleared: () {
+                        controller.selectedLatitude.value = null;
+                        controller.selectedLongitude.value = null;
+                        controller.selectedLocationName.value = "";
+                      },
+                    )),
                     AppInputTextField(
                       key: controller.addressKey,
                       label: "address".tr,

@@ -318,6 +318,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   const SizedBox(height: 24),
                   SectionTitle('location_information'.tr),
 
+                  _buildGooglePlacesSearchSection(context),
+
                   AppInputTextField(
                     label: 'address'.tr,
                     isRequired: true,
@@ -533,6 +535,263 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
           );
         }),
       );});
+  }
+
+  Widget _buildGooglePlacesSearchSection(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Obx(() {
+      final hasPinnedLocation = controller.selectedLatitude.value != null &&
+          controller.selectedLongitude.value != null;
+      final lat = controller.selectedLatitude.value;
+      final lng = controller.selectedLongitude.value;
+      final isSearching = controller.isSearchingLocation.value;
+      final isFetchingDetails = controller.isFetchingLocationDetails.value;
+      final suggestions = controller.locationSuggestions;
+
+      return Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Pinned Location Badge Card (if coordinates are selected)
+            if (hasPinnedLocation)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFF86EFAC), width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF22C55E),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'location_pinned'.tr,
+                            style: const TextStyle(
+                              color: Color(0xFF15803D),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            "Lat: ${lat?.toStringAsFixed(5)}, Lng: ${lng?.toStringAsFixed(5)}",
+                            style: const TextStyle(
+                              color: Color(0xFF166534),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (controller.selectedLocationName.value.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                controller.selectedLocationName.value,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        controller.clearSelectedLocation();
+                      },
+                      icon: const Icon(Icons.refresh_rounded, size: 16, color: Color(0xFF15803D)),
+                      label: Text(
+                        'change_location'.tr,
+                        style: const TextStyle(
+                          color: Color(0xFF15803D),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // Search Bar Input
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: controller.locationSearchCtrl,
+                onChanged: controller.onLocationSearchChanged,
+                decoration: InputDecoration(
+                  labelText: 'search_location_map'.tr,
+                  hintText: 'search_location_hint'.tr,
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13.5),
+                  labelStyle: TextStyle(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  prefixIcon: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      Icons.search_rounded,
+                      color: primaryColor,
+                      size: 24,
+                    ),
+                  ),
+                  suffixIcon: isSearching || isFetchingDetails
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: Padding(
+                            padding: EdgeInsets.all(13.0),
+                            child: CircularProgressIndicator(strokeWidth: 2.2),
+                          ),
+                        )
+                      : controller.locationSearchCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear_rounded, size: 20),
+                              onPressed: () {
+                                controller.clearSelectedLocation();
+                              },
+                            )
+                          : null,
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(color: primaryColor, width: 1.8),
+                  ),
+                ),
+              ),
+            ),
+
+            // Suggestions Dropdown List
+            if (suggestions.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(top: 6),
+                constraints: const BoxConstraints(maxHeight: 260),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    itemCount: suggestions.length,
+                    separatorBuilder: (_, __) => Divider(
+                      height: 1,
+                      thickness: 0.8,
+                      color: Colors.grey.shade200,
+                    ),
+                    itemBuilder: (context, index) {
+                      final item = suggestions[index];
+                      return ListTile(
+                        dense: true,
+                        horizontalTitleGap: 8,
+                        leading: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.location_on_rounded,
+                            color: primaryColor,
+                            size: 18,
+                          ),
+                        ),
+                        title: Text(
+                          item.mainText,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        subtitle: item.secondaryText.isNotEmpty
+                            ? Text(
+                                item.secondaryText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              )
+                            : null,
+                        onTap: () {
+                          FocusScope.of(context).unfocus();
+                          controller.selectLocation(item);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildPhotoGrid(BuildContext context) {

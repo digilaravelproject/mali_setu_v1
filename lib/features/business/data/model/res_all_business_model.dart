@@ -201,6 +201,8 @@ class Business {
   String? pincode;
   String? country;
   String? address;
+  double? latitude;
+  double? longitude;
   User? user;
   Category? category;
   List<Product>? products;
@@ -238,6 +240,8 @@ class Business {
     this.pincode,
     this.country,
     this.address,
+    this.latitude,
+    this.longitude,
     this.user,
     this.category,
     this.products,
@@ -280,6 +284,8 @@ class Business {
       city: json['city'],
       pincode: json['pincode'],
       country: json['country'],
+      latitude: _asDouble(json['latitude']),
+      longitude: _asDouble(json['longitude']),
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       category: json['category'] != null ? Category.fromJson(json['category']) : null,
       products: json['products'] != null
@@ -328,6 +334,8 @@ class Business {
       'city': city,
       'pincode': pincode,
       'country': country,
+      'latitude': latitude,
+      'longitude': longitude,
       'user': user?.toJson(),
       'category': category?.toJson(),
       'products': products?.map((x) => x.toJson()).toList(),

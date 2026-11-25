@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/widgets/location_search_field.dart';
+
 import '../../../../core/constent/api_constants.dart';
 import '../../../../core/helper/form_validator.dart';
 import '../../../../core/utils/app_assets.dart';
@@ -131,6 +133,17 @@ class UpdateProfilePage extends GetView<UpProfileController> {
                   title: "address_details".tr,
                   icon: CupertinoIcons.location_circle_fill,
                   children: [
+                    Obx(() => LocationSearchField(
+                      initialLatitude: controller.selectedLatitude.value,
+                      initialLongitude: controller.selectedLongitude.value,
+                      initialLocationName: controller.selectedLocationName.value,
+                      onLocationSelected: controller.onGooglePlaceSelected,
+                      onCleared: () {
+                        controller.selectedLatitude.value = null;
+                        controller.selectedLongitude.value = null;
+                        controller.selectedLocationName.value = "";
+                      },
+                    )),
                     AppInputTextField(
                       label: "address".tr,
                       textInputType: TextInputType.streetAddress,

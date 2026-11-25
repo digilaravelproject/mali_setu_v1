@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/styles/app_colors.dart';
+import '../../../../core/widgets/location_search_field.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/controller/reg_matrimony_controller.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -105,6 +106,17 @@ class CreateJobPage extends GetWidget<CreateJobController> {
               errorText: controller.errors['jobType'],
             )),
             // const SizedBox(height: 8),
+            Obx(() => LocationSearchField(
+              initialLatitude: controller.selectedLatitude.value,
+              initialLongitude: controller.selectedLongitude.value,
+              initialLocationName: controller.selectedLocationName.value,
+              onLocationSelected: controller.onGooglePlaceSelected,
+              onCleared: () {
+                controller.selectedLatitude.value = null;
+                controller.selectedLongitude.value = null;
+                controller.selectedLocationName.value = "";
+              },
+            )),
             Obx(() => AppInputTextField(
               label: 'location'.tr,
               isRequired: true,

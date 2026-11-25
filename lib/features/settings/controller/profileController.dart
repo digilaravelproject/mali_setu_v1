@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../../../../core/services/google_places_service.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/widgets/name_field_component.dart';
@@ -49,6 +50,45 @@ class UpProfileController extends GetxController {
   final sectorCtrl = TextEditingController();
   final destinationCtrl = TextEditingController();
   final villageCtrl = TextEditingController();
+
+  /// Google Places Location Coordinates
+  final RxnDouble selectedLatitude = RxnDouble();
+  final RxnDouble selectedLongitude = RxnDouble();
+  final RxString selectedLocationName = "".obs;
+
+  void onGooglePlaceSelected(PlaceDetails details) {
+    pincodeCtrl.removeListener(_onPincodeChanged);
+    selectedLatitude.value = details.latitude;
+    selectedLongitude.value = details.longitude;
+    selectedLocationName.value = details.displayName.isNotEmpty ? details.displayName : details.city;
+
+    if (details.formattedAddress.isNotEmpty) {
+      streetAddressCtrl.text = details.formattedAddress;
+    }
+    if (details.postalCode.isNotEmpty) {
+      pincodeCtrl.text = details.postalCode;
+    }
+    if (details.city.isNotEmpty) {
+      cityCtrl.text = details.city;
+    }
+    if (details.state.isNotEmpty) {
+      stateCtrl.text = details.state;
+    }
+    if (details.district.isNotEmpty) {
+      districtCtrl.text = details.district;
+    }
+    if (details.country.isNotEmpty) {
+      countryCtrl.text = details.country;
+    }
+    if (details.taluka.isNotEmpty) {
+      sectorCtrl.text = details.taluka;
+    }
+    if (details.village.isNotEmpty) {
+      villageCtrl.text = details.village;
+    }
+    pincodeCtrl.addListener(_onPincodeChanged);
+    CustomSnackBar.showSuccess(message: "location_autofill_success".tr);
+  }
 
   // Profile Image
   final profileImage = Rxn<File>();
@@ -224,6 +264,8 @@ class UpProfileController extends GetxController {
 
       // Fetch current location
       final location = await LocationHelper.getCurrentLocation();
+      final finalLat = selectedLatitude.value ?? location?['latitude'];
+      final finalLng = selectedLongitude.value ?? location?['longitude'];
 
       // Prepare data
       final Map<String, dynamic> updateData = {
@@ -244,8 +286,8 @@ class UpProfileController extends GetxController {
         'sector': sectorCtrl.text,
         'destination': destinationCtrl.text,
         'village': villageCtrl.text,
-        if (location != null) 'latitude': location['latitude'],
-        if (location != null) 'longitude': location['longitude'],
+        if (finalLat != null) 'latitude': finalLat,
+        if (finalLng != null) 'longitude': finalLng,
       };
 
       // Add profile image as base64 if selected

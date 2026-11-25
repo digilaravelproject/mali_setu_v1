@@ -1,4 +1,5 @@
 import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
+import '../../../core/widgets/location_search_field.dart';
 import 'package:edu_cluezer/core/styles/app_colors.dart';
 import 'package:edu_cluezer/widgets/basic_text_field.dart';
 import 'package:edu_cluezer/widgets/custom_buttons.dart';
@@ -68,6 +69,17 @@ class CreateVolunteerScreen extends GetWidget<VoluntProfileUpdateController> {
                     errorText: controller.errors['bio'],
                   )),
                   const SizedBox(height: 16),
+                  Obx(() => LocationSearchField(
+                    initialLatitude: controller.selectedLatitude.value,
+                    initialLongitude: controller.selectedLongitude.value,
+                    initialLocationName: controller.selectedLocationName.value,
+                    onLocationSelected: controller.onGooglePlaceSelected,
+                    onCleared: () {
+                      controller.selectedLatitude.value = null;
+                      controller.selectedLongitude.value = null;
+                      controller.selectedLocationName.value = "";
+                    },
+                  )),
                   Obx(() => AppInputTextField(
                     controller: controller.locationCtrl,
                     label: "location".tr,
