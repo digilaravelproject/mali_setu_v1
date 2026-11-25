@@ -13,6 +13,8 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 
     <!-- Forcibly remove media permissions injected by third-party plugins (like open_filex) to comply with Google Play Policy -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />

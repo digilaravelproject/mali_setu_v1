@@ -1,9 +1,7 @@
 import 'package:edu_cluezer/features/jobs/presentation/screens/jobs_screen.dart';
 import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/features/dashboard/data/model/btm_nav_model.dart';
-import 'package:edu_cluezer/features/dashboard/presentation/page/more_page.dart';
 import 'package:edu_cluezer/features/matrimony/presentation/page/matrimony_page.dart';
-import 'package:edu_cluezer/features/volunteer/pages/volunteer_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,14 +9,13 @@ import 'package:get/get.dart';
 import '../../../blogs/presentation/screens/blogs_screen.dart';
 import '../../../business/data/model/res_all_business_model.dart';
 import '../../../business/presentation/page/business_page.dart';
-import '../../../settings/page/settings_screen.dart';
 import '../../../business/presentation/controller/business_controller.dart';
 import '../../../Auth/service/auth_service.dart';
 import '../../../../core/routes/app_routes.dart';
 import '../page/home_page.dart';
 import '../../../blogs/presentation/controller/blog_controller.dart';
-import 'package:edu_cluezer/features/referral/presentation/widgets/volunteer_prompt_dialog.dart';
 import '../../../../core/widgets/whatsapp_support_fab.dart';
+import '../../../../core/services/birthday_service.dart';
 
 class DashboardController extends GetxController {
   var currentPage = 0.obs;
@@ -75,6 +72,22 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     // Auto popup dialog moved to dedicated promo card on home screen
+
+    // Listen for user profile updates to trigger birthday wishes if applicable
+    if (Get.isRegistered<AuthService>()) {
+      ever(Get.find<AuthService>().currentUser, (user) {
+        if (user != null) {
+          BirthdayService.checkAndShowBirthdayWish();
+        }
+      });
+    }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Check and show birthday celebration when dashboard is ready
+    BirthdayService.checkAndShowBirthdayWish();
   }
 
   void _checkAndShowBusinessDialog() {

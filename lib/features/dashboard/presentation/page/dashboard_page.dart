@@ -85,7 +85,7 @@ class DashboardPage extends GetWidget<DashboardController> {
         ),
         child: BottomAppBar(
           elevation: 0,
-          height: 58,
+          height: 60,
           padding: EdgeInsets.zero,
           child: Obx(() {
             // Observe auth/screenList dependencies so bottom nav stays synced with IndexedStack
@@ -120,8 +120,8 @@ class DashboardPage extends GetWidget<DashboardController> {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
-                width: isSelected ? 32 : 30,
-                height: isSelected ? 32 : 30,
+                width: isSelected ? 28 : 26,
+                height: isSelected ? 28 : 26,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? e.selectedColor
@@ -132,29 +132,29 @@ class DashboardPage extends GetWidget<DashboardController> {
                   child: Icon(
                     isSelected ? (e.selectedIcon ?? e.icon) : e.icon,
                     color: isSelected ? Colors.white : e.unselectedColor,
-                    size: isSelected ? 18 : 23,
+                    size: isSelected ? 17 : 22,
                   ),
                 ),
               ),
-              if (isSelected)
-                Padding(
-                  padding: const EdgeInsets.only(top: 1.5),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      e.title,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: e.selectedColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10.5,
-                        letterSpacing: 0.1,
-                        height: 1.1,
-                      ),
+              const SizedBox(height: 2),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    e.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: isSelected ? e.selectedColor : e.unselectedColor,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 10,
+                      letterSpacing: 0.1,
+                      height: 1.1,
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),

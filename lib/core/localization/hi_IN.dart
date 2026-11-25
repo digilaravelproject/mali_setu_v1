@@ -1128,6 +1128,15 @@ const Map<String, String> hiIN = {
   'referrals_label': 'रेफरल्स',
   'refer_and_win': 'मित्रों को रेफर करें और लीडरबोर्ड पर आगे बढ़ें!',
   'refer_now': 'रेफर करें',
+
+  // Birthday Celebration
+  'birthday_tag': 'जन्मदिन की शुभकामनाएं',
+  'birthday_greeting_title': 'जन्मदिन मुबारक,\n@name! 🎂✨',
+  'birthday_default_name': 'साथी',
+  'mali_setu_family': 'माली सेतु परिवार',
+  'birthday_wish_main': 'माली सेतु परिवार की ओर से आपको जन्मदिन की हार्दिक शुभकामनाएं! 🌸',
+  'birthday_wish_sub': 'ईश्वर आपको उत्तम स्वास्थ्य, सुख, समृद्धि और अपार सफलता प्रदान करें!',
+  'birthday_thank_you': 'धन्यवाद',
 };
 
 

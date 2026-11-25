@@ -1146,6 +1146,15 @@ const Map<String, String> enUS = {
   'referrals_label': 'referrals',
   'refer_and_win': 'Refer friends & climb the leaderboard!',
   'refer_now': 'Refer Now',
+
+  // Birthday Celebration
+  'birthday_tag': 'HAPPY BIRTHDAY',
+  'birthday_greeting_title': 'Happy Birthday,\n@name! 🎂✨',
+  'birthday_default_name': 'Friend',
+  'mali_setu_family': 'Mali Setu Family',
+  'birthday_wish_main': 'Wishing you a very Happy Birthday from the Mali Setu Family! 🌸',
+  'birthday_wish_sub': 'May your year ahead be blessed with good health, happiness, prosperity, and grand success!',
+  'birthday_thank_you': 'Thank You',
 };
 
 

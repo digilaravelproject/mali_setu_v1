@@ -483,28 +483,30 @@ class Product {
   });
 
   List<String> get allImages {
-    final List<String> list = [];
+    final Set<String> set = {};
+    if (imagePath != null && imagePath!.trim().isNotEmpty) {
+      final p = imagePath!.trim();
+      set.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/${p.replaceFirst(RegExp(r'^/'), '')}');
+    }
+    if (imagePaths != null && imagePaths!.isNotEmpty) {
+      for (final p in imagePaths!) {
+        if (p.trim().isNotEmpty) {
+          final trimmed = p.trim();
+          set.add(trimmed.startsWith('http') ? trimmed : '${ApiConstants.imageBaseUrl}/${trimmed.replaceFirst(RegExp(r'^/'), '')}');
+        }
+      }
+    }
     if (images != null && images!.isNotEmpty) {
       for (final img in images!) {
-        if (img.url != null && img.url!.isNotEmpty) {
-          list.add(img.url!);
-        } else if (img.path != null && img.path!.isNotEmpty) {
-          final p = img.path!;
-          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        if (img.url != null && img.url!.trim().isNotEmpty) {
+          set.add(img.url!.trim());
+        } else if (img.path != null && img.path!.trim().isNotEmpty) {
+          final p = img.path!.trim();
+          set.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/${p.replaceFirst(RegExp(r'^/'), '')}');
         }
       }
     }
-    if (list.isEmpty && imagePaths != null && imagePaths!.isNotEmpty) {
-      for (final p in imagePaths!) {
-        if (p.isNotEmpty) {
-          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
-        }
-      }
-    }
-    if (list.isEmpty && imagePath != null && imagePath!.isNotEmpty) {
-      list.add(imagePath!.startsWith('http') ? imagePath! : '${ApiConstants.imageBaseUrl}/$imagePath');
-    }
-    return list;
+    return set.toList();
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -584,28 +586,30 @@ class Service {
   });
 
   List<String> get allImages {
-    final List<String> list = [];
+    final Set<String> set = {};
+    if (imagePath != null && imagePath!.trim().isNotEmpty) {
+      final p = imagePath!.trim();
+      set.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/${p.replaceFirst(RegExp(r'^/'), '')}');
+    }
+    if (imagePaths != null && imagePaths!.isNotEmpty) {
+      for (final p in imagePaths!) {
+        if (p.trim().isNotEmpty) {
+          final trimmed = p.trim();
+          set.add(trimmed.startsWith('http') ? trimmed : '${ApiConstants.imageBaseUrl}/${trimmed.replaceFirst(RegExp(r'^/'), '')}');
+        }
+      }
+    }
     if (images != null && images!.isNotEmpty) {
       for (final img in images!) {
-        if (img.url != null && img.url!.isNotEmpty) {
-          list.add(img.url!);
-        } else if (img.path != null && img.path!.isNotEmpty) {
-          final p = img.path!;
-          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
+        if (img.url != null && img.url!.trim().isNotEmpty) {
+          set.add(img.url!.trim());
+        } else if (img.path != null && img.path!.trim().isNotEmpty) {
+          final p = img.path!.trim();
+          set.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/${p.replaceFirst(RegExp(r'^/'), '')}');
         }
       }
     }
-    if (list.isEmpty && imagePaths != null && imagePaths!.isNotEmpty) {
-      for (final p in imagePaths!) {
-        if (p.isNotEmpty) {
-          list.add(p.startsWith('http') ? p : '${ApiConstants.imageBaseUrl}/$p');
-        }
-      }
-    }
-    if (list.isEmpty && imagePath != null && imagePath!.isNotEmpty) {
-      list.add(imagePath!.startsWith('http') ? imagePath! : '${ApiConstants.imageBaseUrl}/$imagePath');
-    }
-    return list;
+    return set.toList();
   }
 
   factory Service.fromJson(Map<String, dynamic> json) {

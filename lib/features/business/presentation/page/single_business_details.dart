@@ -24,6 +24,7 @@ import 'package:edu_cluezer/core/widgets/custom_confirm_dialog.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/create_job_controller.dart';
 import 'package:edu_cluezer/features/jobs/presentation/controller/jobs_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/widget/product_service_action_sheet.dart';
+import 'package:edu_cluezer/features/business/presentation/widget/enquiry_bottom_sheet.dart';
 import 'package:edu_cluezer/core/widgets/whatsapp_support_fab.dart';
 
 class BusinessDetailScreen extends StatefulWidget {
@@ -33,9 +34,11 @@ class BusinessDetailScreen extends StatefulWidget {
   State<BusinessDetailScreen> createState() => _BusinessDetailScreenState();
 }
 
-class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
+class _BusinessDetailScreenState extends State<BusinessDetailScreen>
+    with SingleTickerProviderStateMixin {
   late final BusinessController controller;
   late final Business argBusiness;
+  late final TabController _tabController;
   final ScrollController _outerScrollController = ScrollController();
   final RxBool _showTitle = false.obs;
 
@@ -43,6 +46,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   void initState() {
     super.initState();
     controller = Get.find<BusinessController>();
+    _tabController = TabController(length: 4, vsync: this);
     // Store argBusiness once — safe from route argument changes on back navigation
     final args = Get.arguments;
     if (args is Business) {
@@ -74,6 +78,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
   void dispose() {
     _outerScrollController.removeListener(_onScroll);
     _outerScrollController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -96,10 +101,8 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
       floatingActionButton: const WhatsAppSupportFab(bottomPadding: 75),
       body: Stack(
         children: [
-          DefaultTabController(
-            length: 4,
-            child: Obx(() {
-              final business = controller.selectedBusiness.value ?? argBusiness;
+          Obx(() {
+            final business = controller.selectedBusiness.value ?? argBusiness;
               
               final authService = Get.find<AuthService>();
               final currentUser = authService.currentUser.value;
@@ -329,6 +332,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                 ),
                               ),
                               child: TabBar(
+                                controller: _tabController,
                                 labelColor: context.theme.primaryColor,
                                 unselectedLabelColor: Colors.grey[600],
                                 indicatorColor: context.theme.primaryColor,
@@ -358,6 +362,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                   body: Padding(
                     padding: const EdgeInsets.only(bottom: 70),
                     child: TabBarView(
+                      controller: _tabController,
                       children: [
                         Builder(
                           builder: (context) => _buildProductsTab(context),
@@ -405,7 +410,6 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
             ],
           );
         }),
-          ),
           Obx(() {
             final business = controller.selectedBusiness.value ?? argBusiness;
             if (controller.selectedBusiness.value == null && (argBusiness.businessName == null || argBusiness.businessName!.isEmpty)) {
@@ -1296,6 +1300,47 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                   },
                                 );
                               },
+                            )
+                          else
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6),
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  final b = controller.selectedBusiness.value ?? argBusiness;
+                                  EnquiryBottomSheet.show(
+                                    context,
+                                    itemName: product.name ?? 'Product',
+                                    itemType: 'Product',
+                                    itemPrice: product.cost,
+                                    imagePath: product.imagePath,
+                                    businessName: b.businessName,
+                                    contactPhone: b.contactPhone ?? b.user?.phone,
+                                    contactEmail: b.contactEmail ?? b.user?.email,
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  size: 14,
+                                  color: context.theme.primaryColor,
+                                ),
+                                label: Text(
+                                  'Enquiry',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: context.theme.primaryColor,
+                                  ),
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  backgroundColor: context.theme.primaryColor.withOpacity(0.08),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
                             ),
                         ],
                       ),
@@ -1431,6 +1476,47 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen> {
                                       },
                                     );
                                   },
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 6),
+                                  child: TextButton.icon(
+                                    onPressed: () {
+                                      final b = controller.selectedBusiness.value ?? argBusiness;
+                                      EnquiryBottomSheet.show(
+                                        context,
+                                        itemName: service.name ?? 'Service',
+                                        itemType: 'Service',
+                                        itemPrice: service.cost,
+                                        imagePath: service.imagePath,
+                                        businessName: b.businessName,
+                                        contactPhone: b.contactPhone ?? b.user?.phone,
+                                        contactEmail: b.contactEmail ?? b.user?.email,
+                                      );
+                                    },
+                                    icon: Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 14,
+                                      color: context.theme.primaryColor,
+                                    ),
+                                    label: Text(
+                                      'Enquiry',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: context.theme.primaryColor,
+                                      ),
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      backgroundColor: context.theme.primaryColor.withOpacity(0.08),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                             ],
                           ),

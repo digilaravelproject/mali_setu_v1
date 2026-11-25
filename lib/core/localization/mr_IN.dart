@@ -1148,6 +1148,15 @@ const Map<String, String> mrIN = {
   'referrals_label': 'रेफरल्स',
   'refer_and_win': 'मित्रांना रेफर करा आणि लीडरबोर्डवर अव्वल व्हा!',
   'refer_now': 'रेफर करा',
+
+  // Birthday Celebration
+  'birthday_tag': 'वाढदिवसाच्या हार्दिक शुभेच्छा',
+  'birthday_greeting_title': 'वाढदिवसाच्या हार्दिक शुभेच्छा,\n@name! 🎂✨',
+  'birthday_default_name': 'मित्र',
+  'mali_setu_family': 'माळी सेतू परिवार',
+  'birthday_wish_main': 'माळी सेतू परिवारातर्फे तुम्हाला वाढदिवसाच्या हार्दिक शुभेच्छा! 🌸',
+  'birthday_wish_sub': 'ईश्वर तुम्हाला उत्तम आरोग्य, सुख, समृद्धी आणि दीर्घायुष्य प्रदान करो!',
+  'birthday_thank_you': 'धन्यवाद',
 };
 
 

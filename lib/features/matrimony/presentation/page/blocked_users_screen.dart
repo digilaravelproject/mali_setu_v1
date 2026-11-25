@@ -251,36 +251,40 @@ class BlockedUsersScreen extends GetView<BlockedUsersController> {
           const SizedBox(width: 10),
 
           // Unblock Button
-          InkWell(
-            onTap: () => _showUnblockDialog(item, name),
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF00A884),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF00A884).withValues(alpha: 0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _showUnblockDialog(item, name),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00A884).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFF00A884),
+                    width: 1.2,
                   ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.lock_open_rounded, size: 14, color: Colors.white),
-                  const SizedBox(width: 5),
-                  Text(
-                    'unblock'.tr,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.lock_open_rounded,
+                      size: 14,
+                      color: Color(0xFF00A884),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 5),
+                    Text(
+                      'unblock'.tr,
+                      style: const TextStyle(
+                        color: Color(0xFF00A884),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -305,7 +309,7 @@ class BlockedUsersScreen extends GetView<BlockedUsersController> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00A884).withValues(alpha: 0.1),
+                      color: const Color(0xFF00A884).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.lock_open_rounded, color: Color(0xFF00A884), size: 36),
@@ -335,7 +339,15 @@ class BlockedUsersScreen extends GetView<BlockedUsersController> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                          onPressed: isSubmitting
+                              ? null
+                              : () {
+                                  if (Get.isDialogOpen == true) {
+                                    Get.back();
+                                  } else if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
+                                    Navigator.of(dialogContext).pop();
+                                  }
+                                },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
@@ -356,15 +368,21 @@ class BlockedUsersScreen extends GetView<BlockedUsersController> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: isSubmitting
-                              ? null
+                              ? () {}
                               : () async {
                                   setDialogState(() {
                                     isSubmitting = true;
                                   });
                                   final success = await controller.unblockUser(item);
                                   if (success) {
-                                    Navigator.of(dialogContext).pop();
-                                    CustomSnackBar.showSuccess(message: 'user_unblocked'.tr);
+                                    if (Get.isDialogOpen == true) {
+                                      Get.back();
+                                    } else if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
+                                      Navigator.of(dialogContext).pop();
+                                    }
+                                    Future.delayed(const Duration(milliseconds: 150), () {
+                                      CustomSnackBar.showSuccess(message: 'user_unblocked'.tr);
+                                    });
                                   } else {
                                     setDialogState(() {
                                       isSubmitting = false;
@@ -373,7 +391,9 @@ class BlockedUsersScreen extends GetView<BlockedUsersController> {
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF00A884),
+                            foregroundColor: Colors.white,
                             disabledBackgroundColor: const Color(0xFF00A884),
+                            disabledForegroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

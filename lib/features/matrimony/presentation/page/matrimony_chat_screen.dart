@@ -303,7 +303,15 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: isSubmitting ? null : () => Navigator.of(dialogContext).pop(),
+                          onPressed: isSubmitting
+                              ? null
+                              : () {
+                                  if (Get.isDialogOpen == true) {
+                                    Get.back();
+                                  } else if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
+                                    Navigator.of(dialogContext).pop();
+                                  }
+                                },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
@@ -324,17 +332,25 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: isSubmitting
-                              ? null
+                              ? () {}
                               : () async {
                                   setDialogState(() => isSubmitting = true);
                                   final success = await controller.unblockUser();
-                                  setDialogState(() => isSubmitting = false);
                                   if (success) {
-                                    Navigator.of(dialogContext).pop();
+                                    if (Get.isDialogOpen == true) {
+                                      Get.back();
+                                    } else if (dialogContext.mounted && Navigator.of(dialogContext).canPop()) {
+                                      Navigator.of(dialogContext).pop();
+                                    }
+                                  } else {
+                                    setDialogState(() => isSubmitting = false);
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF00A884),
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: const Color(0xFF00A884),
+                            disabledForegroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

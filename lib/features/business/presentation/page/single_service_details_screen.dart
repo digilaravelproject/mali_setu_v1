@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,6 +15,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/presentation/controller/business_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/controller/single_service_controller.dart';
 import 'package:edu_cluezer/features/business/presentation/page/my_products_services_screen.dart';
+import 'package:edu_cluezer/features/business/presentation/widget/enquiry_bottom_sheet.dart';
 
 class SingleServiceDetailsScreen extends StatelessWidget {
   final SingleServiceController controller = Get.find<SingleServiceController>();
@@ -570,11 +572,28 @@ class SingleServiceDetailsScreen extends StatelessWidget {
                                     ),
                                   ),
                                   if (service.business?.contactPhone != null &&
-                                      service.business!.contactPhone!.isNotEmpty)
+                                      service.business!.contactPhone!.isNotEmpty) ...[
                                     IconButton(
                                       onPressed: () => _makePhoneCall(service.business!.contactPhone!),
                                       icon: Icon(Icons.phone_outlined, color: primaryColor, size: 22),
                                     ),
+                                    if (!isOwnerUser)
+                                      IconButton(
+                                        onPressed: () {
+                                          EnquiryBottomSheet.show(
+                                            context,
+                                            itemName: service.name ?? 'Service',
+                                            itemType: 'Service',
+                                            itemPrice: service.cost,
+                                            imagePath: service.imagePath ?? (service.allImages.isNotEmpty ? service.allImages.first : null),
+                                            businessName: service.business?.businessName,
+                                            contactPhone: service.business?.contactPhone,
+                                            contactEmail: service.business?.contactEmail,
+                                          );
+                                        },
+                                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 20),
+                                      ),
+                                  ],
                                   if (service.business?.contactEmail != null &&
                                       service.business!.contactEmail!.isNotEmpty)
                                     IconButton(
@@ -608,38 +627,105 @@ class SingleServiceDetailsScreen extends StatelessWidget {
               ),
               child: SafeArea(
                 top: false,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (isOwnerUser) {
-                        _navigateToEditService(service);
-                      } else if (service.business?.contactPhone != null &&
-                          service.business!.contactPhone!.isNotEmpty) {
-                        _makePhoneCall(service.business!.contactPhone!);
-                      } else {
-                        CustomSnackBar.showInfo(message: 'Contact details not provided.');
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                child: isOwnerUser
+                    ? SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton.icon(
+                          onPressed: () => _navigateToEditService(service),
+                          icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.white),
+                          label: const Text(
+                            'Edit service',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          // Call Button
+                          SizedBox(
+                            height: 48,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                if (service.business?.contactPhone != null &&
+                                    service.business!.contactPhone!.isNotEmpty) {
+                                  _makePhoneCall(service.business!.contactPhone!);
+                                } else {
+                                  CustomSnackBar.showInfo(message: 'Contact details not provided.');
+                                }
+                              },
+                              icon: Icon(Icons.call_outlined, size: 18, color: primaryColor),
+                              label: Text(
+                                'Call',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: primaryColor,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: primaryColor.withOpacity(0.5), width: 1.5),
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Enquiry Button (only for other users)
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  EnquiryBottomSheet.show(
+                                    context,
+                                    itemName: service.name ?? 'Service',
+                                    itemType: 'Service',
+                                    itemPrice: service.cost,
+                                    imagePath: service.imagePath ?? (service.allImages.isNotEmpty ? service.allImages.first : null),
+                                    businessName: service.business?.businessName,
+                                    contactPhone: service.business?.contactPhone,
+                                    contactEmail: service.business?.contactEmail,
+                                  );
+                                },
+                                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Colors.white),
+                                label: const Text(
+                                  'Enquiry',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.2,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: primaryColor,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      isOwnerUser ? 'Edit service' : 'Contact provider',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ),
-                ),
               ),
             ),
           ],
@@ -685,7 +771,7 @@ class SingleServiceDetailsScreen extends StatelessWidget {
   }
 }
 
-/// Full-Width E-Commerce Service Image Box with Auto-Slide
+/// Full-Width E-Commerce Service Image Box with Horizontal Thumbnails Strip
 class EcommerceServiceImageBox extends StatefulWidget {
   final List<String> images;
   final int serviceId;
@@ -705,7 +791,8 @@ class EcommerceServiceImageBox extends StatefulWidget {
 }
 
 class _EcommerceServiceImageBoxState extends State<EcommerceServiceImageBox> {
-  late final PageController _pageController;
+  late PageController _pageController;
+  late ScrollController _thumbScrollController;
   int _currentIndex = 0;
   Timer? _autoSlideTimer;
   bool _isUserInteracting = false;
@@ -714,6 +801,7 @@ class _EcommerceServiceImageBoxState extends State<EcommerceServiceImageBox> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    _thumbScrollController = ScrollController();
     _startTimer();
   }
 
@@ -725,12 +813,9 @@ class _EcommerceServiceImageBoxState extends State<EcommerceServiceImageBox> {
       if (_isUserInteracting || !mounted) return;
       if (!_pageController.hasClients) return;
 
-      int nextIndex = _currentIndex + 1;
-      if (nextIndex >= widget.images.length) {
-        nextIndex = 0;
-      }
+      final nextPage = (_currentIndex + 1) % widget.images.length;
       _pageController.animateToPage(
-        nextIndex,
+        nextPage,
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOutCubic,
       );
@@ -747,6 +832,18 @@ class _EcommerceServiceImageBoxState extends State<EcommerceServiceImageBox> {
     _startTimer();
   }
 
+  void _scrollToThumbnail(int index) {
+    if (_thumbScrollController.hasClients) {
+      const itemWidth = 68.0; // 60 width + 8 spacing
+      final target = (index * itemWidth) - 100.0;
+      _thumbScrollController.animateTo(
+        target.clamp(0.0, _thumbScrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   void didUpdateWidget(covariant EcommerceServiceImageBox oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -759,133 +856,293 @@ class _EcommerceServiceImageBoxState extends State<EcommerceServiceImageBox> {
   void dispose() {
     _autoSlideTimer?.cancel();
     _pageController.dispose();
+    _thumbScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Full width edge-to-edge container
-    return Container(
-      width: double.infinity,
-      height: 350,
-      color: const Color(0xFFF9FAFB),
-      child: Stack(
-        children: [
-          if (widget.images.isEmpty)
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.design_services_outlined, size: 54, color: Colors.grey[400]),
-                  const SizedBox(height: 8),
-                  Text(
-                    'No image available',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 13, fontWeight: FontWeight.w500),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 1. Full View Main Image Stage
+        Container(
+          width: double.infinity,
+          height: 350,
+          color: const Color(0xFFF8FAFC),
+          child: Stack(
+            children: [
+              if (widget.images.isEmpty)
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.design_services_outlined, size: 54, color: Colors.grey[400]),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No image available',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )
-          else
-            Listener(
-              onPointerDown: (_) => _pauseTimer(),
-              onPointerUp: (_) => _resumeTimer(),
-              onPointerCancel: (_) => _resumeTimer(),
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: widget.images.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final imageUrl = widget.images[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Get.to(() => FullScreenImageViewer(
-                            imageUrl: imageUrl,
-                            tag: 'service_img_${widget.serviceId}_$index',
-                          ));
+                )
+              else
+                Listener(
+                  onPointerDown: (_) => _pauseTimer(),
+                  onPointerUp: (_) => _resumeTimer(),
+                  onPointerCancel: (_) => _resumeTimer(),
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: widget.images.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                      _scrollToThumbnail(index);
                     },
-                    child: Hero(
-                      tag: 'service_img_${widget.serviceId}_$index',
-                      child: Container(
-                        width: double.infinity,
-                        height: 350,
-                        color: Colors.transparent,
-                        child: Center(
-                          child: CustomImageView(
-                            url: imageUrl,
+                    itemBuilder: (context, index) {
+                      final imageUrl = widget.images[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Get.to(() => FullScreenImageViewer(
+                                imageUrls: widget.images,
+                                initialIndex: index,
+                                tag: 'service_img_${widget.serviceId}_$index',
+                              ));
+                        },
+                        child: Hero(
+                          tag: 'service_img_${widget.serviceId}_$index',
+                          child: Container(
                             width: double.infinity,
                             height: 350,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
-                              child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey[400]),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            color: Colors.transparent,
+                            child: Center(
+                              child: CustomImageView(
+                                url: imageUrl,
+                                width: double.infinity,
+                                height: 350,
+                                fit: BoxFit.contain, // Full view without any cropping
+                                errorBuilder: (_, __, ___) => Center(
+                                  child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey[400]),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+                      );
+                    },
+                  ),
+                ),
 
-          // Red Badge on Top-Left
-          Positioned(
-            top: 14,
-            left: 14,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFDC2626), // Bold vibrant red
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                widget.statusBadge,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
+              // Status Badge on Top-Left
+              Positioned(
+                top: 14,
+                left: 14,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDC2626),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    widget.statusBadge,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
 
-          // Dots indicator at bottom center if multiple images
-          if (widget.images.length > 1)
-            Positioned(
-              bottom: 12,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(widget.images.length, (index) {
-                  final isSelected = index == _currentIndex;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: isSelected ? 16 : 6,
-                    height: 6,
+              // Image Counter Pill on Top-Right (e.g. 1 / 4)
+              if (widget.images.length > 1)
+                Positioned(
+                  top: 14,
+                  right: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? widget.primaryColor
-                          : Colors.white.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 2,
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.photo_library_outlined, size: 13, color: Colors.white),
+                        const SizedBox(width: 5),
+                        Text(
+                          '${_currentIndex + 1} / ${widget.images.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ],
                     ),
-                  );
-                }),
+                  ),
+                ),
+
+              // Left Nav Arrow
+              if (widget.images.length > 1 && _currentIndex > 0)
+                Positioned(
+                  left: 8,
+                  top: 155,
+                  child: GestureDetector(
+                    onTap: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16, color: Colors.black87),
+                    ),
+                  ),
+                ),
+
+              // Right Nav Arrow
+              if (widget.images.length > 1 && _currentIndex < widget.images.length - 1)
+                Positioned(
+                  right: 8,
+                  top: 155,
+                  child: GestureDetector(
+                    onTap: () {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black87),
+                    ),
+                  ),
+                ),
+
+              // Dots indicator at bottom center
+              if (widget.images.length > 1)
+                Positioned(
+                  bottom: 10,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(widget.images.length, (index) {
+                      final isSelected = index == _currentIndex;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: isSelected ? 16 : 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? widget.primaryColor
+                              : Colors.black.withOpacity(0.25),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        // 2. Horizontal Scrollable Thumbnail Strip
+        if (widget.images.length > 1)
+          Container(
+            height: 76,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: Color(0xFFE5E7EB), width: 1),
               ),
             ),
-        ],
-      ),
+            child: ListView.separated(
+              controller: _thumbScrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: widget.images.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final isSelected = index == _currentIndex;
+                final thumbUrl = widget.images[index];
+                return GestureDetector(
+                  onTap: () {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected ? widget.primaryColor : const Color(0xFFE5E7EB),
+                        width: isSelected ? 2.5 : 1.0,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: widget.primaryColor.withOpacity(0.25),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: CustomImageView(
+                      url: thumbUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.broken_image_outlined,
+                        size: 24,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 }

@@ -70,6 +70,7 @@ class BlockedUsersController extends GetxController {
       isUnblocking.value = true;
       final data = {
         "blocked_user_id": targetId,
+        "user_id": targetId,
         "is_block": false,
       };
       final response = await _repository.unblockUser(data);
@@ -81,7 +82,10 @@ class BlockedUsersController extends GetxController {
            response['code'] == 200 ||
            (response is Map && (response['message'] != null && response['error'] == null)))) {
         // Remove from list immediately
-        blockedUsers.removeWhere((u) => u.userId == targetId || u.blockId == item.blockId);
+        blockedUsers.removeWhere((u) =>
+            u.userId == targetId ||
+            u.blockId == item.blockId ||
+            u.user?.id == targetId);
         filterUsers(searchQuery.value);
 
         // Sync with MatrimonyMembersController if registered

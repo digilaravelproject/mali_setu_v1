@@ -35,6 +35,7 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
   bool _isMicOn = false;
   bool _isCameraOn = false;
   bool _isFrontCamera = true;
+  bool _isScreenSharing = false;
   String _streamStatusText = "Connecting to live session...";
   bool _joinTokenFailed = false;
   AgoraJoinTokenData? _tokenData;
@@ -169,6 +170,20 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
             final refreshed = await controller.getWebinarJoinToken(widget.webinar.id);
             if (refreshed != null && refreshed.token.isNotEmpty) {
               await _engine?.renewToken(refreshed.token);
+            }
+          },
+          onLocalVideoStateChanged: (VideoSourceType source, LocalVideoStreamState state, LocalVideoStreamReason reason) {
+            debugPrint("[Agora] Local video state changed: source=$source, state=$state, reason=$reason");
+            if (source == VideoSourceType.videoSourceScreen) {
+              if (state == LocalVideoStreamState.localVideoStreamStateStopped ||
+                  state == LocalVideoStreamState.localVideoStreamStateFailed) {
+                if (mounted && _isScreenSharing) {
+                  setState(() {
+                    _isScreenSharing = false;
+                  });
+                  CustomSnackBar.showInfo(message: "Screen sharing ended");
+                }
+              }
             }
           },
           onError: (ErrorCodeType err, String msg) {
@@ -337,8 +352,118 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
     }
   }
 
+  Future<void> _toggleScreenShare() async {
+    if (_engine == null || !_isJoined) {
+      CustomSnackBar.showInfo(message: "Connecting to stream, please wait...");
+      return;
+    }
+
+    HapticFeedback.mediumImpact();
+
+    if (!_isScreenSharing) {
+      try {
+        // If camera is currently on, turn it off so screen share takes full priority
+        if (_isCameraOn) {
+          try {
+            await _engine!.muteLocalVideoStream(true);
+            await _engine!.stopPreview();
+            await _engine!.enableLocalVideo(false);
+            if (mounted) {
+              setState(() {
+                _isCameraOn = false;
+              });
+              controller.isCameraOn.value = false;
+            }
+          } catch (e) {
+            debugPrint("[Camera Pause Error] $e");
+          }
+        }
+
+        // Start Agora screen capture
+        await _engine!.startScreenCapture(
+          const ScreenCaptureParameters2(
+            captureAudio: true,
+            captureVideo: true,
+            videoParams: ScreenVideoParameters(
+              dimensions: VideoDimensions(width: 1280, height: 720),
+              frameRate: 15,
+              bitrate: 1000,
+            ),
+          ),
+        );
+
+        // Ensure local video is enabled and UNMUTED so frames are broadcasted
+        await _engine!.enableVideo();
+        await _engine!.enableLocalVideo(true);
+        await _engine!.muteLocalVideoStream(false);
+
+        // Update channel media options to publish screen track to the room
+        await _engine!.updateChannelMediaOptions(
+          const ChannelMediaOptions(
+            publishScreenCaptureVideo: true,
+            publishScreenCaptureAudio: true,
+            publishScreenTrack: true,
+            publishCameraTrack: false,
+            clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          ),
+        );
+
+        if (mounted) {
+          setState(() {
+            _isScreenSharing = true;
+          });
+          CustomSnackBar.showSuccess(message: "Screen sharing started");
+        }
+      } catch (e) {
+        debugPrint("[Screen Share Start Error] $e");
+        if (mounted) {
+          setState(() {
+            _isScreenSharing = false;
+          });
+          CustomSnackBar.showError(message: "Could not start screen share: $e");
+        }
+      }
+    } else {
+      try {
+        await _engine!.stopScreenCapture();
+        await _engine!.updateChannelMediaOptions(
+          ChannelMediaOptions(
+            publishScreenTrack: false,
+            publishScreenCaptureVideo: false,
+            publishScreenCaptureAudio: false,
+            publishCameraTrack: _isCameraOn,
+            clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          ),
+        );
+
+        if (!_isCameraOn) {
+          await _engine!.muteLocalVideoStream(true);
+          await _engine!.enableLocalVideo(false);
+        }
+
+        if (mounted) {
+          setState(() {
+            _isScreenSharing = false;
+          });
+          CustomSnackBar.showInfo(message: "Screen sharing stopped");
+        }
+      } catch (e) {
+        debugPrint("[Screen Share Stop Error] $e");
+        if (mounted) {
+          setState(() {
+            _isScreenSharing = false;
+          });
+        }
+      }
+    }
+  }
+
   Future<void> _leaveAgora() async {
     try {
+      if (_isScreenSharing && _engine != null) {
+        await _engine!.stopScreenCapture();
+        _isScreenSharing = false;
+      }
       if (_engine != null) {
         await _engine!.leaveChannel();
         await _engine!.release();
@@ -476,132 +601,46 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
               aspectRatio: 16 / 9.5,
               child: Stack(
                 children: [
-                  // 1. Video Render (Host Video or Placeholder/Status)
+                  // 1. Video Render (Screen Sharing, Host Video or Placeholder/Status)
                   Positioned.fill(
                     child: Container(
                       color: Colors.black,
-                      child: _engine != null && _remoteUid != null
-                          ? AgoraVideoView(
-                              controller: VideoViewController.remote(
-                                rtcEngine: _engine!,
-                                canvas: VideoCanvas(uid: _remoteUid!),
-                                connection: RtcConnection(channelId: channelName),
+                      child: _buildMainVideoContent(channelName),
+                    ),
+                  ),
+
+                  // 2. Speaker Badge at bottom-left of video (only when not sharing own screen)
+                  if (!_isScreenSharing)
+                    Positioned(
+                      left: 12,
+                      bottom: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.65),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _remoteUid != null ? Icons.mic : Icons.mic_off,
+                              color: _remoteUid != null ? const Color(0xFF10B981) : Colors.white60,
+                              size: 13,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              "${widget.webinar.speaker.name} (Speaker)",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
-                            )
-                          : Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                // Thumbnail / Banner
-                                CachedNetworkImage(
-                                  imageUrl: widget.webinar.videoThumbnailUrl,
-                                  fit: BoxFit.cover,
-                                  errorWidget: (_, __, ___) => Container(
-                                    color: const Color(0xFF1E293B),
-                                    child: const Center(
-                                      child: Icon(Icons.videocam_rounded, size: 54, color: Colors.white30),
-                                    ),
-                                  ),
-                                ),
-
-                                // Dark overlay
-                                Container(
-                                  color: Colors.black.withOpacity(0.68),
-                                ),
-
-                                // Status text / Connecting indicator
-                                Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (_isJoiningAgora) ...[
-                                          const CupertinoActivityIndicator(color: Colors.white, radius: 13),
-                                          const SizedBox(height: 12),
-                                        ] else if (_joinTokenFailed) ...[
-                                          const Icon(Icons.info_outline_rounded, color: Color(0xFFFBBF24), size: 30),
-                                          const SizedBox(height: 10),
-                                        ] else ...[
-                                          const Icon(Icons.live_tv_rounded, color: Colors.white70, size: 32),
-                                          const SizedBox(height: 10),
-                                        ],
-                                        Text(
-                                          _streamStatusText,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        if (_joinTokenFailed) ...[
-                                          const SizedBox(height: 12),
-                                          GestureDetector(
-                                            onTap: _initAgoraAndJoin,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.primary,
-                                                borderRadius: BorderRadius.circular(16),
-                                              ),
-                                              child: const Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(Icons.refresh_rounded, size: 14, color: Colors.white),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    "Retry Join",
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.w700,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
-                    ),
-                  ),
-
-                  // 2. Speaker Badge at bottom-left of video
-                  Positioned(
-                    left: 12,
-                    bottom: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.65),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _remoteUid != null ? Icons.mic : Icons.mic_off,
-                            color: _remoteUid != null ? const Color(0xFF10B981) : Colors.white60,
-                            size: 13,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            "${widget.webinar.speaker.name} (Speaker)",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
 
                   // 3. Floating Local Camera View (PiP) when Camera is ON
                   if (_isCameraOn && _engine != null)
@@ -698,71 +737,94 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
               ),
             ),
 
-            // Interactive Controls Bar (Mic, Camera, Flip Camera, Chat, Leave)
+            // Interactive Controls Bar (Mic, Camera, Screen Share, Flip Camera, Chat, Leave)
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               color: const Color(0xFF1E293B),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // 1. Mic Toggle (User can turn Mic ON/OFF)
-                  _buildControlButton(
-                    icon: _isMicOn ? Icons.mic_rounded : Icons.mic_off_rounded,
-                    label: _isMicOn ? "Mic On" : "Mic Off",
-                    isActive: _isMicOn,
-                    activeColor: const Color(0xFF10B981),
-                    onTap: _toggleMic,
-                  ),
-
-                  // 2. Camera Toggle (User can turn Camera ON/OFF)
-                  _buildControlButton(
-                    icon: _isCameraOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
-                    label: _isCameraOn ? "Camera On" : "Camera Off",
-                    isActive: _isCameraOn,
-                    activeColor: AppColors.primary,
-                    onTap: _toggleCamera,
-                  ),
-
-                  // 3. Flip Camera (Active only when camera is ON)
-                  if (_isCameraOn)
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    const SizedBox(width: 8),
+                    // 1. Mic Toggle (User can turn Mic ON/OFF)
                     _buildControlButton(
-                      icon: Icons.cameraswitch_rounded,
-                      label: "Flip",
-                      isActive: true,
-                      activeColor: const Color(0xFF3B82F6),
-                      onTap: _switchCamera,
+                      icon: _isMicOn ? Icons.mic_rounded : Icons.mic_off_rounded,
+                      label: _isMicOn ? "Mic On" : "Mic Off",
+                      isActive: _isMicOn,
+                      activeColor: const Color(0xFF10B981),
+                      onTap: _toggleMic,
                     ),
+                    const SizedBox(width: 14),
 
-                  // 4. Chat Button
-                  _buildControlButton(
-                    icon: CupertinoIcons.chat_bubble_2_fill,
-                    label: "Chat",
-                    isActive: true,
-                    activeColor: AppColors.primary,
-                    onTap: () {
-                      if (_commentsScrollController.hasClients) {
-                        _commentsScrollController.animateTo(
-                          _commentsScrollController.position.maxScrollExtent,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOut,
-                        );
-                      }
-                    },
-                  ),
+                    // 2. Camera Toggle (User can turn Camera ON/OFF)
+                    _buildControlButton(
+                      icon: _isCameraOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
+                      label: _isCameraOn ? "Camera On" : "Camera Off",
+                      isActive: _isCameraOn,
+                      activeColor: AppColors.primary,
+                      onTap: _toggleCamera,
+                    ),
+                    const SizedBox(width: 14),
 
-                  // 5. Leave Button
-                  _buildControlButton(
-                    icon: Icons.call_end_rounded,
-                    label: "Leave",
-                    isActive: false,
-                    isDestructive: true,
-                    onTap: () {
-                      _leaveAgora();
-                      Get.back();
-                      CustomSnackBar.showInfo(message: "Left live webinar");
-                    },
-                  ),
-                ],
+                    // 3. Screen Share Toggle (User can Share/Stop Screen)
+                    _buildControlButton(
+                      icon: _isScreenSharing
+                          ? Icons.stop_screen_share_rounded
+                          : Icons.screen_share_rounded,
+                      label: _isScreenSharing ? "Stop Share" : "Share",
+                      isActive: _isScreenSharing,
+                      activeColor: const Color(0xFF3B82F6),
+                      onTap: _toggleScreenShare,
+                    ),
+                    const SizedBox(width: 14),
+
+                    // 4. Flip Camera (Active only when camera is ON)
+                    if (_isCameraOn) ...[
+                      _buildControlButton(
+                        icon: Icons.cameraswitch_rounded,
+                        label: "Flip",
+                        isActive: true,
+                        activeColor: const Color(0xFF3B82F6),
+                        onTap: _switchCamera,
+                      ),
+                      const SizedBox(width: 14),
+                    ],
+
+                    // 5. Chat Button
+                    _buildControlButton(
+                      icon: CupertinoIcons.chat_bubble_2_fill,
+                      label: "Chat",
+                      isActive: true,
+                      activeColor: AppColors.primary,
+                      onTap: () {
+                        if (_commentsScrollController.hasClients) {
+                          _commentsScrollController.animateTo(
+                            _commentsScrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 14),
+
+                    // 6. Leave Button
+                    _buildControlButton(
+                      icon: Icons.call_end_rounded,
+                      label: "Leave",
+                      isActive: false,
+                      isDestructive: true,
+                      onTap: () {
+                        _leaveAgora();
+                        Get.back();
+                        CustomSnackBar.showInfo(message: "Left live webinar");
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
               ),
             ),
 
@@ -1084,6 +1146,178 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
     );
   }
 
+  Widget _buildMainVideoContent(String channelName) {
+    if (_isScreenSharing) {
+      return _buildScreenSharingLocalBanner();
+    }
+    if (_engine != null && _remoteUid != null) {
+      return AgoraVideoView(
+        controller: VideoViewController.remote(
+          rtcEngine: _engine!,
+          canvas: VideoCanvas(uid: _remoteUid!),
+          connection: RtcConnection(channelId: channelName),
+        ),
+      );
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Thumbnail / Banner
+        CachedNetworkImage(
+          imageUrl: widget.webinar.videoThumbnailUrl,
+          fit: BoxFit.cover,
+          errorWidget: (_, __, ___) => Container(
+            color: const Color(0xFF1E293B),
+            child: const Center(
+              child: Icon(Icons.videocam_rounded, size: 54, color: Colors.white30),
+            ),
+          ),
+        ),
+
+        // Dark overlay
+        Container(
+          color: Colors.black.withOpacity(0.68),
+        ),
+
+        // Status text / Connecting indicator
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isJoiningAgora) ...[
+                  const CupertinoActivityIndicator(color: Colors.white, radius: 13),
+                  const SizedBox(height: 12),
+                ] else if (_joinTokenFailed) ...[
+                  const Icon(Icons.info_outline_rounded, color: Color(0xFFFBBF24), size: 30),
+                  const SizedBox(height: 10),
+                ] else ...[
+                  const Icon(Icons.live_tv_rounded, color: Colors.white70, size: 32),
+                  const SizedBox(height: 10),
+                ],
+                Text(
+                  _streamStatusText,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (_joinTokenFailed) ...[
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: _initAgoraAndJoin,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.refresh_rounded, size: 14, color: Colors.white),
+                          SizedBox(width: 4),
+                          Text(
+                            "Retry Join",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScreenSharingLocalBanner() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
+                  width: 2,
+                ),
+              ),
+              child: const Icon(
+                Icons.screen_share_rounded,
+                color: Color(0xFF60A5FA),
+                size: 34,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              "You are sharing your screen",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.2,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 3),
+            Text(
+              "Participants can see your screen in real time",
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 11.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: _toggleScreenShare,
+              icon: const Icon(Icons.stop_screen_share_rounded, size: 15, color: Colors.white),
+              label: const Text(
+                "Stop Sharing",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildMessageItem(WebinarChatMessage msg) {
     return Row(
