@@ -653,6 +653,7 @@ const Map<String, String> hiIN = {
   'tap_camera_update_photo': 'फोटो अपडेट करने के लिए टैप करें',
   'personal_details_sub': 'वधू एवं वर का विवरण',
   'gender': 'लिंग',
+  'gender_cannot_be_changed': 'प्रोफ़ाइल एडिट करते समय लिंग नहीं बदला जा सकता',
   'complexion': 'रंग',
   'language': 'भाषा',
   'religious_horoscope': 'धार्मिक कुंडली',
@@ -1144,6 +1145,14 @@ const Map<String, String> hiIN = {
   'location_pinned': 'लोकेशन और कोऑर्डिनेट्स पिन हो गए',
   'change_location': 'बदलें',
   'location_autofill_success': 'पता और लोकेशन कोऑर्डिनेट्स सफलतापूर्वक भर गए!',
+
+  // Volunteer Convert
+  'convert_volunteer_title': 'वॉलिंटियर खाते में बदलें',
+  'convert_volunteer_desc': 'आपका खाता प्रकार "@current" से बदलकर "वॉलिंटियर (Volunteer)" हो जाएगा। आपको अधिक रेफरल रिवॉर्ड्स और वॉलिंटियर सुविधाएं मिलेंगी।',
+  'convert_volunteer_confirm_btn': 'हाँ, वॉलिंटियर में बदलें',
+  'current_account_type': 'वर्तमान प्रकार',
+  'new_account_type': 'नया प्रकार',
+  'convert_success_msg': 'आपका खाता वॉलिंटियर खाते में बदल दिया गया है। सत्यापन लंबित है।',
 };
 
 

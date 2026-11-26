@@ -30,6 +30,7 @@ import '../../../webinars/data/models/webinar_model.dart';
 import '../../data/model/banner_model.dart';
 import '../../../referral/presentation/binding/referral_binding.dart';
 import '../../../referral/presentation/widgets/volunteer_prompt_dialog.dart';
+import '../../../referral/presentation/widgets/volunteer_convert_dialog.dart';
 import '../controller/home_controller.dart';
 
 class HomePage extends GetWidget<HomeController> {
@@ -416,7 +417,7 @@ class HomePage extends GetWidget<HomeController> {
                                     icon: Icons.volunteer_activism_rounded,
                                     buttonText: 'register_volunteer_btn'.tr,
                                     onTap: () {
-                                      VolunteerPromptDialog.checkAndShow(force: true);
+                                      VolunteerConvertDialog.show(context);
                                     },
                                     color1: const Color(0xFF8B5CF6),
                                     color2: const Color(0xFF6D28D9),

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -577,22 +576,6 @@ class SingleServiceDetailsScreen extends StatelessWidget {
                                       onPressed: () => _makePhoneCall(service.business!.contactPhone!),
                                       icon: Icon(Icons.phone_outlined, color: primaryColor, size: 22),
                                     ),
-                                    if (!isOwnerUser)
-                                      IconButton(
-                                        onPressed: () {
-                                          EnquiryBottomSheet.show(
-                                            context,
-                                            itemName: service.name ?? 'Service',
-                                            itemType: 'Service',
-                                            itemPrice: service.cost,
-                                            imagePath: service.imagePath ?? (service.allImages.isNotEmpty ? service.allImages.first : null),
-                                            businessName: service.business?.businessName,
-                                            contactPhone: service.business?.contactPhone,
-                                            contactEmail: service.business?.contactEmail,
-                                          );
-                                        },
-                                        icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 20),
-                                      ),
                                   ],
                                   if (service.business?.contactEmail != null &&
                                       service.business!.contactEmail!.isNotEmpty)
@@ -694,6 +677,7 @@ class SingleServiceDetailsScreen extends StatelessWidget {
                                 onPressed: () {
                                   EnquiryBottomSheet.show(
                                     context,
+                                    serviceId: service.id,
                                     itemName: service.name ?? 'Service',
                                     itemType: 'Service',
                                     itemPrice: service.cost,
@@ -701,6 +685,7 @@ class SingleServiceDetailsScreen extends StatelessWidget {
                                     businessName: service.business?.businessName,
                                     contactPhone: service.business?.contactPhone,
                                     contactEmail: service.business?.contactEmail,
+                                    isOwner: isOwnerUser,
                                   );
                                 },
                                 icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Colors.white),

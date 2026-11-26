@@ -304,9 +304,14 @@ class RegMatrimonyPage extends GetWidget<RegMatrimonyController> {
                   value: controller.gender.value,
                   icon: Icons.person_outline,
                   isRequired: true,
+                  isEnabled: !controller.isEditMode.value,
                   errorText: controller.errors['gender'],
-                  onTap: () => _showSingleSelectBottomSheet(
-                      context, "Gender", controller.genderList, controller.gender.call),
+                  onTap: controller.isEditMode.value
+                      ? () {
+                          CustomSnackBar.showInfo(message: "gender_cannot_be_changed".tr);
+                        }
+                      : () => _showSingleSelectBottomSheet(
+                          context, "Gender", controller.genderList, controller.gender.call),
                 )),
                 const SizedBox(height: 12),
 

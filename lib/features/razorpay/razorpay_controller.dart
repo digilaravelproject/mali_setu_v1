@@ -13,6 +13,7 @@ import 'package:edu_cluezer/features/business/presentation/controller/business_c
 import 'package:edu_cluezer/core/network/api_response.dart';
 
 import '../Auth/service/auth_service.dart';
+import '../webinars/presentation/controllers/webinars_controller.dart';
 
 class RazorpayController extends GetxController {
   late Razorpay _razorpay;
@@ -62,6 +63,7 @@ class RazorpayController extends GetxController {
     String? key,
     required int transaction_id,
     String type = 'general', // New parameter to track payment type
+    int? webinarId,
   }) {
     var options = {
       'key': key ?? 'rzp_test_S9yXFuXcf0S6Ll',
@@ -86,6 +88,7 @@ class RazorpayController extends GetxController {
       'amount': amount,
       'order_id': orderId,
       'type': type,
+      'webinar_id': webinarId,
     };
 
     try {
@@ -102,9 +105,46 @@ class RazorpayController extends GetxController {
     debugPrint("RZP SUCCESS: paymentId=${response.paymentId}, signature=${response.signature}");
 
     if (_pendingVerification != null) {
-      final orderId = _pendingVerification!['order_id'];
+      final orderId = response.orderId ?? _pendingVerification!['order_id'];
       final type = _pendingVerification!['type'];
       final amount = _pendingVerification!['amount'];
+      final webinarId = _pendingVerification!['webinar_id'] as int?;
+
+      if (type == 'webinar') {
+        // 🚀 IMMEDIATELY update webinar registration status without waiting for dialog dismiss
+        if (Get.isRegistered<WebinarsController>()) {
+          Get.find<WebinarsController>().onWebinarPaymentSuccess(webinarId);
+        }
+
+        if (orderId != null) {
+          try {
+            await _paymentRepository.verifyPayment(
+              razorpayOrderId: orderId,
+              razorpayPaymentId: response.paymentId ?? "",
+              razorpaySignature: response.signature ?? '',
+              transaction_id: _pendingVerification!['transaction_id'] ?? 0,
+            );
+          } catch (e) {
+            debugPrint("Webinar verifyPayment error: $e");
+          }
+        }
+
+        PaymentSuccessDialog.show(
+          amount: amount.toString(),
+          paymentId: response.paymentId ?? '',
+          onOkPressed: () {
+            if (Get.isRegistered<AuthService>()) {
+              Get.find<AuthService>().refreshProfile();
+            }
+            if (Get.isRegistered<WebinarsController>()) {
+              Get.find<WebinarsController>().onWebinarPaymentSuccess(webinarId);
+            }
+          },
+        );
+
+        _pendingVerification = null;
+        return;
+      }
 
       if (orderId == null) {
         print("⚠️ Order ID is null – skipping verification");
@@ -153,7 +193,7 @@ class RazorpayController extends GetxController {
       } else {
         Get.snackbar(
           'Verification Failed',
-          res.message ?? 'Payment verification failed',
+          res.message.isNotEmpty ? res.message : 'Payment verification failed',
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );

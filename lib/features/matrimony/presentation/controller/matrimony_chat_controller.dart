@@ -12,6 +12,7 @@ import '../../domain/repository/matrimony_repository.dart';
 import 'matrimony_members_controller.dart';
 import 'matrimony_controller.dart';
 import 'matrimony_requests_controller.dart';
+import 'blocked_users_controller.dart';
 
 class MatrimonyChatController extends GetxController {
   final MatrimonyRepository _repository = Get.find<MatrimonyRepository>();
@@ -66,7 +67,24 @@ class MatrimonyChatController extends GetxController {
       }
     }
 
+    // Check if other user is in BlockedUsersController
+    if (Get.isRegistered<BlockedUsersController>() && otherUserId != null) {
+      final isFound = Get.find<BlockedUsersController>().blockedUsers.any(
+        (b) => b.userId == otherUserId || b.user?.id == otherUserId || b.profile?.userId == otherUserId,
+      );
+      if (isFound) {
+        isBlocked.value = true;
+      }
+    }
+
     print("conversationId : $conversationId  otherUserId: $otherUserId isBlocked: ${isBlocked.value} userName: ${rxUserName.value}");
+
+    // 🚫 If user is blocked, DO NOT call messages API
+    if (isBlocked.value) {
+      debugPrint("🚫 User is blocked. Skipping initial getMessages API call.");
+      messages.clear();
+      return;
+    }
 
     if (conversationId != null) {
       fetchMessages();
@@ -86,6 +104,13 @@ class MatrimonyChatController extends GetxController {
       this.userName = userName;
     }
     messages.clear();
+
+    // 🚫 If user is blocked, DO NOT call messages API
+    if (this.isBlocked.value) {
+      debugPrint("🚫 User is blocked in updateConversation. Skipping getMessages API call.");
+      return;
+    }
+
     if (conversationId != null) {
       fetchMessages();
     } else if (this.otherUserId != null) {
@@ -94,6 +119,11 @@ class MatrimonyChatController extends GetxController {
   }
 
   Future<void> refreshChat() async {
+    // 🚫 If user is blocked, DO NOT call messages API
+    if (isBlocked.value) {
+      debugPrint("🚫 User is blocked. Skipping refreshChat / getMessages API call.");
+      return;
+    }
     if (conversationId != null) {
       await fetchMessages();
     } else if (otherUserId != null) {
@@ -103,17 +133,32 @@ class MatrimonyChatController extends GetxController {
 
   Future<void> fetchMessages() async {
     if (conversationId == null) return;
+    // 🚫 If user is blocked, DO NOT call messages API
+    if (isBlocked.value) {
+      debugPrint("🚫 User is blocked. Skipping fetchMessages / getMessages API call.");
+      messages.clear();
+      return;
+    }
+
     isLoading.value = true;
     try {
       final response = await _repository.getMessages(conversationId!);
       if (response.success == true && response.data != null) {
-        messages.value = response.data!.messages?.data ?? [];
         conversation.value = response.data!.conversation;
         if (response.data!.conversation?.isBlock != null) {
           isBlocked.value = response.data!.conversation!.isBlock == true;
         } else if (!isBlocked.value) {
           _checkBlockStatusFromConversations();
         }
+
+        // 🚫 If conversation is blocked, discard messages and clear list
+        if (isBlocked.value) {
+          debugPrint("🚫 Conversation returned isBlock = true. Clearing messages.");
+          messages.clear();
+          return;
+        }
+
+        messages.value = response.data!.messages?.data ?? [];
         _resolveOtherUserName();
         _scrollToBottom();
       }
@@ -266,6 +311,13 @@ class MatrimonyChatController extends GetxController {
   }
 
   Future<void> fetchConversationsAndFindOne() async {
+    // 🚫 If user is blocked, DO NOT call messages or conversation API
+    if (isBlocked.value) {
+      debugPrint("🚫 User is blocked. Skipping fetchConversationsAndFindOne.");
+      messages.clear();
+      return;
+    }
+
     isLoading.value = true;
     try {
       final response = await _repository.getConversations();
@@ -277,6 +329,11 @@ class MatrimonyChatController extends GetxController {
           conversationId = existing.id;
           if (existing.isBlock != null) {
             isBlocked.value = existing.isBlock == true;
+          }
+          if (isBlocked.value) {
+            debugPrint("🚫 Conversation is blocked. Skipping fetchMessages.");
+            messages.clear();
+            return;
           }
           await fetchMessages();
         } else {
@@ -292,6 +349,10 @@ class MatrimonyChatController extends GetxController {
   }
 
   Future<void> sendMessage() async {
+    if (isBlocked.value) {
+      CustomSnackBar.showError(message: "Cannot send message to a blocked user");
+      return;
+    }
     final text = messageController.text.trim();
     if ((text.isEmpty && selectedFiles.isEmpty) || isSending.value) return;
 
@@ -363,7 +424,9 @@ class MatrimonyChatController extends GetxController {
       final newMsg = MatrimonyMessage.fromJson(response['data']['message']);
       conversationId = newMsg.conversationId;
     }
-    fetchMessages();
+    if (!isBlocked.value) {
+      fetchMessages();
+    }
   }
 
   Future<void> pickImage(ImageSource source) async {
@@ -452,6 +515,7 @@ class MatrimonyChatController extends GetxController {
            (response is Map && (response['message'] != null && response['error'] == null)))) {
         CustomSnackBar.showSuccess(message: response['message'] ?? 'user_blocked'.tr);
         isBlocked.value = true;
+        messages.clear(); // 🚫 Immediately clear messages of blocked user
 
         // Update block status in members list
         if (Get.isRegistered<MatrimonyMembersController>()) {
@@ -508,6 +572,7 @@ class MatrimonyChatController extends GetxController {
         if (Get.isRegistered<MatrimonyMembersController>()) {
           Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, false);
         }
+        fetchMessages();
         return true;
       } else {
         isBlocked.value = false;
@@ -515,6 +580,7 @@ class MatrimonyChatController extends GetxController {
           Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, false);
         }
         CustomSnackBar.showSuccess(message: 'user_unblocked'.tr);
+        fetchMessages();
         return true;
       }
     } catch (e) {
@@ -524,6 +590,7 @@ class MatrimonyChatController extends GetxController {
         Get.find<MatrimonyMembersController>().updateBlockStatusByUserId(userId, false);
       }
       CustomSnackBar.showSuccess(message: 'user_unblocked'.tr);
+      fetchMessages();
       return true;
     }
   }

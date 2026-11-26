@@ -7,6 +7,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/data/model/res_single_product_model.dart';
 import 'package:edu_cluezer/features/business/data/model/res_single_service_model.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
+import 'package:edu_cluezer/features/business/data/model/product_enquiry_model.dart';
 
 
 
@@ -44,6 +45,7 @@ abstract class BusinessDataSource {
   Future<JobApplicationsResponse> getJobApplications(int jobId);
   Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
+  Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request);
 }
 
 class BusinessDataSourceImpl implements BusinessDataSource {
@@ -474,6 +476,21 @@ class BusinessDataSourceImpl implements BusinessDataSource {
       },
     );
     return BusinessResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request) async {
+    final response = await apiClient.post(
+      ApiConstants.businessEnquiries,
+      data: request.toJson(),
+    );
+    if (response.data is Map<String, dynamic>) {
+      return ProductEnquiryResponse.fromJson(response.data);
+    }
+    return ProductEnquiryResponse(
+      success: response.statusCode == 200 || response.statusCode == 201,
+      message: response.statusMessage ?? 'Enquiry submitted successfully',
+    );
   }
 }
 

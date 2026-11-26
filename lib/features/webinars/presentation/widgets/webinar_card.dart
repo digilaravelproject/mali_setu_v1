@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../../core/styles/app_colors.dart';
 import '../../data/models/webinar_model.dart';
+import '../controllers/webinars_controller.dart';
 
 class WebinarCard extends StatelessWidget {
   final Webinar webinar;
@@ -18,7 +20,10 @@ class WebinarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final needsRegistration = webinar.requireRegistration && !webinar.isRegistered;
+    final isRegistered = (Get.isRegistered<WebinarsController>() &&
+            Get.find<WebinarsController>().isWebinarRegistered(webinar.id)) ||
+        webinar.isRegistered;
+    final needsRegistration = webinar.requireRegistration && !isRegistered;
     final isLive = webinar.isLiveSession;
     final isCompleted = webinar.isCompleted;
 

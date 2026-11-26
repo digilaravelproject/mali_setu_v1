@@ -348,6 +348,7 @@ const Map<String, String> mrIN = {
   'name': 'नाव"',
   'got_it': 'समजलं!',
   'gender': 'लिंग',
+  'gender_cannot_be_changed': 'प्रोफाइल एडिट करताना लिंग बदलता येत नाही',
   'language': 'भाषा',
   'religious_horoscope': 'धर्म / राशी',
   'religious_horoscope_sub': 'तुमची ज्योतिषीय माहिती',
@@ -1164,6 +1165,14 @@ const Map<String, String> mrIN = {
   'location_pinned': 'स्थान आणि कोऑर्डिनेट्स पिन झाले',
   'change_location': 'बदला',
   'location_autofill_success': 'पत्ता आणि स्थान कोऑर्डिनेट्स यशस्वीरित्या भरले!',
+
+  // Volunteer Convert
+  'convert_volunteer_title': 'स्वयंसेवक खात्यात बदला',
+  'convert_volunteer_desc': 'तुमचा खाते प्रकार "@current" वरून बदलून "स्वयंसेवक (Volunteer)" होईल. तुम्हाला अधिक रेफरल रिवॉर्ड्स आणि विशेष फायदे मिळतील.',
+  'convert_volunteer_confirm_btn': 'होय, स्वयंसेवकात बदला',
+  'current_account_type': 'सध्याचा प्रकार',
+  'new_account_type': 'नवीन प्रकार',
+  'convert_success_msg': 'तुमचे खाते स्वयंसेवक खात्यात रूपांतरित झाले आहे. पडताळणी प्रलंबित आहे.',
 };
 
 

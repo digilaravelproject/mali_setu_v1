@@ -7,6 +7,7 @@ import '../../../../core/storage/shared_prefs.dart';
 import '../../../../core/styles/app_colors.dart';
 import '../../../Auth/service/auth_service.dart';
 import '../binding/referral_binding.dart';
+import 'volunteer_convert_dialog.dart';
 
 class VolunteerPromptDialog extends StatelessWidget {
   final bool isVolunteer;
@@ -724,23 +725,9 @@ class VolunteerPromptDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () async {
+                      onTap: () {
                         Navigator.of(context).pop();
-                        VolunteerPromptDialog.resetSession();
-
-                        // Logout current profile and navigate to register with volunteer pre-selected
-                        if (Get.isRegistered<AuthService>()) {
-                          final auth = Get.find<AuthService>();
-                          await auth.logout(
-                            redirectToRoute: AppRoutes.register,
-                            arguments: {'user_type': 'volunteer'},
-                          );
-                        } else {
-                          Get.offAllNamed(
-                            AppRoutes.register,
-                            arguments: {'user_type': 'volunteer'},
-                          );
-                        }
+                        VolunteerConvertDialog.show(context);
                       },
                       child: Ink(
                         height: 50,

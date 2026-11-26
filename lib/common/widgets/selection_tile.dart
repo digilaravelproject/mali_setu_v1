@@ -9,6 +9,7 @@ class SelectionTile extends StatelessWidget {
   final String placeholder;
   final String? errorText;
   final bool isRequired;
+  final bool isEnabled;
 
   const SelectionTile({
     super.key,
@@ -19,6 +20,7 @@ class SelectionTile extends StatelessWidget {
     this.placeholder = "Select",
     this.errorText,
     this.isRequired = false,
+    this.isEnabled = true,
   });
 
   @override
@@ -48,40 +50,55 @@ class SelectionTile extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         InkWell(
-          onTap: onTap,
+          onTap: isEnabled ? onTap : null,
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
+              color: isEnabled ? theme.colorScheme.surface : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: hasError 
-                    ? Colors.red.shade400 
-                    : hasValue 
-                        ? theme.primaryColor 
-                        : theme.dividerColor,
+                color: !isEnabled
+                    ? Colors.grey.shade300
+                    : hasError 
+                        ? Colors.red.shade400 
+                        : hasValue 
+                            ? theme.primaryColor 
+                            : theme.dividerColor,
                 width: hasValue || hasError ? 1.5 : 1,
               ),
             ),
             child: Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 20, color: hasError ? Colors.red.shade400 : (hasValue ? theme.primaryColor : theme.iconTheme.color)),
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: !isEnabled
+                        ? Colors.grey.shade500
+                        : (hasError
+                            ? Colors.red.shade400
+                            : (hasValue ? theme.primaryColor : theme.iconTheme.color)),
+                  ),
                   const SizedBox(width: 12),
                 ],
                 Expanded(
                   child: Text(
                     hasValue ? value! : displayPlaceholder,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: hasValue ? theme.textTheme.bodyLarge?.color : theme.hintColor,
+                      color: !isEnabled
+                          ? Colors.grey.shade600
+                          : (hasValue ? theme.textTheme.bodyLarge?.color : theme.hintColor),
                       fontWeight: hasValue ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ),
                 Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: hasError ? Colors.red.shade400 : (hasValue ? theme.primaryColor : theme.hintColor),
+                  !isEnabled ? Icons.lock_outline_rounded : Icons.keyboard_arrow_down_rounded,
+                  size: !isEnabled ? 18 : 24,
+                  color: !isEnabled
+                      ? Colors.grey.shade500
+                      : (hasError ? Colors.red.shade400 : (hasValue ? theme.primaryColor : theme.hintColor)),
                 ),
               ],
             ),

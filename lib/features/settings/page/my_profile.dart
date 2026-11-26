@@ -218,51 +218,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () {
-                 Get.toNamed(AppRoutes.updateProfile);
-              },
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                side: BorderSide(color: context.theme.primaryColor),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              icon: Icon(Icons.edit_outlined, size: 16, color: context.theme.primaryColor),
-              label: Text(
-                'edit_profile'.tr,
-                style: TextStyle(
-                  color: context.theme.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+        OutlinedButton.icon(
+          onPressed: () {
+            Get.toNamed(AppRoutes.updateProfile);
+          },
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            side: BorderSide(color: context.theme.primaryColor),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
-              onPressed: () {
-                 Get.toNamed(AppRoutes.matrimonyBlockedUsers);
-              },
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                side: BorderSide(color: Colors.red.shade300),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              icon: Icon(Icons.block_rounded, size: 16, color: Colors.red.shade400),
-              label: Text(
-                'blocked_users'.tr,
-                style: TextStyle(
-                  color: Colors.red.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          ),
+          icon: Icon(Icons.edit_outlined, size: 16, color: context.theme.primaryColor),
+          label: Text(
+            'edit_profile'.tr,
+            style: TextStyle(
+              color: context.theme.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
-          ],
+          ),
         ),
       ],
     );

@@ -1326,18 +1326,21 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
     ? Stack(
         alignment: Alignment.center,
         children: [
-          CustomImageView(url: 
-            "${ApiConstants.imageBaseUrl}$firstMedia",
-            fit: BoxFit.contain,
+          CustomImageView(
+            url: "${ApiConstants.imageBaseUrl}$firstMedia",
+            fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
           ),
           const Icon(Icons.play_circle_fill, color: Colors.white70, size: 40),
         ],
       )
-    : CustomImageView(url: 
-        "${ApiConstants.imageBaseUrl}$firstMedia",
-        fit: BoxFit.contain,
+    : CustomImageView(
+        url: "${ApiConstants.imageBaseUrl}$firstMedia",
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+        width: double.infinity,
+        height: double.infinity,
         errorBuilder: (_, __, ___) => Container(
           color: Colors.grey[100],
           child: Center(

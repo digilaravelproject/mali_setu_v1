@@ -1576,8 +1576,10 @@ class NotificationHandlerService extends GetxService {
           final chatCtrl = Get.find<MatrimonyChatController>();
           if ((convId != null && chatCtrl.conversationId == convId) ||
               (convId == null && senderId != null && chatCtrl.otherUserId == senderId)) {
-            // Already on correct chat – just refresh
-            chatCtrl.fetchMessages();
+            // Already on correct chat – only refresh if not blocked
+            if (!chatCtrl.isBlocked.value) {
+              chatCtrl.fetchMessages();
+            }
             break;
           } else {
             // Chat screen is open but for a DIFFERENT conversation – update it

@@ -24,6 +24,17 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
   int _selectedTabIndex = 0; // 0: About, 1: Speaker, 2: Agenda
   bool _isLoadingDetails = false;
 
+  Webinar get currentWebinar {
+    if (controller.selectedWebinar.value != null && controller.selectedWebinar.value!.id == webinar.id) {
+      return controller.selectedWebinar.value!;
+    }
+    final inList = controller.webinars.firstWhereOrNull((w) => w.id == webinar.id);
+    if (inList != null) {
+      return inList;
+    }
+    return webinar;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +54,26 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
     } else {
       webinar = Webinar.fromApiJson(const {});
     }
+
+    // 🚀 Reactively update when payment succeeds or registration state changes
+    ever(controller.registeredWebinarIds, (ids) {
+      if (mounted && ids.contains(webinar.id) && !webinar.isRegistered) {
+        setState(() {
+          webinar = webinar.copyWith(
+            isRegistered: true,
+            registeredCount: webinar.registeredCount + 1,
+          );
+        });
+      }
+    });
+
+    ever(controller.selectedWebinar, (sel) {
+      if (mounted && sel != null && sel.id == webinar.id) {
+        setState(() {
+          webinar = sel;
+        });
+      }
+    });
 
     if (webinar.id > 0) {
       final needsLoader = webinar.description.isEmpty && webinar.speaker.name.isEmpty;
@@ -67,6 +98,13 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final active = currentWebinar;
+    final isReg = controller.isWebinarRegistered(active.id) || active.isRegistered;
+    final displayWebinar = isReg && !active.isRegistered
+        ? active.copyWith(isRegistered: true, registeredCount: active.registeredCount + 1)
+        : active;
+    webinar = displayWebinar;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: RefreshIndicator(
@@ -431,7 +469,10 @@ class _WebinarDetailsScreenState extends State<WebinarDetailsScreen> {
               };
             } else if (needsRegistration) {
               // Registration is required and user has NOT registered yet
-              buttonText = isLive ? "Register to Join Live" : "Register for Webinar";
+              final feeText = webinar.fee.isNotEmpty && webinar.fee.toLowerCase() != 'free' ? " (${webinar.fee})" : "";
+              buttonText = isLive
+                  ? (webinar.isPaid ? "Pay & Join Live$feeText" : "Register to Join Live")
+                  : (webinar.isPaid ? "Pay & Register$feeText" : "Register for Webinar");
               buttonColor = AppColors.primary;
               buttonIcon = Icons.app_registration_rounded;
               onTapAction = () async {

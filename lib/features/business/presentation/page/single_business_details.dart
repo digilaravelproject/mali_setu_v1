@@ -1309,6 +1309,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                                   final b = controller.selectedBusiness.value ?? argBusiness;
                                   EnquiryBottomSheet.show(
                                     context,
+                                    productId: product.id,
                                     itemName: product.name ?? 'Product',
                                     itemType: 'Product',
                                     itemPrice: product.cost,
@@ -1316,6 +1317,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                                     businessName: b.businessName,
                                     contactPhone: b.contactPhone ?? b.user?.phone,
                                     contactEmail: b.contactEmail ?? b.user?.email,
+                                    isOwner: _isCurrentBusinessOwner,
                                   );
                                 },
                                 icon: Icon(
@@ -1485,6 +1487,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                                       final b = controller.selectedBusiness.value ?? argBusiness;
                                       EnquiryBottomSheet.show(
                                         context,
+                                        serviceId: service.id,
                                         itemName: service.name ?? 'Service',
                                         itemType: 'Service',
                                         itemPrice: service.cost,
@@ -1492,6 +1495,7 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                                         businessName: b.businessName,
                                         contactPhone: b.contactPhone ?? b.user?.phone,
                                         contactEmail: b.contactEmail ?? b.user?.email,
+                                        isOwner: _isCurrentBusinessOwner,
                                       );
                                     },
                                     icon: Icon(

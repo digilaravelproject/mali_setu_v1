@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:edu_cluezer/core/constent/api_constants.dart';
-import 'package:edu_cluezer/core/controllers/support_controller.dart';
 import 'package:edu_cluezer/widgets/custom_image_view.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
+import '../controller/product_enquiry_controller.dart';
+import '../../domain/usecase/send_product_enquiry_usecase.dart';
+import '../../domain/repository/all_business_repository.dart';
 
 class EnquiryBottomSheet extends StatefulWidget {
+  final int? productId;
+  final int? serviceId;
   final String itemName;
   final String itemType; // 'Product' or 'Service'
   final String? itemPrice;
@@ -14,9 +18,12 @@ class EnquiryBottomSheet extends StatefulWidget {
   final String? businessName;
   final String? contactPhone;
   final String? contactEmail;
+  final bool isOwner;
 
   const EnquiryBottomSheet({
     Key? key,
+    this.productId,
+    this.serviceId,
     required this.itemName,
     required this.itemType,
     this.itemPrice,
@@ -24,10 +31,13 @@ class EnquiryBottomSheet extends StatefulWidget {
     this.businessName,
     this.contactPhone,
     this.contactEmail,
+    this.isOwner = false,
   }) : super(key: key);
 
   static void show(
     BuildContext context, {
+    int? productId,
+    int? serviceId,
     required String itemName,
     required String itemType,
     String? itemPrice,
@@ -35,12 +45,22 @@ class EnquiryBottomSheet extends StatefulWidget {
     String? businessName,
     String? contactPhone,
     String? contactEmail,
+    bool isOwner = false,
   }) {
+    if (isOwner) {
+      CustomSnackBar.showInfo(
+        message: 'You cannot enquire about your own ${itemType.toLowerCase()}.',
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => EnquiryBottomSheet(
+        productId: productId,
+        serviceId: serviceId,
         itemName: itemName,
         itemType: itemType,
         itemPrice: itemPrice,
@@ -48,6 +68,7 @@ class EnquiryBottomSheet extends StatefulWidget {
         businessName: businessName,
         contactPhone: contactPhone,
         contactEmail: contactEmail,
+        isOwner: isOwner,
       ),
     );
   }
@@ -58,6 +79,8 @@ class EnquiryBottomSheet extends StatefulWidget {
 
 class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
   late TextEditingController _messageController;
+  late TextEditingController _priceController;
+  bool _isSubmittingApi = false;
 
   @override
   void initState() {
@@ -72,32 +95,66 @@ class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
       text:
           "Hello, I am interested in inquiring about ${widget.itemType.toLowerCase()} '${widget.itemName}'$priceInfo from $store. Please share more details and availability.",
     );
+
+    final cleanPrice = widget.itemPrice != null
+        ? widget.itemPrice!.replaceAll(RegExp(r'[^0-9.]'), '')
+        : '';
+    _priceController = TextEditingController(text: cleanPrice);
   }
 
   @override
   void dispose() {
     _messageController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
-  Future<void> _sendWhatsAppEnquiry() async {
-    final phone = widget.contactPhone?.trim();
-    if (phone == null || phone.isEmpty) {
-      CustomSnackBar.showInfo(
-        message: 'Contact phone number not available for this seller.',
-      );
+  Future<void> _submitApiEnquiry() async {
+    if (widget.productId == null && widget.serviceId == null) return;
+
+    final description = _messageController.text.trim();
+    if (description.isEmpty) {
+      CustomSnackBar.showError(message: 'Please write your enquiry message.');
       return;
     }
 
-    final message = _messageController.text.trim();
-    await SupportController.launchWhatsApp(
-      phoneNumber: phone,
-      message: message.isNotEmpty
-          ? message
-          : "Hello, I am interested in inquiring about ${widget.itemName}.",
-    );
-    if (mounted) {
-      Navigator.of(context).pop();
+    final double price = double.tryParse(_priceController.text.trim()) ??
+        double.tryParse(widget.itemPrice?.replaceAll(RegExp(r'[^0-9.]'), '') ?? '') ??
+        0.0;
+
+    setState(() {
+      _isSubmittingApi = true;
+    });
+
+    try {
+      final controller = Get.isRegistered<ProductEnquiryController>()
+          ? Get.find<ProductEnquiryController>()
+          : Get.put(ProductEnquiryController(
+              sendEnquiryUseCase: Get.isRegistered<SendProductEnquiryUseCase>()
+                  ? Get.find<SendProductEnquiryUseCase>()
+                  : SendProductEnquiryUseCase(
+                      repository: Get.find<BusinessRepository>(),
+                    ),
+            ));
+
+      final success = await controller.sendEnquiry(
+        productId: widget.productId,
+        serviceId: widget.serviceId,
+        price: price,
+        description: description,
+      );
+
+      if (success && mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      debugPrint('[EnquiryBottomSheet] Error submitting enquiry: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingApi = false;
+        });
+      }
     }
   }
 
@@ -154,47 +211,43 @@ class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
         CustomSnackBar.showError(message: 'Could not open email app for $email');
       }
     } catch (_) {
-      CustomSnackBar.showError(message: 'Could not open email app');
+      CustomSnackBar.showError(message: 'Could not open email client');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final primaryColor = Theme.of(context).primaryColor;
+    final hasPrice = widget.itemPrice != null && widget.itemPrice!.trim().isNotEmpty;
+    final hasApiEnquiry = widget.productId != null || widget.serviceId != null;
 
-    String? fullImageUrl;
-    if (widget.imagePath != null && widget.imagePath!.isNotEmpty) {
-      fullImageUrl = widget.imagePath!.startsWith('http')
-          ? widget.imagePath!
-          : '${ApiConstants.imageBaseUrl}/${widget.imagePath!.replaceFirst(RegExp(r'^/'), '')}';
-    }
+    final String? fullImageUrl = widget.imagePath != null && widget.imagePath!.isNotEmpty
+        ? (widget.imagePath!.startsWith('http')
+            ? widget.imagePath
+            : '${ApiConstants.imageBaseUrl}${widget.imagePath}')
+        : null;
 
-    final hasPrice = widget.itemPrice != null &&
-        widget.itemPrice!.trim().isNotEmpty &&
-        widget.itemPrice!.trim().toLowerCase() != 'null';
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Padding(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top drag handle
+                // Top handle
                 Center(
                   child: Container(
-                    width: 40,
+                    width: 44,
                     height: 4,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
@@ -213,7 +266,7 @@ class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
+                            color: primaryColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
@@ -337,6 +390,50 @@ class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
 
                 const SizedBox(height: 16),
 
+                // Price Field (for Product & Service Enquiry)
+                if (hasApiEnquiry) ...[
+                  const Text(
+                    'Offered / Target Price (₹)',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF374151),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _priceController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF111827)),
+                    decoration: InputDecoration(
+                      prefixText: '₹ ',
+                      prefixStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: primaryColor,
+                      ),
+                      hintText: 'Enter price...',
+                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: primaryColor, width: 1.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
                 // Message Input label
                 const Text(
                   'Your Enquiry Message',
@@ -374,41 +471,74 @@ class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
                   ),
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 20),
 
-                // Primary Action: WhatsApp Enquiry
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: _sendWhatsAppEnquiry,
-                    icon: const FaIcon(
-                      FontAwesomeIcons.whatsapp,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    label: const Text(
-                      'Enquire on WhatsApp',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                // Primary Action Button
+                if (hasApiEnquiry) ...[
+                  // API Send Enquiry Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: _isSubmittingApi ? null : _submitApiEnquiry,
+                      icon: _isSubmittingApi
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(
+                              Icons.send_rounded,
+                              color: Colors.white,
+                              size: 19,
+                            ),
+                      label: Text(
+                        _isSubmittingApi ? 'Submitting Enquiry...' : 'Submit Enquiry',
+                        style: const TextStyle(
+                          fontSize: 15.5,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF25D366), // WhatsApp Brand Green
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: primaryColor.withValues(alpha: 0.6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 2,
                       ),
-                      elevation: 0,
                     ),
                   ),
-                ),
+                  const SizedBox(height: 14),
 
-                const SizedBox(height: 10),
+                  // Divider with "OR Contact Directly"
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: Colors.grey.shade300)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'OR DIRECT CONTACT',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey.shade500,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Colors.grey.shade300)),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
 
-                // Secondary Actions: Call & Email
+                // Call & Email Row
                 Row(
                   children: [
                     Expanded(
@@ -426,7 +556,7 @@ class _EnquiryBottomSheetState extends State<EnquiryBottomSheet> {
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: primaryColor.withOpacity(0.5)),
+                            side: BorderSide(color: primaryColor.withValues(alpha: 0.5)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

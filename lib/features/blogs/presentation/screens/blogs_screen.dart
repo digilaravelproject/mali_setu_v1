@@ -630,26 +630,27 @@ class BlogsScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 400, minHeight: 180),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: firstMedia != null
-                          ? (isVideoFirst
-                          ? VideoThumbnailWidget(
-                        key: ValueKey(firstMedia),
-                        videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
-                        height: 180,
-                        width: double.infinity,
-                        placeholder: _blogPlaceholder(primaryColor, isVideo: true),
-                      )
-                          : CustomImageView(url: 
-                        "${ApiConstants.imageBaseUrl}$firstMedia",
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
-                    ))
+                  child: SizedBox(
+                    height: 200,
+                    width: double.infinity,
+                    child: firstMedia != null
+                        ? (isVideoFirst
+                            ? VideoThumbnailWidget(
+                                key: ValueKey(firstMedia),
+                                videoUrl: "${ApiConstants.imageBaseUrl}$firstMedia",
+                                height: 200,
+                                width: double.infinity,
+                                placeholder: _blogPlaceholder(primaryColor, isVideo: true),
+                              )
+                            : CustomImageView(
+                                url: "${ApiConstants.imageBaseUrl}$firstMedia",
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                                width: double.infinity,
+                                height: 200,
+                                errorBuilder: (_, __, ___) => _blogPlaceholder(primaryColor, isVideo: false),
+                              ))
                         : _blogPlaceholder(primaryColor, isVideo: false),
-                    ),
                   ),
                 ),
                 // Category tag top-left

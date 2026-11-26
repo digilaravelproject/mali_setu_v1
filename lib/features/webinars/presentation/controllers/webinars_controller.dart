@@ -8,6 +8,8 @@ import 'package:edu_cluezer/core/constent/api_constants.dart';
 import 'package:edu_cluezer/features/Auth/service/auth_service.dart';
 import 'package:edu_cluezer/widgets/custom_snack_bar.dart';
 import 'package:edu_cluezer/features/dashboard/presentation/controller/home_controller.dart';
+import 'package:edu_cluezer/features/payment/presentation/page/ccavenue_payment_screen.dart';
+import 'package:edu_cluezer/features/razorpay/razorpay_controller.dart';
 import '../../data/models/webinar_model.dart';
 import '../../data/models/agora_token_model.dart';
 import '../widgets/webinar_notice_dialog.dart';
@@ -24,6 +26,7 @@ class WebinarsController extends GetxController {
   final RxInt lastPage = 1.obs;
   final RxInt totalWebinars = 0.obs;
   final RxSet<int> registeredWebinarIds = <int>{}.obs;
+  int? _pendingPaymentWebinarId;
 
   // Controllers
   final ScrollController scrollController = ScrollController();
@@ -252,6 +255,11 @@ class WebinarsController extends GetxController {
       return false;
     }
 
+    final webinar = webinars.firstWhereOrNull((w) => w.id == targetId) ?? selectedWebinar.value;
+    if (webinar != null && webinar.isPaid) {
+      return await initiateWebinarPayment(targetId);
+    }
+
     if (isRegistering.value) return false;
     isRegistering.value = true;
     HapticFeedback.mediumImpact();
@@ -335,9 +343,167 @@ class WebinarsController extends GetxController {
     }
   }
 
+  Future<bool> initiateWebinarPayment(int webinarId) async {
+    final webinar = webinars.firstWhereOrNull((w) => w.id == webinarId) ?? selectedWebinar.value;
+
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.webinarPaymentOrder(webinarId),
+        data: '',
+      );
+
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      final data = response.data;
+      final int statusCode = response.statusCode ?? 500;
+      final bool isSuccess = (statusCode == 200 || statusCode == 201) &&
+          (data is Map
+              ? (data['success'] == true ||
+                  data['success'] == 1 ||
+                  data['status'] == true ||
+                  data['status'] == 'success')
+              : true);
+
+      if (isSuccess && data is Map) {
+        final orderData = (data['data'] is Map ? data['data'] : data) as Map<String, dynamic>;
+        final paymentWay = orderData['payment_way']?.toString().toLowerCase();
+
+        if (paymentWay == 'ccavenue') {
+          final result = await Get.to(
+            () => CCAvenuePaymentScreen(
+              paymentUrl: orderData['payment_url'] ?? '',
+              encRequest: orderData['encRequest'] ?? '',
+              accessCode: orderData['access_code'] ?? '',
+              type: 'webinar',
+            ),
+          );
+          if (result == true) {
+            await onWebinarPaymentSuccess(webinarId);
+            return true;
+          }
+          return false;
+        } else {
+          // Razorpay
+          final authService = Get.isRegistered<AuthService>() ? Get.find<AuthService>() : null;
+          final user = authService?.currentUser.value;
+
+          final amountNum = orderData['amount'] as num? ??
+              num.tryParse(webinar?.fee.replaceAll(RegExp(r'[^0-9.]'), '') ?? '0') ??
+              0;
+
+          final razorpayController = Get.isRegistered<RazorpayController>()
+              ? Get.find<RazorpayController>()
+              : Get.put(RazorpayController(), permanent: true);
+
+          _pendingPaymentWebinarId = webinarId;
+
+          razorpayController.openCheckout(
+            amount: amountNum.toInt(),
+            name: user?.name ?? 'Mali Setu User',
+            description: "Webinar: ${webinar?.title ?? 'Webinar Registration'}",
+            mobile: user?.phone ?? '',
+            email: user?.email ?? '',
+            orderId: orderData['order_id'],
+            transaction_id: int.tryParse(orderData['transaction_id']?.toString() ?? "0") ?? 0,
+            key: orderData['key_id'] ?? orderData['key'],
+            type: 'webinar',
+            webinarId: webinarId,
+          );
+          return true;
+        }
+      } else {
+        final msg = (data is Map ? data['message'] : null) ?? "Failed to create webinar payment order";
+        CustomSnackBar.showError(message: msg.toString());
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+      debugPrint("ERROR_INITIATE_WEBINAR_PAYMENT: $e");
+      String msg = "Payment initialization failed. Please try again.";
+      if (e is DioException && e.response?.data != null) {
+        final res = e.response?.data;
+        if (res is Map && res['message'] != null) {
+          msg = res['message'].toString();
+        }
+      }
+      CustomSnackBar.showError(message: msg);
+      return false;
+    }
+  }
+
+  Future<void> onWebinarPaymentSuccess([int? webinarId]) async {
+    final targetId = webinarId ?? _pendingPaymentWebinarId ?? selectedWebinar.value?.id;
+    if (targetId != null) {
+      if (!registeredWebinarIds.contains(targetId)) {
+        registeredWebinarIds.add(targetId);
+      }
+      registeredWebinarIds.refresh();
+
+      final idx = webinars.indexWhere((w) => w.id == targetId);
+      if (idx != -1) {
+        final current = webinars[idx];
+        webinars[idx] = current.copyWith(
+          isRegistered: true,
+          registeredCount: current.registeredCount + 1,
+        );
+        if (selectedWebinar.value?.id == targetId) {
+          selectedWebinar.value = webinars[idx];
+        }
+        webinars.refresh();
+      } else if (selectedWebinar.value != null && selectedWebinar.value?.id == targetId) {
+        final current = selectedWebinar.value!;
+        selectedWebinar.value = current.copyWith(
+          isRegistered: true,
+          registeredCount: current.registeredCount + 1,
+        );
+      }
+
+      if (Get.isRegistered<HomeController>()) {
+        final homeCtrl = Get.find<HomeController>();
+        final hIdx = homeCtrl.upcomingWebinars.indexWhere((w) => w.id == targetId);
+        if (hIdx != -1) {
+          final hCurrent = homeCtrl.upcomingWebinars[hIdx];
+          homeCtrl.upcomingWebinars[hIdx] = hCurrent.copyWith(
+            isRegistered: true,
+            registeredCount: hCurrent.registeredCount + 1,
+          );
+          homeCtrl.upcomingWebinars.refresh();
+        }
+      }
+
+      // Automatically register with backend or confirm
+      try {
+        await _apiClient.post(
+          "${ApiConstants.getWebinars}/$targetId/register",
+          data: '',
+        );
+      } catch (_) {}
+
+      // Silently fetch fresh details from server so full model stays synced
+      fetchWebinarDetail(targetId);
+    }
+    _pendingPaymentWebinarId = null;
+  }
+
   void _handleRegistrationFailure(int targetId, String msg) {
     final webinar = webinars.firstWhereOrNull((w) => w.id == targetId) ?? selectedWebinar.value;
     final lowerMsg = msg.toLowerCase();
+
+    // If payment is required, immediately trigger payment flow
+    if (lowerMsg.contains("payment") || lowerMsg.contains("payment order")) {
+      initiateWebinarPayment(targetId);
+      return;
+    }
 
     if (lowerMsg.contains("not open") ||
         lowerMsg.contains("closed") ||

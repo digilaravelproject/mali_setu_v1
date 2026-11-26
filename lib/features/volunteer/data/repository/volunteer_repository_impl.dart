@@ -42,4 +42,9 @@ class VolunteerRepositoryImpl implements VolunteerRepository {
     final res = await dataSource.searchVolunteers(query, size: size);
     return res.data?.data ?? [];
   }
+
+  @override
+  Future<Map<String, dynamic>> convertToVolunteer() async {
+    return dataSource.convertToVolunteer();
+  }
 }

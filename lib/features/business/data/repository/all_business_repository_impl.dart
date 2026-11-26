@@ -5,6 +5,7 @@ import 'package:edu_cluezer/features/business/data/model/res_all_business_model.
 import 'package:edu_cluezer/features/business/data/model/res_single_product_model.dart';
 import 'package:edu_cluezer/features/business/data/model/res_single_service_model.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
+import 'package:edu_cluezer/features/business/data/model/product_enquiry_model.dart';
 
 
 class BusinessRepositoryImpl implements BusinessRepository {
@@ -181,5 +182,10 @@ class BusinessRepositoryImpl implements BusinessRepository {
   @override
   Future<BusinessResponse> searchBusiness(String query, {double? lat, double? long}) {
     return dataSource.searchBusiness(query, lat: lat, long: long);
+  }
+
+  @override
+  Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request) {
+    return dataSource.sendProductEnquiry(request);
   }
 }

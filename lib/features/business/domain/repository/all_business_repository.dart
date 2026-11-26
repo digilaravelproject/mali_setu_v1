@@ -3,6 +3,7 @@ import '../../data/model/res_all_business_model.dart';
 import '../../data/model/res_single_product_model.dart';
 import '../../data/model/res_single_service_model.dart';
 import '../../data/model/business_plan_model.dart';
+import '../../data/model/product_enquiry_model.dart';
 
 
 abstract class BusinessRepository {
@@ -39,4 +40,5 @@ abstract class BusinessRepository {
   Future<JobApplicationsResponse> getJobApplications(int jobId);
   Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
+  Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request);
 }

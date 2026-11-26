@@ -666,6 +666,7 @@ const Map<String, String> enUS = {
   'tap_camera_update_photo': 'Tap to update photo',
   'personal_details_sub': 'Bride(Vadhu) & Groom(Var) Details',
   'gender': 'Gender',
+  'gender_cannot_be_changed': 'Gender cannot be changed in edit profile',
   'complexion': 'Complexion',
   'language': 'Language',
   'religious_horoscope': 'Religious Horoscope',
@@ -1162,6 +1163,14 @@ const Map<String, String> enUS = {
   'location_pinned': 'Location Pinned & Coordinates Saved',
   'change_location': 'Change',
   'location_autofill_success': 'Address and location coordinates auto-filled successfully!',
+
+  // Volunteer Convert
+  'convert_volunteer_title': 'Convert to Volunteer Account',
+  'convert_volunteer_desc': 'Your account type will change from "@current" to "Volunteer". As a volunteer, you will earn higher referral rewards and community benefits.',
+  'convert_volunteer_confirm_btn': 'Yes, Convert to Volunteer',
+  'current_account_type': 'Current Type',
+  'new_account_type': 'New Type',
+  'convert_success_msg': 'Your account has been converted to a volunteer account. Verification is pending.',
 };
 
 

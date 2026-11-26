@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -571,29 +570,6 @@ class SingleProductDetailsScreen extends StatelessWidget {
                                         child: Icon(Icons.phone, color: primaryColor, size: 18),
                                       ),
                                     ),
-                                    if (!isOwnerUser)
-                                      IconButton(
-                                        onPressed: () {
-                                          EnquiryBottomSheet.show(
-                                            context,
-                                            itemName: product.name ?? 'Product',
-                                            itemType: 'Product',
-                                            itemPrice: product.cost,
-                                            imagePath: product.imagePath ?? (product.allImages.isNotEmpty ? product.allImages.first : null),
-                                            businessName: product.business?.businessName,
-                                            contactPhone: product.business?.contactPhone,
-                                            contactEmail: product.business?.contactEmail,
-                                          );
-                                        },
-                                        icon: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFF25D366).withOpacity(0.12),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 18),
-                                        ),
-                                      ),
                                   ],
                                 ],
                               ),
@@ -683,6 +659,7 @@ class SingleProductDetailsScreen extends StatelessWidget {
                                 onPressed: () {
                                   EnquiryBottomSheet.show(
                                     context,
+                                    productId: product.id,
                                     itemName: product.name ?? 'Product',
                                     itemType: 'Product',
                                     itemPrice: product.cost,
@@ -690,6 +667,7 @@ class SingleProductDetailsScreen extends StatelessWidget {
                                     businessName: product.business?.businessName,
                                     contactPhone: product.business?.contactPhone,
                                     contactEmail: product.business?.contactEmail,
+                                    isOwner: isOwnerUser,
                                   );
                                 },
                                 icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18, color: Colors.white),

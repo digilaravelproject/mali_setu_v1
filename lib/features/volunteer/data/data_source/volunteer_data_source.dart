@@ -10,6 +10,7 @@ abstract class VolunteerDataSource {
   Future<ResVolunteerModel> fetchAllVolunteers();
   Future<ResSingleVolunteerModel> getVolunteerOpportunity(int id);
   Future<VolunteerSearchResponse> searchVolunteers(String query, {int size = 20});
+  Future<Map<String, dynamic>> convertToVolunteer();
 }
 
 class VolunteerDataSourceImpl implements VolunteerDataSource {
@@ -56,6 +57,15 @@ class VolunteerDataSourceImpl implements VolunteerDataSource {
       },
     );
     return VolunteerSearchResponse.fromJson(response.data);
+  }
+
+  @override
+  Future<Map<String, dynamic>> convertToVolunteer() async {
+    final response = await apiClient.post(ApiConstants.volunteerConvert);
+    if (response.data is Map<String, dynamic>) {
+      return response.data as Map<String, dynamic>;
+    }
+    return {'success': false, 'message': 'Invalid response from server'};
   }
 }
 

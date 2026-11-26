@@ -25,6 +25,47 @@ class MatrimonyChatScreen extends GetView<MatrimonyChatController> {
                 await controller.refreshChat();
               },
               child: Obx(() {
+                if (controller.isBlocked.value) {
+                  return Center(
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.block_rounded, size: 48, color: Colors.red.shade400),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'user_blocked'.tr,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 40),
+                            child: Text(
+                              'you_blocked_user_tap_to_unblock'.tr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
                 if (controller.isLoading.value && controller.messages.isEmpty) {
                   return const Center(child: CircularProgressIndicator(color: Colors.purple));
                 }

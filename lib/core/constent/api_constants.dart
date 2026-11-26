@@ -43,6 +43,7 @@ class ApiConstants {
 
     static const String addBusinessProduct = "business/products";
     static const String addBusinessService = "business/services";
+    static const String businessEnquiries = "business/enquiries";
     static const String searchBusiness = "search/search_business";
     
     static const String getCategory = "category";
@@ -84,6 +85,7 @@ class ApiConstants {
     static const String donationVerifyPayment = "donation/verify-payment";
 
     // Volunteer Api
+    static const String volunteerConvert = "volunteer/convert";
     static const String volunteerProfile = "volunteer/profile";
     static const String allVolunteer = "volunteer/opportunities";
     static const String volunteerOpportunity = "volunteer/opportunity";
@@ -115,6 +117,7 @@ class ApiConstants {
 
     // Webinars Api
     static const String getWebinars = "webinars";
+    static String webinarPaymentOrder(dynamic id) => "webinars/$id/payment-order";
 
     static const String matrimonyPymentOrder = "payment/create-order/matrimony";
     static const String paymentVerify = "payment/verify";

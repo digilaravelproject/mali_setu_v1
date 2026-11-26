@@ -9,4 +9,5 @@ abstract class VolunteerRepository {
   Future<List<Volunteer>> getAllVolunteers();
   Future<Volunteer?> getVolunteerOpportunity(int id);
   Future<List<VolunteerSearchProfile>> searchVolunteers(String query, {int size = 20});
+  Future<Map<String, dynamic>> convertToVolunteer();
 }
