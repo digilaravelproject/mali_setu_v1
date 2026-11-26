@@ -8,6 +8,7 @@ import 'package:edu_cluezer/features/business/data/model/res_single_product_mode
 import 'package:edu_cluezer/features/business/data/model/res_single_service_model.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 import 'package:edu_cluezer/features/business/data/model/product_enquiry_model.dart';
+import 'package:edu_cluezer/features/business/data/model/business_enquiries_model.dart';
 
 
 
@@ -46,6 +47,8 @@ abstract class BusinessDataSource {
   Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
   Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request);
+  Future<BusinessEnquiriesResponse> getBusinessEnquiries(int businessId, {int page = 1, int perPage = 20});
+  Future<BusinessEnquiryDetailResponse> getBusinessEnquiryDetail(int enquiryId);
 }
 
 class BusinessDataSourceImpl implements BusinessDataSource {
@@ -490,6 +493,38 @@ class BusinessDataSourceImpl implements BusinessDataSource {
     return ProductEnquiryResponse(
       success: response.statusCode == 200 || response.statusCode == 201,
       message: response.statusMessage ?? 'Enquiry submitted successfully',
+    );
+  }
+
+  @override
+  Future<BusinessEnquiriesResponse> getBusinessEnquiries(int businessId, {int page = 1, int perPage = 20}) async {
+    final response = await apiClient.get(
+      ApiConstants.getBusinessEnquiriesUrl(businessId),
+      queryParameters: {
+        'page': page,
+        'per_page': perPage,
+      },
+    );
+    if (response.data is Map<String, dynamic>) {
+      return BusinessEnquiriesResponse.fromJson(response.data as Map<String, dynamic>);
+    }
+    return BusinessEnquiriesResponse(
+      success: response.statusCode == 200,
+      message: response.statusMessage,
+    );
+  }
+
+  @override
+  Future<BusinessEnquiryDetailResponse> getBusinessEnquiryDetail(int enquiryId) async {
+    final response = await apiClient.get(
+      ApiConstants.getBusinessEnquiryDetailUrl(enquiryId),
+    );
+    if (response.data is Map<String, dynamic>) {
+      return BusinessEnquiryDetailResponse.fromJson(response.data as Map<String, dynamic>);
+    }
+    return BusinessEnquiryDetailResponse(
+      success: response.statusCode == 200,
+      message: response.statusMessage,
     );
   }
 }

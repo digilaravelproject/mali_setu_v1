@@ -6,6 +6,7 @@ import 'package:edu_cluezer/features/business/data/model/res_single_product_mode
 import 'package:edu_cluezer/features/business/data/model/res_single_service_model.dart';
 import 'package:edu_cluezer/features/business/data/model/business_plan_model.dart';
 import 'package:edu_cluezer/features/business/data/model/product_enquiry_model.dart';
+import 'package:edu_cluezer/features/business/data/model/business_enquiries_model.dart';
 
 
 class BusinessRepositoryImpl implements BusinessRepository {
@@ -187,5 +188,15 @@ class BusinessRepositoryImpl implements BusinessRepository {
   @override
   Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request) {
     return dataSource.sendProductEnquiry(request);
+  }
+
+  @override
+  Future<BusinessEnquiriesResponse> getBusinessEnquiries(int businessId, {int page = 1, int perPage = 20}) {
+    return dataSource.getBusinessEnquiries(businessId, page: page, perPage: perPage);
+  }
+
+  @override
+  Future<BusinessEnquiryDetailResponse> getBusinessEnquiryDetail(int enquiryId) {
+    return dataSource.getBusinessEnquiryDetail(enquiryId);
   }
 }

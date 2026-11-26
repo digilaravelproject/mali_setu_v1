@@ -44,6 +44,8 @@ class ApiConstants {
     static const String addBusinessProduct = "business/products";
     static const String addBusinessService = "business/services";
     static const String businessEnquiries = "business/enquiries";
+    static String getBusinessEnquiriesUrl(dynamic businessId) => "business/$businessId/enquiries";
+    static String getBusinessEnquiryDetailUrl(dynamic enquiryId) => "business/enquiries/$enquiryId";
     static const String searchBusiness = "search/search_business";
     
     static const String getCategory = "category";

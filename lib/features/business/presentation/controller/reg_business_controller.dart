@@ -640,7 +640,13 @@ class RegBusinessController extends GetxController {
     // Contact - Use component validation for consistency
     final phoneValidationError = phoneFieldKey.currentState?.validate();
     if (phoneValidationError != null) {
-      errors['phone'] = phoneValidationError;
+      if (!isEditMode ||
+          (!phoneValidationError.toLowerCase().contains('otp') &&
+           !phoneValidationError.toLowerCase().contains('verify'))) {
+        errors['phone'] = phoneValidationError;
+      } else {
+        errors.remove('phone');
+      }
     } else {
       errors.remove('phone');
     }
@@ -701,8 +707,11 @@ class RegBusinessController extends GetxController {
       final categoryId = selectedCategoryId ?? 1;
 
       // Get combined phone from PhoneFieldComponent
-      final combinedPhone =
-          phoneFieldKey.currentState?.getCombinedPhone() ?? '';
+      final componentPhone =
+          phoneFieldKey.currentState?.getCombinedPhone().trim();
+      final combinedPhone = (componentPhone != null && componentPhone.isNotEmpty)
+          ? componentPhone
+          : phoneCtrl.text.trim();
 
       // Prepare Request Body
       final body = <String, dynamic>{
@@ -1055,6 +1064,7 @@ class RegBusinessController extends GetxController {
       "[RegBusinessController] Populating form for: ${business.businessName}",
     );
     isEditMode = true;
+    isPhoneVerified.value = true;
     businessId = business.id;
     selectedCategoryId = business.categoryId;
     

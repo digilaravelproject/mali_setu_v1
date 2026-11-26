@@ -170,6 +170,9 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
 
   Widget _buildBusinessCard(Business business, {required BuildContext context}) {
     final bool isApproved = business.verificationStatus?.toLowerCase() == 'approved';
+    final bool hasProductsOrServices = (business.products != null && business.products!.isNotEmpty) ||
+        (business.services != null && business.services!.isNotEmpty);
+    final bool canShowEnquiries = isApproved || hasProductsOrServices;
     final String statusText = business.verificationStatus?.toTitleCase() ?? 'Pending';
     final Color statusColor = isApproved ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
     final isPending = business.verificationStatus?.toLowerCase() != 'approved';
@@ -369,7 +372,77 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
                 ),
               ),
 
-              const SizedBox(height: 18),
+              // Customer Enquiries Button (Shown if approved or has products/services)
+              if (canShowEnquiries)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
+                  child: Material(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(14),
+                    child: InkWell(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.businessEnquiriesList, arguments: business);
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFFECDD3)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE11D48),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.mark_email_unread_outlined,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "customer_enquiries".tr.isNotEmpty && "customer_enquiries".tr != "customer_enquiries"
+                                        ? "customer_enquiries".tr
+                                        : "Customer Enquiries",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF9F1239),
+                                    ),
+                                  ),
+                                  Text(
+                                    "View enquiries received on this business",
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 14,
+                              color: Color(0xFFE11D48),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 14),
 
               // Subtle Contact Section
               Container(
@@ -439,6 +512,9 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
               'businessId': business.id,
             });
             break;
+          case 'enquiries':
+            Get.toNamed(AppRoutes.businessEnquiriesList, arguments: business);
+            break;
           case 'delete':
             _showDeleteConfirmation(context, business);
             break;
@@ -449,7 +525,10 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       itemBuilder: (context) {
-        final isPending = business.verificationStatus?.toLowerCase() != 'approved';
+        final isApproved = business.verificationStatus?.toLowerCase() == 'approved';
+        final hasProductsOrServices = (business.products != null && business.products!.isNotEmpty) ||
+            (business.services != null && business.services!.isNotEmpty);
+        final canShowEnquiries = isApproved || hasProductsOrServices;
         return [
           _buildPopupMenuItem(
             value: 'view',
@@ -469,6 +548,13 @@ class MyBusinessScreen extends GetWidget<BusinessController> {
             label: 'Products & Services',
             color: const Color(0xFF6366F1),
           ),
+          if (canShowEnquiries)
+            _buildPopupMenuItem(
+              value: 'enquiries',
+              icon: Icons.mark_email_unread_outlined,
+              label: 'Customer Enquiries',
+              color: const Color(0xFFE11D48),
+            ),
           _buildPopupMenuItem(
             value: 'delete',
             icon: Icons.delete_sweep_outlined,

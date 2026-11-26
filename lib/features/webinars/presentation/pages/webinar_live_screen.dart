@@ -737,94 +737,72 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
               ),
             ),
 
-            // Interactive Controls Bar (Mic, Camera, Screen Share, Flip Camera, Chat, Leave)
+            // Interactive Controls Bar (Mic, Camera, Screen Share, Flip Camera, Leave)
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              color: const Color(0xFF1E293B),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const SizedBox(width: 8),
-                    // 1. Mic Toggle (User can turn Mic ON/OFF)
-                    _buildControlButton(
-                      icon: _isMicOn ? Icons.mic_rounded : Icons.mic_off_rounded,
-                      label: _isMicOn ? "Mic On" : "Mic Off",
-                      isActive: _isMicOn,
-                      activeColor: const Color(0xFF10B981),
-                      onTap: _toggleMic,
-                    ),
-                    const SizedBox(width: 14),
-
-                    // 2. Camera Toggle (User can turn Camera ON/OFF)
-                    _buildControlButton(
-                      icon: _isCameraOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
-                      label: _isCameraOn ? "Camera On" : "Camera Off",
-                      isActive: _isCameraOn,
-                      activeColor: AppColors.primary,
-                      onTap: _toggleCamera,
-                    ),
-                    const SizedBox(width: 14),
-
-                    // 3. Screen Share Toggle (User can Share/Stop Screen)
-                    _buildControlButton(
-                      icon: _isScreenSharing
-                          ? Icons.stop_screen_share_rounded
-                          : Icons.screen_share_rounded,
-                      label: _isScreenSharing ? "Stop Share" : "Share",
-                      isActive: _isScreenSharing,
-                      activeColor: const Color(0xFF3B82F6),
-                      onTap: _toggleScreenShare,
-                    ),
-                    const SizedBox(width: 14),
-
-                    // 4. Flip Camera (Active only when camera is ON)
-                    if (_isCameraOn) ...[
-                      _buildControlButton(
-                        icon: Icons.cameraswitch_rounded,
-                        label: "Flip",
-                        isActive: true,
-                        activeColor: const Color(0xFF3B82F6),
-                        onTap: _switchCamera,
-                      ),
-                      const SizedBox(width: 14),
-                    ],
-
-                    // 5. Chat Button
-                    _buildControlButton(
-                      icon: CupertinoIcons.chat_bubble_2_fill,
-                      label: "Chat",
-                      isActive: true,
-                      activeColor: AppColors.primary,
-                      onTap: () {
-                        if (_commentsScrollController.hasClients) {
-                          _commentsScrollController.animateTo(
-                            _commentsScrollController.position.maxScrollExtent,
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.easeOut,
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(width: 14),
-
-                    // 6. Leave Button
-                    _buildControlButton(
-                      icon: Icons.call_end_rounded,
-                      label: "Leave",
-                      isActive: false,
-                      isDestructive: true,
-                      onTap: () {
-                        _leaveAgora();
-                        Get.back();
-                        CustomSnackBar.showInfo(message: "Left live webinar");
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                  ],
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1E293B),
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFF334155), width: 0.8),
                 ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // 1. Mic Toggle (User can turn Mic ON/OFF)
+                  _buildControlButton(
+                    icon: _isMicOn ? Icons.mic_rounded : Icons.mic_off_rounded,
+                    label: _isMicOn ? "Mic On" : "Mic Off",
+                    isActive: _isMicOn,
+                    activeColor: const Color(0xFF10B981),
+                    isOff: !_isMicOn,
+                    onTap: _toggleMic,
+                  ),
+
+                  // 2. Camera Toggle (User can turn Camera ON/OFF)
+                  _buildControlButton(
+                    icon: _isCameraOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
+                    label: _isCameraOn ? "Camera On" : "Camera Off",
+                    isActive: _isCameraOn,
+                    activeColor: AppColors.primary,
+                    isOff: !_isCameraOn,
+                    onTap: _toggleCamera,
+                  ),
+
+                  // 3. Screen Share Toggle (User can Share/Stop Screen)
+                  _buildControlButton(
+                    icon: _isScreenSharing
+                        ? Icons.stop_screen_share_rounded
+                        : Icons.screen_share_rounded,
+                    label: _isScreenSharing ? "Stop Share" : "Share",
+                    isActive: _isScreenSharing,
+                    activeColor: const Color(0xFF3B82F6),
+                    onTap: _toggleScreenShare,
+                  ),
+
+                  // 4. Flip Camera (Active only when camera is ON)
+                  if (_isCameraOn)
+                    _buildControlButton(
+                      icon: Icons.cameraswitch_rounded,
+                      label: "Flip",
+                      isActive: true,
+                      activeColor: const Color(0xFF3B82F6),
+                      onTap: _switchCamera,
+                    ),
+
+                  // 5. Leave Button
+                  _buildControlButton(
+                    icon: Icons.call_end_rounded,
+                    label: "Leave",
+                    isActive: false,
+                    isDestructive: true,
+                    onTap: () {
+                      _leaveAgora();
+                      Get.back();
+                      CustomSnackBar.showInfo(message: "Left live webinar");
+                    },
+                  ),
+                ],
               ),
             ),
 
@@ -1106,42 +1084,75 @@ class _WebinarLiveScreenState extends State<WebinarLiveScreen> {
     required bool isActive,
     Color? activeColor,
     bool isDestructive = false,
+    bool isOff = false,
     required VoidCallback onTap,
   }) {
     final bgColor = isDestructive
         ? const Color(0xFFEF4444)
-        : (isActive ? (activeColor ?? AppColors.primary) : Colors.white.withOpacity(0.12));
+        : (isActive
+            ? (activeColor ?? AppColors.primary)
+            : const Color(0xFF334155));
 
-    final labelColor = isDestructive ? const Color(0xFFF87171) : Colors.white70;
+    final iconColor = isDestructive
+        ? Colors.white
+        : (isActive
+            ? Colors.white
+            : (isOff ? const Color(0xFFF87171) : Colors.white70));
 
-    return GestureDetector(
+    final labelColor = isDestructive
+        ? const Color(0xFFFCA5A5)
+        : (isActive ? Colors.white : Colors.white60);
+
+    return InkWell(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: bgColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isDestructive
+                      ? const Color(0xFFDC2626)
+                      : (isActive
+                          ? Colors.white.withValues(alpha: 0.25)
+                          : Colors.white.withValues(alpha: 0.08)),
+                  width: 1,
+                ),
+                boxShadow: (isDestructive || isActive)
+                    ? [
+                        BoxShadow(
+                          color: bgColor.withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: iconColor,
+              ),
             ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: Colors.white,
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: labelColor,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: labelColor,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

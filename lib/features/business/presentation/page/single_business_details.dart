@@ -218,6 +218,11 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                                     AppRoutes.jobAnalytics,
                                     arguments: {"business_id": business.id},
                                   );
+                                } else if (value == 'enquiries') {
+                                  Get.toNamed(
+                                    AppRoutes.businessEnquiriesList,
+                                    arguments: business,
+                                  );
                                 }
                               },
                               itemBuilder: (context) => [
@@ -292,6 +297,25 @@ class _BusinessDetailScreenState extends State<BusinessDetailScreen>
                                       ],
                                     ),
                                   ),
+                                  if ((business.verificationStatus?.toLowerCase() == 'approved') ||
+                                      (business.products != null && business.products!.isNotEmpty) ||
+                                      (business.services != null && business.services!.isNotEmpty) ||
+                                      controller.businessProducts.isNotEmpty ||
+                                      controller.businessServices.isNotEmpty)
+                                    PopupMenuItem(
+                                      value: 'enquiries',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.mark_email_unread_outlined,
+                                            size: 20,
+                                            color: const Color(0xFFE11D48),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Text('Customer Enquiries'),
+                                        ],
+                                      ),
+                                    ),
                                 ],
                               ],
                             ),

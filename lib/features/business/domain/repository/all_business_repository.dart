@@ -4,6 +4,7 @@ import '../../data/model/res_single_product_model.dart';
 import '../../data/model/res_single_service_model.dart';
 import '../../data/model/business_plan_model.dart';
 import '../../data/model/product_enquiry_model.dart';
+import '../../data/model/business_enquiries_model.dart';
 
 
 abstract class BusinessRepository {
@@ -41,4 +42,6 @@ abstract class BusinessRepository {
   Future<BusinessPlanResponse> getBusinessPlans();
   Future<BusinessResponse> updateApplicationStatus(int applicationId, String status, {String? notes});
   Future<ProductEnquiryResponse> sendProductEnquiry(ProductEnquiryRequest request);
+  Future<BusinessEnquiriesResponse> getBusinessEnquiries(int businessId, {int page = 1, int perPage = 20});
+  Future<BusinessEnquiryDetailResponse> getBusinessEnquiryDetail(int enquiryId);
 }

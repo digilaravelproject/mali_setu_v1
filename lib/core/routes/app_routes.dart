@@ -53,6 +53,8 @@ import '../../features/business/presentation/page/register_your_business_screen.
 import '../../features/business/presentation/page/single_business_details.dart';
 import '../../features/business/presentation/page/single_product_details_screen.dart';
 import '../../features/business/presentation/page/single_service_details_screen.dart';
+import '../../features/business/presentation/page/business_enquiries_screen.dart';
+import '../../features/business/presentation/page/business_enquiry_detail_screen.dart';
 import '../../features/dashboard/binding/dashboard_binding.dart';
 import '../../features/dashboard/presentation/page/dashboard_page.dart';
 import '../../features/date/binding/date_binding.dart';
@@ -105,6 +107,8 @@ class AppRoutes {
   static const String myBusiness = "/myBusiness";
   static const String regBusiness = "/regBusiness";
   static const String businessDetails = "/businessDetails";
+  static const String businessEnquiriesList = "/businessEnquiriesList";
+  static const String businessEnquiryDetail = "/businessEnquiryDetail";
   static const String jobs = "/jobs";
   static const String applyJob = "/applyJob";
   static const String jobDetails = "/jobDetails";
@@ -253,6 +257,20 @@ class AppPages {
     GetPage(
       name: AppRoutes.myProductsServices,
       page: () => const MyProductsServicesScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.businessEnquiriesList,
+      page: () => const BusinessEnquiriesScreen(),
+      binding: BusinessBinding(),
+      transition: Transition.cupertino,
+      transitionDuration: const Duration(milliseconds: 500),
+    ),
+    GetPage(
+      name: AppRoutes.businessEnquiryDetail,
+      page: () => const BusinessEnquiryDetailScreen(),
       binding: BusinessBinding(),
       transition: Transition.cupertino,
       transitionDuration: const Duration(milliseconds: 500),

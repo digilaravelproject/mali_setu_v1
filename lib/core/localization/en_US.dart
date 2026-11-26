@@ -1051,6 +1051,7 @@ const Map<String, String> enUS = {
   'user_blocked': 'User has been blocked successfully.',
   'blocked': 'Blocked',
   'blocked_users': 'Blocked Users',
+  'customer_enquiries': 'Customer Enquiries',
   'no_blocked_users': 'No blocked users',
   'no_blocked_users_desc': 'Users you block in Matrimony will appear here.',
   'unblock_user_confirm': 'Are you sure you want to unblock this user? You will be able to message each other again.',

@@ -446,6 +446,8 @@ class RegYourBusinessScreen extends GetWidget<RegBusinessController> {
                   PhoneFieldComponent(
                     key: controller.phoneFieldKey,
                     isRequired: true,
+                    requireOtpVerification: !controller.isEditMode,
+                    showVerifyButton: !controller.isEditMode,
                     initialPhone: controller.phoneCtrl.text,
                     errorText: controller.errors['phone'],
                     onVerificationChanged: (val) {
